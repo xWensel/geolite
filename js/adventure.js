@@ -421,9 +421,14 @@ window.AIQ = window.AIQ || {};
     A.adv.begin({ deck: h.deck, asc: h.asc, seed: DY.trySeed(board, k), ranked: true, board, dailyTry: k, route: h.route, gift: h.gift });
     return true;
   };
-  /* puntos de una expedicion al cerrarla: lo sumado en las rondas + 1.000 por ronda superada + 2.500 si conquisto los tres actos */
-  const finalOf = r => r.score + r.cleared * 1000 + (r.won ? 2500 : 0);
-  A.adv.finalOf = finalOf;
+  /* puntos de una expedicion al cerrarla: lo sumado en las rondas + 1.000 por ronda superada + 2.500 si conquisto los tres actos, y TODO ello por el
+     multiplicador de la Ascension (usuario, 2026-10-03): Ascension 0 no cambia; +10 % por nivel hasta x1,50. Solo se aplica aqui, al cerrar: no toca
+     objetivos, margenes ni lo que ves ronda a ronda. Asi una run infinita en Ascension 0 no le gana a una igual de buena en una dificultad mayor */
+  const ASC_MULT = [1, 1.1, 1.2, 1.3, 1.4, 1.5], ascMult = a => ASC_MULT[Math.max(0, Math.min(5, a | 0))];
+  const mulTxt = m => { try { return m.toLocaleString(A.lang, { minimumFractionDigits: 2 }); } catch (e) { return m.toFixed(2); } };
+  const rawOf = r => r.score + r.cleared * 1000 + (r.won ? 2500 : 0);
+  const finalOf = r => Math.round(rawOf(r) * ascMult(r.asc));
+  A.adv.finalOf = finalOf; A.adv.ascMult = ascMult; A.adv.mulTxt = mulTxt;
   /* v0.13: partidas guardadas con reliquias o herramientas que ya no existen: se quitan y se devuelve su valor en doblones */
   function migrate(r) {
     const TO = { spectacles: "dictionary", lens: "divingmask", umbrella: "divingmask", shockabsorber: "plates", gamer: "steadyhand", spareeye: "steadyhand", taskmgr: "protector", powerbank: "miner", sonarplus: "glass", compass16: "glass", coupon: "spyhole", banker: "hoard" }, seenP = new Set();
@@ -468,7 +473,7 @@ window.AIQ = window.AIQ || {};
      Un intento del Reto diario no se tira: se cierra con los puntos que llevaba y cuenta para la puntuacion global del dia. */
   A.adv.abandon = (daily = !!(run && run.board)) => {
     const act = !!run && !!run.board === daily, r = act ? run : loadSlot(daily), key = act ? slot : keyOf(daily); payLeg(r);
-    if (daily && r && r.board && r.dailyTry) A.rank.daily.finish(r.board, r.dailyTry, finalOf(r) + (r.inf ? r.roundScore || 0 : 0), { r: r.cleared, won: !!r.won });
+    if (daily && r && r.board && r.dailyTry) A.rank.daily.finish(r.board, r.dailyTry, Math.round((rawOf(r) + (r.inf ? r.roundScore || 0 : 0)) * ascMult(r.asc)), { r: r.cleared, won: !!r.won });
     if (act) run = null;
     try { localStorage.removeItem(key); } catch (e) { /* sin almacenamiento */ }
   };
@@ -2128,7 +2133,7 @@ window.AIQ = window.AIQ || {};
     A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.lose, 300);
     const summary = (r.won ? A.tf("Superaste {r} rondas y conquistaste los tres actos. Puntos: {p} + bonus {b}.", "You cleared {r} rounds and conquered all three acts. Points: {p} + bonus {b}.", { r: r.cleared, p: A.fmt(r.score), b: A.fmt(bonus) })
       : r.cleared === 1 ? A.tf("Superaste {r} ronda y llegaste al {act}. Puntos: {p} + bonus {b}.", "You cleared {r} round and reached {act}. Points: {p} + bonus {b}.", { r: r.cleared, act: A.tx(actInfo(r.act).n), p: A.fmt(r.score), b: A.fmt(bonus) })
-      : A.tf("Superaste {r} rondas y llegaste al {act}. Puntos: {p} + bonus {b}.", "You cleared {r} rounds and reached {act}. Points: {p} + bonus {b}.", { r: r.cleared, act: A.tx(actInfo(r.act).n), p: A.fmt(r.score), b: A.fmt(bonus) })) + (rec ? A.T(" ¡Nuevo récord personal!", " New personal best!") : "");
+      : A.tf("Superaste {r} rondas y llegaste al {act}. Puntos: {p} + bonus {b}.", "You cleared {r} rounds and reached {act}. Points: {p} + bonus {b}.", { r: r.cleared, act: A.tx(actInfo(r.act).n), p: A.fmt(r.score), b: A.fmt(bonus) })) + (r.asc > 0 ? " " + A.pick6("Ascensión {a}: ×{m} al total.|Ascension {a}: ×{m} on the total.|Ascension {a} : ×{m} sur le total.|Ascensão {a}: ×{m} no total.|Aufstieg {a}: ×{m} auf die Summe.|Ascensione {a}: ×{m} sul totale.||飞升 {a}：总分 ×{m}。|어센션 {a}: 총점 ×{m}.|アセンション{a}：合計に×{m}。|Восхождение {a}: ×{m} к итогу.|Wniebowstąpienie {a}: ×{m} do sumy.").replace("{a}", r.asc).replace("{m}", mulTxt(ascMult(r.asc))) : "") + (rec ? A.T(" ¡Nuevo récord personal!", " New personal best!") : "");
     if (day) {
       const sp = /^(zh|ja)$/.test(A.lang) ? "" : " ", again = day.left > 0 && board === A.rank.daily.board();   // el siguiente intento solo si sigue siendo el mismo dia
       const toBoard = () => C().showHub("daily"), next = () => { A.sfx.depart(); C().S.ranked = null; C().prepareRun(); if (!A.adv.beginDaily(board)) toBoard(); };

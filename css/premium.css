@@ -337,3 +337,4 @@ html.reduce-motion .of-stamp.on { animation-timing-function: steps(1); }
 /* tanda 17: las Ascensiones con identidad: la linea de la seleccion (nombre en blanco, la suma de lo anterior debajo) y la ficha del Campamento */
 .as-asc b { color: #fff; letter-spacing: .04em; } .as-asc .as-k { display: block; margin-top: 3px; font-size: 12.5px; letter-spacing: .02em; color: rgba(242, 233, 214, .72); }
 .tb-title .tb-ascd { margin: 3px 0 0; font: 600 12px/1.25 var(--mono); letter-spacing: .02em; color: #f3d28a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 38ch; cursor: help; } .tb-title .tb-ascd b { color: #fff4d6; letter-spacing: .04em; }
+.stakes .as-mult { align-self: center; margin-left: 8px; font-family: var(--mono); font-size: 15.5px; letter-spacing: .06em; color: var(--brass-lt); white-space: nowrap; } .stakes .as-mult.off { opacity: .4; }

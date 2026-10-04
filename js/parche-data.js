@@ -36,6 +36,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.38",
+      name: ["Más Ascensión, más puntos", "Higher Ascension, more points"],
+      date: "2026-10-04",
+      summary: ["La puntuación final de una expedición se multiplica según la Ascensión, para que una partida en A0 no valga lo mismo que una igual en A5.",
+        "An expedition's final score is multiplied by its Ascension, so a run on A0 is no longer worth the same as an equal one on A5."],
+      chapters: [
+        { id: "puntos", kicker: ["Puntuación", "Scoring"], title: ["Multiplicador de Ascensión", "Ascension multiplier"],
+          entries: [
+            E(["Multiplicador de Ascensión", "Ascension multiplier"], "change", "0.2.38", [
+              ["Al cerrar la expedición, el total se multiplica: A0 ×1,00 (igual que antes), A1 ×1,10, A2 ×1,20, A3 ×1,30, A4 ×1,40 y A5 ×1,50. Los objetivos y los puntos de cada ronda no cambian: solo cuenta al final, y se ve junto a las fichas de Ascensión.", "When the expedition ends, the total is multiplied: A0 ×1.00 (same as before), A1 ×1.10, A2 ×1.20, A3 ×1.30, A4 ×1.40 and A5 ×1.50. Targets and per-round points don't change: it only counts at the end, and it shows next to the Ascension chips."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.37",
       name: ["Los polos", "The poles"],
       date: "2026-10-04",
