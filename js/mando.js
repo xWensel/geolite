@@ -110,7 +110,7 @@ window.AIQ = window.AIQ || {};
   }
   function scan() {
     const out = [], inside = new Set(); clk = new WeakSet();
-    for (const el of document.body.querySelectorAll("*")) {
+    for (const el of document.body.querySelectorAll(":not([data-pad-skip] *)")) {   // data-pad-skip: tablas enormes (creditos) que la cruceta no recorre
       if (el.parentElement && inside.has(el.parentElement) && !el.matches(INTER)) { inside.add(el); continue; }   // lo de dentro de un boton cuenta como el boton (salvo otro control: el interruptor dentro del aviso)
       if (el.id === "padCur" || el.disabled) continue;
       const cs = getComputedStyle(el); if (!(ptrCur(cs) || (A.teclado && A.teclado.textual(el))) || cs.visibility === "hidden" || cs.pointerEvents === "none") continue;   // y las casillas de texto (A abre el teclado)

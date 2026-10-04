@@ -218,7 +218,7 @@
     if (A.nombre) A.nombre.sync();                                          // v0.37: "Tu nombre" (js/nombre.js)
   }
   /* creditos y licencias (credits.html, tools/build-credits.mjs): pagina aparte, en el navegador del sistema en Electron (main.js abre los http externos alli) */
-  $("openCredits").onclick = () => { A.sfx.ui(); window.open("credits.html", "_blank", "noopener"); };
+  $("openCredits").onclick = () => { A.sfx.ui(); A.creditos.open(); };   // v0.2.33: dentro del juego (js/creditos.js); antes, el navegador del sistema
   /* restablecer la Enciclopedia: hay que pulsar dos veces (la primera arma el boton) */
   { const rc = $("resetCodex"); let tm = 0;
     rc.onclick = () => {

@@ -36,6 +36,24 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.33",
+      name: ["Créditos en casa", "Credits at home"],
+      date: "2026-10-04",
+      summary: ["Los créditos se leen dentro del juego, y en la Steam Deck la pantalla del Clásico se recoloca para que su letra se lea bien.", "Credits are now read inside the game, and on Steam Deck the Classic screen is rearranged so its text reads well."],
+      chapters: [
+        { id: "cr", kicker: ["Ajustes", "Settings"], title: ["Créditos y licencias", "Credits and licenses"],
+          entries: [
+            E(["Dentro del juego", "Inside the game"], "change", "0.2.33", [
+              ["**Créditos y licencias** ya no abre el navegador: se leen en un panel del propio juego, con buscador, y se cierran con **B** o **Esc**.", "**Credits and licenses** no longer opens your browser: they're read in the game's own panel, with search, and close with **B** or **Esc**."],
+            ]) ] },
+        { id: "deck", kicker: ["Steam Deck", "Steam Deck"], title: ["Letra, segunda tanda", "Text, second pass"],
+          entries: [
+            E(["El Clásico", "Classic"], "change", "0.2.33", [
+              ["En la Deck, las campañas del **Clásico** van en tres columnas y a tamaño completo, sin encogerse. Más textos pequeños crecen en Aventura, Reto diario y la Enciclopedia.", "On the Deck, the **Classic** campaigns sit in three columns at full size, without shrinking. More small texts grow in Adventure, Daily challenge and the Encyclopedia."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.32",
       name: ["Letra a la medida de la Deck", "Text sized for the Deck"],
       date: "2026-10-04",
