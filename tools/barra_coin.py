@@ -1,6 +1,6 @@
 """Uso: python tools/barra_coin.py <raiz del repo> [hoja_de_prueba.png]
 La moneda de la Barra, con el arte de la moneda de los logros (assets/icons/coin.webp, pixel logico de 8 px):
- - coin_spin.webp : 24 fotogramas de 64x64 (pixel logico) de la moneda girando sobre su eje horizontal (cara = estrella, cruz = rosa de los vientos)
+ - coin_spin.webp : 24 fotogramas de 64x64 (pixel logico) de la moneda girando sobre su eje horizontal (cara = Don Crupier acunado, de tools/barra_coin_crupier.py; cruz = rosa de los vientos)
  - coin_stand.webp: la moneda de canto, de pie
  - bet_coin.webp  : el icono de la casilla (la moneda inclinada del giro, sin destellos)
 Se renderiza la moneda como un cilindro: dos caras elipticas con la textura del arte original y el canto con su cordoncillo."""
@@ -10,6 +10,7 @@ from PIL import Image
 
 ROOT = sys.argv[1]
 ICONS = ROOT + "/assets/icons/"
+OUT = sys.argv[3] + "/" if len(sys.argv) > 3 else ICONS
 INK = (29, 10, 61, 255)
 GOLD = (245, 166, 35, 255); LIGHT = (255, 217, 90, 255); ORANGE = (196, 106, 27, 255); BROWN = (127, 58, 26, 255); CREAM = (255, 246, 200, 255)
 F = 64                                   # lienzo logico del fotograma
@@ -33,16 +34,29 @@ def face_mask():
 FM = face_mask()
 
 
-def heads_face():
+def plain_face():
     a = np.array(src)
     out = np.zeros_like(a)
     out[FM] = a[FM]
     return out
 
 
+def heads_face():
+    """la cara: Don Crupier (sus pixeles de dealer_neutral) acunado en oro; el ala de la chistera pisa el anillo fino"""
+    sys.path.insert(0, ROOT + "/tools")
+    import barra_coin_crupier as relief
+    a = plain_face()
+    for y in range(64):
+        for x in range(64):
+            r = math.hypot(x + .5 - CX, y + .5 - CY0)
+            if FM[y, x] and (r < 19.2 or (r < 20.5 and tuple(a[y, x]) != BROWN)):   # sin restos de la estrella; el anillo fino se queda
+                a[y, x] = GOLD
+    return relief.paint(a, ROOT)[0]
+
+
 def tails_face():
     """igual que la cara, con la estrella cambiada por una rosa de los vientos (la cruz de la geografia)"""
-    a = heads_face()
+    a = plain_face()
     for y in range(64):
         for x in range(64):
             if math.hypot(x + .5 - CX, y + .5 - CY0) < 17.5 and FM[y, x]:
@@ -206,11 +220,11 @@ def icon(sp):
 
 if __name__ == "__main__":
     sp = sheet()
-    sp.save(ICONS + "coin_spin.webp", lossless=True)
+    sp.save(OUT + "coin_spin.webp", lossless=True)
     st = stand()
-    st.save(ICONS + "coin_stand.webp", lossless=True)
+    st.save(OUT + "coin_stand.webp", lossless=True)
     ic = icon(sp).resize((384, 384), Image.NEAREST)
-    ic.save(ICONS + "bet_coin.webp", lossless=True)
+    ic.save(OUT + "bet_coin.webp", lossless=True)
     # hoja de contacto para revisar
     prev = Image.new("RGBA", (F * 12 * 4, F * 2 * 4 + 40 * 4), (30, 60, 90, 255))
     big = sp.resize((sp.width * 4, sp.height * 4), Image.NEAREST)

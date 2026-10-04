@@ -4,6 +4,8 @@
 
 > **Versiones:** desde la 0.2.3 la version del juego sigue la numeracion de las notas del parche (0.2.N): cada entrega sube el ultimo numero y lleva su entrada en las notas. Antes (hasta la 0.79.1) cada entrega subia la version menor y terminaba en 1. Se cambia en `VERSION`, `js/support.js`, `package.json`, `package-lock.json`, `sw.js` y esta lista. Detalle en `CLAUDE.md`.
 
+**v0.2.42** - La cara de la moneda de Cara o cruz es Don Crupier acunado en oro: sus pixeles de dealer_neutral recoloreados a la rampa del oro (sin la mano con cartas, copa 6 filas mas baja), en tools/barra_coin_crupier.py; tools/barra_coin.py regenera coin_spin y bet_coin.
+
 **v0.2.41** - La partida ya no se pierde si el juego se cierra de golpe (cuelgue, apagon, "Detener" de Steam): Chromium solo escribia localStorage en disco al cerrar bien y un cierre brusco borraba toda la sesion (comprobado con el exe empaquetado); main.js la vuelca cada 3 s con session.flushStorageData(). Ademas tools/steam-upload.mjs: empaqueta y sube con SteamCMD a la rama privada `pruebas` con los IDs de steam/ids.local.json (fuera de git).
 
 **v0.2.40** - La cruceta del mando solo para en lo accionable: las tarjetas con botones dentro (Rojo o negro, Cara o cruz, Ruleta) ya no son destino y el punto de partida es el boton, no la tarjeta, asi que se llega a Negro, Verde y Cruz (scan y step en js/mando.js). El bucle del mando ya no se pierde si el mando desaparece y reaparece (Steam Input), manda el ultimo mando tocado y el Xbox Series ya no lleva iconos de PlayStation. main.js: --no-steam o GEOLITE_NOSTEAM=1 arranca sin Steamworks para probar el mando.

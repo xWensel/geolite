@@ -30,11 +30,25 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = {"mando-atlas":[1100,340],"ajustes-mando":[1100,630],"deck-retos":[1100,687],"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
+  const SZ = {"moneda-crupier":[828,582],"mando-atlas":[1100,340],"ajustes-mando":[1100,630],"deck-retos":[1100,687],"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
 
   A.PATCHES = [
+    {
+      id: "0.2.42",
+      name: ["Cara de crupier", "Dealer's head"],
+      date: "2026-10-04",
+      summary: ["La moneda de Cara o cruz lleva acuñado a Don Crupier.",
+        "The Heads or tails coin now bears Don Crupier's face."],
+      chapters: [
+        { id: "moneda", kicker: ["La Barra", "The Bar"], title: ["La moneda", "The coin"],
+          entries: [
+            E(["Cara o cruz", "Heads or tails"], "change", "0.2.42", [
+              ["La **cara** de la moneda ya no es una estrella: es **Don Crupier acuñado en oro**, con su chistera, su antifaz y su bigote. La cruz sigue siendo la rosa de los vientos.", "The coin's **heads** is no longer a star: it is **Don Crupier struck in gold**, with his top hat, mask and moustache. Tails is still the compass rose."]
+            ], [I("moneda-crupier", ["Don Crupier y su moneda", "Don Crupier and his coin"], "half")]) ] },
+      ],
+    },
     {
       id: "0.2.41",
       name: ["Partida a salvo", "Run kept safe"],
