@@ -12,3 +12,28 @@ html:not([data-glyph="kb"]) .k-kb { display: none !important; }
 .split-alt .sa-gl { margin: -4px 0; }
 .btn-ink .gl, .nm-next .gl { margin: -6px 0 -6px 2px; }
 .set-keys .gl { margin: -4px 4px -4px 0; }
+
+/* v0.2.31: teclado del crupier (js/teclado.js). Bandeja de pano con canto de laton; teclas de ficha; arriba, lo que llevas escrito */
+#osk { position: fixed; inset: 0; z-index: 2147482000; display: flex; align-items: flex-end; justify-content: center; padding: 0 16px 22px; background: rgba(4, 10, 8, .38); opacity: 0; transition: opacity .15s; }
+#osk.top { align-items: flex-start; padding: 22px 16px 0; }
+#osk.on { opacity: 1; } #osk[hidden] { display: none; }
+.osk-pad { display: grid; gap: 7px; padding: 14px 16px 12px; border-radius: 16px; background: linear-gradient(#143a29, #0c2018); box-shadow: inset 0 0 0 2px #f8b449, inset 0 0 0 5px #1f5c40, 0 18px 44px rgba(0, 0, 0, .55); transform: translateY(10px); transition: transform .18s var(--spring, ease-out); }
+#osk.on .osk-pad { transform: none; }
+.osk-view { display: flex; align-items: center; gap: 2px; min-height: 46px; margin-bottom: 4px; padding: 6px 14px; border-radius: 10px; background: #f6efdc; box-shadow: inset 0 0 0 3px #16241c, inset 0 5px 0 rgba(120, 90, 40, .16); color: #16241c; font-family: var(--serif); font-size: 30px; line-height: 1; overflow: hidden; }
+.osk-view b { font-weight: 700; white-space: pre; }
+.osk-view em { font-style: normal; color: rgba(22, 36, 28, .35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.osk-caret { width: 3px; height: 28px; background: #fe5f55; animation: oskCaret 1s steps(1) infinite; }
+@keyframes oskCaret { 50% { opacity: 0; } }
+html.reduce-motion .osk-caret { animation: none; }
+.osk-keys { display: grid; gap: 6px; }
+.osk-row { display: flex; justify-content: center; gap: 6px; }
+.osk-k { min-width: 44px; height: 44px; padding: 0 10px; border-radius: 9px; background: #1f5c40; color: #ffe7ae; font-family: var(--serif); font-size: 24px; font-weight: 700; line-height: 1; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .32), inset 0 0 0 1px rgba(255, 231, 174, .12); transition: background .12s, color .12s, transform .08s; }
+.osk-k:hover { background: #f8b449; color: #16241c; }
+.osk-k:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .32); }
+.osk-k.fn { background: #163f2d; color: #f8b449; font-size: 20px; min-width: 58px; } .osk-k.fn.on { background: #f8b449; color: #16241c; }
+.osk-k.wide { flex: 1 1 auto; min-width: 200px; font-family: var(--mono); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.osk-k.ok { min-width: 96px; background: #fe5f55; color: #fff3cf; font-family: var(--mono); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+.osk-k.ok:hover { background: #ff7a70; color: #fff; }
+.osk-bot { margin-top: 2px; }
+.osk-legend { display: flex; justify-content: center; gap: 18px; margin-top: 6px; color: rgba(255, 231, 174, .75); font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.osk-legend span { display: inline-flex; align-items: center; gap: 6px; } .osk-legend em { font-style: normal; }

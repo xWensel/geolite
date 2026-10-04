@@ -113,7 +113,7 @@ window.AIQ = window.AIQ || {};
     for (const el of document.body.querySelectorAll("*")) {
       if (el.parentElement && inside.has(el.parentElement) && !el.matches(INTER)) { inside.add(el); continue; }   // lo de dentro de un boton cuenta como el boton (salvo otro control: el interruptor dentro del aviso)
       if (el.id === "padCur" || el.disabled) continue;
-      const cs = getComputedStyle(el); if (!ptrCur(cs) || cs.visibility === "hidden" || cs.pointerEvents === "none") continue;
+      const cs = getComputedStyle(el); if (!(ptrCur(cs) || (A.teclado && A.teclado.textual(el))) || cs.visibility === "hidden" || cs.pointerEvents === "none") continue;   // y las casillas de texto (A abre el teclado)
       inside.add(el); clk.add(el);
       const r = el.getBoundingClientRect(); if (r.width < 6 || r.height < 6 || r.right < 0 || r.bottom < 0 || r.left > innerWidth || r.top > innerHeight) continue;
       if (r.width * r.height > innerWidth * innerHeight * 0.45) continue;   // fondos pulsables (cerrar al pulsar fuera, "pulsa para entrar"): A ya los pulsa, la cruceta no se para en ellos
@@ -161,9 +161,10 @@ window.AIQ = window.AIQ || {};
       if (A.pointer) A.pointer.press = 100; map.tapAt(M.x - r.left, M.y - r.top); return;
     }
     if (el.matches("input[type=range]")) return;
+    { const ti = el.closest("input, label"), inp = ti && (ti.tagName === "INPUT" ? ti : ti.querySelector("input")); if (A.teclado && A.teclado.textual(inp)) { A.teclado.open(inp); return; } }   // casilla de texto: el teclado
     if (!clickable(el)) { key("Enter"); return; }                      // nada pulsable debajo: A hace lo de Intro (entrar, boton principal del dialogo)
     ev("pointerdown", el, { buttons: 1 }); ev("mousedown", el, { buttons: 1 });
-    const f = el.closest("input, textarea, select, button, a[href], [tabindex]"); if (f && f.focus) f.focus({ preventScroll: true });
+    const f = el.closest("input, textarea, select, button, a[href], [tabindex]"); if (f && f.focus && !f.closest("#osk")) f.focus({ preventScroll: true });   // las teclas del teclado no quitan el foco a la casilla
     ev("pointerup", el); ev("mouseup", el);
     const c = el.closest("button, a, input, label, select, summary, [role]") || el; c.click();
   }
@@ -243,10 +244,12 @@ window.AIQ = window.AIQ || {};
 
     /* botones: flanco de bajada; la cruceta repite al mantener */
     const pr = i => btn[i] && !prevB[i];
+    const osk = A.teclado && A.teclado.on;
     if (pr(0)) press();
-    if (pr(1)) key("Escape");
-    if (pr(9)) menuBtn();
-    if (pr(3)) key("Tab");
+    if (pr(1)) osk ? A.teclado.close() : key("Escape");
+    if (pr(9)) osk ? A.teclado.ok() : menuBtn();
+    if (pr(3)) osk ? A.teclado.type(" ") : key("Tab");
+    if (pr(2) && osk) A.teclado.back();
     if (pr(5)) { const h = $("zoomHome"); if (h && h.offsetParent) h.click(); }
     for (const [i, dx, dy] of [[12, 0, -1], [13, 0, 1], [14, -1, 0], [15, 1, 0]]) {
       if (!btn[i]) { repAt[i] = 0; continue; }
@@ -267,7 +270,7 @@ window.AIQ = window.AIQ || {};
       }
     }
   }
-  M.step = step; M.targets = targets;                                   // para las pruebas (dev/)
+  M.step = step; M.targets = targets; M.goTo = el => goTo(el);                                   // para las pruebas (dev/)
   const start = () => { if (!raf) { lastT = 0; raf = requestAnimationFrame(loop); } };
   const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
   addEventListener("gamepadconnected", e => { padAt[e.gamepad.index] = performance.now(); start(); });

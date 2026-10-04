@@ -27,6 +27,19 @@ ipcMain.on("host:demo", (e) => { e.returnValue = !!flavor.demo; });
 /* Steam Deck (v0.2.29): iconos de mando y modo mando desde el primer fotograma (el navegador no ve el mando hasta la primera pulsacion) */
 const onDeck = (() => { try { if (steamClient && steamClient.utils.isSteamRunningOnSteamDeck()) return true; } catch (e) { /* steamworks sin utils */ } return process.env.SteamDeck === "1"; })();
 ipcMain.on("host:device", (e) => { e.returnValue = onDeck ? "deck" : "pc"; });
+/* teclado de Steam (v0.2.31): el flotante escribe directamente en la casilla; si no se puede, el de Big Picture devuelve el texto. Si Steam no
+   puede mostrar ninguno (PC sin Big Picture) contesta "none" y el juego saca el teclado del crupier (js/teclado.js) */
+ipcMain.handle("steam:keyboard", async (e, o) => {
+  if (!steamClient || !o || typeof o !== "object") return { kind: "none" };
+  const u = steamClient.utils, n = v => Math.max(0, Math.round(+v || 0));
+  try { if (await u.showFloatingGamepadTextInput(0, n(o.x), n(o.y), n(o.w), n(o.h))) return { kind: "floating" }; } catch (err) { /* sin teclado flotante */ }
+  try {
+    const t0 = Date.now(), txt = await u.showGamepadTextInput(0, 0, String(o.desc || "").slice(0, 60), Math.min(64, n(o.max) || 20), String(o.text || ""));
+    if (txt != null) return { kind: "modal", text: txt };
+    if (Date.now() - t0 > 700) return { kind: "cancel" };                      // se mostro y lo cerraste; si vuelve al instante es que no se pudo mostrar
+  } catch (err) { /* sin Big Picture */ }
+  return { kind: "none" };
+});
 ipcMain.handle("steam:available", () => !!steamClient);
 ipcMain.handle("steam:unlock", (e, id) => {   // si ya esta activo no se vuelve a guardar (profile.js reenvia todos los logros al arrancar)
   if (!steamClient || typeof id !== "string") return false;

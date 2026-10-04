@@ -30,11 +30,25 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = {"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
+  const SZ = {"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
 
   A.PATCHES = [
+    {
+      id: "0.2.31",
+      name: ["El teclado del crupier", "The dealer's keyboard"],
+      date: "2026-10-04",
+      summary: ["Ya puedes escribir tu nombre y buscar en la Enciclopedia con mando: con el teclado de Steam o con el del crupier.", "You can now type your name and search the Encyclopedia with a controller: with Steam's keyboard or the dealer's."],
+      chapters: [
+        { id: "teclado", kicker: ["Mando", "Controller"], title: ["Escribir con mando", "Typing with a controller"],
+          entries: [
+            E(["Teclado en pantalla", "On-screen keyboard"], "new", "0.2.31", [
+              ["Pulsa **A** en una casilla de texto: sale el teclado de **Steam** y, si no está disponible, el del **crupier**, con tildes de todos los idiomas y cirílico en ruso.", "Press **A** on a text box: **Steam**'s keyboard opens and, if it isn't available, the **dealer**'s, with accents for every language and Cyrillic in Russian."],
+              ["Con mando, **X** borra, **Y** pone un espacio, **Menú** confirma y **B** cierra. En la **Steam Deck** se abre solo.", "With a controller, **X** deletes, **Y** adds a space, **Menu** confirms and **B** closes. On **Steam Deck** it opens by itself."],
+            ], [I("teclado-crupier", ["El teclado del crupier", "The dealer's keyboard"], "half")]) ] },
+      ],
+    },
     {
       id: "0.2.30",
       name: ["Hablando tu idioma", "Speaking your language"],

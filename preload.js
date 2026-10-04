@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld("geoliteHost", {
   demo: ipcRenderer.sendSync("host:demo"),
   /* "deck" en una Steam Deck, "pc" en el resto (js/mando.js: iconos y modo mando de entrada) */
   device: ipcRenderer.sendSync("host:device"),
+  /* teclado de Steam para escribir con mando (js/teclado.js): { kind: "floating" | "modal" (con text) | "cancel" | "none" } */
+  steamKeyboard: (o) => ipcRenderer.invoke("steam:keyboard", o),
   steamAvailable: () => ipcRenderer.invoke("steam:available"),
   steamUnlock: (id) => ipcRenderer.invoke("steam:unlock", id),
   /* sincrono a proposito: el renderer lo usa para pintar el selector de
