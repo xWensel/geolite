@@ -10,7 +10,7 @@
     quality: "auto", settingsOpen: false, lastTimeStr: "", intro: true, reduce: false, booting: true, skin: "casino",
     hub: "home", ranked: null, run: null, tool: null, hits: 0,
     cursor: true, tips: true, songToast: true, setTab: "general",
-    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false,
+    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100,
   };
   const prog = id => (S.prog[id] = S.prog[id] || { unlocked: 1, best: 0, bestIq: 0 });
   function load() {
@@ -25,10 +25,11 @@
       S.contrast = !!d.contrast; S.colorblind = ["protan", "deutan", "tritan"].includes(d.colorblind) ? d.colorblind : "off"; S.qSize = ["l", "xl"].includes(d.qSize) ? d.qSize : "n";
       S.shake = d.shake !== false; A.haptic.on = S.shake;
       S.softFlash = !!d.softFlash; S.flashSeen = !!d.flashSeen;
+      S.uiScale = Number.isInteger(d.uiScale) && d.uiScale >= 50 && d.uiScale <= 300 ? d.uiScale : 100;
     } catch (e) { A.lang = A.detectLang(); }
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen })); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen })); } catch (e) { /* sin almacenamiento */ }
   }
 
   const lv = () => S.camp.levels[S.level];
@@ -357,23 +358,62 @@
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
       S.quality = "auto"; map.setQuality("auto"); S.reduce = false; applyMotion(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); S.softFlash = false; applyFlash(); A.cursor.set(true); A.tt.enable(true);
-      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize();
+      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
-  /* modo de pantalla: Ventana / Pantalla completa (y "Sin bordes" si el cliente de escritorio lo ofrece: window.geoliteHost) */
-  { const seg = document.querySelector('[data-seg="win"]'), host = window.geoliteHost;
-    if (host && host.setWindowMode) { const b = document.createElement("button"); b.dataset.v = "border"; b.dataset.i = "win.border"; seg.insertBefore(b, seg.querySelector("i")); seg.classList.add("s3"); }
+  /* Pantalla (v0.2.27): Ventana / Pantalla completa y la escala de la interfaz en todos; en el cliente de escritorio (window.geoliteHost.screenInfo)
+     ademas el tamano del area de juego en pixeles fisicos y el monitor. Filas "< valor >" que valen igual con raton, mando y tactil, sin desplegables */
+  { const seg = document.querySelector('[data-seg="win"]'), host = window.geoliteHost, scr = !!(host && host.screenInfo);
     const cur = () => (host && host.windowMode ? host.windowMode() : document.fullscreenElement ? "full" : "window");
+    const X = s => s[0] + " \u00d7 " + s[1], same = (a, b) => !!a && !!b && a[0] === b[0] && a[1] === b[1];
+    let info = null;
+    /* una fila: valores, posicion del elegido, como se pinta y que hace al elegir otro (las flechas no dan la vuelta) */
+    const row = (id, o) => {
+      const el = $(id); if (!el) return; el.classList.toggle("hidden", !o); if (!o) return;
+      const n = o.vals.length, i = Math.max(0, Math.min(n - 1, o.at)), off = !!o.off || n < 2, [lo, hi] = el.querySelectorAll(".stp-b");
+      const v = el.querySelector(".stp-v"); el.classList.toggle("off", off); v.textContent = o.fmt(o.vals[i]); v.title = o.tip ? o.tip(o.vals[i]) : v.textContent; if (o.tip) el.title = v.title; el.querySelector(".stp-tag").textContent = o.tag ? o.tag(o.vals[i]) : "";
+      lo.disabled = off || i <= 0; hi.disabled = off || i >= n - 1;
+      el._step = d => { const j = i + d; if (off || j < 0 || j >= n) return; A.sfx.ui(); o.pick(o.vals[j]); };
+    };
+    /* tamano: las flechas recorren los tamanos que caben en este monitor, de menor a mayor; el automatico (el mayor que deja aire) es uno mas
+       de la lista con su etiqueta AUTO, y elegirlo vuelve a "automatico". El que dejaste estirando el borde sale en su sitio como PERSONALIZADO */
+    const sizeRow = I => {
+      if (I.mode === "full") return { vals: [I.native], at: 0, off: true, fmt: X, tag: () => A.t("scr.native") };
+      const vals = I.sizes.slice(), add = s => { if (!vals.some(x => same(x, s))) { const ar = s[0] * s[1]; let j = vals.findIndex(x => x[0] * x[1] > ar); vals.splice(j < 0 ? vals.length : j, 0, s); } };
+      const mine = I.size && I.sizeOk ? I.size : null, custom = !!mine && !I.sizes.some(s => same(s, mine)) && !same(mine, I.auto);
+      add(I.auto); if (mine) add(mine);
+      return { vals, at: vals.findIndex(s => same(s, mine || I.auto)), fmt: X,
+        tag: s => (custom && same(s, mine) ? A.t("scr.custom") : same(s, I.auto) ? A.t("scr.auto") : ""),
+        pick: s => host.setScreen({ size: same(s, I.auto) ? null : s }) };
+    };
+    const monRow = I => I.displays.length < 2 ? null : { vals: I.displays, at: I.displays.findIndex(d => d.id === I.display),
+      fmt: d => String(d.n), tip: d => A.t("scr.mon") + " " + d.n + " \u00b7 " + (d.label ? d.label + " \u00b7 " : "") + X([d.w, d.h]), pick: d => host.setScreen({ display: d.id }) };
+    const scaleRow = () => {
+      if (innerWidth < 900 || innerHeight < 520) return null;                               // movil: su propia maqueta, sin escala
+      const r = kRange(), vals = []; for (let s = 50; s <= 300; s += 10) if (s === 100 || (s / 100 >= r.lo - 1e-3 && s / 100 <= r.hi + 1e-3)) vals.push(s);
+      if (vals.length < 2) return null;                                                   // ventana de 1280x720 o menos: la interfaz ya esta a su tamano de diseno, no hay nada que elegir
+      let at = 0; vals.forEach((s, i) => { if (Math.abs(s - S.uiScale) < Math.abs(vals[at] - S.uiScale)) at = i; });
+      return { vals, at, fmt: s => s + " %", tag: s => s === 100 ? A.t("scr.auto") : "",
+        pick: s => { S.uiScale = s; save(); setK(); dispatchEvent(new Event("resize")); sync(); } };
+    };
+    const sync = () => {
+      segSet(seg, cur());
+      if (scr && S.settingsOpen) { info = host.screenInfo(); row("scrSize", sizeRow(info)); row("scrMon", monRow(info)); }
+      row("scrScale", scaleRow()); if (S.settingsOpen) fitSetSoon();
+    };
+    for (const id of ["scrSize", "scrMon", "scrScale"]) $(id).addEventListener("click", e => { const b = e.target.closest(".stp-b"); if (b && !b.disabled && $(id)._step) $(id)._step(+b.dataset.d); });
     seg.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return; const v = b.dataset.v; A.sfx.ui();
       if (v !== cur() && A.dealer && A.dealer.noteWindow) A.dealer.noteWindow(v);           // el crupier lo comenta al volver
       if (host && host.setWindowMode) host.setWindowMode(v);
       else if (v === "full" && !document.fullscreenElement) toggleFs(); else if (v === "window" && document.fullscreenElement) toggleFs();
-      setTimeout(() => segSet(seg, cur()), 120);
+      setTimeout(sync, 120);
     });
-    document.addEventListener("fullscreenchange", () => segSet(seg, cur()));
-    A.syncWin = () => segSet(seg, cur());
-    if (host && host.onWindowModeChange) host.onWindowModeChange(() => { segSet(seg, cur()); $("fsBtn").classList.toggle("on", cur() === "full"); }); }
+    document.addEventListener("fullscreenchange", sync);
+    let syncT = 0; addEventListener("resize", () => { if (!S.settingsOpen) return; clearTimeout(syncT); syncT = setTimeout(sync, 160); });   // la escala posible depende del tamano de la ventana
+    A.syncWin = sync;
+    if (host && host.onScreenChange) host.onScreenChange(() => { if (S.settingsOpen) sync(); });
+    if (host && host.onWindowModeChange) host.onWindowModeChange(() => { sync(); $("fsBtn").classList.toggle("on", cur() === "full"); }); }
   document.querySelector('[data-seg="gfx"]').addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.quality) return;
     S.quality = b.dataset.v; save(); A.sfx.ui(); map.setQuality(S.quality); syncSettings();
@@ -430,7 +470,10 @@
   /* altura ocupada por el pie de pagina: las cartas de herramienta se colocan justo encima */
   /* escala de la interfaz: en pantallas grandes todo el HUD y los menus crecen (k = 1 en 1280x720, hasta 1,85) para aprovechar el espacio */
   const uiK = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--k")) || 1;
-  const setK = () => { const w = innerWidth, h = innerHeight, k = (w < 900 || h < 520) ? 1 : Math.max(1, Math.min(1.85, Math.min(w / 1280, h / 720))); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
+  /* v0.2.27: Ajustes > Pantalla > Interfaz multiplica la k automatica. Nunca baja de 1 (el tamano de diseno: la letra no se hace ilegible) ni pasa
+     de lo que cabe en la ventana (min(w/1280, h/720): mismas proporciones que a 1280x720, asi que nada se solapa ni hace falta desplazarse) */
+  const kRange = (w = innerWidth, h = innerHeight) => { const geo = Math.min(w / 1280, h / 720), auto = Math.max(1, Math.min(1.85, geo)); return { auto, lo: 1 / auto, hi: Math.max(1, geo) / auto }; };
+  const setK = () => { const w = innerWidth, h = innerHeight, r = kRange(w, h), k = (w < 900 || h < 520) ? 1 : Math.max(1, Math.min(r.auto * r.hi, r.auto * (S.uiScale || 100) / 100)); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
   /* ajuste fino: si una pantalla escalada (inicio, campamento, veredicto...) no cabe en la ventana, se baja SU k hasta que quepa entera (nunca hay que desplazarse: esto es un juego de escritorio) */
   const FIT = ".hh, .scr, .table, .vd";
   /* huella de lo que decide el ajuste (pantalla, ventana, escala, fuentes y medidas): si no ha cambiado desde el ultimo, el resultado seria el mismo
@@ -973,7 +1016,6 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   $("pauseBtn").onclick = togglePause;
   function toggleFs() {
     const host = window.geoliteHost;
-    if (host && host.windowMode && host.windowMode() === "border") return;   // Sin bordes ya llena la pantalla; cambiar de marco recrea la ventana y recargaba el juego (el Clasico perdia el nivel). Se cambia en Ajustes > Video
     const to = host && host.windowMode ? (host.windowMode() === "full" ? "window" : "full") : document.fullscreenElement ? "window" : "full";
     if (A.dealer && A.dealer.noteWindow) A.dealer.noteWindow(to);
     if (host && host.setWindowMode) { host.setWindowMode(to); return; }

@@ -16,6 +16,10 @@ contextBridge.exposeInMainWorld("geoliteHost", {
   windowMode: () => ipcRenderer.sendSync("win:getMode"),
   setWindowMode: (mode) => ipcRenderer.send("win:setMode", mode),
   onWindowModeChange: (cb) => ipcRenderer.on("win:mode-changed", (e, mode) => cb(mode)),
+  /* Ajustes > Pantalla (v0.2.27): modo, tamano del area de juego en pixeles fisicos, monitor; sincrono para pintar Ajustes al abrirlos */
+  screenInfo: () => ipcRenderer.sendSync("win:getScreen"),
+  setScreen: (o) => ipcRenderer.send("win:setScreen", o),
+  onScreenChange: (cb) => ipcRenderer.on("win:screen", (e, info) => cb(info)),
   /* boton de encendido de la portada (js/salir.js): cierra el juego */
   quit: () => ipcRenderer.send("app:quit"),
   /* abres el juego otra vez con este abierto: main trae esta ventana al frente y el crupier lo comenta (js/dealer.js) */

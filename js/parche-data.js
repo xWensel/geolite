@@ -30,11 +30,32 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = {"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
+  const SZ = {"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
 
   A.PATCHES = [
+    {
+      id: "0.2.27",
+      name: ["Tu pantalla, a tu medida", "Your screen, your size"],
+      date: "2026-10-04",
+      summary: ["En Ajustes eliges el tamaño exacto de la ventana, el monitor y el tamaño de la interfaz, y cambiar de modo ya nunca recarga el juego.", "In Settings you now pick the exact window size, the monitor and the interface size, and switching modes never reloads the game."],
+      chapters: [
+        { id: "pantalla", kicker: ["Escritorio", "Desktop"], title: ["Pantalla", "Display"],
+          entries: [
+            E(["Tamaño y monitor", "Size and monitor"], "new", "0.2.27", [
+              ["En **Ajustes > General > Pantalla** eliges el tamaño de la ventana en píxeles reales, de 960 × 600 a 4K; solo salen los que caben en tu monitor. **Auto** es el más grande que deja aire, y si estiras el borde a mano se guarda como **Personalizado**.", "In **Settings > General > Display** you pick the window size in real pixels, from 960 × 600 up to 4K; only the sizes that fit your monitor are listed. **Auto** is the largest one that leaves some room, and if you drag the edge yourself it is kept as **Custom**."],
+              ["Con dos o más monitores, las flechas junto a **Pantalla** llevan el juego de uno a otro, en ventana o a pantalla completa.", "With two or more monitors, the arrows next to **Display** move the game from one to another, windowed or fullscreen."],
+            ], [I("pantalla-ajustes", ["Pantalla, con el tamaño y el monitor", "Display, with size and monitor"])]),
+            E(["Interfaz", "Interface"], "new", "0.2.27", [
+              ["En **Imagen**, **Interfaz** hace los menús y el marcador más pequeños o más grandes en pantallas grandes, sin bajar nunca del tamaño de diseño ni pasar de lo que cabe.", "In **Display settings**, **Interface** makes menus and the HUD smaller or larger on big screens, never below their design size and never beyond what fits."],
+            ]),
+            E(["Ventana", "Window"], "fix", "0.2.27", [
+              ["**Sin bordes** pasa a ser la pantalla completa, y cambiar de modo, de tamaño o de monitor ya no recarga el juego ni repite la intro.", "**Borderless** is now the fullscreen mode, and changing mode, size or monitor no longer reloads the game or replays the intro."],
+              ["La ventana mide exactamente lo elegido (antes contaba el marco), cabe en portátiles pequeños, recuerda su sitio y vuelve a la pantalla si desconectas un monitor.", "The window is exactly the size you chose (it used to include the frame), fits small laptops, remembers where it was and comes back on screen if you unplug a monitor."],
+            ]) ] },
+      ],
+    },
     {
       id: "0.2.26",
       name: ["El mismo cristal para todos", "Same glass for everyone"],

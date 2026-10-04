@@ -194,6 +194,31 @@ html.no-shake #plate.hurry { animation: none; }   /* Vibracion = no: la placa no
 .fader output { font-family: var(--mono); font-size: 17px; color: var(--brass-lt); min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
 .fader input { grid-column: 1 / -1; margin-top: 4px; }
 .fader.off label, .fader.off output { opacity: .38; } .fader.off input { opacity: .45; }
+/* v0.2.27: filas "< valor >" de Ajustes > Pantalla (tamano, monitor, interfaz). Mismo dibujo que el selector de canciones; el valor se corta con
+   puntos suspensivos (nombres de monitor largos) en vez de saltar de linea, y las flechas quedan siempre en su sitio */
+.stp { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); align-items: center; column-gap: 14px; padding: 10px 0 0; margin-top: 10px; border-top: 1px dashed rgba(242, 233, 214, .1); }
+.seg + .stp:not(.hidden) { margin-top: 12px; }
+.stp + .stp { padding-top: 8px; margin-top: 8px; }
+.set-card > .stp:first-child, .seg + .stp { border-top: 0; padding-top: 0; }
+.stp-l { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 700; font-size: 20px; white-space: nowrap; }
+.stp-h { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.stp-tag { font-style: normal; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 217, 138, .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.stp-tag:empty { display: none; }
+.stp-c { display: grid; grid-template-columns: 28px minmax(0, 1fr) 28px; align-items: center; gap: 4px; padding: 4px; background: rgba(0, 0, 0, .3); border-radius: 8px; box-shadow: inset 0 0 0 1.5px rgba(242, 233, 214, .12); }
+.stp-v { min-width: 0; text-align: center; font-family: var(--serif); font-size: 22px; font-weight: 700; letter-spacing: .02em; color: var(--brass-lt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.stp-b { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; background: #1f5c40; transition: background .15s, transform .12s; }
+.stp-b:hover:not(:disabled) { background: #f8b449; } .stp-b:active:not(:disabled) { transform: scale(.92); } .stp-b:disabled { opacity: .3; cursor: default; }
+.stp-b:hover:not(:disabled) .np-tri.r { border-left-color: #16241c; } .stp-b:hover:not(:disabled) .np-tri.l { border-right-color: #16241c; }
+.stp.off .stp-l, .stp.off .stp-v { opacity: .5; }
+/* monitor: en la cabecera de Pantalla ("PANTALLA < 2 >"), solo con dos o mas; el nombre del monitor va en el globo del numero */
+.scr-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+.scr-hd h3 { margin: 0 !important; min-width: 0; }
+.stp.mini { display: block; margin: 0; padding: 0; border: 0; flex: none; }
+.stp.mini .stp-h { display: none; }
+.stp.mini .stp-c { grid-template-columns: 24px minmax(2ch, auto) 24px; padding: 2px; gap: 6px; }
+.stp.mini .stp-b { width: 24px; height: 24px; }
+.stp.mini .stp-v { font-size: 22px; line-height: 1; }
+@media (min-width: 901px) { .scr-hd { margin-bottom: 10px; } }
 .ftrack { grid-column: 1 / -1; height: 6px; margin-top: -4px; background: repeating-linear-gradient(to right, rgba(242,233,214,.28) 0 1px, transparent 1px 10%); border-right: 1px solid rgba(242,233,214,.28); pointer-events: none; }
 input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; background: transparent; cursor: pointer; margin: 0; }
 input[type=range]::-webkit-slider-runnable-track { height: 11px; border-radius: 999px; background: linear-gradient(to right, var(--brass) var(--p, 50%), rgba(0,0,0,.32) var(--p, 50%)); box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.3); }
@@ -415,6 +440,11 @@ body.vd-on #hud, body.vd-on .dock-sh, body.vd-on .rail-sh, body.vd-on .note-sh {
   .seg { padding: 4px; } .seg > i { top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / var(--n)); } .seg button { min-height: 34px; padding: 7px 4px; }
   .set-pane[data-pane="general"] .set-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr); align-items: stretch; }
   .set-pane[data-pane="general"] .set-card:has(.row-sw) { order: 3; }
+  /* v0.2.27: en Pantalla (columna estrecha) la etiqueta va encima y el selector a todo el ancho, para que el valor quepa entero sin crecer la
+     tarjeta a lo ancho; la nota de la tecla F sobra (ya esta en la leyenda de abajo) */
+  .set-scr > .stp { grid-template-columns: minmax(0, 1fr); row-gap: 5px; }
+  .set-scr > .stp .stp-l { font-size: 18px; }
+  .set-scr:has(.stp:not(.hidden)) > .set-note { display: none; }
   #settings .langgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
   #settings .langgrid button { padding: 10px 6px 9px; gap: 6px; }
   #settings .lang-flag { width: 32px; }
