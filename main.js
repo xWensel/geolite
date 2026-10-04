@@ -295,6 +295,9 @@ else {
     session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(OK.has(perm)));
     Menu.setApplicationMenu(null);   // sin el menu por defecto: sus atajos (Ctrl+R recarga, Ctrl+W cierra, Ctrl+-/+ zoom, Ctrl+Mayus+I) seguian vivos con la barra oculta
     screen.on("display-removed", screenChanged); screen.on("display-metrics-changed", screenChanged); screen.on("display-added", notifyScreen);   // monitores que se van o cambian de escala
+    /* la partida vive en localStorage y Chromium solo la escribe en disco al cerrar bien: con un cierre de golpe (cuelgue, apagon, "Detener" de
+       Steam) se perdia TODA la sesion, aunque fuera de minutos (comprobado con el exe empaquetado). Se vuelca cada 3 s (solo escribe lo cambiado) */
+    setInterval(() => { try { session.defaultSession.flushStorageData(); } catch (e) { /* sin sesion */ } }, 3000);
     createWindow();
   });
 }

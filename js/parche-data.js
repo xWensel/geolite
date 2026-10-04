@@ -36,6 +36,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.41",
+      name: ["Partida a salvo", "Run kept safe"],
+      date: "2026-10-04",
+      summary: ["Tu progreso ya no se pierde si el juego se cierra de golpe.",
+        "Your progress is no longer lost if the game closes suddenly."],
+      chapters: [
+        { id: "guardado", kicker: ["Guardado", "Saving"], title: ["Cierres inesperados", "Unexpected shutdowns"],
+          entries: [
+            E(["Guardado", "Saving"], "fix", "0.2.41", [
+              ["Si el juego se cuelga, se va la luz o lo cierras desde Steam, **ya no pierdes lo jugado**: la partida se guarda en disco cada pocos segundos.", "If the game crashes, the power goes out or you stop it from Steam, **you no longer lose your progress**: the run is written to disk every few seconds."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.40",
       name: ["El mando, afinado", "The controller, tuned"],
       date: "2026-10-04",

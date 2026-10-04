@@ -11,6 +11,8 @@
 7. Launch options (SteamPipe -> Installation -> General): ejecutable `Geolite.exe` (demo: `GeoliteDemo.exe`), Windows 64.
 
 ## 1. Cada version
+Atajo: `node tools/steam-upload.mjs` (o `--demo`) empaqueta, rellena el .vdf con `steam/ids.local.json` (lo crea la primera vez, fuera de git)
+y sube a la rama privada `pruebas`. Lo de abajo es el paso a paso a mano.
 ```
 node tools/steam-pack.mjs            # juego completo   -> dist/Geolite-win32-x64
 node tools/steam-pack.mjs --demo     # demo (sin fotos HD y con steam-flavor.json) -> dist/Geolite Demo-win32-x64

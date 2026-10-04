@@ -4,6 +4,8 @@
 
 > **Versiones:** desde la 0.2.3 la version del juego sigue la numeracion de las notas del parche (0.2.N): cada entrega sube el ultimo numero y lleva su entrada en las notas. Antes (hasta la 0.79.1) cada entrega subia la version menor y terminaba en 1. Se cambia en `VERSION`, `js/support.js`, `package.json`, `package-lock.json`, `sw.js` y esta lista. Detalle en `CLAUDE.md`.
 
+**v0.2.41** - La partida ya no se pierde si el juego se cierra de golpe (cuelgue, apagon, "Detener" de Steam): Chromium solo escribia localStorage en disco al cerrar bien y un cierre brusco borraba toda la sesion (comprobado con el exe empaquetado); main.js la vuelca cada 3 s con session.flushStorageData(). Ademas tools/steam-upload.mjs: empaqueta y sube con SteamCMD a la rama privada `pruebas` con los IDs de steam/ids.local.json (fuera de git).
+
 **v0.2.40** - La cruceta del mando solo para en lo accionable: las tarjetas con botones dentro (Rojo o negro, Cara o cruz, Ruleta) ya no son destino y el punto de partida es el boton, no la tarjeta, asi que se llega a Negro, Verde y Cruz (scan y step en js/mando.js). El bucle del mando ya no se pierde si el mando desaparece y reaparece (Steam Input), manda el ultimo mando tocado y el Xbox Series ya no lleva iconos de PlayStation. main.js: --no-steam o GEOLITE_NOSTEAM=1 arranca sin Steamworks para probar el mando.
 
 **v0.2.39** - La Barra del Campamento con sitios fijos: centro el juego de casino, izquierda un suministro (Seguro o Cafe doble, sorteado) y derecha SIEMPRE una apuesta (Oferta, Doble o nada, Apuesta final), o hueco si esa ronda no toca ninguna; ya no sale el otro suministro a la derecha (barOf y supHtml en js/adventure.js).
