@@ -2,3 +2,13 @@
 #padCur { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; background: no-repeat 0 0 / 100% 100%; image-rendering: pixelated; will-change: transform; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .35)); }
 #padCur[hidden], #padCur.off { display: none; }
 html[data-input="pad"]:not(.pad-scan), html[data-input="pad"]:not(.pad-scan) * { cursor: none !important; }   /* .pad-scan: un instante, para leer que es pulsable (cursor: pointer) */
+
+/* v0.2.29: iconos de los botones (pixel art de js/glifos-data.js; el dibujo de cada uno lo pone js/mando.js segun html[data-glyph]).
+   Con teclado y raton (data-glyph="kb") se ven las teclas (.k-kb) y no los iconos; con mando, al reves. Ancho fijo: cambiar no mueve nada */
+.gl { display: inline-block; flex: none; vertical-align: middle; background: no-repeat 0 0 / 100% 100%; image-rendering: pixelated; }
+html[data-glyph="kb"] .gl, html[data-glyph="kb"] .k-pad { display: none !important; }
+html:not([data-glyph="kb"]) .k-kb { display: none !important; }
+.tt .tt-gl { margin: -4px 0 -4px 8px; }
+.split-alt .sa-gl { margin: -4px 0; }
+.btn-ink .gl, .nm-next .gl { margin: -6px 0 -6px 2px; }
+.set-keys .gl { margin: -4px 4px -4px 0; }

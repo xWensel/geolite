@@ -8,6 +8,8 @@
  *    (Tab); RB: vista inicial (0).
  * El "pasar por encima" se emula con eventos pointer/mouse sinteticos (globos de ayuda, carta grande, crupier) y una copia de las reglas
  * CSS :hover con la clase .pad-hov. html[data-input] dice que se usa (mouse | pad | touch); el raton de verdad devuelve el control al raton.
+ * Iconos de los botones (v0.2.29): html[data-glyph] = kb | xbox | ps | deck; el dibujo sale de js/glifos-data.js (tools/glifos.py). En la Steam Deck
+ * siempre iconos de Deck y modo mando desde el primer fotograma (tocar la pantalla o el trackpad no cambia los iconos: requisito de Verified).
  * Coste: sin mando conectado no hay bucle; con mando, una lectura por fotograma y solo se toca el DOM cuando el cursor se mueve.
  */
 window.AIQ = window.AIQ || {};
@@ -17,13 +19,21 @@ window.AIQ = window.AIQ || {};
   const M = A.mando = { on: false, x: innerWidth / 2, y: innerHeight / 2 };
   let raf = 0, lastT = 0, padIdx = -1, padAt = {}, prevB = [], repAt = {}, fastT = 0, hit = null, hovChain = [], cur = null, moved = true, snap = null, primSeen = null, primPend = null, primT = 0;
 
+  /* ---------- iconos de los botones: familia segun el mando (o la Deck) y una hoja con el dibujo de cada uno ---------- */
+  const host = window.geoliteHost, DECK = !!(host && host.device === "deck");
+  let fam = DECK ? "deck" : "xbox";
+  const famOf = gp => { const id = (gp && gp.id) || ""; if (DECK) return "deck"; if (/054c|dualsense|dualshock|wireless controller|playstation|ps[345]/i.test(id)) return "ps"; return "xbox"; };
+  const setGlyph = () => { const g = M.on || DECK ? fam : "kb"; if (root.dataset.glyph !== g) { root.dataset.glyph = g; if (A.tt && A.tt.refresh) A.tt.refresh(); } };
+  { const G = A.GLIFOS || {}; let css = ""; for (const f in G) for (const b in G[f]) { const [u, w, h] = G[f][b]; css += `html[data-glyph="${f}"] .gl[data-gl="${b}"]{background-image:url("${u}");width:${w}px;height:${h}px}\n`; }
+    const st = document.createElement("style"); st.id = "glCss"; st.textContent = css; document.head.appendChild(st); }
+
   /* ---------- modo de entrada ---------- */
   const setMode = m => {
-    if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad";
+    if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad"; setGlyph();
     watchDom(M.on);
     if (!M.on) { setHover(null); if (cur) cur.hidden = true; } else { if (!M.used) { M.used = true; M.x = innerWidth / 2; M.y = innerHeight / 2; } sweepHover(); ensureCur(); moved = true; }
   };
-  root.dataset.input = "mouse";
+  root.dataset.input = "mouse"; root.dataset.glyph = DECK ? "deck" : "kb";
   addEventListener("pointermove", e => { if (e.isTrusted && M.on && (Math.abs(e.movementX) + Math.abs(e.movementY) > 2)) setMode(e.pointerType === "touch" ? "touch" : "mouse"); }, { capture: true, passive: true });
   addEventListener("pointerdown", e => { if (e.isTrusted && M.on) setMode(e.pointerType === "touch" ? "touch" : "mouse"); }, { capture: true, passive: true });
 
@@ -198,6 +208,7 @@ window.AIQ = window.AIQ || {};
     const gp = pad(); if (!gp) return;
     const [lx, ly, lm] = stick(gp.axes[0] || 0, gp.axes[1] || 0), [rx, ry, rm] = stick(gp.axes[2] || 0, gp.axes[3] || 0), lt = trig(gp.buttons[6]), rt = trig(gp.buttons[7]);
     const btn = gp.buttons.map((b, i) => down(gp, i)), active = lm || rm || lt || rt || btn.some(Boolean);
+    if (active) { const f = famOf(gp); if (f !== fam) { fam = f; setGlyph(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
     if (active && !M.on) { setMode("pad"); if (A.audio && A.audio.unlock) A.audio.unlock(); }
     if (!M.on) { prevB = btn; return; }
     const map = A.core && A.core.map, S = A.core && A.core.S, W = innerWidth, H = innerHeight;
@@ -268,4 +279,5 @@ window.AIQ = window.AIQ || {};
   addEventListener("blur", () => { prevB = []; snap = null; const S = A.core && A.core.S; if (M.on && S && S.phase === "asking" && !S.paused && A.core.runMenu) A.core.runMenu(); });
   addEventListener("resize", () => { cache = null; M.x = Math.min(M.x, innerWidth - 1); M.y = Math.min(M.y, innerHeight - 1); moved = true; });
   if (navigator.getGamepads && [...navigator.getGamepads()].some(g => g && g.connected)) start();
+  if (DECK) setMode("pad");                                              // Steam Deck: se juega con mando desde el primer fotograma
 })(window.AIQ);

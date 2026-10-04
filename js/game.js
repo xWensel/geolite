@@ -844,7 +844,7 @@
       ${adv && adv.coins ? `<div class="tk-coins">${A.icon("coin", "cn")}+${adv.coins} ${adv.coins === 1 ? A.pick6("doblón|doubloon|doublon|dobrão|Dublone|doblone||枚金币|도블론|ダブロン|дублон|dublon") : A.T("doblones", "doubloons")}</div>` : ""}
       ${guess ? `<div class="tk-cx l${cxr.level}" data-tt="${A.t("codex.title")}
 ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style="--jd:${jpAt(i)}"></u>`).join("")}</i><b style="--jd:${jpAt(Math.max(0, cxr.level - 1))}">${cxr.added.length ? "+" + cxr.added.length : cxr.level ? "" : "&gt;" + fmtKm(A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid })[0] : 300)}</b></div>` : ""}
-      <button class="btn-ink" id="nextBtn" data-primary><span>${!last ? A.t("btn.next") : S.run ? A.pick6("Terminar ronda|Finish round|Terminer la manche|Concluir rodada|Runde beenden|Termina il round||结束本回合|라운드 종료|ラウンドを終了|Завершить раунд|Zakończ rundę") : A.t("btn.finish")}</span><span class="ar">${A.icon("u_next", "sm")}</span> <kbd>${A.icon("u_enter", "sm")}</kbd></button>
+      <button class="btn-ink" id="nextBtn" data-primary><span>${!last ? A.t("btn.next") : S.run ? A.pick6("Terminar ronda|Finish round|Terminer la manche|Concluir rodada|Runde beenden|Termina il round||结束本回合|라운드 종료|ラウンドを終了|Завершить раунд|Zakończ rundę") : A.t("btn.finish")}</span><span class="ar">${A.icon("u_next", "sm")}</span> <kbd class="k-kb">${A.icon("u_enter", "sm")}</kbd><i class="gl" data-gl="a"></i></button>
     </div>`;
     $("factText").textContent = factLine(o);
     $("plate").classList.remove("hurry");

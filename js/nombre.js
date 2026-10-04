@@ -54,7 +54,7 @@ window.AIQ = window.AIQ || {};
           <div class="nm-meter" aria-hidden="true"><span class="nm-dots" id="nmDots">${"<i></i>".repeat(MAX)}</span><output id="nmN"></output></div>
           <p class="nm-hint" id="nmHint"></p>
           <div class="nm-acts"><button type="submit" class="btn-ink" id="nmOk"><span id="nmOkT"></span><span class="ar">${A.icon("u_next", "sm")}</span></button><button type="button" class="nm-skip" id="nmSkip"></button></div>
-          <button type="button" class="nm-next" id="nmNext" tabindex="-1"><span id="nmNextT"></span><kbd>${A.icon("u_enter", "sm")}</kbd></button>
+          <button type="button" class="nm-next" id="nmNext" tabindex="-1"><span id="nmNextT"></span><kbd class="k-kb">${A.icon("u_enter", "sm")}</kbd><i class="gl" data-gl="a"></i></button>
         </form>
       </div>`;
     $("app").appendChild(root);

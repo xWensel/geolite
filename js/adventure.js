@@ -911,7 +911,7 @@ window.AIQ = window.AIQ || {};
     const old = $("splitAlt"); if (old) old.remove();
     const q = A.adv.splitAlt(), sub = $("askSub"); if (!q || !sub) return;
     const b = document.createElement("button"); b.id = "splitAlt"; b.type = "button"; b.className = "split-alt";
-    b.innerHTML = `<span class="sa-k">${ic("oracle", "sm")}${A.tx(SPLIT_OR)}</span><span class="sa-n"></span><kbd class="sa-key">Tab</kbd>`;
+    b.innerHTML = `<span class="sa-k">${ic("oracle", "sm")}${A.tx(SPLIT_OR)}</span><span class="sa-n"></span><kbd class="sa-key k-kb">Tab</kbd><i class="gl sa-gl" data-gl="y"></i>`;
     const n = b.querySelector(".sa-n");
     if (A.adv.isFlagRound() && q.t === "c" && A.FLAGS && q.name && A.FLAGS[q.name.en]) { const fx = A.chal.flagFx && A.chal.flagFx(); n.innerHTML = `<img class="sa-flag" alt="" src="assets/flags/${A.mediaKey(q.name.en)}.svg"${fx ? ` style="filter:${fx}"` : ""}>`; A.chal.flagAlt && A.chal.flagAlt(n.querySelector("img"), q); }
     else if (A.chal.decoAlt) A.chal.decoAlt(n, q); else n.textContent = A.tx(q.name);
@@ -1090,7 +1090,7 @@ window.AIQ = window.AIQ || {};
     tb.classList.toggle("hidden", !ids.length || C().S.phase !== "asking");
     const aim = id => (id === "sonar" ? A.T("Toca el mapa para lanzar una sonda…", "Tap the map to send a probe…") : A.T("Toca el mapa para orientar la brújula…", "Tap the map to aim the compass…"));
     const res = !C().S.tool && (run.probes || []).length ? `<i class="tl-res">${run.probes.map(p => p.label).join("  ·  ")}</i>` : "";   // lo que han dicho las sondas de esta pregunta
-    tb.innerHTML = res + ids.map((id, i) => { const t = run.tools[id], on = C().S.tool === id, off = t.left <= 0 || silenced; return `<button class="tool pc-hand${on ? " on" : ""}${off ? " off" : ""}" data-tool="${id}" style="--r:${((i - (ids.length - 1) / 2) * 6).toFixed(1)}deg" title="${A.tx(TOOLS[id].n)} — ${A.tx(TOOLS[id].d)}">${on && TOOLS[id].kind === "probe" ? `<i class="tl-aim">${aim(id)}</i>` : ""}<span class="tl-ico felt">${ic(TOOLS[id].ico)}</span><b>${A.tx(TOOLS[id].n)}</b><span class="tl-pips">${Array.from({ length: toolMax(id) }, (_, k) => `<i class="${k < t.left ? "on" : ""}"></i>`).join("")}</span><kbd>${i + 1}</kbd></button>`; }).join("");
+    tb.innerHTML = res + ids.map((id, i) => { const t = run.tools[id], on = C().S.tool === id, off = t.left <= 0 || silenced; return `<button class="tool pc-hand${on ? " on" : ""}${off ? " off" : ""}" data-tool="${id}" style="--r:${((i - (ids.length - 1) / 2) * 6).toFixed(1)}deg" title="${A.tx(TOOLS[id].n)} — ${A.tx(TOOLS[id].d)}">${on && TOOLS[id].kind === "probe" ? `<i class="tl-aim">${aim(id)}</i>` : ""}<span class="tl-ico felt">${ic(TOOLS[id].ico)}</span><b>${A.tx(TOOLS[id].n)}</b><span class="tl-pips">${Array.from({ length: toolMax(id) }, (_, k) => `<i class="${k < t.left ? "on" : ""}"></i>`).join("")}</span><kbd class="k-kb">${i + 1}</kbd></button>`; }).join("");
     tb.querySelectorAll(".tool").forEach(b => (b.onclick = () => A.adv.useTool(b.dataset.tool)));
     if (A.pointer) A.pointer.set({ tool: C().S.tool });
   }

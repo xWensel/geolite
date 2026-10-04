@@ -24,6 +24,9 @@ try {
 /* sabor del build: steam-flavor.json ({"demo":true}) lo escribe tools/steam-pack.mjs --demo; sin el fichero es el juego completo */
 let flavor = {}; try { flavor = JSON.parse(fs.readFileSync(path.join(__dirname, "steam-flavor.json"), "utf8")); } catch (e) { /* juego completo */ }
 ipcMain.on("host:demo", (e) => { e.returnValue = !!flavor.demo; });
+/* Steam Deck (v0.2.29): iconos de mando y modo mando desde el primer fotograma (el navegador no ve el mando hasta la primera pulsacion) */
+const onDeck = (() => { try { if (steamClient && steamClient.utils.isSteamRunningOnSteamDeck()) return true; } catch (e) { /* steamworks sin utils */ } return process.env.SteamDeck === "1"; })();
+ipcMain.on("host:device", (e) => { e.returnValue = onDeck ? "deck" : "pc"; });
 ipcMain.handle("steam:available", () => !!steamClient);
 ipcMain.handle("steam:unlock", (e, id) => {   // si ya esta activo no se vuelve a guardar (profile.js reenvia todos los logros al arrancar)
   if (!steamClient || typeof id !== "string") return false;

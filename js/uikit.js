@@ -108,7 +108,7 @@
   };
   const html = el => {
     const h = el.getAttribute("data-th"); if (h) return h;
-    const k = el.getAttribute("data-tip"); if (k && !el.hasAttribute("data-tt")) return `<b>${esc(A.t ? A.t(k) : k)}${el.dataset.key ? `<span class="tt-k">${esc(el.dataset.key)}</span>` : ""}</b>`;
+    const k = el.getAttribute("data-tip"); if (k && !el.hasAttribute("data-tt")) { const pb = PADKEY[el.dataset.key]; return `<b>${esc(A.t ? A.t(k) : k)}${el.dataset.key ? `<span class="tt-k k-kb">${esc(el.dataset.key)}</span>` : ""}${pb ? `<i class="gl tt-gl" data-gl="${pb}"></i>` : ""}</b>`; }
     let raw = el.getAttribute("data-tt"); const f = el.getAttribute("data-tf");
     if (raw == null && f && A.tips[f]) { try { raw = A.tips[f](el); } catch (e) { raw = ""; } }     // tips por funcion: se calculan al pasar el puntero (idioma y numeros al dia)
     const [t, ...r] = String(raw || "").split("\n"); if (!t) return "";
@@ -129,6 +129,8 @@
     hide(); cur = el; if (!el) return;
     timer = setTimeout(show, Date.now() - lastHide < 350 ? 0 : 340);
   }
+  /* la tecla de cada globo y su boton del mando (js/mando.js); las que no tienen boton (F, M, N) no se ensenan con mando */
+  const PADKEY = { "+": "rt", "−": "lt", "-": "lt", "0": "rb", "P": "menu", "Esc": "b" };
   A.tips = A.tips || {};
   A.tt = { enable: on => { tipsOn = !!on; if (!tipsOn) hide(); }, hide, refresh: () => { if (cur && shown) show(); } };
 

@@ -30,11 +30,25 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = {"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
+  const SZ = {"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
 
   A.PATCHES = [
+    {
+      id: "0.2.29",
+      name: ["Botones a la vista", "Buttons in sight"],
+      date: "2026-10-04",
+      summary: ["Con mando, el juego enseña sus botones en vez de las teclas, con iconos pixel art para Xbox, PlayStation y Steam Deck.", "With a controller, the game now shows its buttons instead of keys, with pixel-art icons for Xbox, PlayStation and Steam Deck."],
+      chapters: [
+        { id: "iconos", kicker: ["Mando", "Controller"], title: ["Iconos de botones", "Button icons"],
+          entries: [
+            E(["Cada mando, los suyos", "Each controller, its own"], "new", "0.2.29", [
+              ["En cuanto tocas el mando, las ayudas, la leyenda de **Ajustes**, **Siguiente** y **Cambiar pregunta** enseñan sus botones; con un **DualSense**, cruz, círculo, cuadrado y triángulo. Al volver al ratón vuelven las teclas.", "As soon as you touch the controller, tooltips, the **Settings** legend, **Next** and **Swap question** show its buttons; with a **DualSense**, cross, circle, square and triangle. Back on the mouse, the keys come back."],
+              ["En la **Steam Deck** el juego arranca ya con mando y con sus iconos, y tocar la pantalla no los cambia.", "On **Steam Deck** the game starts ready for the controller with its own icons, and touching the screen doesn't switch them."],
+            ], [I("mando-iconos", ["La leyenda de Ajustes y el botón Siguiente, con mando de Xbox y de PlayStation", "The Settings legend and the Next button, with Xbox and PlayStation controllers"])]) ] },
+      ],
+    },
     {
       id: "0.2.28",
       name: ["Con mando", "With a controller"],
