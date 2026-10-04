@@ -501,6 +501,7 @@ void main(){
       "El crupier ha tomado el control de tu pantalla. ¿Reintentar?|The dealer has taken over your screen. Retry?|Le croupier a pris le contrôle de ton écran. Réessayer ?|O crupiê assumiu o controle da sua tela. Tentar de novo?|Der Croupier hat deinen Bildschirm übernommen. Erneut versuchen?|Il croupier ha preso il controllo del tuo schermo. Riprovare?|El crupier tomó el control de tu pantalla. ¿Reintentar?|荷官接管了你的屏幕。要重试吗？|딜러가 화면을 장악했습니다. 다시 시도할까요?|ディーラーが画面を乗っ取りました。再試行しますか？|Крупье захватил твой экран. Повторить?|Krupier przejął twój ekran. Spróbować ponownie?",
     ].map(L6),
   };
+  X._t = { wins: (n, a) => winsOn(n, a), batt: m => battOn(m) };   // pruebas (como J._nap)
   function winsOn(n, auto) {
     const box = part("chx-wins"); box.innerHTML = ""; box.classList.add("on");
     E.wins = { n }; const order = [0, 1, 2, 3].sort(() => R("wins")() - 0.5);
@@ -527,15 +528,19 @@ void main(){
   /* ------------------------------------------------------------------ CUARTA PARED: bateria baja (toda la pantalla se va apagando) */
   const BT = {
     low: L6("Batería baja|Low battery|Batterie faible|Bateria fraca|Akku schwach|Batteria scarica|Batería baja|电量不足|배터리 부족|バッテリー残量低下|Низкий заряд|Słaba bateria"),
+    lowDeck: L6("La luz se apaga|The lights are going out|La lumière s'éteint|A luz está se apagando|Das Licht geht aus|La luce si spegne|La luz se apaga|灯光正在熄灭|조명이 꺼지고 있어요|明かりが消えていく|Свет гаснет|Światło gaśnie"),
+    plugDeck: L6("Date prisa antes de quedarte a oscuras|Hurry before it goes dark|Dépêche-toi avant le noir complet|Corra antes que fique escuro|Beeil dich, bevor es dunkel wird|Sbrigati prima che faccia buio|Apúrate antes de quedarte a oscuras|趁天还没黑，快一点|어두워지기 전에 서두르세요|暗くなる前に急げ|Поспеши, пока не стемнело|Pospiesz się, zanim zrobi się ciemno"),
+    deadDeck: L6("Se ha ido la luz|The lights went out|Plus de lumière|A luz acabou|Das Licht ist aus|È andata via la luce|Se fue la luz|灯灭了|불이 나갔어요|明かりが消えた|Свет погас|Zgasło światło"),
     plug: L6("Conecta el cargador|Plug in your charger|Branche ton chargeur|Conecte o carregador|Schließ das Ladegerät an|Collega il caricabatterie|Conecta el cargador|请连接充电器|충전기를 연결하세요|充電器を接続してください|Подключи зарядку|Podłącz ładowarkę"),
   };
   function battOn(max, eff) {
     let dim = document.getElementById("chxDim"), hud = document.getElementById("chxBat");
     if (!dim) { dim = document.createElement("div"); dim.id = "chxDim"; document.body.appendChild(dim); }
     if (!hud) { hud = document.createElement("div"); hud.id = "chxBat"; hud.innerHTML = `<div class="cb-cell"><i class="cb-lvl"></i></div><b class="cb-pct"></b><div class="cb-toast"><b></b><span></span></div>`; document.body.appendChild(hud); }
-    hud.querySelector(".cb-toast b").textContent = tx(BT.low); hud.querySelector(".cb-toast span").textContent = tx(BT.plug);
+    const deck = document.documentElement.dataset.dev === "deck";                        // v0.2.34: en la Deck no es "la bateria" (la tiene de verdad): es la luz de la mesa
+    hud.querySelector(".cb-toast b").textContent = tx(deck ? BT.lowDeck : BT.low); hud.querySelector(".cb-toast span").textContent = tx(deck ? BT.plugDeck : BT.plug);
     let dead = document.getElementById("chxDead"); if (!dead) { dead = document.createElement("div"); dead.id = "chxDead"; dead.innerHTML = `<div class="cd-bat"><i></i></div><b></b>`; document.body.appendChild(dead); }
-    dead.querySelector("b").textContent = tx(BT.plug); dead.classList.remove("on");
+    dead.querySelector("b").textContent = tx(deck ? BT.deadDeck : BT.plug); dead.classList.remove("on");
     hud.classList.remove("toast", "crit", "charge", "save"); hud.classList.add("on");
     /* tanda 7: como un movil de verdad: empieza con un 14-26 %, se descarga a saltos (zumbido y parpadeo), avisa al 20, 10 y 5 % y, desde el nivel 2, se apaga un momento al 2 % */
     E.batt = { on: 1, k: 0, max, pct: -1, toast: false, dim, hud, dead, start: Math.round(14 + R("batt")() * 12), drain: 0, toasts: {}, died: false, flick: 0, nextS: 0 }; if (eff && eff.p0 != null) { E.batt.sh = true; E.batt.start = eff.p0; E.batt.p1 = eff.p1; }   // tanda 16: la bateria de Pantallazo, una sola para toda la ronda (p0 -> p1 %)
@@ -553,7 +558,7 @@ void main(){
       const pct = b.sh ? Math.max(1, Math.round(b.start + (b.p1 - b.start) * pr)) : Math.max(1, Math.round(b.start * (1 - pr) - b.drain));
       if (pct !== b.pct) { b.pct = pct; b.hud.querySelector(".cb-pct").textContent = pct + "%"; b.hud.querySelector(".cb-lvl").style.width = Math.max(6, pct * 3.6) + "%"; b.hud.classList.toggle("crit", pct <= 5); b.hud.classList.toggle("save", pct <= 20 && pct > 5); }
       for (const th of [20, 10, 5]) if (pct <= th && b.start > th && !b.toasts[th]) {
-        b.toasts[th] = 1; b.hud.querySelector(".cb-toast b").textContent = tx(BT.low) + " · " + th + " %"; b.hud.classList.add("toast"); say("lowbat");
+        b.toasts[th] = 1; b.hud.querySelector(".cb-toast b").textContent = tx(document.documentElement.dataset.dev === "deck" ? BT.lowDeck : BT.low) + " · " + th + " %"; b.hud.classList.add("toast"); say("lowbat");
         clearTimeout(b.tT); b.tT = later(() => b.hud && b.hud.classList.remove("toast"), 2200);
       }
       if (pct <= 2 && !b.sh && !b.died && asking && b.max >= 0.6) { b.died = true; b.dead.classList.add("on"); say("powerdown"); later(() => { b.dead.classList.remove("on"); say("restore"); }, 650 + R("batt")() * 300); }   // se apaga un momento

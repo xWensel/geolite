@@ -1,7 +1,7 @@
 /* Geolite - textos ES/EN, calculo de IQ e insignia. */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  A.VERSION = "0.2.33";
+  A.VERSION = "0.2.34";
   A.lang = "es";
   /* fotos de la Enciclopedia: en la web salen de GitHub Pages (pesan ~1 GB y Vercel no las admite), repartidas en dos webs para no pasar
      del limite de 1 GB de cada una; en local y en Electron (127.0.0.1) salen de la carpeta del juego. Las publica tools/publish-media.mjs.
@@ -33,8 +33,10 @@ window.AIQ = window.AIQ || {};
   /* v0.2.30: con mando (html[data-glyph] distinto de "kb", js/mando.js) las instrucciones de raton tienen su version (A.PADV, js/mando-textos.js) */
   const padV = es => { if (!es || !A.PADV) return null; const g = document.documentElement.dataset.glyph; if (!g || g === "kb") return null; const p = A.PADV[es]; if (!p) return null;
     const c = A.PADCONF && A.PADCONF[g] ? pick0(A.PADCONF[g]) : "A"; return pick0(p).replace(/\{A\}/g, c); };
-  A.pick6 = s => padV(s.slice(0, s.indexOf("|") >>> 0)) || pick0(s);
-  A.tx = v => (v && typeof v === "object" && v.es && padV(v.es)) || (v && typeof v === "object" ? v[A.lang] || (v.en && trOf(v.en)) || (BASE_OF[A.lang] && v[BASE_OF[A.lang]]) || (A.lang === "es" ? v.es : v.en) || v.en || v.es || "" : v || "");
+  /* v0.2.34: y en la Steam Deck, los retos que imitaban avisos del sistema (A.DEVV) */
+  const devV = es => { if (!es || !A.DEVV || document.documentElement.dataset.dev !== "deck") return null; const p = A.DEVV[es]; return p ? pick0(p) : null; };
+  A.pick6 = s => { const es = s.slice(0, s.indexOf("|") >>> 0); return devV(es) || padV(es) || pick0(s); };
+  A.tx = v => (v && typeof v === "object" && v.es && (devV(v.es) || padV(v.es))) || (v && typeof v === "object" ? v[A.lang] || (v.en && trOf(v.en)) || (BASE_OF[A.lang] && v[BASE_OF[A.lang]]) || (A.lang === "es" ? v.es : v.en) || v.en || v.es || "" : v || "");
   /* respuesta oculta: cada letra es un hueco, las palabras quedan separadas y al final va el recuento "(3, 7)" */
   A.blanks = (text, count) => {
     const t = String(text || "").trim(); if (!t) return "";

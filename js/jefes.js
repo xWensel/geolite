@@ -50,7 +50,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ LA SIESTA DEL CRUPIER */
   const Nap = { on: false, woke: false, noise: 0, thr: 100, lvl: -1, last: 0, s: 1, cx: 0, cy: 0, zoomMoving: false, settle: 0, h: 0, idle: 3, wheelAt: 0 };
-  J._nap = Nap;   // pruebas
+  J._nap = Nap; J._bsod = () => bsodShow();   // pruebas
   function napMeter() { const i = document.querySelector("#advBar .ab-noise i"); if (i) i.style.width = Math.round(clamp(Nap.noise / Math.max(1, Nap.thr), 0, 1) * 100) + "%"; }
   function napAdd(x) {
     if (!Nap.on || Nap.woke || x <= 0) return; Nap.noise = Math.min(Nap.thr, Nap.noise + x); const z = Nap.noise / Nap.thr, lvl = z < 0.4 ? 0 : z < 0.75 ? 1 : 2;
