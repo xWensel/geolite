@@ -113,6 +113,7 @@
         <button type="button" data-v="general"><i class="set-nav-ic" data-ic="chip_k"></i><span class="set-nav-t"><b data-i="set.tab.general"></b><small data-i="set.nav.general"></small></span></button>
         <button type="button" data-v="sound"><i class="set-nav-ic" data-ic="chip_r"></i><span class="set-nav-t"><b data-i="set.tab.sound"></b><small data-i="set.nav.sound"></small></span></button>
         <button type="button" data-v="video"><i class="set-nav-ic" data-ic="chip_b"></i><span class="set-nav-t"><b data-i="set.tab.video"></b><small data-i="set.nav.video"></small></span></button>
+        <button type="button" data-v="pad"><i class="set-nav-ic" data-ic="chip_g"></i><span class="set-nav-t"><b data-i="set.tab.pad"></b><small data-i="set.nav.pad"></small></span></button>
         <button type="button" data-v="data"><i class="set-nav-ic" data-ic="chip_p"></i><span class="set-nav-t"><b data-i="set.tab.data"></b><small data-i="set.nav.data"></small></span></button>
         <i></i>
       </nav>
@@ -182,6 +183,33 @@
               <div class="seg s4" data-seg="cb"><button data-v="off" data-i="cb.off"></button><button data-v="protan" data-i="cb.protan"></button><button data-v="deutan" data-i="cb.deutan"></button><button data-v="tritan" data-i="cb.tritan"></button><i></i></div>
               <p class="set-note" data-i="set.cb.d"></p>
             </div>
+          </div>
+        </div>
+        </div></div>
+
+        <div class="set-pane hidden" data-pane="pad"><div class="set-grid set-2col">
+        <div class="set-col">
+          <div class="set-card"><h3 data-i="pad.sens"></h3>
+            <div class="fader pfader" data-prange="ptr"><label data-i="pad.sens.ptr"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Puntero"><div class="ftrack"></div></div>
+            <div class="fader pfader" data-prange="map"><label data-i="pad.sens.map"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Mapa"><div class="ftrack"></div></div>
+            <div class="fader pfader" data-prange="zoom"><label data-i="pad.sens.zoom"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Zoom"><div class="ftrack"></div></div>
+          </div>
+          <div class="set-card"><h3 data-i="pad.btns"></h3>
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.swapab"></label><small data-i="pad.swapab.d"></small></div><button class="sw" data-psw="swapAB" role="switch" aria-checked="false" aria-label="swapAB"><i></i></button></div>
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.swapst"></label></div><button class="sw" data-psw="swapSticks" role="switch" aria-checked="false" aria-label="swapSticks"><i></i></button></div>
+            <div class="row-sw col"><div class="rs-t"><label data-i="pad.prec"></label></div><div class="seg" data-pseg="prec"><button data-v="hold" data-i="pad.prec.hold"></button><button data-v="toggle" data-i="pad.prec.toggle"></button><i></i></div></div>
+          </div>
+        </div>
+        <div class="set-col">
+          <div class="set-card"><h3 data-i="pad.inv"></h3>
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.lx"></label></div><button class="sw" data-psw="invLX" role="switch" aria-checked="false" aria-label="invLX"><i></i></button></div>
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.ly"></label></div><button class="sw" data-psw="invLY" role="switch" aria-checked="false" aria-label="invLY"><i></i></button></div>
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.rx"></label></div><button class="sw" data-psw="invRX" role="switch" aria-checked="false" aria-label="invRX"><i></i></button></div>
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.ry"></label></div><button class="sw" data-psw="invRY" role="switch" aria-checked="false" aria-label="invRY"><i></i></button></div>
+          </div>
+          <div class="set-card">
+            <div class="row-sw"><div class="rs-t"><label data-i="pad.rumble"></label></div><button class="sw" data-psw="rumble" role="switch" aria-checked="false" aria-label="rumble"><i></i></button></div>
+            <div class="stp" id="padIcons"><span class="stp-h"><span class="stp-l" data-i="pad.icons"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="Iconos -"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="Iconos +"><i class="np-tri r"></i></button></div></div>
           </div>
         </div>
         </div></div>

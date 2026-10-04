@@ -30,11 +30,28 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = {"deck-retos":[1100,687],"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
+  const SZ = {"ajustes-mando":[1100,630],"deck-retos":[1100,687],"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
 
   A.PATCHES = [
+    {
+      id: "0.2.35",
+      name: ["Tu mando, a tu manera", "Your controller, your way"],
+      date: "2026-10-04",
+      summary: ["Nueva pestaña Mando en Ajustes, y los mandos de Nintendo con sus propios iconos.", "A new Controller tab in Settings, and Nintendo controllers get their own icons."],
+      chapters: [
+        { id: "pad", kicker: ["Mando", "Controller"], title: ["Ajustes del mando", "Controller settings"],
+          entries: [
+            E(["Pestaña Mando", "Controller tab"], "new", "0.2.35", [
+              ["Sensibilidad del **puntero**, del **mapa** y del **zoom**; invertir cada eje; intercambiar los **sticks**; **modo precisión** manteniendo o pulsando; la **vibración** del mando aparte; y qué **iconos** quieres ver.", "**Pointer**, **map** and **zoom** sensitivity; invert each axis; swap the **sticks**; **precision mode** by holding or toggling; controller **vibration** on its own; and which **icons** you want to see."],
+              ["**Intercambiar confirmar y atrás**, pensado para los mandos de Nintendo: los iconos y las instrucciones cambian con él.", "**Swap confirm and back**, made for Nintendo controllers: icons and instructions change with it."],
+            ], [I("ajustes-mando", ["Ajustes > Mando", "Settings > Controller"])]),
+            E(["Iconos de Nintendo", "Nintendo icons"], "new", "0.2.35", [
+              ["Los mandos de Nintendo enseñan sus botones: **B** abajo, **A** a la derecha, **L/R**, **ZL/ZR**, **+** y **−**.", "Nintendo controllers show their own buttons: **B** at the bottom, **A** on the right, **L/R**, **ZL/ZR**, **+** and **−**."],
+            ]) ] },
+      ],
+    },
     {
       id: "0.2.34",
       name: ["Bromas de la casa", "House pranks"],

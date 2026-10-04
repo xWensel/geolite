@@ -21,6 +21,8 @@ FAM = {
              "a": (108, 210, 96), "b": (255, 92, 80), "x": (92, 170, 255), "y": (248, 206, 72)},
     "ps": {"rim": (118, 126, 146), "rim2": (80, 86, 102), "body": (34, 38, 46), "hi": (64, 70, 84), "lo": (20, 22, 28), "ink": (236, 230, 211),
              "a": (138, 176, 255), "b": (255, 112, 112), "x": (240, 150, 214), "y": (84, 222, 178)},
+    "nin": {"rim": (150, 152, 160), "rim2": (100, 102, 110), "body": (40, 42, 48), "hi": (74, 76, 84), "lo": (24, 25, 29), "ink": (240, 240, 244),
+             "a": (240, 240, 244), "b": (240, 240, 244), "x": (240, 240, 244), "y": (240, 240, 244)},
     "deck": {"rim": (140, 147, 154), "rim2": (98, 104, 110), "body": (48, 53, 58), "hi": (84, 90, 97), "lo": (28, 31, 35), "ink": (232, 228, 216),
              "a": (232, 228, 216), "b": (232, 228, 216), "x": (232, 228, 216), "y": (232, 228, 216)},
 }
@@ -36,7 +38,7 @@ F5 = {  # letras y simbolos de 5x5
 }
 F3 = {  # 3x5 para L1, RB, LT...
     "L": ["#..", "#..", "#..", "#..", "###"], "R": ["##.", "#.#", "##.", "#.#", "#.#"], "B": ["##.", "#.#", "##.", "#.#", "##."],
-    "T": ["###", ".#.", ".#.", ".#.", ".#."], "1": [".#.", "##.", ".#.", ".#.", "###"], "2": ["##.", "..#", ".#.", "#..", "###"],
+    "T": ["###", ".#.", ".#.", ".#.", ".#."], "Z": ["###", "..#", ".#.", "#..", "###"], "1": [".#.", "##.", ".#.", ".#.", "###"], "2": ["##.", "..#", ".#.", "#..", "###"],
 }
 
 def canvas(w, h): return [[None] * w for _ in range(h)]
@@ -101,12 +103,15 @@ def img(g):
     return im
 
 def face(f, fam, b):
-    g = disc(f); sym = {"a": "cross", "b": "circle", "x": "square", "y": "triangle"}[b] if fam == "ps" else b.upper()
+    g = disc(f)
+    if fam == "ps": sym = {"a": "cross", "b": "circle", "x": "square", "y": "triangle"}[b]
+    elif fam == "nin": sym = {"a": "B", "b": "A", "x": "Y", "y": "X"}[b]          # Nintendo: la letra que lleva el boton en ESA posicion (abajo B, derecha A...)
+    else: sym = b.upper()
     stamp(g, F5[sym], 3, 3, f[b]); return g
 
 def bumper(f, lab, trig):
     w = 13; h = 9 if not trig else 10; g = pill(f, w, h, round_top=trig)
-    text3(g, lab, (w - 7) // 2, (h - 5) // 2 + (1 if trig else 0), f["ink"]); return g
+    tw = len(lab) * 4 - 1; text3(g, lab, (w - tw) // 2, (h - 5) // 2 + (1 if trig else 0), f["ink"]); return g
 
 def stick(f, side):
     g = disc(f, 11)
@@ -134,6 +139,13 @@ def menu(f):
         for x in range(3, 8): g[y][x] = f["ink"]
     return g
 
+def plusminus(f, plus):
+    g = pill(f, 11, 9)
+    for x in range(3, 8): g[4][x] = f["ink"]
+    if plus:
+        for y in range(2, 7): g[y][5] = f["ink"]
+    return g
+
 def view(f):
     g = pill(f, 11, 9)
     stamp(g, ["###..", "#.###", "###.#", "..###"], 3, 2, f["ink"]); return g
@@ -141,10 +153,10 @@ def view(f):
 def build():
     out, sheet = {}, []
     for fam, f in FAM.items():
-        L = {"lb": "LB", "rb": "RB", "lt": "LT", "rt": "RT"} if fam == "xbox" else {"lb": "L1", "rb": "R1", "lt": "L2", "rt": "R2"}
+        L = {"lb": "LB", "rb": "RB", "lt": "LT", "rt": "RT"} if fam == "xbox" else {"lb": "L", "rb": "R", "lt": "ZL", "rt": "ZR"} if fam == "nin" else {"lb": "L1", "rb": "R1", "lt": "L2", "rt": "R2"}
         G = {b: face(f, fam, b) for b in "abxy"}
         G.update({k: bumper(f, v, k in ("lt", "rt")) for k, v in L.items()})
-        G.update({"ls": stick(f, "L"), "rs": stick(f, "R"), "dpad": dpad(f), "dup": dpad(f, "up"), "ddown": dpad(f, "down"), "dleft": dpad(f, "left"), "dright": dpad(f, "right"), "menu": menu(f), "view": view(f)})
+        G.update({"ls": stick(f, "L"), "rs": stick(f, "R"), "dpad": dpad(f), "dup": dpad(f, "up"), "ddown": dpad(f, "down"), "dleft": dpad(f, "left"), "dright": dpad(f, "right"), "menu": plusminus(f, True) if fam == "nin" else menu(f), "view": plusminus(f, False) if fam == "nin" else view(f)})
         out[fam] = {}
         row = []
         for k, g in G.items():

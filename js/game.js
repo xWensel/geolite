@@ -358,7 +358,7 @@
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
       S.quality = "auto"; map.setQuality("auto"); S.reduce = false; applyMotion(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); S.softFlash = false; applyFlash(); A.cursor.set(true); A.tt.enable(true);
-      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
+      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
   /* Pantalla (v0.2.27): Ventana / Pantalla completa y la escala de la interfaz en todos; en el cliente de escritorio (window.geoliteHost.screenInfo)

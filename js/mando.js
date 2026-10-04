@@ -17,14 +17,23 @@ window.AIQ = window.AIQ || {};
   const root = document.documentElement, $ = id => document.getElementById(id);
   const DZ = 0.15, TDZ = 0.08, CURVE = 2.2, REP0 = 380, REP = 90;
   const M = A.mando = { on: false, x: innerWidth / 2, y: innerHeight / 2 };
-  let raf = 0, lastT = 0, padIdx = -1, padAt = {}, prevB = [], repAt = {}, fastT = 0, hit = null, hovChain = [], cur = null, moved = true, snap = null, primSeen = null, primPend = null, primT = 0;
+  let raf = 0, lastT = 0, padIdx = -1, padAt = {}, prevB = [], repAt = {}, fastT = 0, hit = null, hovChain = [], cur = null, moved = true, snap = null, primSeen = null, primPend = null, primT = 0, precOn = false;
 
-  /* ---------- iconos de los botones: familia segun el mando (o la Deck) y una hoja con el dibujo de cada uno ---------- */
+  /* ---------- Ajustes > Mando (v0.2.35): se guardan aparte, en atlasiq.pad ---------- */
+  const DEF = { ptr: 100, map: 100, zoom: 100, swapAB: false, swapSticks: false, prec: "hold", invLX: false, invLY: false, invRX: false, invRY: false, rumble: true, glyphs: "auto" };
+  const PS = Object.assign({}, DEF); try { Object.assign(PS, JSON.parse(localStorage.getItem("atlasiq.pad") || "{}")); } catch (e) { /* sin almacenamiento */ }
+  const savePS = () => { try { localStorage.setItem("atlasiq.pad", JSON.stringify(PS)); } catch (e) { /* sin almacenamiento */ } };
+  M.settings = PS;
+
+  /* ---------- iconos de los botones: familia segun el mando (o la Deck, o lo elegido en Ajustes) y una hoja con el dibujo de cada uno ---------- */
   const host = window.geoliteHost, DECK = !!(host && host.device === "deck");
   let fam = DECK ? "deck" : "xbox";
-  const famOf = gp => { const id = (gp && gp.id) || ""; if (DECK) return "deck"; if (/054c|dualsense|dualshock|wireless controller|playstation|ps[345]/i.test(id)) return "ps"; return "xbox"; };
-  const setGlyph = () => { const g = M.on || DECK ? fam : "kb"; if (root.dataset.glyph !== g) { root.dataset.glyph = g; if (A.tt && A.tt.refresh) A.tt.refresh(); } };
+  const famOf = gp => { const id = (gp && gp.id) || ""; if (DECK) return "deck"; if (/054c|dualsense|dualshock|wireless controller|playstation|ps[345]/i.test(id)) return "ps"; if (/057e|nintendo|pro controller|joy-con/i.test(id)) return "nin"; return "xbox"; };
+  const famNow = () => (PS.glyphs !== "auto" ? PS.glyphs : fam);
+  const setGlyph = () => { const g = M.on || DECK ? famNow() : "kb"; if (root.dataset.glyph !== g) { root.dataset.glyph = g; if (A.tt && A.tt.refresh) A.tt.refresh(); } if (PS.swapAB) root.dataset.swapab = "1"; else delete root.dataset.swapab; };
   { const G = A.GLIFOS || {}; let css = ""; for (const f in G) for (const b in G[f]) { const [u, w, h] = G[f][b]; css += `html[data-glyph="${f}"] .gl[data-gl="${b}"]{background-image:url("${u}");width:${w}px;height:${h}px}\n`; }
+    /* confirmar y atras intercambiados: el icono de "confirmar" (data-gl="a") es el boton de la derecha y el de "atras", el de abajo */
+    for (const f in G) { const [ua, wa, ha] = G[f].a, [ub, wb, hb] = G[f].b; css += `html[data-glyph="${f}"][data-swapab] .gl[data-gl="a"]{background-image:url("${ub}");width:${wb}px;height:${hb}px}\nhtml[data-glyph="${f}"][data-swapab] .gl[data-gl="b"]{background-image:url("${ua}");width:${wa}px;height:${ha}px}\n`; }
     const st = document.createElement("style"); st.id = "glCss"; st.textContent = css; document.head.appendChild(st); }
 
   /* ---------- modo de entrada ---------- */
@@ -181,7 +190,7 @@ window.AIQ = window.AIQ || {};
   const haptic0 = A.haptic;
   A.haptic = p => {
     if (haptic0) haptic0(p);
-    if (!M.on || A.haptic.on === false) return;
+    if (!M.on || A.haptic.on === false || !PS.rumble) return;
     try { const gp = pad(), va = gp && gp.vibrationActuator; if (!va) return;
       const arr = Array.isArray(p) ? p : [p], on = arr.filter((v, i) => i % 2 === 0).reduce((a, b) => a + b, 0), big = Math.max(...arr);
       const k = big <= 15 ? [0.12, 0.3] : big <= 40 ? [0.4, 0.55] : [0.75, 0.9], j = 0.9 + Math.random() * 0.2;   // nunca exactamente igual
@@ -208,9 +217,15 @@ window.AIQ = window.AIQ || {};
     const all = navigator.getGamepads ? navigator.getGamepads() : [];
     for (const g of all) if (g && g.connected && (g.buttons.some(b => b.pressed) || g.axes.some(a => Math.abs(a) > DZ + 0.1))) padAt[g.index] = t;
     const gp = pad(); if (!gp) return;
-    const [lx, ly, lm] = stick(gp.axes[0] || 0, gp.axes[1] || 0), [rx, ry, rm] = stick(gp.axes[2] || 0, gp.axes[3] || 0), lt = trig(gp.buttons[6]), rt = trig(gp.buttons[7]);
+    /* Ajustes > Mando: sticks intercambiados y ejes invertidos */
+    let a0 = gp.axes[0] || 0, a1 = gp.axes[1] || 0, a2 = gp.axes[2] || 0, a3 = gp.axes[3] || 0;
+    if (PS.swapSticks) [a0, a1, a2, a3] = [a2, a3, a0, a1];
+    if (PS.invLX) a0 = -a0; if (PS.invLY) a1 = -a1; if (PS.invRX) a2 = -a2; if (PS.invRY) a3 = -a3;
+    const [lx, ly, lm] = stick(a0, a1), [rx, ry, rm] = stick(a2, a3), lt = trig(gp.buttons[6]), rt = trig(gp.buttons[7]);
     const btn = gp.buttons.map((b, i) => down(gp, i)), active = lm || rm || lt || rt || btn.some(Boolean);
-    if (active) { const f = famOf(gp); if (f !== fam) { fam = f; setGlyph(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
+    if (PS.swapAB) [btn[0], btn[1]] = [btn[1], btn[0]];                // confirmar con el boton de la derecha (mandos de Nintendo)
+    if (PS.prec === "toggle") { if (btn[4] && !prevB[4]) precOn = !precOn; } else precOn = !!btn[4];
+    if (active) { const f = famOf(gp); if (f !== fam) { fam = f; setGlyph(); syncUI(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
     if (active && !M.on) { setMode("pad"); if (A.audio && A.audio.unlock) A.audio.unlock(); }
     if (!M.on) { prevB = btn; return; }
     const map = A.core && A.core.map, S = A.core && A.core.S, W = innerWidth, H = innerHeight;
@@ -219,7 +234,7 @@ window.AIQ = window.AIQ || {};
     /* stick izquierdo: cursor libre */
     if (lm) {
       snap = null; fastT = lm > 0.9 ? fastT + dt : 0;
-      const sp = H * 0.95 * (1 + Math.min(0.6, Math.max(0, fastT - 0.35) * 1.5)) * (btn[4] ? 0.35 : 1);
+      const sp = H * 0.95 * (1 + Math.min(0.6, Math.max(0, fastT - 0.35) * 1.5)) * (precOn ? 0.35 : 1) * PS.ptr / 100;
       let nx = M.x + lx * sp * dt, ny = M.y + ly * sp * dt;
       if (onMap) { const ex = nx < 0 ? nx : nx > W - 1 ? nx - (W - 1) : 0, ey = ny < 0 ? ny : ny > H - 1 ? ny - (H - 1) : 0; if (ex || ey) map.nudge(ex, ey); }   // en el borde, el puntero empuja el mapa
       M.x = Math.max(0, Math.min(W - 1, nx)); M.y = Math.max(0, Math.min(H - 1, ny)); moved = true;
@@ -232,11 +247,11 @@ window.AIQ = window.AIQ || {};
     }
     /* stick derecho y gatillos: el mapa bajo el cursor, o el contenido con scroll */
     if (rm) {
-      if (onMap) map.nudge(rx * W * 1.15 * dt, ry * W * 1.15 * dt);
+      if (onMap) { const k = W * 1.15 * dt * PS.map / 100; map.nudge(rx * k, ry * k); }
       else { const sc = scroller(hit); if (sc) sc.scrollBy(rx * H * 1.4 * dt, ry * H * 1.4 * dt); }
     }
     if ((lt || rt) && onMap) {
-      const z = (Math.pow(rt, 1.5) - Math.pow(lt, 1.5)) * ((A.mapSens && A.mapSens.zoom) || 1);   // la sensibilidad de zoom de Ajustes, como la rueda
+      const z = (Math.pow(rt, 1.5) - Math.pow(lt, 1.5)) * ((A.mapSens && A.mapSens.zoom) || 1) * PS.zoom / 100;   // la sensibilidad de zoom de Ajustes, como la rueda
       if (z) { const r = map.cv.getBoundingClientRect(), span = Math.log(map.maxS / map.minS) || 6; map.zoomBy(Math.exp(z * span / 1.6 * dt), M.x - r.left, M.y - r.top, false); }
     }
     if (moved) { moved = false; place(); track(); }
@@ -271,6 +286,26 @@ window.AIQ = window.AIQ || {};
     }
   }
   M.step = step; M.targets = targets; M.goTo = el => goTo(el);                                   // para las pruebas (dev/)
+  /* ---------- la pestana Mando de Ajustes ---------- */
+  const NAMES = { auto: null, xbox: "Xbox", ps: "PlayStation", nin: "Nintendo", deck: "Steam Deck" }, ORDER = ["auto", "xbox", "ps", "nin", "deck"];
+  function syncUI() {
+    const pane = document.querySelector('[data-pane="pad"]'); if (!pane) return;
+    pane.querySelectorAll("[data-prange]").forEach(f => { const k = f.dataset.prange, v = PS[k], i = f.querySelector("input"); i.value = v; i.style.setProperty("--p", ((v - 50) / 100) * 100 + "%"); f.querySelector("output").textContent = v + "%"; });
+    pane.querySelectorAll("[data-psw]").forEach(s => s.setAttribute("aria-checked", !!PS[s.dataset.psw]));
+    pane.querySelectorAll("[data-pseg]").forEach(sg => { const bs = [...sg.querySelectorAll("button")], ix = Math.max(0, bs.findIndex(b => b.dataset.v === PS[sg.dataset.pseg])); bs.forEach((b, i) => b.classList.toggle("on", i === ix)); sg.style.setProperty("--idx", ix); });
+    const st = $("padIcons"); if (st) { const i = ORDER.indexOf(PS.glyphs), auto = PS.glyphs === "auto"; st.querySelector(".stp-v").textContent = auto ? NAMES[DECK ? "deck" : fam] : NAMES[PS.glyphs]; st.querySelector(".stp-tag").textContent = auto ? A.t("scr.auto") : ""; const [lo, hi] = st.querySelectorAll(".stp-b"); lo.disabled = i <= 0; hi.disabled = i >= ORDER.length - 1; }
+  }
+  function wireUI() {
+    const pane = document.querySelector('[data-pane="pad"]'); if (!pane) return;
+    pane.querySelectorAll("[data-prange]").forEach(f => { const i = f.querySelector("input"); i.addEventListener("input", () => { PS[f.dataset.prange] = +i.value; savePS(); syncUI(); }); i.addEventListener("change", () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); }); });
+    pane.querySelectorAll("[data-psw]").forEach(s => s.addEventListener("click", () => { const k = s.dataset.psw; PS[k] = !PS[k]; savePS(); setGlyph(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); if (k === "rumble" && PS.rumble) A.haptic([24]); }));
+    pane.querySelectorAll("[data-pseg]").forEach(sg => sg.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; PS[sg.dataset.pseg] = b.dataset.v; precOn = false; savePS(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); }));
+    const st = $("padIcons"); if (st) st.addEventListener("click", e => { const b = e.target.closest(".stp-b"); if (!b || b.disabled) return; const i = Math.max(0, Math.min(ORDER.length - 1, ORDER.indexOf(PS.glyphs) + +b.dataset.d)); PS.glyphs = ORDER[i]; savePS(); setGlyph(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); });
+    syncUI();
+  }
+  M.resetSettings = () => { Object.assign(PS, DEF); precOn = false; savePS(); setGlyph(); syncUI(); };
+  wireUI(); setGlyph();
+
   const start = () => { if (!raf) { lastT = 0; raf = requestAnimationFrame(loop); } };
   const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
   addEventListener("gamepadconnected", e => { padAt[e.gamepad.index] = performance.now(); start(); });

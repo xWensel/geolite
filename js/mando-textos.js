@@ -26,7 +26,9 @@ window.AIQ.PADV = {
     "{s} s sin tocar el mando|{s} s without touching the controller|{s} s sans toucher la manette|{s} s sem tocar no controle|{s} s ohne den Controller zu berühren|{s} s senza toccare il controller|{s} s sin tocar el control|{s} 秒没碰手柄|{s}초 동안 패드 안 만지기|{s}秒コントローラーに触れず|{s} с без геймпада|{s} s bez dotykania pada",
 };
 /* el boton de confirmar escrito: A en Xbox y Steam Deck; la cruz en PlayStation, con su nombre en cada idioma */
-window.AIQ.PADCONF = { ps: "Cruz|Cross|Croix|X|Kreuz|Croce|X|×|X|×|Крест|Krzyżyk" };
+window.AIQ.PADCONF = { ps: "Cruz|Cross|Croix|X|Kreuz|Croce|X|×|X|×|Крест|Krzyżyk", nin: "B",
+  /* v0.2.35: con "Intercambiar confirmar y atras" (html[data-swapab]) confirma el boton de la derecha */
+  "xbox+": "B", "deck+": "B", "nin+": "A", "ps+": "Círculo|Circle|Rond|Bola|Kreis|Cerchio|Círculo|○|○|○|Круг|Kółko" };
 
 /* v0.2.34: en la Steam Deck (html[data-dev="deck"]) los retos que imitaban avisos de Windows (ventanas de "No responde", la bateria baja, el
    pantallazo azul) cambian a versiones con el estilo de Geolite: en una consola, un aviso falso del sistema se confundiria con uno de verdad

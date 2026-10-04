@@ -1,7 +1,7 @@
 /* Geolite - textos ES/EN, calculo de IQ e insignia. */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  A.VERSION = "0.2.34";
+  A.VERSION = "0.2.35";
   A.lang = "es";
   /* fotos de la Enciclopedia: en la web salen de GitHub Pages (pesan ~1 GB y Vercel no las admite), repartidas en dos webs para no pasar
      del limite de 1 GB de cada una; en local y en Electron (127.0.0.1) salen de la carpeta del juego. Las publica tools/publish-media.mjs.
@@ -32,7 +32,7 @@ window.AIQ = window.AIQ || {};
   const pick0 = s => { const a = s.split("|"), i = PIPE.indexOf(A.lang); return (i >= 0 && a[i]) || (BASE_OF[A.lang] && a[PIPE.indexOf(BASE_OF[A.lang])]) || a[1] || a[0]; };
   /* v0.2.30: con mando (html[data-glyph] distinto de "kb", js/mando.js) las instrucciones de raton tienen su version (A.PADV, js/mando-textos.js) */
   const padV = es => { if (!es || !A.PADV) return null; const g = document.documentElement.dataset.glyph; if (!g || g === "kb") return null; const p = A.PADV[es]; if (!p) return null;
-    const c = A.PADCONF && A.PADCONF[g] ? pick0(A.PADCONF[g]) : "A"; return pick0(p).replace(/\{A\}/g, c); };
+    const ck = g + (document.documentElement.dataset.swapab ? "+" : ""), c = A.PADCONF && A.PADCONF[ck] ? pick0(A.PADCONF[ck]) : "A"; return pick0(p).replace(/\{A\}/g, c); };
   /* v0.2.34: y en la Steam Deck, los retos que imitaban avisos del sistema (A.DEVV) */
   const devV = es => { if (!es || !A.DEVV || document.documentElement.dataset.dev !== "deck") return null; const p = A.DEVV[es]; return p ? pick0(p) : null; };
   A.pick6 = s => { const es = s.slice(0, s.indexOf("|") >>> 0); return devV(es) || padV(es) || pick0(s); };

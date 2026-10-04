@@ -463,3 +463,8 @@ body.vd-on #hud, body.vd-on .dock-sh, body.vd-on .rail-sh, body.vd-on .note-sh {
 }
 /* la entrada de cada pestana se desliza en horizontal: en vertical desbordaba 8 px y hacia parpadear la barra de scroll */
 @keyframes set-pane-in { from { opacity: 0; transform: translateX(10px); } }
+/* v0.2.35: los deslizadores de Ajustes > Mando, con la misma maqueta que los de sensibilidad del mapa */
+@media (min-width: 901px) {
+  .fader.pfader { grid-template-columns: minmax(7em, auto) minmax(0, 1fr) auto; grid-template-areas: "l i o" ". t ."; column-gap: 14px; }
+  .fader.pfader label { grid-area: l; } .fader.pfader input { grid-area: i; margin: 0; } .fader.pfader output { grid-area: o; min-width: 52px; } .fader.pfader .ftrack { grid-area: t; }
+}
