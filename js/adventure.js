@@ -1528,7 +1528,7 @@ window.AIQ = window.AIQ || {};
     const rr = A.rng(`${run.seed}:barra:${r}`), b = (run.bets || {})[r], open = betsOpen() && !run.inf;   // aun sin apuestas abiertas (antes de tu primer jefe): solo los suministros
     const sd = open ? (b ? b.id : sideRound(r)) : null, bet = sd && sideOk(sd, r) ? sd : null;
     const sup = rr.shuffle(["seguro", "cafe"]).sort((x, y) => (run.sup && run.sup[y] ? 1 : 0) - (run.sup && run.sup[x] ? 1 : 0));   // a la izquierda, un suministro (el que ya tengas activo, primero)
-    const s = [sup[0], bet || sup[1]];
+    const s = [sup[0], bet];                                                // derecha: SIEMPRE una apuesta (o hueco si esa ronda no toca ninguna)
     run.bar = { key, s }; return s;
   }
   const offerPay = c => { const d = A.CHAL[c.id]; return Math.max(1, Math.round(0.6 * (3 + 2 * (c.lv || 3) + (d.kind === "map" ? 1 : 0)) * ascFx(run.asc).price * inflation())); };   // el 60 % del soborno base, sin la escalada
@@ -1931,10 +1931,10 @@ window.AIQ = window.AIQ || {};
   let supFresh = null;                                                 // el suministro recien comprado: solo a ese le cae el sello
   function supHtml() {
     const sup = run.sup || {}, r = roundNo(), card = s => `<button class="sup sp-${s.id}${sup[s.id] ? " on" : ""}${supFresh === s.id ? " fresh" : ""}" data-sup="${s.id}" type="button"><span class="sp-ic">${ic(s.ico)}</span><span class="sp-t"><b>${A.tx(s.n)}</b><i>${A.tx(s.d)}</i></span>${sup[s.id] ? `<em class="sp-on">${A.T("Activo", "On")}</em>` : `<em class="sp-p">${CN()}${supCost(s)}</em>`}</button>`;
-    const void_ = '<i class="sup-void"></i>', red = betHtml(casinoKind(r)), slot = id => (SIDE_GAMES.includes(id) ? betHtml(id) : card(SUPS.find(x => x.id === id))) || void_;
+    const void_ = '<i class="sup-void"></i>', red = betHtml(casinoKind(r)), slot = id => (!id ? "" : SIDE_GAMES.includes(id) ? betHtml(id) : card(SUPS.find(x => x.id === id))) || void_;
     const [L, R] = barOf(r);
     supFresh = null;
-    return `<div class="tb-sup${red ? "" : " no-cas"}">${slot(L)}${red || ""}${slot(R)}</div>`;   // izquierda, un suministro; derecha, la apuesta que toque (o el otro suministro); centro, el juego de casino (si la casa ya abre las apuestas)
+    return `<div class="tb-sup${red ? "" : " no-cas"}">${slot(L)}${red || ""}${slot(R)}</div>`;   // izquierda, un suministro; derecha, la apuesta que toque (o hueco); centro, el juego de casino (si la casa ya abre las apuestas)
   }
   function wireSup() {
     document.querySelectorAll("[data-sup]").forEach(b => (b.onclick = () => {

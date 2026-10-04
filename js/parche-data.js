@@ -36,6 +36,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.39",
+      name: ["La Barra, ordenada", "The Bar, in order"],
+      date: "2026-10-04",
+      summary: ["En el Campamento cada cosa tiene su sitio: el casino al centro, un suministro a la izquierda y las apuestas siempre a la derecha.",
+        "At camp everything has its place: the casino in the middle, a supply on the left and the bets always on the right."],
+      chapters: [
+        { id: "barra", kicker: ["Campamento", "Camp"], title: ["Cada juego en su sitio", "Every game in its place"],
+          entries: [
+            E(["La Barra", "The Bar"], "change", "0.2.39", [
+              ["A la izquierda, **Seguro** o **Café doble** (sorteado); al centro, el juego de casino; a la derecha, **siempre una apuesta**. Si esa ronda no toca ninguna, el hueco queda vacío.", "On the left, **Insurance** or **Double espresso** (drawn); in the middle, the casino game; on the right, **always a bet**. If none is due that round, the slot stays empty."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.38",
       name: ["Más Ascensión, más puntos", "Higher Ascension, more points"],
       date: "2026-10-04",
