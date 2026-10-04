@@ -1193,7 +1193,8 @@ void main(){
       cv.addEventListener("pointerdown", e => {
         if (this.zzUntil && performance.now() < this.zzUntil) return;               // Ctrl+Z: durante el rebobinado no se aceptan clics
         if (e.pointerType === "mouse" && e.button !== 0) return;                   // solo el boton principal: el derecho o la rueda ya no marcan respuesta al soltar
-        cv.setPointerCapture(e.pointerId); this.drift = null; this.inertia = null; this.tv = null; this.samples = [];
+        try { cv.setPointerCapture(e.pointerId); } catch (err) { return; }   // un pointerdown del mando (js/mando.js) no tiene puntero real que capturar
+        this.drift = null; this.inertia = null; this.tv = null; this.samples = [];
         this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false });
         if (this.pointers.size === 2) this._pinch = this._pinchState();
       });

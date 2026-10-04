@@ -56,3 +56,14 @@ html.reduce-motion .osk-caret { animation: none; }
 .cr-table th, .cr-table td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid rgba(242, 233, 214, .1); }
 .cr-table th { position: sticky; top: 0; background: #12231a; color: var(--brass); font-family: var(--mono); font-weight: 500; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
 html[data-dev="deck"] .cr-table th { font-size: 16px; }
+
+/* v0.2.36: leyenda de botones en partida (solo con mando, mientras respondes). Abajo a la derecha, donde el HUD no tiene nada; si sale la luz
+   que se apaga (reto Apagon / Bateria baja), sube para no pisarla */
+#padLeg { position: fixed; right: 16px; bottom: 16px; z-index: 40; display: grid; gap: 6px; padding: 10px 16px 10px 12px; border-radius: 14px; pointer-events: none;
+  background: rgba(10, 26, 18, .78); box-shadow: inset 0 0 0 2px rgba(248, 180, 73, .35), 0 8px 22px rgba(0, 0, 0, .4); opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s; }
+#padLeg.on { opacity: 1; transform: none; }
+#padLeg span { display: grid; grid-template-columns: 72px auto; align-items: center; gap: 8px; min-height: 26px; }
+#padLeg b { display: flex; justify-content: flex-end; gap: 4px; }
+#padLeg em { font: 18px/1 var(--sans); font-style: normal; color: rgba(242, 233, 214, .9); white-space: nowrap; }
+body:has(#chxBat.on) #padLeg { bottom: 74px; }
+html.reduce-motion #padLeg { transition: none; }

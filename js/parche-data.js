@@ -30,11 +30,27 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = {"ajustes-mando":[1100,630],"deck-retos":[1100,687],"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
+  const SZ = {"mando-atlas":[1100,340],"ajustes-mando":[1100,630],"deck-retos":[1100,687],"teclado-crupier":[640,440],"mando-iconos":[1100,190],"mando-cursor":[1100,430],"pantalla-ajustes":[1100,382],"ticket-bandera":[1100,619],"ticket-dos-banderas":[1100,619],"ticket-encuadre":[1100,619],"ticket-racha":[1100,161],"amuleto-sello":[1100,619],"apuestas-barra":[1100,825],"bandera-destenida":[1100,618],"bandera-viento":[1100,618],"bigbang-1":[1100,618],"bigbang-2":[1100,618],"bigbang-3":[1100,618],"cambiar-por":[1100,618],"dividir":[940,500],"duelo-banca":[1100,618],"escalada-acto3":[1100,928],"escalada-apagon":[1100,618],"etiqueta-nuevo":[1100,618],"galeria-reliquias":[1060,1170],"iconos-herramientas":[840,240],"iconos-t14":[1000,460],"iconos-t15":[1040,440],"iconos-t16":[820,622],"miopia":[1100,618],"mochila-amuletos":[884,260],"nombre-girado":[1100,618],"pacto-oferta":[1100,825],"pared-cinco":[1100,928],"pase-vip":[1100,309],"retos-t14":[1100,618],"retos-t15":[1100,618],"rojo-negro":[1100,412],"rueda-coleccionista":[1100,928],"sangre-fria":[1100,837],"segunda-bola":[1100,618],"siesta":[1100,618],"tanda7":[1100,1237],"tanda8":[1100,548],"tienda-ventajas":[1100,618],"vitrina":[1100,618]};
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
 
   A.PATCHES = [
+    {
+      id: "0.2.36",
+      name: ["El atlas, también con mando", "The atlas, by controller too"],
+      date: "2026-10-04",
+      summary: ["El atlas de la Enciclopedia se maneja con mando, y en partida una leyenda pequeña recuerda qué hace cada botón.", "The Encyclopedia atlas now works with a controller, and in-game a small legend reminds you what each button does."],
+      chapters: [
+        { id: "pad", kicker: ["Mando", "Controller"], title: ["Más mando", "More controller"],
+          entries: [
+            E(["Atlas", "Atlas"], "new", "0.2.36", [
+              ["En la **Enciclopedia**, el stick derecho mueve el atlas, los gatillos acercan y **A** abre el país que tienes debajo.", "In the **Encyclopedia**, the right stick moves the atlas, the triggers zoom and **A** opens the country under the cursor."],
+            ]),
+            E(["Leyenda en partida", "In-game legend"], "new", "0.2.36", [
+              ["Con mando, abajo a la derecha: **Apuntar**, **Clavar**, **Zoom**, **Mover mapa** y **Precisión**, con los botones de tu mando.", "With a controller, bottom right: **Aim**, **Drop pin**, **Zoom**, **Move map** and **Precision**, with your controller's buttons."],
+            ], [I("mando-atlas", ["El atlas abierto con A y la leyenda en partida", "The atlas opened with A and the in-game legend"])]) ] },
+      ],
+    },
     {
       id: "0.2.35",
       name: ["Tu mando, a tu manera", "Your controller, your way"],

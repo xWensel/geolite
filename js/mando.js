@@ -41,6 +41,7 @@ window.AIQ = window.AIQ || {};
     if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad"; setGlyph();
     watchDom(M.on);
     if (M.on && A.dealer && A.dealer.noteDevice) A.dealer.noteDevice(DECK ? "deck" : "pad");   // el crupier lo comenta (una vez por sesion)
+    if (!M.on && leg) { legOn = false; leg.classList.remove("on"); }
     if (!M.on) { setHover(null); if (cur) cur.hidden = true; } else { if (!M.used) { M.used = true; M.x = innerWidth / 2; M.y = innerHeight / 2; } sweepHover(); ensureCur(); moved = true; }
   };
   root.dataset.input = "mouse"; root.dataset.glyph = DECK ? "deck" : "kb";
@@ -166,6 +167,7 @@ window.AIQ = window.AIQ || {};
     const map = A.core && A.core.map; track();
     const el = hit; if (!el) return;
     if (map && el === map.cv) {                                         // mapa: clavar la chincheta donde esta la mira (la mira ya lleva los retos)
+      if (A.codex && A.codex.isOpen && A.codex.isOpen()) { ev("pointerdown", el, { buttons: 1 }); ev("pointerup", el); return; }   // atlas: abre el pais bajo el cursor
       if (!map.pickEnabled) return; const r = map.cv.getBoundingClientRect();
       if (A.pointer) A.pointer.press = 100; map.tapAt(M.x - r.left, M.y - r.top); return;
     }
@@ -229,7 +231,8 @@ window.AIQ = window.AIQ || {};
     if (active && !M.on) { setMode("pad"); if (A.audio && A.audio.unlock) A.audio.unlock(); }
     if (!M.on) { prevB = btn; return; }
     const map = A.core && A.core.map, S = A.core && A.core.S, W = innerWidth, H = innerHeight;
-    const onMap = !!(map && hit === map.cv && (map.pickEnabled || (S && S.phase !== "title")));
+    const atlas = !!(A.codex && A.codex.isOpen && A.codex.isOpen());     // el atlas de la Enciclopedia es el mismo mapa (v0.2.36)
+    const onMap = !!(map && hit === map.cv && (map.pickEnabled || atlas || (S && S.phase !== "title")));
 
     /* stick izquierdo: cursor libre */
     if (lm) {
@@ -277,7 +280,7 @@ window.AIQ = window.AIQ || {};
     /* cada 1/4 s con el cursor quieto: lo que tiene debajo puede haber cambiado (un panel que entra deslizandose); y un dialogo nuevo con boton
        principal (veredicto, ticket, pausa) se lleva el cursor, cuando el boton ya ha llegado a su sitio (dos lecturas iguales) */
     if (t - primT > 250) {
-      primT = t; if (!snap) track(true);
+      primT = t; if (!snap) track(true); legSync();
       const p = document.querySelector("#veil:not(.hidden) [data-primary]") || document.querySelector("#layer:not(.hidden) [data-primary]") || (A.marcador && A.marcador.primary && A.marcador.primary());
       if (p !== primSeen) {
         const r = p && p.isConnected && p.offsetParent ? p.getBoundingClientRect() : null, k = r && [Math.round(r.left), Math.round(r.top), Math.round(r.width)].join();
@@ -286,6 +289,23 @@ window.AIQ = window.AIQ || {};
     }
   }
   M.step = step; M.targets = targets; M.goTo = el => goTo(el);                                   // para las pruebas (dev/)
+  /* ---------- leyenda de botones en partida (v0.2.36): abajo a la derecha, solo con mando y mientras respondes ---------- */
+  let leg = null, legOn = false;
+  function legend() {
+    if (!leg) {
+      leg = document.createElement("div"); leg.id = "padLeg"; leg.className = "k-pad"; leg.setAttribute("aria-hidden", "true");
+      const row = (gls, k) => `<span><b>${gls.map(g => `<i class="gl" data-gl="${g}"></i>`).join("")}</b><em data-i="${k}"></em></span>`;
+      leg.innerHTML = row(["ls"], "leg.aim") + row(["a"], "leg.pin") + row(["lt", "rt"], "pad.sens.zoom") + row(["rs"], "leg.move") + row(["lb"], "leg.prec");
+      document.body.appendChild(leg);
+    }
+    leg.querySelectorAll("[data-i]").forEach(e => { e.textContent = A.t(e.dataset.i); });
+  }
+  function legSync() {
+    const S = A.core && A.core.S, want = !!(M.on && S && S.phase === "asking" && !S.paused && !S.settingsOpen);
+    if (want === legOn) return; legOn = want; if (want) legend(); if (leg) leg.classList.toggle("on", want);
+  }
+  addEventListener("aiq:lang", () => { if (leg) legend(); });
+
   /* ---------- la pestana Mando de Ajustes ---------- */
   const NAMES = { auto: null, xbox: "Xbox", ps: "PlayStation", nin: "Nintendo", deck: "Steam Deck" }, ORDER = ["auto", "xbox", "ps", "nin", "deck"];
   function syncUI() {
