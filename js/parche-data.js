@@ -36,6 +36,23 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.40",
+      name: ["El mando, afinado", "The controller, tuned"],
+      date: "2026-10-04",
+      summary: ["La cruceta solo se detiene en lo que se puede pulsar y el mando ya no se pierde.",
+        "The d-pad now only stops on things you can press, and the controller no longer gets lost."],
+      chapters: [
+        { id: "mando", kicker: ["Mando", "Controller"], title: ["Navegar con la cruceta", "Navigating with the d-pad"],
+          entries: [
+            E(["Cruceta", "D-pad"], "fix", "0.2.40", [
+              ["La cruceta salta solo entre **opciones accionables**. En el Campamento ya llegas a **Rojo, Negro y Verde** y a **Cara y Cruz**, y no te lleva a la tarjeta.", "The d-pad jumps only between **actionable options**. At camp you can now reach **Red, Black and Green** and **Heads and Tails**, and it no longer lands on the card."]
+            ]),
+            E(["Mando", "Controller"], "fix", "0.2.40", [
+              ["Si el mando se desconecta y vuelve a aparecer, el juego lo recupera; manda el último mando que tocaste y el Xbox Series sale con sus iconos.", "If the controller disconnects and reappears, the game picks it up again; the last controller you touched takes control and the Xbox Series shows its own icons."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.39",
       name: ["La Barra, ordenada", "The Bar, in order"],
       date: "2026-10-04",

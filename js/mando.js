@@ -10,14 +10,17 @@
  * CSS :hover con la clase .pad-hov. html[data-input] dice que se usa (mouse | pad | touch); el raton de verdad devuelve el control al raton.
  * Iconos de los botones (v0.2.29): html[data-glyph] = kb | xbox | ps | deck; el dibujo sale de js/glifos-data.js (tools/glifos.py). En la Steam Deck
  * siempre iconos de Deck y modo mando desde el primer fotograma (tocar la pantalla o el trackpad no cambia los iconos: requisito de Verified).
- * Coste: sin mando conectado no hay bucle; con mando, una lectura por fotograma y solo se toca el DOM cuando el cursor se mueve.
+ * Varios mandos y vuelta desde el raton (revision del 2026-10-04): manda el ULTIMO que se movio o pulso (un cambio, no una posicion: un mando con un eje
+ * estropeado, un boton atascado o el mando duplicado/congelado de Steam Input no se queda con el control) y cualquier gesto del mando recupera el control
+ * al raton, siempre; el cursor sale de donde estaba el raton. No depende de los avisos del navegador: un vigilante mira si hay un mando a la vista.
+ * Coste: sin mando conectado solo el vigilante (cada 0,5 s); con mando, una lectura por fotograma y solo se toca el DOM cuando el cursor se mueve.
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
   const root = document.documentElement, $ = id => document.getElementById(id);
   const DZ = 0.15, TDZ = 0.08, CURVE = 2.2, REP0 = 380, REP = 90;
   const M = A.mando = { on: false, x: innerWidth / 2, y: innerHeight / 2 };
-  let raf = 0, lastT = 0, padIdx = -1, padAt = {}, prevB = [], repAt = {}, fastT = 0, hit = null, hovChain = [], cur = null, moved = true, snap = null, primSeen = null, primPend = null, primT = 0, precOn = false;
+  let raf = 0, lastT = 0, padIdx = -1, padAt = {}, seen = {}, prevB = [], repAt = {}, fastT = 0, hit = null, hovChain = [], cur = null, moved = true, snap = null, primSeen = null, primPend = null, primT = 0, precOn = false, lastMouse = null, noPad = 0, bad = 0;
 
   /* ---------- Ajustes > Mando (v0.2.35): se guardan aparte, en atlasiq.pad ---------- */
   const DEF = { ptr: 100, map: 100, zoom: 100, swapAB: false, swapSticks: false, prec: "hold", invLX: false, invLY: false, invRX: false, invRY: false, rumble: true, glyphs: "auto" };
@@ -28,7 +31,16 @@ window.AIQ = window.AIQ || {};
   /* ---------- iconos de los botones: familia segun el mando (o la Deck, o lo elegido en Ajustes) y una hoja con el dibujo de cada uno ---------- */
   const host = window.geoliteHost, DECK = !!(host && host.device === "deck");
   let fam = DECK ? "deck" : "xbox";
-  const famOf = gp => { const id = (gp && gp.id) || ""; if (DECK) return "deck"; if (/054c|dualsense|dualshock|wireless controller|playstation|ps[345]/i.test(id)) return "ps"; if (/057e|nintendo|pro controller|joy-con/i.test(id)) return "nin"; return "xbox"; };
+  /* la familia por el fabricante que da el navegador ("... Vendor: 045e Product: 0b12", o "045e-0b12-..." en otros) y, si no, por el nombre. El Xbox One/Series se
+     llama "Xbox Wireless Controller" y el DualShock/DualSense "Wireless Controller": el Xbox se mira primero (antes tambien se llevaba los iconos de PlayStation) */
+  const famOf = gp => {
+    const id = (gp && gp.id) || ""; if (DECK) return "deck";
+    const vid = ((id.match(/vendor:\s*([0-9a-f]{4})/i) || id.match(/^([0-9a-f]{4})-[0-9a-f]{4}-/i) || [])[1] || "").toLowerCase();
+    if (vid === "045e" || /xbox|xinput|microsoft/i.test(id)) return "xbox";
+    if (vid === "054c" || /dualsense|dualshock|playstation|sony|ps[345]\b|wireless controller/i.test(id)) return "ps";
+    if (vid === "057e" || /nintendo|pro controller|joy-con/i.test(id)) return "nin";
+    return "xbox";
+  };
   const famNow = () => (PS.glyphs !== "auto" ? PS.glyphs : fam);
   const setGlyph = () => { const g = M.on || DECK ? famNow() : "kb"; if (root.dataset.glyph !== g) { root.dataset.glyph = g; if (A.tt && A.tt.refresh) A.tt.refresh(); } if (PS.swapAB) root.dataset.swapab = "1"; else delete root.dataset.swapab; };
   { const G = A.GLIFOS || {}; let css = ""; for (const f in G) for (const b in G[f]) { const [u, w, h] = G[f][b]; css += `html[data-glyph="${f}"] .gl[data-gl="${b}"]{background-image:url("${u}");width:${w}px;height:${h}px}\n`; }
@@ -38,15 +50,23 @@ window.AIQ = window.AIQ || {};
 
   /* ---------- modo de entrada ---------- */
   const setMode = m => {
-    if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad"; setGlyph();
+    if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad";
+    console.log("[mando] entrada:", m);
+    try { setGlyph(); } catch (e) { /* un icono que falla no puede dejar al mando sin cursor */ }
     watchDom(M.on);
-    if (M.on && A.dealer && A.dealer.noteDevice) A.dealer.noteDevice(DECK ? "deck" : "pad");   // el crupier lo comenta (una vez por sesion)
     if (!M.on && leg) { legOn = false; leg.classList.remove("on"); }
-    if (!M.on) { setHover(null); if (cur) cur.hidden = true; } else { if (!M.used) { M.used = true; M.x = innerWidth / 2; M.y = innerHeight / 2; } sweepHover(); ensureCur(); moved = true; }
+    if (!M.on) { setHover(null); if (cur) cur.hidden = true; }
+    else {                                                              // el cursor sale de donde estaba el raton; si no lo habias usado, del centro (o de donde lo dejo el mando)
+      if (lastMouse) { M.x = Math.max(0, Math.min(innerWidth - 1, lastMouse[0])); M.y = Math.max(0, Math.min(innerHeight - 1, lastMouse[1])); lastMouse = null; M.used = true; }
+      else if (!M.used) { M.used = true; M.x = innerWidth / 2; M.y = innerHeight / 2; }
+      sweepHover(); ensureCur(); moved = true;
+      try { if (A.dealer && A.dealer.noteDevice) A.dealer.noteDevice(DECK ? "deck" : "pad"); } catch (e) { /* el crupier lo comenta (una vez por sesion); si falla, el mando sigue */ }
+    }
   };
   root.dataset.input = "mouse"; root.dataset.glyph = DECK ? "deck" : "kb";
-  addEventListener("pointermove", e => { if (e.isTrusted && M.on && (Math.abs(e.movementX) + Math.abs(e.movementY) > 2)) setMode(e.pointerType === "touch" ? "touch" : "mouse"); }, { capture: true, passive: true });
-  addEventListener("pointerdown", e => { if (e.isTrusted && M.on) setMode(e.pointerType === "touch" ? "touch" : "mouse"); }, { capture: true, passive: true });
+  const mouseMode = e => setMode(e.pointerType === "touch" ? "touch" : "mouse");
+  addEventListener("pointermove", e => { if (!e.isTrusted) return; lastMouse = [e.clientX, e.clientY]; if (M.on && (Math.abs(e.movementX) + Math.abs(e.movementY) > 2)) mouseMode(e); }, { capture: true, passive: true });
+  addEventListener("pointerdown", e => { if (!e.isTrusted) return; lastMouse = [e.clientX, e.clientY]; if (M.on) mouseMode(e); }, { capture: true, passive: true });
 
   /* ---------- :hover para el cursor del mando: cada regla con :hover se copia con .pad-hov (una vez) ---------- */
   let swept = false;
@@ -67,7 +87,8 @@ window.AIQ = window.AIQ || {};
   /* ---------- cursor dibujado (el mismo pixel art del puntero de casino) ---------- */
   let curKind = "";
   function ensureCur() {
-    if (!cur) { cur = document.createElement("div"); cur.id = "padCur"; cur.setAttribute("aria-hidden", "true"); document.body.appendChild(cur); }
+    if (!cur) { cur = document.createElement("div"); cur.id = "padCur"; cur.setAttribute("aria-hidden", "true"); }
+    if (!cur.isConnected) document.body.appendChild(cur);               // con el mando el cursor del sistema va oculto: si el dibujado desaparece del documento no se veria ninguno
     cur.hidden = false; place();
   }
   function curSprite(k) {
@@ -132,12 +153,15 @@ window.AIQ = window.AIQ || {};
       if (!pts.some(([x, y]) => { if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return false; const h = document.elementFromPoint(x, y); return h && (h === el || el.contains(h)); })) continue;
       out.push({ el, r });
     }
-    return out;
+    /* la cruceta solo para en lo ACCIONABLE: una tarjeta (o caja) que lleva dentro sus propios botones (Rojo / Negro / Verde, Cara / Cruz) no es un
+       destino, lo son los botones; si no, el cursor aterrizaba en el texto de la tarjeta. Los controles de verdad (boton, enlace, casilla...) siempre se quedan */
+    return out.filter(t => t.el.matches(INTER) || !out.some(o => o !== t && t.el.contains(o.el)));
   }
   /* cruceta: el destino mas cercano en esa direccion (huecos y desvio lateral pesan; lo alineado gana) */
   function step(dx, dy) {
     const list = targets();
-    const base = hit && list.find(t => t.el === hit || t.el.contains(hit));
+    let base = null;                                                    // el destino mas interior bajo el cursor (el boton, no la tarjeta que lo contiene)
+    if (hit) for (const t of list) if ((t.el === hit || t.el.contains(hit)) && (!base || t.r.width * t.r.height < base.r.width * base.r.height)) base = t;
     const o = base ? base.r : { left: M.x, right: M.x, top: M.y, bottom: M.y, width: 0, height: 0 };
     const ox = (o.left + o.right) / 2, oy = (o.top + o.bottom) / 2;
     let best = null, bs = Infinity;
@@ -204,33 +228,58 @@ window.AIQ = window.AIQ || {};
   Object.defineProperty(A.haptic, "on", { get: () => haptic0 ? haptic0.on : true, set: v => { if (haptic0) haptic0.on = v; } });
 
   /* ---------- lectura del mando ---------- */
+  const ACT = 0.05;                                                      // lo que debe cambiar un eje o un gatillo en unos 80 ms para contar como "lo han tocado"
+  const anyPad = except => { const l = navigator.getGamepads ? navigator.getGamepads() : []; for (const g of l) if (g && g.connected && g.index !== except) return true; return false; };
   function pad() {
-    const list = navigator.getGamepads ? navigator.getGamepads() : []; let best = null;
-    for (const g of list) { if (!g || !g.connected) continue; if (!best || (padAt[g.index] || 0) > (padAt[best.index] || 0)) best = g; }   // el ultimo que se toco (Steam Input puede dar dos)
+    const list = navigator.getGamepads ? navigator.getGamepads() : []; let best = null, ba = -1;
+    for (const g of list) { if (!g || !g.connected) continue; const a = padAt[g.index] || 0; if (!best || a > ba || (a === ba && g.mapping === "standard" && best.mapping !== "standard")) { best = g; ba = a; } }   // el ultimo que se toco (Steam Input puede dar dos); a igualdad, el de mapa estandar
     return best;
   }
   const stick = (x, y) => { const m = Math.hypot(x, y); if (m < DZ) return [0, 0, 0]; const k = Math.pow(Math.min(1, (m - DZ) / (1 - DZ)), CURVE); return [x / m * k, y / m * k, k]; };
   const trig = b => { const v = b ? (typeof b === "object" ? b.value : b) : 0; return v < TDZ ? 0 : (v - TDZ) / (1 - TDZ); };
   const down = (gp, i) => { const b = gp.buttons[i]; return !!b && (b.pressed || b.value > 0.5); };
+  /* "Tocar" un mando es CAMBIAR algo a proposito (pulsar un boton, empujar un eje o un gatillo), no estar en una posicion: un mando con un eje
+     estropeado, un boton atascado o un estado congelado (el mando virtual de Steam Input, un controlador a medias) ya no puede quedarse con el
+     control ni impedir que el raton lo recupere. La primera vez que se ve un mando cuenta lo que ya tenga pulsado o empujado (el navegador no lo
+     ensena hasta el primer gesto y ese gesto ya paso). De CADA mando se guardan los botones del fotograma anterior (flancos). */
+  function touched(g, t) {
+    let s = seen[g.index]; const first = !s || s.id !== g.id;
+    if (first) s = seen[g.index] = { id: g.id, t, b: [], pb: [], a: [], v: [] };
+    const old = s.pb; s.pb = s.b; s.b = old;                            // el actual pasa a anterior (se reutilizan los dos arrays)
+    let hitIt = false, held = false;
+    for (let i = 0; i < g.buttons.length; i++) { const d = down(g, i); s.b[i] = d; if (d) { held = true; if (!s.pb[i]) hitIt = true; } }
+    if (first) { if (held || g.axes.some(a => Math.abs(a) > DZ + 0.1)) hitIt = true; }
+    else {
+      for (let i = 0; i < g.axes.length; i++) { const a = g.axes[i] || 0; if (Math.abs(a) > DZ && Math.abs(a - (s.a[i] || 0)) > ACT) hitIt = true; }
+      for (let i = 6; i < 8; i++) { const v = (g.buttons[i] && g.buttons[i].value) || 0; if (v > 0.2 && Math.abs(v - (s.v[i] || 0)) > ACT) hitIt = true; }
+    }
+    if (first || t - s.t > 80) { s.t = t; for (let i = 0; i < g.axes.length; i++) s.a[i] = g.axes[i] || 0; for (let i = 6; i < 8; i++) s.v[i] = (g.buttons[i] && g.buttons[i].value) || 0; }
+    return hitIt;
+  }
 
   function loop(t) {
     raf = requestAnimationFrame(loop);
+    try { frame(t); } catch (e) { if (!(bad++ % 300)) console.warn("[mando] error en el bucle:", e); }   // un fallo en un fotograma no deja al mando sin bucle
+  }
+  function frame(t) {
     const dt = lastT ? Math.min(0.05, (t - lastT) / 1000) : 0.016; lastT = t;
-    if (!document.hasFocus() || document.hidden) { prevB = []; return; }
-    const all = navigator.getGamepads ? navigator.getGamepads() : [];
-    for (const g of all) if (g && g.connected && (g.buttons.some(b => b.pressed) || g.axes.some(a => Math.abs(a) > DZ + 0.1))) padAt[g.index] = t;
+    const all = navigator.getGamepads ? navigator.getGamepads() : []; let woke = false, n = 0;
+    for (const g of all) if (g && g.connected) { n++; if (touched(g, t)) { padAt[g.index] = t; woke = true; } }
+    if (!n) { if (++noPad > 120) stop(); return; }                      // sin mando: a los 2 s el bucle se para y el vigilante (cada 0,5 s) lo reactiva en cuanto el navegador vuelva a ensenar uno
+    noPad = 0;
+    if (!document.hasFocus() || document.hidden) return;                // otra ventana encima: los botones se siguen leyendo (lo que ya estaba pulsado al volver no cuenta como nuevo) pero no se hace nada
     const gp = pad(); if (!gp) return;
     /* Ajustes > Mando: sticks intercambiados y ejes invertidos */
     let a0 = gp.axes[0] || 0, a1 = gp.axes[1] || 0, a2 = gp.axes[2] || 0, a3 = gp.axes[3] || 0;
     if (PS.swapSticks) [a0, a1, a2, a3] = [a2, a3, a0, a1];
     if (PS.invLX) a0 = -a0; if (PS.invLY) a1 = -a1; if (PS.invRX) a2 = -a2; if (PS.invRY) a3 = -a3;
     const [lx, ly, lm] = stick(a0, a1), [rx, ry, rm] = stick(a2, a3), lt = trig(gp.buttons[6]), rt = trig(gp.buttons[7]);
-    const btn = gp.buttons.map((b, i) => down(gp, i)), active = lm || rm || lt || rt || btn.some(Boolean);
-    if (PS.swapAB) [btn[0], btn[1]] = [btn[1], btn[0]];                // confirmar con el boton de la derecha (mandos de Nintendo)
+    const btn = gp.buttons.map((b, i) => down(gp, i)), sn = seen[gp.index]; prevB = sn ? sn.pb.slice() : [];
+    if (PS.swapAB) { [btn[0], btn[1]] = [btn[1], btn[0]]; [prevB[0], prevB[1]] = [prevB[1], prevB[0]]; }   // confirmar con el boton de la derecha (mandos de Nintendo)
     if (PS.prec === "toggle") { if (btn[4] && !prevB[4]) precOn = !precOn; } else precOn = !!btn[4];
-    if (active) { const f = famOf(gp); if (f !== fam) { fam = f; setGlyph(); syncUI(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
-    if (active && !M.on) { setMode("pad"); if (A.audio && A.audio.unlock) A.audio.unlock(); }
-    if (!M.on) { prevB = btn; return; }
+    if (woke) { const f = famOf(gp); if (f !== fam) { fam = f; setGlyph(); syncUI(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
+    if (woke && !M.on) { setMode("pad"); if (A.audio && A.audio.unlock) A.audio.unlock(); }
+    if (!M.on) return;
     const map = A.core && A.core.map, S = A.core && A.core.S, W = innerWidth, H = innerHeight;
     const atlas = !!(A.codex && A.codex.isOpen && A.codex.isOpen());     // el atlas de la Enciclopedia es el mismo mapa (v0.2.36)
     const onMap = !!(map && hit === map.cv && (map.pickEnabled || atlas || (S && S.phase !== "title")));
@@ -276,12 +325,11 @@ window.AIQ = window.AIQ || {};
       if (dx && hit && range(hit, dx)) continue;                     // deslizadores de Ajustes: izquierda y derecha cambian el valor
       step(dx, dy);
     }
-    prevB = btn;
 
     /* cada 1/4 s con el cursor quieto: lo que tiene debajo puede haber cambiado (un panel que entra deslizandose); y un dialogo nuevo con boton
        principal (veredicto, ticket, pausa) se lleva el cursor, cuando el boton ya ha llegado a su sitio (dos lecturas iguales) */
     if (t - primT > 250) {
-      primT = t; if (!snap) track(true); legSync();
+      primT = t; if (!cur || !cur.isConnected) { curKind = ""; ensureCur(); } if (!snap) track(true); legSync();
       const p = document.querySelector("#veil:not(.hidden) [data-primary]") || document.querySelector("#layer:not(.hidden) [data-primary]") || (A.marcador && A.marcador.primary && A.marcador.primary());
       if (p !== primSeen) {
         const r = p && p.isConnected && p.offsetParent ? p.getBoundingClientRect() : null, k = r && [Math.round(r.left), Math.round(r.top), Math.round(r.width)].join();
@@ -327,17 +375,23 @@ window.AIQ = window.AIQ || {};
   M.resetSettings = () => { Object.assign(PS, DEF); precOn = false; savePS(); setGlyph(); syncUI(); };
   wireUI(); setGlyph();
 
-  const start = () => { if (!raf) { lastT = 0; raf = requestAnimationFrame(loop); } };
+  const start = () => { if (!raf) { lastT = 0; noPad = 0; raf = requestAnimationFrame(loop); } };
   const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
-  addEventListener("gamepadconnected", e => { padAt[e.gamepad.index] = performance.now(); start(); });
-  addEventListener("gamepaddisconnected", () => {
-    const left = [...(navigator.getGamepads ? navigator.getGamepads() : [])].some(g => g && g.connected);
-    if (M.on) { const S = A.core && A.core.S; if (S && S.phase === "asking" && !S.paused && A.core.runMenu) A.core.runMenu(); setMode("mouse"); }   // se va el mando a mitad de pregunta: pausa
-    if (!left) stop();
+  /* El mando no depende de los avisos del navegador: Steam Input lo quita y lo pone al cambiar de ventana, un USB se suelta y se vuelve a enchufar,
+     el navegador deja ver un mando sin avisar... Si hay un mando a la vista el bucle corre (el aviso solo lo adelanta) y SOLO se vuelve al raton
+     cuando no queda ninguno. Antes un aviso de desconexion paraba el bucle y, sin el aviso de conexion, no volvia a arrancar. */
+  addEventListener("gamepadconnected", e => { const g = e.gamepad; padAt[g.index] = performance.now(); delete seen[g.index]; console.log("[mando] conectado:", g.index, g.id, g.mapping || "(sin mapa estandar)"); start(); });
+  addEventListener("gamepaddisconnected", e => {
+    const g = e.gamepad; if (g) { delete seen[g.index]; delete padAt[g.index]; }
+    console.log("[mando] desconectado:", g && g.index, g && g.id);
+    if (M.on && !anyPad(g && g.index)) { lastMouse = null; const S = A.core && A.core.S; if (S && S.phase === "asking" && !S.paused && A.core.runMenu) A.core.runMenu(); setMode("mouse"); }   // se va el ultimo mando a mitad de pregunta: pausa
   });
+  setInterval(() => { if (!raf && anyPad()) start(); }, 500);
+  addEventListener("focus", () => { if (!raf && anyPad()) start(); });
   /* el menu de Steam u otra ventana encima: los sticks se sueltan y, si estabas respondiendo con el mando, la pregunta se pausa */
-  addEventListener("blur", () => { prevB = []; snap = null; const S = A.core && A.core.S; if (M.on && S && S.phase === "asking" && !S.paused && A.core.runMenu) A.core.runMenu(); });
+  addEventListener("blur", () => { snap = null; const S = A.core && A.core.S; if (M.on && S && S.phase === "asking" && !S.paused && A.core.runMenu) A.core.runMenu(); });
   addEventListener("resize", () => { cache = null; M.x = Math.min(M.x, innerWidth - 1); M.y = Math.min(M.y, innerHeight - 1); moved = true; });
-  if (navigator.getGamepads && [...navigator.getGamepads()].some(g => g && g.connected)) start();
+  M.running = () => !!raf;                                               // para las pruebas (dev/)
+  if (anyPad()) start();
   if (DECK) setMode("pad");                                              // Steam Deck: se juega con mando desde el primer fotograma
 })(window.AIQ);

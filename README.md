@@ -4,6 +4,8 @@
 
 > **Versiones:** desde la 0.2.3 la version del juego sigue la numeracion de las notas del parche (0.2.N): cada entrega sube el ultimo numero y lleva su entrada en las notas. Antes (hasta la 0.79.1) cada entrega subia la version menor y terminaba en 1. Se cambia en `VERSION`, `js/support.js`, `package.json`, `package-lock.json`, `sw.js` y esta lista. Detalle en `CLAUDE.md`.
 
+**v0.2.40** - La cruceta del mando solo para en lo accionable: las tarjetas con botones dentro (Rojo o negro, Cara o cruz, Ruleta) ya no son destino y el punto de partida es el boton, no la tarjeta, asi que se llega a Negro, Verde y Cruz (scan y step en js/mando.js). El bucle del mando ya no se pierde si el mando desaparece y reaparece (Steam Input), manda el ultimo mando tocado y el Xbox Series ya no lleva iconos de PlayStation. main.js: --no-steam o GEOLITE_NOSTEAM=1 arranca sin Steamworks para probar el mando.
+
 **v0.2.39** - La Barra del Campamento con sitios fijos: centro el juego de casino, izquierda un suministro (Seguro o Cafe doble, sorteado) y derecha SIEMPRE una apuesta (Oferta, Doble o nada, Apuesta final), o hueco si esa ronda no toca ninguna; ya no sale el otro suministro a la derecha (barOf y supHtml en js/adventure.js).
 
 **v0.2.38** - Multiplicador de Ascension en la puntuacion final (pedido el 2026-10-03; estaba hecho en la rama asc-multiplicador y sin subir): A0 x1,00, A1 x1,10, A2 x1,20, A3 x1,30, A4 x1,40, A5 x1,50, solo al cerrar la expedicion (finalOf en js/adventure.js, ASC_MULT). Cuenta en la tabla Aventura, el Reto diario y Hoy/Ayer; los objetivos y los puntos de cada ronda no cambian. Chip "x1,30" junto a las fichas de Ascension y frase en el resumen final.

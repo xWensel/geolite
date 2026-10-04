@@ -15,9 +15,15 @@ const path = require("node:path");
  * el init falla y el juego sigue funcionando normal, solo sin logros. */
 let steamClient = null;
 try {
+  if (process.env.GEOLITE_NOSTEAM === "1" || process.argv.includes("--no-steam")) throw new Error("apagado (GEOLITE_NOSTEAM=1 o --no-steam)");   // desarrollo sin Steam (por ejemplo, para probar el mando)
   steamClient = require("steamworks.js").init();
   require("steamworks.js").electronEnableSteamOverlay();
   console.log("Steamworks conectado:", steamClient.localplayer.getName());
+  /* App ID 480 = Spacewar, solo para desarrollar. Con Steam abierto, Steam Input toma el mando (el log de Steam lo abre y reserva XInput 0 y 1) y le
+     aplica la configuracion de Spacewar ("Space War Action Set Config Sample": acciones para la API de Steam Input, que este juego no usa). El
+     2026-10-04, al abrir Steam, el mando dejo de funcionar en el juego y el raton siguio. Para probar con mando en desarrollo: arrancar con --no-steam
+     o GEOLITE_NOSTEAM=1 (sin logros ni teclado de Steam). El App ID propio traera su configuracion de Steam Input: dejarla en la plantilla Gamepad. */
+  try { if (steamClient.utils.getAppId() === 480) console.warn("[steam] App ID 480 (Spacewar): con Steam abierto, Steam Input puede quedarse con el mando. Ver main.js (--no-steam para probar sin Steam)."); } catch (e) { /* sin utils */ }
 } catch (e) {
   console.warn("Steamworks no disponible (¿Steam esta abierto?):", e.message);
 }
