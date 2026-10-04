@@ -36,6 +36,19 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.32",
+      name: ["Letra a la medida de la Deck", "Text sized for the Deck"],
+      date: "2026-10-04",
+      summary: ["En la Steam Deck, la letra pequeña de las etiquetas crece para leerse bien en sus 7 pulgadas. En PC no cambia nada.", "On Steam Deck, the small label text grows so it reads well on its 7-inch screen. Nothing changes on PC."],
+      chapters: [
+        { id: "deck", kicker: ["Steam Deck", "Steam Deck"], title: ["Legibilidad", "Legibility"],
+          entries: [
+            E(["Letra mínima", "Minimum text size"], "change", "0.2.32", [
+              ["Las etiquetas en mayúsculas de menús, Ajustes, Aventura, Reto diario, Enciclopedia y partida pasan a **16 px** en la Deck, nítidas, y los selectores que no cabían (unidades, modo daltónico) se recolocan.", "Uppercase labels in menus, Settings, Adventure, Daily challenge, Encyclopedia and gameplay grow to **16 px** on the Deck, still crisp, and the selectors that no longer fit (units, colour-blind mode) are rearranged."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.31",
       name: ["El teclado del crupier", "The dealer's keyboard"],
       date: "2026-10-04",
