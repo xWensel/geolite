@@ -54,6 +54,13 @@
   }
   const KEY = { auto: "def", default: "def", pointer: "ptr", text: "txt", grab: "grab", grabbing: "grabbing", "not-allowed": "no", wait: "wait", progress: "wait", help: "help", crosshair: "cross", "zoom-in": "zin", "zoom-out": "zout", move: "grab", "all-scroll": "grab" };
   A.cursor = { on: false, available: false, set() {} };
+  /* el cursor del mando (js/mando.js) dibuja estos mismos sprites aunque el puntero de casino del raton este apagado */
+  const sprMemo = {};
+  A.cursor.sprite = name => {
+    if (!SPR[name]) return null; if (sprMemo[name]) return sprMemo[name];
+    const m = /url\("([^"]+)"\) (\d+) (\d+)/.exec(sprite(name)), [src] = SPR[name], w = (Math.max(...src.map(r => r.length)) + 2) * CELL, h = (src.length + 2) * CELL;
+    return (sprMemo[name] = m ? { url: m[1], hx: +m[2], hy: +m[3], w, h } : null);
+  };
 
   function initCursor() {
     let fine = false, off = false;

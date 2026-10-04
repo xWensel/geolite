@@ -1237,6 +1237,15 @@ void main(){
       }, { passive: false });
       this._ro = new ResizeObserver(() => this.resize()); this._ro.observe(cv);
     }
+    /* mando (js/mando.js): mover la camara dx, dy px de pantalla (stick derecho, borde de la pantalla) y clavar donde esta la mira */
+    nudge(dx, dy) {
+      if (this.zzUntil && performance.now() < this.zzUntil) return;
+      if (this._orient().on) { const [a0, b0] = this._orientOut(0, 0), [a1, b1] = this._orientOut(dx, dy); dx = a1 - a0; dy = b1 - b0; }
+      this.anim = null; this.drift = null; this.inertia = null;
+      for (const v of this.tv ? [this.view, this.tv] : [this.view]) { v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); }
+      this.dirty = this.fxDirty = true;
+    }
+    tapAt(px, py) { this._tap(px, py); }
     _pinchState() { const [a, b] = [...this.pointers.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
     _tap(px, py) {
       if (!this.pickEnabled) return;

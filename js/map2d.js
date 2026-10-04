@@ -175,6 +175,8 @@ window.AIQ = window.AIQ || {};
       const t = { s, cx: wx - (px - this.W / 2) / s, cy: wy + (py - this.H / 2) / s };
       if (animate) this.animateTo(t, 260); else { this.drift = null; this.view = this._clamp(t); this.anim = null; this.dirty = this.fxDirty = this.hlDirty = true; }
     }
+    nudge(dx, dy) { if (this.zzUntil && performance.now() < this.zzUntil) return; this.anim = null; this.drift = null; const v = this.view; v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); this.dirty = this.fxDirty = this.hlDirty = true; }   // mando (js/mando.js)
+    tapAt(px, py) { this._tap(px, py); }
     _toWorld(px, py, v = this.view) { return [v.cx + (px - this.W / 2) / v.s, v.cy - (py - this.H / 2) / v.s]; }
     toScreen(x, y, v = this.view) { return [this.W / 2 + (x - v.cx) * v.s, this.H / 2 - (y - v.cy) * v.s]; }
     lonLatToScreen(lon, lat) { const [x, y] = project(lon, lat); return this.toScreen(x, y); }

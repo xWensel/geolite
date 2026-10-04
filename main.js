@@ -221,6 +221,8 @@ ipcMain.on("win:setMode", (e, mode) => { if (alive(win) && e.sender === win.webC
  * js/art.js), asi que aqui solo se deja disable-gpu-sandbox (framerate
  * normal, confirmado). */
 app.commandLine.appendSwitch("disable-gpu-sandbox");
+/* el sonido no espera a un clic: jugando solo con mando (Steam Deck) las pulsaciones del mando no cuentan como gesto del usuario para el navegador */
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 /* Si la GPU se reinicia varias veces (volver de otra aplicacion, suspender, cambiar de monitor), Chromium bloquea WebGL para el origen hasta
  * reiniciar y el mapa se quedaba en blanco y parpadeando. Sin el bloqueo, el contexto vuelve (js/map.js lo reconstruye o recrea el lienzo). */
 app.disableDomainBlockingFor3DAPIs();

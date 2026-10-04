@@ -1,0 +1,4 @@
+/* Geolite - MANDO (v0.2.28): el cursor del mando (el mismo pixel art del puntero de casino) y nada de cursor del sistema mientras se juega con el */
+#padCur { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; background: no-repeat 0 0 / 100% 100%; image-rendering: pixelated; will-change: transform; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .35)); }
+#padCur[hidden], #padCur.off { display: none; }
+html[data-input="pad"]:not(.pad-scan), html[data-input="pad"]:not(.pad-scan) * { cursor: none !important; }   /* .pad-scan: un instante, para leer que es pulsable (cursor: pointer) */
