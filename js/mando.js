@@ -31,6 +31,7 @@ window.AIQ = window.AIQ || {};
   const setMode = m => {
     if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad"; setGlyph();
     watchDom(M.on);
+    if (M.on && A.dealer && A.dealer.noteDevice) A.dealer.noteDevice(DECK ? "deck" : "pad");   // el crupier lo comenta (una vez por sesion)
     if (!M.on) { setHover(null); if (cur) cur.hidden = true; } else { if (!M.used) { M.used = true; M.x = innerWidth / 2; M.y = innerHeight / 2; } sweepHover(); ensureCur(); moved = true; }
   };
   root.dataset.input = "mouse"; root.dataset.glyph = DECK ? "deck" : "kb";
@@ -234,7 +235,7 @@ window.AIQ = window.AIQ || {};
       else { const sc = scroller(hit); if (sc) sc.scrollBy(rx * H * 1.4 * dt, ry * H * 1.4 * dt); }
     }
     if ((lt || rt) && onMap) {
-      const z = Math.pow(rt, 1.5) - Math.pow(lt, 1.5);
+      const z = (Math.pow(rt, 1.5) - Math.pow(lt, 1.5)) * ((A.mapSens && A.mapSens.zoom) || 1);   // la sensibilidad de zoom de Ajustes, como la rueda
       if (z) { const r = map.cv.getBoundingClientRect(), span = Math.log(map.maxS / map.minS) || 6; map.zoomBy(Math.exp(z * span / 1.6 * dt), M.x - r.left, M.y - r.top, false); }
     }
     if (moved) { moved = false; place(); track(); }

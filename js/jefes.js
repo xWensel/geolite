@@ -72,7 +72,7 @@ window.AIQ = window.AIQ || {};
         else {
           const moving = Math.abs(Math.log(vv.s / Nap.s)) > 0.003; Nap.s = vv.s;               // un zoom: la escala se pone en marcha tras estar quieta (ruedas aparte, ver napWheel)
           if (moving) { if (Nap.idle >= 2 && now - Nap.wheelAt > 450) napAdd(20); Nap.idle = 0; } else Nap.idle++;
-          const dragging = mm.pointers && mm.pointers.size > 0 && !moving, d = Math.hypot(vv.cx - Nap.cx, vv.cy - Nap.cy) * vv.s; Nap.cx = vv.cx; Nap.cy = vv.cy;   // arrastrar: +10 por segundo
+          const dragging = ((mm.pointers && mm.pointers.size > 0) || now - (mm.padPanAt || 0) < 200) && !moving, d = Math.hypot(vv.cx - Nap.cx, vv.cy - Nap.cy) * vv.s; Nap.cx = vv.cx; Nap.cy = vv.cy;   // arrastrar: +10 por segundo
           if (dragging && d > 0.4) napAdd(10 * dt);
         }
       }

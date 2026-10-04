@@ -36,6 +36,25 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.30",
+      name: ["Hablando tu idioma", "Speaking your language"],
+      date: "2026-10-04",
+      summary: ["Con mando, el tutorial y los retos explican los controles del mando, y el crupier deja de hablarte de tu ratón.", "With a controller, the tutorial and challenges explain the controller's controls, and the dealer stops talking about your mouse."],
+      chapters: [
+        { id: "textos", kicker: ["Mando", "Controller"], title: ["Instrucciones a medida", "Tailored instructions"],
+          entries: [
+            E(["Lo que se lee", "What you read"], "change", "0.2.30", [
+              ["Con mando, el tutorial dice **pulsa A** (o **Cruz** en PlayStation) y **mueve la mira con el stick**, y el humo, la lluvia y la pantalla en reposo se explican con el stick y los botones. Con ratón, todo sigue igual.", "With a controller, the tutorial says **press A** (or **Cross** on PlayStation) and **move the crosshair with the stick**, and smoke, rain and the sleeping screen are explained with the stick and buttons. With a mouse, nothing changes."],
+            ]),
+            E(["El crupier", "The dealer"], "new", "0.2.30", [
+              ["Se da cuenta cuando coges un mando o juegas en la **Steam Deck**, y no te habla de tu ratón si no lo estás usando.", "He notices when you pick up a controller or play on **Steam Deck**, and doesn't talk about your mouse if you're not using one."],
+            ]),
+            E(["Juego limpio", "Fair play"], "fix", "0.2.30", [
+              ["En la **Siesta del crupier**, mover el mapa con el stick hace el mismo ruido que arrastrarlo con el ratón, y los gatillos respetan tu sensibilidad de zoom.", "In **The dealer's nap**, moving the map with the stick makes the same noise as dragging it with the mouse, and the triggers follow your zoom sensitivity."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.29",
       name: ["Botones a la vista", "Buttons in sight"],
       date: "2026-10-04",

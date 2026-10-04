@@ -1241,7 +1241,7 @@ void main(){
     nudge(dx, dy) {
       if (this.zzUntil && performance.now() < this.zzUntil) return;
       if (this._orient().on) { const [a0, b0] = this._orientOut(0, 0), [a1, b1] = this._orientOut(dx, dy); dx = a1 - a0; dy = b1 - b0; }
-      this.anim = null; this.drift = null; this.inertia = null;
+      this.anim = null; this.drift = null; this.inertia = null; this.padPanAt = performance.now();   // la Siesta (js/jefes.js) lo oye como un arrastre
       for (const v of this.tv ? [this.view, this.tv] : [this.view]) { v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); }
       this.dirty = this.fxDirty = true;
     }

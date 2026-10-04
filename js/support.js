@@ -1,7 +1,7 @@
 /* Geolite - textos ES/EN, calculo de IQ e insignia. */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  A.VERSION = "0.2.29";
+  A.VERSION = "0.2.30";
   A.lang = "es";
   /* fotos de la Enciclopedia: en la web salen de GitHub Pages (pesan ~1 GB y Vercel no las admite), repartidas en dos webs para no pasar
      del limite de 1 GB de cada una; en local y en Electron (127.0.0.1) salen de la carpeta del juego. Las publica tools/publish-media.mjs.
@@ -29,8 +29,12 @@ window.AIQ = window.AIQ || {};
   /* "es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl" -> {es, en, ...}; los huecos vacios caen al idioma base / ingles via A.tx */
   const PIPE = ["es", "en", "fr", "pt", "de", "it", "es-419", "zh", "ko", "ja", "ru", "pl"];
   A.L6 = s => { const a = s.split("|"), o = {}; PIPE.forEach((l, i) => { if (a[i]) o[l] = a[i]; }); return o; };
-  A.pick6 = s => { const a = s.split("|"), i = PIPE.indexOf(A.lang); return (i >= 0 && a[i]) || (BASE_OF[A.lang] && a[PIPE.indexOf(BASE_OF[A.lang])]) || a[1] || a[0]; };
-  A.tx = v => (v && typeof v === "object" ? v[A.lang] || (v.en && trOf(v.en)) || (BASE_OF[A.lang] && v[BASE_OF[A.lang]]) || (A.lang === "es" ? v.es : v.en) || v.en || v.es || "" : v || "");
+  const pick0 = s => { const a = s.split("|"), i = PIPE.indexOf(A.lang); return (i >= 0 && a[i]) || (BASE_OF[A.lang] && a[PIPE.indexOf(BASE_OF[A.lang])]) || a[1] || a[0]; };
+  /* v0.2.30: con mando (html[data-glyph] distinto de "kb", js/mando.js) las instrucciones de raton tienen su version (A.PADV, js/mando-textos.js) */
+  const padV = es => { if (!es || !A.PADV) return null; const g = document.documentElement.dataset.glyph; if (!g || g === "kb") return null; const p = A.PADV[es]; if (!p) return null;
+    const c = A.PADCONF && A.PADCONF[g] ? pick0(A.PADCONF[g]) : "A"; return pick0(p).replace(/\{A\}/g, c); };
+  A.pick6 = s => padV(s.slice(0, s.indexOf("|") >>> 0)) || pick0(s);
+  A.tx = v => (v && typeof v === "object" && v.es && padV(v.es)) || (v && typeof v === "object" ? v[A.lang] || (v.en && trOf(v.en)) || (BASE_OF[A.lang] && v[BASE_OF[A.lang]]) || (A.lang === "es" ? v.es : v.en) || v.en || v.es || "" : v || "");
   /* respuesta oculta: cada letra es un hueco, las palabras quedan separadas y al final va el recuento "(3, 7)" */
   A.blanks = (text, count) => {
     const t = String(text || "").trim(); if (!t) return "";

@@ -1373,6 +1373,17 @@ window.AIQ = window.AIQ || {};
       "¿Qué tal el Clásico? Aburrido sin mí, ¿a que sí?|How was the Classic? Boring without me, wasn't it?|Alors, ce Classique ? Ennuyeux sans moi, hein ?|Como foi o Clássico? Chato sem mim, né?|Wie war der Klassiker? Langweilig ohne mich, oder?|Com'è andato il Classico? Noioso senza di me, vero?||经典模式怎么样？没有我很无聊吧？|클래식 어땠어? 나 없으니 지루했지?|クラシックはどうだった？私がいないと退屈だろう？|Как Классика? Скучно без меня, да?|Jak tam Klasyczny? Nudno beze mnie, co?",
       "Has vuelto del Clásico. Ya decía yo que se oía menos jaleo.|You're back from the Classic. I thought it had gone quiet.|Te revoilà du Classique. Je me disais bien que c'était calme.|Voltou do Clássico. Bem que eu achei que estava quieto demais.|Zurück vom Klassiker. Ich dachte mir schon, dass es so ruhig war.|Sei tornato dal Classico. Mi pareva che ci fosse meno baccano.|Volviste del Clásico. Ya decía yo que se oía menos bulla.|你从经典模式回来了。我就说怎么这么安静。|클래식에서 돌아왔구나. 어쩐지 조용하더라.|クラシックから戻ったか。道理で静かだと思った。|Вернулся из Классики. То-то я думаю, тихо стало.|Wróciłeś z Klasycznego. Tak myślałem, że jakoś ciszej."
     ],
+    /* v0.2.30: coges un mando (o juegas en la Steam Deck) por primera vez en la sesion */
+    padOn: [
+      "¿Un mando? Vaya, vienes a jugar en serio. Mis cartas también.|A controller? Well, you came to play for real. So did my cards.|Une manette ? Tiens, tu viens jouer pour de vrai. Mes cartes aussi.|Um controle? Olha só, veio jogar a sério. Minhas cartas também.|Ein Controller? Sieh an, du meinst es ernst. Meine Karten auch.|Un controller? Però, fai sul serio. Anche le mie carte.|¿Un control? Vaya, vienes a jugar en serio. Mis cartas también.|手柄？看来你是认真来玩的。我的牌也是。|패드라니, 제대로 하러 오셨군요. 제 카드도 진심이에요.|コントローラー？本気で遊びに来たね。私のカードも本気だよ。|Геймпад? Ого, ты пришёл играть всерьёз. Мои карты тоже.|Pad? No proszę, przyszedłeś grać na serio. Moje karty też.",
+      "Has soltado el ratón. Por fin alguien que juega desde el sofá.|You let go of the mouse. Finally someone playing from the couch.|Tu as lâché la souris. Enfin quelqu'un qui joue depuis le canapé.|Você largou o mouse. Finalmente alguém jogando do sofá.|Du hast die Maus losgelassen. Endlich spielt jemand vom Sofa aus.|Hai mollato il mouse. Finalmente qualcuno che gioca dal divano.|Soltaste el mouse. Por fin alguien que juega desde el sillón.|你放下了鼠标。终于有人窝在沙发上玩了。|마우스를 놓으셨군요. 드디어 소파에서 하는 분이네요.|マウスを手放したね。やっとソファで遊ぶ人が来た。|Ты отпустил мышь. Наконец-то кто-то играет с дивана.|Puściłeś myszkę. Wreszcie ktoś gra z kanapy.",
+      "Con mando, cada pulsación vibra. Con la mía, tiembla tu puntuación.|With a controller, every press rumbles. With mine, your score trembles.|Avec une manette, chaque pression vibre. Avec la mienne, c'est ton score qui tremble.|Com controle, cada botão vibra. Com o meu, quem treme é sua pontuação.|Mit Controller vibriert jeder Druck. Mit meinem zittert dein Punktestand.|Col controller ogni pressione vibra. Col mio, trema il tuo punteggio.|Con control, cada botón vibra. Con el mío, tiembla tu puntuación.|用手柄，每次按键都会震动。用我的，抖的是你的分数。|패드는 누를 때마다 진동하죠. 제 쪽에선 당신 점수가 떨려요.|コントローラーなら押すたびに震える。私のなら、震えるのは君のスコアだ。|С геймпадом каждое нажатие вибрирует. С моим дрожат твои очки.|Na padzie każde naciśnięcie wibruje. Na moim drży twój wynik.",
+    ],
+    deckOn: [
+      "Me has metido en una Steam Deck. Qué mesa tan pequeña… y qué bien me queda.|You put me in a Steam Deck. Such a small table… and it suits me so well.|Tu m'as mis dans une Steam Deck. Quelle petite table… et comme elle me va bien.|Você me colocou num Steam Deck. Que mesa pequena… e como ficou bem em mim.|Du hast mich in ein Steam Deck gesteckt. So ein kleiner Tisch… und er steht mir so gut.|Mi hai messo in una Steam Deck. Che tavolo piccolo… e come mi sta bene.|Me metiste en una Steam Deck. Qué mesa tan pequeña… y qué bien me queda.|你把我装进了 Steam Deck。桌子真小……不过很衬我。|저를 스팀 덱에 넣으셨군요. 테이블이 작네요… 그래도 잘 어울려요.|私をSteam Deckに入れたね。小さなテーブル…でもよく似合う。|Ты засунул меня в Steam Deck. Какой маленький стол… и как он мне идёт.|Wsadziłeś mnie do Steam Decka. Jaki mały stolik… i jak mi w nim dobrze.",
+      "Casino de bolsillo. Ahora puedo ganarte en el autobús.|Pocket casino. Now I can beat you on the bus.|Casino de poche. Maintenant je peux te battre dans le bus.|Cassino de bolso. Agora posso te vencer no ônibus.|Taschencasino. Jetzt kann ich dich im Bus schlagen.|Casinò tascabile. Ora posso batterti anche in autobus.|Casino de bolsillo. Ahora puedo ganarte en el camión.|口袋赌场。现在我在公交车上也能赢你了。|주머니 카지노. 이제 버스에서도 이길 수 있겠네요.|ポケットカジノ。これでバスの中でも君に勝てる。|Карманное казино. Теперь я могу обыграть тебя в автобусе.|Kasyno kieszonkowe. Teraz pokonam cię nawet w autobusie.",
+      "Siete pulgadas de mesa. Cada píxel mío, bien aprovechado.|Seven inches of table. Every pixel of mine, put to good use.|Sept pouces de table. Chacun de mes pixels, bien employé.|Sete polegadas de mesa. Cada pixel meu, bem aproveitado.|Sieben Zoll Tisch. Jedes meiner Pixel gut genutzt.|Sette pollici di tavolo. Ogni mio pixel, ben sfruttato.|Siete pulgadas de mesa. Cada píxel mío, bien aprovechado.|七英寸的桌面。我的每个像素都物尽其用。|7인치 테이블. 제 픽셀 하나하나 알차게 쓰이네요.|7インチのテーブル。私のピクセルを一つ残らず活かしてる。|Семь дюймов стола. Каждый мой пиксель при деле.|Siedem cali stołu. Każdy mój piksel dobrze wykorzystany.",
+    ],
     monitor: [
       "¿Me cambias de pantalla? Aquí la luz es distinta.|Moving me to another screen? The light's different here.|Tu me changes d'écran ? Ici, la lumière est différente.|Me mudou de tela? Aqui a luz é diferente.|Du verschiebst mich auf einen anderen Bildschirm? Hier ist das Licht anders.|Mi sposti su un altro schermo? Qui la luce è diversa.|¿Me cambias de pantalla? Aquí la luz es distinta.|把我挪到另一块屏幕？这儿的光线不一样。|날 다른 화면으로 옮겨? 여긴 빛이 다르네.|別の画面に移すのか？ここは光が違うな。|Переносишь меня на другой экран? Здесь свет другой.|Przenosisz mnie na inny ekran? Tu jest inne światło."
     ],
@@ -1576,7 +1587,7 @@ window.AIQ = window.AIQ || {};
     "achGen#0": ["bored", "jot"], "achGen#1": ["bored"], achAll: ["shock", "hat_pop"], "achAll#1": ["bow", "hat_off_bow"],
     podOne: ["bored", "slow_clap"], podGold: ["suspicious", "shuffle"], podPodium: ["sly", "finger_wag"], podRank: ["laugh"],
     podNone: ["sly", "deal_card"], osLang: ["sly", "hat_tip"], gearHover: ["suspicious", "finger_wag"], "gearHover#1": ["dare"], classicBack: ["sly"],
-    monitor: ["puzzled", "preen"],
+    monitor: ["puzzled", "preen"], padOn: ["sly", "preen"], deckOn: ["puzzled", "preen"],
   };
   const D = A.dealer = { on: false, onHome: false, host: null, timers: [], busy: false };
   let el, face, spr, bubble, txt, sofar, rest, typing = false, doneAt = 0, pend = null, dozing = false;   // typing: esta escribiendo una frase; doneAt: cuando acabo la ultima; pend: la que espera su turno
@@ -1749,6 +1760,10 @@ window.AIQ = window.AIQ || {};
   };
   const shuffled = n => { const a = Array.from({ length: n }, (_, i) => i); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   /* saca una frase de `key` sin repetir ninguna hasta que se agoten todas (la bolsa se guarda en localStorage: tampoco se repite si cierras y abres el juego) */
+  /* con mando (v0.2.30) no pegan las frases que hablan de tu raton o de tus clics: se saltan, salvo las que tienen version de mando y las del propio aparato */
+  const MOUSEY = /\b(clic\w*|clica\w*|clicad\w*|rat[oó]n|mouse)\b/i;
+  const mousey = (key, ln) => { if (key === "padOn" || key === "deckOn") return false; const g = document.documentElement.dataset.glyph; if (!g || g === "kb") return false;
+    const es = ln && (ln.es || (typeof ln === "string" ? ln.split("|")[0] : "")); return !!es && MOUSEY.test(es) && !(A.PADV && A.PADV[es]); };
   function pickLine(key) {
     const arr = LINES[key]; if (!arr || !arr.length) return null;
     let bag = DS.bags[key], idx = -1;
@@ -1758,7 +1773,7 @@ window.AIQ = window.AIQ || {};
         bag = { order: shuffled(arr.length), pos: 0 }; if (arr.length > 1 && bag.order[0] === last) bag.order.push(bag.order.shift());   // al empezar bolsa nueva, tampoco repite la ultima que dijo
         DS.bags[key] = bag;
       }
-      const k = bag.order[bag.pos++], ok = ONLY.get(arr[k]); if (!ok || ok()) idx = k;
+      const k = bag.order[bag.pos++], ok = ONLY.get(arr[k]); if ((!ok || ok()) && !mousey(key, arr[k])) idx = k;
     }
     saveStore();
     return idx < 0 ? null : arr[idx];
@@ -2625,6 +2640,8 @@ window.AIQ = window.AIQ || {};
   /* VUELVES DEL CLASICO (game.js lo avisa al empezar un nivel del Clasico) y ME CAMBIAS DE MONITOR (Electron avisa: onDisplay) */
   let classicPend = false;
   D.noteClassic = () => { classicPend = true; };
+  /* COGES UN MANDO o juegas en la Steam Deck (js/mando.js lo avisa): una vez por sesion */
+  D.noteDevice = k => { const key = k === "deck" ? "deckOn" : "padOn"; if (once[key]) return; once[key] = 1; newsSay(say1(key), k === "deck" ? "shock" : "laugh"); };
   if (window.geoliteHost && window.geoliteHost.onDisplay) window.geoliteHost.onDisplay(() => { fsAt = Date.now(); if (once.monitor) return; once.monitor = 1; newsSay(say1("monitor"), "shock"); });
 
   /* ---------------------------------------------------------------- la cuarta pared en vivo: vuelves de otra ventana, cambias el tamaño */
