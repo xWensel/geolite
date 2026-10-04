@@ -114,7 +114,8 @@ window.AIQ = window.AIQ || {};
       const polysRaw = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
       const path = new Path2D();
       const polys = polysRaw.map(rawRings => {
-        const rings = rawRings.map(unwrap);
+        let rings = rawRings.map(unwrap);
+        if (rings.length > 1 && rings[0].every(q => q[1] <= -89.99)) { const c = rings[1]; rings = [c.concat([[c[c.length - 1][0], -90], [c[0][0], -90]])].concat(rings.slice(2)); }   // la Antartida (world-atlas, geometria esferica): el anillo 0 es solo el polo y la costa venia como hueco; se cierra por el polo (relleno en el mapa y clic "dentro")
         let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
         for (const [lo, la] of rings[0]) {
           if (lo < x0) x0 = lo; if (lo > x1) x1 = lo;

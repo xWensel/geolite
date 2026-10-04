@@ -778,5 +778,55 @@
   "Arctic Ocean",
   84,
   0
+ ],
+ "esperanza-base": [
+  "Esperanza Base",
+  -63.3975,
+  -56.9967
+ ],
+ "port-lockroy": [
+  "Port Lockroy",
+  -64.8253,
+  -63.4942
+ ],
+ "paradise-harbour": [
+  "Paradise Harbour",
+  -64.85,
+  -62.8833
+ ],
+ "lemaire-channel": [
+  "Lemaire Channel",
+  -65.1,
+  -63.97
+ ],
+ "king-george-island": [
+  "King George Island (South Shetland Islands)",
+  -62.0333,
+  -58.35
+ ],
+ "svalbard-global-seed-vault": [
+  "Svalbard Global Seed Vault",
+  78.2357,
+  15.4911
+ ],
+ "ilulissat-icefjord": [
+  "Ilulissat Icefjord",
+  69.1333,
+  -49.6
+ ],
+ "norilsk": [
+  "Norilsk",
+  69.3333,
+  88.2167
+ ],
+ "franklin-s-lost-expedition": [
+  "Franklin's lost expedition",
+  69,
+  -97.5
+ ],
+ "endurance": [
+  "Endurance (1912 ship)",
+  -68.7394,
+  -52.3297
  ]
 }

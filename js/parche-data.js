@@ -36,6 +36,39 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.37",
+      name: ["Los polos", "The poles"],
+      date: "2026-10-04",
+      summary: ["La Antártida y el Ártico entran en el juego: 18 lugares nuevos, pistas, fichas de la Enciclopedia con sus fotos y tres personajes y sucesos polares. Y la Antártida, por fin, se ve rellena en el mapa.",
+        "Antarctica and the Arctic join the game: 18 new places, clues, Encyclopedia entries with their photos and three polar figures and events. And Antarctica finally shows up filled in on the map."],
+      chapters: [
+        { id: "polos", kicker: ["Aventura y Reto diario", "Adventure and Daily challenge"], title: ["Hasta el fin del mundo", "To the ends of the Earth"],
+          entries: [
+            E(["Antártida", "Antarctica"], "new", "0.2.37", [
+              ["**Base Esperanza**, **Port Lockroy**, **Dumont d'Urville**, **Mawson**, **Isla Decepción**, **Isla Elefante**, **Bahía Paraíso**, el **Canal Lemaire**, la **Isla Rey Jorge** y el pecio del **Endurance**. Debajo del nombre, «Antártida».", "**Esperanza Base**, **Port Lockroy**, **Dumont d'Urville**, **Mawson**, **Deception Island**, **Elephant Island**, **Paradise Harbour**, the **Lemaire Channel**, **King George Island** and the wreck of the **Endurance**. Under the name, «Antarctica»."],
+              ["Están en el borde sur del mapa: acércate con el zoom para clicar con precisión.", "They sit on the southern edge of the map: zoom in to click precisely."]
+            ]),
+            E(["Ártico", "Arctic"], "new", "0.2.37", [
+              ["El **Banco Mundial de Semillas de Svalbard**, el **fiordo de Ilulissat**, el **Cabo Norte**, la **Tierra de Francisco José**, **Utqiagvik**, **Kiruna**, **Norilsk** y la **expedición perdida de Franklin**.", "The **Svalbard Global Seed Vault**, the **Ilulissat Icefjord**, the **North Cape**, **Franz Josef Land**, **Utqiagvik**, **Kiruna**, **Norilsk** and **Franklin's lost expedition**."]
+            ]),
+            E(["Pistas polares", "Polar clues"], "new", "0.2.37", [
+              ["Diez pistas nuevas para la ronda de **Apodos y pistas**, de las difíciles: una oficina de correos entre pingüinos, una ciudad que se muda entera, el búnker de las semillas…", "Ten new clues for the **Nicknames and clues** round, hard ones: a post office among penguins, a town that moves itself, the seed bunker…"]
+            ]) ] },
+        { id: "atlas", kicker: ["Enciclopedia y mapa", "Encyclopedia and map"], title: ["El sexto rincón del atlas", "A new corner of the atlas"],
+          entries: [
+            E(["Enciclopedia", "Encyclopedia"], "new", "0.2.37", [
+              ["Cada lugar con su ficha, su foto y sus medallas. La Antártida tiene su grupo en la familia **Polos y océanos polares**.", "Every place has its entry, photo and medals. Antarctica has its own group in the **Poles & polar oceans** family."],
+              ["Cartas nuevas: **Ernest Shackleton**, **Fridtjof Nansen** y el **Tratado Antártico**. Los pingüinos, la aurora boreal, el sol de medianoche, el oso polar, los fiordos y Amundsen se desbloquean también desde los polos.", "New cards: **Ernest Shackleton**, **Fridtjof Nansen** and the **Antarctic Treaty**. Penguins, the northern lights, the midnight sun, the polar bear, fjords and Amundsen can now also be unlocked from the poles."]
+            ]),
+            E(["La Antártida en el mapa", "Antarctica on the map"], "fix", "0.2.37", [
+              ["La Antártida se dibuja rellena y un clic sobre ella cuenta como «dentro» (antes el ticket decía que tu chincheta había caído en el mar).", "Antarctica is drawn filled in, and a click on it counts as «inside» (before, the ticket said your pin had landed in the sea)."]
+            ]),
+            E(["Vibración", "Vibration"], "fix", "0.2.37", [
+              ["Con el mando conectado, los jackpots (la legendaria del cofre, las medallas de la Enciclopedia) ya no se cortan a medias.", "With a controller connected, jackpots (the chest legendary, Encyclopedia medals) no longer stop halfway."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.36",
       name: ["El atlas, también con mando", "The atlas, by controller too"],
       date: "2026-10-04",

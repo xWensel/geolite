@@ -431,5 +431,58 @@
   "en": "Saint John's",
   "es": "Saint John's",
   "pt": "Saint John's"
+ },
+ "port-lockroy": {
+  "zh": "洛克罗伊港",
+  "ko": "포트록로이",
+  "ja": "ポート・ロックロイ",
+  "ru": "Порт-Локрой"
+ },
+ "dumont-d-urville-station": {
+  "pt": "Base Dumont d'Urville",
+  "ja": "デュモン・デュルヴィル基地"
+ },
+ "mawson-station": {
+  "pt": "Estação Mawson",
+  "ja": "モーソン基地",
+  "pl": "Stacja Mawson"
+ },
+ "deception-island": {
+  "pl": "Wyspa Deception"
+ },
+ "elephant-island": {
+  "zh": "象岛",
+  "ru": "Остров Элефант",
+  "pl": "Wyspa Elephant"
+ },
+ "paradise-harbour": {
+  "ko": "파라다이스만",
+  "ja": "パラダイス湾",
+  "ru": "Бухта Парадайз",
+  "pl": "Zatoka Paradise"
+ },
+ "lemaire-channel": {
+  "pt": "Canal Lemaire",
+  "it": "Canale Lemaire",
+  "ko": "르메르 해협",
+  "ja": "ルメール海峡",
+  "ru": "Пролив Лемера",
+  "pl": "Kanał Lemaire'a"
+ },
+ "king-george-island": {
+  "ru": "Остров Кинг-Джордж"
+ },
+ "ilulissat-icefjord": {
+  "it": "Fiordo ghiacciato di Ilulissat",
+  "ko": "일룰리사트 빙하 피오르",
+  "ja": "イルリサット・アイスフィヨルド",
+  "pl": "Lodowy Fiord Ilulissat"
+ },
+ "franz-josef-land": {
+  "ko": "프란츠요제프 제도",
+  "ja": "フランツ・ヨーゼフ諸島"
+ },
+ "endurance": {
+  "ja": "エンデュアランス号"
  }
 }

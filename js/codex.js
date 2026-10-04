@@ -310,7 +310,7 @@ window.AIQ = window.AIQ || {};
     RG("mediterraneo", "sea", "Mediterráneo y mar Negro|Mediterranean & Black Sea|Méditerranée et mer Noire|Mediterrâneo e mar Negro|Mittelmeer und Schwarzes Meer|Mediterraneo e Mar Nero||地中海与黑海|지중해와 흑해|地中海と黒海|Средиземное и Чёрное моря|Morze Śródziemne i Czarne", [], { seas: ["mediterranean-sea", "adriatic-sea", "aegean-sea", "black-sea"] }),
     RG("indico", "sea", "Océano Índico|Indian Ocean|Océan Indien|Oceano Índico|Indischer Ozean|Oceano Indiano||印度洋|인도양|インド洋|Индийский океан|Ocean Indyjski", [], { seas: ["indian-ocean", "red-sea", "persian-gulf", "arabian-sea", "bay-of-bengal"] }),
     RG("pacifico", "sea", "Océano Pacífico|Pacific Ocean|Océan Pacifique|Oceano Pacífico|Pazifischer Ozean|Oceano Pacifico||太平洋|태평양|太平洋|Тихий океан|Ocean Spokojny", [], { seas: ["pacific-ocean", "south-china-sea", "sea-of-japan", "coral-sea", "tasman-sea"] }),
-    RG("polares", "sea", "Océanos polares|Polar oceans|Océans polaires|Oceanos polares|Polarmeere|Oceani polari||极地海洋|극지 바다|極地の海|Полярные океаны|Oceany polarne", [], { seas: ["arctic-ocean", "southern-ocean", "drake-passage"] }),
+    RG("polares", "sea", "Polos y océanos polares|Poles & polar oceans|Pôles et océans polaires|Polos e oceanos polares|Pole und Polarmeere|Poli e oceani polari||两极与极地海洋|극지방과 극지 바다|極地と極地の海|Полюса и полярные океаны|Bieguny i oceany polarne", ["Antarctica"], { seas: ["arctic-ocean", "southern-ocean", "drake-passage"] }),
   ];
   const regName = r => P(r.names);
   const REG_OF = {}; REGIONS.forEach(r => r.countries.forEach(ne => (REG_OF[ne] = r)));   // pais del mapa (Natural Earth) -> su familia (la Aventura la usa en la nota de las banderas)
@@ -822,7 +822,7 @@ window.AIQ = window.AIQ || {};
           ${tr ? `<div class="cx-dmeds">${[0, 1, 2].map(i => `<span data-tt="${esc(P(S[MED[i]]) + " · " + P(S.within).replace("{km}", kmTxt(L[i])) + "\n" + (m > i ? P(S.got) : P(S.miss)))}">${medal(i, m > i)}<em>&lt; ${esc(kmTxt(L[i]))}</em></span>`).join("")}</div>` : ""}
         </div>
         <div class="cx-dinfo">
-          <div class="cx-d-top"><p class="cx-tags"><span>${esc(typeLabel(e.type))}</span>${g ? `<span>${g.ne && gKnown(g) ? `<img class="cx-tflag" alt="" src="${esc(flagSrc(g.ne))}">` : A.icon("k_" + g.reg.cont, "sm")}${esc(where)}</span><span>${esc(regName(g.reg))}</span>` : ""}</p>${nav}</div>
+          <div class="cx-d-top"><p class="cx-tags"><span>${esc(typeLabel(e.type))}</span>${g ? `<span>${g.ne && gKnown(g) && hasFlag(g.ne) ? `<img class="cx-tflag" alt="" src="${esc(flagSrc(g.ne))}">` : A.icon("k_" + g.reg.cont, "sm")}${esc(where)}</span><span>${esc(regName(g.reg))}</span>` : ""}</p>${nav}</div>
           <h2>${un ? esc(nameOf(e, rec)) : "???"}</h2>
           ${un && rec && rec.desc ? `<p class="cx-desc">${esc(cap(rec.desc))}</p>` : ""}
           ${un && A.tx(e.fact) ? `<blockquote class="cx-fact">${esc(A.tx(e.fact))}</blockquote>` : ""}
@@ -1113,7 +1113,7 @@ window.AIQ = window.AIQ || {};
         const lon = (c.bx[0] + c.bx[2]) / 2, lat = (c.bx[1] + c.bx[3]) / 2, pt = map.lonLatToScreen(lon, lat), cx = r.left + pt[0], cy = r.top + pt[1];
         if (cx < st.left + 60 || cx > st.right - 60 || cy < st.top + 40 || cy > st.bottom - 40) continue;
         const tip = $("cxTip"); map.setHighlight(c.x.ne); A.sfx.card();
-        tip._ne = null; tip.innerHTML = `<img alt="" src="${esc(flagSrc(c.x.ne))}"><b>${esc(cName(c.x.ne))}</b>`; tip.classList.remove("hidden");
+        tip._ne = null; tip.innerHTML = `${hasFlag(c.x.ne) ? `<img alt="" src="${esc(flagSrc(c.x.ne))}">` : ""}<b>${esc(cName(c.x.ne))}</b>`; tip.classList.remove("hidden");
         const z = st.width / Math.max(1, $("cxStage").clientWidth), w = tip.offsetWidth;
         tip.style.left = Math.max(6, (cx - st.left) / z - w / 2) + "px"; tip.style.top = Math.max(4, (cy - st.top) / z - 44) + "px";
         setTimeout(() => { if (!isOpen()) return; map.setHighlight(mapCtx.hi); if (tip._ne == null) tip.classList.add("hidden"); }, 3400);

@@ -200,6 +200,7 @@ window.AIQ = window.AIQ || {};
     } catch (e) { /* mando sin vibracion */ }
   };
   if (haptic0) A.haptic.on = haptic0.on;
+  if (haptic0 && haptic0.jackpot) A.haptic.jackpot = haptic0.jackpot;   // la escalera de jackpots (js/audio.js) sigue existiendo: sin ella, cada jackpot (legendaria, medalla) lanzaba un error y cortaba lo de detras
   Object.defineProperty(A.haptic, "on", { get: () => haptic0 ? haptic0.on : true, set: v => { if (haptic0) haptic0.on = v; } });
 
   /* ---------- lectura del mando ---------- */
