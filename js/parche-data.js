@@ -36,6 +36,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.46",
+      name: ["Steam Deck y Proton", "Steam Deck and Proton"],
+      date: "2026-10-05",
+      summary: ["El juego se prepara para abrir en Linux y bajo Proton.",
+        "The game is set up to open on Linux and under Proton."],
+      chapters: [
+        { id: "deck", kicker: ["Steam Deck", "Steam Deck"], title: ["Abrir en Linux y Proton", "Opening on Linux and Proton"],
+          entries: [
+            E(["Arranque", "Launch"], "fix", "0.2.46", [
+              ["En Linux y bajo Proton el juego **se cerraba sin abrir ventana**; se ha ajustado el arranque para que abra. En Windows no cambia nada.", "On Linux and under Proton the game **closed without opening a window**; the launch has been adjusted so it opens. Nothing changes on Windows."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.45",
       name: ["Ofertas en cada Campamento", "An offer at every camp"],
       date: "2026-10-05",

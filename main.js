@@ -243,6 +243,11 @@ ipcMain.on("win:setMode", (e, mode) => { if (alive(win) && e.sender === win.webC
  * js/art.js), asi que aqui solo se deja disable-gpu-sandbox (framerate
  * normal, confirmado). */
 app.commandLine.appendSwitch("disable-gpu-sandbox");
+/* Linux (build nativo para la Steam Deck) y Proton/Wine: el sandbox de Chromium no arranca (en Linux pide chrome-sandbox con SUID de root,
+ * que un tar.gz no conserva; bajo Wine no funciona) y el juego se cerraba sin abrir ventana. Proton pasa sus variables de entorno al proceso
+ * de Windows y monta la raiz de Linux en Z:, asi que cualquiera de las senales basta */
+const underWine = process.platform === "win32" && (!!(process.env.STEAM_COMPAT_DATA_PATH || process.env.WINEPREFIX || process.env.SteamDeck === "1") || fs.existsSync("Z:\\etc\\os-release"));
+if (process.platform === "linux" || underWine) app.commandLine.appendSwitch("no-sandbox");
 /* el sonido no espera a un clic: jugando solo con mando (Steam Deck) las pulsaciones del mando no cuentan como gesto del usuario para el navegador */
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 /* Si la GPU se reinicia varias veces (volver de otra aplicacion, suspender, cambiar de monitor), Chromium bloquea WebGL para el origen hasta
