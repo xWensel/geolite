@@ -36,6 +36,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.45",
+      name: ["Ofertas en cada Campamento", "An offer at every camp"],
+      date: "2026-10-05",
+      summary: ["La Oferta de la casa sale en casi todos los Campamentos, no solo en dos por partida.",
+        "The House offer shows up at almost every camp, not just two per run."],
+      chapters: [
+        { id: "oferta", kicker: ["La Barra", "The Bar"], title: ["La Oferta de la casa", "The House offer"],
+          entries: [
+            E(["Oferta de la casa", "House offer"], "change", "0.2.45", [
+              ["La **Oferta de la casa** ya no sale solo en un Campamento sorteado del acto II y otro del III: sale en **todos los Campamentos que no preceden a un jefe** (9 de los 12), desde el primero. Antes de cada jefe siguen su Doble o nada y La apuesta final.", "The **House offer** no longer shows up only at one drawn camp in act II and one in act III: it is there at **every camp that does not come right before a boss** (9 of 12), from the very first. Before each boss you still get Double or nothing and The final bet."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.44",
       name: ["La mano a mano", "Hand to hand"],
       date: "2026-10-05",

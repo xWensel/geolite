@@ -1518,7 +1518,6 @@ window.AIQ = window.AIQ || {};
     noMore: L6("NO VA MÁS|NO MORE BETS|RIEN NE VA PLUS|NADA MAIS VAI|NICHTS GEHT MEHR|NULLA VA PIÙ||停止下注|베팅 마감|ベット終了|СТАВКИ СДЕЛАНЫ|KONIEC ZAKŁADÓW"),
     house: L6("Gana la casa|The house wins|La maison gagne|A casa ganha|Das Haus gewinnt|Vince il banco||庄家赢|하우스 승리|ハウスの勝ち|Заведение выигрывает|Kasyno wygrywa"),
     tip: L6("1 entre 37: si sale, te saltas el acto entero (en el último, vas directo al jefe final). Si sale y no lo elegiste, gana la casa.|1 in 37: if it hits, you skip the whole act (in the last one, straight to the final boss). If it hits and you didn't pick it, the house wins.|1 sur 37 : s'il sort, tu sautes l'acte entier (au dernier, direct au boss final). S'il sort sans que tu l'aies choisi, la maison gagne.|1 em 37: se sair, você pula o ato inteiro (no último, vai direto ao chefe final). Se sair e você não escolheu, a casa ganha.|1 aus 37: Fällt es, überspringst du den ganzen Akt (im letzten geht's direkt zum Endboss). Fällt es und du hast es nicht gewählt, gewinnt das Haus.|1 su 37: se esce, salti l'intero atto (nell'ultimo, dritto al boss finale). Se esce e non l'hai scelto, vince il banco.||37 选 1：开出就跳过整幕（最后一幕则直达最终首领）。开出但你没选，庄家赢。|37분의 1: 나오면 막 전체를 건너뜁니다 (마지막 막에서는 곧장 최종 보스). 나왔는데 고르지 않았다면 하우스가 이깁니다.|37分の1：出れば幕を丸ごと飛ばす（最後の幕では最終ボスへ直行）。出たのに選んでいなければ、ハウスの勝ち。|1 из 37: выпадет — пропускаешь весь акт (в последнем — сразу к финальному боссу). Выпадет, а ты не выбрал — выигрывает заведение.|1 do 37: jeśli wypadnie, przeskakujesz cały akt (w ostatnim — prosto do ostatecznego bossa). Jeśli wypadnie, a go nie wybrałeś, wygrywa kasyno.") };
-  const offerRound = act => act * 4 + A.rng(`${run.seed}:oferta:${act}`).pick([0, 1, 2]);   // tanda 13: la Oferta de la casa, en un Campamento sorteado del acto II y otro del III
   /* v0.2.8: la Barra es una fila de TRES casillas de juego. En el centro, SIEMPRE Rojo o negro. A los lados, dos sorteados por ronda entre los demas:
      los suministros (Seguro, Cafe doble) y las apuestas que tocan en esa ronda (Oferta de la casa en su Campamento sorteado; Doble o nada / La apuesta
      final antes de cada jefe: salian siempre y no se pierden). Lo que ya tienes puesto (apuesta o suministro activo) no se esconde. Un juego nuevo de
@@ -1527,7 +1526,7 @@ window.AIQ = window.AIQ || {};
   const CASINO = ["red", "coin", "wheel"];                              // los juegos del centro; cada ronda sortea uno (la semilla) y se queda con el
   const casinoKind = r => { const R = casOf(r); return R && CASINO.includes(R.id) ? R.id : A.rng(`${run.seed}:casino:${r}`).pick(CASINO); };
   const SIDE_GAMES = ["offer", "double", "final"];
-  const sideRound = r => (r > LAST ? null : r % 4 === 3 ? (r === LAST ? "final" : "double") : Math.floor(r / 4) >= 1 && r === offerRound(Math.floor(r / 4)) ? "offer" : null);   // la apuesta lateral que toca en la ronda r
+  const sideRound = r => (r > LAST ? null : r % 4 === 3 ? (r === LAST ? "final" : "double") : "offer");   // la apuesta lateral que toca en la ronda r: antes de cada jefe la suya; en los demas Campamentos (desde el primero), la Oferta de la casa
   function sideOk(k, r) {
     const b = (run.bets || {})[r]; if (b && b.id === k) return true;                      // la que ya pusiste se queda
     if (run.attempt > 0) return false;
