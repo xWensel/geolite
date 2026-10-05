@@ -36,6 +36,23 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.43",
+      name: ["Jefes sin ruleta", "Bosses without the wheel"],
+      date: "2026-10-05",
+      summary: ["Se acabó la ruleta del jefe final y el sorteo de banderas del jefe del acto II: los jefes vuelven a ser combinaciones fijas que suben de tono.",
+        "The final boss no longer spins a wheel and the act II flag boss no longer draws its flags: bosses are fixed combinations that ramp up again."],
+      chapters: [
+        { id: "jefes", kicker: ["Jefes", "Bosses"], title: ["Sin ruletas", "No wheels"],
+          entries: [
+            E(["Rueda de la fortuna y El coleccionista", "Wheel of fortune and The collector"], "out", "0.2.43", [
+              ["La **Rueda de la fortuna** (acto III) y **El coleccionista** (jefe de banderas) **ya no salen**: dejan de sortearse el reto de cada pregunta. Los jefes son combinaciones fijas que suben de dificultad y de retos pregunta a pregunta. El acto III tiene ahora 7 combinaciones, no 8.", "The **Wheel of fortune** (act III) and **The collector** (flag boss) **are gone**: no more drawing the challenge for each question. Bosses are fixed combinations that get harder, and gain challenges, question by question. Act III now has 7 combinations, not 8."]
+            ]),
+            E(["Rondas de banderas", "Flag rounds"], "change", "0.2.43", [
+              ["Toda ronda de banderas lleva su **reto de bandera**. El jefe del acto II con una combinación normal (Falsa alarma, Terremoto en la sala o Rompe la cuarta pared) trae siempre como tercer reto uno de bandera.", "Every flag round carries its **flag challenge**. The act II boss, when it is a regular combination (False alarm, Quake in the hall or Breaking the fourth wall), always brings a flag challenge as its third one."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.42",
       name: ["Cara de crupier", "Dealer's head"],
       date: "2026-10-04",
