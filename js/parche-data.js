@@ -36,6 +36,23 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.44",
+      name: ["La mano a mano", "Hand to hand"],
+      date: "2026-10-05",
+      summary: ["Las cartas de herramienta caben y se pulsan aunque un reto te mueva el ratón.",
+        "Tool cards fit, and you can press them even when a challenge moves your mouse."],
+      chapters: [
+        { id: "mano", kicker: ["Herramientas", "Tools"], title: ["La mano de abajo", "The hand below"],
+          entries: [
+            E(["Nombres en las cartas", "Names on the cards"], "fix", "0.2.44", [
+              ["Los nombres **ya caben** en la carta (el Interruptor se salía por un lado) y todas las cartas miden lo mismo.", "Names **now fit** on the card (the Master switch spilled over the side) and every card is the same size."]
+            ]),
+            E(["Retos que mueven el ratón", "Challenges that move your mouse"], "fix", "0.2.44", [
+              ["Si un reto te mueve el retículo, la carta sobre la que lo pones **se ilumina y el clic la usa**. Antes ese clic podía responder la pregunta.", "If a challenge moves your reticle, the card you put it on **lights up and the click uses it**. Before, that click could answer the question."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.43",
       name: ["Jefes sin ruleta", "Bosses without the wheel"],
       date: "2026-10-05",

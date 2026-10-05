@@ -285,7 +285,11 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 
 /* cartas sin indices (A K Q J, numeros ni palos) en ninguna parte: se libera el hueco de las esquinas */
 .ix { display: none !important; }
-.tool.pc-hand { padding-top: 10px; } .table .offer.pc { padding-top: clamp(16px, calc(2.6 * var(--vh)), 26px); }
+/* mano de herramientas (v0.2.44): cartas mas anchas, todas del mismo alto, y apenas se pisan (antes la carta de al lado tapaba el borde del nombre).
+   El nombre tiene un hueco de dos lineas centrado; si una palabra no cabe, js/adventure.js (fitToolNames) reduce la letra. .aim = el reticulo (no el raton) esta encima */
+.tool.pc-hand { width: 128px; margin: 0 -3px; padding: 10px 10px 8px; grid-template-columns: minmax(0, 1fr); }   /* minmax(0,..): una palabra larga no ensancha la columna, desborda y la letra se reduce */
+.tool.pc-hand .tl-n { display: grid; align-items: center; justify-self: stretch; width: 100%; height: 34px; line-height: 17px; text-align: center; text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: manual; }
+.table .offer.pc { padding-top: clamp(16px, calc(2.6 * var(--vh)), 26px); }
 
 /* titulos de cancion completos (antes se cortaban con "..." en Ajustes) */
 .np-t { flex-wrap: wrap; row-gap: 2px; min-height: 30px; align-content: center; }

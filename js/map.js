@@ -1254,6 +1254,7 @@ void main(){
       if (this.dist.spec && this.dist.spec.deal && this.dist.k < 0.999) return;   // Continentes barajados: mientras se reparten, el mapa esta casi vacio (el reloj devuelve ese tiempo)
       const rx = px, ry = py;
       const ef = A.pointer && A.pointer.effective && A.pointer.effective(); if (ef) { px = ef[0]; py = ef[1]; }     // el puntero puede tener retos (temblor, retraso, invertido...)
+      if (ef) { const card = A.pointer.uiAt && A.pointer.uiAt(); if (card) { card.click(); return; } }          // el reticulo esta encima de una carta de la mano: se pulsa la carta, no se pone chincheta debajo
       let [x, y] = this._toWorld(px, py); [x, y] = this._undisp(x, y); const [lon, lat] = this._real(x, y);
       if (lon < -180 || lon > 180 || lat > 90 || lat < -90) return;
       this.pickCt = this.lastCt;                                         // marco del clic: la chincheta y el anillo del Sonar se dibujan justo donde has tocado

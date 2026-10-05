@@ -11,6 +11,7 @@ window.AIQ = window.AIQ || {};
   let hx = 0, hy = 0, lagT = 0, wox = 0, woy = 0, wlx = null, wly = null, beatN = -1;   // tanda 8: retraso a saltos, oposicion del viento y latidos del Pulso
   /* Pulso (tanda 8): el temblor va al ritmo de un corazon, dos latidos cada 0,82 s; entre latido y latido la mano se calma */
   const BEAT = 820, beat = now => { const ph = now % BEAT; return Math.exp(-ph / 70) + (ph >= 190 ? 0.75 * Math.exp(-(ph - 190) / 70) : 0); };
+  let aimEl = null, cvL = 0, cvT = 0, vis = true;   // carta de la mano bajo el RETICULO (no bajo el raton), origen del lienzo en pantalla y si el reticulo se ve (Cursor fantasma)
   let map = null, root, cv, c, tag, windEl, mag, mctx, guideX, guideY, ghost, raf = 0, mask = null, lastLL = null, lastLand = null, lastTick = 0, lastHov = 0, lastName = "", pulse = 0;
 
   /* mascara de tierra (equirrectangular, 720x360) para saber si el puntero esta sobre mar o tierra sin coste */
@@ -109,6 +110,12 @@ window.AIQ = window.AIQ || {};
   function neonOn(now, b) { const u = now / 1000 / b.period, n = Math.floor(u), ph = u - n, duty = b.duty + 0.02 + (hash1(n) - 0.5) * 0.3; if (ph >= duty) return false; return ph > 0.08 || Math.floor(now / 25) % 2 === 0; }
   let ghostWas = true;
 
+  /* "Lo que ves es lo que pulsas": con un reto que separa el reticulo del raton (invertido, mareo, retraso, viento...), las cartas de la mano de abajo se
+     pulsan con el raton de verdad, y el jugador lleva el RETICULO a la carta. Si el reticulo esta encima de una carta, esa carta se ilumina y el clic la usa
+     (js/map.js _tap) en vez de poner la chincheta debajo, que respondia la pregunta. Con el reticulo invisible (Cursor fantasma) no cuenta */
+  const uiAt = () => { if (!P.on || !vis) return null; const el = document.elementFromPoint(cvL + P.x, cvT + P.y); return el && el.closest ? el.closest("#toolBar .tool") : null; };
+  P.uiAt = uiAt;
+  const markAim = el => { if (el === aimEl) return; if (aimEl) aimEl.classList.remove("aim"); if (el) el.classList.add("aim"); aimEl = el; };
   /* ---------------------------------------------------------------- bucle */
   function frame(now) {
     raf = requestAnimationFrame(frame); if (!P.on) return;
@@ -117,7 +124,8 @@ window.AIQ = window.AIQ || {};
     const fx = P.st.fx || {};
     // lat/lon bajo el puntero (a ~30 Hz) -> tierra/mar, coordenadas, pais
     if (now - lastHov > 33) {
-      lastHov = now; const ll = map.screenToLonLat(P.x, P.y); lastLL = ll; const l = landAt(ll[0], ll[1]);
+      lastHov = now; if (aimEl && !aimEl.isConnected) aimEl = null; markAim(P.m || P.st.windFn ? uiAt() : null);
+      const ll = map.screenToLonLat(P.x, P.y); lastLL = ll; const l = landAt(ll[0], ll[1]);
       if (fx.thermo && P.st.distFn) { const km = P.st.distFn(ll[0], ll[1]); if (km != null) { const col = hotColor(km); if (col !== hotCol && now - hotAt > 260) { hotCol = col; hotAt = now; } } } else hotCol = null;
       if (lastLand !== null && l !== lastLand && now - lastTick > 120) { lastTick = now; A.sfx.ptrEdge && A.sfx.ptrEdge(l); }
       lastLand = l;
@@ -145,7 +153,7 @@ window.AIQ = window.AIQ || {};
   function show(on) {
     if (on === P.on) return; P.on = on; root.classList.toggle("on", on); document.body.classList.toggle("ptr-on", on);
     const fx = P.st.fx || {}; mag.classList.toggle("on", on && !!fx.mag); guideX.classList.toggle("on", on && !!fx.guides); guideY.classList.toggle("on", on && !!fx.guides);
-    if (!on) { const app = $("app"); if (app) { /* deja la ultima posicion */ } if (map) map.setLens && map.setLens(null); }
+    if (!on) { markAim(null); const app = $("app"); if (app) { /* deja la ultima posicion */ } if (map) map.setLens && map.setLens(null); }
   }
   /* posicion EFECTIVA del puntero: la del raton mas los retos (temblor, retraso, invertido, mareo). El clic usa esta misma posicion. */
   function eff(now) {
@@ -194,7 +202,7 @@ window.AIQ = window.AIQ || {};
       if (m.lag && A.chfx && A.chfx.trail) { A.chfx.trail(x, y); if (A.chfx.tether && P.pre) A.chfx.tether(P.pre[0], P.pre[1], x, y); }   // Cursor con retraso: estela y goma hasta donde esta el raton
     }
     if (a === 0 && fx.beacon) a = 0.28;
-    cv.style.opacity = a; tag.style.opacity = a;
+    vis = a > 0.05; cv.style.opacity = a; tag.style.opacity = a;
     cv.style.transform = sc !== 1 ? `scale(${sc.toFixed(3)})` : "";
     cv.classList.toggle("neon", neon);
   }
@@ -225,7 +233,7 @@ window.AIQ = window.AIQ || {};
     window.addEventListener("pointermove", e => {
       if (e.pointerType === "touch") { if (map.pickEnabled && e.target === map.cv) { const r = map.cv.getBoundingClientRect(); P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; P.x = P.rx; P.y = P.ry; if (A.chal && A.chal.pointer) A.chal.pointer(P.x, P.y); } return show(false); }   // en tactil solo se mueven las capas (linterna, lupa)
       const ok = map.pickEnabled && e.target === map.cv; if (!ok) return show(false);
-      const r = map.cv.getBoundingClientRect(); P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; if (!P.on) { sx = P.rx; sy = P.ry; } show(true); const t = performance.now(); eff(t); apply(t);
+      const r = map.cv.getBoundingClientRect(); cvL = r.left; cvT = r.top; P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; if (!P.on) { sx = P.rx; sy = P.ry; } show(true); const t = performance.now(); eff(t); apply(t);
     }, { passive: true });
     window.addEventListener("pointerdown", e => { if (P.on && e.target === map.cv && e.button === 0) P.press = 100; }, true);   // solo el boton principal (el mapa ignora el derecho)
     document.addEventListener("pointerleave", () => show(false));

@@ -191,14 +191,14 @@ html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] 
 .tool.pc-hand { position: relative; display: grid; grid-template-columns: 1fr; justify-items: center; align-content: start; row-gap: 3px; width: 104px; min-width: 0; padding: 30px 8px 8px; margin: 0 -8px; text-align: center; color: #16241c;
   background: #f6efdc; border-radius: 12px; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 4px #6c8cff, inset 0 0 0 5.5px #16241c, 0 8px 0 rgba(0, 0, 0, .4);
   transform: rotate(var(--r, 0deg)); transform-origin: 50% 130%; transition: transform .25s var(--spring); }
-.tool.pc-hand:hover:not(.off) { transform: rotate(0deg) translateY(-22px) scale(1.06); z-index: 3; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 4px #f8b449, inset 0 0 0 5.5px #16241c, 0 14px 0 rgba(0, 0, 0, .4); }
+.tool.pc-hand:hover:not(.off), .tool.pc-hand.aim:not(.off) { transform: rotate(0deg) translateY(-22px) scale(1.06); z-index: 3; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 4px #f8b449, inset 0 0 0 5.5px #16241c, 0 14px 0 rgba(0, 0, 0, .4); }
 .tool.pc-hand.on { background: #ffe08a; transform: rotate(0deg) translateY(-26px) scale(1.08); z-index: 4; }
 .tool.pc-hand .tl-ico { grid-column: 1; grid-row: auto; width: 100%; height: 58px; display: grid; place-items: center; border: 2.5px solid #16241c; border-radius: 8px; background-color: #17553a; }
 .tool.pc-hand .tl-ico .ic { width: 42px; height: 42px; } .tool.pc-hand b { font-size: 15.5px; color: #16241c; letter-spacing: .06em; }
 .tool.pc-hand .ix.tl { left: 8px; top: 7px; } .tool.pc-hand .ix b { font-size: 18px; } .tool.pc-hand .tl-pips i { background: rgba(22, 36, 28, .22); } .tool.pc-hand .tl-pips i.on { background: #c2372e; }
 .tool.pc-hand kbd { top: -10px; right: -4px; } .tool.pc-hand.off { filter: grayscale(.9) brightness(.85); }
 /* al pasar el raton la carta sube 22 px: su franja de abajo sigue siendo suya (antes un clic ahi caia en el mapa y respondia la pregunta) */
-.tool.pc-hand:hover::after, .tool.pc-hand.on::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 30px; }
+.tool.pc-hand:hover::after, .tool.pc-hand.aim::after, .tool.pc-hand.on::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 30px; }
 /* lo que han dicho las sondas de la pregunta, encima de las cartas (en la nota, esta crecia y las cartas subian bajo el raton) */
 .tool-bar .tl-res { position: absolute; left: 50%; bottom: calc(100% + 34px); transform: translateX(-50%); white-space: nowrap; padding: 5px 11px 6px; font-family: var(--mono); font-size: 13px; font-style: normal; font-weight: 500; letter-spacing: .04em; color: #16241c; background: #f6efdc; border-radius: 6px; box-shadow: 0 0 0 2px #16241c, 0 6px 0 rgba(0, 0, 0, .35); pointer-events: none; }
 /* pista de la herramienta activa (Sonar, Brujula) encima de su carta: en la nota de abajo, esta crecia y la carta saltaba bajo el raton */
