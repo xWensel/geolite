@@ -36,6 +36,25 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.49",
+      name: ["El duelo de dados", "The dice duel"],
+      date: "2026-10-06",
+      summary: ["Otro juego para el centro de la Barra: tú contra el crupier, dos dados cada uno, y gana el total más alto.",
+        "Another game for the middle of the Bar: you against the dealer, two dice each, and the higher total wins."],
+      chapters: [
+        { id: "dados", kicker: ["La Barra", "The Bar"], title: ["Un casino más", "One more casino game"],
+          intro: ["Ya son cinco los juegos que el crupier puede poner en el centro de la Barra. Este es el de los dados: el resultado está decidido antes de que ruede ninguno, y tú solo eliges **cuándo soltar el cubilete**.",
+            "The dealer can now put five different games in the middle of the Bar. This is the dice one: the result is decided before a single die rolls, and you only choose **when to let go of the cup**."],
+          entries: [
+            E(["Duelo de dados", "Dice duel"], "new", "0.2.49", [
+              ["Cada uno tira **dos dados** y gana el total más alto: cobras **el doble** de lo apostado. Si empatáis se repite la tirada **una vez**; si vuelve a empatar, gana la banca. Ganas el 49,4 % de las veces.", "Each of you rolls **two dice** and the higher total wins: you collect **double** your stake. On a tie the roll is repeated **once**; if it ties again, the house wins. You win 49.4 % of the time."],
+              ["La banca tira primero. Luego **mantén** pulsado (clic, Espacio o el botón A) para agitar el cubilete y **suelta** para lanzar. El momento y la fuerza son solo espectáculo.", "The house rolls first. Then **hold** (click, Space or the A button) to shake the cup and **release** to throw. Timing and force are just for show."],
+              ["Hay **10 maneras de tirar** (a botes, deslizada, rebote en la baranda, chocando, de canto, desde arriba, cubilete volcado, peonza, rodando): cada tirada sortea la suya y la banca y tú nunca tiráis igual.", "There are **10 ways to roll** (bouncing, sliding, off the rail, colliding, on edge, from above, slammed cup, spinning top, rolling): each roll draws its own and the house and you never roll the same way."],
+              ["Cuanto mayor la diferencia a tu favor, más fuerte la recompensa: sonido, temblor y monedas crecientes. Y el crupier tiene frases para ojos de serpiente, doble seis, un siete, el empate…", "The bigger your margin, the bigger the reward: growing sound, shake and coins. And the dealer has lines for snake eyes, double six, a seven, a tie…"]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.48",
       name: ["Los tres cubiletes", "The three cups"],
       date: "2026-10-06",

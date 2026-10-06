@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es" data-skin="casino">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Duelo de dados · maqueta</title>
+<link rel="stylesheet" href="../../../css/style.css">
+<link rel="stylesheet" href="../../../css/skins.css">
+<link rel="stylesheet" href="../../../css/uikit.css">
+<link rel="stylesheet" href="../../../css/campamento.css">
+<link rel="stylesheet" href="maqueta.css">
+</head>
+<body class="mq">
+<main class="mq-page">
+
+  <header class="mq-head">
+    <h1>Duelo de dados <small>maqueta jugable · v1</small></h1>
+    <p>Un juego del centro de la Barra. Tú contra Don Crupier: cada uno saca <b>dos dados</b> y gana el total más alto (<b>×2</b>). <b>Empate</b>: se repite la tirada una vez; si vuelve a empatar, gana la banca (<b>RTP 98,73 %</b>). Tú solo decides el <b>momento</b> y la fuerza <i>cosmética</i> de la tirada: el resultado sale de la semilla antes de que ruede un solo dado. Todo el arte es nuevo: dados y cubilete trazados en 3D y cuantizados a la rejilla nativa (rampas de 3-4 tonos, tramado de 1 px, contorno índigo).</p>
+  </header>
+
+  <section class="mq-sec">
+    <h2>1 · La carta en la Barra <small>junto a las tres que ya existen (CSS real del juego) · pulsa el precio para cambiar la ficha</small></h2>
+    <div class="table mesa mq-bar"><div class="tb-sup" id="ddCards"></div></div>
+  </section>
+
+  <section class="mq-sec">
+    <h2>2 · La mesa <small>pulsa JUGAR · el crupier tira primero · MANTÉN pulsado (clic, Espacio o Enter) para agitar y SUELTA para lanzar · un toque rápido también vale</small></h2>
+    <div class="dd-wrap" id="ddWrap">
+      <div class="dd-stage" id="ddStage">
+        <div class="dd-bg"></div>
+        <img class="dd-dealer" id="ddDealer" src="../../../assets/icons/dealer_neutral.webp" alt="" draggable="false">
+        <div class="dd-bubble" id="ddBubble"><span id="ddBubbleTx"></span></div>
+        <div class="dd-left"><div class="dd-pill" id="ddPill"></div><div class="dd-hint" id="ddHint"></div></div>
+        <div class="dd-top"><b class="dd-no" id="ddNo"></b><div class="dd-res" id="ddRes"><span class="dd-plate" id="ddPlate"></span><span class="dd-msg" id="ddMsg"></span></div></div>
+        <div class="dd-band" id="ddBand">
+          <div class="dd-rail dd-rail-h"></div><div class="dd-rail dd-rail-l"></div><div class="dd-rail dd-rail-r"></div>
+          <img class="dd-ring" id="ddRingD" src="out/ring.png" alt="" draggable="false"><img class="dd-ring" id="ddRingP" src="out/ring.png" alt="" draggable="false">
+          <b class="dd-lab" id="ddLabD"></b><b class="dd-lab" id="ddLabP"></b>
+          <div class="dd-vs"><span>VS</span></div>
+          <i class="rou-lights top"></i><i class="rou-lights bot"></i>
+        </div>
+        <div class="dd-world" id="ddWorld"></div>
+        <div class="dd-tot" id="ddTotD"></div><div class="dd-tot" id="ddTotP"></div>
+        <div class="dd-turn" id="ddTurn"><span id="ddTurnTx"></span></div>
+        <div class="dd-glovelayer" id="ddGloves"></div>
+        <div class="dd-hit" id="ddHit"></div>
+        <div class="dd-hud" id="ddHud"></div>
+        <div class="dd-wash" id="ddWash"></div>
+      </div>
+    </div>
+    <div class="mq-bar2">
+      <div class="seg" id="ddSegStake"><span>FICHA</span><button data-v="2">2</button><button data-v="5" class="on">5</button><button data-v="10">10</button></div>
+      <div class="seg" id="ddSegLang"><button data-v="es" class="on">ES</button><button data-v="en">EN</button></div>
+      <label class="chk"><input type="checkbox" id="ddChkReduce"> Reducir movimiento</label>
+      <label class="chk"><input type="checkbox" id="ddChkSound" checked> Sonido</label>
+      <button class="big" id="ddBtnPlay">▶ JUGAR</button>
+      <button id="ddBtnFull">Pantalla completa</button>
+    </div>
+    <div class="mq-bar2 mq-test">
+      <label class="chk">Presentación (tú) <select id="ddSelPres"></select></label>
+      <label class="chk">Forzar resultado <select id="ddSelForce"></select></label>
+      <span class="dd-count" id="ddCount">presentación — de —</span>
+      <span class="dd-count" id="ddLast"></span>
+    </div>
+  </section>
+
+  <section class="mq-sec mq-notes">
+    <h2>3 · Tabla de pagos y RTP <small>calculado por <code>rtp.cjs</code> enumerando las 36×36 combinaciones</small></h2>
+    <div class="mq-cols">
+      <div>
+        <h3>Reglas y pagos</h3>
+        <table class="mq-t" id="ddPay"></table>
+        <p>Si pierdes, pierdes solo la ficha (como en la Moneda). Ficha de 2, 5 o 10 con el mismo premio ×2: la ficha solo cambia el ritmo del crupier y la longitud de las pausas de tensión, nunca las probabilidades.</p>
+        <h3>Distribución de un total (2d6)</h3>
+        <div class="dd-dist" id="ddDist"></div>
+      </div>
+      <div>
+        <h3>Probabilidades exactas</h3>
+        <table class="mq-t" id="ddProb"></table>
+        <h3>Recompensas por niveles (según el margen)</h3>
+        <table class="mq-t" id="ddLvl"></table>
+        <h3>Otras reglas que se consideraron</h3>
+        <table class="mq-t" id="ddAlt"></table>
+      </div>
+    </div>
+  </section>
+
+  <section class="mq-sec mq-notes">
+    <h2>4 · El carrete de tiradas y las reacciones del crupier <small>cada tirada sortea su presentación (sin repetir las 2 últimas, más peso a las menos vistas), independiente del resultado y de la apuesta</small></h2>
+    <div class="mq-cols">
+      <div><h3>Presentaciones (<span id="ddNPres"></span>) <small id="ddSeen"></small></h3><ol class="dd-pres" id="ddPresList"></ol></div>
+      <div><h3>Reacciones por situación (ES / EN según el idioma)</h3><div id="ddReact"></div></div>
+    </div>
+  </section>
+
+  <section class="mq-sec mq-notes">
+    <h2>5 · Cómo funciona <small>lo que propongo implementar</small></h2>
+    <div class="mq-cols">
+      <div><h3>El flujo</h3><ol>
+        <li><b>Apuesta</b>: ficha de 2, 5 o 10 (clic en el precio, como en la Moneda). Se decide la semilla: las 4 caras (y la tirada de desempate, si la hay).</li>
+        <li><b>La banca tira</b>: Don Crupier agita y lanza con su presentación del carrete.</li>
+        <li><b>Tu turno</b>: mantén para agitar (el cubilete suena más cuanto más agitas), suelta para lanzar. Fuerza y momento = solo estética.</li>
+        <li><b>Redoble</b> mientras ruedan tus dados, parón dramático y los dos totales se comparan.</li>
+        <li><b>Premio</b> por niveles 1-2-3 según el margen: sonido, temblor y monedas crecientes.</li></ol></div>
+      <div><h3>Reglas de oro</h3><ul>
+        <li>Resultado y presentación son independientes: ninguna presentación "avisa" de nada.</li>
+        <li>Las caras salen de una semilla (mulberry32 + hash); la animación solo las ENSEÑA. Si se recarga a mitad, el crupier se guarda la ficha.</li>
+        <li>"Reducir movimiento": una sola presentación corta, sin temblor ni vuelo.</li>
+        <li>Mando: A / Espacio mantienen y sueltan; la cruceta cambia la ficha.</li></ul></div>
+    </div>
+  </section>
+</main>
+<script src="texts.js"></script>
+<script src="maqueta.js"></script>
+</body>
+</html>

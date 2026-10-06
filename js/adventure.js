@@ -1570,6 +1570,7 @@ window.AIQ = window.AIQ || {};
       if (b && b.att === att) return `<div class="sup bet cas bt-coin done ${b.win ? "win" : "lose"}" data-bet="coin">${head}<em class="bt-res"><b>${A.tx(CT[b.out])}</b>${A.tx(edge ? CT.edgeMsg : b.win ? BT.won : BT.lost)}${b.pay ? " · +" + b.pay : ""}</em></div>`;
       return `<div class="sup bet cas bt-coin" data-bet="coin">${head}<span class="bt-pick"><button class="bt-c bt-ch" type="button" data-side="heads">${A.tx(CT.heads)}</button><button class="bt-c bt-ct" type="button" data-side="tails">${A.tx(CT.tails)}</button><em class="sp-p bt-stake" role="button" tabindex="0">${CN()}${coinCost(coinStake)}</em></span></div>`;
     }
+    if (CASINO_EXT[k]) return CASINO_EXT[k].card(Object.assign(Object.create(CX), { b, head, att: run.attempt || 0 }));   // v0.2.49: los juegos que viven en js/casino-*.js
     if (k === "cups") {
       const att = run.attempt || 0; cupsPreload();
       if (b && b.att === att) {
@@ -1619,6 +1620,7 @@ window.AIQ = window.AIQ || {};
       }));
       return;
     }
+    if (CASINO_EXT[k]) return CASINO_EXT[k].wire(el, Object.assign(Object.create(CX), { r }));
     if (k === "cups") {
       const pill = el.querySelector(".bt-stake");
       if (pill) pill.onclick = e => { e.stopPropagation(); cupsStake = (cupsStake + 1) % COIN_STAKES.length; pill.innerHTML = CN() + coinCost(cupsStake); A.sfx.tick(1); };   // el precio se cambia con un clic en la ficha (y con el, lo rapido que mezcla)
@@ -2232,7 +2234,18 @@ window.AIQ = window.AIQ || {};
       } finally { removeEventListener("keydown", onKey, true); }
     })();
   }
-  A.adv._cups = { moves: cupsMoves, cfg: CUPS_CFG, card: () => betHtml("cups"), rec: () => casOf(roundNo()) };                                         // solo para pruebas (dev/)
+  A.adv._cups = { moves: cupsMoves, cfg: CUPS_CFG, card: () => betHtml("cups"), rec: () => casOf(roundNo()) };
+  /* ---------------- v0.2.49: los juegos de casino que viven en su propio archivo (js/casino-*.js, despues de este) ----------------
+     Un archivo registra su juego con A.adv.casino.add({ id, bet: { n, d, s, ico }, card(cx), wire(el, cx) }): entra en CASINO (el sorteo del centro de la Barra), su carta se pinta con
+     card() y se cablea con wire(). cx es CX (abajo) mas { b, head, att } en card() y { r } en wire(); b es el registro de la ronda (run.reds[r]). Cada juego guarda su registro ANTES de animar. */
+  const CASINO_EXT = {};
+  const CX = {
+    get run() { return run; }, get open() { return rouOpen; }, round: roundNo, persist, rouShell, reelPick, coinCost, STAKES: COIN_STAKES, CN, BT, BT2, ic, L6, casOf,
+    shake: el => shake(el),                                                                                 // (shake se define mas abajo)
+    refresh: () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); },        // repinta el Campamento cuando se cierra la pantalla del juego
+    coins: () => { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins; },   // el saldo que se ve detras de la capa
+  };
+  A.adv.casino = { add(def) { CASINO_EXT[def.id] = def; BETS[def.id] = def.bet; if (!CASINO.includes(def.id)) CASINO.push(def.id); }, ids: () => CASINO.slice() };                                         // solo para pruebas (dev/)
   const SUPS = [
     { id: "cafe", cost: 4, ico: "sup_cafe", n: A.L("Café doble", "Double espresso"), d: A.L("+4 s por pregunta en la próxima ronda", "+4 s per question next round") },
     { id: "seguro", cost: 8, ico: "sup_seguro", n: A.L("Seguro de ronda", "Round insurance"), d: A.L("Si fallas la próxima ronda, no pierdes provisión", "If you fail next round, you keep your provision") },
