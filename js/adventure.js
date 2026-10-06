@@ -1650,7 +1650,7 @@ window.AIQ = window.AIQ || {};
   }
   /* ---------------- la ruleta lineal de Rojo o negro (v0.73) ----------------
      Una banda a pantalla completa con las 37 casillas de la rueda europea, en su orden real (el 0 verde, 18 rojos, 18 negros). Un puntero dorado
-     fijo en el centro; la tira arranca a toda velocidad, frena cada vez mas, roza la casilla contigua y se asienta en la ganadora (~3 s).
+     fijo en el centro; la tira arranca a toda velocidad y se asienta en la ganadora (1,5-5 s) con un final sorteado del carrete (ROU_REEL, v0.2.47).
      Todo el resultado ya esta decidido y guardado: esto solo lo ensena. Pixel art: casillas de ancho entero, posiciones redondeadas al pixel,
      nada de medir la maquetacion por fotograma (la tira se mueve solo con transform). */
   const WHEEL = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];   // el orden de la rueda
@@ -1666,20 +1666,72 @@ window.AIQ = window.AIQ || {};
     run.attempt = 0; run.stock = null;
     return last ? "final" : "act";
   }
+  /* ---------------- el carrete de finales (v0.2.47) ----------------
+     La tira acababa siempre igual (frenaba, rozaba la casilla contigua, que por la alternancia de la rueda es SIEMPRE de otro color, y volvia): previsible.
+     Ahora cada giro sortea un FINAL del carrete y una DIRECCION. El resultado ya esta decidido y guardado: esto solo elige COMO se ensena.
+     Cada final es una lista de tramos { d: segundos, to: casillas que le faltan, e: curva, ev: aviso }; la ruleta los recorre con
+     r(t) = lo que le falta a la tira para el centro de la casilla ganadora (positivo: aun no llega; negativo: se ha pasado).
+     Nada del final depende de lo apostado ni de si se gana (delataria): los falsos finales paran en una casilla cualquiera, del mismo color o de otro. */
+  const rouE = { out: p => x => 1 - Math.pow(1 - x, p), io: x => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2), lin: x => x,
+    ramp: (v0, v1) => y => (2 * v0 * y - (v0 - v1) * y * y) / (v0 + v1) };                      // frena de v0 a v1 (casillas por segundo) sin saltos de velocidad
+  const rouU = (a, b) => a + Math.random() * (b - a), rouI = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const rouWarp = t => (t < 0.16 ? (t * t) / 0.32 : t - 0.08);                                  // arranque con 0,16 s de aceleracion (la velocidad es continua en el empalme)
+  const ROU_REEL = {
+    classic: { ext: 1, plan: (sc = 1) => {                  // el de siempre: frena, roza la casilla contigua y se arrastra de vuelta; ahora tambien puede quedarse corto
+      const off = rouU(0.55, 0.85), r1 = Math.random() < 0.55 ? -off : off;
+      return { r0: rouU(80, 115) * sc, segs: [{ d: rouU(2.05, 2.3), to: r1, e: rouE.out(3.6) }, { d: 0.55, to: 0, ev: "crawl" }] }; } },
+    brake: { ext: 0.3, hit: 14, plan: (sc = 1) => {         // a tope y frenazo en seco, con un golpecito al parar
+      const v0 = rouU(100, 135) * sc, v1 = rouU(46, 56) * sc, d1 = rouU(1.15, 1.45), d2 = rouU(0.5, 0.7), p = rouU(2.1, 2.6), rb = (v1 * d2) / p - 0.16;   // rb: lo que recorre frenando (la velocidad empalma)
+      return { r0: (d1 * (v0 + v1)) / 2 + rb, segs: [{ d: d1, to: rb, e: rouE.ramp(v0, v1) }, { d: d2, to: -0.16, e: rouE.out(p), ev: "brake" }, { d: 0.17, to: 0 }] }; } },
+    spring: { ext: 3.4, plan: (sc = 1) => {                 // pasa de largo y vuelve y va, cada vez mas corto, como un muelle
+      const a = rouU(0.9, 3.2), segs = [{ d: rouU(1.7, 2.0), to: -a, e: rouE.out(3.2) }];
+      for (let amp = a * rouU(0.5, 0.62), sg = 1, d = 0.46; amp > 0.17; amp *= rouU(0.42, 0.55), sg = -sg, d = Math.max(0.2, d * 0.8)) segs.push({ d, to: sg * amp });
+      segs.push({ d: 0.2, to: 0 }); return { r0: rouU(80, 115) * sc, segs }; } },
+    drip: { ext: 0, plan: (sc = 1) => {                     // para a unas casillas y se arrastra de una en una, con parones al azar: cada paso puede ser el ultimo
+      const n = rouI(2, 4), segs = [{ d: rouU(1.5, 1.8), to: n, e: rouE.out(3.6) }];
+      for (let i = n; i > 0; i--) segs.push({ d: rouU(0.12, 0.42), ev: i === n ? "crawl" : null }, { d: rouU(0.24, 0.32), to: i - 1 });
+      return { r0: rouU(80, 115) * sc, segs }; } },
+    fake: { ext: 7, plan: (sc = 1) => {                     // falso final: parece que ha parado (suena el tope) y no: arranca otra vez; a veces dos veces
+      const k = rouI(2, 6), fwd = Math.random() < 0.6, rf = fwd ? k : -k, segs = [{ d: rouU(1.8, 2.1), to: rf, e: rouE.out(3.6) }, { d: rouU(0.5, 0.85), ev: "stop" }];
+      if (Math.random() < 0.28) { const r2 = (fwd ? 1 : -1) * rouI(1, k - 1); segs.push({ d: rouU(0.4, 0.55), to: r2, ev: "kick" }, { d: rouU(0.32, 0.55), ev: "stop" }); }
+      segs.push({ d: rouU(0.45, 0.7), to: 0, ev: "kick" }); return { r0: rouU(80, 115) * sc, segs }; } },
+    drift: { ext: 0, plan: (sc = 1) => {                    // frena sin fin: las ultimas casillas tardan una eternidad (latido y bombillas lentas)
+      const r0 = rouU(85, 120) * sc, p = rouU(5.2, 6.2), D = rouU(3.2, 3.8), x1 = 1 - Math.pow(3 / r0, 1 / p);   // x1: cuando le faltan 3 casillas; a partir de ahi la tension
+      return { r0, segs: [{ d: x1 * D, to: 3, e: y => (1 - Math.pow(1 - x1 * y, p)) / (1 - Math.pow(1 - x1, p)) }, { d: (1 - x1) * D, to: 0, e: rouE.out(p), ev: "crawl" }] }; } },
+    flash: { hit: 14, plan: (sc = 1) => ({ r0: rouU(45, 70) * sc, segs: [{ d: rouU(1.3, 1.65), to: 0, e: rouE.out(rouU(2.4, 3)) }] }) },   // relampago: de golpe, sin tiempo de pensar
+  };
+  /* los tramos encadenados: at(tw) = lo que falta en el instante tw (ya con el arranque de rouWarp); un tramo sin "to" es una parada */
+  function rouPath(r0, segs) {
+    let t = 0, from = r0; const T = segs.map(s => { const to = s.to === undefined ? from : s.to, g = { t0: t, t1: (t += s.d), from, to, e: s.e || rouE.io, ev: s.ev }; from = to; return g; });
+    return { T, total: t, at: tw => { if (tw <= 0) return r0; for (const g of T) if (tw < g.t1) return g.from + (g.to - g.from) * g.e((tw - g.t0) / (g.t1 - g.t0)); return 0; } };
+  }
+  /* la tira entera: casillas de sobra para el recorrido y para media pantalla a cada lado, y la casilla ganadora colocada para que la salida y lo que se pase de largo queden dentro */
+  function rouBuild(id, pos, dir, cw) {
+    const K = ROU_REEL[id], { r0, segs } = K.plan(), M = Math.ceil(innerWidth / cw / 2) + 3 + Math.ceil(K.ext || 0);
+    const NB = Math.ceil((r0 + 2 * M + 37) / 37), NC = 37 * NB, ok = [];
+    for (let k = 0; k < NB; k++) { const F = pos + 37 * k + 0.5; if (dir > 0 ? F - r0 >= M && F <= NC - M : F >= M && F + r0 <= NC - M) ok.push(k); }
+    const k = ok.length ? ok[Math.floor(Math.random() * ok.length)] : NB >> 1, SF = pos + 37 * k;
+    return { id, K, dir, r0, path: rouPath(r0, segs), NC, SF, F: SF + 0.5 };
+  }
+  /* el sorteo del final, comun a Rojo o negro, la Ruleta de premios y la Moneda: azar vivo (nunca los dos ultimos y mas peso a los que menos han salido);
+     cada pantalla guarda su memoria en el perfil (rouSeen/rouLast, whSeen/whLast, cnSeen/cnLast), no se repite al reabrir el juego */
+  function reelPick(key, ids) {
+    const PA = A.profile.get().adv, sk = key + "Seen", lk = key + "Last", seen = (PA[sk] = PA[sk] && typeof PA[sk] === "object" ? PA[sk] : {}), last = Array.isArray(PA[lk]) ? PA[lk] : [];
+    const pool = ids.filter(id => !last.includes(id)), min = Math.min(...pool.map(id => seen[id] || 0)), w = pool.map(id => 1 / (1 + (seen[id] || 0) - min));
+    let x = Math.random() * w.reduce((a, b) => a + b, 0), i = 0; while (i < pool.length - 1 && x >= w[i]) x -= w[i++];
+    const id = pool[i]; seen[id] = (seen[id] || 0) + 1; PA[lk] = [id, ...last].slice(0, 2); A.profile.save(); return id;
+  }
+  const rouPick = () => reelPick("rou", Object.keys(ROU_REEL));
   function spinRoulette(o, done) {
     const { pick, n, skip } = o, out = colorOf(n), win = pick === out, zero = out === "green", S = C().S, app = $("app");
     const reduced = !!(S && S.reduce);
     if (!app) return done();
     rouOpen = true;
-    const REPS = 6, pos = WHEEL.indexOf(n), cw = Math.max(60, Math.min(116, Math.round(innerHeight * 0.125), Math.round(innerWidth / 7)));   // casilla entera en px: pixel art
-    const SF = 37 * 4 + pos, S0 = 37 + ((pos + 14) % 37), SEND = SF + 0.5;                       // casilla final y casilla de salida; el puntero para en el centro de la casilla
-    const cNext = colorOf(WHEEL[(pos + 1) % 37]), cPrev = colorOf(WHEEL[(pos + 36) % 37]);
-    const off = cNext !== out ? 0.7 : cPrev !== out ? -0.7 : 0, S1 = SEND + off;                  // el casi-fallo: se pasa a la casilla contigua de otro color (o se queda corto) y la ultima casilla se arrastra hasta la ganadora
-    const T_IN = 0.34, D1 = off ? 2.15 : 2.5, D2 = off ? 0.55 : 0, ease = x => 1 - Math.pow(1 - x, 3.6), easeIO = x => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
-    const warp = t => (t < 0.16 ? (t * t) / 0.32 : t - 0.08);                                     // arranque con 0,16 s de aceleracion (la velocidad es continua en el empalme)
-    const sAt = t => { if (t <= 0) return S0 + 0.5; const w = warp(t); return w < D1 ? S0 + 0.5 + (S1 - S0 - 0.5) * ease(w / D1) : D2 ? S1 + (SEND - S1) * easeIO(Math.min(1, (w - D1) / D2)) : S1; };
-    const END = D1 + D2 + 0.08;                                                                   // t en que la tira queda parada
-    const cells = []; for (let i = 0; i < REPS * 37; i++) { const v = WHEEL[i % 37]; cells.push(`<i class="rc rc-${colorOf(v)}"><b>${v}</b></i>`); }
+    const cw = Math.max(60, Math.min(116, Math.round(innerHeight * 0.125), Math.round(innerWidth / 7)));   // casilla entera en px: pixel art
+    const F0 = A.adv._rouForce || {}, plan = rouBuild(reduced ? "classic" : F0.kind || rouPick(), WHEEL.indexOf(n), F0.dir || (Math.random() < 0.5 ? 1 : -1), cw);   // el final y la direccion de este giro (_rouForce: solo pruebas)
+    const { path, dir, SF, F: SEND, NC, K } = plan, S0 = SEND - dir * plan.r0, T_IN = 0.34;      // casilla final y punto de salida; el puntero para en el centro de la casilla
+    const END = path.total + 0.08;                                                                // t en que la tira queda parada
+    const cells = []; for (let i = 0; i < NC; i++) { const v = WHEEL[i % 37]; cells.push(`<i class="rc rc-${colorOf(v)}"><b>${v}</b></i>`); }
     const pickName = A.tx(pick === "red" ? BT.red : pick === "black" ? BT.black : BT2.green), outName = A.tx(zero ? BT2.zero : out === "red" ? BT.red : BT.black);
     const msg = zero ? (win ? A.tx(o.last ? BT2.toFinal : BT2.skip) : A.tx(BT2.house) + (o.extra ? " · " + A.tx(BT2.extra) : "")) : A.tx(win ? BT.won : BT.lost) + (o.extra ? " · " + A.tx(BT2.extra) : "");
     const ov = document.createElement("div"); ov.id = "rouOv"; ov.className = `rou spin${win ? " win" : " lose"}${zero ? " zero" : ""}`; ov.style.setProperty("--cw", cw + "px");
@@ -1690,21 +1742,29 @@ window.AIQ = window.AIQ || {};
     app.appendChild(ov);
     const strip = ov.querySelector(".rou-strip"), ptr = ov.querySelector(".rou-ptr"), band = ov.querySelector(".rou-band"), kids = strip.children;
     const place = s => { strip.style.transform = `translate3d(${-Math.round(s * cw)}px,0,0)`; };
-    place(S0 + 0.5);
+    place(S0);
     const block = e => { e.preventDefault(); e.stopPropagation(); };                                // mientras gira, ni el teclado llega al Campamento de detras
     addEventListener("keydown", block, true);
-    let closed = false, revealed = false, t0 = 0, last = S0 + 0.5, lastT = 0, lastTick = 0, cur = -1, fast = false, crawl = false;
+    let closed = false, revealed = false, t0 = 0, last = S0, lastT = 0, lastTick = 0, cur = -1, fast = false, evI = 0;
     const cleanup = () => { removeEventListener("keydown", block, true); rouOpen = false; };
     const close = () => {
       if (closed) return; closed = true; removeEventListener("keydown", block, true); ov.classList.add("out");
       setTimeout(() => { ov.remove(); rouOpen = false; done(); }, reduced ? 0 : 280);
     };
     const bail = e => { try { console.error("ruleta", e); } catch (x) { /* nada */ } if (closed) return; closed = true; cleanup(); ov.remove(); done(); };   // pase lo que pase, el Campamento nunca se queda bloqueado
+    const hit = px => { if (!reduced) band.animate([{ transform: "translateY(0)" }, { transform: `translateY(${px}px)` }, { transform: `translateY(${-px * 0.375}px)` }, { transform: "translateY(0)" }], { duration: 300, easing: "ease-out" }); };   // el golpe del tope
+    const tense = on => { ov.classList.toggle("crawl", on); ov.classList.toggle("spin", !on); };   // tension: latido y bombillas lentas
+    const EV = {                                                                                    // los avisos de los tramos del final (ROU_REEL)
+      crawl: () => { tense(true); A.sfx.rouCrawl(); },
+      brake: () => A.sfx.rouBrake(),
+      stop: () => { ov.classList.add("hush"); A.sfx.rouStop(); hit(8); if (A.haptic) A.haptic([30]); },   // falso final: suena, golpea y apaga las bombillas igual que el de verdad
+      kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
+    };
     const reveal = () => {
-      if (revealed) return; revealed = true; place(SEND); ov.classList.remove("spin", "fast", "crawl"); ov.classList.add("done", "is-" + out);
+      if (revealed) return; revealed = true; place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
       if (cur >= 0 && kids[cur]) kids[cur].classList.remove("cur"); kids[SF].classList.add("hit");
       A.sfx.rouStop(); if (A.haptic) A.haptic([zero ? 60 : 30]);
-      if (!reduced) band.animate([{ transform: "translateY(0)" }, { transform: "translateY(8px)" }, { transform: "translateY(-3px)" }, { transform: "translateY(0)" }], { duration: 300, easing: "ease-out" });   // el golpe del tope
+      hit(K.hit || 8);
       ov.classList.add("flash");
       setTimeout(() => {
         A.dealer.enable(true);
@@ -1724,10 +1784,10 @@ window.AIQ = window.AIQ || {};
           if (!ov.isConnected) { cleanup(); return; }                                              // otra pantalla se llevo la capa por delante: que no se quede el teclado bloqueado
           if (revealed) return;
           if (!t0) t0 = now + T_IN * 1000;
-          const t = (now - t0) / 1000, s = sAt(t), dt = Math.max(1, now - lastT) / 1000, v = lastT ? Math.abs(s - last) / dt : 0;   // v: casillas por segundo
+          const t = (now - t0) / 1000, tw = rouWarp(t), s = t <= 0 ? S0 : SEND - dir * path.at(tw), dt = Math.max(1, now - lastT) / 1000, v = lastT ? Math.abs(s - last) / dt : 0;   // v: casillas por segundo
           place(s);
           if ((v > 30) !== fast) { fast = v > 30; ov.classList.toggle("fast", fast); }              // a toda velocidad los numeros se funden: solo color
-          if (off && !crawl && t > 0 && warp(t) >= D1) { crawl = true; ov.classList.add("crawl"); ov.classList.remove("spin"); A.sfx.rouCrawl(); }   // la ultima casilla: latido y bombillas lentas
+          while (t > 0 && evI < path.T.length && tw >= path.T[evI].t0) { const ev = path.T[evI++].ev; if (ev && EV[ev]) EV[ev](); }   // el aviso de cada tramo, una vez, al empezar
           const idx = Math.floor(s);
           if (idx !== cur) {
             if (cur >= 0 && kids[cur]) kids[cur].classList.remove("cur");
@@ -1745,6 +1805,7 @@ window.AIQ = window.AIQ || {};
       requestAnimationFrame(frame);
     } catch (e) { bail(e); }
   }
+  A.adv._rou = { kinds: Object.keys(ROU_REEL), build: rouBuild, pick: rouPick, spin: spinRoulette, warp: rouWarp, wheel: (o, done) => spinWheel(o, done), coin: (o, done) => spinCoin(o, done) };   // solo para pruebas (dev/): _rouForce = { kind, dir } fuerza el final y la direccion
   /* ---------------- v0.2.9: mas juegos de casino para el centro de la Barra: Moneda al aire y Ruleta de premios ----------------
      El centro lo sortea la semilla por ronda entre CASINO (Rojo o negro, Moneda al aire, Ruleta de premios); cada juego tiene su cenefa y su pantalla.
      Todo se decide y se guarda ANTES de animar (como la ruleta): recargar a medias no lo deshace. El registro de la ronda vive en run.reds[r]
@@ -1827,6 +1888,40 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ---------------- Moneda al aire: la moneda (la de los logros, en 24 fotogramas de giro) sube, gira y cae; si cae de canto, se queda de pie ---------------- */
+  /* ---------------- el carrete de finales de la Moneda (v0.2.47) ----------------
+     Como en las ruletas: el resultado (cara, cruz o canto) ya esta decidido y guardado; esto solo elige COMO cae la moneda. 7 finales propios de una moneda, un sentido de giro al azar
+     (la moneda gira hacia un lado o hacia el otro) y el mismo sorteo vivo (nunca los dos ultimos, mas peso a los menos vistos).
+     Nada depende de la apuesta ni del resultado: el que se tambalea (topple) aterriza con una cara al azar y se da la vuelta la mitad de las veces, ganes o pierdas. */
+  const CN_UP = "cubic-bezier(.2,.7,.35,1)", CN_DN = "cubic-bezier(.6,0,.85,.4)", CN_UPS = "cubic-bezier(.2,.6,.4,1)";
+  /* la linea de tiempo vertical (alturas en unidades de H, ms): sube, cae (golpe de fuerza k; k<0 = tintineo) o espera en el suelo; cada punto lleva la curva del tramo que EMPIEZA en el */
+  function cnLine(from) {
+    const L = { pts: [[0, -(from || 0), CN_DN]], hits: [], t: 0 }, last = () => L.pts[L.pts.length - 1];
+    L.up = (h, ms, e) => { last()[2] = e || CN_UPS; L.t += ms; L.pts.push([L.t, -h, CN_DN]); return L; };
+    L.down = (ms, k) => { last()[2] = CN_DN; L.t += ms; L.pts.push([L.t, 0, CN_UPS]); L.hits.push([L.t, k]); return L; };
+    L.hold = ms => { L.t += ms; L.pts.push([L.t, 0, CN_UPS]); return L; };
+    return L;
+  }
+  /* grados de giro (E: el angulo final de la cara; el sentido lo pone el sorteo): hasta el primer golpe, y el balanceo de una moneda que se asienta (puntos [ms, grados] suavizados) */
+  const cnFly = (turns, p, land, E) => t => (t >= land ? 360 * turns + E : (360 * turns + E) * (1 - Math.pow(1 - t / land, p)));
+  const cnRock = (base, pts, t0) => t => { const x = t - t0; for (let i = 1; i < pts.length; i++) if (x < pts[i][0]) { const [ta, oa] = pts[i - 1], [tb, ob] = pts[i], u = Math.max(0, (x - ta) / (tb - ta)); return base + oa + (ob - oa) * u * u * (3 - 2 * u); } return base + pts[pts.length - 1][1]; };
+  const COIN_REEL = {
+    toss: { plan: E => ({ L: cnLine().up(1, 836, CN_UP).down(608, 0).up(0.14, 209).down(247, 1), deg: cnFly(4, 2.3, 1444, E) }) },   // el de siempre
+    high: { plan: E => { const L = cnLine().up(rouU(1.7, 2.1), rouU(840, 940), CN_UP).down(rouU(660, 760), 0), land = L.t; L.up(0.3, 250).down(290, 1).up(0.08, 125).down(145, 1.2); return { L, deg: cnFly(rouI(6, 8), 2, land, E) }; } },   // al techo: vuelo largo y dos rebotes
+    slow: { plan: E => { const L = cnLine().up(0.8, rouU(1050, 1200), "cubic-bezier(.1,.8,.3,1)").down(rouU(640, 740), 0), land = L.t; L.up(0.1, 170).down(200, 1); return { L, deg: cnFly(2, rouU(1.15, 1.4), land, E) }; } },   // camara lenta: se queda colgando y gira despacio
+    drop: { plan: E => { const L = cnLine(2.1).down(rouU(480, 560), 0), land = L.t; L.up(0.55, 330).down(360, 1).up(0.2, 200).down(230, 1.2).up(0.06, 110).down(130, 1.4); return { L, deg: cnFly(rouI(2, 3), 1.6, land, E), sky: true }; } },   // cae del cielo y rebota tres veces
+    flash: { plan: E => { const L = cnLine().up(0.55, 380, CN_UP).down(330, 0), land = L.t; L.up(0.06, 90).down(110, 1); return { L, deg: cnFly(3, 2, land, E) }; } },   // tiro seco: ni un segundo
+    topple: { plan: (E, edge) => {                                       // aterriza, se tambalea y a veces se da la vuelta
+      const L = cnLine().up(rouU(0.85, 1), rouU(760, 840), CN_UP).down(rouU(560, 640), 0), land = L.t; L.up(0.12, 190).down(230, 1);
+      const flip = !edge && Math.random() < 0.5, F = flip ? E + 180 : E, turns = rouI(3, 4), fly = cnFly(turns, 2.2, land, F), t0 = L.t;
+      const rock = flip ? [[0, 0], [150, 28], [280, -6], [390, 52], [470, 14], [540, 96], [590, 150], [640, 180]] : [[0, 0], [130, -34], [260, 12], [360, -20], [440, 6], [500, -9], [545, 3], [575, 0]], rk = cnRock(360 * turns + F, rock, t0);
+      rock.slice(1, flip ? -1 : undefined).forEach(r => L.hits.push([t0 + r[0], -1])); if (flip) L.hits.push([t0 + 640, 0.9]);
+      return { L, deg: t => (t < t0 ? fly(t) : rk(t)), total: t0 + rock[rock.length - 1][0] }; } },
+    spin: { plan: E => {                                                  // peonza: aterriza girando en el sitio y el traqueteo final se acelera hasta que cae plana
+      const L = cnLine().up(rouU(0.65, 0.8), rouU(540, 620), CN_UP).down(rouU(440, 520), 0).up(0.12, 160).down(190, 1), T = rouU(2500, 3000), gaps = [276, 200, 145, 105, 76, 55, 40];
+      const wait = T - gaps.reduce((a, b) => a + b, 0) - L.t; if (wait > 0) L.hold(wait);
+      gaps.forEach(g => L.up(0.04 * Math.sqrt(g / 276), g / 2).down(g / 2, -1));
+      const TH = 360 * rouI(6, 8) + E; return { L, deg: t => TH * (1 - Math.pow(1 - Math.min(1, t / T), 3)), total: T }; } },
+  };
   function spinCoin(o, done) {
     const { pick, out, win, pay } = o, edge = out === "edge", cw = Math.max(60, Math.min(116, Math.round(innerHeight * 0.125), Math.round(innerWidth / 7))), k = Math.max(2, Math.min(3, Math.round(cw * 1.5 / 64))), fw = 64 * k, NF = 24;   // fotograma de 64 px logicos, ampliado en entero
     const msg = edge ? A.tx(CT.edgeMsg) + " +" + pay : win ? A.tx(BT.won) + " +" + pay : A.tx(BT.lost);
@@ -1837,9 +1932,11 @@ window.AIQ = window.AIQ || {};
       { "--cw": cw + "px", "--fw": fw + "px", "--k": k }, done);
     if (!sh) return;
     const ov = sh.ov, arc = ov.querySelector(".cn-arc"), spr = ov.querySelector(".cn-spr"), shadow = ov.querySelector(".cn-shadow");
-    const END = out === "tails" ? 180 : edge ? 75 : 0, TH = 360 * 4 + END, H = Math.round(fw * 0.62), DUR = 1900, DS = DUR * 0.76, T_IN = 340;
-    const frameAt = deg => Math.round(deg / (360 / NF)) % NF, put = i => { spr.style.backgroundPositionX = -i * fw + "px"; };
-    put(0);
+    const END = out === "tails" ? 180 : edge ? 75 : 0, H = Math.round(fw * 0.62), T_IN = 340;
+    const F0 = A.adv._cnForce || {}, kind = sh.reduced ? "toss" : F0.kind || reelPick("cn", Object.keys(COIN_REEL)), sg = F0.dir || (Math.random() < 0.5 ? 1 : -1);   // el final y el sentido de giro de este tiro (_cnForce: solo pruebas)
+    const P = COIN_REEL[kind].plan(END, edge), DUR = Math.max(P.L.t, P.total || 0);
+    const frameAt = deg => ((Math.round((sg * deg) / (360 / NF)) % NF) + NF) % NF, put = i => { spr.style.backgroundPositionX = -i * fw + "px"; };
+    put(0); if (P.sky && !sh.reduced) arc.style.visibility = shadow.style.visibility = "hidden";   // el que cae del cielo no se ve antes de soltarlo
     const reveal = () => {
       if (sh.revealed) return; sh.revealed = true; put(frameAt(END)); ov.classList.remove("spin"); ov.classList.add("done", "is-coin", edge ? "is-edge" : win ? "is-win" : "is-lose");
       if (A.haptic) A.haptic([edge ? 60 : 30]);
@@ -1856,20 +1953,19 @@ window.AIQ = window.AIQ || {};
       A.sfx.rouNoMore();
       setTimeout(() => {
         if (sh.closed || sh.revealed) return;
-        A.sfx.coinToss();
-        arc.animate([{ transform: "translateY(0)", offset: 0, easing: "cubic-bezier(.2,.7,.35,1)" }, { transform: `translateY(${-H}px)`, offset: 0.44, easing: "cubic-bezier(.6,0,.85,.4)" },
-          { transform: "translateY(0)", offset: 0.76, easing: "cubic-bezier(.2,.6,.4,1)" }, { transform: `translateY(${-Math.round(H * 0.14)}px)`, offset: 0.87, easing: "cubic-bezier(.6,0,.85,.4)" }, { transform: "translateY(0)", offset: 1 }], { duration: DUR, fill: "forwards" });
-        shadow.animate([{ transform: "scaleX(1)", opacity: 0.55, offset: 0 }, { transform: "scaleX(.55)", opacity: 0.22, offset: 0.44 }, { transform: "scaleX(1)", opacity: 0.55, offset: 0.76 }, { transform: "scaleX(.88)", opacity: 0.42, offset: 0.87 }, { transform: "scaleX(1)", opacity: 0.55, offset: 1 }], { duration: DUR, fill: "forwards" });
+        if (P.sky) { arc.style.visibility = shadow.style.visibility = ""; A.sfx.rouBrake(); } else A.sfx.coinToss();
+        const pts = P.L.pts.slice(); if (P.L.t < DUR) pts.push([DUR, 0, CN_UPS]);
+        arc.animate(pts.map(([t, y, e]) => ({ transform: `translateY(${Math.round(y * H)}px)`, offset: t / DUR, easing: e })), { duration: DUR, fill: "forwards" });
+        shadow.animate(pts.map(([t, y, e]) => { const a = Math.abs(y); return { transform: `scaleX(${Math.max(0.25, 1 - 0.45 * a).toFixed(2)})`, opacity: Math.max(0.1, 0.55 - 0.33 * a), offset: t / DUR, easing: e }; }), { duration: DUR, fill: "forwards" });
         const t0 = performance.now(); let cur = 0;
         const frame = now => {
           if (sh.closed || sh.revealed) return;
-          const x = Math.min(1, (now - t0) / DS), deg = TH * (1 - Math.pow(1 - x, 2.3)), i = frameAt(deg);
+          const t = now - t0, i = frameAt(P.deg(t));
           if (i !== cur) { cur = i; put(i); }
-          if (x < 1) requestAnimationFrame(frame);
+          if (t < DUR) requestAnimationFrame(frame);
         };
         requestAnimationFrame(frame);
-        setTimeout(() => { if (!sh.closed) { put(frameAt(END)); A.sfx.coinLand(0); } }, DS);
-        setTimeout(() => { if (!sh.closed) A.sfx.coinLand(1); }, DUR * 0.87);
+        P.L.hits.forEach(([t, kk]) => setTimeout(() => { if (!sh.closed && !sh.revealed) { if (kk < 0) A.sfx.coinTink(); else A.sfx.coinLand(kk); } }, t));   // cada golpe contra la mesa
         setTimeout(() => { if (!sh.closed) reveal(); }, DUR + 60);
       }, T_IN);
     } catch (e) { sh.bail(e); }
@@ -1892,12 +1988,22 @@ window.AIQ = window.AIQ || {};
     if (!sh) return;
     const ov = sh.ov, discEl = ov.querySelector(".wh-disc"), ptr = ov.querySelector(".wh-ptr");
     const jit = (A.rng(`${run.seed}:premios:j:${roundNo()}:${run.attempt || 0}`)() - 0.5) * 0.7 * STEP;           // donde se para dentro de la cuna: a veces rozando el borde
-    const TH = 360 * 5 - w * STEP + jit, D = 3.2, T_IN = 0.34, ease = x => 1 - Math.pow(1 - x, 3.5);
-    const warp = t => (t < 0.16 ? (t * t) / 0.32 : t - 0.08), angAt = t => (t <= 0 ? 0 : TH * ease(Math.min(1, warp(t) / D))), END = D + 0.08;
+    /* v0.2.47: el mismo carrete de finales que Rojo o negro (ROU_REEL), con el recorrido en cunas (0,36: ~2-4 vueltas), una direccion al azar y un angulo de salida al azar.
+       La cuna ganadora sigue decidida y guardada antes de girar; la rueda siempre acaba en TH (la cuna bajo el puntero) */
+    const F0 = A.adv._whForce || {}, kind = sh.reduced ? "classic" : F0.kind || reelPick("wh", Object.keys(ROU_REEL)), dir = F0.dir || (Math.random() < 0.5 ? 1 : -1);   // _whForce: solo pruebas
+    const pl = ROU_REEL[kind].plan(0.36), path = rouPath(pl.r0, pl.segs), T_IN = 0.34, END = path.total + 0.08;
+    const TH = 360 * 5 - w * STEP + jit, a0 = TH - dir * pl.r0 * STEP, angAt = t => (t <= 0 ? a0 : TH - dir * path.at(rouWarp(t)) * STEP);
     const put = a => { discEl.style.transform = `rotate(${a.toFixed(2)}deg)`; };
-    put(0);
+    put(a0);
+    const tense = on => { ov.classList.toggle("crawl", on); ov.classList.toggle("spin", !on); };   // tension: latido y bombillas lentas
+    const EV = {                                                                                    // los avisos de los tramos del final (ROU_REEL)
+      crawl: () => { tense(true); A.sfx.rouCrawl(); },
+      brake: () => A.sfx.rouBrake(),
+      stop: () => { ov.classList.add("hush"); A.sfx.rouStop(); if (A.haptic) A.haptic([30]); },   // falso final: suena y apaga las bombillas igual que el de verdad
+      kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
+    };
     const reveal = () => {
-      if (sh.revealed) return; sh.revealed = true; put(TH); ov.classList.remove("spin"); ov.classList.add("done", "is-" + info.tone);
+      if (sh.revealed) return; sh.revealed = true; put(TH); ov.classList.remove("spin", "crawl", "hush"); ov.classList.add("done", "is-" + info.tone);
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
@@ -1910,7 +2016,7 @@ window.AIQ = window.AIQ || {};
     try {
       if (sh.reduced) { setTimeout(() => { if (!sh.closed) reveal(); }, 2000); return; }   // sin movimiento, pero con su espera
       A.sfx.rouNoMore(); setTimeout(() => { if (!sh.closed && !sh.revealed) A.sfx.rouStart(); }, T_IN * 1000);
-      let t0 = 0, last = 0, lastT = 0, lastTick = 0, cur = 0;
+      let t0 = 0, last = a0, lastT = 0, lastTick = 0, cur = 0, evI = 0;
       const frame = now => {
         try {
           if (!ov.isConnected) { rouOpen = false; return; }
@@ -1918,6 +2024,7 @@ window.AIQ = window.AIQ || {};
           if (!t0) t0 = now + T_IN * 1000;
           const t = (now - t0) / 1000, a = angAt(t), dt = Math.max(1, now - lastT) / 1000, v = lastT ? Math.abs(a - last) / dt : 0;      // v: grados por segundo
           put(a);
+          while (t > 0 && evI < path.T.length && rouWarp(t) >= path.T[evI].t0) { const ev = path.T[evI++].ev; if (ev && EV[ev]) EV[ev](); }   // el aviso de cada tramo, una vez, al empezar
           const idx = Math.floor((a + STEP / 2) / STEP);
           if (idx !== cur) {
             cur = idx;

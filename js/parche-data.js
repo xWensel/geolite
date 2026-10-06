@@ -36,6 +36,30 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.47",
+      name: ["Cada tirada, un final distinto", "A different ending every spin"],
+      date: "2026-10-06",
+      summary: ["Rojo o negro, la Ruleta de premios y la Moneda ya no acaban siempre igual: cada tirada sortea su final y su sentido de giro.",
+        "Red or black, the Prize wheel and the Coin flip no longer end the same way every time: each spin draws its own ending and its direction."],
+      chapters: [
+        { id: "finales", kicker: ["La Barra", "The Bar"], title: ["Finales para las ruletas y la moneda", "Endings for the roulettes and the coin"],
+          intro: ["El resultado se decide antes de girar y no cambia: solo cambia **cómo se enseña**. Los finales salen al azar, sin repetir los dos últimos y con más peso a los que menos han salido, y nunca dependen de lo que apuestes ni de si ganas.",
+            "The result is decided before the spin and never changes: only **how it is shown** does. Endings are drawn at random, never repeating the last two and favouring the ones you have seen least, and they never depend on what you bet or whether you win."],
+          entries: [
+            E(["Rojo o negro", "Red or black"], "new", "0.2.47", [
+              ["La tira ya no acaba siempre rozando la casilla de al lado y volviendo atrás: cada giro sortea **uno de 7 finales** (el clásico, un frenazo en seco, un muelle que va y viene, de casilla en casilla, un falso final que arranca otra vez, una frenada sin fin y un relámpago de menos de 2 s) y **gira hacia un lado u otro**.", "The strip no longer always ends by brushing the next slot and coming back: each spin draws **one of 7 endings** (the classic, a hard brake, a spring that swings back and forth, slot by slot, a false ending that starts again, a never-ending slow-down and a flash under 2 s) and **spins either way**."],
+              ["Cada número sigue siendo 1 entre 37.", "Every number is still 1 in 37."]
+            ]),
+            E(["Ruleta de premios", "Prize wheel"], "new", "0.2.47", [
+              ["La rueda usa los mismos 7 finales, sale desde un ángulo al azar y gira hacia un lado u otro. Termina siempre con la cuna ganadora bajo el puntero.", "The wheel uses the same 7 endings, starts from a random angle and spins either way. It always ends with the winning wedge under the pointer."]
+            ]),
+            E(["Moneda al aire", "Coin flip"], "new", "0.2.47", [
+              ["La moneda tiene **sus propios 7 finales**: el tiro de siempre, al techo, en cámara lenta, cayendo del cielo, un tiro seco, un tambaleo que a veces se da la vuelta y una peonza que traquetea sobre la mesa. También gira hacia un lado u otro.", "The coin has **its own 7 endings**: the usual toss, a sky-high throw, slow motion, dropping from above, a quick flick, a wobble that sometimes flips over and a spinning top rattling on the table. It also spins either way."],
+              ["Cara, cruz y canto (1 de 64) siguen con las mismas probabilidades.", "Heads, tails and the edge (1 in 64) keep the same odds."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.46",
       name: ["Steam Deck y Proton", "Steam Deck and Proton"],
       date: "2026-10-05",

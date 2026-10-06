@@ -405,6 +405,7 @@ html.reduce-motion .rou, html.reduce-motion .rou * { animation: none !important;
 @keyframes rou-no { 0% { opacity: 0; transform: scale(1.5); } 18% { opacity: 1; transform: scale(1); } 72% { opacity: 1; } 100% { opacity: 0; transform: scale(.96); } }
 .rou.spin .rou-lights { animation-duration: .16s; }
 .rou.crawl .rou-lights { animation-duration: 1s; }
+.rou.hush .rou-lights { animation-play-state: paused; }                /* v0.2.47: el falso final: las bombillas se quedan quietas como si hubiera acabado */
 .rou.fast .rc b { opacity: .18; }
 .rc b { transition: opacity .25s; }
 .rou-band { transition: transform .55s ease-in-out; } .rou.crawl .rou-band { transform: scale(1.014); }
@@ -463,6 +464,7 @@ html.reduce-motion .rou-no { display: none; }
   box-shadow: 0 0 0 2px #0a140f, 0 0 10px 2px rgba(255, 224, 138, .8); transform: rotate(var(--a)) translateY(calc(var(--ws) * -.445)); animation: wh-blink .5s steps(1) infinite; }
 .wh-b.o { animation-delay: .25s; } @keyframes wh-blink { 0% { background: #fff4b0; } 50% { background: #8a6a2a; box-shadow: 0 0 0 2px #0a140f; } }
 .rou.spin .wh-b { animation-duration: .16s; } .rou.spin .wh-b.o { animation-delay: .08s; }
+.rou.crawl .wh-b { animation-duration: 1s; } .rou.crawl .wh-b.o { animation-delay: .5s; } .rou.hush .wh-b { animation-play-state: paused; }   /* v0.2.47: tension y falso final de la rueda */
 .rou.done .wh-b { animation: rou-flash .26s steps(1) 8; }
 .wh-disc { position: absolute; inset: 9%; border-radius: 50%; overflow: hidden; will-change: transform; box-shadow: 0 0 0 3px #0a140f; }
 .wh-s { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: rotate(var(--a)); }
