@@ -1,0 +1,110 @@
+/* Geolite - Lluvia de fichas (v0.2.50): la carta de la Barra y la mesa de 1920x1080 (se escala con K/4, K entero: cada pixel del arte = K pixeles de pantalla).
+   Maqueta aprobada en tools/art/plinko. Todo cuelga de .rou.plk (la capa que comparten las pantallas de casino: rouShell). */
+.table.mesa .sup.bet.bt-plk { background: radial-gradient(ellipse at 50% 40%, #12909e 0%, #07323d 82%); --sc: #35b8c6; }
+.table.mesa .sup.bet.bt-plk::before { background: url(../assets/plinko/cenefa.png) top left / 16px 10px repeat-x, url(../assets/plinko/cenefa.png) bottom left / 16px 10px repeat-x; image-rendering: pixelated; }
+.table.mesa .sup.bet.bt-plk .bt-pl { background: #e8a91e; color: #3a2606; text-shadow: none; }
+.table.mesa .sup.bet.bt-plk .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-plk .bt-stake:hover { filter: brightness(1.25); }
+.table.mesa .sup.bet.bt-plk .ic-bet_plinko { filter: none; }
+.table.mesa .sup.bet.bt-plk.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
+.rp-plk { background: #35b8c6; }
+
+.rou.plk { background: radial-gradient(ellipse at 50% 40%, rgba(3, 26, 34, .98), rgba(1, 8, 12, 1) 85%); }
+.rou.plk .rou-wash { --wc: rgba(255, 217, 90, .55); } .rou.plk.lv3 .rou-wash { --wc: rgba(255, 138, 232, .6); } .rou.plk.lose .rou-wash { --wc: rgba(0, 0, 0, .35); }
+.rou.plk .pk-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; user-select: none; --bg1: #0b4a56; --bg2: #031a22; --bg3: #010a0e; }
+.rou.plk .pk-stage img, .rou.plk .pk-stage i, .rou.plk .pk-stage u { image-rendering: pixelated; }
+.rou.plk .pk-stage img { display: block; }
+.rou.plk .pk-stage[data-decor=noche] { --bg1: #2a1c6e; --bg2: #0d0830; --bg3: #040214; }
+.rou.plk .pk-stage[data-decor=marmol] { --bg1: #6b4a22; --bg2: #2a1a0a; --bg3: #0c0704; }
+.rou.plk .pk-stage[data-decor=rubi] { --bg1: #7a1030; --bg2: #2a0614; --bg3: #0c0208; }
+.rou.plk .pk-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 46%, var(--bg1) 0%, var(--bg2) 58%, var(--bg3) 100%); transition: background .6s; }
+.rou.plk .pk-bg::after { content: ""; position: absolute; inset: 0; background: url(../assets/trile/felt.png) 0 0 / 128px 128px; opacity: .55; image-rendering: pixelated; }
+
+/* columna izquierda: pastilla, crupier (el sprite animado va fuera del escenario), globo, pista y ultimas caidas */
+.rou.plk .pk-left { position: absolute; left: 0; top: 0; width: 520px; height: 1080px; z-index: 6; pointer-events: none; }
+.rou.plk .pk-left .rou-pick { position: absolute; left: 60px; top: 40px; font-size: 15px; }
+.rou.plk .pk-dealer { position: absolute; z-index: 7; pointer-events: none; }
+.rou.plk .pk-bubble { position: absolute; left: 50px; top: 446px; width: 420px; z-index: 6; padding: 14px 20px 12px; background: #fff; color: #120a2a; border: 4px solid #0a0048; box-shadow: 0 6px 0 #0a0048;
+  font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; }
+.rou.plk .pk-bubble.on { opacity: 1; transform: none; }
+.rou.plk .pk-bubble::before { content: ""; position: absolute; left: 200px; top: -26px; border: 12px solid transparent; border-bottom: 14px solid #0a0048; }
+.rou.plk .pk-bubble::after { content: ""; position: absolute; left: 204px; top: -17px; border: 8px solid transparent; border-bottom: 10px solid #fff; }
+.rou.plk .pk-hint { position: absolute; left: 60px; top: 700px; font: 900 34px/1.05 var(--serif); letter-spacing: .04em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f; opacity: 0; transition: opacity .25s; max-width: 430px; }
+.rou.plk .pk-hint.on { opacity: 1; }
+.rou.plk .pk-hist { position: absolute; left: 60px; top: 830px; width: 430px; display: flex; flex-wrap: wrap; gap: 10px; }
+.rou.plk .pk-hist b { min-width: 76px; text-align: center; padding: 6px 8px 8px; border-radius: 8px; background: var(--cc); color: #fff; font: 900 28px/1 var(--serif); text-shadow: 0 2px 0 rgba(0, 0, 0, .42); box-shadow: 0 0 0 3px #0a140f, inset 0 4px 0 var(--ch), inset 0 -5px 0 var(--cs); }
+.rou.plk .pk-hist b.n { animation: pk-pop .45s var(--spring) both; } @keyframes pk-pop { from { transform: scale(1.6); opacity: 0; } }
+
+/* resultado y "no va mas" */
+.rou.plk .pk-top { position: absolute; left: 0; right: 0; top: 14px; z-index: 12; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.rou.plk .pk-no { position: absolute; top: 4px; font: 900 70px/1 var(--serif); letter-spacing: .06em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f, 0 0 26px rgba(255, 217, 90, .5); opacity: 0; white-space: nowrap; }
+.rou.plk .pk-no.on { animation: pk-no 1.3s both; } @keyframes pk-no { 0% { opacity: 0; transform: scale(1.5); } 18% { opacity: 1; transform: scale(1); } 72% { opacity: 1; } 100% { opacity: 0; transform: scale(.96); } }
+.rou.plk .pk-res { display: flex; flex-direction: row; align-items: center; gap: 26px; visibility: hidden; }
+.rou.plk .pk-res.on { visibility: visible; }
+.rou.plk .pk-plate { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; display: inline-flex; align-items: baseline; gap: 16px; padding: 4px 28px 8px 24px; border-radius: 12px; background: var(--cc); color: #fff; text-transform: uppercase; font: 900 56px/1 var(--serif); letter-spacing: .05em; text-shadow: 0 3px 0 rgba(0, 0, 0, .42);
+  box-shadow: 0 0 0 3px #0a140f, inset 0 5px 0 var(--ch), inset 0 -7px 0 var(--cs), 0 8px 0 3px #0a140f; }
+.rou.plk .pk-plate i { font: 400 28px var(--mono); font-style: normal; color: rgba(255, 255, 255, .88); }
+.rou.plk .pk-msg { font: 900 38px/1 var(--serif); letter-spacing: .03em; color: #ffe9a6; text-shadow: 0 3px 0 rgba(0, 0, 0, .6); }
+.rou.plk .pk-res.on .pk-plate { animation: rou-stamp .55s var(--spring) both; } .rou.plk .pk-res.on .pk-msg { animation: rou-up .45s .25s var(--spring) both; }
+.rou.plk .t0 { --cc: #5d6470; --ch: #8a93a2; --cs: #3a4049; } .rou.plk .t1 { --cc: #b8413a; --ch: #e8806a; --cs: #7a2420; } .rou.plk .t2 { --cc: #1f9a58; --ch: #6fe6a0; --cs: #0f5f33; } .rou.plk .t3 { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; } .rou.plk .t4 { --cc: #b23acb; --ch: #ff8ae8; --cs: #5e1f78; }
+
+/* el tablero: sprite de 214x220 a x4 (856x880); encima, bombillas, tolva, clavijas, casillas y efectos */
+.rou.plk .pk-board { position: absolute; left: 532px; top: 110px; width: 856px; height: 880px; z-index: 5; will-change: transform; }
+.rou.plk .pk-bshadow { position: absolute; left: 532px; top: 110px; width: 856px; height: 880px; z-index: 4; box-shadow: 0 26px 60px rgba(0, 0, 0, .6); pointer-events: none; }
+.rou.plk .pk-stage img.pk-back { position: absolute; left: 0; top: 0; width: 856px; height: 880px; display: none; }
+.rou.plk .pk-stage[data-decor=petroleo] img.pk-back.petroleo, .rou.plk .pk-stage[data-decor=noche] img.pk-back.noche, .rou.plk .pk-stage[data-decor=marmol] img.pk-back.marmol, .rou.plk .pk-stage[data-decor=rubi] img.pk-back.rubi { display: block; }
+.rou.plk .pk-layer { position: absolute; left: 0; top: 0; width: 856px; height: 880px; pointer-events: none; }   /* (en la maqueta estas capas se comian los clics de la tolva) */
+.rou.plk .pk-lights { --lc: #ffe08a; --ld: #4a3410; position: absolute; z-index: 4; pointer-events: none; background-size: 56px 12px; background-image: linear-gradient(90deg, var(--lc) 0 12px, transparent 12px 28px, var(--ld) 28px 40px, transparent 40px 56px); animation: rou-chase .5s steps(1) infinite; }
+.rou.plk .pk-lights.t { left: 40px; right: 40px; top: 10px; height: 12px; } .rou.plk .pk-lights.b { left: 40px; right: 40px; bottom: 10px; height: 12px; }
+.rou.plk .pk-lights.l, .rou.plk .pk-lights.r { width: 12px; top: 40px; bottom: 40px; background-size: 12px 56px; background-image: linear-gradient(180deg, var(--lc) 0 12px, transparent 12px 28px, var(--ld) 28px 40px, transparent 40px 56px); animation-name: pk-chasev; }
+.rou.plk .pk-lights.l { left: 10px; } .rou.plk .pk-lights.r { right: 10px; }
+@keyframes pk-chasev { 50% { background-position: 0 28px; } }
+.rou.plk .pk-stage[data-decor=noche] .pk-lights { --lc: #7fe8ff; --ld: #ff4fd8; } .rou.plk .pk-stage[data-decor=marmol] .pk-lights { --lc: #fff3b0; --ld: #7a5a1c; } .rou.plk .pk-stage[data-decor=rubi] .pk-lights { --lc: #ffc0cc; --ld: #7a1030; }
+.rou.plk .pk-board.fast .pk-lights { animation-duration: .16s; } .rou.plk .pk-board.crawl .pk-lights { animation-duration: 1s; }
+.rou.plk .pk-board.done .pk-lights { animation: rou-flash .26s steps(1) 8; }
+.rou.plk .pk-notch { position: absolute; top: 32px; width: 72px; height: 76px; cursor: pointer; text-align: center; font: 400 20px/1 var(--mono); color: rgba(255, 233, 166, .55); padding-top: 52px; box-sizing: border-box; pointer-events: auto; }
+.rou.plk .pk-notch:hover { color: #fff; } .rou.plk .pk-notch.on { color: #ffe9a6; text-shadow: 0 2px 0 #0a140f; }
+.rou.plk .pk-notch.on::before { content: ""; position: absolute; left: 18px; top: 12px; width: 36px; height: 28px; background: url(../assets/plinko/arrow_on.png) 0 0 / 36px 28px no-repeat; image-rendering: pixelated; }
+.rou.plk .pk-notch:not(.on):hover::before { content: ""; position: absolute; left: 18px; top: 12px; width: 36px; height: 28px; background: url(../assets/plinko/arrow_on.png) 0 0 / 36px 28px no-repeat; image-rendering: pixelated; opacity: .45; }
+.rou.plk .pk-stage[data-decor=marmol] .pk-notch { color: rgba(74, 36, 16, .75); } .rou.plk .pk-stage[data-decor=marmol] .pk-notch.on { color: #4a2410; text-shadow: none; } .rou.plk .pk-stage[data-decor=marmol] .pk-notch:hover { color: #000; }
+.rou.plk .pg { position: absolute; left: 0; top: 0; width: 32px; height: 32px; background: url(../assets/plinko/peg_petroleo.png) 0 0 / 96px 32px no-repeat; will-change: background-position; }
+.rou.plk .pk-stage[data-decor=noche] .pg { background-image: url(../assets/plinko/peg_noche.png); } .rou.plk .pk-stage[data-decor=marmol] .pg { background-image: url(../assets/plinko/peg_marmol.png); } .rou.plk .pk-stage[data-decor=rubi] .pg { background-image: url(../assets/plinko/peg_rubi.png); }
+.rou.plk .pk-halo { position: absolute; left: 0; top: 0; width: 112px; height: 112px; background: url(../assets/plinko/halo_petroleo.png) 0 0 / 336px 112px no-repeat; opacity: 0; will-change: transform, opacity; }
+.rou.plk .pk-stage[data-decor=noche] .pk-halo { background-image: url(../assets/plinko/halo_noche.png); } .rou.plk .pk-stage[data-decor=marmol] .pk-halo { background-image: url(../assets/plinko/halo_marmol.png); } .rou.plk .pk-stage[data-decor=rubi] .pk-halo { background-image: url(../assets/plinko/halo_rubi.png); }
+.rou.plk .pk-wall { position: absolute; top: 32px; bottom: 32px; width: 8px; opacity: 0; background: linear-gradient(var(--wc, #fff3b0), var(--wc, #fff3b0)); box-shadow: 0 0 24px 10px var(--wc, #fff3b0); }
+.rou.plk .pk-wall.l { left: 32px; } .rou.plk .pk-wall.r { right: 32px; }
+.rou.plk .pk-slot { position: absolute; top: 744px; width: 64px; height: 100px; box-sizing: border-box; background: var(--cc); box-shadow: inset 0 5px 0 var(--ch), inset 0 -7px 0 var(--cs); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; color: #fff; font: 900 28px/1 var(--serif); text-shadow: 0 3px 0 rgba(0, 0, 0, .5); overflow: hidden; white-space: nowrap; letter-spacing: -.02em; transition: opacity .3s, filter .3s; }
+.rou.plk .pk-slot.s3 { font-size: 22px; padding-bottom: 14px; letter-spacing: -.04em; }
+.rou.plk .pk-slot.off { opacity: .32; filter: saturate(.35); }
+.rou.plk .pk-slot.flash { animation: pk-flash .24s steps(1) 6; } @keyframes pk-flash { 50% { filter: brightness(1.9); } }
+.rou.plk .pk-slot.hit { filter: brightness(1.25); } .rou.plk .pk-slot.hit::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 5px #ffd95a, inset 0 0 0 8px #0a140f; animation: rou-frame .24s steps(1) 8; }
+.rou.plk .pk-chip { position: absolute; left: 0; top: 0; width: 48px; height: 48px; background: url(../assets/plinko/chip.png) 0 0 / 576px 48px no-repeat; will-change: transform; filter: drop-shadow(4px 8px 0 rgba(8, 0, 24, .45)); z-index: 6; }
+.rou.plk .pk-chip.ghost { filter: grayscale(.4) brightness(1.3) hue-rotate(150deg); opacity: .42; z-index: 3; }
+.rou.plk .pk-trail { position: absolute; left: 0; top: 0; width: 24px; height: 24px; background: url(../assets/plinko/trail_petroleo.png) 0 0 / 72px 24px no-repeat; will-change: transform, opacity; opacity: 0; z-index: 5; }
+.rou.plk .pk-stage[data-decor=noche] .pk-trail { background-image: url(../assets/plinko/trail_noche.png); } .rou.plk .pk-stage[data-decor=marmol] .pk-trail { background-image: url(../assets/plinko/trail_marmol.png); } .rou.plk .pk-stage[data-decor=rubi] .pk-trail { background-image: url(../assets/plinko/trail_rubi.png); }
+.rou.plk .pk-spin { position: absolute; left: 0; top: 0; width: 192px; height: 192px; z-index: 20; background: url(../assets/icons/coin_spin.webp) 0 0 / 4608px 192px no-repeat; image-rendering: pixelated; display: none; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .35)); }
+.rou.plk .pk-vig { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s; background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0, 0, 0, .55) 100%); z-index: 8; }
+.rou.plk .pk-vig.on { opacity: 1; }
+
+/* panel de mandos (derecha) */
+.rou.plk .pk-right { position: absolute; left: 1420px; top: 110px; width: 450px; z-index: 6; display: flex; flex-direction: column; gap: 10px; }
+.rou.plk .pk-lab { font: 400 17px var(--mono); color: #b9d9e0; letter-spacing: .14em; margin-top: 6px; }
+.rou.plk .pk-risks { display: flex; flex-direction: column; gap: 12px; }
+.rou.plk .pk-risk, .rou.plk .pk-arrow, .rou.plk .pk-go, .rou.plk .pk-stk, .rou.plk .pk-back2 { cursor: pointer; border: 0; color: #fff; font-family: var(--serif); background: var(--cc); box-shadow: 0 0 0 3px #0a140f, inset 0 5px 0 var(--ch), inset 0 -6px 0 var(--cs), 0 6px 0 3px #0a140f; }
+.rou.plk .pk-risk { --cc: #2a4a52; --ch: #4e7a86; --cs: #16282e; display: flex; align-items: center; justify-content: space-between; padding: 8px 18px 12px; border-radius: 10px; font: 900 32px/1 var(--serif); letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 3px 0 rgba(0, 0, 0, .5); }
+.rou.plk .pk-risk:hover { filter: brightness(1.2); } .rou.plk .pk-risk.on { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; color: #3a2606; text-shadow: none; }
+.rou.plk .pk-risk .sh { display: flex; align-items: flex-end; gap: 3px; height: 34px; } .rou.plk .pk-risk .sh u { display: block; width: 7px; background: currentColor; opacity: .85; min-height: 3px; }
+.rou.plk .pk-stakes { display: flex; gap: 18px; }
+.rou.plk .pk-stk { --cc: #2a4a52; --ch: #4e7a86; --cs: #16282e; flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 0 12px; border-radius: 10px; font: 900 40px/1 var(--serif); text-shadow: 0 3px 0 rgba(0, 0, 0, .5); }
+.rou.plk .pk-stk img { width: 38px; height: 38px; } .rou.plk .pk-stk:hover { filter: brightness(1.2); } .rou.plk .pk-stk.on { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; color: #3a2606; text-shadow: none; }
+.rou.plk .pk-cols { display: flex; align-items: center; gap: 14px; }
+.rou.plk .pk-arrow { --cc: #2a4a52; --ch: #4e7a86; --cs: #16282e; width: 74px; padding: 6px 0 10px; border-radius: 10px; font: 900 32px/1 var(--serif); } .rou.plk .pk-arrow:hover { filter: brightness(1.25); }
+.rou.plk .pk-cols b { flex: 1; text-align: center; font: 900 54px/1 var(--serif); color: #ffe9a6; text-shadow: 0 4px 0 #0a140f; } .rou.plk .pk-cols b small { font: 400 20px var(--mono); color: #9fd0da; letter-spacing: .08em; margin-left: 8px; }
+.rou.plk .pk-prob { display: flex; align-items: flex-end; gap: 5px; height: 76px; padding: 8px 10px 6px; border-radius: 10px; background: #031a22; box-shadow: inset 0 0 0 3px #0a140f, inset 0 0 0 5px #2a6a78; }
+.rou.plk .pk-prob u { display: block; flex: 1; background: #3fb8c8; min-height: 2px; box-shadow: inset 0 3px 0 #9fe8f2; } .rou.plk .pk-prob u.cur { background: #ffd95a; box-shadow: inset 0 3px 0 #fff3b0; } .rou.plk .pk-prob u.z { background: #2a4a52; box-shadow: none; }
+.rou.plk .pk-info { font: 400 18px/1.35 var(--mono); color: #cfe8ee; min-height: 76px; } .rou.plk .pk-info b { color: #ffe9a6; font-weight: 400; }
+.rou.plk .pk-go { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; margin-top: 6px; padding: 12px 0 18px; border-radius: 12px; font: 900 56px/1 var(--serif); letter-spacing: .06em; color: #3a2606; text-transform: uppercase; }
+.rou.plk .pk-go:hover { filter: brightness(1.12); } .rou.plk .pk-go:disabled { opacity: .5; cursor: default; filter: none; }
+.rou.plk .pk-back2 { --cc: #2a4a52; --ch: #4e7a86; --cs: #16282e; position: absolute; left: 1700px; top: 38px; z-index: 13; padding: 6px 22px 10px; border-radius: 10px; font: 900 24px/1 var(--serif); letter-spacing: .05em; text-transform: uppercase; }
+.rou.plk .pk-back2:hover { filter: brightness(1.25); } .rou.plk .pk-back2[hidden] { display: none; }
+.rou.plk .pk-hud { position: absolute; left: 60px; top: 975px; z-index: 9; display: flex; gap: 14px; align-items: center; font: 900 28px/1 var(--serif); letter-spacing: .05em; color: #fff; text-shadow: 0 3px 0 #0a140f; }
+.rou.plk .pk-hud span { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px 6px; border-radius: 10px; background: #0a140f; box-shadow: inset 0 0 0 3px #f8b449; } .rou.plk .pk-hud img { width: 32px; height: 32px; } .rou.plk .pk-hud em { font-style: normal; color: #ffd24a; } .rou.plk .pk-hud small { font: 400 16px var(--mono); color: #cfc4ec; letter-spacing: .1em; }

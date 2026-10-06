@@ -357,6 +357,13 @@ window.AIQ = window.AIQ || {};
     diceTie: go(t => { bell(69, t, { vol: 0.08, dur: 0.5, rev: 0.25 }); bell(69, t + 0.3, { vol: 0.08, dur: 0.7, rev: 0.3 }); bell(64, t + 0.3, { vol: 0.05, dur: 0.7, rev: 0.3 }); }),
     diceSnake: go(t => { noise(t, 0.7, { hp: 5000, sweepTo: 2400, vol: 0.05 }); pluck(98, t, { vol: 0.03, dur: 0.5, bright: 3, wave: "sawtooth", rev: 0.3 }); }),
     diceBoom: go(t => { thump(t, { vol: 0.3, f0: 80, f1: 30, dur: 0.6 }); [72, 76, 79, 84, 88].forEach((m, i) => bell(m, t + 0.1 + i * 0.08, { vol: 0.07, dur: 0.6, rev: 0.3 })); }),
+    /* Lluvia de fichas (v0.2.50): cada clavija suena una nota de una pentatonica que sube con la caida (root: nota base de esa ficha, i: fila), la pared, el aterrizaje y el destello falso */
+    plkPeg: go((t, i = 0, root = 57, soft = false) => { const m = root + [0, 2, 4, 7, 9][i % 5] + 12 * Math.floor(i / 5); pluck(m, t, { vol: soft ? 0.035 : 0.09, dur: 0.42, bright: 4, rev: 0.25 }); noise(t, 0.02, { hp: 3500, vol: soft ? 0.015 : 0.04 }); }),
+    plkWall: go(t => { noise(t, 0.05, { hp: 1800, vol: 0.07 }); thump(t, { vol: 0.1, f0: 420, f1: 300, dur: 0.14 }); bell(91, t, { vol: 0.02, dur: 0.2, rev: 0.1 }); }),
+    plkDrop: go(t => { noise(t, 0.2, { hp: 900, sweepTo: 3000, vol: 0.06 }); thump(t, { vol: 0.08, f0: 520, f1: 180, dur: 0.22 }); }),
+    plkLand: go((t, i = 0, root = 57) => { thump(t, { vol: 0.2, f0: 150, f1: 50, dur: 0.22 }); noise(t, 0.07, { hp: 1400, vol: 0.07 }); [0, 2, 4].forEach(k => bell(root + 12 + [0, 2, 4, 7, 9][(i + k) % 5] + 12 * Math.floor((i + k) / 5), t + 0.02, { vol: 0.04, dur: 0.6, rev: 0.3 })); }),
+    plkFlash: go(t => { bell(100, t, { vol: 0.02, dur: 0.12, rev: 0.1 }); }),
+    plkTick: go(t => { noise(t, 0.015, { hp: 3000, vol: 0.012 }); }),
     rouZero: go(t => { thump(t, { vol: 0.4, f0: 95, f1: 30, dur: 0.55 }); bell(67, t + 0.02, { vol: 0.08, dur: 1.4, rev: 0.4 }); bell(60, t + 0.1, { vol: 0.07, dur: 1.4, rev: 0.4 }); A.music.duck(0.3, 1500); }),
     intro: go(t => { noise(t, 0.5, { lp: 400, sweepTo: 6000, vol: 0.09, type: "bandpass", q: 1.4 }); thump(t + 0.32, { vol: 0.25, f0: 100, f1: 40, dur: 0.3 }); MOTIF.forEach((m, i) => pluck(m - 12, t + 0.34 + i * 0.09, { vol: 0.1, dur: 0.6 })); A.music.duck(0.4, 1800); }),
     stamp: go(t => { thump(t, { vol: 0.45, f0: 120, f1: 32, dur: 0.35 }); noise(t, 0.12, { lp: 1600, vol: 0.14 }); }),

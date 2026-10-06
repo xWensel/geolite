@@ -36,6 +36,25 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.50",
+      name: ["La lluvia de fichas", "Chip rain"],
+      date: "2026-10-06",
+      summary: ["Otro juego para el centro de la Barra: una ficha cae entre clavijas hasta una casilla con multiplicador, y tú eliges el riesgo.",
+        "Another game for the middle of the Bar: a chip falls through pegs into a multiplier slot, and you choose the risk."],
+      chapters: [
+        { id: "lluvia", kicker: ["La Barra", "The Bar"], title: ["Un casino más", "One more casino game"],
+          intro: ["Ya son seis los juegos que el crupier puede poner en el centro de la Barra. Este es el de las clavijas: **la caída está decidida antes de soltar** y tú eliges cómo quieres jugártela.",
+            "The dealer can now put six different games in the middle of the Bar. This is the pegs one: **the fall is decided before you drop** and you choose how to play it."],
+          entries: [
+            E(["Lluvia de fichas", "Chip rain"], "new", "0.2.50", [
+              ["Una ficha cae por **12 filas de clavijas**, rebotando a izquierda o derecha al 50 % (y en las paredes), hasta una de **11 casillas con multiplicador**. Tú pones la ficha (2, 5 o 10), el **riesgo** (Seguro, Equilibrado o Arriesgado) y la **columna de salida**.", "A chip falls through **12 rows of pegs**, bouncing left or right 50/50 (and off the walls), into one of **11 slots with a multiplier**. You pick the stake (2, 5 or 10), the **risk** (Safe, Balanced or Risky) and the **drop column**."],
+              ["Todas las combinaciones devuelven entre el **96 y el 97 %**: el riesgo y la columna cambian lo **raro y grande** que es un premio, no lo que devuelve el juego. Desde el centro con riesgo máximo, el premio gordo (×95) sale 1 de cada 171.", "Every combination pays back **96 to 97 %**: risk and column change how **rare and big** a prize is, not what the game returns. From the centre at maximum risk, the top prize (×95) comes up 1 in 171."],
+              ["Cada clavija suena una nota que sube con la caída. Hay **11 maneras de caer** y **4 decorados** del tablero que se sortean solos; el crupier (ahora animado) comenta cada situación.", "Every peg plays a note that climbs as the chip falls. There are **11 ways of falling** and **4 board looks** that are drawn on their own; the dealer (now animated) comments on every situation."],
+              ["La tolva responde al ratón: haz clic en una columna, usa las flechas, 1-9 y 0, o el mando. **Esc** o **Volver** antes de soltar no cuestan nada.", "The hopper responds to the mouse: click a column, use the arrows, 1-9 and 0, or the controller. **Esc** or **Back** before dropping costs nothing."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.49",
       name: ["El duelo de dados", "The dice duel"],
       date: "2026-10-06",
