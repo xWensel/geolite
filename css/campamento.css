@@ -480,3 +480,53 @@ html.reduce-motion .rou-no { display: none; }
 .wh-ptr::after { content: ""; position: absolute; inset: 4px 6px 9px; background: #ffd95a; clip-path: polygon(0 0, 100% 0, 50% 100%); }
 .rou.wheel .rou-wash { --wc: rgba(255, 217, 90, .5); } .rou.wheel.lose .rou-wash { --wc: rgba(0, 0, 0, .4); }
 .rou.wheel, .rou.coin { background: radial-gradient(ellipse at 50% 50%, rgba(14, 6, 18, .96), rgba(3, 2, 6, .99) 85%); }
+/* ---------------------------------------------------------------- v0.2.48: Los tres cubiletes (el trile). Fieltro burdeos y cenefa de rombos de oro (el ♦ del crupier);
+   la mesa es un escenario fijo de 1920x1080 con el arte a x4 (se escala con transform: scale(K/4), K entero, para que el pixel art quede nitido) */
+.table.mesa .sup.bet.bt-cups { background: radial-gradient(ellipse at 50% 40%, #8a1f3f 0%, #3b0a1e 80%); --sc: #b0405a; }
+.table.mesa .sup.bet.bt-cups::before { background: url(../assets/trile/cenefa.png) top left / 12px 10px repeat-x, url(../assets/trile/cenefa.png) bottom left / 12px 10px repeat-x; image-rendering: pixelated; }
+.table.mesa .sup.bet.bt-cups .bt-cu { background: #e8a91e; color: #3a2606; text-shadow: none; }
+.table.mesa .sup.bet.bt-cups .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-cups .bt-stake:hover { filter: brightness(1.25); }
+.table.mesa .sup.bet.bt-cups.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
+.rp-cups { background: #b0405a; }
+.rou.cups { background: radial-gradient(ellipse at 50% 40%, rgba(40, 8, 22, .98), rgba(4, 1, 8, 1) 85%); }
+.rou.cups .rou-wash { --wc: rgba(255, 217, 90, .5); } .rou.cups.lose .rou-wash { --wc: rgba(0, 0, 0, .4); } .rou.cups.joke .rou-wash { --wc: rgba(138, 31, 63, .55); }
+.rou.cups.hush .rou-lights { animation-play-state: paused; }
+.rou.cups .tr-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; user-select: none; }
+.rou.cups .tr-stage img { image-rendering: pixelated; display: block; }
+.rou.cups .tr-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 38%, #3d1024 0%, #14050e 58%, #05010a 100%); }
+.rou.cups .tr-dealer { position: absolute; left: 800px; top: 100px; width: 320px; height: 320px; z-index: 2; }
+.rou.cups .tr-bubble { position: absolute; left: 1160px; top: 150px; max-width: 560px; z-index: 6; padding: 14px 20px 12px; background: #fff; color: #120a2a; border: 4px solid #0a0048; box-shadow: 0 6px 0 #0a0048;
+  font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; pointer-events: none; }
+.rou.cups .tr-bubble.on { opacity: 1; transform: none; }
+.rou.cups .tr-bubble::before { content: ""; position: absolute; left: -22px; top: 26px; border: 12px solid transparent; border-right: 14px solid #0a0048; }
+.rou.cups .tr-bubble::after { content: ""; position: absolute; left: -15px; top: 30px; border: 8px solid transparent; border-right: 10px solid #fff; }
+.rou.cups .tr-left { position: absolute; left: 130px; top: 150px; width: 600px; z-index: 6; display: flex; flex-direction: column; gap: 22px; align-items: flex-start; pointer-events: none; }
+.rou.cups .tr-left .rou-pick { font-size: 15px; }
+.rou.cups .tr-hint { font: 900 36px/1.05 var(--serif); letter-spacing: .04em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f; opacity: 0; transition: opacity .25s; max-width: 600px; }
+.rou.cups .tr-hint.on { opacity: 1; }
+.rou.cups .tr-top { position: absolute; left: 0; right: 0; top: 34px; z-index: 8; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.rou.cups .tr-no { position: absolute; top: 8px; font: 900 76px/1 var(--serif); letter-spacing: .06em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f, 0 0 26px rgba(255, 217, 90, .5); opacity: 0; }
+.rou.cups .tr-no.on { animation: tr-no 1.3s both; } @keyframes tr-no { 0% { opacity: 0; transform: scale(1.5); } 18% { opacity: 1; transform: scale(1); } 72% { opacity: 1; } 100% { opacity: 0; transform: scale(.96); } }
+.rou.cups .tr-res { display: flex; flex-direction: row; align-items: center; gap: 26px; visibility: hidden; }
+.rou.cups .tr-res.on { visibility: visible; }
+.rou.cups .tr-plate { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; display: inline-flex; align-items: baseline; gap: 18px; padding: 6px 32px 10px 28px; border-radius: 12px; background: var(--cc); color: #fff; text-transform: uppercase;
+  font: 900 62px/1 var(--serif); letter-spacing: .05em; text-shadow: 0 3px 0 rgba(0, 0, 0, .42); box-shadow: 0 0 0 3px #0a140f, inset 0 5px 0 var(--ch), inset 0 -7px 0 var(--cs), 0 8px 0 3px #0a140f; }
+.rou.cups .tr-plate.lose { --cc: #5d6470; --ch: #8a93a2; --cs: #3a4049; } .rou.cups .tr-plate.joke { --cc: #8a1f3f; --ch: #d9506d; --cs: #4a0d22; }
+.rou.cups .tr-plate i { font: 400 34px var(--mono); font-style: normal; color: rgba(255, 255, 255, .88); }
+.rou.cups .tr-msg { font: 900 34px/1 var(--serif); letter-spacing: .03em; color: #ffe9a6; text-shadow: 0 3px 0 rgba(0, 0, 0, .6); }
+.rou.cups .tr-res.on .tr-plate { animation: rou-stamp .55s var(--spring) both; } .rou.cups .tr-res.on .tr-msg { animation: rou-up .45s .25s var(--spring) both; }
+.rou.cups .tr-band { position: absolute; left: 0; top: 450px; width: 1920px; height: 500px; z-index: 3; background: url(../assets/trile/felt.png) 0 0 / 128px 128px, radial-gradient(ellipse at 50% 46%, #9a2447 0%, #66142f 52%, #2b0816 100%);
+  box-shadow: 0 -4px 0 #0a140f, 0 -8px 0 #f0b94f, 0 -11px 0 #9a6a1c, 0 -14px 0 #0a140f, 0 4px 0 #0a140f, 0 8px 0 #f0b94f, 0 11px 0 #9a6a1c, 0 14px 0 #0a140f, 0 40px 70px rgba(0, 0, 0, .65); animation: none; }
+.rou.cups .tr-band .rou-lights { --lc: #ffe08a; --ld: #4a3410; }
+.rou.cups .tr-ring { position: absolute; width: 232px; height: 72px; z-index: 4; }
+.rou.cups .tr-num { position: absolute; z-index: 4; width: 80px; text-align: center; font: 900 54px/1 var(--serif); color: #f6c453; text-shadow: 0 4px 0 #0a140f; opacity: .9; transition: transform .15s, color .15s; }
+.rou.cups .tr-num.hot { color: #fff3b0; transform: translateY(-4px); }
+.rou.cups .tr-shadow { position: absolute; left: 0; top: 0; width: 176px; height: 48px; z-index: 5; }
+.rou.cups .tr-coin { position: absolute; left: 0; top: 0; width: 76px; height: 52px; z-index: 6; }
+.rou.cups .tr-cup { position: absolute; left: 0; top: 0; width: 192px; height: 224px; will-change: transform; }
+.rou.cups .tr-cup.pick { cursor: pointer; }
+.rou.cups .tr-glovelayer { position: absolute; inset: 0; z-index: 100; pointer-events: none; clip-path: inset(452px 0 0 0); }
+.rou.cups .tr-glove { position: absolute; left: 0; top: 0; width: 184px; height: 200px; z-index: 100; will-change: transform; pointer-events: none; }
+.rou.cups .tr-glove.r img { transform: scaleX(-1); }
+.rou.cups .tr-glove.open { z-index: 101; width: 184px; height: 248px; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 36px); mask-image: linear-gradient(to top, transparent 0, #000 36px); }
+.rou.cups .tr-spin { position: absolute; left: 0; top: 0; width: 192px; height: 192px; z-index: 120; background: url(../assets/icons/coin_spin.webp) 0 0 / 4608px 192px no-repeat; image-rendering: pixelated; display: none; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .35)); }

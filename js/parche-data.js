@@ -36,6 +36,24 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.48",
+      name: ["Los tres cubiletes", "The three cups"],
+      date: "2026-10-06",
+      summary: ["Un juego nuevo en el centro de la Barra: el crupier esconde un doblón bajo un cubilete, los mezcla y tú eliges.",
+        "A new game in the middle of the Bar: the dealer hides a doubloon under a cup, shuffles them and you pick."],
+      chapters: [
+        { id: "cubiletes", kicker: ["La Barra", "The Bar"], title: ["Un casino más", "One more casino game"],
+          intro: ["Los juegos del centro de la Barra se sortean en cada Campamento. Ahora son cuatro, y el nuevo es de **ojo y atención**: el resultado también está decidido de antemano, pero aquí, si sigues bien el doblón, lo ves venir.",
+            "The games in the middle of the Bar are drawn at every Camp. There are now four, and the new one is about **eyes and attention**: the result is also decided beforehand, but here, if you follow the doubloon well, you can see it coming."],
+          entries: [
+            E(["Los tres cubiletes", "The three cups"], "new", "0.2.48", [
+              ["El crupier esconde un doblón bajo uno de **tres cubiletes** y los mezcla. Sigue el doblón con la vista y elige: si aciertas, cobras **el doble** de lo apostado.", "The dealer hides a doubloon under one of **three cups** and shuffles them. Follow the doubloon with your eyes and pick: guess right and you win **double** your stake."],
+              ["Cuanto **mayor la ficha**, más rápido mezcla, con giros de los tres y falsos pases. El precio se cambia con un clic en la ficha.", "The **bigger the stake**, the faster he shuffles, with three-way rotations and fake swaps. Click the chip to change the price."],
+              ["Se elige con el ratón, con las flechas y Enter, o con el mando. Y el crupier tiene varias frases para cada momento… y algún truco bajo la manga.", "Pick with the mouse, with the arrows and Enter, or with the controller. And the dealer has several lines for every moment… and a trick or two up his sleeve."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.47",
       name: ["Cada tirada, un final distinto", "A different ending every spin"],
       date: "2026-10-06",

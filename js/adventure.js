@@ -1523,8 +1523,8 @@ window.AIQ = window.AIQ || {};
      final antes de cada jefe: salian siempre y no se pierden). Lo que ya tienes puesto (apuesta o suministro activo) no se esconde. Un juego nuevo de
      casino entra en SIDE_GAMES y en barOf. */
   const casOf = r => { const R = run.reds && run.reds[r]; if (R) return R; const b = (run.bets || {})[r]; if (b && b.id === "red") { run.reds = run.reds || {}; run.reds[r] = b; delete run.bets[r]; return b; } return null; };   // las partidas guardadas con Rojo o negro en run.bets se mudan solas
-  const CASINO = ["red", "coin", "wheel"];                              // los juegos del centro; cada ronda sortea uno (la semilla) y se queda con el
-  const casinoKind = r => { const R = casOf(r); return R && CASINO.includes(R.id) ? R.id : A.rng(`${run.seed}:casino:${r}`).pick(CASINO); };
+  const CASINO = ["red", "coin", "wheel", "cups"];                              // los juegos del centro; cada ronda sortea uno (la semilla) y se queda con el
+  const casinoKind = r => { const R = casOf(r); return R && CASINO.includes(R.id) ? R.id : A.adv._casinoForce || A.rng(`${run.seed}:casino:${r}`).pick(CASINO); };   // _casinoForce: solo pruebas
   const SIDE_GAMES = ["offer", "double", "final"];
   const sideRound = r => (r > LAST ? null : r % 4 === 3 ? (r === LAST ? "final" : "double") : "offer");   // la apuesta lateral que toca en la ronda r: antes de cada jefe la suya; en los demas Campamentos (desde el primero), la Oferta de la casa
   function sideOk(k, r) {
@@ -1570,6 +1570,14 @@ window.AIQ = window.AIQ || {};
       if (b && b.att === att) return `<div class="sup bet cas bt-coin done ${b.win ? "win" : "lose"}" data-bet="coin">${head}<em class="bt-res"><b>${A.tx(CT[b.out])}</b>${A.tx(edge ? CT.edgeMsg : b.win ? BT.won : BT.lost)}${b.pay ? " · +" + b.pay : ""}</em></div>`;
       return `<div class="sup bet cas bt-coin" data-bet="coin">${head}<span class="bt-pick"><button class="bt-c bt-ch" type="button" data-side="heads">${A.tx(CT.heads)}</button><button class="bt-c bt-ct" type="button" data-side="tails">${A.tx(CT.tails)}</button><em class="sp-p bt-stake" role="button" tabindex="0">${CN()}${coinCost(coinStake)}</em></span></div>`;
     }
+    if (k === "cups") {
+      const att = run.attempt || 0; cupsPreload();
+      if (b && b.att === att) {
+        if (b.pick == null && !rouOpen) { b.pick = -1; b.win = false; b.pay = 0; persist(); }   // se cerro el juego a mitad del baile: el crupier se guarda la ficha
+        return `<div class="sup bet cas bt-cups done ${b.win ? "win" : "lose"}" data-bet="cups">${head}<em class="bt-res"><b>${A.tx(b.joke ? TRL.joke : b.win ? BT.won : BT.lost)}</b>${b.pay ? "+" + b.pay : ""}</em></div>`;
+      }
+      return `<div class="sup bet cas bt-cups" data-bet="cups">${head}<span class="bt-pick"><button class="bt-c bt-cu" type="button" data-play="1">${A.tx(TRL.play)}</button><em class="sp-p bt-stake" role="button" tabindex="0">${CN()}${coinCost(cupsStake)}</em></span></div>`;
+    }
     if (k === "wheel") {
       const att = run.attempt || 0, P = b && PRIZES[b.w];
       if (b && b.att === att && P) return `<div class="sup bet cas bt-wheel done ${P.t === "good" ? "win" : "lose"}" data-bet="wheel">${head}<em class="bt-res"><b>${A.tx(WT[P.k])}</b>${b.val ? (b.val > 0 ? "+" : "") + b.val : ""}</em></div>`;
@@ -1609,6 +1617,24 @@ window.AIQ = window.AIQ || {};
         { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins - pay; }
         spinCoin({ pick, out, win, pay, stake }, () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
       }));
+      return;
+    }
+    if (k === "cups") {
+      const pill = el.querySelector(".bt-stake");
+      if (pill) pill.onclick = e => { e.stopPropagation(); cupsStake = (cupsStake + 1) % COIN_STAKES.length; pill.innerHTML = CN() + coinCost(cupsStake); A.sfx.tick(1); };   // el precio se cambia con un clic en la ficha (y con el, lo rapido que mezcla)
+      const btn = el.querySelector("[data-play]"); if (!btn) return;
+      btn.onclick = e => {
+        e.stopPropagation(); if (rouOpen) return; const tier = cupsStake % COIN_STAKES.length, stake = coinCost(cupsStake); if (run.coins < stake) { A.sfx.deny(); shake(el); return; }
+        const att = run.attempt || 0, u = A.rng(`${run.seed}:trile:${r}:${att}`), coinId = Math.floor(u() * 3), joke = A.adv._cupsJoke != null ? !!A.adv._cupsJoke : u() < 1 / 50;   // donde esta el doblon y el chiste del trilero (1 de cada 50): decididos por la semilla (_cupsJoke: solo pruebas)
+        run.coins -= stake; run.reds = run.reds || {};
+        const rec = (run.reds[r] = { id: "cups", att, stake, coin: coinId, joke, pick: null, win: false, pay: 0 });   // la ficha ya esta pagada: recargar a mitad del baile = el crupier se la queda
+        persist(); A.sfx.rouBet(1); if (A.haptic) A.haptic([10]);
+        const upd = () => { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins; }; upd();
+        spinCups({ stake, tier, coinId, joke, seq: cupsMoves(`${run.seed}:trile:baile:${r}:${att}`, tier),
+          onPick(id) { rec.pick = id; rec.win = !joke && id === coinId; rec.pay = rec.win ? stake * 2 : 0; if (rec.pay) { run.coins += rec.pay; run.stats.coinsEarned += rec.pay - stake; } persist(); upd(); return rec; },   // se decide y se guarda ANTES de la revelacion
+          onError() { if (rec.pick == null) { run.coins += stake; if (run.reds && run.reds[r] === rec) delete run.reds[r]; persist(); upd(); } } },   // un fallo de la pantalla no se come la ficha
+          () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
+      };
       return;
     }
     if (k === "wheel") {
@@ -2041,6 +2067,172 @@ window.AIQ = window.AIQ || {};
       requestAnimationFrame(frame);
     } catch (e) { sh.bail(e); }
   }
+  /* ---------------- v0.2.48: Los tres cubiletes (el trile) ----------------
+     El crupier esconde un doblon bajo uno de tres cubiletes, los mezcla y eliges. El baile es HONESTO (se puede seguir con la vista): la ficha sube la dificultad
+     (6 / 9 / 12 cambios, de 0,64 a 0,31 s). Aciertas = x2. Y 1 de cada 50 el crupier se queda el doblon: al levantar los tres no hay nada (el chiste del trilero;
+     cuenta como perdida, no depende de lo que elijas). Todo se decide ANTES de animar con la semilla (donde esta el doblon, el chiste y la lista de cambios);
+     lo unico que decide el jugador es el cubilete. Si se cierra el juego a mitad del baile (pick sin guardar), el crupier se guarda la ficha: no se puede recargar
+     para ver la solucion. Maqueta aprobada: tools/art/trile/. El escenario es de 1920x1080 con el arte a x4 y se escala con K/4 (K entero) para que el pixel art quede nitido. */
+  Object.assign(BETS, {
+    cups: { n: L6("Los tres cubiletes|The three cups|Les trois gobelets|Os três copos|Hütchenspiel|Le tre tazze||三个杯子|세 개의 컵|3つのカップ|Напёрстки|Trzy kubki"),
+      d: L6("El crupier esconde un doblón bajo uno de tres cubiletes y los mezcla. Sigue el doblón con la vista y elige: si aciertas, cobras el doble de lo apostado. Cuanto mayor la ficha, más rápido mezcla.|The dealer hides a doubloon under one of three cups and shuffles them. Follow the doubloon with your eyes and pick: guess right and you win double your stake. The bigger the stake, the faster he shuffles.|Le croupier cache un doublon sous l'un des trois gobelets et les mélange. Suis le doublon des yeux et choisis : si tu as raison, tu gagnes le double de ta mise. Plus la mise est grosse, plus il mélange vite.|O crupiê esconde um dobrão sob um dos três copos e embaralha. Siga o dobrão com os olhos e escolha: se acertar, recebe o dobro da aposta. Quanto maior a ficha, mais rápido ele embaralha.|Der Croupier versteckt eine Dublone unter einem von drei Bechern und mischt sie. Verfolge die Dublone mit den Augen und wähl: Liegst du richtig, bekommst du den doppelten Einsatz. Je höher der Einsatz, desto schneller mischt er.|Il croupier nasconde un doblone sotto una di tre tazze e le mescola. Segui il doblone con gli occhi e scegli: se indovini, vinci il doppio della puntata. Più alta è la puntata, più veloce mescola.||荷官把一枚金币藏在三个杯子之一下面并打乱它们。用眼睛盯紧金币再选杯子：猜对赢双倍赌注。赌注越大，他洗得越快。|딜러가 도블론 하나를 컵 세 개 중 하나 밑에 숨기고 섞습니다. 눈으로 도블론을 따라가 컵을 고르세요. 맞히면 건 돈의 두 배. 판돈이 클수록 더 빨리 섞습니다.|ディーラーがダブロンを3つのカップのどれかの下に隠してシャッフルします。目で追ってカップを選ぼう。当たれば賭け金の2倍。賭け金が大きいほど速く混ぜます。|Крупье прячет дублон под одним из трёх стаканов и перемешивает их. Следи за дублоном глазами и выбирай: угадал — получишь удвоенную ставку. Чем больше ставка, тем быстрее он мешает.|Krupier chowa dublona pod jednym z trzech kubków i tasuje je. Śledź dublona wzrokiem i wybierz: trafisz — dostajesz podwójną stawkę. Im wyższa stawka, tym szybciej tasuje."),
+      s: L6("Encuentra el doblón y cobras el doble.|Find the doubloon and win double.|Trouve le doublon et gagne le double.|Encontre o dobrão e receba o dobro.|Finde die Dublone: doppelter Einsatz.|Trova il doblone e vinci il doppio.||找到金币，赢双倍赌注。|도블론을 찾으면 두 배.|ダブロンを見つけたら2倍。|Найди дублон — получи вдвое.|Znajdź dublona i wygraj podwójnie."), ico: "bet_cups" },
+  });
+  const TRL = {
+    play: L6("Jugar|Play|Jouer|Jogar|Spielen|Gioca||玩|시작|遊ぶ|Играть|Graj"),
+    watch: L6("Mira dónde está el doblón…|Watch where the doubloon is…|Regarde où est le doublon…|Veja onde está o dobrão…|Schau, wo die Dublone liegt…|Guarda dov'è il doblone…||看好金币在哪儿…|도블론이 어디 있는지 봐…|ダブロンの場所をよく見て…|Смотри, где дублон…|Patrz, gdzie jest dublon…"),
+    dance: L6("Sigue el doblón|Follow the doubloon|Suis le doublon|Siga o dobrão|Folge der Dublone|Segui il doblone||盯紧金币|도블론을 따라가|ダブロンを追え|Следи за дублоном|Śledź dublona"),
+    pick: L6("¡Elige un cubilete!|Pick a cup!|Choisis un gobelet !|Escolha um copo!|Wähl einen Becher!|Scegli una tazza!||选一个杯子！|컵을 골라!|カップを選べ！|Выбирай стакан!|Wybierz kubek!"),
+    joke: L6("Se lo ha quedado|He kept it|Il l'a gardé|Ficou com ele|Er hat sie behalten|Se l'è tenuto||他收走了|가져가 버렸다|懐に入れた|Он оставил себе|Zatrzymał ją"),
+  };
+  const CUPS_CFG = [{ n: 6, dur: 640, rots: 0, feints: 0 }, { n: 9, dur: 440, rots: 2, feints: 1 }, { n: 12, dur: 310, rots: 3, feints: 2 }];   // por ficha: cambios, ms por cambio, rotaciones de tres y falsos pases
+  const CUPS_SLOT = [620, 960, 1300], CUPS_GY = 790;
+  let cupsStake = 0;
+  const cupsPreload = () => { if (cupsPreload.done) return; cupsPreload.done = 1; ["cup", "glove_grab", "glove_open", "coin_flat", "ring", "shadow", "felt", "cenefa"].forEach(n => { new Image().src = `assets/trile/${n}.png`; }); };
+  /* la lista de cambios (sembrada: la misma tirada baila igual); ranuras 0-1-2 de izquierda a derecha */
+  function cupsMoves(seed, tier) {
+    const c = CUPS_CFG[tier] || CUPS_CFG[0], rnd = A.rng(seed), pairs = [[0, 1], [1, 2], [0, 2]], mv = []; let rots = c.rots, last = "";
+    while (mv.length < c.n) {
+      let m; const front = rnd() < 0.5 ? 1 : -1;
+      if (rots > 0 && rnd() < 0.3) { m = { type: "rot", dir: rnd() < 0.5 ? 1 : -1 }; rots--; } else { const p = pairs[Math.floor(rnd() * 3)]; m = { type: "swap", a: p[0], b: p[1], front }; }
+      const key = m.type + (m.a != null ? m.a + "" + m.b : m.dir); if (key === last) continue; last = key; mv.push(m);
+    }
+    for (let i = 0; i < c.feints; i++) { const p = pairs[Math.floor(rnd() * 3)]; mv.splice(1 + Math.floor(rnd() * (mv.length - 1)), 0, { type: "feint", a: p[0], b: p[1], front: rnd() < 0.5 ? 1 : -1 }); }
+    return mv;
+  }
+  function spinCups(o, done) {
+    const SL = CUPS_SLOT, GY = CUPS_GY, ANCH = 176, LIFT = 130, ARC = 40, lerp = (a, b, t) => a + (b - a) * t, ease = p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2), easeOut = p => 1 - Math.pow(1 - p, 3);
+    const html = `<div class="tr-stage"><div class="tr-bg"></div><img class="tr-dealer" src="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="tr-bubble"><span></span></div>
+      <div class="tr-left"><div class="rou-pick"><span class="rp-dot rp-cups"></span><span class="rp-k">${A.tx(BT.seal)}</span><b>${A.tx(BETS.cups.n)} · ${o.stake}</b></div><div class="tr-hint"></div></div>
+      <div class="tr-top"><b class="tr-no">${A.tx(BT2.noMore)}</b><div class="tr-res"><span class="tr-plate"></span><span class="tr-msg"></span></div></div>
+      <div class="tr-band"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div></div>`;
+    const sh = rouShell("cups", html, {}, () => { try { A.dealer.hold(false); } catch (e) { /* sin crupier */ } done(); });
+    if (!sh) return;
+    try { A.dealer.hold(true); } catch (e) { /* sin crupier */ }                                  // el crupier de la esquina calla: aqui habla el de la mesa
+    const ov = sh.ov, stage = ov.querySelector(".tr-stage"), reduced = sh.reduced, Q = s => ov.querySelector(s), CANCEL = {};
+    ov.classList.remove("spin");
+    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 90 && (1080 * c / 4 - H) / 2 <= 24) k = c;   // K entero: cada pixel del arte = K pixeles de pantalla
+      stage.style.transform = `translate(${Math.round((W - 1920 * k / 4) / 2)}px,${Math.round((H - 1080 * k / 4) / 2)}px) scale(${k / 4})`; };
+    fit(); const onResize = () => { if (ov.isConnected) fit(); else removeEventListener("resize", onResize); }; addEventListener("resize", onResize);
+    const alive = () => !sh.closed && ov.isConnected;
+    const sleep = ms => new Promise((res, rej) => setTimeout(() => (alive() ? res() : rej(CANCEL)), ms));
+    const run = (dur, fn) => new Promise((res, rej) => { const t0 = performance.now(); const f = now => { if (!alive()) return rej(CANCEL); const p = Math.min(1, (now - t0) / dur); fn(p); p < 1 ? requestAnimationFrame(f) : res(); }; requestAnimationFrame(f); });
+    const mk = (cls, inner, parent) => { const d = document.createElement("div"); d.className = cls; if (inner) d.innerHTML = inner; (parent || stage).appendChild(d); return d; };
+    const IMG = (n, w, h) => `<img src="assets/trile/${n}.png" width="${w}" height="${h}" alt="" draggable="false">`;
+    const cups = SL.map((x, i) => {
+      const ring = mk("tr-ring", IMG("ring", 232, 72)); ring.style.transform = `translate3d(${x - 116}px,${GY + 2 - 36}px,0)`;
+      const num = mk("tr-num", String(i + 1)); num.style.transform = `translate3d(${x - 40}px,${GY + 52}px,0)`;
+      return { id: i, x, arc: 0, lift: 0, hl: 0, z: 10 + i, num, sh: mk("tr-shadow", IMG("shadow", 176, 48)), el: mk("tr-cup", IMG("cup", 192, 224)) };
+    });
+    const coin = { cup: o.coinId, show: false, el: mk("tr-coin", IMG("coin_flat", 76, 52)) };
+    const spinEl = mk("tr-spin"), gloveLayer = mk("tr-glovelayer");
+    const gloves = [0, 1].map(i => ({ vis: 0, tv: 0, x: 0, y: -400, cup: null, el: mk("tr-glove" + (i ? " r" : ""), IMG("glove_grab", 184, 200), gloveLayer) }));
+    const openGlove = { vis: 0, tv: 0, x: 0, y: 0, el: mk("tr-glove open", IMG("glove_open", 184, 248)) };
+    const jokeCoin = mk("tr-coin", IMG("coin_flat", 76, 52)); jokeCoin.style.display = "none"; jokeCoin.style.zIndex = 102;
+    const order = [0, 1, 2], slotOf = id => order.indexOf(id), cupTop = c => GY - ANCH + c.arc - Math.round((c.lift + c.hl * 0.11) * LIFT);
+    const render = () => {
+      if (!alive()) return;
+      for (const c of cups) {
+        c.el.style.transform = `translate3d(${Math.round(c.x - 96)}px,${Math.round(cupTop(c))}px,0)`; c.el.style.zIndex = c.z;
+        c.sh.style.transform = `translate3d(${Math.round(c.x - 88)}px,${Math.round(GY - 18 + c.arc * 0.25)}px,0)`; c.sh.style.opacity = Math.max(0.25, 1 - 0.4 * c.lift - Math.abs(c.arc) * 0.004);
+      }
+      const cc = cups[coin.cup];                                                              // el doblon acompana a su cubilete (arco incluido) y queda en el tapete al levantarlo
+      coin.el.style.display = coin.show ? "block" : "none"; if (coin.show) coin.el.style.transform = `translate3d(${Math.round(cc.x - 38)}px,${Math.round(GY - 32 + cc.arc)}px,0)`;
+      for (const g of gloves) {
+        g.vis += (g.tv - g.vis) * 0.34; if (Math.abs(g.tv - g.vis) < 0.01) g.vis = g.tv;
+        if (g.cup != null) { const c = cups[g.cup], gx = c.x - 92, gy = cupTop(c) - 124; if (g.vis < 0.05 && g.tv === 1) { g.x = gx; g.y = gy - 150; } g.x += (gx - g.x) * 0.42; g.y += (gy - g.y) * 0.42; }
+        g.el.style.opacity = g.vis; g.el.style.transform = `translate3d(${Math.round(g.x)}px,${Math.round(g.y - (1 - g.vis) * 60)}px,0)`;
+      }
+      openGlove.vis += (openGlove.tv - openGlove.vis) * 0.3; openGlove.el.style.opacity = openGlove.vis; openGlove.el.style.transform = `translate3d(${Math.round(openGlove.x)}px,${Math.round(openGlove.y + (1 - openGlove.vis) * 70)}px,0)`;
+      requestAnimationFrame(render);
+    };
+    requestAnimationFrame(render);
+    const attach = (g, id) => { g.cup = id; g.tv = id == null ? 0 : 1; }, release = () => gloves.forEach(g => { g.tv = 0; });
+    /* el crupier: globo (Jersey, siempre 1 s mas en pantalla), cara y pista */
+    const bubble = Q(".tr-bubble"), bTx = bubble.firstChild, dealerImg = Q(".tr-dealer"), hintEl = Q(".tr-hint"); let bubbleT = 0;
+    const face = f => { dealerImg.src = `assets/icons/dealer_${f}.webp`; };
+    const say = (key, f) => { const t = A.tx(A.dealer.line(key)) || ""; bTx.textContent = t; bubble.classList.add("on"); if (f) face(f); clearTimeout(bubbleT); bubbleT = setTimeout(() => bubble.classList.remove("on"), 1800 + t.length * 22 + (A.dealer.LINGER || 1000)); };
+    const hint = k => { if (!k) { hintEl.classList.remove("on"); return; } hintEl.textContent = A.tx(TRL[k]); hintEl.classList.add("on"); };
+    const plate = (kind, name, extra, msg) => { const p = Q(".tr-plate"); p.className = "tr-plate " + kind; p.innerHTML = `<b>${name}</b>${extra ? `<i>${extra}</i>` : ""}`; Q(".tr-msg").textContent = msg; const r = Q(".tr-res"); r.classList.remove("on"); void r.offsetWidth; r.classList.add("on"); };
+    /* el baile */
+    async function doMove(m, dur, i) {
+      const D = reduced ? Math.max(280, dur) : dur, arcK = reduced ? 0 : 1; A.sfx.cupClack(i);
+      if (m.type === "swap" || m.type === "feint") {
+        const a = order[m.a], b = order[m.b], ca = cups[a], cb = cups[b], xa = SL[m.a], xb = SL[m.b], front = m.front, feint = m.type === "feint";
+        if (!reduced) { attach(gloves[0], a); attach(gloves[1], b); }
+        await run(feint ? D * 0.85 : D, p => { const e = ease(p), s = Math.sin(Math.PI * p);
+          ca.x = feint ? xa + (xb - xa) * 0.4 * s : lerp(xa, xb, e); cb.x = feint ? xb + (xa - xb) * 0.4 * s : lerp(xb, xa, e);
+          ca.arc = front * ARC * s * arcK; cb.arc = -front * ARC * s * arcK; ca.z = front > 0 ? 30 : 20; cb.z = front > 0 ? 20 : 30; });
+        if (!feint) { order[m.a] = b; order[m.b] = a; }
+        ca.x = SL[slotOf(a)]; cb.x = SL[slotOf(b)]; ca.arc = cb.arc = 0;
+      } else {                                                                                // rotacion de tres: el que cruza dos casillas va por detras
+        const d = m.dir, moves = order.map((id, s) => ({ id, from: s, to: (s + d + 3) % 3 })), long = moves.find(x => Math.abs(x.to - x.from) === 2), other = moves.find(x => x !== long);
+        if (!reduced) { attach(gloves[0], long.id); attach(gloves[1], other.id); }
+        await run(D * 1.35, p => { const e = ease(p), s = Math.sin(Math.PI * p); for (const x of moves) { const c = cups[x.id]; c.x = lerp(SL[x.from], SL[x.to], e); c.arc = (x === long ? -1 : 0.55) * ARC * s * arcK; c.z = x === long ? 18 : 24; } });
+        const next = [0, 0, 0]; for (const x of moves) next[x.to] = x.id; next.forEach((id, s) => (order[s] = id)); for (const c of cups) { c.x = SL[slotOf(c.id)]; c.arc = 0; }
+      }
+      cups.forEach(c => (c.z = 10 + slotOf(c.id)));
+    }
+    const lift = async (id, to, ms = 360) => { const c = cups[id], from = c.lift; await run(reduced ? 160 : ms, p => (c.lift = lerp(from, to, easeOut(p)))); };
+    let pickResolve = null, pickable = false;
+    const choose = () => new Promise(res => { pickable = true; cups.forEach(c => c.el.classList.add("pick")); pickResolve = id => { pickable = false; cups.forEach(c => { c.el.classList.remove("pick"); c.hl = 0; c.num.classList.remove("hot"); }); pickResolve = null; res(id); }; });
+    const pickSlot = s => { if (pickable && pickResolve) { A.sfx.cupClack(2); pickResolve(order[s]); } };
+    let sel = -1; const setSel = s => { cups.forEach(c => { c.hl = 0; c.num.classList.remove("hot"); }); sel = s; if (s >= 0) { const c = cups[order[s]]; c.hl = 1; c.num.classList.add("hot"); A.sfx.cupClack(0); } };
+    cups.forEach(c => {
+      c.el.addEventListener("click", () => pickSlot(slotOf(c.id)));
+      c.el.addEventListener("mouseenter", () => { if (!pickable) return; setSel(slotOf(c.id)); }); c.el.addEventListener("mouseleave", () => { if (pickable && sel === slotOf(c.id)) setSel(-1); });
+    });
+    const onKey = e => { if (!ov.isConnected) { removeEventListener("keydown", onKey, true); return; } if (!pickable) return;
+      if (e.key >= "1" && e.key <= "3") pickSlot(+e.key - 1); else if (e.key === "ArrowLeft" || e.key === "ArrowRight") setSel(sel < 0 ? (e.key === "ArrowLeft" ? 2 : 0) : (sel + (e.key === "ArrowLeft" ? 2 : 1)) % 3); else if ((e.key === "Enter" || e.key === " ") && sel >= 0) pickSlot(sel); };
+    addEventListener("keydown", onKey, true);
+    (async () => {
+      try {
+        const joke = o.joke, coinId = o.coinId; coin.show = true;
+        // 1. muestra: el crupier levanta el cubilete de la doblon y la ensena
+        hint("watch"); say("trileIntro", "neutral"); await sleep(700);
+        attach(gloves[0], coinId); await sleep(260); A.sfx.cupLift(); await lift(coinId, 1, 420); await sleep(reduced ? 700 : 1100); await lift(coinId, 0, 340); A.sfx.cupClack(0); release(); await sleep(260);
+        if (joke) coin.show = false;                                                          // el chiste: el doblon ya no esta en la mesa (el crupier se lo guarda ahora)
+        // 2. baile
+        const no = Q(".tr-no"); no.classList.remove("on"); void no.offsetWidth; no.classList.add("on"); A.sfx.rouNoMore(); ov.classList.add("spin");
+        hint("dance"); say("trileDance"); await sleep(1100);
+        const dur = CUPS_CFG[o.tier].dur;
+        for (let i = 0; i < o.seq.length; i++) { await doMove(o.seq[i], dur, i); if (dur >= 400 || i === o.seq.length - 1) release(); await sleep(i === o.seq.length - 1 ? 200 : Math.max(40, dur * 0.18)); }
+        release(); ov.classList.remove("spin");
+        // 3. elige
+        hint("pick"); say("trilePick"); if (A.haptic) A.haptic([8]); const pickId = await choose();
+        const rec = o.onPick(pickId), win = rec.win;                                           // la tirada se decide y se guarda AQUI, antes de la revelacion
+        // 4. revelacion
+        hint(null); ov.classList.add("hush"); bubble.classList.remove("on"); A.sfx.cupDrum(900); await sleep(950);
+        attach(gloves[0], pickId); await sleep(180); A.sfx.cupLift(); await lift(pickId, 1, 420); A.sfx.rouStop();
+        if (win) {
+          coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([30, 30, 60]); ov.classList.add("win", "flash");
+          const c = cups[pickId], x = c.x - 96, y0 = GY - 150; spinEl.style.display = "block"; let f = 0;                      // la doblon del juego (24 fotogramas) sale hacia el espectador y cae
+          await run(reduced ? 300 : 900, p => { const h = Math.sin(Math.PI * p) * 150; spinEl.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y0 - h)}px,0)`; const nf = Math.floor(p * 36) % 24; if (nf !== f) { f = nf; spinEl.style.backgroundPositionX = -nf * 192 + "px"; } });
+          spinEl.style.display = "none"; plate("win", A.tx(BT.won), "×2", "+" + rec.pay); say("betWin");
+          await sleep(500); for (const oc of cups) if (oc.id !== pickId) { attach(gloves[1], oc.id); await sleep(120); await lift(oc.id, 1, 320); }
+          release(); sh.hold(3400);
+        } else {
+          if (!joke) coin.show = true;                                                        // al levantar el tuyo vacio, el crupier ensena donde estaba
+          await sleep(joke ? 700 : 500);
+          for (const oc of cups) if (oc.id !== pickId) { attach(gloves[1], oc.id); await sleep(150); A.sfx.cupLift(); await lift(oc.id, 1, 360); await sleep(joke ? 330 : 240); }
+          release(); ov.classList.add("lose");
+          if (joke) {                                                                          // el chiste del trilero: los tres vacios; suelta el doblon de entre los dedos, guina y se lo guarda
+            ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh"); await sleep(800);
+            openGlove.x = 640; openGlove.y = 300; openGlove.tv = 1; jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 54}px,${openGlove.y + 112}px,0)`;
+            A.sfx.cupWink(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([40, 20, 40]);
+            sh.hold(5200); await sleep(2600);
+            await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 54, 860, e))}px,${Math.round(lerp(openGlove.y + 112, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
+            jokeCoin.style.display = "none"; A.sfx.stamp();
+          } else { face("laugh"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
+        }
+      } catch (e) {
+        if (e === CANCEL) { if (!sh.closed && !ov.isConnected) sh.bail("capa retirada"); return; }   // otra pantalla se llevo la capa: que el Campamento no se quede bloqueado
+        try { console.error("trile", e); } catch (x) { /* nada */ }
+        if (o.onError) o.onError(); sh.bail(e);                                               // pase lo que pase, el Campamento no se queda bloqueado (y no se pierde la ficha por un fallo)
+      } finally { removeEventListener("keydown", onKey, true); }
+    })();
+  }
+  A.adv._cups = { moves: cupsMoves, cfg: CUPS_CFG, card: () => betHtml("cups"), rec: () => casOf(roundNo()) };                                         // solo para pruebas (dev/)
   const SUPS = [
     { id: "cafe", cost: 4, ico: "sup_cafe", n: A.L("Café doble", "Double espresso"), d: A.L("+4 s por pregunta en la próxima ronda", "+4 s per question next round") },
     { id: "seguro", cost: 8, ico: "sup_seguro", n: A.L("Seguro de ronda", "Round insurance"), d: A.L("Si fallas la próxima ronda, no pierdes provisión", "If you fail next round, you keep your provision") },
