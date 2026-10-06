@@ -84,7 +84,7 @@ window.AIQ = window.AIQ || {};
     const f1 = ctx.createBiquadFilter(); f1.type = type || (hp ? "highpass" : "lowpass"); f1.frequency.value = hp || lp; f1.Q.value = q;
     if (sweepTo) f1.frequency.exponentialRampToValueAtTime(sweepTo, t + dur);
     const g = ctx.createGain(); s.connect(f1).connect(g).connect(bus); env(g, t, 0.004, vol, dur);
-    s.start(t, Math.random() * (noiseBuf.duration - dur - 0.2)); s.stop(t + dur + 0.05);
+    s.start(t, Math.max(0, Math.random() * (noiseBuf.duration - dur - 0.2))); s.stop(t + dur + 0.05);
   }
   function thump(t, o = {}) {
     const { vol = 0.3, f0 = 130, f1 = 42, dur = 0.16, bus = sfxBus } = o;
@@ -364,6 +364,16 @@ window.AIQ = window.AIQ || {};
     plkLand: go((t, i = 0, root = 57) => { thump(t, { vol: 0.2, f0: 150, f1: 50, dur: 0.22 }); noise(t, 0.07, { hp: 1400, vol: 0.07 }); [0, 2, 4].forEach(k => bell(root + 12 + [0, 2, 4, 7, 9][(i + k) % 5] + 12 * Math.floor((i + k) / 5), t + 0.02, { vol: 0.04, dur: 0.6, rev: 0.3 })); }),
     plkFlash: go(t => { bell(100, t, { vol: 0.02, dur: 0.12, rev: 0.1 }); }),
     plkTick: go(t => { noise(t, 0.015, { hp: 3000, vol: 0.012 }); }),
+    /* El globo (v0.2.51): tonos y ruido sintetizados con los parametros de la maqueta (js/casino-globo.js compone con ellos todos sus sonidos) y el motor continuo, que sube de tono con el multiplicador */
+    gbTone: go((t, f0, f1, d, type, v, delay) => { const T = t + (delay || 0), o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, T); if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, T + d); env(g, T, 0.004, v, d); o.connect(g).connect(sfxBus); o.start(T); o.stop(T + d + 0.05); }),
+    gbNoise: go((t, d, v, hp, delay, lp, sweep) => { noise(t + (delay || 0), d, Object.assign({ vol: v }, lp ? { lp } : { hp }, sweep ? { sweepTo: sweep } : {})); }),
+    gbEngine: (() => {
+      let n = null;
+      const f = p => { if (!ctx || !A.audio.sfxOn) return; if (!n) { const o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(); o1.type = "sine"; o2.type = "triangle"; o2.detune.value = 7; g.gain.value = 0.0001; o1.connect(g); o2.connect(g); g.connect(sfxBus); o1.start(); o2.start(); n = { o1, o2, g }; }
+        const fr = 160 * Math.pow(2, p * 2.7), t = ctx.currentTime; n.o1.frequency.setTargetAtTime(fr, t, 0.08); n.o2.frequency.setTargetAtTime(fr * 1.5, t, 0.08); n.g.gain.setTargetAtTime(0.012 + p * 0.028, t, 0.1); };
+      f.stop = () => { if (!n) return; const m = n; n = null; m.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.05); setTimeout(() => { try { m.o1.stop(); m.o2.stop(); } catch (e) { /* ya parado */ } }, 400); };
+      return f;
+    })(),
     rouZero: go(t => { thump(t, { vol: 0.4, f0: 95, f1: 30, dur: 0.55 }); bell(67, t + 0.02, { vol: 0.08, dur: 1.4, rev: 0.4 }); bell(60, t + 0.1, { vol: 0.07, dur: 1.4, rev: 0.4 }); A.music.duck(0.3, 1500); }),
     intro: go(t => { noise(t, 0.5, { lp: 400, sweepTo: 6000, vol: 0.09, type: "bandpass", q: 1.4 }); thump(t + 0.32, { vol: 0.25, f0: 100, f1: 40, dur: 0.3 }); MOTIF.forEach((m, i) => pluck(m - 12, t + 0.34 + i * 0.09, { vol: 0.1, dur: 0.6 })); A.music.duck(0.4, 1800); }),
     stamp: go(t => { thump(t, { vol: 0.45, f0: 120, f1: 32, dur: 0.35 }); noise(t, 0.12, { lp: 1600, vol: 0.14 }); }),

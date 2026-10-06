@@ -36,6 +36,25 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.51",
+      name: ["El globo", "The balloon"],
+      date: "2026-10-06",
+      summary: ["Otro juego para el centro de la Barra: un globo sube sobre el mapa y tú decides cuándo cobrar antes de que reviente.",
+        "Another game for the middle of the Bar: a balloon climbs over the map and you decide when to cash out before it bursts."],
+      chapters: [
+        { id: "globo", kicker: ["La Barra", "The Bar"], title: ["Un casino más", "One more casino game"],
+          intro: ["Ya son siete los juegos que el crupier puede poner en el centro de la Barra. Este es de **nervios**: el momento del reventón ya está decidido, y tú solo eliges cuándo bajarte.",
+            "The dealer can now put seven different games in the middle of the Bar. This one is about **nerve**: the burst moment is already decided, and you only choose when to get off."],
+          entries: [
+            E(["El globo", "The balloon"], "new", "0.2.51", [
+              ["Un globo sube sobre el mapa de la Tierra y el **multiplicador sube con él**. Pulsa **Cobrar** (clic, Espacio, Intro o el botón A) antes de que reviente: cobras tu ficha por el multiplicador de ese instante. Si revienta antes, pierdes la ficha.", "A balloon climbs over the map of the Earth and the **multiplier climbs with it**. Press **Cash out** (click, Space, Enter or the A button) before it bursts: you collect your stake times the multiplier of that moment. If it bursts first, you lose the stake."],
+              ["Cobres cuando cobres, el juego devuelve **el 97 %**. Reventar nada más despegar pasa 1 de cada 32 veces; llegar a **×100** (el techo, que se cobra solo), 1 de cada 103.", "Whenever you cash out, the game returns **97 %**. Bursting right at take-off happens 1 time in 32; reaching **×100** (the ceiling, which cashes out by itself) happens 1 in 103."],
+              ["**Auto** cobra por ti al llegar a ×1,5, ×2, ×3, ×5 o ×10. Y cuando cobras, un **globo fantasma** sigue subiendo hasta reventar para enseñarte hasta dónde habrías llegado.", "**Auto** cashes out for you at ×1.5, ×2, ×3, ×5 or ×10. And when you cash out, a **ghost balloon** keeps climbing until it bursts to show you how far you would have gone."],
+              ["Nada avisa del reventón: los pájaros, rayos, granizos y crujidos que ves salen al azar y **también ocurren cuando no pasa nada**. Hay 10 cielos, 8 reventones y 8 globos distintos, y el crupier (animado) tiene frases para cada momento.", "Nothing warns you of the burst: the birds, lightning, hail and creaks you see come up at random and **also happen when nothing is wrong**. There are 10 skies, 8 ways to burst and 8 different balloons, and the dealer (animated) has lines for every moment."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.50",
       name: ["La lluvia de fichas", "Chip rain"],
       date: "2026-10-06",
