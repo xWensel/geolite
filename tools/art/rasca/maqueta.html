@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es" data-skin="casino">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rasca y gana · maqueta</title>
+<link rel="stylesheet" href="../../../css/style.css">
+<link rel="stylesheet" href="../../../css/skins.css">
+<link rel="stylesheet" href="../../../css/uikit.css">
+<link rel="stylesheet" href="../../../css/campamento.css">
+<link rel="stylesheet" href="maqueta.css">
+</head>
+<body class="mq">
+<main class="mq-page">
+
+  <header class="mq-head">
+    <h1>Rasca y gana <small>maqueta jugable · v1</small></h1>
+    <p>Un juego del centro de la Barra. Tarjeta de 3×3 casillas: <b>tres símbolos iguales en cualquier parte</b> = premio según el símbolo (×2 · ×3 · ×5 · ×10 · ×25 · ×100). Se rasca con la <b>doblón</b> (ratón, teclado o mando). El resultado se decide <b>antes</b>, por semilla: nada de lo que hagas con la doblón lo cambia. Todo el arte es nuevo, dibujado con el método de los iconos de la Barra (rejilla nativa, rampas de 3-4 tonos, contorno índigo) y mostrado a ×4.</p>
+  </header>
+
+  <section class="mq-sec">
+    <h2>1 · La carta en la Barra <small>junto a las tres que ya existen (CSS real del juego); clic en la ficha para cambiarla</small></h2>
+    <div class="table mesa mq-bar"><div class="tb-sup" id="raCards"></div></div>
+  </section>
+
+  <section class="mq-sec">
+    <h2>2 · La mesa <small>COMPRAR · arrastra la doblón sobre la lámina · flechas + Espacio · stick + A · R / Y = rasca todo</small></h2>
+    <div class="ra-wrap" id="raWrap">
+      <div class="ra-stage" id="raStage">
+        <div class="ra-wall"></div>
+        <div class="ra-spotl" id="raSpotL"></div><div class="ra-spotl r" id="raSpotR"></div>
+        <div class="ra-sign" id="raSign"><span id="raSignTx">RASCA Y GANA</span><i class="rou-lights top"></i><i class="rou-lights bot"></i></div>
+        <div class="ra-tag" id="raTag"><b id="raTagNo"></b><span id="raTagTh"></span></div>
+        <div class="ra-top"><div class="ra-res" id="raRes"><span class="ra-plate" id="raPlate"></span><span class="ra-msg" id="raMsg"></span></div></div>
+        <div class="ra-dealerbox" id="raDealerBox">
+          <img class="ra-dealer" id="raDealer" src="../../../assets/icons/dealer_neutral.webp" alt="" draggable="false">
+          <img class="ra-sweat s1" src="out/sweat.png" alt="" draggable="false"><img class="ra-sweat s2" src="out/sweat.png" alt="" draggable="false">
+        </div>
+        <div class="ra-bubble" id="raBubble"><span id="raBubbleTx"></span></div>
+        <div class="ra-band" id="raBand"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div>
+        <div class="ra-glovelayer"><img class="ra-gl l" id="raGlL" src="out/glove_open.png" alt="" draggable="false"><img class="ra-gl r" id="raGlR" src="out/glove_open.png" alt="" draggable="false"></div>
+
+        <div class="ra-plaque ra-pay" id="raPayBox"></div>
+
+        <div class="ra-card" id="raCard">
+          <img class="ra-base" id="raBase" src="out/card_mapamundi.png" alt="" draggable="false">
+          <div class="ra-ct" id="raCardTitle">RASCA Y GANA</div>
+          <div class="ra-cf" id="raCardFoot"></div>
+          <div class="ra-syms" id="raSyms"></div>
+          <canvas class="ra-foil" id="raFoil" width="108" height="146"></canvas>
+          <div class="ra-hls" id="raHls"></div>
+        </div>
+        <div class="ra-curtain l" id="raCurL"></div><div class="ra-curtain r" id="raCurR"></div>
+
+        <div class="ra-right">
+          <div class="ra-pill" id="raPill"></div>
+          <button class="ra-btn big" id="raBtnBuy" type="button"></button>
+          <button class="ra-btn" id="raBtnAll" type="button"></button>
+          <div class="ra-hint" id="raHint"></div>
+        </div>
+        <div class="ra-plaque ra-help" id="raHelp"></div>
+        <div class="ra-hud" id="raHud"></div>
+
+        <div class="ra-beam" id="raBeam"></div>
+        <canvas class="ra-fx" id="raFx" width="1920" height="1080"></canvas>
+        <img class="ra-coin" id="raCoin" src="out/coin_cur.png" alt="" draggable="false"><img class="ra-coin" id="raCoinH" src="out/coin_hold.png" alt="" draggable="false">
+        <div class="ra-wash" id="raWash"></div>
+      </div>
+    </div>
+    <div class="mq-bar2">
+      <div class="seg" id="raSegStake"><span>FICHA</span><button data-v="2">2</button><button data-v="5" class="on">5</button><button data-v="10">10</button></div>
+      <div class="seg" id="raSegLang"><button data-v="es" class="on">ES</button><button data-v="en">EN</button></div>
+      <label class="chk"><input type="checkbox" id="raChkReduce"> Reducir movimiento</label>
+      <label class="chk"><input type="checkbox" id="raChkSound" checked> Sonido</label>
+      <button class="big" id="raBtnBuy2">▶ COMPRAR TARJETA</button>
+      <button id="raBtnFull">Pantalla completa</button>
+    </div>
+    <div class="mq-bar2 mq-test">
+      <span class="mq-lab">Pruebas ▸</span>
+      <label class="chk">Presentación <select id="raSelReel"></select></label>
+      <label class="chk">Resultado <select id="raSelOut"><option value="">sorteo normal</option><option value="x100">forzar ×100</option><option value="x25">forzar ×25</option><option value="x10">forzar ×10</option><option value="x5">forzar ×5</option><option value="x3">forzar ×3</option><option value="x2">forzar ×2</option><option value="casi">forzar CASI</option><option value="nada">forzar nada</option></select></label>
+      <span class="mq-note">(forzar busca una semilla REAL de esa clase y usa el generador de verdad; solo para probar la maqueta)</span>
+    </div>
+  </section>
+
+  <section class="mq-sec mq-notes">
+    <h2>3 · Tabla de pagos y RTP exacto <small>generada por el mismo núcleo (<code>rasca-core.js</code>) que usa la mesa; verificada por <code>rtp.cjs</code></small></h2>
+    <div id="raPayTable"></div>
+  </section>
+
+  <section class="mq-sec mq-notes">
+    <h2>4 · El carrete <small>8 presentaciones sorteadas sin repetir las 2 últimas y con más peso a las menos vistas (independientes del resultado)</small></h2>
+    <div id="raReelTable"></div>
+    <h2 style="margin-top:26px">5 · Reacciones del crupier <small>≥ 6 frases ES+EN por situación; clic en una frase para verla en la mesa</small></h2>
+    <div id="raSayTable"></div>
+  </section>
+
+  <section class="mq-sec mq-notes">
+    <h2>6 · Cómo funciona <small>lo que propongo implementar</small></h2>
+    <div class="mq-cols" id="raHow"></div>
+  </section>
+</main>
+<script src="rasca-core.js"></script>
+<script src="out/art.js"></script>
+<script src="maqueta.js"></script>
+</body>
+</html>

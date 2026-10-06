@@ -36,6 +36,25 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.52",
+      name: ["Rasca y gana", "Scratch & win"],
+      date: "2026-10-06",
+      summary: ["Otro juego para el centro de la Barra: una tarjeta que rascas con la doblón y en la que tres símbolos iguales son premio.",
+        "Another game for the middle of the Bar: a card you scratch with the doubloon, where three matching symbols win a prize."],
+      chapters: [
+        { id: "rasca", kicker: ["La Barra", "The Bar"], title: ["Un casino más", "One more casino game"],
+          intro: ["Ya son ocho los juegos que el crupier puede poner en el centro de la Barra. Este es de **paciencia**: la tarjeta ya está decidida cuando la compras, y tú solo la descubres.",
+            "The dealer can now put eight different games in the middle of the Bar. This one is about **patience**: the card is already decided when you buy it, and you only uncover it."],
+          entries: [
+            E(["Rasca y gana", "Scratch & win"], "new", "0.2.52", [
+              ["Una tarjeta de **3×3 casillas** cubierta de lámina de plata. Ráscala con la doblón (ratón, flechas + Espacio, o el stick y el botón A del mando) y **tres símbolos iguales en cualquier parte** son premio.", "A **3×3 card** covered in silver foil. Scratch it with the doubloon (mouse, arrows + Space, or the stick and A button on a controller) and **three matching symbols anywhere** win a prize."],
+              ["Los premios son **×2, ×3, ×5, ×10, ×25** y, con tres chisteras, **×100**. La ficha (2, 5 o 10) solo multiplica el premio. Devuelve el **96 %** y no hay trampa: el resultado sale de la semilla antes de rascar, y «Rasca todo» solo lo descubre de golpe.", "The prizes are **×2, ×3, ×5, ×10, ×25** and, with three top hats, **×100**. The stake (2, 5 or 10) only multiplies the prize. It returns **96 %** and there is no trick: the result comes from the seed before you scratch, and “Scratch all” just uncovers it at once."],
+              ["Cada tarjeta trae su **tema** (tesoro, mapamundi, banderas, noche de gala, monumentos, faro, gemas y el tiempo), su manera de entrar y su efecto de premio. Los símbolos de ×2, ×3 y ×5 cambian con el tema, así que la tabla del escenario marca el de ×5.", "Each card has its own **theme** (treasure, world map, flags, gala night, monuments, lighthouse, gems and weather), its own way of coming in and its own prize effect. The ×2, ×3 and ×5 symbols change with the theme, so the table on the stage frames the ×5 one."],
+              ["Si ves **dos iguales y la tercera sigue tapada**, el crupier se pone nervioso. Tiene 62 frases en 12 idiomas, y si cae el premio gordo se desmaya.", "If you see **two matching symbols and the third is still covered**, the dealer gets nervous. He has 62 lines in 12 languages, and he faints at the big prize."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.51",
       name: ["El globo", "The balloon"],
       date: "2026-10-06",

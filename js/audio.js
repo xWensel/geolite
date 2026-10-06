@@ -374,6 +374,21 @@ window.AIQ = window.AIQ || {};
       f.stop = () => { if (!n) return; const m = n; n = null; m.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.05); setTimeout(() => { try { m.o1.stop(); m.o2.stop(); } catch (e) { /* ya parado */ } }, 400); };
       return f;
     })(),
+    /* Rasca y gana (v0.2.52): el ruido filtrado de la maqueta (con paso banda si se da una frecuencia) y el rasqueo, un ruido en bucle cuya intensidad y tono siguen la velocidad de la doblon */
+    rcNoise: go((t, d, v, hp, delay, bp) => { noise(t + (delay || 0), d, Object.assign({ vol: v }, bp ? { lp: bp, type: "bandpass", q: 1.1 } : { hp })); }),
+    rcScratch: (() => {
+      let n = null;
+      const f = speed => {
+        if (!A.audio.sfxOn || document.hidden || !init()) return;
+        if (!n) { const nn = ctx.sampleRate, b = ctx.createBuffer(1, nn, ctx.sampleRate), d0 = b.getChannelData(0); for (let i = 0; i < nn; i++) d0[i] = Math.random() * 2 - 1;
+          const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), hp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = b; s.loop = true; bp.type = "bandpass"; bp.Q.value = 0.9; hp.type = "highpass"; hp.frequency.value = 1400; g.gain.value = 0;
+          s.connect(bp).connect(hp).connect(g).connect(sfxBus); s.start(); n = { s, bp, g, last: 0 }; }
+        const t = ctx.currentTime; n.g.gain.setTargetAtTime(Math.min(0.13, 0.025 + speed * 0.00009), t, 0.012); n.bp.frequency.setTargetAtTime(2600 + Math.random() * 2400 + Math.min(1800, speed * 0.6), t, 0.008); n.last = performance.now();
+      };
+      f.idle = now => { if (n && now - n.last > 70 && n.g.gain.value > 0.0005) n.g.gain.setTargetAtTime(0, ctx.currentTime, 0.025); };
+      f.stop = () => { if (!n) return; const m = n; n = null; try { m.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.03); } catch (e) { /* contexto cerrado */ } setTimeout(() => { try { m.s.stop(); } catch (e) { /* ya parado */ } }, 300); };
+      return f;
+    })(),
     rouZero: go(t => { thump(t, { vol: 0.4, f0: 95, f1: 30, dur: 0.55 }); bell(67, t + 0.02, { vol: 0.08, dur: 1.4, rev: 0.4 }); bell(60, t + 0.1, { vol: 0.07, dur: 1.4, rev: 0.4 }); A.music.duck(0.3, 1500); }),
     intro: go(t => { noise(t, 0.5, { lp: 400, sweepTo: 6000, vol: 0.09, type: "bandpass", q: 1.4 }); thump(t + 0.32, { vol: 0.25, f0: 100, f1: 40, dur: 0.3 }); MOTIF.forEach((m, i) => pluck(m - 12, t + 0.34 + i * 0.09, { vol: 0.1, dur: 0.6 })); A.music.duck(0.4, 1800); }),
     stamp: go(t => { thump(t, { vol: 0.45, f0: 120, f1: 32, dur: 0.35 }); noise(t, 0.12, { lp: 1600, vol: 0.14 }); }),
