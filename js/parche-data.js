@@ -36,6 +36,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.53",
+      name: ["Pulido de píxeles", "Pixel polish"],
+      date: "2026-10-07",
+      summary: ["Una vuelta de pulido al arte: píxeles sueltos fuera, sin cambiar ningún dibujo.", "A polish pass over the art: stray pixels gone, no drawing changed."],
+      chapters: [
+        { id: "pulido", kicker: ["Arte", "Art"], title: ["Pulido", "Polish"],
+          intro: ["Una pasada por el arte de píxeles buscando motas que se colaron. No cambia ningún dibujo.", "A sweep through the pixel art looking for stray specks. No drawing changes."],
+          entries: [
+            E(["Píxeles sueltos", "Stray pixels"], "fix", "0.2.53", [
+              ["Quitados los píxeles sueltos de la bandera de España, el volcán, la siesta, el explorador, el navegante, la manga, el moái coronado, la isla del códice, la caja de suministros, la pantalla de victoria y el propio Don Crupier.", "Removed the stray pixels from the Spanish flag, the volcano, the siesta, the explorer, the navigator, the sleeve, the crowned moai, the codex island, the supplies crate, the victory screen and Don Crupier himself."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.52",
       name: ["Rasca y gana", "Scratch & win"],
       date: "2026-10-06",
