@@ -172,7 +172,6 @@ window.AIQ = window.AIQ || {};
     /* estado del dia en el perfil (sin crear la entrada: solo los dias jugados cuentan para los logros) */
     get(board) {
       const P = A.profile.get(); let d = P.daily[board];
-      if (d && d.v !== 2) d = P.daily[board] = { v: 2, tries: [{ s: d.score || 0, ts: d.ts || 0 }] };   // formato antiguo: un solo intento
       if (!d || !Array.isArray(d.tries)) d = { v: 2, tries: [] };       // entrada a medio escribir: sin esto la portada no se pintaba
       const done = d.tries.filter(t => !t.live);
       return { tries: d.tries, done: done.length, live: d.tries.findIndex(t => t.live) + 1, left: TRIES - d.tries.length, total: done.reduce((n, t) => n + (t.s || 0), 0) };

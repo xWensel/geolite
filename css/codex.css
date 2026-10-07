@@ -278,9 +278,9 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-light p { position: absolute; bottom: 14px; left: 0; right: 0; margin: 0; text-align: center; font-family: var(--mono); font-size: 14px; color: rgba(242, 233, 214, .6); } .cx-lx { position: absolute; top: 14px; right: 16px; font-size: 22px; color: var(--paper); background: none; border: 0; cursor: pointer; }
 
 /* ---------- aviso de tarjeta nueva ---------- */
-.cx-toast { position: absolute; z-index: 11; right: 16px; bottom: 16px; display: flex; gap: 12px; align-items: center; text-align: left; max-width: min(340px, calc(calc(100 * var(--vw)) - 32px)); padding: 10px 16px 10px 10px; cursor: pointer; color: var(--ink); background: var(--paper); background-image: var(--paper-grain); border: 0; box-shadow: inset 0 0 0 2px var(--ink), 0 10px 0 -2px rgba(0,0,0,.35); }
+.cx-toast { position: absolute; z-index: 11; right: 16px; bottom: 16px; display: flex; gap: 12px; align-items: center; text-align: left; max-width: min(420px, calc(calc(100 * var(--vw)) - 32px)); padding: 10px 16px 14px 10px; cursor: pointer; color: var(--ink); background: var(--paper); background-image: var(--paper-grain); border: 0; box-shadow: inset 0 0 0 2px var(--ink), 0 10px 0 -2px rgba(0,0,0,.35); }
 .cx-toast.hidden { display: none; } .cx-toast.in { animation: cx-toast .7s var(--spring) both; } @keyframes cx-toast { from { transform: translateX(120%) rotate(6deg); opacity: 0; } }
-.cx-tcard { --rc: #1fb3a3; position: relative; flex: none; width: 46px; aspect-ratio: 5 / 7; padding: 3px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--rc); }
+.cx-tcard { --rc: #1fb3a3; position: relative; flex: none; width: 104px; aspect-ratio: 1;  padding: 3px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--rc); }
 .cx-tcard.m1 { --rc: #a45530; } .cx-tcard.m2 { --rc: #9095ab; } .cx-tcard.m3 { --rc: #f5a623; }
 .cx-tcard .cx-art { position: relative; width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; background: var(--ink); color: rgba(242,233,214,.5); } .cx-tcard .cx-ic { width: 60%; }
 .cx-tcard .cx-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } .cx-tcard .cx-art.flag > img { object-fit: contain; }
@@ -291,7 +291,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-rbar { position: absolute; left: 10px; right: 16px; bottom: 4px; height: 2px; display: flex; gap: 3px; pointer-events: none; }
 .cx-rbar u { flex: 1; background: rgba(20, 35, 43, .16); text-decoration: none; transition: background .25s; } .cx-rbar u.on { background: var(--red); }
 .cx-toast.out { animation: cx-toast-out .34s ease-in both; } @keyframes cx-toast-out { to { transform: translateX(120%); opacity: 0; } }
-.cx-tt { display: grid; gap: 2px; min-width: 0; } .cx-tt em { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--red-deep); } .cx-tt b { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 20px; line-height: 1.05; } .cx-tt i { font-style: normal; font-family: var(--mono); font-size: 14px; color: var(--ink-2); }
+.cx-tt { display: grid; gap: 2px; min-width: 0; } .cx-tt em { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--red-deep); } .cx-tt b { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 20px; line-height: 1.05; } .cx-tt s { text-decoration: none; font-family: var(--mono); font-size: 14px; letter-spacing: .04em; color: var(--muted, #5b6a5f); } .cx-tt i { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-style: normal; font-family: var(--mono); font-size: 14px; color: var(--ink-2); }
 
 /* ---------- por aspecto ---------- */
 html[data-skin="casino"] .cx-toast { border-radius: 14px; }

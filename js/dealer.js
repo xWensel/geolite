@@ -1745,7 +1745,6 @@ window.AIQ = window.AIQ || {};
   D.sequence = (items, done) => { let k = 0; const next = () => { if (k >= items.length) return done && done(); const it = items[k++]; D.say(it.line, { mood: it.mood, lang: it.lang, hold: 0, done: () => later(next, it.gap || 700) }); }; next(); };
   D.line = (key, i) => { const a = LINES[key]; return a ? (i == null ? rand(a) : a[i % a.length]) : null; };
   D.lines = LINES; D.LINGER = LINGER;
-  D._pick = key => pickLine(key);   // solo para pruebas de desarrollo (dev/*.js): saca una frase de la bolsa sin repetir
   D._fake = (kind, n) => fakeAch(kind || "idle", n || 75);   // solo para pruebas: fuerza el logro falso
 
   /* ---------------------------------------------------------------- memoria persistente: visitas, tiempo jugado, como acabo la ultima expedicion

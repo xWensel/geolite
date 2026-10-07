@@ -38,7 +38,7 @@ Cada Campamento sortea un juego de los ocho. Todos se deciden con la semilla de 
 | El globo | Crash: cobra antes de que reviente; sube hasta ×100 | 97,00 % exacto |
 | Rasca y gana | Tarjeta de 3×3 casillas que se rasca con la doblón; tres iguales pagan de ×2 a ×100 | 96,00 % exacto |
 
-Las fichas son de 2, 5 o 10 doblones. Los retornos se comprueban enumerando todas las combinaciones (`tools/art/*/rtp.cjs`).
+Las fichas son de 2, 5 o 10 doblones. Los retornos se comprueban enumerando todas las combinaciones.
 
 ## Logros
 
@@ -67,11 +67,9 @@ Las fichas son de 2, 5 o 10 doblones. Los retornos se comprueban enumerando toda
 - `js/adventure.js`, `js/relics.js`, `js/challenges.js`, `js/chfx.js`, `js/jefes.js` – Aventura, reliquias, retos y jefes · `js/casino-*.js` – los juegos del casino · `js/dealer.js`, `js/crupier.js` – el crupier y su guion
 - `js/hub.js`, `js/profile.js`, `js/rank.js`, `js/steam.js`, `api/` – menús, perfil y logros, clasificación y Steamworks · `js/codex.js`, `js/wiki.js` – Enciclopedia
 - `js/audio.js`, `js/jukebox.js` – efectos sintetizados y la banda sonora (`assets/music/`) · `js/i18n*.js` – textos en 12 idiomas · `js/parche*.js` – notas del parche dentro del juego
-- `data/` – mundo, lugares, preguntas, Enciclopedia (`data/wiki/`) · `tools/` – generadores de datos, arte y exportaciones · `dev/` – pruebas en consola (`smoke`, `bot2`, `ovCheck`, `layoutTest`) · `docs/`, `steam/` – Steam y documentación
+- `data/` – mundo, lugares, preguntas, Enciclopedia (`data/wiki/`) · `tools/` – empaquetado y subida a Steam, logros, créditos y fotos · `docs/steam/`, `steam/` – material y guía de Steam
 - `fonts/` – Silkscreen, Jersey 15, Pixelify Sans y Fusion Pixel (SIL OFL) más subconjuntos propios para CJK, cirílico y polaco
 - Los datos del jugador usan claves `atlasiq.*` en `localStorage` y el código el espacio de nombres `window.AIQ`: son nombres internos estables.
-
-Herramienta de desarrollo: `dev/bot.js`, un jugador automático para medir dificultad y economía (`bot2(errKm, baraja, ascension, semilla, …)`).
 
 ## Créditos
 
@@ -81,7 +79,7 @@ Herramienta de desarrollo: `dev/bot.js`, un jugador automático para medir dific
 
 Todo el arte de Geolite es pixel art de Cousins Studios. La base está ideada por el estudio y levantada con andamiaje de IA (libro de estilo propio, paleta limitada); el trabajo manual y el pulido son humanos: cada pieza se retoca, se redibuja y se pule a mano hasta quedar a la rejilla nativa del juego.
 
-- **Don Crupier:** retrato maestro pulido a mano; capas, caras, manos, expresiones y gestos animados por capas (`tools/crupier/`).
+- **Don Crupier:** retrato maestro pulido a mano; capas, caras, manos, expresiones y gestos animados por capas.
 - **Iconos:** insignias de logros (48 px nativos sobre su ficha), iconos del casino, reliquias, herramientas, jefes, retos, barajas, tipos de tarjeta e interfaz.
 - **Escenas y tarjetas:** jefes, actos, Campamento, cofre, victoria y derrota, las tarjetas de modo y las mesas de cada juego del casino.
 - **Marca:** logo y escudo (la Tierra de la O de GEOLITE con la carta y la ficha), en PNG a escala entera.

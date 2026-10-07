@@ -79,20 +79,6 @@ window.AIQ = window.AIQ || {};
       seen.add("clue:" + id);
       add("clue", 1, { ...q, name: txt, answer: q.name, sub: { es: "", en: "" }, clue: true, cid: ["clue:" + id, id], topic: "clue", tier: 1, fame: diff });
     });
-    // apodos antiguos del Clasico (descripciones de Wikidata): solo si no existe el banco nuevo de pistas; y respaldo con las preguntas antiguas si aun no existe el banco de lugares
-    for (const camp of A.CAMPAIGNS) {
-      if (!camp.levels[0] || !camp.levels[0].all) continue;
-      for (const Lv of camp.levels) for (const q of Lv.all()) {
-        const id = q.cid && q.cid[0]; if (!id) continue;
-        const kind = q.clue ? "clue" : Lv.kind, topic = { capital: "capital", city: "city", landmark: "landmark", country: "country", place: "landmark", nature: "nature", water: "nature", strait: "nature", battle: "history", event: "history", clue: "clue" }[kind];
-        if (!topic) continue;
-        if (topic !== "clue" && (A.PLACES || []).length > 200) continue;               // con el banco nuevo, solo aportan las pistas
-        if (topic === "clue" && (A.CLUES || []).length) continue;                       // ...y con el banco de pistas, ni eso
-        const key = topic === "clue" ? "clue:" + id : id;                              // una pista es otra pregunta aunque su respuesta ya este en el banco (Las Vegas...): antes se descartaban 78 de 80 y la ronda 10 salia con 2 lugares
-        if (seen.has(key)) continue;
-        seen.add(key); add(topic, clamp(Lv.tier || 0, 0, 2), { ...q, kind, topic, tier: clamp(Lv.tier || 0, 0, 2) });
-      }
-    }
     return POOLS;
   }
   /* v0.20 (usuario, 2026-09-30): TODAS las preguntas del banco tienen salida en las 12 rondas (la Enciclopedia y sus logros se completan jugando la Aventura).
@@ -260,9 +246,6 @@ window.AIQ = window.AIQ || {};
   A.adv.poolStats = () => Object.fromEntries(Object.entries(pools()).map(([k, v]) => [k, v.length]));
   A.adv.roundPlaces = r => poolFor(r);
   A.adv.countSeen = countSeen;
-  A.adv._autoAssign = () => autoAssign();                            // solo para tools/: regenerar data/carretes.js desde el reparto automatico (ids)
-  A.adv._pools = () => pools();                                      // solo para tools/: el banco entero por tema (documento de carretes)
-  A.adv._pickTest = (slot, fresh, realSeen) => { if (fresh) run.used = []; if (!realSeen) run._scratch = run._scratch || {}; run.act = Math.floor(slot / 4); run.round = slot % 4; run.attempt = (run.attempt || 0) + 1; run.curQ = null; const qs = pickQuestions(5); const t = ROUND_THEME[slot]; qs.forEach(q => A.adv.countSeen(q, t === "flag" ? "flag" : q.topic)); return qs.map(q => q.cid[0]); };   // solo para pruebas (dev/): sorteo de una ronda y la cuenta de vistas (aparte, salvo realSeen)
   A.adv.roundPool = r => poolFor(r).length;
   const persist = () => { try { if (run) localStorage.setItem(slot, JSON.stringify(run)); else localStorage.removeItem(slot); } catch (e) { /* sin almacenamiento */ } };
 
@@ -429,30 +412,18 @@ window.AIQ = window.AIQ || {};
   const rawOf = r => r.score + r.cleared * 1000 + (r.won ? 2500 : 0);
   const finalOf = r => Math.round(rawOf(r) * ascMult(r.asc));
   A.adv.finalOf = finalOf; A.adv.ascMult = ascMult; A.adv.mulTxt = mulTxt;
-  /* v0.13: partidas guardadas con reliquias o herramientas que ya no existen: se quitan y se devuelve su valor en doblones */
-  function migrate(r) {
-    const TO = { spectacles: "dictionary", lens: "divingmask", umbrella: "divingmask", shockabsorber: "plates", gamer: "steadyhand", spareeye: "steadyhand", taskmgr: "protector", powerbank: "miner", sonarplus: "glass", compass16: "glass", coupon: "spyhole", banker: "hoard" }, seenP = new Set();
-    r.perks = r.perks.map(id => (!A.RELICS[id] && TO[id] && !r.perks.includes(TO[id]) && !seenP.has(TO[id]) ? (seenP.add(TO[id]), TO[id]) : id));
-    const gone = r.perks.filter(id => !A.RELICS[id]); if (gone.length) { r.perks = r.perks.filter(id => A.RELICS[id]); r.coins += gone.length * 4; }
-    const dead = Object.keys(r.tools).filter(id => !TOOLS[id]); dead.forEach(id => { delete r.tools[id]; r.coins += 3; });
+  /* partida guardada: se descarta lo que ya no exista en el catalogo (reliquias, herramientas, retos) para que reanudar nunca falle */
+  function sanitize(r) {
+    r.perks = r.perks.filter(id => A.RELICS[id]);
+    Object.keys(r.tools).filter(id => !TOOLS[id]).forEach(id => delete r.tools[id]);
     if ((r.stock || []).some(s => (s.k === "perk" && !A.RELICS[s.id]) || (s.k === "tool" && !TOOLS[s.id]))) { r.stock = null; r.stockKey = null; }
-    if (r.cjk == null) r.cjk = A.chal.noLatin();                    // v0.4.1: partidas de antes sin run.cjk: se fija una vez con el idioma de ahora
-    /* v0.23: retos que ya no existen ("Continentes cambiados"): fuera de la partida guardada, y el soborno que se pago por quitarlo se devuelve
-       (en esa ronda sale otro reto en su lugar) */
-    if (r.chal) r.chal = r.chal.filter(c => A.CHAL[c.id]).map(c => A.chal.canon(c));   // tanda 6: los gemelos de antes pasan al reto que los absorbe
-    /* v0.29: y los sobornos de un reto que ya no sale en esa ronda (entre la v0.23 y la v0.28 alli se sorteaba otro; ahora salen Continentes barajados) */
-    const now = r.act * 4 + r.round;
-    for (const k in r.bribed || {}) {
-      let inPlan = null; if (!r.inf && !A.adv._force && r === run && +k >= now) try { inPlan = chalFor(+k).paid; } catch (e) { inPlan = null; }
-      const gone = r.bribed[k].filter(id => !A.CHAL[id] || (inPlan && !inPlan.includes(id) && !(r.salt && r.salt[k]))); if (!gone.length) continue;
-      r.bribed[k] = r.bribed[k].filter(id => !gone.includes(id)); r.bribeN = Math.max(0, (r.bribeN || 0) - gone.length);
-      r.coins += gone.length * Math.max(2, Math.round(10 * (+k % 4 === 3 ? 2 : 1) * (1 + 0.5 * r.bribeN) * ascFx(r.asc).price * (1 + 0.25 * Math.floor(+k / 4))));   // lo mas que podia costar sobornarlo en esa ronda (truco de mapa de nivel 3): nunca se devuelve de menos
-    }
+    if (r.cjk == null) r.cjk = A.chal.noLatin();
+    if (r.chal) r.chal = r.chal.filter(c => A.CHAL[c.id]);
   }
   A.adv.resume = function (daily = false) {
     slot = keyOf(daily); run = loadSlot(daily);
     if (!run) return false;
-    migrate(run); resumedIntro = true;
+    sanitize(run); resumedIntro = true;
     if (run.phase === "shop" || run.phase === "chest") openShop(run.phase === "chest");
     else if (run.phase === "verdict") afterVerdict(!!run.vBoss);                            // la ronda ya estaba superada y cobrada: seguimos al campamento
     else if (run.phase === "win") showWinChoice();                                          // ya habias ganado: vuelve a preguntar cobrar o modo infinito
@@ -1847,7 +1818,6 @@ window.AIQ = window.AIQ || {};
       requestAnimationFrame(frame);
     } catch (e) { bail(e); }
   }
-  A.adv._rou = { kinds: Object.keys(ROU_REEL), build: rouBuild, pick: rouPick, spin: spinRoulette, warp: rouWarp, wheel: (o, done) => spinWheel(o, done), coin: (o, done) => spinCoin(o, done) };   // solo para pruebas (dev/): _rouForce = { kind, dir } fuerza el final y la direccion
   /* ---------------- v0.2.9: mas juegos de casino para el centro de la Barra: Moneda al aire y Ruleta de premios ----------------
      El centro lo sortea la semilla por ronda entre CASINO (Rojo o negro, Moneda al aire, Ruleta de premios); cada juego tiene su cenefa y su pantalla.
      Todo se decide y se guarda ANTES de animar (como la ruleta): recargar a medias no lo deshace. El registro de la ronda vive en run.reds[r]

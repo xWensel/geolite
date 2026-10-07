@@ -1,13 +1,13 @@
 /*
  * Geolite - iconos (v0.15): ilustraciones pixel art casino generadas con un unico libro de estilo (tools/gen_art.py) en assets/icons/.
- * Uso: A.icon("sonar") -> <img class="ic">. Ya no queda ningun dibujo vectorial antiguo.
+ * Uso: A.icon("sonar") -> <img class="ic">.
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
   A.blind = (kind, inner) => `<span class="ic blindchip">${A.icon("blank_" + kind, "bc-base")}${A.icon(inner, "bc-in")}</span>`;
   /* Los iconos son ilustraciones pixel-art generadas con un unico libro de estilo (tools/gen_art.py) en assets/icons/.
      Si falta alguno, simplemente no se pinta. */
-  const ALIAS = { steadyhand: "steady", a_globe: "globe", a_cal: "t_event", a_boots: "boots", a_flag: "t_country", a_bolt: "flash", a_night: "a_moon", roulette_r: "roulette_r" };
+  const ALIAS = { steadyhand: "steady" };
   A.icon = (id, cls = "") => {
     id = ALIAS[id] || id;
     return `<img class="ic ic-${id} ${cls}" src="assets/icons/${id}.webp" alt="" draggable="false" decoding="async" onerror="AIQ._icErr(this)">`;

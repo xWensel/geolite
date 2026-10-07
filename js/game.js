@@ -1097,7 +1097,6 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     };
     gate.addEventListener("pointerdown", enter);
     addEventListener("keydown", function k(e) { if (entered) { removeEventListener("keydown", k); return; } if ((e.key === "Enter" || e.key === " ") && !(e.target && e.target.closest && e.target.closest("#gwSw"))) { e.preventDefault(); enter(); } });
-    (A._debug = A._debug || {}).enterBoot = enter;
     if (S.intro) playStudio(showGate); else showGate();
   }
 
@@ -1118,5 +1117,4 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
 
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
 
-  A._debug = Object.assign(A._debug || {}, { S, map, world, reveal, revealObs, startLevel_, showTitle, odoSet, setLang, finishBoot, playStudio, gateWarn });
 })(window.AIQ);

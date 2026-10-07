@@ -33,6 +33,7 @@ window.AIQ = window.AIQ || {};
       }
       return rec;
     },
+    imgOf: async id => { const I = await loadImg(); return I[id] || null; },                // la foto de una carta (sin cargar su texto completo): [origen, ancho, alto, credito]
     factOf: (id, lang) => { const S = shortC[lang]; return (S && S[id]) || ""; },
   };
   /* limpia el extracto de Wikipedia para las notas: fuera transliteraciones, pronunciaciones y parentesis en otros alfabetos,

@@ -1,2 +1,0 @@
-<!doctype html><meta charset="utf-8"><title>gen</title><style>body{margin:0;background:#1d1631;color:#f3eddc;font:11px monospace}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px}img{width:100%;display:block}</style><div class="g" id="g"></div>
-<script>fetch('../assets/gen/manifest.json').then(r=>r.json()).then(l=>{g.innerHTML=l.filter(x=>!x.startsWith('type_')).map(k=>`<div><img src="../assets/gen/${k}.jpg?${Date.now()}"><span>${k}</span></div>`).join('')})</script>

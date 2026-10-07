@@ -822,7 +822,7 @@ window.AIQ = window.AIQ || {};
     return `<div class="cx-d1">
         <div class="cx-dtop"><div class="cx-d-card">
           <div class="cx-big ${un ? "open" : "locked"} ${tr ? "m" + m : un ? "mx" : "m0"}">
-            <div class="cx-art${rec && rec.img && rec.img.flag ? " flag" : ""}">${un ? `<img class="cx-ph" alt="" data-gen="type_${e.type}">${iconSvg(e.type)}${rec && rec.img ? `<img id="cxHero" class="${photo(rec.img.card)}" alt="" src="${esc(rec.img.card)}" decoding="async" data-light><button class="cx-hd" type="button" data-light ${A.ttAttr(A.t("codex.hd"))}>${A.icon("a_lens")}</button>` : ""}` : `<span class="cx-bk">${iconSvg(e.type)}${A.icon("lock", "q")}</span>`}</div>
+            <div class="cx-art${rec && rec.img && rec.img.flag ? " flag" : ""}">${un ? `${iconSvg(e.type)}${rec && rec.img ? `<img id="cxHero" class="${photo(rec.img.card)}" alt="" src="${esc(rec.img.card)}" decoding="async" data-light><button class="cx-hd" type="button" data-light ${A.ttAttr(A.t("codex.hd"))}>${A.icon("a_lens")}</button>` : ""}` : `<span class="cx-bk">${iconSvg(e.type)}${A.icon("lock", "q")}</span>`}</div>
             <div class="cx-cap"><span class="cx-pn">${un ? esc(nameOf(e, rec)) : esc(A.t("codex.locked"))}</span><span class="cx-mt"><em>${esc(typeLabel(e.type))}</em>${tr ? pips(m) : ""}</span></div><span class="cx-foil"></span>
           </div>
           ${tr ? `<div class="cx-dmeds">${[0, 1, 2].map(i => `<span data-tt="${esc(P(S[MED[i]]) + " · " + P(S.within).replace("{km}", kmTxt(L[i])) + "\n" + (m > i ? P(S.got) : P(S.miss)))}">${medal(i, m > i)}<em>&lt; ${esc(kmTxt(L[i]))}</em></span>`).join("")}</div>` : ""}
@@ -1143,23 +1143,38 @@ window.AIQ = window.AIQ || {};
   function toastItem(id) {
     const e = E[id], it = document.createElement("span"); it.className = "cx-ri";
     const lvl = e.parent ? e.tier : tiered(id) ? 1 : 0, what = e.parent ? A.t(e.tier === 2 ? "codex.tierh" : "codex.tierk") : typeLabel(e.type);
-    it.innerHTML = `<span class="cx-tcard m${lvl}"><span class="cx-art">${iconSvg(e.type)}</span>${lvl ? `<span class="cx-tmed">${A.icon("medal_" + MED[lvl - 1])}</span>` : ""}</span><span class="cx-tt"><em>${esc(A.t("codex.new"))} · ${esc(what)}</em><b>${esc(nameOf(e, memOf(id)))}</b></span>`;
-    loadContent(e, A.wlang()).then(rec => {
-      if (rec.none) return;
-      it.querySelector("b").textContent = nameOf(e, rec);
-      if (rec.img) { const im = new Image(); im.alt = ""; im.className = photo(rec.img.thumb); im.onerror = () => { im.onerror = null; im.src = rec.img.thumb; }; im.src = thumbOf(id, rec); A.revealImg(im, () => { const art = it.querySelector(".cx-art"); art.classList.toggle("flag", !!rec.img.flag); art.prepend(im); }); }
+    const ctry = e.country && cName(e.country) ? cName(e.country) : "", pid = e.parent || id, lang = A.wlang();
+    it.innerHTML = `<span class="cx-tcard m${lvl}"><span class="cx-art">${iconSvg(e.type)}</span>${lvl ? `<span class="cx-tmed">${A.icon("medal_" + MED[lvl - 1])}</span>` : ""}</span><span class="cx-tt"><em>${esc(A.t("codex.new"))} · ${esc(what)}</em><b>${esc(nameOf(e, memOf(id)))}</b>${ctry ? `<s>${esc(ctry)}</s>` : ""}<i></i></span>`;
+    const info = it.querySelector("i"), say = d => { if (d) info.textContent = d; };
+    /* la foto (img.json) y el dato corto llegan enseguida; el texto completo de la tarjeta mejora el nombre y la descripcion cuando carga */
+    const put = (src, back, flag) => new Promise(res => {
+      const im = new Image(); im.alt = ""; im.className = photo(src);
+      const done = () => { const art = it.querySelector(".cx-art"); art.classList.toggle("flag", !!flag); art.prepend(im); res(); };
+      im.onload = done; im.onerror = () => { if (!back) return res(); im.onerror = () => res(); im.src = back; };
+      im.src = src;
+    });
+    const full = loadContent(e, lang).then(rec => { if (rec.none) return null; it.querySelector("b").textContent = nameOf(e, rec); say(rec.desc); return rec; }).catch(() => null);
+    it._ready = Promise.all([A.wiki.imgOf(pid), A.wiki.loadShort(lang)]).then(([im]) => {
+      say(A.cleanFact(A.wiki.factOf(pid, lang)));
+      if (im) return put(A.media(`assets/wiki/th/${A.mediaKey(pid)}.webp`), A.media(`assets/wiki/card/${A.mediaKey(pid)}.webp`), /\/(\d+px-)?(State_)?flag_of_[^\/]*$/i.test(im[0]));
+      return full.then(rec => (rec && rec.img ? put(rec.img.thumb, rec.img.card, rec.img.flag) : null));   // paises sin foto propia: su bandera
     }).catch(() => {});
     return it;
   }
+  /* el aviso espera (hasta 1,4 s) a que las fotos de las primeras tarjetas esten cargadas: se ve la foto, no el icono de relleno */
   function toast(ids) {
     if (!ids.length) return;
+    const items = ids.map(toastItem);
+    Promise.race([Promise.all(items.slice(0, 2).map(x => x._ready)), new Promise(r => setTimeout(r, 1400))]).then(() => toastShow(ids, items));
+  }
+  function toastShow(ids, items) {
     let el = $("cxToast"); if (!el) { el = document.createElement("button"); el.id = "cxToast"; el.type = "button"; el.className = "cx-toast hidden"; (document.getElementById("leftCol") || $("app")).appendChild(el); }
     clearTimeout(toastT); clearTimeout(reelT);
     const n = ids.length, FIRST = 1300, END = 7000, step = Math.max(240, Math.min(900, 3800 / Math.max(1, n - 1)));
     const hold = k => n === 1 ? END : k === 0 ? FIRST : k < n - 1 ? step : Math.max(1600, END - FIRST - (n - 2) * step);
     const calm = document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.innerHTML = `<span class="cx-reel"></span>${n > 1 ? `<span class="cx-rbar">${"<u></u>".repeat(n)}</span>` : ""}`;
-    const items = ids.map(toastItem), pips2 = el.querySelectorAll(".cx-rbar u");
+    const pips2 = el.querySelectorAll(".cx-rbar u");
     items.forEach(it => el.firstElementChild.appendChild(it));
     let i = 0;
     const show = (k, from) => {
