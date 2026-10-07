@@ -51,6 +51,14 @@ window.AIQ = window.AIQ || {};
               ["La ficha de cada tarjeta ya no se tapa con una ilustración por tipo: manda la foto.", "A card's page no longer sits under a filler illustration: the photo comes first."]
             ])
           ] },
+        { id: "rendimiento", kicker: ["Rendimiento", "Performance"], title: ["Medir antes de tocar", "Measure before touching"],
+          intro: ["Pulsa **F3** para ver los fotogramas por segundo, la memoria y el motor del mapa. No cambia cómo se juega.",
+            "Press **F3** to see frames per second, memory and the map engine. It does not change how the game plays."],
+          entries: [
+            E(["Panel de rendimiento", "Performance panel"], "new", "0.3.0", [
+              ["**F3** lo enseña u oculta, y guarda un informe por pantalla (`geolite-perf.txt`) para enviarlo si algo va a tirones. En Steam Deck también se activa con `GEOLITE_PERF=1`.", "**F3** shows or hides it, and saves a per-screen report (`geolite-perf.txt`) you can send if something stutters. On Steam Deck it also turns on with `GEOLITE_PERF=1`."]
+            ])
+          ] },
         { id: "limpieza", kicker: ["Limpieza", "Clean-up"], title: ["Solo lo que hay hoy", "Only what is here today"],
           intro: ["Esta versión retira lo heredado para que el juego sea exactamente lo que se ve.",
             "This version removes what was left over so the game is exactly what you see."],

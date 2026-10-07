@@ -33,6 +33,9 @@ ipcMain.on("host:demo", (e) => { e.returnValue = !!flavor.demo; });
 /* Steam Deck (v0.2.29): iconos de mando y modo mando desde el primer fotograma (el navegador no ve el mando hasta la primera pulsacion) */
 const onDeck = (() => { try { if (steamClient && steamClient.utils.isSteamRunningOnSteamDeck()) return true; } catch (e) { /* steamworks sin utils */ } return process.env.SteamDeck === "1"; })();
 ipcMain.on("host:device", (e) => { e.returnValue = onDeck ? "deck" : "pc"; });
+/* panel de rendimiento (js/perf.js): se enciende desde el arranque con GEOLITE_PERF=1 o --perf; su informe se guarda en la carpeta de datos del juego */
+ipcMain.on("host:perf", (e) => { e.returnValue = process.env.GEOLITE_PERF === "1" || process.argv.includes("--perf"); });
+ipcMain.on("perf:save", (e, txt) => { if (alive(win) && e.sender === win.webContents && typeof txt === "string" && txt.length < 20000) { try { fs.writeFileSync(path.join(app.getPath("userData"), "geolite-perf.txt"), txt); } catch (err) { /* sin permisos de escritura */ } } });
 /* teclado de Steam (v0.2.31): el flotante escribe directamente en la casilla; si no se puede, el de Big Picture devuelve el texto. Si Steam no
    puede mostrar ninguno (PC sin Big Picture) contesta "none" y el juego saca el teclado del crupier (js/teclado.js) */
 ipcMain.handle("steam:keyboard", async (e, o) => {
