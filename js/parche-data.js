@@ -36,6 +36,31 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.53",
+      name: ["Revisión a fondo", "A close look"],
+      date: "2026-10-07",
+      summary: ["Una pasada por todo el juego para cazar fallos: el puntero que se perdía, el zoom que se desviaba, Ajustes que quedaba tapado y partidas guardadas que no se podían continuar.",
+        "A sweep through the whole game to catch bugs: the lost pointer, the drifting zoom, Settings hiding behind the pause menu and saved games that could not be continued."],
+      chapters: [
+        { id: "revision", kicker: ["Arreglos", "Fixes"], title: ["Lo que se ha corregido", "What has been fixed"],
+          intro: ["Sin contenido nuevo: solo arreglos de controles, mapa, partidas guardadas y la Barra.", "No new content: only fixes to controls, the map, saved games and the Bar."],
+          entries: [
+            E(["Puntero y mando", "Pointer and gamepad"], "fix", "0.2.53", [
+              ["El **retículo ya reaparece** al empezar una pregunta o al quitar la pausa con el ratón quieto sobre el mapa (antes no se veía ningún puntero hasta moverlo), y con **Controles invertidos** más **Cursor con retraso** ya no nace en el lado equivocado.", "The **reticle now comes back** when a question starts or the pause ends with the mouse resting on the map (before, no pointer showed until you moved it), and with **Inverted controls** plus **Lagging cursor** it no longer spawns on the wrong side."],
+              ["Con mando, la cruceta ya no se queda **empujando sin fin** al llegar al final de una lista, el cursor no se oculta ni se duplica sobre el mapa, y **Start** no abre el menú por detrás de un juego de la Barra. En la Steam Deck el teclado de pantalla se puede cerrar tocando el fondo.", "With a gamepad, the d-pad no longer **keeps pushing forever** at the end of a list, the cursor no longer hides or doubles over the map, and **Start** no longer opens the menu behind a Bar game. On the Steam Deck the on-screen keyboard can be closed by tapping the background."]
+            ]),
+            E(["Mapa", "Map"], "fix", "0.2.53", [
+              ["El **zoom** con rueda o pellizco ya se ancla bajo el cursor aunque el mapa tenga la curva de pantalla antigua o esté girado (se desviaba hasta 100 px), y la rueda funciona en Firefox.", "**Zooming** with the wheel or a pinch now anchors under the cursor even with the old-screen curve or a rotated map (it drifted up to 100 px), and the wheel works in Firefox."],
+              ["**Cambiar el tamaño de la ventana** conserva tu nivel de zoom: al encogerla ya no queda el mapa con un zoom que no habías puesto.", "**Resizing the window** keeps your zoom level: shrinking it no longer leaves the map zoomed in by a level you did not choose."]
+            ]),
+            E(["Partidas y Ajustes", "Games and Settings"], "fix", "0.2.53", [
+              ["**Ajustes** abierto con el engranaje en plena pregunta ya queda por encima de la pausa, y abrirlo durante la intro no deja correr el reloj por debajo.", "**Settings** opened from the cog mid-question now sits above the pause menu, and opening it during the intro no longer lets the clock run underneath."],
+              ["En el **modo infinito**, salir y reanudar ya no rebaraja las preguntas, el **Interruptor** sigue apagando los retos aunque descartes o dividas la pregunta, y una partida guardada corrupta ya no rompe la portada ni deja un «Continuar» que no hace nada.", "In **infinite mode**, leaving and resuming no longer reshuffles the questions, the **Switch** keeps challenges off even if you discard or split the question, and a corrupt save no longer breaks the title screen or leaves a «Continue» that does nothing."],
+              ["En **Rasca y gana**, si pierdes el foco con una tecla pulsada la doblón ya no sigue rascando sola.", "In **Scratch & win**, losing focus with a key held no longer leaves the doubloon scratching by itself."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.52",
       name: ["Rasca y gana", "Scratch & win"],
       date: "2026-10-06",

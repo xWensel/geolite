@@ -230,14 +230,22 @@ window.AIQ = window.AIQ || {};
     guideX = document.createElement("i"); guideX.className = "ptr-gx"; guideY = document.createElement("i"); guideY.className = "ptr-gy";
     const app = $("app"); app.append(guideX, guideY, mag, root);
     cv = root.querySelector(".ptr-cv"); c = cv.getContext("2d"); tag = root.querySelector(".ptr-tag"); ghost = root.querySelector(".ptr-ghost"); windEl = root.querySelector(".ptr-wind"); mctx = mag.getContext("2d");
-    window.addEventListener("pointermove", e => {
+    /* el reticulo entra en el lienzo (con el raton en (x, y) del lienzo): el filtro de retraso y el viento parten de donde esta el reticulo, no del raton */
+    const enter = (x, y) => {
+      const r = map.cv.getBoundingClientRect(); cvL = r.left; cvT = r.top; P.rx = x; P.ry = y;
+      if (!P.on) { const m = P.m; sx = hx = m && m.cmirror && m.cmirror.x ? map.W - x : x; sy = hy = m && m.cmirror && m.cmirror.y ? map.H - y : y; wlx = wly = null; }
+      show(true); const t = performance.now(); eff(t); apply(t);
+    };
+    const move = e => {
       if (e.pointerType === "touch") { if (map.pickEnabled && e.target === map.cv) { const r = map.cv.getBoundingClientRect(); P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; P.x = P.rx; P.y = P.ry; if (A.chal && A.chal.pointer) A.chal.pointer(P.x, P.y); } return show(false); }   // en tactil solo se mueven las capas (linterna, lupa)
       const ok = map.pickEnabled && e.target === map.cv; if (!ok) return show(false);
-      const r = map.cv.getBoundingClientRect(); cvL = r.left; cvT = r.top; P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; if (!P.on) { sx = P.rx; sy = P.ry; } show(true); const t = performance.now(); eff(t); apply(t);
-    }, { passive: true });
+      const r = map.cv.getBoundingClientRect(); enter(e.clientX - r.left, e.clientY - r.top);
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerover", e => { if (e.pointerType === "mouse") move(e); }, { passive: true });   // el raton ya estaba sobre el mapa cuando se activo (pregunta nueva, fin de la pausa): sin esto no hay ni reticulo ni cursor hasta moverlo
     window.addEventListener("pointerdown", e => { if (P.on && e.target === map.cv && e.button === 0) P.press = 100; }, true);   // solo el boton principal (el mapa ignora el derecho)
     document.addEventListener("pointerleave", () => show(false));
-    const mo = new MutationObserver(() => { if (!map.pickEnabled) show(false); }), watch = () => mo.observe(map.cv, { attributes: true, attributeFilter: ["class"] });
+    const mo = new MutationObserver(() => { if (!map.pickEnabled) show(false); else if (!P.on && map.mouse) enter(map.mouse.x, map.mouse.y); }), watch = () => mo.observe(map.cv, { attributes: true, attributeFilter: ["class"] });
     watch(); document.addEventListener("aiq:mapcanvas", () => { mo.disconnect(); watch(); });   // el mapa recreo su lienzo (la GPU se reinicio)
     raf = requestAnimationFrame(frame);
   };

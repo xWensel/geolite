@@ -592,7 +592,11 @@ window.AIQ = window.AIQ || {};
     const fix = n => { if (n <= 0 || tok !== pump.tok || !el.isConnected) return; const t = Math.min(tg(), m.scrollHeight - m.clientHeight); if (Math.abs(t - m.scrollTop) > 1) { m.scrollTop = t; requestAnimationFrame(() => requestAnimationFrame(() => fix(n - 1))); } };
     const settle = () => requestAnimationFrame(() => requestAnimationFrame(() => fix(3)));   // content-visibility da su alto a las regiones al fotograma siguiente
     if (now) requestAnimationFrame(() => { m.scrollTo({ top: tg(), behavior: "auto" }); settle(); });
-    else { m.addEventListener("scrollend", settle, { once: true }); m.scrollTo({ top: tg(), behavior: "smooth" }); }
+    else {                                                              // si el scroll suave no mueve nada no hay scrollend: el listener se quitaba nunca y devolvia al capitulo mas tarde
+      if (m._jt) m.removeEventListener("scrollend", m._jt); m._jt = settle;
+      m.addEventListener("scrollend", settle, { once: true }); setTimeout(() => { m.removeEventListener("scrollend", settle); if (m._jt === settle) m._jt = null; }, 1500);
+      m.scrollTo({ top: tg(), behavior: "smooth" });
+    }
   }
   /* pulsas tarjetas bloqueadas: a la 3.a, la cerradura es suya */
   function openCard(id, src) {
@@ -1124,7 +1128,7 @@ window.AIQ = window.AIQ || {};
   }
   function close() { const was = isOpen(), r = $("codex"); if (r) r.classList.add("hidden");
     pump.tok++; cancelAnimationFrame(pump.raf); pump.raf = 0; pump.q = []; if (io) io.disconnect(); silQueue.length = 0; cancelAnimationFrame(silT); silT = 0;   // nada sigue trabajando con ella cerrada
-    if ($("cxLight")) $("cxLight").classList.add("hidden"); document.body.classList.remove("cx-on"); if (A.coverMap) A.coverMap("codex", false); if (was) mapRestore(); ui.cur = null; A.sfx.ui(); if (A.codexOnClose) A.codexOnClose();
+    if ($("cxLight")) $("cxLight").classList.add("hidden"); document.body.classList.remove("cx-on"); if (A.coverMap) A.coverMap("codex", false); if (was) mapRestore(); ui.cur = null; if (was) A.sfx.ui(); if (A.codexOnClose) A.codexOnClose();
     const S2 = A.core && A.core.S;
     if (dealerWas && A.dealer && A.dealer.homeTease && document.querySelector(".hh") && S2 && S2.phase === "title" && !S2.settingsOpen) A.dealer.homeTease(true);
     dealerWas = false;

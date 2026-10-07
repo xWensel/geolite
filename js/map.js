@@ -761,6 +761,7 @@ void main(){
     resize(force) {
       const r = this.cv.getBoundingClientRect(), raw = window.devicePixelRatio || 1;
       this.dpr = this.quality === "saver" ? Math.min(1, raw) : this.quality === "high" ? Math.min(3, raw) : Math.min(2, raw);
+      if (r.width < 2 || r.height < 2) return;                          // lienzo oculto o minimizado: no se toca la camara ni los topes
       const W = Math.max(1, r.width), H = Math.max(1, r.height);
       /* el lienzo GL se dibuja a una fraccion (rsCap) de la resolucion nativa segun la pantalla y el equipo; se ajusta solo si va justo */
       if (!this._capInit || this._capQ !== this.quality) {
@@ -777,9 +778,13 @@ void main(){
         this.fx.width = Math.round(W * this.dpr); this.fx.height = Math.round(H * this.dpr);
       }
       this._lastDpr = this.cdpr; this.W = W; this.H = H;
+      const oldMin = this.minS;
       this.minS = Math.max(W / (BX1 - BX0), H / (BY1 - BY0));
       this.maxS = this.minS * 70;
+      /* al cambiar el tamano se conserva el NIVEL de zoom (el mundo entero sigue entero; antes, al encoger la ventana, s se quedaba en pixeles y el mapa quedaba con un zoom de 1,5x que el jugador no habia puesto) */
+      if (oldMin && Math.abs(this.minS - oldMin) > 1e-6) { const k = this.minS / oldMin; this.view.s *= k; if (this.tv) this.tv.s *= k; if (this.anim) { this.anim.from.s *= k; this.anim.to.s *= k; } if (this.drift) this.drift.base.s *= k; }
       this.view.s = clamp(this.view.s, this.minS, this.maxS); this._clamp(this.view);
+      if (this.tv) { this.tv.s = clamp(this.tv.s, this.minS, this.maxS); this._clamp(this.tv); }
       this.dirty = this.fxDirty = true;
     }
     _clamp(v) {
@@ -798,7 +803,7 @@ void main(){
     }
     animateTo(target, ms = 800) {
       const t = this._clamp({ ...target, s: clamp(target.s, this.minS, this.maxS) });
-      this.drift = null; this.tv = null; this.inertia = null;
+      clearTimeout(this._dT); this.drift = null; this.tv = null; this.inertia = null;
       if (ms <= 0) { this.view = t; this.anim = null; this.dirty = this.fxDirty = true; return; }
       const from = { ...this.view };
       const far = Math.min(1, Math.hypot(t.cx - from.cx, t.cy - from.cy) * Math.min(from.s, t.s) / Math.max(this.W, this.H));
@@ -859,7 +864,7 @@ void main(){
     }
     startDrift() {
       const v = this._clamp({ cx: 0.3, cy: 0.9, s: this.minS * 1.7 });
-      this.animateTo(v, 1400); setTimeout(() => { if (!this.anim) this.drift = { base: { ...this.view }, t0: performance.now() }; }, 1500);
+      this.animateTo(v, 1400); clearTimeout(this._dT); this._dT = setTimeout(() => { if (!this.anim && !this.pointers.size && !this.tv) this.drift = { base: { ...this.view }, t0: performance.now() }; }, 1500);
     }
     /* zoom suavizado hacia el cursor (objetivo + amortiguacion critica) */
     zoomBy(f, px = this.W / 2, py = this.H / 2, animate = true) {
@@ -867,8 +872,9 @@ void main(){
       const base = this.tv || (this.anim ? this.anim.to : this.view);
       const [wx, wy] = this._toWorld(px, py, base);
       const s = clamp(base.s * f, this.minS, this.maxS);
-      const t = this._clamp({ s, cx: wx - (px - this.W / 2) / s, cy: wy + (py - this.H / 2) / s });
-      this.anim = null; this.drift = null; this.inertia = null; this.zc = [px, py];
+      const [qx, qy] = this._outToScene(px, py);                                    // el ancla es el punto de la ESCENA bajo el cursor (curva CRT y giro incluidos)
+      const t = this._clamp({ s, cx: wx - (qx - this.W / 2) / s, cy: wy + (qy - this.H / 2) / s });
+      clearTimeout(this._dT); this.anim = null; this.drift = null; this.inertia = null; this.zc = [px, py];
       if (animate === false && f === 1) return;
       this.tv = t;
     }
@@ -1194,7 +1200,7 @@ void main(){
         if (this.zzUntil && performance.now() < this.zzUntil) return;               // Ctrl+Z: durante el rebobinado no se aceptan clics
         if (e.pointerType === "mouse" && e.button !== 0) return;                   // solo el boton principal: el derecho o la rueda ya no marcan respuesta al soltar
         try { cv.setPointerCapture(e.pointerId); } catch (err) { return; }   // un pointerdown del mando (js/mando.js) no tiene puntero real que capturar
-        this.drift = null; this.inertia = null; this.tv = null; this.samples = [];
+        clearTimeout(this._dT); this.drift = null; this.inertia = null; this.tv = null; this.samples = [];
         this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false });
         if (this.pointers.size === 2) this._pinch = this._pinchState();
       });
@@ -1213,7 +1219,8 @@ void main(){
           if (this._pinch && this._pinch.d > 0) {
             this.anim = null; const r = cv.getBoundingClientRect(), px = st.mx - r.left, py = st.my - r.top;
             const [wx, wy] = this._toWorld(px, py); const s = clamp(this.view.s * (st.d / this._pinch.d), this.minS, this.maxS);
-            this.view = this._clamp({ s, cx: wx - (px - this.W / 2) / s, cy: wy + (py - this.H / 2) / s }); this.zc = [px, py]; this.dirty = this.fxDirty = true;
+            const [qx, qy] = this._outToScene(px, py);
+            this.view = this._clamp({ s, cx: wx - (qx - this.W / 2) / s, cy: wy + (qy - this.H / 2) / s }); this.zc = [px, py]; this.dirty = this.fxDirty = true;
           }
           this._pinch = st;
         }
@@ -1234,7 +1241,7 @@ void main(){
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
         e.preventDefault(); const r = cv.getBoundingClientRect();
-        this.zoomBy(Math.exp(-e.deltaY * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), e.clientX - r.left, e.clientY - r.top);
+        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), e.clientX - r.left, e.clientY - r.top);
       }, { passive: false });
       this._ro = new ResizeObserver(() => this.resize()); this._ro.observe(cv);
     }
@@ -1311,7 +1318,7 @@ void main(){
         /* la deriva sale de donde se paro el mapa, sin salto (antes empezaba con cy desplazado sin(1) * 0,16 y el mapa se recolocaba de golpe
            1,5 s despues de abrir la portada) y arranca despacio: el reloj u acelera durante los primeros 4 s, asi la velocidad crece desde 0 */
         const t = (now - this.drift.t0) / 1000, u = t < 4 ? t * t / 8 : t - 2, b = this.drift.base;
-        this.view = this._clamp({ cx: b.cx + Math.sin(u * 0.09) * 1.1, cy: b.cy + Math.sin(u * 0.07) * 0.16, s: b.s }); this.dirty = this.fxDirty = true;
+        this.view = this._clamp({ cx: b.cx + Math.sin(u * 0.09) * 1.1, cy: b.cy + Math.sin(u * 0.07) * 0.16, s: clamp(b.s, this.minS, this.maxS) }); this.dirty = this.fxDirty = true;
       }
       // velocidades (para efectos y sonido)
       const lz = Math.log(this.view.s);

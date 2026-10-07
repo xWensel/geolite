@@ -84,6 +84,7 @@ window.AIQ = window.AIQ || {};
       const r = this.cv.getBoundingClientRect();
       const raw = window.devicePixelRatio || 1;
       this.dpr = this.quality === "saver" ? 1 : Math.min(2.5, raw);
+      if (r.width < 2 || r.height < 2) return;                          // lienzo oculto o minimizado
       const W = Math.max(1, r.width), H = Math.max(1, r.height);
       const sizeChanged = force || Math.abs(W - (this.W || 0)) > 0.5 || Math.abs(H - (this.H || 0)) > 0.5;
       this.W = W; this.H = H;
@@ -91,8 +92,10 @@ window.AIQ = window.AIQ || {};
         for (const c of [this.hl, this.fx]) { c.width = Math.round(W * this.dpr); c.height = Math.round(H * this.dpr); }
         this.cv.width = Math.round(W * this.dpr * this.rs); this.cv.height = Math.round(H * this.dpr * this.rs);
       }
+      const oldMin = this.minS;
       this.minS = Math.max(W / (BX1 - BX0), H / (BY1 - BY0));
       this.maxS = this.minS * 120;
+      if (oldMin && Math.abs(this.minS - oldMin) > 1e-6) { const k = this.minS / oldMin; this.view.s *= k; if (this.tv) this.tv.s *= k; if (this.anim) { this.anim.from.s *= k; this.anim.to.s *= k; } if (this.drift) this.drift.base.s *= k; }   // se conserva el nivel de zoom al cambiar el tamano
       this.view.s = clamp(this.view.s, this.minS, this.maxS);
       this._clamp(this.view);
       this.sharp = null;
@@ -146,7 +149,7 @@ window.AIQ = window.AIQ || {};
     }
     animateTo(target, ms = 800) {
       const t = this._clamp({ ...target, s: clamp(target.s, this.minS, this.maxS) });
-      this.drift = null;
+      clearTimeout(this._dT); this.drift = null;
       if (ms <= 0) { this.view = t; this.anim = null; this.dirty = this.fxDirty = this.hlDirty = true; return; }
       const from = { ...this.view };
       const far = Math.min(1, Math.hypot(t.cx - from.cx, t.cy - from.cy) * Math.min(from.s, t.s) / Math.max(this.W, this.H));
@@ -165,7 +168,7 @@ window.AIQ = window.AIQ || {};
     }
     startDrift() {
       const v = this._clamp({ cx: 0.3, cy: 0.9, s: this.minS * 1.7 });
-      this.animateTo(v, 1400); setTimeout(() => { if (!this.anim) this.drift = { base: { ...this.view }, t0: performance.now() }; }, 1500);
+      this.animateTo(v, 1400); clearTimeout(this._dT); this._dT = setTimeout(() => { if (!this.anim && !this.pointers.size) this.drift = { base: { ...this.view }, t0: performance.now() }; }, 1500);
     }
     zoomBy(f, px = this.W / 2, py = this.H / 2, animate = true) {
       if (this.zzUntil && performance.now() < this.zzUntil) return;
@@ -189,7 +192,7 @@ window.AIQ = window.AIQ || {};
       cv.addEventListener("pointerdown", e => {
         if (this.zzUntil && performance.now() < this.zzUntil) return;
         if (e.pointerType === "mouse" && e.button !== 0) return;                   // solo el boton principal (el derecho marcaba respuesta al soltar)
-        cv.setPointerCapture(e.pointerId); this.drift = null;
+        try { cv.setPointerCapture(e.pointerId); } catch (err) { return; } this.drift = null;   // un pointerdown del mando no tiene puntero real que capturar
         this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false });
         if (this.pointers.size === 2) this._pinch = this._pinchState();
       });
@@ -220,7 +223,7 @@ window.AIQ = window.AIQ || {};
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
         e.preventDefault(); const r = cv.getBoundingClientRect();
-        this.zoomBy(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), e.clientX - r.left, e.clientY - r.top, false);
+        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), e.clientX - r.left, e.clientY - r.top, false);
       }, { passive: false });
       new ResizeObserver(() => this.resize()).observe(cv);
     }
@@ -269,7 +272,7 @@ window.AIQ = window.AIQ || {};
         /* la deriva sale de donde se paro el mapa, sin salto (antes empezaba con cy desplazado sin(1) * 0,16 y el mapa se recolocaba de golpe
            1,5 s despues de abrir la portada) y arranca despacio: el reloj u acelera durante los primeros 4 s, asi la velocidad crece desde 0 */
         const t = (now - this.drift.t0) / 1000, u = t < 4 ? t * t / 8 : t - 2, b = this.drift.base;
-        this.view = this._clamp({ cx: b.cx + Math.sin(u * 0.09) * 1.1, cy: b.cy + Math.sin(u * 0.07) * 0.16, s: b.s });
+        this.view = this._clamp({ cx: b.cx + Math.sin(u * 0.09) * 1.1, cy: b.cy + Math.sin(u * 0.07) * 0.16, s: clamp(b.s, this.minS, this.maxS) });
         this.dirty = this.fxDirty = this.hlDirty = true;
       }
       if (this.dirty) { this.lastMove = now; this.sharpStale = true; }

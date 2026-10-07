@@ -103,19 +103,22 @@ window.AIQ = window.AIQ || {};
     t.dispatchEvent(new E(type, Object.assign({ bubbles: !/enter|leave/.test(type), cancelable: true, composed: true, clientX: M.x, clientY: M.y, view: window, button: 0, buttons: 0 }, P ? { pointerId: 1, pointerType: "mouse", isPrimary: true } : {}, o || {}))); };
   const chainOf = el => { const c = []; for (let e = el; e && e.nodeType === 1; e = e.parentElement) c.push(e); return c; };
   function setHover(el) {
-    const old = hit; if (old === el) return; hit = el;
+    const old = hit; syncCur(el); if (old === el) return; hit = el;
     const nc = el ? chainOf(el) : [];
     if (old && old.isConnected) { ev("pointerout", old, { relatedTarget: el }); ev("mouseout", old, { relatedTarget: el }); for (const e of hovChain) if (!nc.includes(e)) { ev("pointerleave", e, { relatedTarget: el }); ev("mouseleave", e, { relatedTarget: el }); } }
     for (const e of hovChain) if (!nc.includes(e)) e.classList.remove("pad-hov");
     if (el) { ev("pointerover", el, { relatedTarget: old }); ev("mouseover", el, { relatedTarget: old }); for (const e of nc.slice().reverse()) if (!hovChain.includes(e)) { ev("pointerenter", e, { relatedTarget: old }); ev("mouseenter", e, { relatedTarget: old }); } }
     for (const e of nc) e.classList.add("pad-hov");
     hovChain = nc; if (cache) mo.takeRecords();
-    if (cur) { const map = A.core && A.core.map; const onMap = !!(el && map && el === map.cv); cur.classList.toggle("off", onMap && !!map.pickEnabled); curSprite(el && clickable(el) ? "ptr" : "def"); }
+    curSprite(el && clickable(el) ? "ptr" : "def");
   }
+  /* el cursor del mando se oculta sobre el mapa mientras el reticulo (js/pointer.js) hace de puntero; se recalcula siempre, porque pickEnabled cambia con el cursor quieto */
+  function syncCur(el) { if (cur) { const map = A.core && A.core.map; cur.classList.toggle("off", !!(el && map && el === map.cv && map.pickEnabled)); } }
   /* se llama cuando el cursor se ha movido: nuevo elemento bajo el cursor + movimiento */
   function track(still) {
     const el = document.elementFromPoint(M.x, M.y);                     // #padCur no cuenta (pointer-events: none)
-    setHover(el); if (el && !still) { ev("pointermove", el); ev("mousemove", el); }   // quieto: solo se mira que hay debajo (sin "movimiento": hay retos que lo vigilan)
+    setHover(el); if (el && !still) { ev("pointermove", el); ev("mousemove", el); }
+    else if (el && still) { const map = A.core && A.core.map; if (map && el === map.cv && map.pickEnabled && A.pointer && !A.pointer.on) ev("pointermove", el); }   // quieto sobre el mapa con la pregunta abierta: que el reticulo aparezca   // quieto: solo se mira que hay debajo (sin "movimiento": hay retos que lo vigilan)
   }
 
   /* ---------- que es "pulsable": lo que el puntero de casino marca con la mano (cursor: pointer). Con el mando el cursor del sistema va
@@ -158,7 +161,7 @@ window.AIQ = window.AIQ || {};
     return out.filter(t => t.el.matches(INTER) || !out.some(o => o !== t && t.el.contains(o.el)));
   }
   /* cruceta: el destino mas cercano en esa direccion (huecos y desvio lateral pesan; lo alineado gana) */
-  function step(dx, dy) {
+  function step(dx, dy, tries = 0) {
     const list = targets();
     let base = null;                                                    // el destino mas interior bajo el cursor (el boton, no la tarjeta que lo contiene)
     if (hit) for (const t of list) if ((t.el === hit || t.el.contains(hit)) && (!base || t.r.width * t.r.height < base.r.width * base.r.height)) base = t;
@@ -174,8 +177,11 @@ window.AIQ = window.AIQ || {};
       const s = gap + ortho * 3 + off * 0.15 + along * 0.05;
       if (s < bs) { bs = s; best = t; }
     }
-    if (!best) { const sc = scroller(hit); if (sc) { sc.scrollBy({ top: dy * sc.clientHeight * 0.6, left: dx * sc.clientWidth * 0.6, behavior: "smooth" }); setTimeout(() => step(dx, dy), 260); } else bump(dx, dy); return; }
-    if (!best.el.isConnected) { cache = null; return step(dx, dy); }
+    if (!best) {
+      const sc = scroller(hit), can = sc && (dy > 0 ? sc.scrollTop + sc.clientHeight < sc.scrollHeight - 2 : dy < 0 ? sc.scrollTop > 2 : dx > 0 ? sc.scrollLeft + sc.clientWidth < sc.scrollWidth - 2 : sc.scrollLeft > 2);   // solo si la lista puede moverse en esa direccion (si no, el reintento se encadenaba sin fin)
+      if (can && tries < 4) { sc.scrollBy({ top: dy * sc.clientHeight * 0.6, left: dx * sc.clientWidth * 0.6, behavior: "smooth" }); setTimeout(() => step(dx, dy, tries + 1), 260); } else bump(dx, dy); return;
+    }
+    if (!best.el.isConnected) { cache = null; return tries < 4 ? step(dx, dy, tries + 1) : bump(dx, dy); }
     goTo(best.el);
   }
   function goTo(el, r) {
@@ -206,6 +212,7 @@ window.AIQ = window.AIQ || {};
   const key = (k, code) => { const t = document.activeElement && document.activeElement !== document.body ? document.activeElement : document.body; t.dispatchEvent(new KeyboardEvent("keydown", { key: k, code: code || k, bubbles: true, cancelable: true })); t.dispatchEvent(new KeyboardEvent("keyup", { key: k, code: code || k, bubbles: true })); };
   function menuBtn() {
     const C = A.core; if (!C) return; const S = C.S;
+    if (document.getElementById("rouOv")) return;                      // un juego de la Barra abierto: Start no abre el menu por debajo (Esc ya lo captura el juego)
     if (S.settingsOpen) return C.openSettings(false);
     if (S.phase === "title" || S.phase === "intro" || !(S.run || S.camp)) return C.openSettings(true);
     C.runMenu();

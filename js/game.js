@@ -15,12 +15,13 @@
   const prog = id => (S.prog[id] = S.prog[id] || { unlocked: 1, best: 0, bestIq: 0 });
   function load() {
     try {
-      const d = JSON.parse(localStorage.getItem(KEY) || "{}");
+      const raw = localStorage.getItem(KEY); let d; try { d = JSON.parse(raw || "{}"); } catch (e) { try { localStorage.setItem(KEY + ".bad", raw); } catch (e2) { /* sin sitio */ } d = {}; }   // JSON roto: copia de seguridad antes de que el siguiente guardado lo pise
+      if (!d || typeof d !== "object") d = {};
       A.lang = d.lang && A.STR[d.lang] ? d.lang : A.detectLang();
-      S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = d.setTab || "general"; S.skin = "casino";
+      S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = ["general", "sound", "video", "pad", "data"].includes(d.setTab) ? d.setTab : "general"; S.skin = "casino";
       A.audio.sfxOn = d.sfx !== false; A.audio.musicOn = d.music !== false;
-      if (d.vol) Object.assign(A.audio.vol, d.vol);
-      S.prog = d.prog || {}; S.mode = d.mode || "classic"; S.campId = d.campId || null; S.quality = d.quality || "auto";
+      if (d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
+      S.prog = d.prog && typeof d.prog === "object" && !Array.isArray(d.prog) ? d.prog : {}; S.mode = d.mode || "classic"; S.campId = d.campId || null; S.quality = d.quality || "auto";
       S.panSens = d.panSens || 100; S.zoomSens = d.zoomSens || 100; S.units = d.units === "mi" ? "mi" : "km";
       S.contrast = !!d.contrast; S.colorblind = ["protan", "deutan", "tritan"].includes(d.colorblind) ? d.colorblind : "off"; S.qSize = ["l", "xl"].includes(d.qSize) ? d.qSize : "n";
       S.shake = d.shake !== false; A.haptic.on = S.shake;
@@ -589,7 +590,7 @@
     $("plate").classList.remove("hidden", "hurry"); $("pauseBtn").classList.remove("hidden"); $("factText").textContent = "";
     if (S.run) A.adv.onQuestion();
     updateHud();
-    if (document.hidden && !S.paused) togglePause();                        // la intro acabo con la pestana oculta: la pregunta empieza en pausa
+    if ((document.hidden || S.settingsOpen) && !S.paused) togglePause();    // la intro acabo con la pestana oculta o con Ajustes abierto (el reloj corria debajo): la pregunta empieza en pausa
   }
   /* efectos del clic: pin que cae, ondas y chispas donde pulsas */
   let lastPtr = { x: innerWidth / 2, y: innerHeight / 2 };
@@ -998,6 +999,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     A.sfx.pause(); veilMenu(closeVeil);
   }
   (function clock() {
+    requestAnimationFrame(clock);                                          // primero: si algo de abajo lanza, el reloj no muere para toda la sesion
     if (S.phase === "asking" && !S.paused) {
       const left = S.limit - (performance.now() - S.t0 - S.pausedAcc) / 1000;
       setTimer(left);
@@ -1006,7 +1008,6 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       if (left > 0 && left <= 3.2 && !S.tense) { S.tense = true; A.music.mode(2); }
       if (left <= 0) reveal(null, 0);
     }
-    requestAnimationFrame(clock);
   })();
 
   /* ------------------------------------------------------------ controles */

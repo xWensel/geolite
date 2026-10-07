@@ -45,7 +45,7 @@ window.AIQ = window.AIQ || {};
   };
   T.close = () => close(true);
   function close(keepFocus) {
-    if (!el) return; T.on = false; el.classList.remove("on"); const i = inp; inp = null;
+    if (!el) return; T.on = false; T.closedAt = performance.now(); el.classList.remove("on"); const i = inp; inp = null;
     setTimeout(() => { if (el && !T.on) el.hidden = true; }, 160);
     if (i && keepFocus && document.activeElement !== i) i.focus({ preventScroll: true });
   }
@@ -97,7 +97,7 @@ window.AIQ = window.AIQ || {};
       i.focus({ preventScroll: true });
       if (host && host.steamKeyboard) {
         const r = i.getBoundingClientRect(), d = devicePixelRatio || 1;
-        const res = await host.steamKeyboard({ x: Math.round(r.left * d), y: Math.round(r.top * d), w: Math.round(r.width * d), h: Math.round(r.height * d), text: i.value, max: i.maxLength > 0 ? i.maxLength : 40, desc: i.placeholder || "" });
+        const res = await Promise.race([new Promise(r => setTimeout(() => r({ kind: "cancel" }), 60000)), host.steamKeyboard({ x: Math.round(r.left * d), y: Math.round(r.top * d), w: Math.round(r.width * d), h: Math.round(r.height * d), text: i.value, max: i.maxLength > 0 ? i.maxLength : 40, desc: i.placeholder || "" })]);   // sin respuesta del overlay de Steam en 60 s: se cancela (si no, busy quedaba a true para siempre)
         if (res && res.kind === "floating") return;                                       // Steam escribe en la casilla
         if (res && res.kind === "modal") { inp = i; put(String(res.text || "")); inp = null; i.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true, cancelable: true })); i.dispatchEvent(new Event("change", { bubbles: true })); return; }
         if (res && res.kind === "cancel") return;
@@ -108,7 +108,7 @@ window.AIQ = window.AIQ || {};
   const textual = t => t && t.tagName === "INPUT" && /^(text|search)$/.test(t.type) && !t.readOnly && !t.disabled;
   T.textual = textual;
   /* Steam Deck: sin teclado fisico, enfocar una casilla ya abre el teclado */
-  if (DECK) document.addEventListener("focusin", e => { if (textual(e.target) && !T.on) T.open(e.target); });
+  if (DECK) document.addEventListener("focusin", e => { if (textual(e.target) && !T.on && performance.now() - (T.closedAt || -1e9) > 400) T.open(e.target); });   // 400 ms: al cerrar tocando el fondo se devuelve el foco a la casilla y no debe reabrirse
   /* la casilla desaparece (se cierra la tarjeta del nombre, la Enciclopedia): el teclado tambien */
   setInterval(() => { if (T.on && (!inp || !inp.isConnected || !inp.offsetParent || inp.readOnly)) close(false); }, 300);
 })(window.AIQ);

@@ -519,7 +519,7 @@ window.AIQ = window.AIQ || {};
       if (S.storm > .08) { for (let i = 0; i < 90; i++) { const x = (i * 37.7 + T * 70) % WD, y = ((i * 91.3 + T * 480) % (HT + 20)) - 10; fr(x, y, 1, 4, "#b4c8ee", .5 * S.storm); } }
     }
     function frameLoop(now) {
-      if (!alive()) { cleanup(); return; }
+      if (!alive()) { cleanup(); sh.bail("capa retirada"); return; }
       requestAnimationFrame(frameLoop);
       const dtR = Math.min(.05, (now - lastT) / 1000); lastT = now; T += dtR; const dt = dtR * (TST.speed || 1);
       if (ST.phase === "count" || ST.phase === "ready") BC.oy = OY0;
@@ -539,7 +539,7 @@ window.AIQ = window.AIQ || {};
     const cleanup = () => { clearInterval(talkIv); removeEventListener("keydown", onKey, true); removeEventListener("resize", onResize); try { A.sfx.gbEngine.stop(); } catch (e) { /* nada */ } };
     TST.st = ST; TST.getF = () => F; TST.cashNow = () => cash(0, "manual"); TST.takeoff = () => takeoff(); TST.sc = () => Sn;
 
-    loadAll().then(() => { if (!alive()) return; prepNext(); setBtn(); requestAnimationFrame(frameLoop); if (TST.auto) setTimeout(() => { if (!alive()) return; if (TST.auto.stake != null) { stakeI = TST.auto.stake; ST.stake = cx.coinCost(stakeI); } if (TST.auto.autoM != null) ST.autoM = TST.auto.autoM; setBtn(); setTimeout(act, 400); }, 600); });
+    loadAll().then(() => { if (!alive()) { cleanup(); sh.bail("capa retirada"); return; } prepNext(); setBtn(); requestAnimationFrame(frameLoop); if (TST.auto) setTimeout(() => { if (!alive()) return; if (TST.auto.stake != null) { stakeI = TST.auto.stake; ST.stake = cx.coinCost(stakeI); } if (TST.auto.autoM != null) ST.autoM = TST.auto.autoM; setBtn(); setTimeout(act, 400); }, 600); });
   }
 
   A.adv._globo = Object.assign(A.adv._globo || {}, { draw, payout, tOf, mOf, R, CAP });   // solo pruebas (dev/): x (reventon forzado en milesimas), f ({ sky, burst, event, liv }), auto ({ stake, autoM }), speed, st, getF, cashNow, takeoff

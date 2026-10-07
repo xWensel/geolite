@@ -372,7 +372,8 @@ window.AIQ = window.AIQ || {};
     stage.addEventListener("pointermove", onMove);
     stage.addEventListener("pointerdown", e => { if (e.button !== 0 || e.target.closest(".ra-btn,.ra-pill")) return; const [x, y] = toStage(e.clientX, e.clientY); cur.x = x; cur.y = y; ST.pointerIn = true; ST.down = true; if (card) card.last = null; try { stage.setPointerCapture(e.pointerId); } catch (_) { /* sintetico */ } });
     const up = () => { ST.down = false; };
-    stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up); stage.addEventListener("pointerleave", () => { ST.pointerIn = false; }); addEventListener("blur", up);
+    stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up); stage.addEventListener("pointerleave", () => { ST.pointerIn = false; });
+    const onBlur = () => { up(); keys.clear(); ST.keyHold = false; ST.padHold = false; }; addEventListener("blur", onBlur);   // Alt+Tab con una tecla pulsada: el keyup no llega y la doblon seguia rascando sola
     btnAll.onclick = e => { e.stopPropagation(); scratchAll(); };
     const MOVE = ["arrowleft", "arrowright", "arrowup", "arrowdown", "a", "d", "w", "s"];
     const onKey = e => {
@@ -400,7 +401,7 @@ window.AIQ = window.AIQ || {};
     let tPrev = performance.now(), px = -1, py = -1, padCls = false, ctf = "";
     const rootEl = document.documentElement, killPend = () => { pend.forEach(e => e.rej(CANCEL)); pend.clear(); };
     function frame(now) {
-      if (!alive()) { killPend(); return; }
+      if (!alive()) { killPend(); if (!sh.closed) sh.bail("capa retirada"); return; }   // la capa se fue: libera teclado y estado (await finished no pasa por killPend)
       const dt = Math.min(0.05, (now - tPrev) / 1000); tPrev = now; const pad = pollInput(dt);
       const active = ST.phase === "scratch" && card && !card.finished, auto = active && card.autoHold, holding = active && (ST.down || ST.keyHold || ST.padHold || auto) && !(card.auto && !card.autoHold);
       const onCard = pad && active && cur.x > CX0 - 60 && cur.x < CX0 + 432 + 60 && cur.y > CY0 - 60 && cur.y < CY0 + 584 + 60;       // con mando, el cursor del juego se esconde sobre la tarjeta (ahi manda la doblon)

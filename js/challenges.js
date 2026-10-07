@@ -1169,7 +1169,8 @@ window.AIQ = window.AIQ || {};
       if (S.bk) { if (A.jefes) A.jefes.question(o, qi); if (A.adv && A.adv.refresh) A.adv.refresh(); }   // tanda 16: la escalada del jefe (barra, sonido y lo suyo)
     },
     reveal(ms = 750) {
-      const map = S.map; clearTimers(); fxStop(); zzClear(); S.nt = null; if (A.jefes) A.jefes.reveal(); if (A.chfx) A.chfx.clear();
+      const map = S.map; clearTimers(); { const ap = $("app"); if (ap) ap.classList.remove("ch-glitch", "ch-quaking"); }   // clearTimers cancela el later que las quitaba: si respondias antes quedaban pegadas
+      fxStop(); zzClear(); S.nt = null; if (A.jefes) A.jefes.reveal(); if (A.chfx) A.chfx.clear();
       if (S.suspended) boardStop(); else { boardFinal(); passReveal(); fzSolve(); fwStill(); fbReveal(); }   // tanda 14
       if (map && map.clearDistort) { map.clearDistort(ms); if (map.setDecoys) map.setDecoys([]); }
       $("app").classList.remove("ch-negative");
@@ -1180,7 +1181,7 @@ window.AIQ = window.AIQ || {};
     suspend() { S.suspended = true; this.reveal(500); const o = A.core && A.core.S.qs[A.core.S.qi]; if (o) decorate(o); if (A.pointer && A.pointer.mods) A.pointer.mods(); },
     upright() { const map = S.map; if (map && map.setOrient) map.setOrient(false, 900); },
     end() {
-      clearTimers(); clearTimeout(S.preT); fxStop(); zzClear(); trapClear(); S.bk = null; S.bl = null; if (A.jefes) A.jefes.end(); S.nt = null; if (A.chfx) A.chfx.clear(); boardStop(); S.on = false; S.list = []; S.pub = []; S.qlist = null; S.qsub = null; const map = S.map || (A.core && A.core.map);
+      clearTimers(); { const ap = $("app"); if (ap) ap.classList.remove("ch-glitch", "ch-quaking"); } clearTimeout(S.preT); fxStop(); zzClear(); trapClear(); S.bk = null; S.bl = null; if (A.jefes) A.jefes.end(); S.nt = null; if (A.chfx) A.chfx.clear(); boardStop(); S.on = false; S.list = []; S.pub = []; S.qlist = null; S.qsub = null; const map = S.map || (A.core && A.core.map);
       if (map && map.clearDistort) { map.clearDistort(300); map.setLens && map.setLens(null); map.setDecoys && map.setDecoys([]); }
       const app = $("app"); if (app) app.classList.remove("ch-negative");
       if (S.ov) { S.ov.classList.remove("on"); for (const c of ["blur", "myopia", "myopia2", "dark", "halo", "spot"]) layer(c).classList.remove("on"); layer("flick").style.opacity = 0; layer("flash").style.opacity = 0; layer("night").classList.remove("on"); }

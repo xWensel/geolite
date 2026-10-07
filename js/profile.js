@@ -18,6 +18,8 @@ window.AIQ = window.AIQ || {};
   catch (e) { try { localStorage.setItem(KEY + ".bad", localStorage.getItem(KEY)); } catch (e2) { /* sin almacenamiento */ } }   // JSON roto: se aparta antes de que el perfil nuevo lo pise
   /* piezas con otra forma (perfil a medio escribir o tocado a mano): se reponen para que nada casque al leerlas (P.ach[id], P.daily[b]...) */
   { const D0 = defaults(), obj = v => !!v && typeof v === "object" && !Array.isArray(v); ["records", "ach", "boards", "daily", "medals", "stats", "adv"].forEach(k => { if (!obj(P[k])) P[k] = D0[k]; });
+    for (const b in P.boards) if (!Array.isArray(P.boards[b])) delete P.boards[b];
+    for (const b in P.daily) if (!P.daily[b] || typeof P.daily[b] !== "object") delete P.daily[b];
     if (!Array.isArray(P.nameLog)) P.nameLog = []; if (typeof P.name !== "string") P.name = ""; if (!P.id || typeof P.id !== "string") P.id = D0.id; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { /* sin almacenamiento */ } };
   /* barajas (2026-10-02): antes se abrian con el Acto I (Historiador), un jefe (Navegante) y ganar (Aventurero ciego); ahora con victorias y

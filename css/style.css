@@ -135,9 +135,9 @@ html.no-shake #plate.hurry { animation: none; }   /* Vibracion = no: la placa no
 @keyframes pop-up { from { opacity: 0; transform: translateY(14px) scale(.94); } }
 
 /* ------------------------------------------------ panel de ajustes: pantalla completa */
-.set-veil { position: absolute; inset: 0; z-index: 8; background: #060d09; animation: veil-in .25s ease both; }
+.set-veil { position: absolute; inset: 0; z-index: 61; background: #060d09; animation: veil-in .25s ease both; }
 @keyframes veil-in { from { opacity: 0; } }
-.set-sh { position: absolute; inset: 0; z-index: 9; }
+.set-sh { position: absolute; inset: 0; z-index: 62; }   /* por encima de la pausa (#veil, z 60): el engranaje en pregunta abre Ajustes sobre ella */
 #settings { position: absolute; inset: 0; display: flex; flex-direction: column; color: var(--paper); isolation: isolate;
   background: radial-gradient(ellipse 900px 500px at 50% -8%, rgba(255, 224, 138, .09), transparent 60%), radial-gradient(ellipse 1100px 700px at 50% 112%, rgba(31, 92, 64, .4), transparent 60%), linear-gradient(160deg, #17281e 0%, #0d1e15 55%, #060d09 100%);
   animation: set-in .4s var(--spring) both; }
