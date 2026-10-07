@@ -152,8 +152,6 @@ html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] 
 .pic-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .7s ease; image-rendering: auto; } .pic-img.on { opacity: 1; }
 .pic-frame { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .16), inset 0 -18px 30px -18px rgba(0, 0, 0, .5); border-radius: inherit; }
 .intro-art .pic { transform: none; } .v-art .pic { width: 100%; }
-.cx-art .cx-ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0; transition: opacity .5s; } .cx-art .cx-ph.on { opacity: 1; }
-.cx-art:has(.cx-ph.on) > .cx-ic { display: none; } .cx-art > img:not(.cx-ph) { z-index: 1; } @media (max-width: 760px) { }
 
 /* ==================== CASINO x GEOGRAFIA ==================== */
 /* fieltro impreso como mapa: retícula de meridianos y paralelos */

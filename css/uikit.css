@@ -299,7 +299,7 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 .brand-rose { width: 32px; height: 32px; } .menu-rose { width: 96px; height: 96px; } .idcard img.ic { width: 48px; height: 48px; }
 
 /* pixel art nitido: los recursos grandes (escenas, cartas, iconos grandes, crupier) se amplian sin suavizar; los iconos pequenos se reducen desde un original nitido */
-.pic-img, .cx-ph, .cx-art img, .cx-bigcard img, .of-ico .ic, .tl-ico .ic, .dc-art .ic, .intro-num .ic, .nx-ic .ic, .sp-ic .ic, .dl-face, .ic.big, .mc-win img { image-rendering: pixelated; }
+.pic-img, .cx-art img, .cx-bigcard img, .of-ico .ic, .tl-ico .ic, .dc-art .ic, .intro-num .ic, .nx-ic .ic, .sp-ic .ic, .dl-face, .ic.big, .mc-win img { image-rendering: pixelated; }
 
 /* ==== legibilidad (v0.22): tipografias pixel mas grandes y nitidas; la placa de la pregunta NO se toca ==== */
 html body { -webkit-font-smoothing: none; font-smooth: never; text-rendering: optimizeSpeed; }
