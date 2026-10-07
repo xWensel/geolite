@@ -128,6 +128,8 @@ def body(m):
         for x in range(x0, x1):
             if ch(m, x, y) == "R": m[y, x] = RGB["e"]
     recolor(m, (40, 88, 110, 118), {"G": "d", "a": "P", "j": "d", "k": "d"})
+    # mota: un pixel azul-indigo suelto dentro de la tinta de la chaqueta
+    setpx(m, [(82, 105)], "K")
 
 def build():
     m = base()

@@ -36,7 +36,7 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
-      id: "0.2.53",
+      id: "0.2.54",
       name: ["El retículo equipado", "The equipped reticle"],
       date: "2026-10-07",
       summary: ["El puntero ahora enseña lo que llevas: los retos en rojo, los perks en el aro y las cuatro esquinas de la mira encendidas por eje.",
@@ -46,10 +46,24 @@ window.AIQ = window.AIQ || {};
           intro: ["Es un cambio **solo visual**: ningún reto ni perk funciona distinto, pero ahora se nota en el retículo.",
             "This is a **visual-only** change: no challenge or perk works differently, but now you can see it on the reticle."],
           entries: [
-            E(["Marcas del retículo", "Reticle marks"], "new", "0.2.53", [
+            E(["Marcas del retículo", "Reticle marks"], "new", "0.2.54", [
               ["**Controles invertidos** ya tiene señal: dos flechas que se miran de frente (y otras dos arriba y abajo en los niveles 2 y 3).", "**Reversed controls** now has a sign: two arrows facing each other (and two more above and below at levels 2 and 3)."],
               ["**Mano firme** sustituye los segmentos que giran por cuatro cierres dorados fijos y un segundo aro. **Foco**, **Catalejo**, **Protector**, **Gafas de sol** y **Ancla** dejan cada uno su marca en el aro.", "**Steady hand** swaps the spinning segments for four fixed gold clasps and a second ring. **Spotlight**, **Spyglass**, **Screen guard**, **Sunglasses** and **Anchor** each leave their mark on the ring."],
               ["Las cuatro esquinas de la mira se ponen **rojas** si un reto toca ese eje (pulso, vista, luz o controles) y **turquesa** si un perk lo cubre.", "The four corners of the sights turn **red** if a challenge hits that axis (pulse, sight, light or controls) and **teal** if a perk covers it."]
+            ]) ] },
+      ],
+    },
+    {
+      id: "0.2.53",
+      name: ["Pulido de píxeles", "Pixel polish"],
+      date: "2026-10-07",
+      summary: ["Una vuelta de pulido al arte: píxeles sueltos fuera, sin cambiar ningún dibujo.", "A polish pass over the art: stray pixels gone, no drawing changed."],
+      chapters: [
+        { id: "pulido", kicker: ["Arte", "Art"], title: ["Pulido", "Polish"],
+          intro: ["Una pasada por el arte de píxeles buscando motas que se colaron. No cambia ningún dibujo.", "A sweep through the pixel art looking for stray specks. No drawing changes."],
+          entries: [
+            E(["Píxeles sueltos", "Stray pixels"], "fix", "0.2.53", [
+              ["Quitados los píxeles sueltos de la bandera de España, el volcán, la siesta, el explorador, el navegante, la manga, el moái coronado, la isla del códice, la caja de suministros, la pantalla de victoria y el propio Don Crupier.", "Removed the stray pixels from the Spanish flag, the volcano, the siesta, the explorer, the navigator, the sleeve, the crowned moai, the codex island, the supplies crate, the victory screen and Don Crupier himself."]
             ]) ] },
       ],
     },
