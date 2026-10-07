@@ -36,6 +36,23 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.57",
+      name: ["Medir para mejorar", "Measure to improve"],
+      date: "2026-10-07",
+      summary: ["Un panel de rendimiento para medir fps, memoria y calidad del mapa en cualquier equipo, sobre todo en la Steam Deck.",
+        "A performance panel to measure fps, memory and map quality on any machine, the Steam Deck above all."],
+      chapters: [
+        { id: "rendimiento", kicker: ["Rendimiento", "Performance"], title: ["Medir antes de tocar", "Measure before touching"],
+          intro: ["Pulsa **F3** para ver los fotogramas por segundo, la memoria y el motor del mapa. No cambia cómo se juega.",
+            "Press **F3** to see frames per second, memory and the map engine. It does not change how the game plays."],
+          entries: [
+            E(["Panel de rendimiento", "Performance panel"], "new", "0.2.57", [
+              ["**F3** lo enseña u oculta, y guarda un informe por pantalla (`geolite-perf.txt`) para enviarlo si algo va a tirones.", "**F3** shows or hides it, and saves a per-screen report (`geolite-perf.txt`) you can send if something stutters."]
+            ])
+          ] }
+      ],
+    },
+    {
       id: "0.2.56",
       name: ["Logros renovados", "Achievements, renewed"],
       date: "2026-10-07",

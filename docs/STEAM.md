@@ -128,3 +128,11 @@ piden antes del 28 de septiembre.
 
 Los items de accesibilidad y localizacion completa no son bloqueantes para el
 demo/Next Fest: se pueden dejar para la fase posterior sin riesgo.
+
+## Medir el rendimiento en Steam Deck
+1. Opciones de lanzamiento del juego en Steam: `GEOLITE_PERF=1 %command%` (en escritorio tambien vale F3 con teclado).
+2. Juega 10-15 minutos recorriendo: portada, Clasico (zoom con la rueda), Aventura con Campamento y los 8 juegos del casino, Enciclopedia.
+3. Recoge `geolite-perf.txt` (Linux nativo: `~/.config/geolite/`; Proton: dentro del prefijo, en `AppData/Roaming/geolite/`). Da fps mediana y minimo,
+   p95 de fotograma, fotogramas largos y memoria por modo/fase, mas la GPU y el motor del mapa (GL o 2D).
+4. Objetivo de referencia: 60 fps medianos en mapa y menus, p95 por debajo de 25 ms, memoria JS estable (sin subida continua entre rondas).
+   Si el mapa cae a 2D, o una fase baja de 40 fps, ahi esta el trabajo; el vigilante del mapa (`js/map.js`, `_adapt`) ya baja la resolucion solo.
