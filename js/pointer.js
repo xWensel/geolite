@@ -57,15 +57,37 @@ window.AIQ = window.AIQ || {};
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), 1, 1); };
   function circle(cx, cy, r, col) { let x = r, y = 0, e = 1 - r; while (x >= y) { for (const [a, b] of [[x, y], [y, x], [-x, y], [-y, x], [x, -y], [y, -x], [-x, -y], [-y, -x]]) px(cx + a, cy + b, col); y++; if (e < 0) e += 2 * y + 1; else { x--; e += 2 * (y - x) + 1; } } }
   function arc(cx, cy, r, a0, a1, col) { for (let a = a0; a < a1; a += 0.04) px(cx + Math.cos(a) * r, cy + Math.sin(a) * r, col); }
+  /* v0.2.53: marcas de perk en el anillo exterior y senal de los controles invertidos (hasta ahora el unico reto de puntero sin dibujo) */
+  function marks(t, cx, cy, Ri, o) {
+    if (o.halo) for (let k = 0; k < 12; k++) { const a = (k * Math.PI) / 6 + t * 0.2; for (let d = Ri + 8; d <= Ri + 10; d++) px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, GOLD2); }   // Foco: rayos de luz
+    if (o.scope) for (let k = 0; k < 24; k++) { if (k % 6 === 0) continue; const a = (k * Math.PI) / 12, l = k % 3 === 0 ? 3 : 2; for (let d = Ri - 3; d > Ri - 3 - l; d--) px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, WHITE); }   // Catalejo: graduacion de telemetro
+    if (o.guard) { arc(cx, cy, Ri + 7, Math.PI * 1.1, Math.PI * 1.9, CYAN); arc(cx, cy, Ri + 8, Math.PI * 1.1, Math.PI * 1.9, "rgba(127,227,255,.45)"); for (const a of [1.1, 1.5, 1.9]) for (let d = Ri + 5; d <= Ri + 10; d++) px(cx + Math.cos(a * Math.PI) * d, cy + Math.sin(a * Math.PI) * d, CYAN); }   // Protector: escudo
+    if (o.shades) { for (let k = 0; k < 6; k++) { px(cx - 9 + k, cy - 11 + k, WHITE); px(cx - 6 + k, cy - 13 + k, "rgba(255,247,230,.6)"); } arc(cx, cy, Ri - 3, Math.PI * 1.05, Math.PI * 1.45, CYAN); }   // Gafas de sol: destello en la lente
+    if (o.anchor) {                                                                                      // Ancla: base gruesa y ancla bajo la chincheta
+      for (let a = Math.PI * 0.3; a < Math.PI * 0.7; a += 0.03) for (let d = Ri; d <= Ri + 3; d++) px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, GOLD);
+      const ay = cy + Ri + 6; for (let k = 0; k < 6; k++) px(cx, ay - 3 + k, GOLD2); px(cx - 2, ay - 1, GOLD2); px(cx + 2, ay - 1, GOLD2); for (let k = -3; k <= 3; k++) px(cx + k, ay + 3 - (Math.abs(k) > 1 ? 1 : 0), GOLD2);
+    }
+    if (o.mirror) {                                                                                      // Controles invertidos: flechas que se miran de frente (izquierda y derecha) y/o de arriba abajo
+      const sh = Math.round(Math.abs(Math.sin(t * 2)) * 3), arrow = (x, y, dx, dy) => { for (let k = 0; k < 5; k++) px(x + dx * k, y + dy * k, RED); for (const s of [-1, 1]) for (let k = 1; k <= 2; k++) px(x + dx * (5 - k) + dy * s * k, y + dy * (5 - k) + dx * s * k, RED); };
+      if (o.mirror.x) { arrow(cx - Ri - 11 + sh, cy, 1, 0); arrow(cx + Ri + 11 - sh, cy, -1, 0); }
+      if (o.mirror.y) { arrow(cx, cy - Ri - 11 + sh, 0, 1); arrow(cx, cy + Ri + 11 - sh, 0, -1); }
+    }
+  }
   function draw(now) {
     const t = now / 1000, st = P.st, land = lastLand, tool = st.tool, cx = 32, cy = 32;
+    /* v0.2.53: el reticulo ensena lo que llevas. Perks = metal en el aro (oro/turquesa); retos = rojo. Cada esquina de la mira se enciende por su eje */
+    const ids = (st.fx && st.fx.ids) || [], has = id => ids.includes(id), mm = P.m || {};
+    const steady = has("steadyhand"), halo = has("miner"), anchor = has("plates"), shades = has("divingmask"), guard = has("protector"), scope = has("glass");
     c.clearRect(0, 0, 64, 64);
     const shrink = P.m && P.m.tinyDark ? 0.55 : 1;
     const R = (19 - (P.press > 0 ? 3 * Math.min(1, P.press / 100) : 0) + (tool ? Math.sin(t * 6) * 0.6 : 0)) * shrink;
     const ring = hotCol || (tool === "sonar" || tool === "compass" ? CYAN : land ? GOLD : TEAL);
     circle(cx, cy, Math.round(R) + 1, INK); circle(cx, cy, Math.round(R) - 2, INK);                     // borde oscuro
     circle(cx, cy, Math.round(R), ring); circle(cx, cy, Math.round(R) - 1, ring);
-    for (let k = 0; k < 3; k++) { const a0 = t * 0.9 + (k * Math.PI * 2) / 3; arc(cx, cy, Math.round(R), a0, a0 + 0.5, WHITE); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.5, WHITE); }   // segmentos que giran
+    if (steady) {                                                                                       // Mano firme: cuatro cierres fijos (el pulso ya no baila) y un segundo aro dorado
+      circle(cx, cy, Math.round(R) + 2, GOLD2);
+      for (let k = 0; k < 4; k++) { const a0 = Math.PI / 4 + (k * Math.PI) / 2 - 0.3; arc(cx, cy, Math.round(R), a0, a0 + 0.6, GOLD2); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.6, GOLD2); arc(cx, cy, Math.round(R) + 2, a0, a0 + 0.6, WHITE); }
+    } else for (let k = 0; k < 3; k++) { const a0 = t * 0.9 + (k * Math.PI * 2) / 3; arc(cx, cy, Math.round(R), a0, a0 + 0.5, WHITE); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.5, WHITE); }   // segmentos que giran
     for (let k = 0; k < 4; k++) {                                                                        // muescas cardinales
       const a = (k * Math.PI) / 2, dx = Math.cos(a), dy = Math.sin(a);
       for (let d = -7; d <= 1; d++) { px(cx + dx * (R + d) + dy, cy + dy * (R + d) + dx, INK); px(cx + dx * (R + d) - dy, cy + dy * (R + d) - dx, INK); }
@@ -73,12 +95,16 @@ window.AIQ = window.AIQ || {};
     }
     if (tool === "sonar") { const p = (t * 1.2) % 1, rr = 4 + p * (R - 6); circle(cx, cy, Math.round(rr), `rgba(127,227,255,${(1 - p).toFixed(2)})`); }
     if (tool === "compass") { const a = t * 1.4; for (let d = 3; d < 13; d++) { px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, d > 9 ? RED : WHITE); } px(cx, cy - 15, WHITE); }
-    // esquinas de "mira" y brazo de radar
+    // esquinas de "mira": rojas si un reto toca ese eje, turquesa si un perk lo cubre (TL pulso, TR vista, BR luz, BL controles)
     { const B = Math.round(R) + 5 + (P.press > 0 ? -2 : 0), open = tool ? 3 : 0;
-      for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) for (let k = 0; k < 6; k++) {
-        px(cx + sx * (B - open) - sx * k, cy + sy * (B - open), INK); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, INK);
-        px(cx + sx * (B - open) - sx * k, cy + sy * (B - open) + sy * 0, ring); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, ring);
-      } }
+      const bad = [mm.tremble || mm.dizzy, mm.cblur || mm.lag || mm.ghost, mm.blink || mm.tinyDark, mm.cmirror], good = [steady || halo, scope || guard, anchor, shades];
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy], q) => {
+        const col = bad[q] ? RED : good[q] ? TEAL : ring;
+        for (let k = 0; k < 6; k++) {
+          px(cx + sx * (B - open) - sx * k, cy + sy * (B - open), INK); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, INK);
+          px(cx + sx * (B - open) - sx * k, cy + sy * (B - open), col); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, col);
+        } });
+      marks(t, cx, cy, Math.round(R), { halo, scope, guard, shades, anchor, mirror: mm.cmirror }); }
     if (!tool) { const a = t * 2.4; for (let d = 4; d < Math.round(R) - 2; d++) px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, `rgba(255,224,138,${(0.55 * d / R).toFixed(2)})`); }
     // chincheta central
     const pin = [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]];
@@ -89,7 +115,7 @@ window.AIQ = window.AIQ || {};
       const a = t * 3.1 + (k * Math.PI * 2) / 3, sx = Math.round(cx + Math.cos(a) * (R + 9)), sy = Math.round(cy + Math.sin(a) * (R + 9) * 0.45 - 4), col = k === 1 ? WHITE : GOLD2;
       for (const [a2, b2] of [[0, -2], [0, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [0, 1], [0, 2]]) px(sx + a2, sy + b2, col);
     }
-    if (P.m && P.m.tremble) { const hb = Math.min(1, beat(now)); if (hb > 0.2) { circle(cx, cy, Math.round(R) + 3, `rgba(254,95,85,${(hb * 0.9).toFixed(2)})`); circle(cx, cy, Math.round(R) + 4, `rgba(254,95,85,${(hb * 0.45).toFixed(2)})`); } }   // el latido se ve en el reticulo
+    if (P.m && P.m.tremble) { const hb = Math.min(1, beat(now)); if (hb > 0.2) { const k = steady ? 0.35 : 1; circle(cx, cy, Math.round(R) + 3, `rgba(254,95,85,${(hb * 0.9 * k).toFixed(2)})`); circle(cx, cy, Math.round(R) + 4, `rgba(254,95,85,${(hb * 0.45 * k).toFixed(2)})`); } }   // el latido se ve en el reticulo
     if (P.st.calm) { circle(cx, cy, Math.round(R) + 3, "rgba(150,230,255,.9)"); for (let k = 0; k < 4; k++) { const a = t * 0.4 + (k * Math.PI) / 2, sx = cx + Math.cos(a) * (R + 3), sy = cy + Math.sin(a) * (R + 3); for (const [a2, b2] of [[0, -2], [0, 2], [-2, 0], [2, 0], [0, 0], [-1, -1], [1, 1], [1, -1], [-1, 1]]) px(sx + a2, sy + b2, k % 2 ? WHITE : CYAN); } }   // Sangre fria (tanda 9): halo de escarcha
     if (P.m && P.m.cblur) defocus(P.m.cblur.px, t);
   }
