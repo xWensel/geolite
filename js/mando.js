@@ -193,6 +193,7 @@ window.AIQ = window.AIQ || {};
   function scroller(el) { for (let e = el; e && e !== document.body; e = e.parentElement) { if (e.scrollHeight > e.clientHeight + 4) { const o = getComputedStyle(e).overflowY; if (o === "auto" || o === "scroll") return e; } } return null; }
 
   /* ---------- A, B y compania ---------- */
+  let holdUp = null;
   function press() {
     const map = A.core && A.core.map; track();
     const el = hit; if (!el) return;
@@ -202,6 +203,7 @@ window.AIQ = window.AIQ || {};
       if (A.pointer) A.pointer.press = 100; map.tapAt(M.x - r.left, M.y - r.top); return;
     }
     if (el.matches("input[type=range]")) return;
+    if (el.closest(".dd-hit")) { ev("pointerdown", el, { buttons: 1 }); holdUp = el; return; }   // Duelo de dados: "mantén" para sacudir; el pointerup llega al SOLTAR la A (antes eran seguidos y la sacudida siempre era la minima)
     { const ti = el.closest("input, label"), inp = ti && (ti.tagName === "INPUT" ? ti : ti.querySelector("input")); if (A.teclado && A.teclado.textual(inp)) { A.teclado.open(inp); return; } }   // casilla de texto: el teclado
     if (!clickable(el)) { key("Enter"); return; }                      // nada pulsable debajo: A hace lo de Intro (entrar, boton principal del dialogo)
     ev("pointerdown", el, { buttons: 1 }); ev("mousedown", el, { buttons: 1 });
@@ -312,7 +314,7 @@ window.AIQ = window.AIQ || {};
     }
     if ((lt || rt) && onMap) {
       const z = (Math.pow(rt, 1.5) - Math.pow(lt, 1.5)) * ((A.mapSens && A.mapSens.zoom) || 1) * PS.zoom / 100;   // la sensibilidad de zoom de Ajustes, como la rueda
-      if (z) { const r = map.cv.getBoundingClientRect(), span = Math.log(map.maxS / map.minS) || 6; map.zoomBy(Math.exp(z * span / 1.6 * dt), M.x - r.left, M.y - r.top, false); }
+      if (z) { const r = map.cv.getBoundingClientRect(), span = Math.log(map.maxS / map.minS) || 6; map.zoomBy(Math.exp(z * span / 1.6 * dt), ...(A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(M.x - r.left, M.y - r.top) : [M.x - r.left, M.y - r.top]), false); }
     }
     if (moved) { moved = false; place(); track(); }
     else if (hit && !hit.isConnected) track(true);
@@ -320,6 +322,7 @@ window.AIQ = window.AIQ || {};
     /* botones: flanco de bajada; la cruceta repite al mantener */
     const pr = i => btn[i] && !prevB[i];
     const osk = A.teclado && A.teclado.on;
+    if (holdUp && !btn[0]) { const t0 = holdUp; holdUp = null; ev("pointerup", t0.isConnected ? t0 : document.body); }
     if (pr(0)) press();
     if (pr(1)) osk ? A.teclado.close() : key("Escape");
     if (pr(9)) osk ? A.teclado.ok() : menuBtn();

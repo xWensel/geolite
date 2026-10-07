@@ -183,6 +183,7 @@ window.AIQ = window.AIQ || {};
       if (!ov.isConnected || ST.dropped) return; const k = e.key;
       if (k === "ArrowLeft") { setCol(ST.col - 1); e.preventDefault(); } else if (k === "ArrowRight") { setCol(ST.col + 1); e.preventDefault(); }
       else if (k === "ArrowUp") { setRisk(ST.risk - 1); e.preventDefault(); } else if (k === "ArrowDown" || k === "r" || k === "R") { setRisk(ST.risk + 1); e.preventDefault(); }
+      else if ((k === "s" || k === "S") && !e.ctrlKey && !e.metaKey && !e.altKey) { setStake((stakeI + 1) % cx.STAKES.length); e.preventDefault(); }   // la ficha tambien con el teclado
       else if (k >= "1" && k <= "9") setCol(+k - 1); else if (k === "0") setCol(9); else if (k === "Enter" || k === " ") { e.preventDefault(); doDrop(); } else if (k === "Escape") { e.preventDefault(); sh.close(); }
     };
     addEventListener("keydown", onKey, true);

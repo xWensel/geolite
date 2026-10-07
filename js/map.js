@@ -756,7 +756,7 @@ void main(){
       if (t != null) p[0] += t * TWO_PI; else if (p[0] > BX1 || p[0] < BX0) p[0] -= TWO_PI * Math.round(p[0] / TWO_PI); return p;
     }
     setPick(on) { this.pickEnabled = on; this.fxDirty = true; for (const c of [this.cv, this.fx]) c.classList.toggle("aiming", on); }
-    setQuality(q) { this.quality = q; this.rs = 1; this._capInit = false; this.idleMs = 40; this.slow = 0; this.resize(true); }
+    setQuality(q) { this.quality = q; this.rs = 1; this.rsPerf = 1; this._capQ = ""; this.idleMs = 40; this.slow = 0; this.resize(true); }
 
     resize(force) {
       const r = this.cv.getBoundingClientRect(), raw = window.devicePixelRatio || 1;
@@ -764,13 +764,14 @@ void main(){
       if (r.width < 2 || r.height < 2) return;                          // lienzo oculto o minimizado: no se toca la camara ni los topes
       const W = Math.max(1, r.width), H = Math.max(1, r.height);
       /* el lienzo GL se dibuja a una fraccion (rsCap) de la resolucion nativa segun la pantalla y el equipo; se ajusta solo si va justo */
-      if (!this._capInit || this._capQ !== this.quality) {
-        this._capInit = true; this._capQ = this.quality; this.rsCap = 1;
+      /* el tope por tamano se recalcula con CADA tamano (antes se fijaba una vez: arrancar en 4K y pasar a ventana dejaba el mapa al 65 % y en modo lite); el que baja _degrade es aparte (rsPerf) */
+      if (this._capQ !== this.quality) { this._capQ = this.quality; this.rsPerf = 1; }
+      { let size = 1;
         if (this.quality === "auto") {
           const px = W * H * this.dpr * this.dpr, nv = navigator, weak = (nv.hardwareConcurrency || 8) <= 4 || (nv.deviceMemory || 8) <= 4 || /Android|iPhone|iPad|Mobile/i.test(nv.userAgent || "");
-          this.rsCap = px > 8e6 ? 0.65 : px > 4.2e6 ? 0.8 : 1; if (weak) { this.rsCap = Math.min(this.rsCap, 0.8); this.idleMs = 50; }
+          size = px > 8e6 ? 0.65 : px > 4.2e6 ? 0.8 : 1; if (weak) { size = Math.min(size, 0.8); this.idleMs = Math.max(this.idleMs, 50); }
         }
-      }
+        this.rsCap = Math.min(size, this.rsPerf == null ? 1 : this.rsPerf); }
       this.lite = this.quality === "saver" || this.rsCap <= 0.8; if (this.quality === "saver") this.idleMs = Math.max(this.idleMs, 66);
       this.cdpr = this.dpr * this.rsCap;
       if (force || Math.abs(W - (this.W || 0)) > 0.5 || Math.abs(H - (this.H || 0)) > 0.5 || this._lastDpr !== this.cdpr) {
@@ -1241,7 +1242,7 @@ void main(){
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
         e.preventDefault(); const r = cv.getBoundingClientRect();
-        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), e.clientX - r.left, e.clientY - r.top);
+        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), ...(A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top]));
       }, { passive: false });
       this._ro = new ResizeObserver(() => this.resize()); this._ro.observe(cv);
     }
@@ -1282,7 +1283,7 @@ void main(){
       if (med > 37) { if (++this.slow >= 2 && now - this._degAt > 6000) { this.slow = 0; this._degAt = now; this._degrade(); } } else this.slow = 0;
     }
     _degrade() {
-      if (this.rsCap > 0.7) this.rsCap = Math.max(0.7, +(this.rsCap - 0.15).toFixed(2));
+      if (this.rsCap > 0.7) this.rsPerf = Math.max(0.7, +(this.rsCap - 0.15).toFixed(2));
       else if (this.idleMs < 66) this.idleMs = 66;
       else return;
       this.resize(true);

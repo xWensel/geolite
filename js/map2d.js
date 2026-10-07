@@ -223,7 +223,7 @@ window.AIQ = window.AIQ || {};
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
         e.preventDefault(); const r = cv.getBoundingClientRect();
-        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), e.clientX - r.left, e.clientY - r.top, false);
+        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), ...(A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top]), false);
       }, { passive: false });
       new ResizeObserver(() => this.resize()).observe(cv);
     }

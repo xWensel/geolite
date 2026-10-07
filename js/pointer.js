@@ -208,6 +208,8 @@ window.AIQ = window.AIQ || {};
   }
   P.mods = () => { P.m = A.chal && A.chal.ptrMods ? A.chal.ptrMods() : null; };
   P.effective = () => (P.on ? [P.x, P.y] : null);
+  /* donde ancla el zoom: con un reto que separa el reticulo del raton (espejo), bajo el RETICULO (lo que ves); si no, bajo el raton */
+  P.zoomAt = (x, y) => (P.on && P.m && P.m.cmirror ? [P.x, P.y] : [x, y]);
   /* para el crupier (js/dealer.js): lon/lat bajo el reticulo (lo que ya se calcula a ~30 Hz) y el pais de un punto */
   P.ll = () => (P.on ? lastLL : null);
   P.featureAt = (lon, lat) => {                                                     // en la costa el mapa simplificado deja fuera muchas ciudades: el pais mas cercano a menos de 40 km
@@ -236,13 +238,19 @@ window.AIQ = window.AIQ || {};
       if (!P.on) { const m = P.m; sx = hx = m && m.cmirror && m.cmirror.x ? map.W - x : x; sy = hy = m && m.cmirror && m.cmirror.y ? map.H - y : y; wlx = wly = null; }
       show(true); const t = performance.now(); eff(t); apply(t);
     };
+    const touchAt = e => {                                               // en tactil solo se mueven las capas (linterna, lupa); la lupa de fronteras tambien (antes solo se movia con el raton)
+      if (!map.pickEnabled || e.target !== map.cv) return;
+      const r = map.cv.getBoundingClientRect(); P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; P.x = P.rx; P.y = P.ry;
+      if (A.chal) { if (A.chal.pointer) A.chal.pointer(P.x, P.y); const lr = A.chal.lensRadius ? A.chal.lensRadius() : 0; map.setLens(lr > 0 ? { x: P.x, y: P.y, r: lr } : null); }
+    };
     const move = e => {
-      if (e.pointerType === "touch") { if (map.pickEnabled && e.target === map.cv) { const r = map.cv.getBoundingClientRect(); P.rx = e.clientX - r.left; P.ry = e.clientY - r.top; P.x = P.rx; P.y = P.ry; if (A.chal && A.chal.pointer) A.chal.pointer(P.x, P.y); } return show(false); }   // en tactil solo se mueven las capas (linterna, lupa)
+      if (e.pointerType === "touch") { touchAt(e); return show(false); }
       const ok = map.pickEnabled && e.target === map.cv; if (!ok) return show(false);
       const r = map.cv.getBoundingClientRect(); enter(e.clientX - r.left, e.clientY - r.top);
     };
     window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("pointerover", e => { if (e.pointerType === "mouse") move(e); }, { passive: true });   // el raton ya estaba sobre el mapa cuando se activo (pregunta nueva, fin de la pausa): sin esto no hay ni reticulo ni cursor hasta moverlo
+    window.addEventListener("pointerdown", e => { if (e.pointerType === "touch") touchAt(e); }, true);   // un toque sin arrastre tambien mueve linterna y lupa (antes se quedaban donde estaban)
     window.addEventListener("pointerdown", e => { if (P.on && e.target === map.cv && e.button === 0) P.press = 100; }, true);   // solo el boton principal (el mapa ignora el derecho)
     document.addEventListener("pointerleave", () => show(false));
     const mo = new MutationObserver(() => { if (!map.pickEnabled) show(false); else if (!P.on && map.mouse) enter(map.mouse.x, map.mouse.y); }), watch = () => mo.observe(map.cv, { attributes: true, attributeFilter: ["class"] });

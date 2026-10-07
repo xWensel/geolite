@@ -534,7 +534,9 @@ window.AIQ = window.AIQ || {};
     const cycleAuto = () => { if (ST.phase !== "ready") return; autoI = (autoI + 1) % AUTOS.length; ST.autoM = AUTOS[autoI]; sfx.ui(); hud(); };
     const act = () => { if (ST.phase === "ready") takeoff().catch(e => { if (e !== CANCEL) { try { console.error("globo", e); } catch (x) { /* nada */ } sh.bail(e); } }); else if (ST.phase === "fly" && !F.cashed) cash(0, "manual"); };
     btn.onclick = act; Q(".gb-pstake").onclick = cycleStake; Q(".gb-pauto").onclick = cycleAuto; Q(".gb-back").onclick = () => { if (ST.phase === "ready") sh.close(); };
-    const onKey = e => { if (!ov.isConnected) return; if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (!e.repeat) act(); } else if (e.key === "Escape" && ST.phase === "ready") { e.preventDefault(); sh.close(); } };
+    const onKey = e => { if (!ov.isConnected) return; if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (!e.repeat) act(); } else if (e.key === "Escape" && ST.phase === "ready") { e.preventDefault(); sh.close(); }
+      else if (!e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && (e.key === "a" || e.key === "A")) { e.preventDefault(); cycleAuto(); }       // teclado puro: A cambia AUTO y S la ficha (antes solo se podia con el raton o el cursor del mando)
+      else if (!e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); cycleStake(); } };
     addEventListener("keydown", onKey, true);
     const cleanup = () => { clearInterval(talkIv); removeEventListener("keydown", onKey, true); removeEventListener("resize", onResize); try { A.sfx.gbEngine.stop(); } catch (e) { /* nada */ } };
     TST.st = ST; TST.getF = () => F; TST.cashNow = () => cash(0, "manual"); TST.takeoff = () => takeoff(); TST.sc = () => Sn;
