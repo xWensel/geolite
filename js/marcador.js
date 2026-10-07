@@ -210,7 +210,7 @@ window.AIQ = window.AIQ || {};
       if (e.goal) {
         if (bar) { bar.classList.add("done"); if (moving) bar.animate([{ filter: "brightness(1.9)" }, { filter: "none" }], { duration: 520, easing: "ease-out" }); }
         if (mark && moving) mark.animate([{ transform: "none" }, { transform: "scale(2.2, 1.9)", background: "#4bc292", offset: 0.35 }, { transform: "none" }], { duration: 480, easing: "ease-out" });
-        if (led) { const st = document.createElement("b"); st.className = "mc-stamp"; st.textContent = A.pick6("¡META!|GOAL!|OBJECTIF !|META!|ZIEL!|OBIETTIVO!||达标！|목표 달성!|目標達成！|ЦЕЛЬ!|CEL!"); led.appendChild(st); }
+        if (led) { const st = document.createElement("b"); st.className = "mc-stamp"; st.textContent = A.pick6("¡META!|TARGET HIT!|OBJECTIF !|META!|ZIEL!|TRAGUARDO!||达标！|목표 달성!|目標達成！|ЦЕЛЬ ВЗЯТА!|CEL!"); led.appendChild(st); }
         if (loot) loot.classList.remove("mc-hold");
         if (A.sfx.goal) A.sfx.goal(); buzz([40, 50, 40, 50, 110]);   // la firma del juego (sol-do-re) y tres pulsos, el ultimo largo
       } else {

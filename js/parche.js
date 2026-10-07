@@ -26,7 +26,7 @@ window.AIQ = window.AIQ || {};
     inpatch: "En este parche|In this patch|Dans ce patch|Neste patch|In diesem Patch|In questa patch||本补丁内容|이 패치 내용|このパッチの内容|В этом патче|W tym patchu",
     latest: "Último|Latest|Dernier|Mais recente|Neuester|Ultima||最新|최신|最新|Последний|Najnowszy",
     new: "Nuevo|New|Nouveau|Novo|Neu|Nuovo||新|새 글|新着|Новое|Nowe",
-    games: "Compilaciones {a} a {b}|Builds {a} to {b}|Versions {a} à {b}|Compilações {a} a {b}|Builds {a} bis {b}|Build {a} a {b}||构建 {a} 至 {b}|빌드 {a} ~ {b}|ビルド {a}〜{b}|Сборки {a}–{b}|Wersje {a} do {b}",
+    games: "Compilaciones {a} a {b}|Builds {a} to {b}|Versions {a} à {b}|Compilações {a} a {b}|Builds {a} bis {b}|Build da {a} a {b}||构建 {a} 至 {b}|빌드 {a} ~ {b}|ビルド {a}〜{b}|Сборки {a}–{b}|Wersje od {a} do {b}",
     bld: "comp.|build|vers.|comp.|Build|build||构建|빌드|ビルド|сборка|wersja",
     top: "Subir|Back to top|Haut de page|Voltar ao topo|Nach oben|Torna su||回到顶部|맨 위로|先頭へ|Наверх|Do góry",
     close: "Cerrar|Close|Fermer|Fechar|Schließen|Chiudi||关闭|닫기|閉じる|Закрыть|Zamknij",
@@ -41,10 +41,10 @@ window.AIQ = window.AIQ || {};
     new_: "Nuevo|New|Nouveau|Novo|Neu|Nuovo||新增|신규|新規|Новое|Nowe",
     change: "Cambio|Change|Changement|Mudança|Änderung|Modifica||调整|변경|変更|Изменение|Zmiana",
     buff: "Mejora|Improved|Amélioré|Melhorado|Verbessert|Migliorato||加强|개선|強化|Улучшено|Ulepszenie",
-    nerf: "Ajuste|Adjusted|Ajusté|Ajustado|Angepasst|Ritoccato||削弱|조정|調整|Подправлено|Korekta",
+    nerf: "Ajuste|Adjusted|Ajusté|Ajustado|Angepasst|Ritoccato||下调|조정|調整|Подправлено|Korekta",
     fix: "Arreglo|Fix|Correctif|Correção|Fehlerbehebung|Correzione||修复|수정|修正|Исправлено|Poprawka",
     out: "Sale|Removed|Retiré|Removido|Entfernt|Rimosso||移除|제거|削除|Убрано|Usunięto",
-    merge: "Fusión|Merged|Fusionné|Fundido|Zusammengelegt|Unito||合并|통합|統合|Объединено|Połączono",
+    merge: "Fusión|Merged|Fusionné|Mesclado|Zusammengelegt|Unito||合并|통합|統合|Объединено|Połączono",
   };
   const t = k => A.pick6(TX[k]);
   const tagName = g => t(g === "new" ? "new_" : g);

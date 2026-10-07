@@ -42,7 +42,7 @@ window.AIQ = window.AIQ || {};
     "Hong Kong": "Hong Kong|Hong Kong|Hong Kong|Hong Kong|Hongkong|Hong Kong||香港|홍콩|香港|Гонконг|Hongkong",
     "Macao": "Macao|Macau|Macao|Macau|Macau|Macao||澳门|마카오|マカオ|Макао|Makau",
     "Faeroe Is.": "Islas Feroe|Faroe Islands|Îles Féroé|Ilhas Faroé|Färöer|Isole Fær Øer||法罗群岛|페로 제도|フェロー諸島|Фарерские острова|Wyspy Owcze",
-    "Fr. S. Antarctic Lands": "Tierras Australes Francesas|French Southern Lands|Terres australes françaises|Terras Austrais Francesas|Französische Süd-Gebiete|Terre australi francesi||法属南部领地|프랑스령 남방 지역|フランス領南方地域|Французские Южные территории|Francuskie Terytoria Południowe",
+    "Fr. S. Antarctic Lands": "Tierras Australes Francesas|French Southern Lands|Terres australes françaises|Terras Austrais Francesas|Französische Südgebiete|Terre australi francesi||法属南部领地|프랑스령 남방 지역|フランス領南方地域|Французские Южные территории|Francuskie Terytoria Południowe",
     "S. Geo. and the Is.": "Georgia del Sur|South Georgia|Géorgie du Sud|Geórgia do Sul|Südgeorgien|Georgia del Sud||南乔治亚|사우스조지아|サウスジョージア|Южная Георгия|Georgia Południowa",
   };
   const PC_EN = { Greenland: "Greenland", "Curaçao": "Curaçao", Aruba: "Aruba", "Cook Is.": "Cook Islands" };   // estos si vienen en A.PCOUNTRY (por su nombre ingles)

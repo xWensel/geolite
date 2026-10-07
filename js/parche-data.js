@@ -31,6 +31,39 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.1",
+      name: { es: "Doce idiomas de verdad", en: "Twelve real languages", fr: "Douze vraies langues", pt: "Doze idiomas de verdade", de: "Zwölf echte Sprachen", it: "Dodici lingue vere", "es-419": "Doce idiomas de verdad", zh: "十二种地道语言", ko: "진짜 12개 언어", ja: "本物の12言語", ru: "Двенадцать настоящих языков", pl: "Dwanaście prawdziwych języków" },
+      date: "2026-10-08",
+      summary: {
+        es: "Revisión nativa de todos los textos del juego en los 12 idiomas: menús, retos, cartas, casino, Clásico, pistas y, sobre todo, el crupier, que ahora bromea como uno más en cada idioma.",
+        en: "A native review of every text in the game across all 12 languages: menus, challenges, cards, casino, Classic, clues and, above all, the dealer, who now jokes like a local in every language.",
+        fr: "Relecture native de tous les textes du jeu dans les 12 langues : menus, défis, cartes, casino, Classique, indices et surtout le croupier, qui plaisante désormais comme un local dans chaque langue.",
+        pt: "Revisão nativa de todos os textos do jogo nos 12 idiomas: menus, desafios, cartas, cassino, Clássico, pistas e, acima de tudo, o crupiê, que agora faz piada como um local em cada idioma.",
+        de: "Muttersprachliche Überarbeitung aller Texte des Spiels in allen 12 Sprachen: Menüs, Herausforderungen, Karten, Casino, Klassik, Hinweise und vor allem der Croupier, der jetzt in jeder Sprache scherzt wie ein Einheimischer.",
+        it: "Revisione madrelingua di tutti i testi del gioco nelle 12 lingue: menu, sfide, carte, casinò, Classico, indizi e soprattutto il croupier, che ora scherza come uno del posto in ogni lingua.",
+        "es-419": "Revisión nativa de todos los textos del juego en los 12 idiomas: menús, retos, cartas, casino, Clásico, pistas y, sobre todo, el crupier, que ahora bromea como uno más en cada idioma.",
+        zh: "对游戏全部 12 种语言的所有文本进行了母语级审校：菜单、挑战、卡牌、赌场、经典模式、线索，尤其是荷官——他现在在每种语言里都能像本地人一样开玩笑。",
+        ko: "게임의 모든 텍스트를 12개 언어 전부 원어민 수준으로 다듬었습니다. 메뉴, 도전, 카드, 카지노, 클래식, 힌트, 그리고 무엇보다 이제 각 언어에서 현지인처럼 농담하는 딜러까지.",
+        ja: "ゲーム内のすべてのテキストを12言語すべてでネイティブが見直しました。メニュー、チャレンジ、カード、カジノ、クラシック、ヒント、そして何よりディーラー。どの言語でも地元っ子のように冗談を飛ばします。",
+        ru: "Носители языка вычитали все тексты игры на всех 12 языках: меню, испытания, карты, казино, «Классику», подсказки и прежде всего крупье — теперь он шутит на каждом языке как свой.",
+        pl: "Natywna korekta wszystkich tekstów gry we wszystkich 12 językach: menu, wyzwania, karty, kasyno, tryb klasyczny, wskazówki i przede wszystkim krupier, który teraz w każdym języku żartuje jak swój."
+      },
+      chapters: [
+        { id: "idiomas", kicker: ["Idiomas", "Languages"], title: ["Traducción premium", "Premium localization"],
+          intro: ["Cada idioma lo han repasado de principio a fin revisores nativos, con una segunda pasada de coherencia.", "Native reviewers went through every language from start to finish, followed by a second pass for consistency."],
+          entries: [
+            E(["Casi 2.900 textos corregidos", "Almost 2,900 texts fixed"], "fix", "0.3.1", [
+              ["Erratas, calcos, frases que decían otra cosa que el original, registro y tuteo coherentes, y nombres de cartas, retos y minijuegos unificados en todo el juego.", "Typos, literal translations, lines that said something other than the original, a consistent tone and form of address, and card, challenge and minigame names unified across the whole game."],
+              ["Los 15 logros que llegaron en la 0.2.56 ya no salen en inglés en los otros 10 idiomas.", "The 15 achievements added in 0.2.56 no longer show up in English in the other 10 languages."],
+              ["El inglés pasa a inglés de EE. UU. en todo el juego; el portugués es de Brasil de verdad (topónimos incluidos) y el español latinoamericano tiene su propia voz donde el de España chirría.", "English is now US English throughout; Portuguese is truly Brazilian (place names included), and Latin American Spanish gets its own voice wherever Spain's would grate."]
+            ]),
+            E(["El crupier, con gracia local", "The dealer, with local wit"], "change", "0.3.1", [
+              ["En cada idioma, unas treinta frases suyas usan refranes, juegos de palabras y guiños propios de ese público, sin cambiar la situación ni las reglas.", "In every language, about thirty of his lines now use that audience's own sayings, puns and nods, without changing the situation or the rules."]
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.0",
       name: ["Build limpia", "A clean build"],
       date: "2026-10-07",

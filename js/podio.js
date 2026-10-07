@@ -9,7 +9,7 @@ window.AIQ = window.AIQ || {};
 (function (A) {
   const $ = id => document.getElementById(id), P6 = s => A.pick6(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const TITLE = () => P6("Clasificación|Leaderboard|Classement|Placar|Rangliste|Classifica|Ranking|排行榜|리더보드|ランキング|Рейтинг|Ranking");   // corto: cabe en la fila de la portada
+  const TITLE = () => P6("Clasificación|Leaderboard|Classement|Placar|Rangliste|Classifica|Clasificación|排行榜|리더보드|ランキング|Рейтинг|Ranking");   // corto: cabe en la fila de la portada
   const TABS = () => [["adv", A.T("Aventura", "Adventure")], ["today", P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś")], ["yday", P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj")]];
   const boardOf = t => (t === "today" ? A.rank.day.board() : t === "yday" ? A.rank.day.yesterday() : "adv-all");   // Hoy y Ayer: la mejor partida de cada uno, de la Aventura o del Reto diario
   const ROWS = 8;                                                     // 3 en el podio + 5 en la lista: la misma peticion que la tabla del Reto diario
@@ -104,8 +104,8 @@ window.AIQ = window.AIQ || {};
     let foot = "";
     if (res) {
       if (meI < 0 && res.global && res.me) foot = `<ol class="lb pd-list pd-me${day ? " dy" : ""}"><li class="lb-gap" aria-hidden="true">···</li>${li({ id: my, name: A.rank.name(), score: res.me.score, tries: day ? A.rank.daily.get(boardOf(tab)).tries.filter(t => !t.live) : null }, res.me.rank, 0)}</ol>`;
-      else if (meI < 0) foot = `<p class="pd-hint"><span>${tab === "yday" ? P6("Ayer no jugaste|You didn't play yesterday|Tu n'as pas joué hier|Você não jogou ontem|Gestern hast du nicht gespielt|Ieri non hai giocato||你昨天没有参加|어제는 플레이하지 않았어요|昨日はプレイしていない|Вчера ты не играл|Wczoraj nie grałeś")
-        : P6("Todavía no estás aquí|You're not on the board yet|Tu n'es pas encore classé|Você ainda não está no placar|Du stehst noch nicht in der Liste|Non sei ancora in classifica||你还没有上榜|아직 순위에 없어요|まだランクインしていない|Тебя пока нет в таблице|Jeszcze cię tu nie ma")}</span>${tab === "yday" ? "" : `<button type="button" class="btn-ink" id="pdPlay"><span>${P6("Jugar|Play|Jouer|Jogar|Spielen|Gioca||开始游戏|플레이|プレイ|Играть|Graj")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button>`}</p>`;
+      else if (meI < 0) foot = `<p class="pd-hint"><span>${tab === "yday" ? P6("Ayer no jugaste|You didn't play yesterday|Tu n'as pas joué hier|Você não jogou ontem|Gestern hast du nicht gespielt|Ieri non hai giocato||你昨天没玩|어제는 플레이하지 않았어요|昨日はプレイしていない|Вчера игры не было|Wczoraj cię nie było")
+        : P6("Todavía no estás aquí|You're not on the board yet|Tu n'es pas encore au classement|Você ainda não está no placar|Du stehst noch nicht in der Liste|Non sei ancora in classifica||你还没有上榜|아직 순위에 없어요|まだランクインしていない|Тебя пока нет в таблице|Jeszcze cię tu nie ma")}</span>${tab === "yday" ? "" : `<button type="button" class="btn-ink" id="pdPlay"><span>${P6("Jugar|Play|Jouer|Jogar|Spielen|Gioca||开始游戏|플레이|プレイ|Играть|Graj")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button>`}</p>`;
       else if (res.global && meI < 3) foot = `<p class="pd-hint top">${A.icon("u_star", "sm")}<span>${P6("¡Estás en el podio!|You're on the podium!|Tu es sur le podium !|Você está no pódio!|Du stehst auf dem Podest!|Sei sul podio!||你登上了领奖台！|시상대에 올랐어요!|表彰台に乗った！|Ты на пьедестале!|Jesteś na podium!")}</span></p>`;
       else if (res.global) foot = `<p class="pd-hint"><span>${P6("A {n} pts del podio|{n} pts from the podium|À {n} pts du podium|A {n} pts do pódio|{n} Pkt. bis zum Podest|A {n} punti dal podio||距领奖台还差 {n} 分|시상대까지 {n}점|表彰台まであと{n}点|До пьедестала {n} очк.|Do podium brakuje {n} pkt").replace("{n}", A.fmt(Math.max(1, rows[2].score - rows[meI].score + 1)))}</span></p>`;
     }

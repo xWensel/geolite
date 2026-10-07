@@ -195,7 +195,7 @@ window.AIQ = window.AIQ || {};
       AD("casino_canto", "🪙", "De canto", "On its edge", "La moneda cae de canto en Moneda al aire.", "The coin lands on its edge in Coin flip.", "casino", c => !!c.edge, true),
       AD("casino_espacial", "🚀", "Misión espacial", "Space mission", "Cobra El globo a ×77 o más.", "Cash out The balloon at ×77 or more.", "casino", c => c.kind === "play" && c.mult >= 77, true),
       AD("antipodas", "🌐", "Al otro lado del mundo", "Other side of the world", "Responde con más de 15.000 km de error.", "Answer with more than 15,000 km of error.", "q", c => c.km != null && c.km > 15000, true),
-      AD("casino_falso", "🃏", "Con la guardia baja", "Caught off guard", "Don Crupier te cuela un logro falso.", "Don Crupier slips you a fake achievement.", "dealer", () => true, true),
+      AD("casino_falso", "🃏", "Con la guardia baja", "Caught off guard", "Don Crupier te cuela un logro falso.", "The dealer slips you a fake achievement.", "dealer", () => true, true),
       AD("adv_ascmax", "🎩", "Jubila al crupier", "Retire the dealer", "Gana una expedición en la Ascensión máxima.", "Win an expedition at max Ascension.", "adv", c => c.kind === "act" && c.act >= 3 && !c.daily && c.asc >= 5, true),
     ]),
   ];
