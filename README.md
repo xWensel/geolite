@@ -79,7 +79,7 @@ Herramienta de desarrollo: `dev/bot.js`, un jugador automático para medir dific
 
 ### Arte
 
-Todo el arte de Geolite es pixel art de Cousins Studios, sobre un libro de estilo propio y una paleta limitada, con cada pieza retocada y pulida a mano hasta quedar a la rejilla nativa del juego.
+Todo el arte de Geolite es pixel art de Cousins Studios. La base está ideada por el estudio y levantada con andamiaje de IA (libro de estilo propio, paleta limitada); el trabajo manual y el pulido son humanos: cada pieza se retoca, se redibuja y se pule a mano hasta quedar a la rejilla nativa del juego.
 
 - **Don Crupier:** retrato maestro pulido a mano; capas, caras, manos, expresiones y gestos animados por capas (`tools/crupier/`).
 - **Iconos:** insignias de logros (48 px nativos sobre su ficha), iconos del casino, reliquias, herramientas, jefes, retos, barajas, tipos de tarjeta e interfaz.

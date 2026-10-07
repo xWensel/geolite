@@ -46,7 +46,33 @@ th{position:sticky;top:0;background:#12231a;color:var(--brass)} td:nth-child(2){
 
 <h2>Game</h2>
 <ul>
-<li><b>Design, code, art and soundtrack:</b> Cousins Studios. The soundtrack was composed and produced by the author of the game.</li>
+<li><b>Design, code and soundtrack:</b> Cousins Studios. The soundtrack was created by the studio with AKAI.</li>
+<li><b>Art:</b> Cousins Studios. The base was conceived by the studio and scaffolded with AI tools; the hand work and the polish are human: every piece is retouched, redrawn and polished by hand to the game's native pixel grid.</li>
+</ul>
+
+<h2>Soundtrack</h2>
+<ul>
+<li>01. Sure Bet (lounge nocturno, 1:30)</li>
+<li>02. Double or Nothing (ragtime, 1:44)</li>
+<li>03. Both Teams to Score (bossa nova, 1:41)</li>
+<li>04. Over 2.5 Goals (samba, 1:37)</li>
+<li>05. All on Red (blues, 1:48)</li>
+<li>06. Orphans (vals, 1:45)</li>
+<li>07. All In (funk, 1:33)</li>
+<li>08. Parlay (big band, 1:43)</li>
+<li>09. Raise the Stakes (mambo, 1:40)</li>
+<li>10. Cash Out (lo-fi, 1:45)</li>
+<li>11. Bankroll (reggae, 1:42)</li>
+<li>12. Live Bet (reggaeton, 1:45)</li>
+<li>13. Straight Up (flamenco, 1:48)</li>
+<li>14. Asian Handicap (deep house, 1:35)</li>
+<li>15. High Roller (funk, 1:44)</li>
+<li>16. Progressive Jackpot (house, 1:34)</li>
+<li>17. House Edge (tecno, 1:46)</li>
+<li>18. Hot Hand (merengue, 1:47)</li>
+<li>19. Each Way (cha-cha-chá, 1:46)</li>
+<li>20. Draw No Bet (ranchera, 1:43)</li>
+<li>21. Max Bet (corrido, 1:45)</li>
 </ul>
 
 <h2>Encyclopedia texts</h2>
