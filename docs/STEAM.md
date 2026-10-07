@@ -64,7 +64,7 @@ piden antes del 28 de septiembre.
       hace nada, son logros que no existen para App 480).
       **Alta de logros:** `node tools/steam-achievements.mjs` y
       `python tools/steam_icons.py` generan `docs/steam/achievements.csv`
-      (81 logros: API name = id de `js/profile.js`, oculto si/no, nombre y
+      (100 logros: API name = id de `js/profile.js`, oculto si/no, nombre y
       descripcion en los 12 idiomas con el codigo de Steam) y
       `docs/steam/icons/` (64x64 JPG, conseguido y `_locked`). Cada logro
       tiene insignia propia. Retirado `classic_win` (se desbloqueaba siempre

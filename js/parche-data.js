@@ -36,6 +36,35 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.53",
+      name: ["Logros renovados", "Achievements, renewed"],
+      date: "2026-10-07",
+      summary: ["Catorce logros nuevos, centrados en el mapa y la Enciclopedia: uno por continente completo, un secreto sobre geografía y unos pocos guiños al casino. La última Ascensión pasa a ser un secreto.",
+        "Fourteen new achievements, centred on the map and the Encyclopedia: one for every finished continent, a geography secret and a few nods to the casino. The last Ascension becomes a secret."],
+      chapters: [
+        { id: "logros", kicker: ["Logros", "Achievements"], title: ["Más mapa, menos contadores", "More map, fewer counters"],
+          intro: ["Siguen siendo **100**, con ocho secretos. Salen catorce que solo contaban cosas y entran catorce que cuentan una historia.",
+            "There are still **100**, with eight secrets. Fourteen that only counted things are out, and fourteen that tell a story are in."],
+          entries: [
+            E(["Un logro por continente", "One for every continent"], "new", "0.2.53", [
+              ["Completa **Europa, Asia, África, Norteamérica, Sudamérica u Oceanía** en la Enciclopedia y te llevas su logro. En el Perfil ves cuántas tarjetas te faltan de cada uno.", "Finish **Europe, Asia, Africa, North America, South America or Oceania** in the Encyclopedia and you earn its achievement. The Profile shows how many cards you still need in each."]
+            ]),
+            E(["Casino", "Casino"], "new", "0.2.53", [
+              ["**A la mesa** (tu primer juego), **Gira del casino** (los 8 juegos distintos) y **Banca privada** (177 doblones a la vez).", "**Pull up a chair** (your first game), **Casino tour** (all 8 different games) and **Private bank** (177 doubloons at once)."],
+              ["Tres secretos para los que prueban suerte: uno con el cero de la ruleta, otro con la moneda y otro con el globo.", "Three secrets for those who try their luck: one with the roulette zero, one with the coin and one with the balloon."]
+            ]),
+            E(["Secretos de geografía y del crupier", "Geography and dealer secrets"], "new", "0.2.53", [
+              ["Hay un secreto para quien se equivoca de verdad y otro para quien se deja engañar por Don Crupier.", "There is a secret for those who miss spectacularly and another for those Don Crupier fools."]
+            ]),
+            E(["La cumbre", "The summit"], "change", "0.2.53", [
+              ["El logro de la última Ascensión ahora es un **secreto** y cambia de nombre. Sigue habiendo un logro por cada Ascensión.", "The achievement for the last Ascension is now a **secret** and has a new name. There is still one achievement for every Ascension."]
+            ]),
+            E(["Logros que salen", "Achievements removed"], "out", "0.2.53", [
+              ["Salen catorce logros que repetían a otros con una cifra distinta (partidas jugadas, clics dentro de un país, rondas perfectas, retos diarios y similares). Los que ya tuvieras no cuentan en el total.", "Fourteen achievements that repeated others with a different number are gone (games played, clicks inside a country, perfect rounds, daily challenges and similar). Any you had no longer count towards the total."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.52",
       name: ["Rasca y gana", "Scratch & win"],
       date: "2026-10-06",

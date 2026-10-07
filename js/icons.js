@@ -22,7 +22,7 @@ window.AIQ = window.AIQ || {};
   A.achIcon = id => A.ACH_ICON[id] || "ach_" + id;
   /* insignia de logro: ficha del color de su modo (rojo preguntas, azul Clasico, turquesa Enciclopedia, naranja Aventura, oro Reto diario)
      + la ilustracion encima, un poco mas grande que el hueco de la ficha (igual que el icono de Steam: tools/steam_icons.py) */
-  A.ACH_FRAME = { q: "blank_boss", level: "blank_boss", classic: "blank_small", codex: "blank_teal", adv: "blank_big", daily: "blank_gold" };
+  A.ACH_FRAME = { q: "blank_boss", level: "blank_boss", classic: "blank_small", codex: "blank_teal", adv: "blank_big", daily: "blank_gold", casino: "blank_green", dealer: "blank_boss" };
   A.badge = (achId, cls = "") => {
     const a = A.ACH.find(x => x.id === achId);
     return `<span class="ic badge ${cls}">${A.icon(A.ACH_FRAME[a && a.ev] || "blank_boss", "bd-base")}${A.icon(A.achIcon(achId), "bd-in")}</span>`;

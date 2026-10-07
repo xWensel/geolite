@@ -249,7 +249,9 @@ window.AIQ = window.AIQ || {};
     return out;
   };
   const byType = () => { const cnt = {}; order.forEach(id => { const e = E[id], c = cnt[e.type] || (cnt[e.type] = [0, 0]); c[1]++; if (isUnlocked(id)) c[0]++; }); return cnt; };
-  const emitStats = () => { if (A.ach) { const st = stats(); A.ach.emit("codex", { u: st.u, t: st.t, by: byType() }); } };
+  /* tarjetas de cada continente [desbloqueadas, total] (logros por continente) */
+  const byCont = () => { const o = {}; ["eu", "as", "af", "na", "sa", "oc"].forEach(c => { const s = sumStats(contGroups(c)); o[c] = [s.u, s.t]; }); return o; };
+  const emitStats = () => { if (A.ach) { const st = stats(); A.ach.emit("codex", { u: st.u, t: st.t, by: byType(), cont: byCont() }); } };
   A.codexLimits = e => { const id = (e && e.cids && e.cids.find(c => E[c])) || (e && (e.parent || e.id)), sc = (E[id] && SCALE[E[id].type]) || 1; return LIM.map(x => x * sc); };   // cids: las pistas llevan antes "clue:<id>"
   A.continent = continent; A.continentMap = continentMap;
   function stats() { let u = 0; order.forEach(id => { if (isUnlocked(id)) u++; }); return { u, t: order.length }; }
@@ -1186,7 +1188,7 @@ window.AIQ = window.AIQ || {};
     ids: () => order.slice(),
     regionNames: ne => (REG_OF[ne] ? REG_OF[ne].names : ""),         // nombre de la familia de un pais, "es|en|..." (sin montar el atlas)
     reset() { store = { unlocked: {}, seen: {} }; save(); dirty(); ui.cur = null; if (isOpen()) { ui.stack = []; ui.view = { k: "home" }; render(); } },
-    byType,
+    byType, byCont,
     refresh() { if (isOpen()) { labels(); saveTop(); render(); } },
   };
 })(window.AIQ);

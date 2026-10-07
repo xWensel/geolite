@@ -735,7 +735,7 @@ window.AIQ = window.AIQ || {};
         if (run.lives <= 0) run.infOver = true;                                     // se acaban las provisiones: la siguiente pantalla cobra la expedicion
       }
     }
-    persist(); A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length, inf: run.inf ? run.qi : 0 });   // inf: preguntas aguantadas en el modo infinito
+    persist(); A.ach.emit("casino", { kind: "hold", coins: run.coins }); A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length, inf: run.inf ? run.qi : 0 });   // inf: preguntas aguantadas en el modo infinito
     const kind = res.km == null ? "timeout" : res.dist >= 960 ? "bull" : res.dist < 400 ? "miss" : res.streak >= 3 ? "streak" : res.dist >= 750 ? "good" : null;
     const qAt = C().S.qi, still = () => { const S2 = C().S; return !!run && S2.qi === qAt && S2.phase === "reveal"; };   // pasaste a la siguiente: ya no la comenta
     /* lo que el crupier sabe de esta respuesta: el lugar, tu mano de verdad y si es "ese sitio otra vez" (js/dealer.js) */
@@ -1438,7 +1438,20 @@ window.AIQ = window.AIQ || {};
   A.peek.on("#advBar .ab-perk", el => peekRelic(el.dataset.id, false));
   A.peek.on(".table.mesa .tr-tool", el => { const id = el.dataset.tool, t = TOOLS[id]; if (!t || !run || !run.tools[id]) return null; const n = toolMax(id);
     return { key: `t:${id}:${n}`, cls: `r${t.r} pk-tool`, html: pkCard(t, A.tx(PK_TOOL), `<span class="pk-pips">${"<i></i>".repeat(n)}</span>${A.tx(PK_USES).replace("{n}", n)}`) }; });
+  /* logros del casino: cada jugada deja su registro en run.reds (se guarda ANTES de animar); se cuenta al volver al Campamento, con el resultado ya visto, para que el aviso no destripe el giro */
+  function reportCasino() {
+    if (!run || !run.reds || !A.profile || !A.profile.casino) return;
+    let any = false;
+    for (const k in run.reds) {
+      const b = run.reds[k]; if (!b || b.rep || !CASINO.includes(b.id)) continue;
+      if ((b.id === "globo" || b.id === "rasca") && !b.done) continue;                       // a medias: se cuenta cuando termina
+      b.rep = 1; any = true;
+      A.profile.casino({ game: b.id, green: b.id === "red" && !!b.win && b.out === "green", edge: b.id === "coin" && b.out === "edge", mult: b.id === "globo" ? (b.cashM || 0) / 1000 : 0 });
+    }
+    if (any) persist();
+  }
   function renderShop(chest) {
+    reportCasino();
     legOn = 0; swapIx = null; shopChest = !!chest; A.peek.close(true);  // mesa nueva: si la legendaria se estaba luciendo en la anterior, esa secuencia ya no sigue
     const slots = maxPerks(), info = actInfo(run.act), rc = rerollCost(), r = roundNo(), cf = chalFor(r);
     const cards = run.stock.map((s, i) => cardHtml(s, i, chest)).join("") || `<p class="tb-empty">${A.T("No quedan cartas: ¡sigue adelante!", "No cards left: move on!")}</p>`;
@@ -1496,7 +1509,7 @@ window.AIQ = window.AIQ || {};
       if (chest) { const k = gain(chestSkip()); run.coins += k; run.stats.coinsEarned += k; A.sfx.sell(); }   // dejar el cofre sin abrir tambien se cobra (con la mochila llena, el cofre no es papel mojado)
       persist(); chest ? openShop(false) : startRound();
     };
-    A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length });
+    A.ach.emit("casino", { kind: "hold", coins: run.coins }); A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length });
     if (A.tour) A.tour.maybe("camp");
   }
   /* Suministros de la proxima ronda (se gastan cada ronda: el dinero siempre tiene en que invertirse) */

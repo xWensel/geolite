@@ -30,6 +30,8 @@ const rows = A.ACH.map(a => {
   return r;
 });
 const missing = rows.flatMap(r => STEAM.filter(([, s]) => !r.name[s] || !r.desc[s]).map(([, s]) => `${r.id}:${s}`));
+/* sin traduccion cae al ingles, como hace el juego (CLAUDE.md); el aviso de abajo sigue diciendo cuales faltan */
+rows.forEach(r => { const a = A.ACH.find(x => x.id === r.id); for (const [, s] of STEAM) { r.name[s] = r.name[s] || a.name.en; r.desc[s] = r.desc[s] || a.desc.en; } });
 
 fs.writeFileSync(path.join(OUT, "achievements.json"), JSON.stringify(rows, null, 1));
 const q = s => `"${String(s ?? "").replace(/"/g, '""')}"`;
