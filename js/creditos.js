@@ -29,7 +29,8 @@ window.AIQ = window.AIQ || {};
     if (loaded) return; loaded = true;
     const inn = sh.querySelector(".cr-in");
     try {
-      const html = await (await fetch("credits.html", { cache: "no-cache" })).text();
+      const resp = await fetch("credits.html", { cache: "no-cache" }); if (!resp.ok) throw new Error("credits.html " + resp.status);
+      const html = await resp.text();
       const doc = new DOMParser().parseFromString(html, "text/html"), main = doc.querySelector("main") || doc.body;
       main.querySelectorAll("script, #q, h1").forEach(e => e.remove());
       { const p0 = main.querySelector("p"); if (p0 && /Credits and licenses/i.test(p0.textContent)) p0.remove(); }   // la cabecera del panel ya lo dice

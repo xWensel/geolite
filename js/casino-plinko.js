@@ -183,6 +183,7 @@ window.AIQ = window.AIQ || {};
       if (!ov.isConnected || ST.dropped) return; const k = e.key;
       if (k === "ArrowLeft") { setCol(ST.col - 1); e.preventDefault(); } else if (k === "ArrowRight") { setCol(ST.col + 1); e.preventDefault(); }
       else if (k === "ArrowUp") { setRisk(ST.risk - 1); e.preventDefault(); } else if (k === "ArrowDown" || k === "r" || k === "R") { setRisk(ST.risk + 1); e.preventDefault(); }
+      else if ((k === "s" || k === "S") && !e.ctrlKey && !e.metaKey && !e.altKey) { setStake((stakeI + 1) % cx.STAKES.length); e.preventDefault(); }   // la ficha tambien con el teclado
       else if (k >= "1" && k <= "9") setCol(+k - 1); else if (k === "0") setCol(9); else if (k === "Enter" || k === " ") { e.preventDefault(); doDrop(); } else if (k === "Escape") { e.preventDefault(); sh.close(); }
     };
     addEventListener("keydown", onKey, true);
@@ -320,7 +321,7 @@ window.AIQ = window.AIQ || {};
     renderSlots(false); renderPanel(); renderHist(false); chipPark(); hint("hStart");
     if (TST.auto) setTimeout(() => { if (!alive()) return; if (TST.auto.col != null) { ST.col = TST.auto.col; chipPark(); } if (TST.auto.risk != null) ST.risk = TST.auto.risk; if (TST.auto.stake != null) stakeI = TST.auto.stake; renderSlots(false); renderPanel(); setTimeout(doDrop, 400); }, 700);
     const cleanup = () => { clearInterval(talkIv); removeEventListener("keydown", onKey, true); removeEventListener("resize", onResize); };
-    const wd = setInterval(() => { if (!alive()) { clearInterval(wd); cleanup(); pend.forEach(e => e.rej(CANCEL)); pend.clear(); } }, 250);
+    const wd = setInterval(() => { if (!alive()) { clearInterval(wd); cleanup(); pend.forEach(e => e.rej(CANCEL)); pend.clear(); if (!sh.closed) sh.bail("capa retirada"); } }, 250);
   }
 
   A.adv._plinko = Object.assign(A.adv._plinko || {}, { decide, walk, sitFor, levelOf, PRES, DECORS });   // solo pruebas (dev/): force(res), pres, decor, slow, auto ({ col, risk, stake }), st

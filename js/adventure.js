@@ -233,11 +233,11 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ partida (run) */
   let run = null, slot = RUNKEY;                                     // slot: ranura de la partida activa (expedicion normal o intento del Reto diario)
   const keyOf = daily => (daily ? DAILYKEY : RUNKEY);
-  const loadSlot = daily => { try { return JSON.parse(localStorage.getItem(keyOf(daily)) || "null"); } catch (e) { return null; } };
+  const loadSlot = daily => { try { const r = JSON.parse(localStorage.getItem(keyOf(daily)) || "null"); return r && typeof r === "object" && Number.isFinite(r.act) && Number.isFinite(r.round) ? r : null; } catch (e) { return null; } };   // una ranura corrupta o a medio escribir cuenta como vacia (antes Continuar no hacia nada o lanzaba)
   /* el logro de la legendaria del cofre se queda en deuda (run.legAch) hasta la tienda: su aviso no tapa la secuencia. Se paga ahi, al reanudar
      o, si la partida se cierra a mitad y no se continua, al abandonarla o al empezar otra encima. Pagar dos veces no hace nada */
   const payLeg = r => { if (r && r.legAch) { r.legAch = 0; A.ach.emit("adv", { kind: "legend", chest: true }); } };
-  A.adv = { get run() { return run; }, hasSave(daily) { try { return !!localStorage.getItem(keyOf(daily)); } catch (e) { return false; } } };
+  A.adv = { get run() { return run; }, hasSave(daily) { return !!loadSlot(daily); } };
   /* ---------------- la ruta de la expedicion: 12 rondas en 3 actos (el jefe cierra cada acto) y el modo infinito al final ----------------
      v0.35 (usuario): antes el Campamento ensenaba una ventana de 12 casillas que se corria y llegaba a rondas 13-18 que no existen.
      size "bar": la barra del Campamento (lo jugado, ficha de oro con su marca; la proxima, encendida y con la chincheta encima).
@@ -592,12 +592,12 @@ window.AIQ = window.AIQ || {};
     Object.keys(P).forEach(k => P[k].forEach(q => { if (!seen.has(q.cid[0])) { seen.add(q.cid[0]); out.push(q); } }));
     return out;
   }
-  function infBatch() {
-    const rr = A.rng(`${run.seed}:inf:${run.infN = (run.infN || 0) + 1}`);
+  function infBatch(n) {                                                // la tanda n sale siempre igual de la semilla: reanudar no rebaraja el carrete (ni deja cambiar una pregunta dificil saliendo y volviendo; ni rompe el Reto diario)
+    const rr = A.rng(`${run.seed}:inf:${n}`);
     return rr.shuffle(infPool()).map(q => withSub({ ...q }));
   }
   function infiniteLevel() {
-    const qs = [].concat(infBatch(), infBatch());                     // dos barajadas del banco entero: de sobra para una sesion normal (se rellena sola si hace falta)
+    const N = Math.max(2, run.infN || 0), qs = []; for (let i = 1; i <= N; i++) qs.push(...infBatch(i)); run.infN = N;                     // dos barajadas del banco entero: de sobra para una sesion normal (se rellena sola si hace falta)
     return {
       name: A.T("Modo infinito", "Infinite mode"), topicName: A.T("Preguntas sin parar", "Nonstop questions"), topic: "mixed", kind: "adventure", boss: false,
       seconds: run.infSeconds, advance: 1, maxPerQ: 1400, bonus: false, plainName: true, questions: () => qs,
@@ -606,7 +606,7 @@ window.AIQ = window.AIQ || {};
   }
   function startInfinite(keep) {
     run.inf = true; run.phase = "round"; run.topic = "mixed"; run.tier = 2; run.chal = []; run.chalName = null; run.chalHalve = 1; run.boss = []; run.wind = null;
-    if (!keep) { run.infOver = false; run.infSeconds = 12; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; refillTools(); }
+    if (!keep) { run.infN = 0; run.infOver = false; run.infSeconds = 12; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; refillTools(); }
     const Lv = infiniteLevel(), S = C().S;
     S.run = run; S.camp = { id: "adv", mode: "adventure", title: { es: "Aventura", en: "Adventure" }, home: { lat: 20, lon: 10, zoom: 1 }, levels: [Lv] };
     S.runTotal = run.score; S.runMax = 0; C().map.setHome(S.camp.home); C().map.setStyle(mapStyleFor());
@@ -727,7 +727,7 @@ window.AIQ = window.AIQ || {};
     if (run.inf && !run.infOver) {
       const S = C().S, Lv = S.camp.levels[0];
       Lv.seconds = Math.max(3, Math.round((Lv.seconds - 0.2) * 10) / 10); run.infSeconds = Lv.seconds;
-      if (S.qs.length - S.qi < 60) S.qs.push(...infBatch());                        // se acerca el final del carrete: se rellena antes de que se note
+      if (S.qs.length - S.qi < 60) S.qs.push(...infBatch(run.infN = (run.infN || 2) + 1));                        // se acerca el final del carrete: se rellena antes de que se note
       const failed = res.km == null || res.dist < 400;
       if (failed) {
         const insured = !!(run.sup && run.sup.seguro), shielded = insured || (has("shieldAct") && run.shieldAct !== run.act);
@@ -841,6 +841,7 @@ window.AIQ = window.AIQ || {};
     if (!!calm !== !!run.calmOn) { if (calm) A.adv.flash("coolhead", 0, "❄"); else A.adv.flash("coolhead", 0, "✕", () => A.sfx.chip(0.3)); }   // entra en frio / se le quiebra el halo
     const calmWas = !!run.calmOn; run.calmOn = !!calm; if (calmWas !== run.calmOn) renderBars();   // las fichas que apaga, heladas
     const fx = A.chal.fx(amuPerks()); A.chal.question(o, run.qi, { calm });
+    if (run.intQ === qKey()) { A.chal.suspend(); run.windOff = true; }   // el Interruptor ya estaba gastado en esta pregunta: Descarte, Dividir o recargar no lo deshacen
     showSplit();
     if (kept) { C().map.avoid = hudRects(); C().map.setProbes(kept); renderBars(); }
     A.pointer.set({ tool: null, fx, calm: !!calm, noCountry: o.t === "c", windFn: run.wind ? windGhost : null, distFn: (lon, lat) => { const oo = C().S.qs[C().S.qi]; if (!oo) return null; const fo = featOf(oo); return fo ? A.geo.distToFeature(lon, lat, fo) : A.geo.haversine(lat, lon, oo.lat, oo.lon); } });
@@ -901,7 +902,7 @@ window.AIQ = window.AIQ || {};
     t.left--; run.qTools++; run.rTools++; A.sfx.buy();
     const o = C().S.qs[S.qi];
     if (id === "hourglass") { S.limit += 6; noteH(A.T("+6 segundos", "+6 seconds")); }
-    else if (id === "interruptor") { A.chal.suspend(); run.windOff = true; A.sfx.restore(); noteH(A.T("Retos apagados en esta pregunta", "Challenges off for this question")); A.dealer.react("counter"); }
+    else if (id === "interruptor") { A.chal.suspend(); run.windOff = true; run.intQ = qKey(); A.sfx.restore(); noteH(A.T("Retos apagados en esta pregunta", "Challenges off for this question")); A.dealer.react("counter"); }
     else if (id === "swapcard") { if (!swapQuestion()) { t.left++; run.qTools--; run.rTools--; A.sfx.deny(); return; } }
     else if (id === "journal") { const txt = o.clue ? A.tf("Empieza por «{l}» y está en {c}.", "Starts with “{l}” and lies in {c}.", { l: A.tx(o.answer).trim()[0], c: continentName(o) }) : fieldNote(o) || A.T("Sin notas para este lugar.", "No notes for this place."); noteH(txt, "journal"); }
     else if (id === "passport") trile(o);                                // tanda 10: el Pase VIP es un trile
@@ -1383,7 +1384,7 @@ window.AIQ = window.AIQ || {};
     }
     return {
       /* tras pintar la mesa: un brillo por lienzo nuevo (el tamano llega con el primer aviso del ResizeObserver, ya maquetado) */
-      mount: root => { if (!ro) return; root.querySelectorAll(".lg-clip > canvas").forEach(cv => { if (cv.parentNode._gold) return; const g = new Glint(cv); live.add(g); ro.observe(g.clip, { box: "device-pixel-content-box" }); if (io) io.observe(g.clip); }); },
+      mount: root => { if (!ro) return; root.querySelectorAll(".lg-clip > canvas").forEach(cv => { if (cv.parentNode._gold) return; const g = new Glint(cv); live.add(g); try { ro.observe(g.clip, { box: "device-pixel-content-box" }); } catch (e) { ro.observe(g.clip); } if (io) io.observe(g.clip); }); },
       of: el => { const c = el && el.querySelector(".lg-clip"); return (c && c._gold) || null; },
     };
   })();
@@ -2060,7 +2061,7 @@ window.AIQ = window.AIQ || {};
       let t0 = 0, last = a0, lastT = 0, lastTick = 0, cur = 0, evI = 0;
       const frame = now => {
         try {
-          if (!ov.isConnected) { rouOpen = false; return; }
+          if (!ov.isConnected) { sh.bail("capa retirada"); return; }
           if (sh.revealed) return;
           if (!t0) t0 = now + T_IN * 1000;
           const t = (now - t0) / 1000, a = angAt(t), dt = Math.max(1, now - lastT) / 1000, v = lastT ? Math.abs(a - last) / dt : 0;      // v: grados por segundo

@@ -2688,7 +2688,7 @@ window.AIQ = window.AIQ || {};
     const lr = DS.lastRun, runs = advRuns();
     curDaily = !!o.ranked;
     if (o.fresh || o.resumed) { runN = 0; if (entry === "afterRun" || entry === "left") entry = ""; }   // ya juegas otra: lo de "vuelves al menu tras la anterior" caduca (si la abandonas no te la recuerda)
-    if (o.fresh) { ghostR = lr && !lr.won && lr.r >= 2 && !!lr.daily === !!o.ranked ? lr.r : 0; ghostSaid = virginSaid = false; }   // donde caiste la ultima vez (mismo modo)
+    if (o.fresh) { DS.bet = null; ghostR = lr && !lr.won && lr.r >= 2 && !!lr.daily === !!o.ranked ? lr.r : 0; ghostSaid = virginSaid = false; }   // donde caiste la ultima vez (mismo modo)
     let special = null;                                                               // el fantasma de tu ultima caida o territorio nuevo: sustituye a la frase de contexto
     if (!o.inf && !o.resumed && !o.fresh && !(o.attempt > 0)) {
       if (ghostR && o.rn === ghostR && !ghostSaid) { ghostSaid = true; special = say1("ghostFall", { r: o.rn }); }

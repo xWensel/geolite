@@ -8,8 +8,8 @@ window.AIQ = window.AIQ || {};
 (function (A) {
   const cache = {}, pending = {}, shortC = {};
   let IMG = null, imgP = null;
-  const load = lang => cache[lang] ? Promise.resolve(cache[lang]) : (pending[lang] = pending[lang] || fetch(`data/wiki/${lang}.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => (cache[lang] = j)));
-  const loadImg = () => IMG ? Promise.resolve(IMG) : (imgP = imgP || fetch("data/wiki/img.json").then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => (IMG = j)));
+  const load = lang => cache[lang] ? Promise.resolve(cache[lang]) : (pending[lang] = pending[lang] || fetch(`data/wiki/${lang}.json`).then(r => (r.ok ? r.json() : {})).then(j => (cache[lang] = j), () => { delete pending[lang]; return {}; }));   // un fallo de red no se cachea como "sin textos" toda la sesion (se reintenta; el archivo que no existe si se recuerda)
+  const loadImg = () => IMG ? Promise.resolve(IMG) : (imgP = imgP || fetch("data/wiki/img.json").then(r => (r.ok ? r.json() : {})).then(j => (IMG = j), () => { imgP = null; return {}; }));
   /* fotos y banderas empaquetadas por tools/bundle-media.py: el nombre de archivo es la clave con los caracteres raros cambiados por "_" */
   A.mediaKey = id => String(id).replace(/[^A-Za-z0-9._-]/g, "_");
   const card = id => A.media(`assets/wiki/card/${A.mediaKey(id)}.webp`), hdOf = id => A.media(`assets/wiki/hd/${A.mediaKey(id)}.webp`);
@@ -96,6 +96,6 @@ window.AIQ = window.AIQ || {};
   };
   /* dato curioso corto (descripcion + 1.a frase) para las notas de campo; se usa en la Aventura */
   A.factOf = o => { const id = o.cid && o.cid[0]; return id ? A.cleanFact(A.wiki.factOf(id, A.wlang())) : ""; };
-  const loadShort = lang => (shortC[lang] ? Promise.resolve(shortC[lang]) : fetch(`data/wiki/${lang}-s.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => (shortC[lang] = j)));
+  const loadShort = lang => (shortC[lang] ? Promise.resolve(shortC[lang]) : fetch(`data/wiki/${lang}-s.json`).then(r => (r.ok ? r.json() : {})).then(j => (shortC[lang] = j), () => ({})));
   A.wiki.loadShort = loadShort; loadShort((A.wlang && A.wlang()) || "es");
 })(window.AIQ);

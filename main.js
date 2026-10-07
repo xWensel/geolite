@@ -217,7 +217,7 @@ function screenChanged() {
 ipcMain.on("win:getMode", (e) => { e.returnValue = liveMode; });
 ipcMain.on("win:getScreen", (e) => { e.returnValue = screenInfo(); });
 /* boton de encendido de la portada (js/salir.js): cierra el juego entero; solo lo acepta de la ventana del juego */
-ipcMain.on("app:quit", (e) => { if (win && e.sender === win.webContents) app.quit(); });
+ipcMain.on("app:quit", (e) => { if (alive(win) && e.sender === win.webContents) app.quit(); });
 /* Ajustes y la tecla F: { mode, size ([w,h] fisicos o null = automatico), display }. "border" de versiones anteriores = pantalla completa */
 ipcMain.on("win:setScreen", (e, o) => {
   if (!alive(win) || e.sender !== win.webContents || !o || typeof o !== "object") return;
@@ -256,7 +256,7 @@ app.disableDomainBlockingFor3DAPIs();
 
 const ROOT = __dirname;
 const PORT = 47815;
-const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon", ".woff2": "font/woff2", ".mp3": "audio/mpeg", ".wasm": "application/wasm", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml" };
+const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon", ".woff2": "font/woff2", ".mp3": "audio/mpeg", ".wasm": "application/wasm", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml", ".txt": "text/plain; charset=utf-8" };
 
 function startServer() {
   return new Promise((resolve) => {
@@ -265,6 +265,7 @@ function startServer() {
          que empiecen igual) y nada oculto (.env.local con la clave de Pollinations, .git...). Una URL mal codificada ya no tumba la app */
       if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/i.test(req.headers.host || "")) { res.writeHead(403); res.end(); return; }
       let urlPath; try { urlPath = decodeURIComponent(req.url.split("?")[0]); } catch (e) { res.writeHead(400); res.end(); return; }
+      if (urlPath.includes("\0")) { res.writeHead(400); res.end(); return; }          // un %00 hacia fs.readFile lanza de forma sincrona y tumbaba el proceso principal
       let filePath = path.join(ROOT, urlPath === "/" ? "index.html" : urlPath);
       if (!filePath.startsWith(ROOT + path.sep) || path.relative(ROOT, filePath).split(path.sep).some(p => p.startsWith("."))) { res.writeHead(403); res.end(); return; }
       fs.readFile(filePath, (err, data) => {
@@ -293,7 +294,7 @@ async function createWindow() {
 /* una sola instancia: una segunda abriria otro puerto (otro origen) y mostraria el juego sin partidas ni perfil; se trae al frente la primera */
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on("second-instance", () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); win.webContents.send("host:again"); } });   // el crupier lo comenta: "solo hay un crupier"
+  app.on("second-instance", () => { if (alive(win)) { if (win.isMinimized()) win.restore(); win.focus(); win.webContents.send("host:again"); } });   // el crupier lo comenta: "solo hay un crupier"
   app.whenReady().then(() => {
     /* permisos: solo lo que el juego usa (pantalla completa, copiar el resultado al portapapeles, bloqueo del puntero); el resto se deniega */
     const OK = new Set(["fullscreen", "clipboard-sanitized-write", "pointerLock"]);

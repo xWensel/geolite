@@ -36,7 +36,7 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
-      id: "0.2.53",
+      id: "0.2.56",
       name: ["Logros renovados", "Achievements, renewed"],
       date: "2026-10-07",
       summary: ["Catorce logros nuevos, centrados en el mapa y la Enciclopedia: uno por continente completo, un secreto sobre geografía y unos pocos guiños al casino. La última Ascensión pasa a ser un secreto.",
@@ -46,21 +46,82 @@ window.AIQ = window.AIQ || {};
           intro: ["Siguen siendo **100**, con ocho secretos. Salen catorce que solo contaban cosas y entran catorce que cuentan una historia.",
             "There are still **100**, with eight secrets. Fourteen that only counted things are out, and fourteen that tell a story are in."],
           entries: [
-            E(["Un logro por continente", "One for every continent"], "new", "0.2.53", [
+            E(["Un logro por continente", "One for every continent"], "new", "0.2.56", [
               ["Completa **Europa, Asia, África, Norteamérica, Sudamérica u Oceanía** en la Enciclopedia y te llevas su logro. En el Perfil ves cuántas tarjetas te faltan de cada uno.", "Finish **Europe, Asia, Africa, North America, South America or Oceania** in the Encyclopedia and you earn its achievement. The Profile shows how many cards you still need in each."]
             ]),
-            E(["Casino", "Casino"], "new", "0.2.53", [
+            E(["Casino", "Casino"], "new", "0.2.56", [
               ["**A la mesa** (tu primer juego), **Gira del casino** (los 8 juegos distintos) y **Banca privada** (177 doblones a la vez).", "**Pull up a chair** (your first game), **Casino tour** (all 8 different games) and **Private bank** (177 doubloons at once)."],
               ["Tres secretos para los que prueban suerte: uno con el cero de la ruleta, otro con la moneda y otro con el globo.", "Three secrets for those who try their luck: one with the roulette zero, one with the coin and one with the balloon."]
             ]),
-            E(["Secretos de geografía y del crupier", "Geography and dealer secrets"], "new", "0.2.53", [
+            E(["Secretos de geografía y del crupier", "Geography and dealer secrets"], "new", "0.2.56", [
               ["Hay un secreto para quien se equivoca de verdad y otro para quien se deja engañar por Don Crupier.", "There is a secret for those who miss spectacularly and another for those Don Crupier fools."]
             ]),
-            E(["La cumbre", "The summit"], "change", "0.2.53", [
+            E(["La cumbre", "The summit"], "change", "0.2.56", [
               ["El logro de la última Ascensión ahora es un **secreto** y cambia de nombre. Sigue habiendo un logro por cada Ascensión.", "The achievement for the last Ascension is now a **secret** and has a new name. There is still one achievement for every Ascension."]
             ]),
-            E(["Logros que salen", "Achievements removed"], "out", "0.2.53", [
+            E(["Logros que salen", "Achievements removed"], "out", "0.2.56", [
               ["Salen catorce logros que repetían a otros con una cifra distinta (partidas jugadas, clics dentro de un país, rondas perfectas, retos diarios y similares). Los que ya tuvieras no cuentan en el total.", "Fourteen achievements that repeated others with a different number are gone (games played, clicks inside a country, perfect rounds, daily challenges and similar). Any you had no longer count towards the total."]
+            ]) ] },
+      ],
+    },
+    {
+      id: "0.2.55",
+      name: ["Revisión a fondo", "A close look"],
+      date: "2026-10-07",
+      summary: ["Una pasada por todo el juego para cazar fallos: el puntero que se perdía, el zoom que se desviaba, Ajustes que quedaba tapado y partidas guardadas que no se podían continuar.",
+        "A sweep through the whole game to catch bugs: the lost pointer, the drifting zoom, Settings hiding behind the pause menu and saved games that could not be continued."],
+      chapters: [
+        { id: "revision", kicker: ["Arreglos", "Fixes"], title: ["Lo que se ha corregido", "What has been fixed"],
+          intro: ["Sin contenido nuevo: solo arreglos de controles, mapa, partidas guardadas y la Barra.", "No new content: only fixes to controls, the map, saved games and the Bar."],
+          entries: [
+            E(["Puntero y mando", "Pointer and gamepad"], "fix", "0.2.55", [
+              ["El **retículo ya reaparece** al empezar una pregunta o al quitar la pausa con el ratón quieto sobre el mapa (antes no se veía ningún puntero hasta moverlo), y con **Controles invertidos** más **Cursor con retraso** ya no nace en el lado equivocado.", "The **reticle now comes back** when a question starts or the pause ends with the mouse resting on the map (before, no pointer showed until you moved it), and with **Inverted controls** plus **Lagging cursor** it no longer spawns on the wrong side."],
+              ["Con mando, la cruceta ya no se queda **empujando sin fin** al llegar al final de una lista, el cursor no se oculta ni se duplica sobre el mapa, y **Start** no abre el menú por detrás de un juego de la Barra. En la Steam Deck el teclado de pantalla se puede cerrar tocando el fondo.", "With a gamepad, the d-pad no longer **keeps pushing forever** at the end of a list, the cursor no longer hides or doubles over the map, and **Start** no longer opens the menu behind a Bar game. On the Steam Deck the on-screen keyboard can be closed by tapping the background."]
+            ]),
+            E(["Teclado, mando y táctil", "Keyboard, gamepad and touch"], "fix", "0.2.55", [
+              ["En **El globo** puedes cambiar AUTO con **A** y la ficha con **S**; en **La lluvia de fichas**, la ficha con **S**. Antes solo se podía con el ratón o el cursor del mando.", "In **The balloon** you can change AUTO with **A** and the stake with **S**; in **The chip rain**, the stake with **S**. Before, that was only possible with the mouse or the gamepad cursor."],
+              ["En el **Duelo de dados** con mando, la **A se mantiene**: la sacudida dura lo que la tengas pulsada (antes siempre era la mínima). Con **Controles invertidos**, el zoom de la rueda y de los gatillos se ancla bajo el retículo. En pantallas táctiles, la lupa y la linterna siguen al dedo también al tocar.", "In the **Dice duel** with a gamepad, **A is held**: the shake lasts as long as you keep it pressed (before it was always the minimum). With **Inverted controls**, wheel and trigger zoom anchors under the reticle. On touch screens, the magnifier and the lantern follow your finger on a tap too."]
+            ]),
+            E(["Mapa", "Map"], "fix", "0.2.55", [
+              ["El **zoom** con rueda o pellizco ya se ancla bajo el cursor aunque el mapa tenga la curva de pantalla antigua o esté girado (se desviaba hasta 100 px), y la rueda funciona en Firefox.", "**Zooming** with the wheel or a pinch now anchors under the cursor even with the old-screen curve or a rotated map (it drifted up to 100 px), and the wheel works in Firefox."],
+              ["**Cambiar el tamaño de la ventana** conserva tu nivel de zoom: al encogerla ya no queda el mapa con un zoom que no habías puesto.", "**Resizing the window** keeps your zoom level: shrinking it no longer leaves the map zoomed in by a level you did not choose."]
+            ]),
+            E(["Partidas y Ajustes", "Games and Settings"], "fix", "0.2.55", [
+              ["**Ajustes** abierto con el engranaje en plena pregunta ya queda por encima de la pausa, y abrirlo durante la intro no deja correr el reloj por debajo.", "**Settings** opened from the cog mid-question now sits above the pause menu, and opening it during the intro no longer lets the clock run underneath."],
+              ["En el **modo infinito**, salir y reanudar ya no rebaraja las preguntas, el **Interruptor** sigue apagando los retos aunque descartes o dividas la pregunta, y una partida guardada corrupta ya no rompe la portada ni deja un «Continuar» que no hace nada.", "In **infinite mode**, leaving and resuming no longer reshuffles the questions, the **Switch** keeps challenges off even if you discard or split the question, and a corrupt save no longer breaks the title screen or leaves a «Continue» that does nothing."],
+              ["En **Rasca y gana**, si pierdes el foco con una tecla pulsada la doblón ya no sigue rascando sola.", "In **Scratch & win**, losing focus with a key held no longer leaves the doubloon scratching by itself."]
+            ]) ] },
+      ],
+    },
+    {
+      id: "0.2.54",
+      name: ["El retículo equipado", "The equipped reticle"],
+      date: "2026-10-07",
+      summary: ["El puntero ahora enseña lo que llevas: los retos en rojo, los perks en el aro y las cuatro esquinas de la mira encendidas por eje.",
+        "The pointer now shows what you carry: challenges in red, perks on the ring and the four corners of the sights lit by axis."],
+      chapters: [
+        { id: "reticulo", kicker: ["El puntero", "The pointer"], title: ["Se ve lo que llevas", "You can see what you carry"],
+          intro: ["Es un cambio **solo visual**: ningún reto ni perk funciona distinto, pero ahora se nota en el retículo.",
+            "This is a **visual-only** change: no challenge or perk works differently, but now you can see it on the reticle."],
+          entries: [
+            E(["Marcas del retículo", "Reticle marks"], "new", "0.2.54", [
+              ["**Controles invertidos** ya tiene señal: dos flechas que se miran de frente (y otras dos arriba y abajo en los niveles 2 y 3).", "**Reversed controls** now has a sign: two arrows facing each other (and two more above and below at levels 2 and 3)."],
+              ["**Mano firme** sustituye los segmentos que giran por cuatro cierres dorados fijos y un segundo aro. **Foco**, **Catalejo**, **Protector**, **Gafas de sol** y **Ancla** dejan cada uno su marca en el aro.", "**Steady hand** swaps the spinning segments for four fixed gold clasps and a second ring. **Spotlight**, **Spyglass**, **Screen guard**, **Sunglasses** and **Anchor** each leave their mark on the ring."],
+              ["Las cuatro esquinas de la mira se ponen **rojas** si un reto toca ese eje (pulso, vista, luz o controles) y **turquesa** si un perk lo cubre.", "The four corners of the sights turn **red** if a challenge hits that axis (pulse, sight, light or controls) and **teal** if a perk covers it."]
+            ]) ] },
+      ],
+    },
+    {
+      id: "0.2.53",
+      name: ["Pulido de píxeles", "Pixel polish"],
+      date: "2026-10-07",
+      summary: ["Una vuelta de pulido al arte: píxeles sueltos fuera, sin cambiar ningún dibujo.", "A polish pass over the art: stray pixels gone, no drawing changed."],
+      chapters: [
+        { id: "pulido", kicker: ["Arte", "Art"], title: ["Pulido", "Polish"],
+          intro: ["Una pasada por el arte de píxeles buscando motas que se colaron. No cambia ningún dibujo.", "A sweep through the pixel art looking for stray specks. No drawing changes."],
+          entries: [
+            E(["Píxeles sueltos", "Stray pixels"], "fix", "0.2.53", [
+              ["Quitados los píxeles sueltos de la bandera de España, el volcán, la siesta, el explorador, el navegante, la manga, el moái coronado, la isla del códice, la caja de suministros, la pantalla de victoria y el propio Don Crupier.", "Removed the stray pixels from the Spanish flag, the volcano, the siesta, the explorer, the navigator, the sleeve, the crowned moai, the codex island, the supplies crate, the victory screen and Don Crupier himself."]
             ]) ] },
       ],
     },

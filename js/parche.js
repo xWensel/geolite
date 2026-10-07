@@ -232,7 +232,7 @@ window.AIQ = window.AIQ || {};
 
   /* teclado de la pantalla: flechas, AvPag/RePag, Inicio/Fin y Espacio desplazan las notas aunque el foco este en la lista */
   addEventListener("keydown", e => {
-    const u = ui; if (!u || !u.root.isConnected || $("ptLb") || e.ctrlKey || e.metaKey || e.altKey || (e.target && e.target.tagName === "INPUT")) return;
+    const u = ui; if (!u || !u.root.isConnected || $("ptLb") || (A.core && A.core.S.settingsOpen) || (A.creditos && A.creditos.on) || e.ctrlKey || e.metaKey || e.altKey || (e.target && e.target.tagName === "INPUT")) return;
     const ae = document.activeElement, onBtn = ae && ae.tagName === "BUTTON", s = u.scroll, M = u.M;
     let dy = null, abs = null;
     if (e.key === "ArrowDown") dy = 90; else if (e.key === "ArrowUp") dy = -90;
