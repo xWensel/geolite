@@ -36,6 +36,24 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.2.53",
+      name: ["El retículo equipado", "The equipped reticle"],
+      date: "2026-10-07",
+      summary: ["El puntero ahora enseña lo que llevas: los retos en rojo, los perks en el aro y las cuatro esquinas de la mira encendidas por eje.",
+        "The pointer now shows what you carry: challenges in red, perks on the ring and the four corners of the sights lit by axis."],
+      chapters: [
+        { id: "reticulo", kicker: ["El puntero", "The pointer"], title: ["Se ve lo que llevas", "You can see what you carry"],
+          intro: ["Es un cambio **solo visual**: ningún reto ni perk funciona distinto, pero ahora se nota en el retículo.",
+            "This is a **visual-only** change: no challenge or perk works differently, but now you can see it on the reticle."],
+          entries: [
+            E(["Marcas del retículo", "Reticle marks"], "new", "0.2.53", [
+              ["**Controles invertidos** ya tiene señal: dos flechas que se miran de frente (y otras dos arriba y abajo en los niveles 2 y 3).", "**Reversed controls** now has a sign: two arrows facing each other (and two more above and below at levels 2 and 3)."],
+              ["**Mano firme** sustituye los segmentos que giran por cuatro cierres dorados fijos y un segundo aro. **Foco**, **Catalejo**, **Protector**, **Gafas de sol** y **Ancla** dejan cada uno su marca en el aro.", "**Steady hand** swaps the spinning segments for four fixed gold clasps and a second ring. **Spotlight**, **Spyglass**, **Screen guard**, **Sunglasses** and **Anchor** each leave their mark on the ring."],
+              ["Las cuatro esquinas de la mira se ponen **rojas** si un reto toca ese eje (pulso, vista, luz o controles) y **turquesa** si un perk lo cubre.", "The four corners of the sights turn **red** if a challenge hits that axis (pulse, sight, light or controls) and **teal** if a perk covers it."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.2.52",
       name: ["Rasca y gana", "Scratch & win"],
       date: "2026-10-06",
