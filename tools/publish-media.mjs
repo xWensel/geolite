@@ -26,7 +26,9 @@ const DRY = process.argv.includes("--dry");
 const git = (cwd, ...args) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
 const list = dir => (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => fs.statSync(path.join(dir, f)).isFile()) : []);
 
+const ONLY = (process.argv.find(a => a.startsWith("--only=")) || "").slice(7);   // --only=geolite-media-hd2: un solo repositorio (se pueden lanzar varios a la vez)
 for (const t of TARGETS) {
+  if (ONLY && t.repo !== ONLY) continue;
   const dest = path.join(ROOT, "..", t.repo);
   if (!fs.existsSync(dest)) { if (DRY) { console.log(`${t.repo}: sin clonar todavia`); continue; } execFileSync("git", ["clone", `https://github.com/${OWNER}/${t.repo}.git`, dest], { stdio: "inherit" }); }
   let added = 0, changed = 0, removed = 0;
