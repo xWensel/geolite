@@ -1759,9 +1759,10 @@ window.AIQ = window.AIQ || {};
     const block = e => { e.preventDefault(); e.stopPropagation(); };                                // mientras gira, ni el teclado llega al Campamento de detras
     addEventListener("keydown", block, true);
     let closed = false, revealed = false, t0 = 0, last = S0, lastT = 0, lastTick = 0, cur = -1, fast = false, evI = 0;
-    const cleanup = () => { removeEventListener("keydown", block, true); rouOpen = false; };
+    const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, {}) : null;                               // v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js)
+    const cleanup = () => { if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); rouOpen = false; };
     const close = () => {
-      if (closed) return; closed = true; removeEventListener("keydown", block, true); ov.classList.add("out");
+      if (closed) return; closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out");
       setTimeout(() => { ov.remove(); rouOpen = false; done(); }, reduced ? 0 : 280);
     };
     const bail = e => { try { console.error("ruleta", e); } catch (x) { /* nada */ } if (closed) return; closed = true; cleanup(); ov.remove(); done(); };   // pase lo que pase, el Campamento nunca se queda bloqueado
@@ -1774,7 +1775,7 @@ window.AIQ = window.AIQ || {};
       kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
     };
     const reveal = () => {
-      if (revealed) return; revealed = true; place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
+      if (revealed) return; revealed = true; if (ctl) ctl.outcome(); place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
       if (cur >= 0 && kids[cur]) kids[cur].classList.remove("cur"); kids[SF].classList.add("hit");
       A.sfx.rouStop(); if (A.haptic) A.haptic([zero ? 60 : 30]);
       hit(K.hit || 8);
@@ -1892,10 +1893,13 @@ window.AIQ = window.AIQ || {};
     const ov = document.createElement("div"); ov.id = "rouOv"; ov.className = "rou spin " + cls;
     Object.keys(vars).forEach(k => ov.style.setProperty(k, vars[k])); ov.innerHTML = html + '<u class="rou-wash"></u>'; app.appendChild(ov);
     const block = e => { e.preventDefault(); e.stopPropagation(); }; addEventListener("keydown", block, true);
-    const sh = { ov, reduced, closed: false, revealed: false };
-    sh.close = () => { if (sh.closed) return; sh.closed = true; removeEventListener("keydown", block, true); ov.classList.add("out"); setTimeout(() => { ov.remove(); rouOpen = false; done(); }, reduced ? 0 : 280); };
-    sh.bail = e => { try { console.error("casino", e); } catch (x) { /* nada */ } if (sh.closed) return; sh.closed = true; removeEventListener("keydown", block, true); ov.remove(); rouOpen = false; done(); };
-    sh.hold = ms => { setTimeout(() => { ov.addEventListener("click", sh.close); ov.classList.add("skippable"); }, 600); setTimeout(sh.close, ms); };
+    const sh = { ov, reduced, closed: false, revealed: false, hooks: {} };
+    /* v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js). sh.waiting(true) = el juego espera al jugador (sin botones y a x1); sh.outcome() = llega el resultado (a x1, sin botones); sh.hooks.skip = salto propio del juego */
+    const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, sh.hooks) : null;
+    sh.waiting = on => { if (ctl) ctl.waiting(on); }; sh.outcome = () => { if (ctl) ctl.outcome(); };
+    sh.close = () => { if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out"); setTimeout(() => { ov.remove(); rouOpen = false; done(); }, reduced ? 0 : 280); };
+    sh.bail = e => { try { console.error("casino", e); } catch (x) { /* nada */ } if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.remove(); rouOpen = false; done(); };
+    sh.hold = ms => { sh.outcome(); setTimeout(() => { ov.addEventListener("click", sh.close); ov.classList.add("skippable"); }, 600); setTimeout(sh.close, ms); };   // sh.hold llega siempre al final: por si algun juego no avisa del resultado
     return sh;
   }
 
@@ -1950,7 +1954,7 @@ window.AIQ = window.AIQ || {};
     const frameAt = deg => ((Math.round((sg * deg) / (360 / NF)) % NF) + NF) % NF, put = i => { spr.style.backgroundPositionX = -i * fw + "px"; };
     put(0); if (P.sky && !sh.reduced) arc.style.visibility = shadow.style.visibility = "hidden";   // el que cae del cielo no se ve antes de soltarlo
     const reveal = () => {
-      if (sh.revealed) return; sh.revealed = true; put(frameAt(END)); ov.classList.remove("spin"); ov.classList.add("done", "is-coin", edge ? "is-edge" : win ? "is-win" : "is-lose");
+      if (sh.revealed) return; sh.revealed = true; sh.outcome(); put(frameAt(END)); ov.classList.remove("spin"); ov.classList.add("done", "is-coin", edge ? "is-edge" : win ? "is-win" : "is-lose");
       if (A.haptic) A.haptic([edge ? 60 : 30]);
       setTimeout(() => {
         A.dealer.enable(true);
@@ -2015,7 +2019,7 @@ window.AIQ = window.AIQ || {};
       kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
     };
     const reveal = () => {
-      if (sh.revealed) return; sh.revealed = true; put(TH); ov.classList.remove("spin", "crawl", "hush"); ov.classList.add("done", "is-" + info.tone);
+      if (sh.revealed) return; sh.revealed = true; sh.outcome(); put(TH); ov.classList.remove("spin", "crawl", "hush"); ov.classList.add("done", "is-" + info.tone);
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
@@ -2185,7 +2189,7 @@ window.AIQ = window.AIQ || {};
         for (let i = 0; i < o.seq.length; i++) { await doMove(o.seq[i], dur, i); if (dur >= 400 || i === o.seq.length - 1) release(); await sleep(i === o.seq.length - 1 ? 200 : Math.max(40, dur * 0.18)); }
         release(); ov.classList.remove("spin");
         // 3. elige
-        hint("pick"); say("trilePick"); if (A.haptic) A.haptic([8]); const pickId = await choose();
+        hint("pick"); say("trilePick"); if (A.haptic) A.haptic([8]); sh.waiting(true); const pickId = await choose(); sh.waiting(false);
         const rec = o.onPick(pickId), win = rec.win;                                           // la tirada se decide y se guarda AQUI, antes de la revelacion
         // 4. revelacion
         hint(null); ov.classList.add("hush"); bubble.classList.remove("on"); A.sfx.cupDrum(900); await sleep(950);
@@ -2194,7 +2198,7 @@ window.AIQ = window.AIQ || {};
           coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([30, 30, 60]); ov.classList.add("win", "flash");
           const c = cups[pickId], x = c.x - 96, y0 = GY - 150; spinEl.style.display = "block"; let f = 0;                      // la doblon del juego (24 fotogramas) sale hacia el espectador y cae
           await run(reduced ? 300 : 900, p => { const h = Math.sin(Math.PI * p) * 150; spinEl.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y0 - h)}px,0)`; const nf = Math.floor(p * 36) % 24; if (nf !== f) { f = nf; spinEl.style.backgroundPositionX = -nf * 192 + "px"; } });
-          spinEl.style.display = "none"; plate("win", A.tx(BT.won), "×2", "+" + rec.pay); say("betWin");
+          spinEl.style.display = "none"; sh.outcome(); plate("win", A.tx(BT.won), "×2", "+" + rec.pay); say("betWin");
           await sleep(500); for (const oc of cups) if (oc.id !== pickId) { attach(gloves[1], oc.id); await sleep(120); await lift(oc.id, 1, 320); }
           release(); sh.hold(3400);
         } else {
@@ -2205,11 +2209,11 @@ window.AIQ = window.AIQ || {};
           if (joke) {                                                                          // el chiste del trilero: los tres vacios; suelta el doblon de entre los dedos, guina y se lo guarda
             ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh"); await sleep(800);
             openGlove.x = 640; openGlove.y = 300; openGlove.tv = 1; jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 54}px,${openGlove.y + 112}px,0)`;
-            A.sfx.cupWink(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([40, 20, 40]);
+            A.sfx.cupWink(); sh.outcome(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([40, 20, 40]);
             sh.hold(5200); await sleep(2600);
             await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 54, 860, e))}px,${Math.round(lerp(openGlove.y + 112, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
             jokeCoin.style.display = "none"; A.sfx.stamp();
-          } else { face("laugh"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
+          } else { sh.outcome(); face("laugh"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
         }
       } catch (e) {
         if (e === CANCEL) { if (!sh.closed && !ov.isConnected) sh.bail("capa retirada"); return; }   // otra pantalla se llevo la capa: que el Campamento no se quede bloqueado

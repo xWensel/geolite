@@ -31,6 +31,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.2",
+      name: ["Acelerar y saltar", "Speed up & skip"],
+      date: "2026-10-08",
+      summary: ["Los juegos del casino se pueden acelerar o saltar hasta el resultado, sin recortarlos.",
+        "The casino games can be sped up or skipped straight to the result, without cutting them short."],
+      chapters: [
+        { id: "ctl", kicker: ["La Barra", "The Bar"], title: ["Dos botones nuevos", "Two new buttons"],
+          intro: ["Algunos juegos del centro de la Barra son largos y están pensados así. Ahora, si ya los conoces, puedes ir más rápido.",
+            "Some games in the middle of the Bar run long, on purpose. Now, if you know them already, you can go faster."],
+          entries: [
+            E(["Mantén pulsado: ×2", "Hold: ×2"], "new", "0.3.2", [
+              ["Abajo a la derecha de cada juego del casino hay un botón **×2**: mientras lo mantienes pulsado, **todo va al doble** (la animación, el crupier, los globos de texto y los efectos). Al soltarlo, todo vuelve a su ritmo. También con **Mayús**. Con mando, un toque lo fija y otro lo suelta.", "Bottom right of every casino game there is a **×2** button: while you hold it, **everything runs at double speed** (animation, dealer, speech bubbles and effects). Let go and it returns to normal. Also with **Shift**. With a gamepad, one tap locks it and another releases it."],
+            ]),
+            E(["Saltar", "Skip"], "new", "0.3.2", [
+              ["El botón **Saltar** (o **Esc**) acelera la escena sin sonido y se detiene en el **resultado**, que se ve entero y a su ritmo. Lo que pagas no cambia: el resultado ya estaba decidido y cobrado antes de empezar.", "The **Skip** button (or **Esc**) fast-forwards the scene without sound and stops at the **result**, which you see in full at normal speed. What you win doesn't change: the result was already decided and paid before it started."],
+              ["Los botones se esconden cuando el juego espera algo de ti (agitar los dados, elegir un cubilete, soltar la ficha, despegar o cobrar el globo, rascar) y vuelven en cuanto el juego sigue solo. Están en los ocho juegos y desaparecen con Reducir movimiento, donde las escenas ya son cortas.", "The buttons hide whenever the game is waiting for you (shaking the dice, picking a cup, dropping the chip, taking off or cashing out the balloon, scratching) and return as soon as it carries on by itself. They are in all eight games and disappear with Reduce motion, where the scenes are already short."],
+            ]) ] },
+        { id: "linux", kicker: ["Steam Deck y Linux", "Steam Deck and Linux"], title: ["Sin pantalla negra", "No black screen"],
+          intro: ["Arreglo de arranque para Linux y Steam Deck.", "A startup fix for Linux and Steam Deck."],
+          entries: [
+            E(["Arranque en X11", "Starts on X11"], "fix", "0.3.2", [
+              ["En Linux y Steam Deck el juego arranca siempre en X11: con Wayland la ventana podía quedarse en negro. Deja además un registro **geolite-log.txt** junto al juego por si hay que diagnosticar algo, y **Geolite-seguro** arranca sin aceleración gráfica si el negro viene del driver.", "On Linux and Steam Deck the game now always starts on X11: under Wayland the window could stay black. It also leaves a **geolite-log.txt** log next to the game in case something needs diagnosing, and **Geolite-seguro** starts without graphics acceleration if the black screen comes from the driver."]
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.1",
       name: { es: "Doce idiomas de verdad", en: "Twelve real languages", fr: "Douze vraies langues", pt: "Doze idiomas de verdade", de: "Zwölf echte Sprachen", it: "Dodici lingue vere", "es-419": "Doce idiomas de verdad", zh: "十二种地道语言", ko: "진짜 12개 언어", ja: "本物の12言語", ru: "Двенадцать настоящих языков", pl: "Dwanaście prawdziwych języków" },
       date: "2026-10-08",

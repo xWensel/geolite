@@ -1,0 +1,25 @@
+/* Geolite - botones de los juegos del casino (v0.2.53): mantener = x2 y SALTAR. Mismo lenguaje que la ficha de apuesta (.rou-pick): fieltro oscuro, aro dorado y sombra dura.
+   Todo en enteros de pixel (--s/--r/--u los pone js/casino-ctl.js) y con steps(): nada de degradados ni suavizado. */
+.cc-dock { --s: 4; --r: 3; --u: 3; --rp: calc(var(--r) * 1px); position: absolute; right: calc(var(--s) * 7px); bottom: calc(var(--s) * 6px); z-index: 100002; display: flex; align-items: flex-end; gap: calc(var(--s) * 3px);
+  font-family: var(--mono); pointer-events: auto; animation: cc-in .4s steps(5) .7s both; transition: opacity .2s steps(3), transform .2s steps(3); }
+.cc-dock.shown { animation: none; }                                                     /* la entrada con retraso solo la primera vez; luego aparece y se esconde con el fundido */
+.cc-dock[data-st="wait"], .cc-dock[data-st="done"] { opacity: 0; transform: translateY(calc(var(--s) * 4px)); pointer-events: none; animation: none; }
+@keyframes cc-in { from { opacity: 0; transform: translateY(calc(var(--s) * 4px)); } to { opacity: 1; transform: none; } }
+.cc-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: calc(var(--s) * 2.5px); height: calc(var(--s) * 13px); min-width: calc(var(--s) * 20px); padding: 0 calc(var(--s) * 4px) 0 calc(var(--s) * 3.5px);
+  border: 0; border-radius: calc(var(--s) * 2px); background: #0a140f; color: #ffd98a; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  font: 400 calc(var(--s) * 4px) / 1 var(--mono); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+  box-shadow: inset 0 0 0 var(--rp) #f8b449, 0 var(--rp) 0 var(--rp) #0a140f, 0 calc(var(--rp) * 2) 0 var(--rp) rgba(0, 0, 0, .4); }
+.cc-btn b, .cc-btn span { font-weight: 400; color: #fff; padding-top: calc(var(--s) * .5px); }
+.cc-ff b { font-size: calc(var(--s) * 5px); }
+.cc-btn:hover { filter: brightness(1.2); }
+.cc-ic { width: calc(var(--u) * 11px); height: calc(var(--u) * 10px); flex: none; image-rendering: pixelated; overflow: visible; }
+.cc-skip .cc-ic { width: calc(var(--u) * 8px); }
+.cc-ic .fg { fill: #ffd98a; } .cc-ic .sh { fill: #3a2606; }
+.cc-btn:active, .cc-btn.on { background: #f8b449; color: #2a1a04; transform: translateY(var(--rp)); box-shadow: inset 0 0 0 var(--rp) #ffe9a6, 0 0 0 var(--rp) #0a140f, 0 var(--rp) 0 var(--rp) rgba(0, 0, 0, .4); filter: none; }
+.cc-btn:active b, .cc-btn:active span, .cc-btn.on b, .cc-btn.on span { color: #2a1a04; }
+.cc-btn:active .cc-ic .fg, .cc-btn.on .cc-ic .fg { fill: #2a1a04; } .cc-btn:active .cc-ic .sh, .cc-btn.on .cc-ic .sh { fill: none; }
+.cc-ff.on .cc-ic { animation: cc-nudge .32s steps(2) infinite; }                                /* mientras va al doble, las flechas avanzan a saltitos */
+@keyframes cc-nudge { 50% { transform: translateX(calc(var(--u) * 1px)); } }
+.cc-skip.on { pointer-events: none; } .cc-skip.on .cc-ic { animation: cc-nudge .16s steps(2) infinite; }
+.cc-dock.is-ff .cc-ff { opacity: .45; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .cc-dock, .cc-ff.on .cc-ic, .cc-skip.on .cc-ic { animation: none; } }

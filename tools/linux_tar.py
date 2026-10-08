@@ -4,7 +4,7 @@ import os, sys, tarfile
 
 src, out = sys.argv[1], sys.argv[2]
 top = os.path.basename(src.rstrip("/\\"))
-EXEC = {"Geolite", "GeoliteDemo", "chrome_crashpad_handler", "chrome-sandbox"}
+EXEC = {"Geolite", "GeoliteDemo", "geolite-bin", "geolitedemo-bin", "Geolite-seguro", "GeoliteDemo-seguro", "chrome_crashpad_handler", "chrome-sandbox"}
 
 def fix(ti):
     name = os.path.basename(ti.name)

@@ -279,7 +279,7 @@ window.AIQ = window.AIQ || {};
     async function doDrop() {
       if (ST.dropped) return; const stake = stakes[stakeI];
       if (run.coins < stake) { A.sfx.deny(); cx.shake(Q(".pk-go")); return; }
-      ST.dropped = true; ST.phase = "drop"; ov.classList.add("dropped"); Q(".pk-back2").hidden = true;
+      ST.dropped = true; ST.phase = "drop"; ov.classList.add("dropped"); Q(".pk-back2").hidden = true; sh.waiting(false);
       const att = run.attempt || 0, res = decide(`${run.seed}:plinko:${cx.r}:${att}`, ST.col, ST.risk, stake);
       run.coins += res.coins - stake; if (res.coins > stake) run.stats.coinsEarned += res.coins - stake;                                          // se cobra al soltar, como la ruleta: recargar a medias no lo deshace
       run.reds = run.reds || {}; run.reds[cx.r] = { id: "plk", att, stake, risk: ST.risk, col: ST.col, slot: res.slot, t: res.t, coins: res.coins };
@@ -305,7 +305,7 @@ window.AIQ = window.AIQ || {};
       }
     }
     async function settle(res) {
-      ST.phase = "done"; ST.lastSlot = res.slot; const s = slots[res.slot], lv = levelOf(res), sit = sitFor(res), H = hist();
+      sh.outcome(); ST.phase = "done"; ST.lastSlot = res.slot; const s = slots[res.slot], lv = levelOf(res), sit = sitFor(res), H = hist();
       board.classList.add("done"); s.classList.add("hit"); purse = run.coins; H.push({ s: res.slot, t: res.t }); while (H.length > 9) H.shift(); A.profile.save(); renderHist(true); renderPanel();
       const net = res.coins - res.stake;
       plate("t" + tier(res.t), `×${fm(res.t)}`, `${res.stake} × ${fm(res.t)} = ${fm(res.x)}`, (net > 0 ? "+" + net : net < 0 ? "−" + -net : "±0") + (res.x % 10 ? "  " + tr(U.frac) : ""));
@@ -318,7 +318,7 @@ window.AIQ = window.AIQ || {};
     }
 
     /* ---- arranque: la pantalla de eleccion ---- */
-    renderSlots(false); renderPanel(); renderHist(false); chipPark(); hint("hStart");
+    renderSlots(false); renderPanel(); renderHist(false); chipPark(); hint("hStart"); sh.waiting(true);               // la pantalla de eleccion espera al jugador: sin botones de velocidad
     if (TST.auto) setTimeout(() => { if (!alive()) return; if (TST.auto.col != null) { ST.col = TST.auto.col; chipPark(); } if (TST.auto.risk != null) ST.risk = TST.auto.risk; if (TST.auto.stake != null) stakeI = TST.auto.stake; renderSlots(false); renderPanel(); setTimeout(doDrop, 400); }, 700);
     const cleanup = () => { clearInterval(talkIv); removeEventListener("keydown", onKey, true); removeEventListener("resize", onResize); };
     const wd = setInterval(() => { if (!alive()) { clearInterval(wd); cleanup(); pend.forEach(e => e.rej(CANCEL)); pend.clear(); if (!sh.closed) sh.bail("capa retirada"); } }, 250);

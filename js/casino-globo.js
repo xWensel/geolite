@@ -110,6 +110,8 @@ window.AIQ = window.AIQ || {};
     const [gcv, gctx] = mk(WD, GH), [hzcv, hz] = mk(WD, 44), [tcv, tctx] = mk(260, 80), [bcv, bc] = mk(BW, BH);
     const skyImg = ctx.createImageData(WD, SKYR), sky32 = new Uint32Array(skyImg.data.buffer);
     let F = null, T = 0, SC = null, Sn = null, BC = null, BL = null, CL = [], STARS = [], rec = null;
+    sh.waiting(true);                                                                              // la pantalla de preparacion espera al jugador (js/casino-ctl.js: sin botones de velocidad)
+    sh.hooks.skip = () => { if (ST.phase === "fly" && F && F.cashed) F.t = Math.max(F.t, (F.X >= CAP ? tOf(CAP) : F.tB - (F.lead || 0)) - 0.1); };   // saltar tras cobrar: el vuelo sigue (alarmas, aviso del final) pero sin esperar los segundos que faltan
     const ST = { phase: "ready", stake: 0, autoM: AUTOS[autoI], lvl: 0 };
     ST.stake = cx.coinCost(stakeI);
       /* ------------------------------------------------------------------ cielo: una linea de tiempo unica (amanecer -> dia -> atardecer -> noche) y cada vuelo la recorre a su ritmo */
@@ -462,11 +464,11 @@ window.AIQ = window.AIQ || {};
       setBtn(); if (!reduced) setTimeout(() => { if (alive() && ST.phase !== "done") { ov.classList.add("skippable"); ov.addEventListener("click", sh.close, { once: true }); } }, 2600);   // despues de cobrar, tocar la pantalla se salta el resto del vuelo
     }
     function ceiling() {                                                                           // el techo x100: si no habias cobrado, se cobra solo a x100; el globo sale al espacio
-      F.t = tOf(CAP); F.m = CAP; if (!F.cashed) cash(CAP, "ceiling"); ST.phase = "burst"; pushHist(CAP);
+      sh.outcome(); F.t = tOf(CAP); F.m = CAP; if (!F.cashed) cash(CAP, "ceiling"); ST.phase = "burst"; pushHist(CAP);
       BC.mode = "abduct"; BC.vy = -30; BC.t = 0; BC.duck = 0; sfx.engine.stop(); wash("rgba(180,220,255,.7)"); kick(8, 500); sfx.cash(3); finishSoon();
     }
     function burst() {
-      F.t = F.tB; F.m = F.X; ST.phase = "burst"; const g = F.cashed; sfx.engine.stop(); BURST[F.kind].contact(g); pushHist(F.X);
+      sh.outcome(); F.t = F.tB; F.m = F.X; ST.phase = "burst"; const g = F.cashed; sfx.engine.stop(); BURST[F.kind].contact(g); pushHist(F.X);
       if (!g) { showPlate("lose", tr(U.pLose), fmtX(F.X), "−" + F.stake); react(F.X <= 1000 ? "gbBurst100" : F.X >= 10000 ? "gbBurstHigh" : "gbBurst"); }
       else { const dt = F.t - F.cashT; setTimeout(() => { if (!alive()) return; if (dt < .6) react("gbCloseCall"); else if (F.X >= 3 * F.cashM && F.X >= 5000) react("gbRegret"); else if (F.X <= 1.25 * F.cashM) react("gbRelief"); }, 1300); }
       setBtn(); finishSoon();
@@ -491,6 +493,7 @@ window.AIQ = window.AIQ || {};
       else if (ST.phase === "fly" && !F.cashed) { cls += " cash"; a = tr(U.cashBtn); }
       else { cls += " off"; a = F && F.cashed ? tr(U.cashed) : tr(U.burst); s = F && F.cashed ? "+" + F.pay : ""; }
       if (btn.className !== cls) btn.className = cls; setT(btnA, a); setT(btnB, s); hud();
+      sh.waiting(ST.phase === "ready" || (ST.phase === "fly" && !(F && F.cashed)));                // despegar y cobrar son del jugador: ahi no hay botones de velocidad
     }
     const MC = ["#ffffff", "#ffe9a6", "#ffc23a", "#ff8a3a", "#ff5a7a"], MG = ["rgba(255,255,255,.25)", "rgba(255,233,166,.4)", "rgba(255,194,58,.5)", "rgba(255,138,58,.6)", "rgba(255,90,122,.7)"];
     const fillEl = Q(".gb-alt-fill"), flagC = Q(".gb-flag.cash"), flagG = Q(".gb-flag.ghost"), vigEl = Q(".gb-vig"), kmEl = Q(".gb-alt-km"); const lastS = {};

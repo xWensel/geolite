@@ -221,7 +221,7 @@ window.AIQ = window.AIQ || {};
     const cardTexts = () => { fitText(Q(".ra-ct"), tr(U.title), 352, 56); fitText(Q(".ra-cf"), tr(U.foot), 352, 28); };
     const hint = (k, extra) => { if (!k) { hintEl.classList.remove("on"); return; } hintEl.innerHTML = tr(U[k]) + (extra ? `<small>${extra}</small>` : ""); hintEl.classList.add("on"); };
     const showPlate = (kind, name, extra, msg) => { const p = Q(".ra-plate"); p.className = "ra-plate " + kind; p.innerHTML = `<b>${name}</b>${extra ? `<i>${extra}</i>` : ""}`; Q(".ra-msg").textContent = msg; const r = Q(".ra-res"); r.classList.remove("on"); void r.offsetWidth; r.classList.add("on"); };
-    const setBtns = () => { const sc = ST.phase === "scratch" && card && !card.auto && !card.finished; btnAll.hidden = ST.phase !== "scratch" && ST.phase !== "done"; btnAll.disabled = !sc; };
+    const setBtns = () => { const sc = ST.phase === "scratch" && card && !card.auto && !card.finished; btnAll.hidden = ST.phase !== "scratch" && ST.phase !== "done"; btnAll.disabled = !sc; sh.waiting(sc); };   // rascar es del jugador: sin botones de velocidad (si "Rasca todo" va solo, si hay)
 
     /* ---- particulas (un solo canvas 1920x1080; todo a enteros) ---- */
     const parts = []; let bunt = null;
@@ -320,14 +320,14 @@ window.AIQ = window.AIQ || {};
     function tensionOff() { if (!card) return; card.tense = false; heartOff(); dealerBox.classList.remove("sweat", "g-peek"); QA(".ra-hls .hl.pair").forEach(h => h.classList.remove("pair")); }
     let finishRes = null; const finished = new Promise(res => { finishRes = res; });
     function win() {
-      const c = card, tier = TIERS.find(t => t.id === out.cls); tensionOff(); c.paid = true; purse = run.coins; hud();
+      const c = card, tier = TIERS.find(t => t.id === out.cls); sh.outcome(); tensionOff(); c.paid = true; purse = run.coins; hud();
       out.cells.forEach(i => { hlsEl.children[i].classList.add("win"); symsEl.children[i].classList.add("win"); }); later(() => c.rev.forEach((r, i) => { if (r && !out.cells.includes(i)) symsEl.children[i].classList.add("dim"); }), 700);
       const row = Q(`.ra-row[data-tier="${tier.id}"]`); row && row.classList.add("hit");
       showPlate(tier.level >= 3 ? "big" : "", tr(U.win), "×" + tier.m, "+" + o.pay); hint(null); reward(tier.level, tier); say(tier.sit, 4);
       later(() => { if (!c.finished) swallow(autoReveal(false)); }, reduced ? 600 : 1500);
     }
     function finish() {
-      const c = card; if (c.finished) return; c.finished = true; tensionOff();
+      const c = card; if (c.finished) return; c.finished = true; sh.outcome(); tensionOff();
       if (!c.paid) {
         if (out.cls === "casi") { sfx.casi(); showPlate("casi", tr(U.casi), "", "−" + o.stake); say("rcCasi", 4); shake(4, 300); }
         else { A.sfx.lose(); showPlate("lose", tr(U.lose), "", "−" + o.stake); say("rcNada", 4); }
@@ -349,7 +349,7 @@ window.AIQ = window.AIQ || {};
           else if (withCoin) { c.autoHold = true; await autoPath(i); c.autoHold = false; if (!c.rev[i]) revealCell(i, false); await sleep(60); }
           else { revealCell(i, false); await sleep(170); }
         }
-      } finally { c.auto = false; c.autoHold = false; }
+      } finally { c.auto = false; c.autoHold = false; setBtns(); }
     }
     function scratchAll() { if (ST.phase !== "scratch" || !card || card.auto || card.finished) return; say("rcAll", 2); swallow(autoReveal(true)); setBtns(); }
 

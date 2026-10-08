@@ -50,6 +50,21 @@ try {
   /* steamworks.js carga steam_api64.dll / libsteam_api.so desde la carpeta del ejecutable */
   const sapi = LINUX ? "linux64/libsteam_api.so" : "win64/steam_api64.dll";
   fs.copyFileSync(path.join(ROOT, "node_modules/steamworks.js/dist", sapi), path.join(dir, path.basename(sapi)));
+  /* Linux: el ejecutable que se lanza es un script que fuerza X11 (en Wayland la ventana de Electron se quedaba en negro en la Deck), apaga el
+     sandbox desde la linea de comandos (appendSwitch llega tarde para algunos procesos) y deja geolite-log.txt junto al juego para diagnosticar
+     sin consola. "<exe>-seguro" arranca ademas sin GPU, por si el negro es del driver */
+  if (LINUX) {
+    const exe = DEMO ? "GeoliteDemo" : "Geolite", bin = exe.toLowerCase() + "-bin";
+    fs.renameSync(path.join(dir, exe), path.join(dir, bin));
+    const sh = extra => `#!/bin/sh
+D="$(cd "$(dirname "$0")" && pwd)"
+export ELECTRON_ENABLE_LOGGING=1
+` +
+      `exec "$D/${bin}" --no-sandbox --ozone-platform=x11${extra} "$@" > "$D/geolite-log.txt" 2>&1
+`;
+    fs.writeFileSync(path.join(dir, exe), sh(""));
+    fs.writeFileSync(path.join(dir, exe + "-seguro"), sh(" --disable-gpu"));
+  }
   let bytes = 0; const walk = d => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); e.isDirectory() ? walk(f) : (bytes += fs.statSync(f).size); } }; walk(dir);
   console.log(`Listo: ${dir}  (${(bytes / 1048576).toFixed(0)} MB)`);
   if (LINUX) execFileSync("python", [path.join(ROOT, "tools/linux_tar.py"), dir, path.join(OUT, `${name.replace(/ /g, "")}-${pkg.version}-linux.tar.gz`)], { stdio: "inherit" });

@@ -255,7 +255,7 @@ window.AIQ = window.AIQ || {};
       rattleIv = setInterval(() => { const a = Math.min(1, 0.55 + (performance.now() - holdT0) / 1600); SIDES.P.shaking = a; A.sfx.diceRattle(0.5 + a * 0.5); }, 130); }
     function release() { if (!holding) return; holding = false; awaiting = false; clearInterval(rattleIv); const dur = performance.now() - holdT0;
       setTimeout(() => { hit.classList.remove("on"); const r = holdRes; holdRes = null; r && r({ dur }); }, Math.max(0, 650 - dur)); }   // un toque rapido tambien vale: agita 0,65 s como minimo
-    const waitHold = () => waitFor(res => { holdRes = res; awaiting = true; hit.classList.add("on"); turnEl.classList.add("on"); hint("hTurn"); if (TST.auto) setTimeout(() => { press(); setTimeout(release, TST.auto.hold || 900); }, 700); });
+    const waitHold = () => waitFor(res => { sh.waiting(true); holdRes = v => { sh.waiting(false); res(v); }; awaiting = true; hit.classList.add("on"); turnEl.classList.add("on"); hint("hTurn"); if (TST.auto) setTimeout(() => { press(); setTimeout(release, TST.auto.hold || 900); }, 700); });
     hit.addEventListener("pointerdown", e => { e.preventDefault(); press(); });
     const onUp = () => release(), onKey = e => { if (!ov.isConnected) return; if ((e.key === " " || e.key === "Enter") && awaiting) { e.preventDefault(); if (!e.repeat) press(); } }, onKeyUp = e => { if ((e.key === " " || e.key === "Enter") && holding) release(); };
     addEventListener("pointerup", onUp); addEventListener("pointercancel", onUp); addEventListener("blur", onUp); addEventListener("keydown", onKey, true); addEventListener("keyup", onKeyUp, true);
@@ -295,7 +295,7 @@ window.AIQ = window.AIQ || {};
             else { ov.classList.remove("hush"); }
           }
         }
-        const th = res.throws[res.throws.length - 1], lv = res.level; ov.classList.remove("hush");
+        const th = res.throws[res.throws.length - 1], lv = res.level; ov.classList.remove("hush"); sh.outcome();
         if (res.win) {
           tot("D", th.dt, "lose"); tot("P", th.pt, "win"); face("shock");
           if (lv >= 2) ov.classList.add("lv" + lv); ov.classList.add("win"); flash(); A.sfx.jackpot(lv); if (A.core.jpShake) A.core.jpShake(lv); if (A.haptic) A.haptic(lv === 3 ? [40, 40, 80] : [30, 30, 60]);
