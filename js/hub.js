@@ -14,8 +14,10 @@ window.AIQ = window.AIQ || {};
   const shell = (inner, back) => `<div class="menu-in hub">${top(back)}${inner}<p class="menu-foot">Geolite · v${A.VERSION}</p></div>`;
   /* donde va una partida guardada (A.adv.summary): tras el Acto III ya no hay rondas numeradas (antes decia "Acto 4 · Ronda 1") */
   const CONT_RUN = () => A.pick6("Continuar expedición|Continue expedition|Reprendre l'expédition|Continuar expedição|Expedition fortsetzen|Riprendi la spedizione||继续远征|원정 계속하기|遠征を再開|Продолжить экспедицию|Kontynuuj wyprawę");
-  /* la linea pequena del boton de continuar (portada y Aventura): dos trozos que nunca se parten por dentro; si no caben juntos, la moneda abre la segunda linea */
-  const runLine = sv => `<span>${where(sv)}</span><span>${A.icon("coin", "sb-coin")}${sv.coins} · ${A.fmt(sv.score)} ${T("pts", "pts")}</span>`;
+  /* la linea pequena del boton de continuar (portada y Aventura): trozos cortos sin puntos entre ellos (la ronda como en la ruta, 1-12; la ficha de la
+     Ascension; la moneda; los puntos). Si no caben en una linea saltan trozos enteros: nunca queda un "· A1" suelto */
+  const runLine = sv => [sv.inf || sv.act > 3 ? where(sv) : `${T("Ronda", "Round")} ${(sv.act - 1) * 4 + sv.round}/12`,
+    sv.asc ? A.icon(STAKE_CHIP[sv.asc], "sb-coin") + "A" + sv.asc : "", A.icon("coin", "sb-coin") + sv.coins, `${A.fmt(sv.score)} ${T("pts", "pts")}`].filter(Boolean).map(x => `<span>${x}</span>`).join("");
   const where = sv => (sv.inf ? T("Modo infinito", "Infinite mode") : sv.act > 3 ? T("Tres actos completados", "Three acts completed") : `${T("Acto", "Act")} ${sv.act} · ${T("Ronda", "Round")} ${sv.round}${sv.asc ? " · A" + sv.asc : ""}`);
 
   /* ------------------------------------------------------------------ pantalla principal */
