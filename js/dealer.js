@@ -1642,7 +1642,7 @@ window.AIQ = window.AIQ || {};
      la nota ni el dock: mide el hueco real, encoge el retrato hasta que quepa y sube o estrecha el bocadillo (ventanas bajas, portatiles
      pequenos, movil en horizontal). Antes el retrato de 250 px tapaba la placa en pantallas de poca altura. */
   function fitCorner() {
-    if (!el || el.classList.contains("camp")) return;                                // en el Campamento su sitio lo mide campRoom
+    if (!el || el.classList.contains("camp") || el.classList.contains("lvpos")) return;      // en el Campamento su sitio lo mide campRoom
     const bs = bubble.style, fs = face.style;
     const reset = () => { el.style.bottom = el.style.top = ""; fs.width = fs.height = fs.display = ""; bs.marginBottom = bs.maxWidth = ""; };
     if (el.classList.contains("home") && !D.host) {                                 // en el inicio: el hueco libre a su lado de la portada (homeRoom)
@@ -1689,6 +1689,7 @@ window.AIQ = window.AIQ || {};
      (o acaba de terminar), la nueva espera su turno (si llegan varias, solo la ultima). Solo las escenas forzadas (o.force, js/nombre.js) entran ya.
      o.fx: efecto de pantalla (rabieta) que sale justo cuando empieza la frase; o.start, igual: aviso de que por fin empieza (si esperaba turno) */
   D.say = (line, o = {}) => {
+    if (!o.live && !o.force && A.vivoQuiet && A.vivoQuiet()) return;      // el autor habla por el: sus frases automaticas callan mientras el esta en la mesa y 90 s despues
     if (!o.force && (held || napping || napWant || (!D.on && !D.onHome))) return;
     if (o.valid && !o.valid()) return;                                // la frase ya no toca (p. ej. la reaccion a una pregunta que ya paso)
     if (el) ensure();
@@ -1701,7 +1702,9 @@ window.AIQ = window.AIQ || {};
     spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " screen" + (o.screen === "pod" ? " pod" : "") : home); bubble.classList.add("on");
     if (o.camp && campBox) { const st = el.style; st.bottom = st.top = ""; face.style.width = face.style.height = face.style.display = ""; bubble.style.marginBottom = bubble.style.maxWidth = "";
       st.setProperty("--cl", campBox.l + "px"); st.setProperty("--cb", campBox.b + "px"); st.setProperty("--hf", campBox.hf + "px"); st.setProperty("--hb", campBox.hb + "px"); }
-    bubble.className = bubble.className.replace(/\s*st-\w+/g, ""); if (o.sty) bubble.classList.add("st-" + o.sty);   // estilo del bocadillo que elige la mesa (gritando, susurro...)
+    if (o.pos) { el.removeAttribute("style"); el.className = "dealer in lvpos lv-" + o.pos + " " + mood; document.body.appendChild(el); }   // la mesa elige donde sale: una esquina o el centro grande, por encima de todo
+    else if (el.parentNode === document.body) (D.host || $("app")).appendChild(el);
+    bubble.className = bubble.className.replace(/\s*\bst-\w+/g, ""); if (o.sty) bubble.classList.add("st-" + o.sty);   // estilo del bocadillo que elige la mesa (gritando, susurro...)
     bubble.classList.toggle("live", !!o.live); if (o.live) bubble.querySelector(".dl-live span").textContent = A.pick6(LIVE_TAG);   // js/vivo.js: el crupier de verdad (el autor) te habla en directo
     if (o.lang) { bubble.lang = o.lang; bubble.style.setProperty("--dll", /^(zh|ja|ko|ru)/.test(o.lang) ? ".889" : "1"); } else if (bubble.lang) { bubble.removeAttribute("lang"); bubble.style.removeProperty("--dll"); }
     /* la frase entera ya maquetada desde el principio, con lo que falta por escribir invisible: el globo nace con su tamano final y ninguna palabra
@@ -1769,7 +1772,7 @@ window.AIQ = window.AIQ || {};
     ensure(); el.classList.remove("hidden");
     let screen;
     if (!D.on && !D.host) { if (D.onHome && (homeCorner = homeCorner || pickCorner())) screen = undefined; else screen = true; }
-    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, sty: o.sty || "", force: true, live: true, screen, hold: holdFor(t) + 1500, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); } });   // el clic del foco al entrar en antena
+    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, sty: o.sty || "", pos: o.pos || "", force: true, live: true, screen, hold: holdFor(t) + 1500, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); } });   // el clic del foco al entrar en antena
     return true;
   };
   /* tanda 16: LA SIESTA DEL CRUPIER. Duerme en su esquina de la partida, sin globo y sin reaccionar a nada (napping calla D.say); nap(false) lo despierta sin

@@ -52,18 +52,20 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { const was = fast; fast = !!j.w; if (!fast && pc) camOff(); if (was && !fast && A.chfx && A.chfx.liveReset) A.chfx.liveReset(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
+      if (j && j.ok) { const was = fast; fast = !!j.w; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (was && !fast && A.chfx && A.chfx.liveReset) A.chfx.liveReset(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
     } catch (e) { fast = false; }
     sched(fast ? 2000 : document.hidden ? 60000 : 25000);
   }
   /* lo que llega se dice en orden: cada frase espera a que la anterior este escrita (A.dealer encola una sola) */
-  const queue = []; let busyTill = 0, dt = 0;
+  const queue = []; let busyTill = 0, dt = 0, hushTill = 0;
+  A.vivoQuiet = () => fast || Date.now() < hushTill;   // el autor esta en la mesa (y 90 s despues de su ultima frase): el crupier del juego se calla
   const MOOD = { laugh: "laugh", angry: "angry", furious: "angry", shock: "shock", dare: "boss" };
   function drain() {
     clearTimeout(dt); if (!queue.length) return;
     const wait = busyTill - Date.now(); if (wait > 0) { dt = setTimeout(drain, wait); return; }
     const m = queue.shift(), t = String(m.t || "").slice(0, 160); if (!t || !A.dealer || !A.dealer.live) return drain();
-    A.dealer.live(t, { mood: MOOD[m.e] || "sly", face: m.e || undefined, gest: m.g || null, sty: m.s || "" });
+    A.dealer.live(t, { mood: MOOD[m.e] || "sly", face: m.e || undefined, gest: m.g || null, sty: m.s || "", pos: m.p || "" });
+    hushTill = Date.now() + 90000;
     busyTill = Date.now() + [...t].length * 40 + 1600;
     if (queue.length) dt = setTimeout(drain, busyTill - Date.now());
   }

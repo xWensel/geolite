@@ -534,21 +534,31 @@ html.reduce-motion #ssFx, html.reduce-motion #albumFx, html.reduce-motion #wheel
 html.reduce-motion #vivoGlove.tap .vg-ring, html.reduce-motion #vivoEye i { animation: none; }
 
 /* estilos del bocadillo que elige la mesa en directo (api/mesa.js STY, js/dealer.js): gritando, tembloroso, susurro, pensando, siniestro, cantando, glitch y gran anuncio */
-.dealer .dl-bubble.st-shout { font-size: calc(38px * var(--dll, 1)); color: #c4152a; text-transform: uppercase; padding: 16px 22px 18px; background: #fff3c4; animation: dlShout .09s steps(2) infinite;
+#dealer .dl-bubble.st-shout { font-size: calc(38px * var(--dll, 1)); color: #c4152a; text-transform: uppercase; padding: 16px 22px 18px; background: #fff3c4; animation: dlShout .09s steps(2) infinite;
   clip-path: polygon(0 6%, 4% 0, 10% 6%, 17% 0, 24% 6%, 31% 0, 38% 6%, 45% 0, 52% 6%, 59% 0, 66% 6%, 73% 0, 80% 6%, 87% 0, 94% 6%, 100% 0, 98% 30%, 100% 50%, 98% 70%, 100% 100%, 12px 100%, 0 calc(100% + 12px), 2% 70%, 0 50%, 2% 30%); }
 @keyframes dlShout { 0% { transform: translate(2px, -1px) rotate(-.6deg); } 50% { transform: translate(-2px, 1px) rotate(.6deg); } }
-.dealer .dl-bubble.st-tremble { font-size: calc(24px * var(--dll, 1)); } .dl-bubble.st-tremble p { animation: dlTremble .12s steps(2) infinite; }
+#dealer .dl-bubble.st-tremble { font-size: calc(24px * var(--dll, 1)); } .dl-bubble.st-tremble p { animation: dlTremble .12s steps(2) infinite; }
 @keyframes dlTremble { 0% { transform: translate(1px, 0); } 50% { transform: translate(-1px, 1px); } }
-.dealer .dl-bubble.st-whisper { font-size: calc(20px * var(--dll, 1)); font-style: italic; letter-spacing: .06em; color: rgba(22, 36, 28, .62); background: #e9e2cc; box-shadow: inset 0 0 0 3px rgba(22, 36, 28, .45), 0 6px 0 rgba(0, 0, 0, .3); }
-.dealer .dl-bubble.st-think { font-style: italic; border-radius: 30px; clip-path: none; padding: 13px 22px 15px; }
+#dealer .dl-bubble.st-whisper { font-size: calc(20px * var(--dll, 1)); font-style: italic; letter-spacing: .06em; color: rgba(22, 36, 28, .62); background: #e9e2cc; box-shadow: inset 0 0 0 3px rgba(22, 36, 28, .45), 0 6px 0 rgba(0, 0, 0, .3); }
+#dealer .dl-bubble.st-think { font-style: italic; border-radius: 30px; clip-path: none; padding: 13px 22px 15px; }
 .dl-bubble.st-think::after { content: ""; position: absolute; left: 14px; bottom: -22px; width: 12px; height: 12px; border-radius: 50%; background: #fdf5fd; box-shadow: -8px 12px 0 -2px #fdf5fd, 0 0 0 3px #16241c; }
-.dealer .dl-bubble.st-dark { background: #1a0a10; color: #ff4a5a; text-shadow: 0 0 8px rgba(255, 40, 60, .7); box-shadow: inset 0 0 0 3px #7a0c1a, 0 6px 0 rgba(0, 0, 0, .55); letter-spacing: .04em; }
-.dealer .dl-bubble.st-sing { background: #fff1b0; color: #7a4b00; animation: dlSway 1.1s ease-in-out infinite; }
+#dealer .dl-bubble.st-dark { background: #1a0a10; color: #ff4a5a; text-shadow: 0 0 8px rgba(255, 40, 60, .7); box-shadow: inset 0 0 0 3px #7a0c1a, 0 6px 0 rgba(0, 0, 0, .55); letter-spacing: .04em; }
+#dealer .dl-bubble.st-sing { background: #fff1b0; color: #7a4b00; animation: dlSway 1.1s ease-in-out infinite; }
 @keyframes dlSway { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg) translateY(-3px); } }
-.dealer .dl-bubble.st-glitch { background: #0c1a1a; color: #aef; text-shadow: 2px 0 #ff2e63, -2px 0 #08f9ff; animation: dlGlitch 1.3s steps(1) infinite; box-shadow: inset 0 0 0 3px #08f9ff, 0 6px 0 rgba(0, 0, 0, .5); }
+#dealer .dl-bubble.st-glitch { background: #0c1a1a; color: #aef; text-shadow: 2px 0 #ff2e63, -2px 0 #08f9ff; animation: dlGlitch 1.3s steps(1) infinite; box-shadow: inset 0 0 0 3px #08f9ff, 0 6px 0 rgba(0, 0, 0, .5); }
 @keyframes dlGlitch { 0%, 88%, 100% { transform: none; } 90% { transform: translateX(5px) skewX(-6deg); } 94% { transform: translateX(-4px); } }
-.dealer .dl-bubble.st-gold { font-size: calc(32px * var(--dll, 1)); background: linear-gradient(100deg, #f1d79a 0 40%, #fff6d0 50%, #f1d79a 60% 100%) 0 0 / 250% 100%; animation: dlShine 2.2s linear infinite; padding: 14px 22px 16px; }
+#dealer .dl-bubble.st-gold { font-size: calc(32px * var(--dll, 1)); background: linear-gradient(100deg, #f1d79a 0 40%, #fff6d0 50%, #f1d79a 60% 100%) 0 0 / 250% 100%; animation: dlShine 2.2s linear infinite; padding: 14px 22px 16px; }
 @keyframes dlShine { to { background-position: -150% 0; } }
-@media (max-width: 720px) { .dealer .dl-bubble.st-shout { font-size: calc(28px * var(--dll, 1)); } .dealer .dl-bubble.st-gold { font-size: calc(24px * var(--dll, 1)); } .dealer .dl-bubble.st-whisper { font-size: calc(17px * var(--dll, 1)); } .dealer .dl-bubble.st-tremble { font-size: calc(20px * var(--dll, 1)); } }
+@media (max-width: 720px) { #dealer .dl-bubble.st-shout { font-size: calc(28px * var(--dll, 1)); } #dealer .dl-bubble.st-gold { font-size: calc(24px * var(--dll, 1)); } #dealer .dl-bubble.st-whisper { font-size: calc(17px * var(--dll, 1)); } #dealer .dl-bubble.st-tremble { font-size: calc(20px * var(--dll, 1)); } }
 @media (prefers-reduced-motion: reduce) { .dl-bubble[class*="st-"], .dl-bubble[class*="st-"] p { animation: none !important; } }
 html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class*="st-"] p { animation: none !important; }
+
+/* donde sale el crupier cuando habla la mesa (js/dealer.js, o.pos): esquinas o centro grande, por encima de todo */
+.dealer.lvpos { position: fixed; left: auto; right: auto; top: auto; bottom: auto; z-index: 2147483000; flex-direction: column; gap: 4px; transform: none; opacity: 1; --hf: 224px; --tail: calc(var(--hf) / 2); }
+.dealer.lvpos.lv-tl { left: 24px; top: 24px; align-items: flex-start; } .dealer.lvpos.lv-bl { left: 24px; bottom: 24px; align-items: flex-start; }
+.dealer.lvpos.lv-tr { right: 24px; top: 24px; align-items: flex-end; --tail: calc(100% - var(--hf) / 2); } .dealer.lvpos.lv-br { right: 24px; bottom: 24px; align-items: flex-end; --tail: calc(100% - var(--hf) / 2); }
+.dealer.lvpos.lv-c { left: 50%; top: 50%; transform: translate(-50%, -50%); align-items: center; --hf: clamp(300px, 54vh, 520px); --tail: 50%; }
+.dealer.lvpos .dl-face { order: 2; width: var(--hf); height: var(--hf); }
+.dealer.lvpos .dl-bubble { order: 1; margin: 0; min-width: min(var(--hf), 420px); max-width: min(460px, 80vw); padding-bottom: 22px; transform-origin: var(--tail) 100%;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(var(--tail) + 10px) calc(100% - 12px), var(--tail) 100%, calc(var(--tail) - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+.dealer.lvpos.lv-c .dl-bubble { max-width: min(640px, 86vw); font-size: calc(32px * var(--dll, 1)); }

@@ -3,7 +3,7 @@
      GET                                  ->  { ok, now, list: [{ sid, t, st, w }] }  partidas con latido en los ultimos 80 s
      POST { op: "watch", sid }            ->  la estas mirando (45 s): esa partida pregunta cada 2 s
      POST { op: "unwatch", sid }
-     POST { op: "say", sid, t, e, g, s }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
+     POST { op: "say", sid, t, e, g, s, p }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
      POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto (v true/false), cristal/huellas/ventana (v 0-5)
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
@@ -14,6 +14,7 @@ const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
 const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "cristal", "huellas", "ventana"];
 const KEY = process.env.MESA_KEY || "";
 const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // estilos del bocadillo (css/challenges.css, .dl-bubble.st-*)
+const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier en la pantalla del jugador: esquinas o centro grande
 const same = (a, b) => { const h = x => crypto.createHash("sha256").update(String(x)).digest(); return crypto.timingSafeEqual(h(a), h(b)); };
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store"); res.setHeader("X-Robots-Tag", "noindex");
@@ -58,9 +59,9 @@ module.exports = async (req, res) => {
     }
     if (b.op === "say") {
       const t = [...String(b.t || "").normalize("NFC").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim()].slice(0, 160).join("");
-      const e = WORD.test(b.e || "") ? b.e || "" : "", g = WORD.test(b.g || "") ? b.g || "" : "", s = STY.includes(b.s) ? b.s : "";
+      const e = WORD.test(b.e || "") ? b.e || "" : "", g = WORD.test(b.g || "") ? b.g || "" : "", s = STY.includes(b.s) ? b.s : "", p = POS.includes(b.p) ? b.p : "";
       if (!t) return res.status(400).json({ ok: false });
-      const msg = JSON.stringify({ t, e, g, s, at: now }), ik = "vivo:in:" + sid;
+      const msg = JSON.stringify({ t, e, g, s, p, at: now }), ik = "vivo:in:" + sid;
       const [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
       let who = ""; try { who = JSON.parse(st).n || ""; } catch (x) { /* ya no esta */ }
       await kv.pipeline([["RPUSH", ik, msg], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45], ["LPUSH", "vivo:log", JSON.stringify({ sid, who, t, e, at: now })], ["LTRIM", "vivo:log", 0, 199], ["EXPIRE", "vivo:log", 604800]]);

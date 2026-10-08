@@ -279,6 +279,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
         <div class="tool"><span class="lbl">Gesto</span><select id="gest" aria-label="Gesto"></select></div>
         <div class="tool"><span class="lbl">Cara</span><div class="faces" id="faces"></div></div>
         <div class="tool"><span class="lbl">Estilo del bocadillo</span><div class="styles" id="styles"></div></div>
+        <div class="tool"><span class="lbl">Dónde sale en su pantalla</span><div class="styles" id="poss"></div></div>
       </section>
       <section class="plaque"><span class="lbl m">Cartas · frases rápidas</span><div class="cards" id="quick"></div></section>
       <section class="plaque"><span class="lbl m">El jugador</span><div id="facts"><p class="none" style="margin:0">Elige un asiento de la mesa.</p></div></section>
@@ -476,6 +477,8 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     });
     $("styles").innerHTML = STY.map(([k, n]) => `<button class="st${k === bst ? " on" : ""}" type="button" data-s="${k}">${n}</button>`).join("");
     $("styles").querySelectorAll(".st").forEach(b => b.onclick = () => setStyle(b.dataset.s));
+    $("poss").innerHTML = POS.map(([k, n]) => `<button class="st${k === bpos ? " on" : ""}" type="button" data-p="${k}">${n}</button>`).join("");
+    $("poss").querySelectorAll(".st").forEach(b => b.onclick = () => { bpos = b.dataset.p; $("poss").querySelectorAll(".st").forEach(x => x.classList.toggle("on", x === b)); toast(bpos ? "Saldrá: " + b.textContent + ", por encima de todo." : "Saldrá donde suele."); });
     const tx = $("txt");
     $("play").onclick = () => playing ? stop(true) : rehearse();
     tx.oninput = e => { if (e) quick = null; if (playing) stop(false); refresh(); document.querySelectorAll(".card").forEach(c => c.classList.toggle("on", +c.dataset.i === quick)); };   // si tocas el texto, ya es tuyo: llega tal cual
@@ -491,6 +494,8 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   }
   const STY = [["", "Normal"], ["shout", "Gritando"], ["tremble", "Tembloroso"], ["whisper", "Susurro"], ["think", "Pensando"], ["dark", "Siniestro"], ["sing", "Cantando"], ["glitch", "Glitch"], ["gold", "Gran anuncio"]];
   let bst = "";
+  const POS = [["", "Como siempre"], ["tl", "↖ Arriba izq."], ["tr", "↗ Arriba der."], ["bl", "↙ Abajo izq."], ["br", "↘ Abajo der."], ["c", "◎ Centro grande"]];
+  let bpos = "";
   function setStyle(s) {
     bst = s; document.querySelectorAll(".st").forEach(b => b.classList.toggle("on", b.dataset.s === s));
     const bub = document.querySelector(".bub"); bub.className = "bub" + (s ? " st-" + s : "");
@@ -654,7 +659,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     const tx = $("txt"), t = outText(), es = quick != null && !same(lang()) ? phrase(QUICK[quick][1], "es") : ""; if (!t || !sel) return;
     const b = $("send"); b.disabled = true;
     try {
-      const j = await call("POST", { op: "say", sid: sel, t, e: face, g: gest, s: bst });
+      const j = await call("POST", { op: "say", sid: sel, t, e: face, g: gest, s: bst, p: bpos });
       (said[sel] = said[sel] || []).push({ t, es, at: Date.now(), ok: !!(j.ok && j.live) });
       if (j.ok && j.live) { toast("En antena. Le llega en 1-2 s."); quick = null; tx.value = ""; tx.oninput(); rehearse(t); }   // y aqui lo ves como lo esta viendo
       else toast(j.ok ? "Esa partida ya se ha cerrado." : "No se ha podido enviar.");
