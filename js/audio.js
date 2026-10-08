@@ -232,10 +232,13 @@ window.AIQ = window.AIQ || {};
     v = Math.max(0, Math.min(1, v)); A.audio.vol[kind] = v;
     if (!ctx) return;
     const t = ctx.currentTime;
-    if (kind === "master") master.gain.setTargetAtTime(v, t, 0.03);
+    if (kind === "master") { if (!ducked) master.gain.setTargetAtTime(v, t, 0.03); }
     else if (kind === "music") { musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(MUS_BASE * v, t, 0.03); }
     else sfxBus.gain.setTargetAtTime(v, t, 0.03);
   };
+  /* Ajustes > Sonido > Sonar en segundo plano (v0.3.2): baja el volumen general a 0 mientras el juego no esta delante y lo devuelve al volver */
+  let ducked = false;
+  A.audio.duck = on => { ducked = !!on; if (ctx) master.gain.setTargetAtTime(ducked ? 0 : A.audio.vol.master, ctx.currentTime, ducked ? 0.08 : 0.15); };
   A.audio.unlock = (music = true) => { init(); if (music && A.audio.musicOn && ctx) A.music.start(); };
   A.audio.setMusic = on => { A.audio.musicOn = on; if (on) A.music.start(); else A.music.stop(); };
 

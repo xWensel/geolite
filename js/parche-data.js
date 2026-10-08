@@ -31,6 +31,49 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.3",
+      name: ["Ajustes nuevos", "New settings"],
+      date: "2026-10-08",
+      summary: ["Ajustes rehechos de arriba abajo: pestaña nueva de Controles para cambiar cualquier tecla, botón del ratón o del mando, pestaña de Accesibilidad, y ningún ajuste bloqueado ni repetido.",
+        "Settings rebuilt top to bottom: a new Controls tab to change any key, mouse button or controller button, an Accessibility tab, and no more locked or duplicated settings."],
+      chapters: [
+        { id: "ctl", kicker: ["Controles", "Controls"], title: ["Todo se puede cambiar", "Change anything"],
+          intro: ["La pestaña Mando pasa a llamarse Controles y tiene tres vistas: Teclado, Ratón y Mando.",
+            "The Controller tab is now Controls, with three views: Keyboard, Mouse and Controller."],
+          entries: [
+            E(["Teclas a tu gusto", "Your own keys"], "new", "0.3.3", [
+              ["Cada acción tiene **tecla y alternativa**. Pulsas la casilla, el crupier te pide la tecla nueva y, si ya la usa otra acción, te ofrece **intercambiarlas**. **Esc** siempre abre la pausa, para que nunca te quedes sin salida.", "Every action has a **key and an alternate**. Click the slot, the dealer asks for the new key and, if another action already uses it, offers to **swap them**. **Esc** always opens the pause menu, so you're never stuck."],
+              ["El mapa se mueve también con el teclado: **W A S D** de fábrica.", "The map now moves with the keyboard too: **W A S D** by default."],
+            ]),
+            E(["Arrastrar el mapa, con el botón que quieras", "Drag the map with any button"], "new", "0.3.3", [
+              ["Elige qué botón del ratón **marca** en el mapa y cuál lo **arrastra**: izquierdo, derecho, rueda o los laterales. El dibujo del ratón te enseña cuál hace qué y se ilumina al pulsarlo.", "Pick which mouse button **pins** on the map and which one **drags** it: left, right, wheel or the side buttons. The mouse drawing shows which does what and lights up when you press it."],
+              ["Además: **ratón para zurdos**, **rueda invertida**, zoom hacia el **puntero o el centro** y un **puntero de casino grande**.", "Also: **left-handed mouse**, **inverted wheel**, zoom toward the **pointer or the center** and a **large casino pointer**."],
+            ]),
+            E(["Mando a medida", "A controller that fits you"], "new", "0.3.3", [
+              ["Un dibujo de tu mando que **se ilumina** con cada botón, perfiles **Estándar** y **Zurdo**, y cambiar el botón de cada acción pulsándolo o eligiéndolo en la lista.", "A drawing of your controller that **lights up** with every button, **Standard** and **Left-handed** profiles, and a new button for any action by pressing it or picking it from the list."],
+              ["**Zona muerta** de cada stick con un visor en vivo (si tu mando se mueve solo, lo ves y lo corriges), **curva de respuesta**, **imán** que asienta el puntero en los botones de los menús (nunca en el mapa) e **intensidad de la vibración** con botón Probar.", "A **dead zone** for each stick with a live view (if your controller drifts, you see it and fix it), a **response curve**, a **magnet** that settles the pointer on menu buttons (never on the map) and **vibration strength** with a Test button."],
+            ]) ] },
+        { id: "fix", kicker: ["Accesibilidad y arreglos", "Accessibility and fixes"], title: ["Nada bloqueado", "Nothing locked"],
+          intro: ["Revisamos cada ajuste: los que no hacían lo que decían, ahora sí.", "We went through every setting: the ones that didn't do what they said now do."],
+          entries: [
+            E(["Tamaño del texto", "Text size"], "fix", "0.3.3", [
+              ["Antes solo agrandaba la placa de la pregunta. Ahora agranda también las pistas, el bocadillo del crupier, la carta grande y las ayudas, con vista previa.", "It used to enlarge only the question plate. Now it also enlarges clues, the dealer's speech bubble, the big card and tooltips, with a preview."],
+            ]),
+            E(["Movimiento en tres niveles", "Three motion levels"], "merge", "0.3.3", [
+              ["**Reducir movimiento** y **Destellos suaves** (que se quedaba bloqueado) se juntan en **Completo / Suave / Mínimo**.", "**Reduce motion** and **Soft flashes** (which could get locked) become **Full / Soft / Minimal**."],
+            ]),
+            E(["Temblor y vibración, por separado", "Shake and vibration, apart"], "fix", "0.3.3", [
+              ["**Vibración** hacía dos cosas a la vez y el mando necesitaba dos interruptores. Ahora el **Temblor de pantalla** está en Accesibilidad y la **vibración del mando** en Controles.", "**Vibration** did two things at once and the controller needed two switches. Now **Screen shake** lives in Accessibility and **controller vibration** in Controls."],
+            ]),
+            E(["Interfaz y pantalla completa", "Interface and fullscreen"], "fix", "0.3.3", [
+              ["**Interfaz** solo podía encoger y su botón de agrandar estaba siempre apagado. Ahora es **Grande / Media / Compacta** y solo sale cuando tu ventana deja elegir. En pantalla completa, la resolución se muestra como dato, sin flechas muertas.", "**Interface** could only shrink and its enlarge button was always off. Now it's **Large / Medium / Compact** and only shows when your window allows a choice. In fullscreen, the resolution is shown as information, with no dead arrows."],
+            ]),
+            E(["Más cosas", "More"], "new", "0.3.3", [
+              ["**Sonar en segundo plano**: apágalo y el juego calla al irte a otra ventana. En Datos, **Tus partidas** dice si tu progreso está en la nube de Steam. El tutorial se puede **repetir** desde General.", "**Play in background**: turn it off and the game goes quiet when you switch windows. In Data, **Your saves** tells you whether your progress is in Steam Cloud. The tutorial can be **replayed** from General."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.2",
       name: ["Acelerar y saltar", "Speed up & skip"],
       date: "2026-10-08",

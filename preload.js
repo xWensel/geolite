@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld("geoliteHost", {
   /* teclado de Steam para escribir con mando (js/teclado.js): { kind: "floating" | "modal" (con text) | "cancel" | "none" } */
   steamKeyboard: (o) => ipcRenderer.invoke("steam:keyboard", o),
   steamAvailable: () => ipcRenderer.invoke("steam:available"),
+  /* { account, app } de Steam Cloud, o null sin Steam (Ajustes > Datos) */
+  steamCloud: () => ipcRenderer.invoke("steam:cloud"),
   steamUnlock: (id) => ipcRenderer.invoke("steam:unlock", id),
   /* sincrono a proposito: el renderer lo usa para pintar el selector de
    * pantalla al instante, igual que document.fullscreenElement. */

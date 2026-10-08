@@ -277,7 +277,7 @@ window.AIQ = window.AIQ || {};
     window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("pointerover", e => { if (e.pointerType === "mouse") move(e); }, { passive: true });   // el raton ya estaba sobre el mapa cuando se activo (pregunta nueva, fin de la pausa): sin esto no hay ni reticulo ni cursor hasta moverlo
     window.addEventListener("pointerdown", e => { if (e.pointerType === "touch") touchAt(e); }, true);   // un toque sin arrastre tambien mueve linterna y lupa (antes se quedaban donde estaban)
-    window.addEventListener("pointerdown", e => { if (P.on && e.target === map.cv && e.button === 0) P.press = 100; }, true);   // solo el boton principal (el mapa ignora el derecho)
+    window.addEventListener("pointerdown", e => { if (P.on && e.target === map.cv && (A.keys ? A.keys.isPick(e) : e.button === 0)) P.press = 100; }, true);   // solo el boton principal (el mapa ignora el derecho)
     document.addEventListener("pointerleave", () => show(false));
     const mo = new MutationObserver(() => { if (!map.pickEnabled) show(false); else if (!P.on && map.mouse) enter(map.mouse.x, map.mouse.y); }), watch = () => mo.observe(map.cv, { attributes: true, attributeFilter: ["class"] });
     watch(); document.addEventListener("aiq:mapcanvas", () => { mo.disconnect(); watch(); });   // el mapa recreo su lienzo (la GPU se reinicio)

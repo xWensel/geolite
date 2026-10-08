@@ -1199,19 +1199,20 @@ void main(){
       cv.addEventListener("contextmenu", e => e.preventDefault());
       cv.addEventListener("pointerdown", e => {
         if (this.zzUntil && performance.now() < this.zzUntil) return;               // Ctrl+Z: durante el rebobinado no se aceptan clics
-        if (e.pointerType === "mouse" && e.button !== 0) return;                   // solo el boton principal: el derecho o la rueda ya no marcan respuesta al soltar
+        const mk = A.keys ? A.keys.mouse : { pick: 0, drag: 0 }, mb = e.pointerType === "mouse" && e.isTrusted ? e.button : -1;   // v0.3.2: el boton de marcar y el de arrastrar salen de Ajustes > Controles (antes, solo el izquierdo)
+        if (mb >= 0 && mb !== mk.pick && mb !== mk.drag) return;
         try { cv.setPointerCapture(e.pointerId); } catch (err) { return; }   // un pointerdown del mando (js/mando.js) no tiene puntero real que capturar
         clearTimeout(this._dT); this.drift = null; this.inertia = null; this.tv = null; this.samples = [];
-        this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false });
+        this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: mb, drag: mb < 0 || mb === mk.drag, pick: mb < 0 || mb === mk.pick });
         if (this.pointers.size === 2) this._pinch = this._pinchState();
       });
       cv.addEventListener("pointermove", e => {
         if (e.pointerType === "mouse") { const r = cv.getBoundingClientRect(); this.mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; this.fxDirty = true; }
-        const p = this.pointers.get(e.pointerId); if (!p) return; if (e.pointerType === "mouse" && !(e.buttons & 1)) { up({ pointerId: e.pointerId, type: "pointercancel" }); return; }   // el boton ya no esta pulsado: el arrastre acabo fuera
+        const p = this.pointers.get(e.pointerId); if (!p) return; if (e.pointerType === "mouse" && !(e.buttons & (p.btn >= 0 && A.keys ? A.keys.bit(p.btn) : 1))) { up({ pointerId: e.pointerId, type: "pointercancel" }); return; }   // el boton ya no esta pulsado: el arrastre acabo fuera
         let dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
         if (this._orient().on) { const [a0, b0] = this._orientOut(0, 0), [a1, b1] = this._orientOut(dx, dy); dx = a1 - a0; dy = b1 - b0; }   // arrastrar: solo el giro (la curva CRT no cambia el sentido)
         if (Math.hypot(e.clientX - p.sx, e.clientY - p.sy) > (e.pointerType === "touch" ? 10 : 5)) p.moved = true;
-        if (this.pointers.size === 1 && p.moved) {
+        if (this.pointers.size === 1 && p.moved && p.drag) {
           this.anim = null; this.view.cx -= (dx * A.mapSens.pan) / this.view.s; this.view.cy += (dy * A.mapSens.pan) / this.view.s; this._clamp(this.view);
           this.dirty = this.fxDirty = true; cv.classList.add("grabbing"); this.fx.classList.add("grabbing");
           const now = performance.now(); this.samples.push([now, dx, dy]); while (this.samples.length && now - this.samples[0][0] > 90) this.samples.shift();
@@ -1230,9 +1231,9 @@ void main(){
       const up = e => {
         const p = this.pointers.get(e.pointerId); if (!p) return;
         this.pointers.delete(e.pointerId); cv.classList.remove("grabbing"); this.fx.classList.remove("grabbing");
-        if (!p.moved && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") { const r = cv.getBoundingClientRect(); this._tap(e.clientX - r.left, e.clientY - r.top); }
+        if ((!p.moved || !p.drag) && p.pick && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") { const r = cv.getBoundingClientRect(); this._tap(e.clientX - r.left, e.clientY - r.top); }
         // inercia al soltar
-        if (p.moved && this.pointers.size === 0 && !this._wasPinch && this.samples.length > 1) {
+        if (p.moved && p.drag && this.pointers.size === 0 && !this._wasPinch && this.samples.length > 1) {
           const t0 = this.samples[0][0], t1 = this.samples[this.samples.length - 1][0], dt = Math.max(16, t1 - t0) / 1000;
           const sx = this.samples.reduce((a, s) => a + s[1], 0) / dt, sy = this.samples.reduce((a, s) => a + s[2], 0) / dt;
           if (performance.now() - t1 < 60 && Math.hypot(sx, sy) > 250) this.inertia = { vx: (-sx * A.mapSens.pan) / this.view.s, vy: (sy * A.mapSens.pan) / this.view.s };
@@ -1242,7 +1243,8 @@ void main(){
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
         e.preventDefault(); const r = cv.getBoundingClientRect();
-        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), ...(A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top]));
+        const wc = A.keys && A.keys.mouse.zoomMid;   // Ajustes > Controles: zoom hacia el centro del mapa en vez del puntero
+        this.zoomBy(Math.exp(-(A.keys ? A.keys.wheel(e.deltaY) : e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), ...(wc ? [this.W / 2, this.H / 2] : (A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top])));
       }, { passive: false });
       this._ro = new ResizeObserver(() => this.resize()); this._ro.observe(cv);
     }

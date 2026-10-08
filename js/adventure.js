@@ -902,7 +902,7 @@ window.AIQ = window.AIQ || {};
     A.adv.flash("oracle", run.splitSeen ? 0 : 2, "⇄"); if (!run.splitSeen) { run.splitSeen = 1; setTimeout(() => A.sfx.jackpot(2), 300); }   // la primera vez de la expedicion, con jackpot
     persist(); return true;
   }
-  addEventListener("keydown", e => { if (e.key === "Tab" && $("splitAlt") && C().S.phase === "asking") { e.preventDefault(); splitSwap(); } });
+  addEventListener("keydown", e => { if ((A.keys ? A.keys.match("alt", e) : e.key === "Tab") && $("splitAlt") && C().S.phase === "asking") { e.preventDefault(); splitSwap(); } });
   /* Carta de cambio: otro lugar de la ronda en vez del actual */
   function swapQuestion() {
     const S = C().S, cur = S.qs[S.qi], rr = A.rng(`${run.seed}:swap:${roundNo()}:${S.qi}:${run.qTotal}`); let pick = null;

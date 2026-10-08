@@ -23,8 +23,18 @@ window.AIQ = window.AIQ || {};
   let raf = 0, lastT = 0, padIdx = -1, padAt = {}, seen = {}, prevB = [], repAt = {}, fastT = 0, hit = null, hovChain = [], cur = null, moved = true, snap = null, primSeen = null, primPend = null, primT = 0, precOn = false, lastMouse = null, noPad = 0, bad = 0;
 
   /* ---------- Ajustes > Mando (v0.2.35): se guardan aparte, en atlasiq.pad ---------- */
-  const DEF = { ptr: 100, map: 100, zoom: 100, swapAB: false, swapSticks: false, prec: "hold", invLX: false, invLY: false, invRX: false, invRY: false, rumble: true, glyphs: "auto" };
+  /* v0.3.2 (Ajustes > Controles > Mando): perfil (std | left | custom) y botones de cada accion, zona muerta de cada stick, curva, iman de los menus e intensidad
+     de la vibracion (0-100). swapAB y el swapSticks suelto de la 0.2.35 se convierten en un perfil Personalizado */
+  const DEF = { ptr: 100, map: 100, zoom: 100, prec: "hold", invLX: false, invLY: false, invRX: false, invRY: false, rumble: 100, glyphs: "auto", dzL: 15, dzR: 15, curve: "soft", magnet: "soft", profile: "std", binds: null, swapSticks: false };
   const PS = Object.assign({}, DEF); try { Object.assign(PS, JSON.parse(localStorage.getItem("atlasiq.pad") || "{}")); } catch (e) { /* sin almacenamiento */ }
+  /* botones del mando estandar: 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 8 View, 9 Menu (fijo: pausa), 10 LS, 11 RS, 12-15 cruceta (fija: moverse) */
+  const BDEF = { ok: 0, back: 1, alt: 3, home: 5, prec: 4, zin: 7, zout: 6 }, FREE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11];
+  if (typeof PS.rumble === "boolean") PS.rumble = PS.rumble ? 100 : 0;
+  if (PS.swapAB !== undefined) { if (PS.swapAB) { PS.profile = "custom"; PS.binds = Object.assign({}, BDEF, { ok: 1, back: 0 }); } delete PS.swapAB; }
+  if (PS.swapSticks && PS.profile === "std") PS.profile = "custom";
+  if (PS.profile === "custom" && !(PS.binds && typeof PS.binds === "object")) PS.binds = Object.assign({}, BDEF);
+  if (!["std", "left", "custom"].includes(PS.profile)) PS.profile = "std";
+  for (const k of ["dzL", "dzR"]) PS[k] = Math.max(0, Math.min(40, Math.round(+PS[k]) || 0));
   const savePS = () => { try { localStorage.setItem("atlasiq.pad", JSON.stringify(PS)); } catch (e) { /* sin almacenamiento */ } };
   M.settings = PS;
 
@@ -42,11 +52,31 @@ window.AIQ = window.AIQ || {};
     return "xbox";
   };
   const famNow = () => (PS.glyphs !== "auto" ? PS.glyphs : fam);
-  const setGlyph = () => { const g = M.on || DECK ? famNow() : "kb"; if (root.dataset.glyph !== g) { root.dataset.glyph = g; if (A.tt && A.tt.refresh) A.tt.refresh(); } if (PS.swapAB) root.dataset.swapab = "1"; else delete root.dataset.swapab; };
+  const setGlyph = () => { const g = M.on || DECK ? famNow() : "kb"; if (root.dataset.glyph !== g) { root.dataset.glyph = g; if (A.tt && A.tt.refresh) A.tt.refresh(); } glMap(); };
   { const G = A.GLIFOS || {}; let css = ""; for (const f in G) for (const b in G[f]) { const [u, w, h] = G[f][b]; css += `html[data-glyph="${f}"] .gl[data-gl="${b}"]{background-image:url("${u}");width:${w}px;height:${h}px}\n`; }
-    /* confirmar y atras intercambiados: el icono de "confirmar" (data-gl="a") es el boton de la derecha y el de "atras", el de abajo */
-    for (const f in G) { const [ua, wa, ha] = G[f].a, [ub, wb, hb] = G[f].b; css += `html[data-glyph="${f}"][data-swapab] .gl[data-gl="a"]{background-image:url("${ub}");width:${wb}px;height:${hb}px}\nhtml[data-glyph="${f}"][data-swapab] .gl[data-gl="b"]{background-image:url("${ua}");width:${wa}px;height:${ha}px}\n`; }
+    /* .glp = el boton fisico, siempre el mismo (dibujo del mando en Ajustes, teclado del crupier) */
+    for (const f in G) for (const b in G[f]) { const [u, w, h] = G[f][b]; css += `html[data-glyph="${f}"] .glp[data-glp="${b}"]{background-image:url("${u}");width:${w}px;height:${h}px}\n`; }
+    /* en Ajustes > Controles > Mando los iconos salen aunque se este usando el raton: la familia la pone data-padfam (js/controles.js) */
+    for (const f in G) for (const b in G[f]) { const [u, w, h] = G[f][b]; css += `[data-padfam="${f}"] .glp[data-glp="${b}"]{background-image:url("${u}");width:${w}px;height:${h}px}\n`; }
     const st = document.createElement("style"); st.id = "glCss"; st.textContent = css; document.head.appendChild(st); }
+  /* .gl[data-gl] nombra la ACCION por su boton de fabrica (a = elegir, b = atras, y = cambiar de pregunta, rt/lt = zoom, lb = precision, rb = vista inicial):
+     si la accion se ha movido a otro boton, el icono es el del boton nuevo, en todo el juego */
+  const GLN = ["a", "b", "x", "y", "lb", "rb", "lt", "rt", "view", "menu", "ls", "rs"], GL_ACT = { a: "ok", b: "back", y: "alt", rb: "home", lb: "prec", rt: "zin", lt: "zout" };
+  let glSig = "";
+  function glMap() {
+    const B = binds(), G = A.GLIFOS || {}, sig = JSON.stringify(B); if (sig === glSig) return; glSig = sig; let css = "";
+    for (const code in GL_ACT) { const i = B[GL_ACT[code]], to = GLN[i]; if (to === code || i == null) continue;
+      for (const fm in G) { const g = G[fm][to]; if (g) css += `html[data-glyph="${fm}"] .gl[data-gl="${code}"]{background-image:url("${g[0]}");width:${g[1]}px;height:${g[2]}px}\n`; } }
+    let el = $("glMap"); if (!el) { el = document.createElement("style"); el.id = "glMap"; document.head.appendChild(el); } el.textContent = css;
+  }
+  /* botones de cada accion segun el perfil. En los mandos de Nintendo (detectados) elegir y atras van como en su consola, salvo en Personalizado */
+  function binds() {
+    if (PS.profile === "custom") return Object.assign({}, BDEF, PS.binds);
+    const b = Object.assign({}, BDEF); if (PS.profile === "left") [b.prec, b.home] = [b.home, b.prec];
+    if (fam === "nin" && !DECK) [b.ok, b.back] = [b.back, b.ok];
+    return b;
+  }
+  const sticksSwapped = () => PS.profile === "left" || (PS.profile === "custom" && !!PS.swapSticks);
 
   /* ---------- modo de entrada ---------- */
   const setMode = m => {
@@ -225,13 +255,15 @@ window.AIQ = window.AIQ || {};
   const haptic0 = A.haptic;
   A.haptic = p => {
     if (haptic0) haptic0(p);
-    if (!M.on || A.haptic.on === false || !PS.rumble) return;
+    if (!M.on || !(PS.rumble > 0)) return;
     try { const gp = pad(), va = gp && gp.vibrationActuator; if (!va) return;
       const arr = Array.isArray(p) ? p : [p], on = arr.filter((v, i) => i % 2 === 0).reduce((a, b) => a + b, 0), big = Math.max(...arr);
       const k = big <= 15 ? [0.12, 0.3] : big <= 40 ? [0.4, 0.55] : [0.75, 0.9], j = 0.9 + Math.random() * 0.2;   // nunca exactamente igual
-      va.playEffect("dual-rumble", { duration: Math.min(600, on * 1.6), strongMagnitude: Math.min(1, k[0] * j), weakMagnitude: Math.min(1, k[1] * j) }).catch(() => {});
+      const g = PS.rumble / 100; va.playEffect("dual-rumble", { duration: Math.min(600, on * 1.6), strongMagnitude: Math.min(1, k[0] * j * g), weakMagnitude: Math.min(1, k[1] * j * g) }).catch(() => {});
     } catch (e) { /* mando sin vibracion */ }
   };
+  /* Probar (Ajustes): un golpe medio a la intensidad elegida */
+  M.testRumble = () => { try { const gp = pad(), va = gp && gp.vibrationActuator, g = PS.rumble / 100; if (va && g > 0) va.playEffect("dual-rumble", { duration: 260, strongMagnitude: 0.55 * g, weakMagnitude: 0.75 * g }).catch(() => {}); return !!va; } catch (e) { return false; } };
   if (haptic0) A.haptic.on = haptic0.on;
   if (haptic0 && haptic0.jackpot) A.haptic.jackpot = haptic0.jackpot;   // la escalera de jackpots (js/audio.js) sigue existiendo: sin ella, cada jackpot (legendaria, medalla) lanzaba un error y cortaba lo de detras
   Object.defineProperty(A.haptic, "on", { get: () => haptic0 ? haptic0.on : true, set: v => { if (haptic0) haptic0.on = v; } });
@@ -244,7 +276,8 @@ window.AIQ = window.AIQ || {};
     for (const g of list) { if (!g || !g.connected) continue; const a = padAt[g.index] || 0; if (!best || a > ba || (a === ba && g.mapping === "standard" && best.mapping !== "standard")) { best = g; ba = a; } }   // el ultimo que se toco (Steam Input puede dar dos); a igualdad, el de mapa estandar
     return best;
   }
-  const stick = (x, y) => { const m = Math.hypot(x, y); if (m < DZ) return [0, 0, 0]; const k = Math.pow(Math.min(1, (m - DZ) / (1 - DZ)), CURVE); return [x / m * k, y / m * k, k]; };
+  const CURV = { lin: 1, soft: CURVE, fine: 3.2 };
+  const stick = (x, y, dz = DZ) => { const m = Math.hypot(x, y); if (m < dz || m === 0) return [0, 0, 0]; const k = Math.pow(Math.min(1, (m - dz) / Math.max(0.05, 1 - dz)), CURV[PS.curve] || CURVE); return [x / m * k, y / m * k, k]; };
   const trig = b => { const v = b ? (typeof b === "object" ? b.value : b) : 0; return v < TDZ ? 0 : (v - TDZ) / (1 - TDZ); };
   const down = (gp, i) => { const b = gp.buttons[i]; return !!b && (b.pressed || b.value > 0.5); };
   /* "Tocar" un mando es CAMBIAR algo a proposito (pulsar un boton, empujar un eje o un gatillo), no estar en una posicion: un mando con un eje
@@ -259,7 +292,7 @@ window.AIQ = window.AIQ || {};
     for (let i = 0; i < g.buttons.length; i++) { const d = down(g, i); s.b[i] = d; if (d) { held = true; if (!s.pb[i]) hitIt = true; } }
     if (first) { if (held || g.axes.some(a => Math.abs(a) > DZ + 0.1)) hitIt = true; }
     else {
-      for (let i = 0; i < g.axes.length; i++) { const a = g.axes[i] || 0; if (Math.abs(a) > DZ && Math.abs(a - (s.a[i] || 0)) > ACT) hitIt = true; }
+      for (let i = 0; i < g.axes.length; i++) { const a = g.axes[i] || 0; if (Math.abs(a) > Math.max(0.06, Math.min(PS.dzL, PS.dzR) / 100) && Math.abs(a - (s.a[i] || 0)) > ACT) hitIt = true; }
       for (let i = 6; i < 8; i++) { const v = (g.buttons[i] && g.buttons[i].value) || 0; if (v > 0.2 && Math.abs(v - (s.v[i] || 0)) > ACT) hitIt = true; }
     }
     if (first || t - s.t > 80) { s.t = t; for (let i = 0; i < g.axes.length; i++) s.a[i] = g.axes[i] || 0; for (let i = 6; i < 8; i++) s.v[i] = (g.buttons[i] && g.buttons[i].value) || 0; }
@@ -280,13 +313,21 @@ window.AIQ = window.AIQ || {};
     const gp = pad(); if (!gp) return;
     /* Ajustes > Mando: sticks intercambiados y ejes invertidos */
     let a0 = gp.axes[0] || 0, a1 = gp.axes[1] || 0, a2 = gp.axes[2] || 0, a3 = gp.axes[3] || 0;
-    if (PS.swapSticks) [a0, a1, a2, a3] = [a2, a3, a0, a1];
+    if (sticksSwapped()) [a0, a1, a2, a3] = [a2, a3, a0, a1];
     if (PS.invLX) a0 = -a0; if (PS.invLY) a1 = -a1; if (PS.invRX) a2 = -a2; if (PS.invRY) a3 = -a3;
-    const [lx, ly, lm] = stick(a0, a1), [rx, ry, rm] = stick(a2, a3), lt = trig(gp.buttons[6]), rt = trig(gp.buttons[7]);
-    const btn = gp.buttons.map((b, i) => down(gp, i)), sn = seen[gp.index]; prevB = sn ? sn.pb.slice() : [];
-    if (PS.swapAB) { [btn[0], btn[1]] = [btn[1], btn[0]]; [prevB[0], prevB[1]] = [prevB[1], prevB[0]]; }   // confirmar con el boton de la derecha (mandos de Nintendo)
+    const [lx, ly, lm] = stick(a0, a1, PS.dzL / 100), [rx, ry, rm] = stick(a2, a3, PS.dzR / 100);
+    const raw = gp.buttons.map((b, i) => down(gp, i)), sn = seen[gp.index], rawPrev = sn ? sn.pb.slice() : [];
+    M.live = { ax: [a0, a1, a2, a3], btn: raw, t };                                  // Ajustes: el dibujo del mando y los visores de los sticks
+    /* Ajustes: grabando un boton nuevo para una accion. El primer boton libre que se pulse es el elegido y no hace nada mas; Menu cancela */
+    if (capture) { if (raw[9] && !rawPrev[9]) { const c = capture; capture = null; c(-1); } else for (const i of FREE) if (raw[i] && !rawPrev[i]) { const c = capture; capture = null; c(i); break; } swallow = true; }
+    if (swallow) { if (raw.some(Boolean)) { prevB = raw.slice(); return; } swallow = false; }   // hasta soltarlo todo, nada de lo pulsado cuenta
+    /* botones de ACCION (reasignables) en las casillas de siempre: 0 elegir, 1 atras, 3 cambiar pregunta, 4 precision, 5 vista inicial; los gatillos, analogicos */
+    const B = binds(), btn = raw.slice(); prevB = rawPrev.slice();
+    for (const [a, i] of [["ok", 0], ["back", 1], ["alt", 3], ["prec", 4], ["home", 5]]) { btn[i] = !!raw[B[a]]; prevB[i] = !!rawPrev[B[a]]; }
+    btn[2] = !!raw[2] && ![B.ok, B.back, B.alt, B.prec, B.home, B.zin, B.zout].includes(2); prevB[2] = !!rawPrev[2] && btn[2];   // X: libre, salvo que ahora lleve una accion
+    const tv = i => (i === 6 || i === 7 ? trig(gp.buttons[i]) : raw[i] ? 1 : 0), lt = tv(B.zout), rt = tv(B.zin);
     if (PS.prec === "toggle") { if (btn[4] && !prevB[4]) precOn = !precOn; } else precOn = !!btn[4];
-    if (woke) { const f = famOf(gp); if (f !== fam) { fam = f; setGlyph(); syncUI(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
+    if (woke) { const f = famOf(gp); if (f !== fam) { fam = f; glSig = ""; setGlyph(); syncUI(); } }       // otro mando (DualSense despues de un Xbox): sus iconos
     if (woke && !M.on) { setMode("pad"); if (A.audio && A.audio.unlock) A.audio.unlock(); }
     if (!M.on) return;
     const map = A.core && A.core.map, S = A.core && A.core.S, W = innerWidth, H = innerHeight;
@@ -301,6 +342,7 @@ window.AIQ = window.AIQ || {};
       if (onMap) { const ex = nx < 0 ? nx : nx > W - 1 ? nx - (W - 1) : 0, ey = ny < 0 ? ny : ny > H - 1 ? ny - (H - 1) : 0; if (ex || ey) map.nudge(ex, ey); }   // en el borde, el puntero empuja el mapa
       M.x = Math.max(0, Math.min(W - 1, nx)); M.y = Math.max(0, Math.min(H - 1, ny)); moved = true;
     } else fastT = 0;
+    if (PS.magnet !== "off" && !onMap && !snap && (!lm || lm < 0.6)) magnet(t, dt, lm);
     /* salto de la cruceta, animado */
     if (snap) {
       const k = Math.min(1, (t - snap.t0) / snap.ms), e = snap.back ? Math.sin(Math.PI * k) : 1 - Math.pow(1 - k, 3);
@@ -347,6 +389,30 @@ window.AIQ = window.AIQ || {};
       }
     }
   }
+  /* el iman: atrae el cursor al centro del pulsable que tiene debajo (o a menos de R px) mientras el stick va suave o quieto. La lista de pulsables
+     es la de la cruceta y se relee como mucho 3 veces por segundo (leerla cuesta 5-10 ms): nunca en cada fotograma */
+  let magList = null, magT = 0;
+  function magnet(t, dt, lm) {
+    if (!magList || (!cache && t - magT > 330)) { magList = targets(); magT = t; }
+    const R = PS.magnet === "strong" ? 48 : 24, pull = (PS.magnet === "strong" ? 9 : 4.5) * (1 - (lm || 0) / 0.6);
+    let best = null, bd = R;
+    for (const o of magList) { const r = o.r, dx = Math.max(r.left - M.x, 0, M.x - r.right), dy = Math.max(r.top - M.y, 0, M.y - r.bottom), d = Math.hypot(dx, dy); if (d < bd || (d === 0 && best && o.r.width * o.r.height < best.r.width * best.r.height)) { bd = d; best = o; } }
+    if (!best || !best.el.isConnected) return;
+    const cx = (best.r.left + best.r.right) / 2, cy = (best.r.top + best.r.bottom) / 2, ex = cx - M.x, ey = cy - M.y;
+    if (Math.hypot(ex, ey) < 0.6) return; const k = Math.min(1, pull * dt);
+    M.x += ex * k; M.y += ey * k; moved = true;
+  }
+  let capture = null, swallow = false;
+  /* Ajustes: grabar el siguiente boton (cb(i), o cb(-1) si se cancela con Menu) */
+  M.capture = cb => { capture = cb; };
+  M.cancelCapture = () => { capture = null; };
+  M.binds = binds; M.sticksSwapped = sticksSwapped; M.FREE = FREE; M.BDEF = BDEF; M.GLN = GLN;
+  M.famName = () => (DECK ? "deck" : fam);
+  M.famNow = famNow;
+  /* reasignar: la accion a pasa al boton i; si otra accion lo usaba, se intercambian. Pasa a Personalizado */
+  M.setBind = (a, i) => { const b = binds(); const other = Object.keys(b).find(k => b[k] === i && k !== a); if (other) b[other] = b[a]; b[a] = i; PS.binds = b; if (PS.profile !== "custom") PS.swapSticks = sticksSwapped(); PS.profile = "custom"; savePS(); setGlyph(); glMap(); syncUI(); return other || null; };
+  M.setProfile = p => { PS.profile = p; if (p !== "custom") PS.binds = null; else if (!PS.binds) PS.binds = binds(); savePS(); glSig = ""; setGlyph(); glMap(); syncUI(); };
+  M.cursorChanged = () => { curKind = ""; if (cur && M.on) curSprite(hit && clickable(hit) ? "ptr" : "def"); };
   M.step = step; M.targets = targets; M.goTo = el => goTo(el);                                   // para las pruebas (dev/)
   /* ---------- leyenda de botones en partida (v0.2.36): abajo a la derecha, solo con mando y mientras respondes ---------- */
   let leg = null, legOn = false;
@@ -368,21 +434,23 @@ window.AIQ = window.AIQ || {};
   /* ---------- la pestana Mando de Ajustes ---------- */
   const NAMES = { auto: null, xbox: "Xbox", ps: "PlayStation", nin: "Nintendo", deck: "Steam Deck" }, ORDER = ["auto", "xbox", "ps", "nin", "deck"];
   function syncUI() {
-    const pane = document.querySelector('[data-pane="pad"]'); if (!pane) return;
-    pane.querySelectorAll("[data-prange]").forEach(f => { const k = f.dataset.prange, v = PS[k], i = f.querySelector("input"); i.value = v; i.style.setProperty("--p", ((v - 50) / 100) * 100 + "%"); f.querySelector("output").textContent = v + "%"; });
-    pane.querySelectorAll("[data-psw]").forEach(s => s.setAttribute("aria-checked", !!PS[s.dataset.psw]));
+    const pane = $("ctlPad"); if (!pane) return;
+    pane.querySelectorAll("[data-prange]").forEach(f => { const k = f.dataset.prange, v = PS[k], i = f.querySelector("input"); i.value = v; i.style.setProperty("--p", ((v - i.min) / (i.max - i.min)) * 100 + "%"); f.querySelector("output").textContent = v + "%"; if (k === "rumble") f.classList.toggle("off", !(v > 0)); });
+    pane.querySelectorAll("[data-psw]").forEach(s => { s.setAttribute("aria-pressed", !!PS[s.dataset.psw]); s.classList.toggle("on", !!PS[s.dataset.psw]); });
     pane.querySelectorAll("[data-pseg]").forEach(sg => { const bs = [...sg.querySelectorAll("button")], ix = Math.max(0, bs.findIndex(b => b.dataset.v === PS[sg.dataset.pseg])); bs.forEach((b, i) => b.classList.toggle("on", i === ix)); sg.style.setProperty("--idx", ix); });
+    if (A.ctl && A.ctl.padSync) A.ctl.padSync();
     const st = $("padIcons"); if (st) { const i = ORDER.indexOf(PS.glyphs), auto = PS.glyphs === "auto"; st.querySelector(".stp-v").textContent = auto ? NAMES[DECK ? "deck" : fam] : NAMES[PS.glyphs]; st.querySelector(".stp-tag").textContent = auto ? A.t("scr.auto") : ""; const [lo, hi] = st.querySelectorAll(".stp-b"); lo.disabled = i <= 0; hi.disabled = i >= ORDER.length - 1; }
   }
   function wireUI() {
-    const pane = document.querySelector('[data-pane="pad"]'); if (!pane) return;
-    pane.querySelectorAll("[data-prange]").forEach(f => { const i = f.querySelector("input"); i.addEventListener("input", () => { PS[f.dataset.prange] = +i.value; savePS(); syncUI(); }); i.addEventListener("change", () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); }); });
-    pane.querySelectorAll("[data-psw]").forEach(s => s.addEventListener("click", () => { const k = s.dataset.psw; PS[k] = !PS[k]; savePS(); setGlyph(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); if (k === "rumble" && PS.rumble) A.haptic([24]); }));
+    const pane = $("ctlPad"); if (!pane) return;
+    pane.querySelectorAll("[data-prange]").forEach(f => { const i = f.querySelector("input"); i.addEventListener("input", () => { PS[f.dataset.prange] = +i.value; savePS(); syncUI(); }); i.addEventListener("change", () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); if (f.dataset.prange === "rumble") M.testRumble(); }); });
+    pane.querySelectorAll("[data-psw]").forEach(s => s.addEventListener("click", () => { const k = s.dataset.psw; PS[k] = !PS[k]; savePS(); setGlyph(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); }));
     pane.querySelectorAll("[data-pseg]").forEach(sg => sg.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; PS[sg.dataset.pseg] = b.dataset.v; precOn = false; savePS(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); }));
+    const rt = $("rumbleTest"); if (rt) rt.addEventListener("click", () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); M.testRumble(); });
     const st = $("padIcons"); if (st) st.addEventListener("click", e => { const b = e.target.closest(".stp-b"); if (!b || b.disabled) return; const i = Math.max(0, Math.min(ORDER.length - 1, ORDER.indexOf(PS.glyphs) + +b.dataset.d)); PS.glyphs = ORDER[i]; savePS(); setGlyph(); syncUI(); if (A.sfx && A.sfx.ui) A.sfx.ui(); });
     syncUI();
   }
-  M.resetSettings = () => { Object.assign(PS, DEF); precOn = false; savePS(); setGlyph(); syncUI(); };
+  M.resetSettings = () => { Object.assign(PS, DEF); PS.binds = null; precOn = false; savePS(); glSig = ""; setGlyph(); syncUI(); };
   wireUI(); setGlyph();
 
   const start = () => { if (!raf) { lastT = 0; noPad = 0; raf = requestAnimationFrame(loop); } };

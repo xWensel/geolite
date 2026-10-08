@@ -39,6 +39,7 @@
 <link rel="stylesheet" href="css/casino-rasca.css">
 <link rel="stylesheet" href="css/peek.css">
 <link rel="stylesheet" href="css/mando.css">
+<link rel="stylesheet" href="css/ajustes.css">
 <link rel="stylesheet" href="css/deck.css">
 <script>/* Steam Deck (v0.2.32): la marca antes de pintar nada (css/deck.css sube la letra pequena) */ try { if (window.geoliteHost && window.geoliteHost.device === "deck") document.documentElement.dataset.dev = "deck"; } catch (e) {}</script>
 <style>
@@ -116,133 +117,186 @@
     <div class="set-body">
       <nav class="set-nav" data-seg="settab">
         <button type="button" data-v="general"><i class="set-nav-ic" data-ic="chip_k"></i><span class="set-nav-t"><b data-i="set.tab.general"></b><small data-i="set.nav.general"></small></span></button>
+        <button type="button" data-v="screen"><i class="set-nav-ic" data-ic="chip_b"></i><span class="set-nav-t"><b data-i="set.tab.screen"></b><small data-i="set.nav.screen"></small></span></button>
         <button type="button" data-v="sound"><i class="set-nav-ic" data-ic="chip_r"></i><span class="set-nav-t"><b data-i="set.tab.sound"></b><small data-i="set.nav.sound"></small></span></button>
-        <button type="button" data-v="video"><i class="set-nav-ic" data-ic="chip_b"></i><span class="set-nav-t"><b data-i="set.tab.video"></b><small data-i="set.nav.video"></small></span></button>
-        <button type="button" data-v="pad"><i class="set-nav-ic" data-ic="chip_g"></i><span class="set-nav-t"><b data-i="set.tab.pad"></b><small data-i="set.nav.pad"></small></span></button>
+        <button type="button" data-v="ctl"><i class="set-nav-ic" data-ic="chip_g"></i><span class="set-nav-t"><b data-i="set.tab.ctl"></b><small data-i="set.nav.ctl"></small></span></button>
+        <button type="button" data-v="a11y"><i class="set-nav-ic" data-ic="chip_o"></i><span class="set-nav-t"><b data-i="set.tab.a11y"></b><small data-i="set.nav.a11y"></small></span></button>
         <button type="button" data-v="data"><i class="set-nav-ic" data-ic="chip_p"></i><span class="set-nav-t"><b data-i="set.tab.data"></b><small data-i="set.nav.data"></small></span></button>
         <i></i>
       </nav>
 
       <div class="set-panes">
+        <!-- General: idioma, nombre, distancias y ayudas -->
         <div class="set-pane" data-pane="general"><div class="set-grid">
           <div class="set-card wide"><h3 data-i="set.lang"></h3>
             <div class="langgrid" id="langGrid"></div>
-          </div>
-          <div class="set-card set-scr"><div class="scr-hd"><h3 data-i="set.screen"></h3><div class="stp mini hidden" id="scrMon"><span class="stp-h"><span class="stp-l" data-i="scr.mon"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="Monitor -"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="Monitor +"><i class="np-tri r"></i></button></div></div></div>
-            <div class="seg" data-seg="win"><button data-v="window" data-i="win.window"></button><button data-v="full" data-i="win.full"></button><i></i></div>
-            <div class="stp hidden" id="scrSize"><span class="stp-h"><span class="stp-l" data-i="scr.size"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="Tamaño -"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="Tamaño +"><i class="np-tri r"></i></button></div></div>
-            <p class="set-note" data-i="set.win.d"></p>
-          </div>
-          <div class="set-card">
-            <div class="row-sw"><div class="rs-t"><label data-i="set.intro"></label></div><button class="sw" data-sw="intro" role="switch" aria-checked="true" aria-label="Intro del estudio"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="set.tour"></label><small data-i="set.tour.d"></small></div><button class="sw" data-sw="tour" role="switch" aria-checked="true" aria-label="Tutorial guiado"><i></i></button></div>
-          </div>
-          <div class="set-card"><h3 data-i="set.units"></h3>
-            <div class="seg" data-seg="units"><button data-v="km" data-i="unit.km"></button><button data-v="mi" data-i="unit.mi"></button><i></i></div>
-            <p class="set-note" data-i="set.units.d"></p>
           </div>
           <div class="set-card set-name">
             <div class="sn-head"><h3 id="setNameH"></h3><em class="sn-no" id="setNameNo"></em></div>
             <div class="sn-row"><input id="setName" type="text" maxlength="20" spellcheck="false" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-labelledby="setNameH" aria-describedby="setNameNote"><span class="sn-ok" id="setNameOk" aria-live="polite"></span></div>
             <p class="set-note" id="setNameNote"></p>
           </div>
-        </div></div>
-
-        <div class="set-pane hidden" data-pane="sound"><div class="set-grid">
-          <div class="set-card wide">
-            <div class="fader" data-k="master"><label data-i="vol.master"></label><output>85</output><input type="range" min="0" max="100" value="85" aria-label="Volumen general"><div class="ftrack"></div></div>
-            <div class="fader" data-k="music"><label data-i="vol.music"></label><button class="sw" data-sw="music" role="switch" aria-checked="true" aria-label="Música"><i></i></button><output>70</output><input type="range" min="0" max="100" value="70" aria-label="Volumen de la música"><div class="ftrack"></div></div>
-            <div class="np np-set" id="setSong"><button type="button" class="np-b" data-d="-1" data-tf="songprev"><i class="np-tri l"></i></button><span class="np-t"><i class="np-note">&#9834;</i><b data-np-t></b><em data-np-n></em></span><button type="button" class="np-b" data-d="1" data-tf="songnext"><i class="np-tri r"></i></button></div>
-            <div class="fader" data-k="sfx"><label data-i="vol.sfx"></label><button class="sw" data-sw="sfx" role="switch" aria-checked="true" aria-label="Efectos"><i></i></button><output>90</output><input type="range" min="0" max="100" value="90" aria-label="Volumen de los efectos"><div class="ftrack"></div></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="set.songs"></label><small data-i="set.songs.d"></small></div><button class="sw" data-sw="songs" role="switch" aria-checked="true" aria-label="Aviso de canciones"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="set.shake"></label><small data-i="set.shake.d"></small></div><button class="sw" data-sw="shake" role="switch" aria-checked="true" aria-label="Vibración"><i></i></button></div>
+          <div class="set-card"><h3 data-i="set.units"></h3>
+            <div class="seg" data-seg="units"><button data-v="km" data-i="unit.km"></button><button data-v="mi" data-i="unit.mi"></button><i></i></div>
+            <p class="set-note" data-i="set.units.d"></p>
+          </div>
+          <div class="set-card">
+            <div class="row-sw"><div class="rs-t"><label data-i="set.intro"></label></div><button class="sw" data-sw="intro" role="switch" aria-checked="true" aria-label="Intro"><i></i></button></div>
+            <div class="row-sw"><div class="rs-t"><label data-i="set.tour"></label><small data-i="set.tour.d"></small></div><div class="rs-c"><button type="button" class="mini-btn" id="tourAgain" data-i="set.tour.again"></button><button class="sw" data-sw="tour" role="switch" aria-checked="true" aria-label="Tutorial"><i></i></button></div></div>
+            <div class="row-sw"><div class="rs-t"><label data-i="set.tips"></label><small data-i="set.tips.d"></small></div><button class="sw" data-sw="tips" role="switch" aria-checked="true" aria-label="Tips"><i></i></button></div>
           </div>
         </div></div>
 
-        <div class="set-pane hidden" data-pane="video"><div class="set-grid set-2col">
+        <!-- Pantalla: ventana, interfaz y graficos -->
+        <div class="set-pane hidden" data-pane="screen"><div class="set-grid set-2col">
         <div class="set-col">
-          <div class="set-card"><h3 data-i="set.gfx"></h3>
-            <div class="seg s3" data-seg="gfx"><button data-v="auto" data-i="gfx.auto"></button><button data-v="high" data-i="gfx.high"></button><button data-v="saver" data-i="gfx.saver"></button><i></i></div>
-            <p class="set-note" data-i="set.gfx.d"></p>
-            <div class="row-sw" id="rowFlash"><div class="rs-t"><label data-i="set.flash"></label></div><button class="sw" data-sw="flash" role="switch" aria-checked="false" aria-label="Destellos suaves"><i></i></button></div>
+          <div class="set-card set-scr"><div class="scr-hd"><h3 data-i="set.screen"></h3><div class="stp mini hidden" id="scrMon"><span class="stp-h"><span class="stp-l" data-i="scr.mon"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="Monitor -"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="Monitor +"><i class="np-tri r"></i></button></div></div></div>
+            <div class="seg" data-seg="win"><button data-v="window" data-i="win.window"></button><button data-v="full" data-i="win.full"></button><i></i></div>
+            <div class="stp hidden" id="scrSize"><span class="stp-h"><span class="stp-l" data-i="scr.size"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="-"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="+"><i class="np-tri r"></i></button></div></div>
+            <p class="set-note" data-i="set.win.d"></p>
           </div>
-          <div class="set-card"><h3 data-i="set.sens"></h3>
-            <div class="fader" data-range="pan"><label data-i="sens.pan"></label><output>100%</output><input type="range" min="50" max="200" step="10" value="100" aria-label="Sensibilidad de arrastre"><div class="ftrack"></div></div>
-            <div class="fader" data-range="zoom"><label data-i="sens.zoom"></label><output>100%</output><input type="range" min="50" max="200" step="10" value="100" aria-label="Sensibilidad de zoom"><div class="ftrack"></div></div>
-            <p class="set-note"><span class="k-kb" data-i="set.sens.d"></span><span class="k-pad" data-i="set.sens.d.pad"></span></p>
-          </div>
-          <div class="set-card"><h3 data-i="set.qsize"></h3>
-            <div class="seg s3" data-seg="qsize"><button data-v="n" data-i="qsize.n"></button><button data-v="l" data-i="qsize.l"></button><button data-v="xl" data-i="qsize.xl"></button><i></i></div>
-            <div class="stp hidden" id="scrScale"><span class="stp-h"><span class="stp-l" data-i="scr.scale"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="Escala -"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="Escala +"><i class="np-tri r"></i></button></div></div>
+          <div class="set-card hidden" id="uiCard"><h3 data-i="scr.scale"></h3>
+            <div class="seg s3" data-seg="uisz"><button data-v="100" data-i="ui.big"></button><button data-v="85" data-i="ui.mid"></button><button data-v="70" data-i="ui.small"></button><i></i></div>
+            <p class="set-note" data-i="ui.d"></p>
           </div>
         </div>
         <div class="set-col">
-          <div class="set-card">
-            <div class="row-sw"><div class="rs-t"><label data-i="set.motion"></label><small data-i="set.motion.d"></small></div><button class="sw" data-sw="motion" role="switch" aria-checked="false" aria-label="Reducir movimiento"><i></i></button></div>
-            <div class="row-sw" id="rowCursor"><div class="rs-t"><label data-i="set.cursor"></label><small data-i="set.cursor.d"></small></div><button class="sw" data-sw="cursor" role="switch" aria-checked="true" aria-label="Puntero de casino"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="set.tips"></label><small data-i="set.tips.d"></small></div><button class="sw" data-sw="tips" role="switch" aria-checked="true" aria-label="Ayudas emergentes"><i></i></button></div>
+          <div class="set-card"><h3 data-i="set.gfx"></h3>
+            <div class="seg s3" data-seg="gfx"><button data-v="auto" data-i="gfx.auto"></button><button data-v="high" data-i="gfx.high"></button><button data-v="saver" data-i="gfx.saver"></button><i></i></div>
+            <p class="set-note" id="gfxNote"></p>
           </div>
-          <div class="set-card"><h3 data-i="set.a11y"></h3>
-            <div class="row-sw"><div class="rs-t"><label data-i="set.contrast"></label><small data-i="set.contrast.d"></small></div><button class="sw" data-sw="contrast" role="switch" aria-checked="false" aria-label="Alto contraste"><i></i></button></div>
+        </div>
+        </div></div>
+
+        <!-- Sonido -->
+        <div class="set-pane hidden" data-pane="sound"><div class="set-grid set-2col">
+        <div class="set-col"><div class="set-card">
+          <div class="fader" data-k="master"><label data-i="vol.master"></label><output>85</output><input type="range" min="0" max="100" value="85" aria-label="Volumen general"><div class="ftrack"></div></div>
+          <div class="fader" data-k="music"><label data-i="vol.music"></label><button class="sw" data-sw="music" role="switch" aria-checked="true" aria-label="Música"><i></i></button><output>70</output><input type="range" min="0" max="100" value="70" aria-label="Volumen de la música"><div class="ftrack"></div></div>
+          <div class="np np-set" id="setSong"><button type="button" class="np-b" data-d="-1" data-tf="songprev"><i class="np-tri l"></i></button><span class="np-t"><i class="np-note">&#9834;</i><b data-np-t></b><em data-np-n></em></span><button type="button" class="np-b" data-d="1" data-tf="songnext"><i class="np-tri r"></i></button></div>
+          <div class="fader" data-k="sfx"><label data-i="vol.sfx"></label><button class="sw" data-sw="sfx" role="switch" aria-checked="true" aria-label="Efectos"><i></i></button><output>90</output><input type="range" min="0" max="100" value="90" aria-label="Volumen de los efectos"><div class="ftrack"></div></div>
+        </div></div>
+        <div class="set-col"><div class="set-card">
+          <div class="row-sw"><div class="rs-t"><label data-i="set.songs"></label><small data-i="set.songs.d"></small></div><button class="sw" data-sw="songs" role="switch" aria-checked="true" aria-label="Canciones"><i></i></button></div>
+          <div class="row-sw"><div class="rs-t"><label data-i="set.bg"></label><small data-i="set.bg.d"></small></div><button class="sw" data-sw="bg" role="switch" aria-checked="true" aria-label="Segundo plano"><i></i></button></div>
+        </div></div>
+        </div></div>
+
+        <!-- Controles: teclado y raton | mando (js/controles.js pinta las listas y el dibujo del mando) -->
+        <div class="set-pane hidden" data-pane="ctl"><div class="ctl">
+          <div class="ctl-top">
+            <div class="seg s3" data-seg="ctldev"><button data-v="kb" data-i="ctl.kbOnly"></button><button data-v="mouse" data-i="ctl.mouse"></button><button data-v="pad" data-i="ctl.pad"></button><i></i></div>
+            <span class="ctl-use" id="ctlUse"></span><span class="ctl-sp"></span>
+            <button type="button" class="mini-btn" id="ctlReset"></button>
+          </div>
+          <div class="ctl-sub" id="ctlKb">
+            <div class="set-card ctl-keys"><h3><span data-i="ctl.keys"></span><em data-i="ctl.keys.d"></em></h3><div class="kb-list" id="kbList"></div><p class="set-note" data-i="ctl.esc"></p></div>
+          </div>
+          <div class="ctl-sub hidden" id="ctlMouse">
+            <div class="set-card mouse-card"><h3><span data-i="mo.diag"></span><em data-i="mo.diag.d"></em></h3><div class="mouse-diag" id="mouseDiag"><canvas width="64" height="96"></canvas></div>
+              <div class="mouse-leg"><span class="ml-pk"><i></i><b data-i="mb.pickL"></b></span><span class="ml-dg"><i></i><b data-i="mb.dragL"></b></span></div></div>
+            <div class="set-card ctl-mouse"><h3 data-i="ctl.mouse"></h3>
+              <div class="fader" data-range="pan"><label data-i="sens.pan"></label><output>100%</output><input type="range" min="50" max="200" step="10" value="100" aria-label="Arrastre"><div class="ftrack"></div></div>
+              <div class="fader" data-range="zoom"><label data-i="sens.zoom"></label><output>100%</output><input type="range" min="50" max="200" step="10" value="100" aria-label="Zoom"><div class="ftrack"></div></div>
+              <div class="row-sw"><div class="rs-t"><label data-i="mb.pickL"></label></div><button type="button" class="kslot" data-mb="pick"></button></div>
+              <div class="row-sw"><div class="rs-t"><label data-i="mb.dragL"></label></div><button type="button" class="kslot" data-mb="drag"></button></div>
+              <div class="row-sw"><div class="rs-t"><label data-i="mb.left"></label></div><button class="sw" data-msw="left" role="switch" aria-checked="false" aria-label="Zurdos"><i></i></button></div>
+              <div class="row-sw"><div class="rs-t"><label data-i="mb.inv"></label></div><button class="sw" data-msw="invWheel" role="switch" aria-checked="false" aria-label="Rueda"><i></i></button></div>
+              <div class="row-sw"><div class="rs-t"><label data-i="mb.zoomTo"></label></div><div class="seg" data-mseg="zoomMid"><button data-v="0" data-i="mb.zoomPtr"></button><button data-v="1" data-i="mb.zoomMid"></button><i></i></div></div>
+              <div class="row-sw" id="rowCursor"><div class="rs-t"><label data-i="set.cursor"></label></div><div class="rs-c"><div class="seg" data-seg="cursz"><button data-v="n" data-i="cur.n"></button><button data-v="l" data-i="cur.l"></button><i></i></div><button class="sw" data-sw="cursor" role="switch" aria-checked="true" aria-label="Puntero"><i></i></button></div></div>
+            </div>
+          </div>
+          <div class="ctl-sub hidden" id="ctlPad">
+            <div class="ctl-padl">
+              <div class="set-card pad-card"><h3><span data-i="pad.diag"></span><em data-i="pad.diag.d"></em></h3><div class="pad-diag" id="padDiag"></div></div>
+              <div class="seg s3" data-seg="padsub"><button data-v="btns" data-i="pad.btns"></button><button data-v="sticks" data-i="pad.sticks"></button><button data-v="feel" data-i="pad.feel"></button><i></i></div>
+            </div>
+            <div class="ctl-padr">
+              <div class="set-card" id="padBtns"><h3><span data-i="pad.btns"></span><div class="stp mini" id="padProfile"><span class="stp-h"><span class="stp-l" data-i="pad.profile"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="-"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="+"><i class="np-tri r"></i></button></div></div></h3>
+                <div class="pad-list" id="padList"></div><p class="set-note" data-i="pad.btns.d"></p></div>
+              <div class="set-card hidden" id="padSticks"><h3 data-i="pad.sticks"></h3>
+                <div class="pad-dz"><div class="viz"><canvas id="vizL" width="64" height="64"></canvas><small data-i="pad.vizL"></small></div><div class="viz"><canvas id="vizR" width="64" height="64"></canvas><small data-i="pad.vizR"></small></div>
+                  <div class="pad-dzf">
+                    <div class="fader pfader" data-prange="dzL"><label data-i="pad.dzL"></label><output>15%</output><input type="range" min="0" max="40" step="1" value="15" aria-label="Zona muerta del puntero"><div class="ftrack"></div></div>
+                    <div class="fader pfader" data-prange="dzR"><label data-i="pad.dzR"></label><output>15%</output><input type="range" min="0" max="40" step="1" value="15" aria-label="Zona muerta del mapa"><div class="ftrack"></div></div>
+                  </div></div>
+                <p class="set-note pad-vizn" id="vizNote" data-i="pad.viz.d"></p>
+                <div class="row-sw"><div class="rs-t"><label data-i="pad.curve"></label><small data-i="pad.curve.d"></small></div><div class="rs-c"><canvas class="curve" id="curveCv" width="48" height="30"></canvas><div class="seg s3" data-pseg="curve"><button data-v="lin" data-i="pad.curve.lin"></button><button data-v="soft" data-i="pad.curve.soft"></button><button data-v="fine" data-i="pad.curve.fine"></button><i></i></div></div></div>
+                <div class="row-sw"><div class="rs-t"><label data-i="pad.inv"></label></div><div class="inv-chips"><span data-i="pad.vizL"></span><button type="button" class="chip-t" data-psw="invLX">X</button><button type="button" class="chip-t" data-psw="invLY">Y</button><span data-i="pad.vizR"></span><button type="button" class="chip-t" data-psw="invRX">X</button><button type="button" class="chip-t" data-psw="invRY">Y</button></div></div>
+              </div>
+              <div class="set-card hidden" id="padFeel"><h3 data-i="pad.feel"></h3>
+                <div class="fader pfader" data-prange="ptr"><label data-i="pad.sens.ptr"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Puntero"><div class="ftrack"></div></div>
+                <div class="fader pfader" data-prange="map"><label data-i="pad.sens.map"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Mapa"><div class="ftrack"></div></div>
+                <div class="fader pfader" data-prange="zoom"><label data-i="pad.sens.zoom"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Zoom"><div class="ftrack"></div></div>
+                <div class="fader pfader" data-prange="rumble"><label data-i="pad.rumble"></label><button type="button" class="mini-btn" id="rumbleTest" data-i="pad.rumble.test"></button><output>100%</output><input type="range" min="0" max="100" step="10" value="100" aria-label="Vibración"><div class="ftrack"></div></div>
+                <div class="row-sw"><div class="rs-t"><label data-i="pad.prec"></label></div><div class="seg" data-pseg="prec"><button data-v="hold" data-i="pad.prec.hold"></button><button data-v="toggle" data-i="pad.prec.toggle"></button><i></i></div></div>
+                <div class="row-sw"><div class="rs-t"><label data-i="pad.magnet"></label><small data-i="pad.magnet.d"></small></div><div class="seg s3" data-pseg="magnet"><button data-v="off" data-i="pad.magnet.off"></button><button data-v="soft" data-i="pad.magnet.soft"></button><button data-v="strong" data-i="pad.magnet.strong"></button><i></i></div></div>
+                <div class="stp" id="padIcons"><span class="stp-h"><span class="stp-l" data-i="pad.icons"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="-"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="+"><i class="np-tri r"></i></button></div></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+
+        <!-- Accesibilidad: texto, movimiento y color -->
+        <div class="set-pane hidden" data-pane="a11y"><div class="set-grid set-2col">
+        <div class="set-col">
+          <div class="set-card"><h3><span data-i="set.text"></span><em data-i="set.text.w"></em></h3>
+            <div class="seg s3" data-seg="qsize"><button data-v="n" data-i="qsize.n"></button><button data-v="l" data-i="qsize.l"></button><button data-v="xl" data-i="qsize.xl"></button><i></i></div>
+            <div class="ts-prev" aria-hidden="true"><div class="ts-plate"><small data-i="ts.kicker"></small><b data-i="ts.place"></b><i data-i="ts.ask"></i></div>
+              <div class="ts-bub"><i data-ic="dealer_neutral"></i><p data-i="ts.line"></p></div></div>
+            <p class="set-note" data-i="set.text.d"></p>
+          </div>
+        </div>
+        <div class="set-col">
+          <div class="set-card"><h3 data-i="set.motion2"></h3>
+            <div class="seg s3" data-seg="motion"><button data-v="full" data-i="mo.full"></button><button data-v="soft" data-i="mo.soft"></button><button data-v="min" data-i="mo.min"></button><i></i></div>
+            <p class="set-note" id="motionNote"></p>
+            <div class="row-sw"><div class="rs-t"><label data-i="set.shake2"></label><small data-i="set.shake2.d"></small></div><button class="sw" data-sw="shake" role="switch" aria-checked="true" aria-label="Temblor"><i></i></button></div>
+          </div>
+          <div class="set-card"><h3 data-i="set.color"></h3>
+            <div class="row-sw"><div class="rs-t"><label data-i="set.contrast"></label><small data-i="set.contrast.d"></small></div><button class="sw" data-sw="contrast" role="switch" aria-checked="false" aria-label="Contraste"><i></i></button></div>
             <div class="row-sw col"><div class="rs-t"><label data-i="set.cb"></label></div>
               <div class="seg s4" data-seg="cb"><button data-v="off" data-i="cb.off"></button><button data-v="protan" data-i="cb.protan"></button><button data-v="deutan" data-i="cb.deutan"></button><button data-v="tritan" data-i="cb.tritan"></button><i></i></div>
-              <p class="set-note" data-i="set.cb.d"></p>
+              <div class="cb-sw" aria-hidden="true"><span class="r" data-i="cbs.miss"></span><span class="g" data-i="cbs.hit"></span><span class="o" data-i="cbs.prize"></span><span class="t" data-i="cbs.sea"></span></div>
             </div>
           </div>
         </div>
         </div></div>
 
-        <div class="set-pane hidden" data-pane="pad"><div class="set-grid set-2col">
-        <div class="set-col">
-          <div class="set-card"><h3 data-i="pad.sens"></h3>
-            <div class="fader pfader" data-prange="ptr"><label data-i="pad.sens.ptr"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Puntero"><div class="ftrack"></div></div>
-            <div class="fader pfader" data-prange="map"><label data-i="pad.sens.map"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Mapa"><div class="ftrack"></div></div>
-            <div class="fader pfader" data-prange="zoom"><label data-i="pad.sens.zoom"></label><output>100%</output><input type="range" min="50" max="150" step="10" value="100" aria-label="Zoom"><div class="ftrack"></div></div>
-          </div>
-          <div class="set-card"><h3 data-i="pad.btns"></h3>
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.swapab"></label><small data-i="pad.swapab.d"></small></div><button class="sw" data-psw="swapAB" role="switch" aria-checked="false" aria-label="swapAB"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.swapst"></label></div><button class="sw" data-psw="swapSticks" role="switch" aria-checked="false" aria-label="swapSticks"><i></i></button></div>
-            <div class="row-sw col"><div class="rs-t"><label data-i="pad.prec"></label></div><div class="seg" data-pseg="prec"><button data-v="hold" data-i="pad.prec.hold"></button><button data-v="toggle" data-i="pad.prec.toggle"></button><i></i></div></div>
-          </div>
-        </div>
-        <div class="set-col">
-          <div class="set-card"><h3 data-i="pad.inv"></h3>
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.lx"></label></div><button class="sw" data-psw="invLX" role="switch" aria-checked="false" aria-label="invLX"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.ly"></label></div><button class="sw" data-psw="invLY" role="switch" aria-checked="false" aria-label="invLY"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.rx"></label></div><button class="sw" data-psw="invRX" role="switch" aria-checked="false" aria-label="invRX"><i></i></button></div>
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.inv.ry"></label></div><button class="sw" data-psw="invRY" role="switch" aria-checked="false" aria-label="invRY"><i></i></button></div>
-          </div>
-          <div class="set-card">
-            <div class="row-sw"><div class="rs-t"><label data-i="pad.rumble"></label></div><button class="sw" data-psw="rumble" role="switch" aria-checked="false" aria-label="rumble"><i></i></button></div>
-            <div class="stp" id="padIcons"><span class="stp-h"><span class="stp-l" data-i="pad.icons"></span><em class="stp-tag"></em></span><div class="stp-c"><button type="button" class="stp-b" data-d="-1" aria-label="Iconos -"><i class="np-tri l"></i></button><b class="stp-v"></b><button type="button" class="stp-b" data-d="1" aria-label="Iconos +"><i class="np-tri r"></i></button></div></div>
-          </div>
-        </div>
-        </div></div>
-
+        <!-- Datos -->
         <div class="set-pane hidden" data-pane="data"><div class="set-grid">
           <div class="set-card wide dl-file" id="dlFile"></div>
+          <div class="set-card" id="cloudCard"><h3 data-i="set.saves"></h3><div class="cloud"><i data-ic="atlasbook" class="cloud-ic"></i><div><b id="cloudT"></b><small id="cloudD"></small></div></div></div>
           <div class="set-card">
-            <button class="row-btn danger" id="resetCodex" type="button"></button>
-            <p class="set-note" id="resetCodexNote"></p>
+            <button class="row-btn" id="openCredits" type="button"><span data-i="set.credits"></span></button>
+            <p class="set-note" data-i="set.credits.d"></p>
           </div>
           <div class="set-card">
             <button class="row-btn danger" id="resetSet" type="button"></button>
             <p class="set-note" id="resetSetNote"></p>
           </div>
           <div class="set-card">
-            <button class="row-btn danger" id="resetAll" type="button"></button>
-            <p class="set-note" id="resetAllNote"></p>
+            <button class="row-btn danger" id="resetCodex" type="button"></button>
+            <p class="set-note" id="resetCodexNote"></p>
           </div>
           <div class="set-card">
-            <button class="row-btn" id="openCredits" type="button"><span data-i="set.credits"></span></button>
-            <p class="set-note" data-i="set.credits.d"></p>
+            <button class="row-btn danger" id="resetAll" type="button"></button>
+            <p class="set-note" id="resetAllNote"></p>
           </div>
         </div></div>
       </div>
     </div>
 
+    <!-- reasignar una tecla, un boton del raton o del mando (js/controles.js) -->
+    <div class="rb-ov hidden" id="rbOv" role="dialog" aria-modal="true" aria-labelledby="rbSay"><div class="rb-box">
+      <i class="rb-face" data-ic="dealer_neutral"></i>
+      <div class="rb-main"><p class="rb-say" id="rbSay"></p><div class="rb-what" id="rbWhat"></div><div class="rb-timer"><i id="rbBar"></i></div>
+        <div class="rb-zone hidden" id="rbZone"></div><div class="rb-gls hidden" id="rbGls"></div>
+        <div class="rb-acts"><span class="rb-hint" id="rbHint"></span><span class="ctl-sp"></span><button type="button" class="rb-btn rb-yes hidden" id="rbYes"></button><button type="button" class="rb-btn" id="rbNo"></button></div></div>
+    </div></div>
+
     <div class="set-keys k-pad"><span><i class="gl" data-gl="dpad"></i> <em data-i="key.p.nav"></em></span><span><i class="gl" data-gl="a"></i> <em data-i="key.p.ok"></em></span><span><i class="gl" data-gl="b"></i> <em data-i="key.p.back"></em></span><span><i class="gl" data-gl="menu"></i> <em data-i="set.close"></em></span></div>
-    <div class="set-keys k-kb"><span><kbd>F</kbd> <em data-i="key.fs"></em></span><span><kbd>P</kbd> <em data-i="key.pause"></em></span><span><kbd>M</kbd> <em data-i="key.sfx"></em></span><span><kbd>N</kbd> <em data-i="key.mus"></em></span><span><kbd>&larr;</kbd><kbd>&rarr;</kbd> <em data-i="key.song"></em></span></div>
+    <div class="set-keys k-kb"><span><kbd data-kk="fs">F</kbd> <em data-i="key.fs"></em></span><span><kbd data-kk="pause">P</kbd> <em data-i="key.pause"></em></span><span><kbd data-kk="sfx">M</kbd> <em data-i="key.sfx"></em></span><span><kbd data-kk="mus">N</kbd> <em data-i="key.mus"></em></span><span><kbd data-kk="songPrev">&larr;</kbd><kbd data-kk="songNext">&rarr;</kbd> <em data-i="key.song"></em></span></div>
   </section></div>
 
 
@@ -313,10 +367,12 @@
 <script src="js/i18n.js"></script>
 <script src="js/logo.js"></script>
 <script src="js/support.js"></script>
+<script src="js/teclas.js"></script>
 <script src="js/i18n2.js"></script>
 <script src="js/i18n3.js"></script>
 <script src="js/i18n4.js"></script>
 <script src="js/i18n5.js"></script>
+<script src="js/i18n6.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/vendor/earcut.min.js"></script>
 <script src="js/map2d.js"></script>
@@ -365,6 +421,7 @@
 <script src="js/glifos-data.js"></script>
 <script src="js/mando-textos.js"></script>
 <script src="js/mando.js"></script>
+<script src="js/controles.js"></script>
 <script src="js/teclado.js"></script>
 <script src="js/creditos.js"></script>
 <script src="js/perf.js"></script>

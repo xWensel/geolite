@@ -10,7 +10,7 @@
     quality: "auto", settingsOpen: false, lastTimeStr: "", intro: true, reduce: false, booting: true, skin: "casino",
     hub: "home", ranked: null, run: null, tool: null, hits: 0,
     cursor: true, tips: true, songToast: true, setTab: "general",
-    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100,
+    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n",
   };
   const prog = id => (S.prog[id] = S.prog[id] || { unlocked: 1, best: 0, bestIq: 0 });
   function load() {
@@ -18,19 +18,22 @@
       const raw = localStorage.getItem(KEY); let d; try { d = JSON.parse(raw || "{}"); } catch (e) { try { localStorage.setItem(KEY + ".bad", raw); } catch (e2) { /* sin sitio */ } d = {}; }   // JSON roto: copia de seguridad antes de que el siguiente guardado lo pise
       if (!d || typeof d !== "object") d = {};
       A.lang = d.lang && A.STR[d.lang] ? d.lang : A.detectLang();
-      S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = ["general", "sound", "video", "pad", "data"].includes(d.setTab) ? d.setTab : "general"; S.skin = "casino";
+      S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = ({ video: "screen", pad: "ctl" })[d.setTab] || (["general", "screen", "sound", "ctl", "a11y", "data"].includes(d.setTab) ? d.setTab : "general");   // v0.3.2: Imagen pasa a Pantalla y Mando a Controles S.skin = "casino";
       A.audio.sfxOn = d.sfx !== false; A.audio.musicOn = d.music !== false;
       if (d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
       S.prog = d.prog && typeof d.prog === "object" && !Array.isArray(d.prog) ? d.prog : {}; S.mode = d.mode || "classic"; S.campId = d.campId || null; S.quality = d.quality || "auto";
       S.panSens = d.panSens || 100; S.zoomSens = d.zoomSens || 100; S.units = d.units === "mi" ? "mi" : "km";
       S.contrast = !!d.contrast; S.colorblind = ["protan", "deutan", "tritan"].includes(d.colorblind) ? d.colorblind : "off"; S.qSize = ["l", "xl"].includes(d.qSize) ? d.qSize : "n";
-      S.shake = d.shake !== false; A.haptic.on = S.shake;
-      S.softFlash = !!d.softFlash; S.flashSeen = !!d.flashSeen;
-      S.uiScale = Number.isInteger(d.uiScale) && d.uiScale >= 50 && d.uiScale <= 300 ? d.uiScale : 100;
+      S.shake = d.shake !== false; S.bgAudio = d.bgAudio !== false; S.curSize = d.curSize === "l" ? "l" : "n";   // v0.3.2: el temblor de pantalla ya no apaga la vibracion del mando (tiene la suya en Controles)
+      S.flashSeen = !!d.flashSeen;
+      /* v0.3.2: Movimiento en tres niveles (antes "Reducir movimiento" + "Destellos suaves", que se bloqueaba con el primero) */
+      S.motion = ["full", "soft", "min"].includes(d.motion) ? d.motion : d.reduce ? "min" : d.softFlash ? "soft" : "full";
+      S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
+      S.uiScale = d.uiScale === 70 || (d.uiScale < 78) ? 70 : d.uiScale === 85 || (d.uiScale < 93) ? 85 : 100;   // v0.3.2: Grande (100) / Media (85) / Compacta (70); antes cualquier % entre 50 y 300
     } catch (e) { A.lang = A.detectLang(); }
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen })); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize })); } catch (e) { /* sin almacenamiento */ }
   }
 
   const lv = () => S.camp.levels[S.level];
@@ -55,11 +58,10 @@
     map.holdCheck = () => { for (const [k, f] of covers) if (!f()) covers.delete(k); if (!covers.size) sync(); return covers.size > 0; };   // red de seguridad: si la pantalla se fue por otro camino, el mapa vuelve solo
   }
   A.codex.init(world, map); A.pointer.init(map);
-  map.quality = S.quality; map.resize(true); map.fxOn = !S.reduce; A.applySkin(S.skin, map);
-  document.documentElement.classList.toggle("reduce-motion", S.reduce);
-  applySens(); applyVisualFX(); applyQSize(); applyShake(); applyFlash();
+  map.quality = S.quality; map.resize(true); A.applySkin(S.skin, map);
+  applyMotion(); applySens(); applyVisualFX(); applyQSize(); applyShake();
   map.animateTo(map.home(), 0);
-  A.cursor.set(S.cursor); A.tt.enable(S.tips);
+  A.cursor.set(S.cursor); if (A.cursor.setSize) A.cursor.setSize(S.curSize === "l"); A.tt.enable(S.tips);
 
   /* ------------------------------------------------------------ odometro mecanico */
   const DIGITS = [..."0123456789"].map(d => `<i>${d}</i>`).join("");
@@ -115,7 +117,7 @@
   function closeDialog() { A.marcador.close(); $("layer").classList.add("hidden"); $("dlg").classList.remove("in"); document.body.classList.remove("vd-on", "tk-on"); if (A.dealer && A.dealer.refit) A.dealer.refit(); }   // el ticket del marcador se arranca y cae
   /* control segmentado con indicador deslizante */
   function segSet(seg, value) {
-    const btns = [...seg.querySelectorAll("button")], idx = Math.max(0, btns.findIndex(b => b.dataset.v === value));
+    const btns = [...seg.querySelectorAll("button")].filter(b => !b.classList.contains("hidden")), idx = Math.max(0, btns.findIndex(b => b.dataset.v === value));   // los ocultos (Interfaz sin Media) no cuentan
     btns.forEach((b, i) => b.classList.toggle("on", i === idx)); seg.style.setProperty("--idx", idx);
   }
   const chrome = on => { for (const id of ["ledgerSh", "noteSh", "dockSh", "railSh"]) $(id).classList.toggle("hidden", !on); };
@@ -203,11 +205,11 @@
     segSet(document.querySelector('[data-seg="gfx"]'), S.quality);
     segSet(document.querySelector('[data-seg="units"]'), S.units);
     segSet(document.querySelector('[data-seg="cb"]'), S.colorblind);
-    segSet(document.querySelector('[data-seg="qsize"]'), S.qSize);
+    segSet(document.querySelector('[data-seg="qsize"]'), S.qSize); segSet(document.querySelector('[data-seg="motion"]'), S.motion); segSet(document.querySelector('[data-seg="cursz"]'), S.curSize);
+    $("gfxNote").textContent = A.t("gfx.d." + S.quality); $("motionNote").textContent = A.t("mo.d." + S.motion);
     refreshLangUIs(); if (A.syncWin) A.syncWin();
-    const st = { motion: S.reduce, intro: S.intro, cursor: S.cursor, tips: S.tips, tour: S.tour, songs: S.songToast, contrast: S.contrast, shake: S.shake, flash: S.softFlash || flashForced() };
+        const st = { intro: S.intro, cursor: S.cursor, tips: S.tips, tour: S.tour, songs: S.songToast, contrast: S.contrast, shake: S.shake, bg: S.bgAudio };
     for (const k in st) { const el = document.querySelector('.sw[data-sw="' + k + '"]'); if (el) el.setAttribute("aria-checked", !!st[k]); }
-    { const rf = $("rowFlash"), lock = flashForced(); if (rf) { rf.classList.toggle("lock", lock); rf.querySelector(".sw").setAttribute("aria-disabled", lock); } }   // con "reducir movimiento" ya van suaves: encendido y quieto
     const sg = document.querySelector('.sw[data-sw="songs"]'); if (sg) sg.closest(".row-sw").classList.toggle("off", !A.audio.musicOn);
     $("rowCursor").classList.toggle("hidden", !A.cursor.available);
     setTab(S.setTab, true); if (A.jukebox) A.jukebox.sync();
@@ -217,6 +219,16 @@
     const rc = $("resetCodex"); if (rc && !rc.classList.contains("armed")) rc.textContent = A.T("Restablecer Enciclopedia", "Reset Encyclopedia");
     $("resetCodexNote").textContent = A.T("Borra todas las tarjetas desbloqueadas. Tu perfil, logros y récords no cambian.", "Deletes every unlocked card. Your profile, achievements and records stay.");
     if (A.nombre) A.nombre.sync();                                          // v0.37: "Tu nombre" (js/nombre.js)
+    if (A.ctl) A.ctl.sync(); cloudSync();                                    // v0.3.2: Controles (js/controles.js) y la nube de Steam
+  }
+  /* Datos > Tus partidas: con Steam, si la nube esta activa para Geolite en tu cuenta; sin Steam, que se guardan en este equipo */
+  let cloudAt = 0;
+  function cloudSync() {
+    const t = $("cloudT"), d = $("cloudD"), h = window.geoliteHost; if (!t) return;
+    const put = st => { t.textContent = A.t("cloud." + st); d.textContent = A.t("cloud." + st + ".d"); $("cloudCard").dataset.st = st; };
+    if (!h || !h.steamCloud) { put("local"); return; }
+    if (performance.now() - cloudAt < 4000 && $("cloudCard").dataset.st) return; cloudAt = performance.now();
+    h.steamCloud().then(c => put(!c ? "local" : c.account && c.app ? "on" : "off")).catch(() => put("local"));
   }
   /* creditos y licencias (credits.html, tools/build-credits.mjs): pagina aparte, en el navegador del sistema en Electron (main.js abre los http externos alli) */
   $("openCredits").onclick = () => { A.sfx.ui(); A.creditos.open(); };   // v0.2.33: dentro del juego (js/creditos.js); antes, el navegador del sistema
@@ -262,6 +274,7 @@
     }
     if (on) { if (A.jukebox) A.jukebox.hide(); syncSettings(); A.sfx.ui(); const v = $("setVer"); if (v) v.textContent = A.VERSION; if (S.setTab === "data" && A.dealer && A.dealer.renderFile) A.dealer.renderFile($("dlFile")); fitSetSoon(); }
     if (on !== was) A.coverMap("settings", on, () => S.settingsOpen);
+    if (A.ctl) A.ctl.shown(on && S.setTab === "ctl");
     /* foco (teclado y lectores de pantalla): al abrir va al panel y al cerrar vuelve a donde estaba (boton de ajustes, "Continuar" de la pausa...) */
     /* el foco del panel, justo despues de pintarlo: dado en el mismo instante obligaba a recalcular la pagina entera a medio abrir (tiron al abrir Ajustes) */
     if (on && !was) { setFocusBack = document.activeElement; const p = $("settings"); if (p) { p.tabIndex = -1; requestAnimationFrame(() => setTimeout(() => { if (S.settingsOpen) p.focus({ preventScroll: true }); }, 0)); } }
@@ -319,13 +332,17 @@
     pop.style.left = Math.max(12, Math.min(innerWidth - w - 12, r.right - w)) + "px"; pop.style.top = r.bottom + 10 + "px";
   }
   document.addEventListener("pointerdown", e => { if (!e.target.closest("#langPop, #menuLang")) $("langPop").classList.add("hidden"); }, true);
-  function applyMotion() { document.documentElement.classList.toggle("reduce-motion", S.reduce); map.fxOn = !S.reduce; }
+  /* Movimiento (v0.3.2): Completo / Suave (destellos suaves y sin desenfoque de zoom) / Minimo (ademas sin animaciones largas). S.reduce y S.softFlash
+     se siguen leyendo en muchos sitios: salen de aqui */
+  function applyMotion() {
+    S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
+    document.documentElement.classList.toggle("reduce-motion", S.reduce); document.documentElement.classList.toggle("soft-flash", S.softFlash); map.fxOn = S.motion === "full";
+  }
   function applySens() { A.mapSens.pan = S.panSens / 100; A.mapSens.zoom = S.zoomSens / 100; }
   /* Vibracion = no: html.no-shake quita en CSS todos los temblores de pantalla (rachas, rabieta y golpes del crupier; ver uikit.css),
      jpShake no arranca y el movil no vibra. Los retos que tiemblan (Terremoto, letras...) son el propio reto y siguen */
-  function applyShake() { document.documentElement.classList.toggle("no-shake", !S.shake); A.haptic.on = S.shake; }
+  function applyShake() { document.documentElement.classList.toggle("no-shake", !S.shake); }   // v0.3.2: solo el temblor de pantalla; la vibracion del mando va aparte (Controles > Mando > Sensacion)
   /* Destellos suaves (v0.52): html.soft-flash; js/chfx.js (A.softFlash) suma "reducir movimiento" del juego o del sistema, que tambien los suaviza */
-  function applyFlash() { document.documentElement.classList.toggle("soft-flash", !!S.softFlash); }
   function flashForced() { return !!S.reduce || matchMedia("(prefers-reduced-motion: reduce)").matches; }
   /* daltonismo (filtro SVG, ver index.html #cbDefs) + alto contraste: se combinan en un solo filter CSS */
   function applyVisualFX() {
@@ -334,14 +351,17 @@
     document.body.style.filter = [cb, hc].filter(Boolean).join(" ");
     document.documentElement.classList.toggle("hi-contrast", S.contrast);
   }
-  function applyQSize() { document.documentElement.style.setProperty("--ask-scale", S.qSize === "xl" ? 1.3 : S.qSize === "l" ? 1.15 : 1); }
+  /* Tamano del texto (v0.3.2): la placa de la pregunta (--ask-scale) y todo lo que se lee en partida (--ts: pistas, bocadillo del crupier, carta grande, ayudas) */
+  function applyQSize() { const k = S.qSize === "xl" ? 1.3 : S.qSize === "l" ? 1.15 : 1, r = document.documentElement.style; r.setProperty("--ask-scale", k); r.setProperty("--ts", k); }
+  /* Sonar en segundo plano = no: el juego calla al irte a otra ventana y vuelve al volver */
+  function applyBg() { const away = !S.bgAudio && (document.hidden || !document.hasFocus()); if (A.audio.duck) A.audio.duck(away); }
+  addEventListener("blur", applyBg); addEventListener("focus", applyBg); document.addEventListener("visibilitychange", applyBg);
   const TOG = {
-    motion: () => { S.reduce = !S.reduce; applyMotion(); }, intro: () => { S.intro = !S.intro; },
+    intro: () => { S.intro = !S.intro; }, bg: () => { S.bgAudio = !S.bgAudio; applyBg(); },
     cursor: () => { S.cursor = !S.cursor; A.cursor.set(S.cursor); }, tips: () => { S.tips = !S.tips; A.tt.enable(S.tips); }, tour: () => { S.tour = !S.tour; if (S.tour && A.tour) A.tour.reset(); },
     songs: () => { S.songToast = !S.songToast; if (!S.songToast && A.jukebox) A.jukebox.hide(); },
     contrast: () => { S.contrast = !S.contrast; applyVisualFX(); },
     shake: () => { S.shake = !S.shake; applyShake(); if (S.shake) { jpShake(1); A.haptic([40]); } },   // al encenderla, un temblor flojo de muestra
-    flash: () => { if (flashForced()) { A.sfx.deny(); return false; } S.softFlash = !S.softFlash; applyFlash(); },
   };
   for (const sw of document.querySelectorAll(".sw[data-sw]")) if (TOG[sw.dataset.sw]) sw.addEventListener("click", () => { if (TOG[sw.dataset.sw]() === false) return; A.sfx.flip(true); save(); syncSettings(); });
   /* pestanas de Ajustes */
@@ -349,6 +369,7 @@
     S.setTab = t; segSet(document.querySelector('[data-seg="settab"]'), t);
     if (t === "data" && A.dealer && A.dealer.renderFile) A.dealer.renderFile($("dlFile"));   // su expediente
     document.querySelectorAll(".set-pane").forEach(p => p.classList.toggle("hidden", p.dataset.pane !== t));
+    if (A.ctl) A.ctl.shown(t === "ctl" && S.settingsOpen);
     if (!silent) { save(); A.sfx.ui(); } fitSetSoon();
   }
   document.querySelector('[data-seg="settab"]').addEventListener("click", e => { const b = e.target.closest("button"); if (b && b.dataset.v !== S.setTab) { setTab(b.dataset.v); if (A.jukebox) A.jukebox.sync(); } });
@@ -358,7 +379,7 @@
       if (!rs.classList.contains("armed")) { rs.classList.add("armed"); rs.textContent = A.t("set.reset.ask"); A.sfx.ui(); clearTimeout(tm); tm = setTimeout(() => { rs.classList.remove("armed"); syncSettings(); }, 4000); return; }
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
-      S.quality = "auto"; map.setQuality("auto"); S.reduce = false; applyMotion(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); S.softFlash = false; applyFlash(); A.cursor.set(true); A.tt.enable(true);
+      S.quality = "auto"; map.setQuality("auto"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
       S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
@@ -372,14 +393,15 @@
     const row = (id, o) => {
       const el = $(id); if (!el) return; el.classList.toggle("hidden", !o); if (!o) return;
       const n = o.vals.length, i = Math.max(0, Math.min(n - 1, o.at)), off = !!o.off || n < 2, [lo, hi] = el.querySelectorAll(".stp-b");
-      const v = el.querySelector(".stp-v"); el.classList.toggle("off", off); v.textContent = o.fmt(o.vals[i]); v.title = o.tip ? o.tip(o.vals[i]) : v.textContent; if (o.tip) el.title = v.title; el.querySelector(".stp-tag").textContent = o.tag ? o.tag(o.vals[i]) : "";
+      el.classList.toggle("info", !!o.info); const lab = el.querySelector(".stp-l"); if (lab && lab.dataset.i) lab.textContent = A.t(o.info ? "scr.res" : lab.dataset.i);
+      const v = el.querySelector(".stp-v"); el.classList.toggle("off", off && !o.info); v.textContent = o.fmt(o.vals[i]); v.title = o.tip ? o.tip(o.vals[i]) : v.textContent; if (o.tip) el.title = v.title; el.querySelector(".stp-tag").textContent = o.tag ? o.tag(o.vals[i]) : "";
       lo.disabled = off || i <= 0; hi.disabled = off || i >= n - 1;
       el._step = d => { const j = i + d; if (off || j < 0 || j >= n) return; A.sfx.ui(); o.pick(o.vals[j]); };
     };
     /* tamano: las flechas recorren los tamanos que caben en este monitor, de menor a mayor; el automatico (el mayor que deja aire) es uno mas
        de la lista con su etiqueta AUTO, y elegirlo vuelve a "automatico". El que dejaste estirando el borde sale en su sitio como PERSONALIZADO */
     const sizeRow = I => {
-      if (I.mode === "full") return { vals: [I.native], at: 0, off: true, fmt: X, tag: () => A.t("scr.native") };
+      if (I.mode === "full") return { vals: [I.native], at: 0, info: true, fmt: X };   // v0.3.2: en pantalla completa es un dato (la resolucion del monitor), sin flechas muertas
       const vals = I.sizes.slice(), add = s => { if (!vals.some(x => same(x, s))) { const ar = s[0] * s[1]; let j = vals.findIndex(x => x[0] * x[1] > ar); vals.splice(j < 0 ? vals.length : j, 0, s); } };
       const mine = I.size && I.sizeOk ? I.size : null, custom = !!mine && !I.sizes.some(s => same(s, mine)) && !same(mine, I.auto);
       add(I.auto); if (mine) add(mine);
@@ -389,20 +411,20 @@
     };
     const monRow = I => I.displays.length < 2 ? null : { vals: I.displays, at: I.displays.findIndex(d => d.id === I.display),
       fmt: d => String(d.n), tip: d => A.t("scr.mon") + " " + d.n + " \u00b7 " + (d.label ? d.label + " \u00b7 " : "") + X([d.w, d.h]), pick: d => host.setScreen({ display: d.id }) };
-    const scaleRow = () => {
-      if (innerWidth < 900 || innerHeight < 520) return null;                               // movil: su propia maqueta, sin escala
-      const r = kRange(), vals = []; for (let s = 50; s <= 300; s += 10) if (s === 100 || (s / 100 >= r.lo - 1e-3 && s / 100 <= r.hi + 1e-3)) vals.push(s);
-      if (vals.length < 2) return null;                                                   // ventana de 1280x720 o menos: la interfaz ya esta a su tamano de diseno, no hay nada que elegir
-      let at = 0; vals.forEach((s, i) => { if (Math.abs(s - S.uiScale) < Math.abs(vals[at] - S.uiScale)) at = i; });
-      return { vals, at, fmt: s => s + " %", tag: s => s === 100 ? A.t("scr.auto") : "",
-        pick: s => { S.uiScale = s; save(); setK(); dispatchEvent(new Event("resize")); sync(); } };
+    /* Interfaz (v0.3.2): Grande = la escala automatica, que ya llena la ventana; Media y Compacta dejan mas mapa a la vista. Solo sale si la ventana
+       es mayor que el tamano de diseno (a 1280x720 no hay nada que elegir) y Media solo si se distingue de Compacta. Nunca baja de k = 1 */
+    const uiSync = () => {
+      const card = $("uiCard"), r = kRange(), on = innerWidth >= 900 && innerHeight >= 520 && r.auto >= 1.1; card.classList.toggle("hidden", !on); if (!on) return;
+      const mid = r.auto * 0.85 > Math.max(1, r.auto * 0.7) + 0.04, sg = card.querySelector(".seg"); sg.querySelector('[data-v="85"]').classList.toggle("hidden", !mid); sg.classList.toggle("s3", mid);
+      segSet(sg, String(!mid && S.uiScale === 85 ? 70 : S.uiScale));
     };
+    $("uiCard").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (!b || +b.dataset.v === S.uiScale) return; S.uiScale = +b.dataset.v; save(); A.sfx.ui(); setK(); dispatchEvent(new Event("resize")); sync(); });
     const sync = () => {
       segSet(seg, cur());
       if (scr && S.settingsOpen) { info = host.screenInfo(); row("scrSize", sizeRow(info)); row("scrMon", monRow(info)); }
-      row("scrScale", scaleRow()); if (S.settingsOpen) fitSetSoon();
+      uiSync(); if (S.settingsOpen) fitSetSoon();
     };
-    for (const id of ["scrSize", "scrMon", "scrScale"]) $(id).addEventListener("click", e => { const b = e.target.closest(".stp-b"); if (b && !b.disabled && $(id)._step) $(id)._step(+b.dataset.d); });
+    for (const id of ["scrSize", "scrMon"]) $(id).addEventListener("click", e => { const b = e.target.closest(".stp-b"); if (b && !b.disabled && $(id)._step) $(id)._step(+b.dataset.d); });
     seg.addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return; const v = b.dataset.v; A.sfx.ui();
       if (v !== cur() && A.dealer && A.dealer.noteWindow) A.dealer.noteWindow(v);           // el crupier lo comenta al volver
@@ -431,6 +453,15 @@
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.qSize) return;
     S.qSize = b.dataset.v; save(); A.sfx.ui(); applyQSize(); syncSettings();
   });
+  document.querySelector('[data-seg="motion"]').addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.dataset.v === S.motion) return;
+    S.motion = b.dataset.v; applyMotion(); save(); A.sfx.ui(); syncSettings();
+  });
+  document.querySelector('[data-seg="cursz"]').addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.dataset.v === S.curSize) return;
+    S.curSize = b.dataset.v; if (A.cursor.setSize) A.cursor.setSize(S.curSize === "l"); save(); A.sfx.ui(); syncSettings();
+  });
+  { const ta = $("tourAgain"); let tm = 0; ta.onclick = () => { S.tour = true; if (A.tour) A.tour.reset(); save(); A.sfx.card(); syncSettings(); ta.textContent = A.t("set.tour.ok"); ta.classList.add("done"); clearTimeout(tm); tm = setTimeout(() => { ta.classList.remove("done"); ta.textContent = A.t("set.tour.again"); }, 1800); }; }
   $("setBtn").onclick = () => openSettings(!S.settingsOpen);
   $("setClose").onclick = () => openSettings(false);
   document.addEventListener("pointerdown", e => { if (S.settingsOpen && !e.target.closest("#setSh, #setBtn, .menu-gear, #langPop")) openSettings(false); }, true);
@@ -474,7 +505,7 @@
   /* v0.2.27: Ajustes > Pantalla > Interfaz multiplica la k automatica. Nunca baja de 1 (el tamano de diseno: la letra no se hace ilegible) ni pasa
      de lo que cabe en la ventana (min(w/1280, h/720): mismas proporciones que a 1280x720, asi que nada se solapa ni hace falta desplazarse) */
   const kRange = (w = innerWidth, h = innerHeight) => { const geo = Math.min(w / 1280, h / 720), auto = Math.max(1, Math.min(1.85, geo)); return { auto, lo: 1 / auto, hi: Math.max(1, geo) / auto }; };
-  const setK = () => { const w = innerWidth, h = innerHeight, r = kRange(w, h), k = (w < 900 || h < 520) ? 1 : Math.max(1, Math.min(r.auto * r.hi, r.auto * (S.uiScale || 100) / 100)); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
+  const setK = () => { const w = innerWidth, h = innerHeight, r = kRange(w, h), k = (w < 900 || h < 520) ? 1 : Math.max(1, r.auto * Math.min(100, S.uiScale || 100) / 100); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
   /* ajuste fino: si una pantalla escalada (inicio, campamento, veredicto...) no cabe en la ventana, se baja SU k hasta que quepa entera (nunca hay que desplazarse: esto es un juego de escritorio) */
   const FIT = ".hh, .scr, .table, .vd";
   /* huella de lo que decide el ajuste (pantalla, ventana, escala, fuentes y medidas): si no ha cambiado desde el ultimo, el resultado seria el mismo
@@ -1033,30 +1064,53 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     else if (S.phase === "title" && !(e.target.closest && e.target.closest("button, a, input, select, textarea, label, [role=button], .dl-face"))) A.sfx.felt();   // su cara suena a ficha (js/dealer.js)
   }, true);
 
+  /* atajos (v0.3.2: las teclas salen de Ajustes > Controles, js/teclas.js; Esc es fija y siempre abre la pausa) */
+  const K = A.keys;
   addEventListener("keydown", e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target && e.target.tagName === "INPUT") { if (e.key === "Escape") openSettings(false); return; }
     A.audio.unlock(!S.booting);
     if (S.booting) return;
-    const k = e.key.toLowerCase();
-    if (k === "escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else runMenu(); }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
-    else if (S.settingsOpen && !["f", "m", "n"].includes(k)) return;       // con Ajustes abierto solo valen sus atajos: Intro pulsaba el boton de la pantalla de debajo (p. ej. Jugar) y P reanudaba la pregunta tapada
-    else if (S.run && S.phase === "asking" && /^[1-4]$/.test(k)) { if (!e.repeat) A.adv.toolKey(+k - 1); }   // mantener pulsada la tecla encendia y apagaba la herramienta sin parar
-    else if (k === "f") toggleFs();
-    else if (k === "c" && S.phase === "title") (A.codex.isOpen() ? A.codex.close() : A.codex.open());
-    else if (k === "m") toggleSwitch("sfx");
-    else if (k === "n") toggleSwitch("music");
-    else if (k === "p") togglePause();
-    else if (k === "+" || k === "=") map.zoomBy(1.6);
-    else if (k === "-") map.zoomBy(1 / 1.6);
-    else if (k === "0") $("zoomHome").click();
-    else if (k === "enter" || (k === " " && document.activeElement === document.body)) {
+    if (e.key === "Escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else runMenu(); return; }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
+    const act = K.which(e); if (!act) return;
+    if (S.settingsOpen && !["fs", "sfx", "mus"].includes(act)) return;    // con Ajustes abierto solo valen sus atajos: Intro pulsaba el boton de la pantalla de debajo (p. ej. Jugar) y P reanudaba la pregunta tapada
+    if (/^t[1-4]$/.test(act)) { if (S.run && S.phase === "asking" && !e.repeat) A.adv.toolKey(+act[1] - 1); return; }   // mantener pulsada la tecla encendia y apagaba la herramienta sin parar
+    if (panKey(act, e, true)) return;
+    if (act === "fs") { e.preventDefault(); if (!e.repeat) toggleFs(); }
+    else if (act === "codex") { if (S.phase === "title") (A.codex.isOpen() ? A.codex.close() : A.codex.open()); }
+    else if (act === "sfx") toggleSwitch("sfx");
+    else if (act === "mus") toggleSwitch("music");
+    else if (act === "pause") togglePause();
+    else if (act === "zin") map.zoomBy(1.6);
+    else if (act === "zout") map.zoomBy(1 / 1.6);
+    else if (act === "home") $("zoomHome").click();
+    else if (act === "ok" && (e.code !== "Space" || document.activeElement === document.body)) {
       if (e.repeat) { e.preventDefault(); return; }                         // dejar Intro pulsado no se salta el veredicto ni la intro siguientes
       if (S.phase === "intro" && S.skipIntro) { e.preventDefault(); S.skipIntro(); return; }
       const b = document.querySelector("#veil:not(.hidden) [data-primary]") || document.querySelector("#layer:not(.hidden) [data-primary]") || A.marcador.primary();   // la pausa va encima de todo: antes Intro pulsaba el ticket o el veredicto de debajo
       if (b && document.activeElement !== b) { e.preventDefault(); b.click(); }
     }
   });
+  /* mover el mapa con el teclado (W A S D de fabrica): mientras se mantiene, con la sensibilidad de arrastre. Solo con el mapa delante y libre
+     (preguntando, en el revelado o en el atlas de la Enciclopedia); nunca con un juego de la Barra, la pausa o Ajustes encima */
+  const panHeld = new Set(); let panRaf = 0, panT = 0;
+  const PAN = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  const panFree = () => !S.settingsOpen && !S.paused && !document.getElementById("rouOv") && ((S.phase === "asking" || S.phase === "reveal") || (A.codex && A.codex.isOpen && A.codex.isOpen()));
+  function panKey(act, e, down) {
+    if (!PAN[act]) return false;
+    if (down) { if (!panFree()) return true; e.preventDefault(); panHeld.add(act); if (!panRaf) { panT = 0; panRaf = requestAnimationFrame(panStep); } }
+    else panHeld.delete(act);
+    return true;
+  }
+  function panStep(t) {
+    if (!panHeld.size || !panFree() || !document.hasFocus()) { panHeld.clear(); panRaf = 0; return; }
+    const dt = panT ? Math.min(0.05, (t - panT) / 1000) : 0.016; panT = t; let dx = 0, dy = 0;
+    for (const a of panHeld) { dx += PAN[a][0]; dy += PAN[a][1]; }
+    const k = Math.min(innerWidth, innerHeight) * 0.9 * dt; if (dx || dy) map.nudge(dx * k, dy * k);   // nudge ya aplica la sensibilidad de arrastre
+    panRaf = requestAnimationFrame(panStep);
+  }
+  addEventListener("keyup", e => { const act = K.which(e); if (act) panKey(act, e, false); });
+  addEventListener("blur", () => panHeld.clear());
 
   /* ------------------------------------------------------------ entrada + intro del estudio */
   function requestFs() { if (window.geoliteHost) return; const el = document.documentElement; try { (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); } catch (e) { /* denegado */ } }   // en Electron el modo (Ventana / Sin bordes / Pantalla completa) ya lo pone main.js: antes "Entrar" forzaba pantalla completa en cada arranque
@@ -1076,11 +1130,11 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   function gateWarn() {
     const w = $("gateWarn"); if (!w || S.flashSeen) return false;
     const sw = $("gwSw"), sync = () => { const on = S.softFlash || flashForced(); sw.setAttribute("aria-checked", on); sw.setAttribute("aria-disabled", flashForced()); };
-    $("gwWhere").textContent = A.t("warn.where", { p: A.t("set.title") + " › " + A.t("set.tab.video") });
+    $("gwWhere").textContent = A.t("warn.where", { p: A.t("set.title") + " › " + A.t("set.tab.a11y") });
     if (A.iconize) A.iconize(w);
     if (!w.dataset.on) { w.dataset.on = "1";
       w.addEventListener("pointerdown", e => e.stopPropagation());               // leer o tocar el aviso no entra
-      sw.addEventListener("click", e => { e.stopPropagation(); if (flashForced()) { A.sfx.deny(); return; } S.softFlash = !S.softFlash; applyFlash(); save(); sync(); A.sfx.flip(S.softFlash); }); }
+      sw.addEventListener("click", e => { e.stopPropagation(); if (flashForced()) { A.sfx.deny(); return; } S.motion = S.motion === "full" ? "soft" : "full"; applyMotion(); save(); sync(); A.sfx.flip(S.softFlash); }); }   // v0.3.2: es el nivel Suave de Movimiento
     sync(); w.classList.remove("hidden"); $("gate").classList.add("warn");
     return true;
   }
@@ -1100,7 +1154,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (S.intro) playStudio(showGate); else showGate();
   }
 
-  A.core = { S, map, world, dialog, closeDialog, verdict, prog, save, toggleFs, openSettings, openLangPop, runMenu, refreshPrompt: () => { setPrompt(); }, updateHud, newRun, prepareRun, startLevel: startLevel_, showHub: showTitle, odoSet, jpShake };   // jpShake: el temblor de los jackpots (tambien la legendaria del cofre, js/adventure.js)
+  A.core = { S, map, world, dialog, closeDialog, verdict, prog, save, toggleFs, openSettings, openLangPop, runMenu, refreshPrompt: () => { setPrompt(); }, updateHud, newRun, prepareRun, startLevel: startLevel_, showHub: showTitle, odoSet, jpShake, syncSettings };   // jpShake: el temblor de los jackpots (tambien la legendaria del cofre, js/adventure.js)
 
   applyLang(); syncSettings();
   const start = () => {

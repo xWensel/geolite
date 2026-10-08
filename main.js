@@ -50,6 +50,8 @@ ipcMain.handle("steam:keyboard", async (e, o) => {
   return { kind: "none" };
 });
 ipcMain.handle("steam:available", () => !!steamClient);
+/* Datos > Tus partidas (v0.3.2): si Steam Cloud esta activo en la cuenta y para el juego. Sin Steam: null (el juego dice que se guarda en este equipo) */
+ipcMain.handle("steam:cloud", () => { if (!steamClient) return null; try { return { account: !!steamClient.cloud.isEnabledForAccount(), app: !!steamClient.cloud.isEnabledForApp() }; } catch (err) { return null; } });
 ipcMain.handle("steam:unlock", (e, id) => {   // si ya esta activo no se vuelve a guardar (profile.js reenvia todos los logros al arrancar)
   if (!steamClient || typeof id !== "string") return false;
   try { if (steamClient.achievement.isActivated(id)) return true; return steamClient.achievement.activate(id); } catch (err) { console.warn("steam:unlock", id, err.message); return false; }

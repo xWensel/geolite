@@ -43,6 +43,7 @@
   document.addEventListener("click", e => { const b = e.target.closest("#setSong .np-b"); if (b && !b.disabled) step(+b.dataset.d); });
   document.addEventListener("keydown", e => {
     if (!el || !el.classList.contains("show") || e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey || e.altKey || (A.codex && A.codex.isOpen && A.codex.isOpen()) || document.getElementById("ptLb")) return;   // en la Enciclopedia y en el visor de capturas las flechas son suyas
-    if (e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); step(-1); } else if (e.key === "ArrowRight") { e.preventDefault(); e.stopPropagation(); step(1); }
+    const sa = A.keys ? (A.keys.match("songPrev", e) ? -1 : A.keys.match("songNext", e) ? 1 : 0) : (e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0);   // v0.3.2: teclas de Ajustes > Controles
+    if (sa) { e.preventDefault(); e.stopPropagation(); step(sa); }
   }, true);
 })();

@@ -9,7 +9,7 @@ Versión actual: ver `VERSION` (se muestra también en Ajustes). Sin build ni de
 - **Mapa de precisión.** Mapa del mundo en WebGL2 vectorial (con respaldo en 2D), nítido a cualquier zoom. En las preguntas de país, estar dentro es 0 km; fuera cuenta la distancia real sobre la esfera hasta la frontera más cercana.
 - **Casino en pixel art.** Todo el juego es una mesa de casino: tapete, cartas, fichas, monitor CRT, tipografías pixel y una banda sonora propia.
 - **12 idiomas:** es, en, fr, pt (Brasil), de, it, es-419, zh, ko, ja, ru y pl.
-- **Plataformas:** navegador y PWA instalable, escritorio (Windows con Electron y Steamworks), Linux y Steam Deck (también bajo Proton). Mando completo con cursor propio en el mapa.
+- **Plataformas:** navegador y PWA instalable, escritorio (Windows con Electron y Steamworks), Linux y Steam Deck (también bajo Proton). Mando completo con cursor propio en el mapa. Teclas, botones del ratón y del mando reasignables en Ajustes > Controles.
 - **100 logros** conectados a Steamworks, con ocultos y contadores de progreso (“37 / 100”).
 
 ## Modos

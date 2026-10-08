@@ -191,17 +191,18 @@ window.AIQ = window.AIQ || {};
       cv.addEventListener("contextmenu", e => e.preventDefault());
       cv.addEventListener("pointerdown", e => {
         if (this.zzUntil && performance.now() < this.zzUntil) return;
-        if (e.pointerType === "mouse" && e.button !== 0) return;                   // solo el boton principal (el derecho marcaba respuesta al soltar)
+        const mk = A.keys ? A.keys.mouse : { pick: 0, drag: 0 }, mb = e.pointerType === "mouse" && e.isTrusted ? e.button : -1;   // v0.3.2: el boton de marcar y el de arrastrar salen de Ajustes > Controles (antes, solo el izquierdo)
+        if (mb >= 0 && mb !== mk.pick && mb !== mk.drag) return;
         try { cv.setPointerCapture(e.pointerId); } catch (err) { return; } this.drift = null;   // un pointerdown del mando no tiene puntero real que capturar
-        this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false });
+        this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: mb, drag: mb < 0 || mb === mk.drag, pick: mb < 0 || mb === mk.pick });
         if (this.pointers.size === 2) this._pinch = this._pinchState();
       });
       cv.addEventListener("pointermove", e => {
         if (e.pointerType === "mouse") { const r = cv.getBoundingClientRect(); this.mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; this.fxDirty = true; }
-        const p = this.pointers.get(e.pointerId); if (!p) return; if (e.pointerType === "mouse" && !(e.buttons & 1)) { up({ pointerId: e.pointerId, type: "pointercancel" }); return; }   // el boton ya no esta pulsado: el arrastre acabo fuera
+        const p = this.pointers.get(e.pointerId); if (!p) return; if (e.pointerType === "mouse" && !(e.buttons & (p.btn >= 0 && A.keys ? A.keys.bit(p.btn) : 1))) { up({ pointerId: e.pointerId, type: "pointercancel" }); return; }   // el boton ya no esta pulsado: el arrastre acabo fuera
         const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
         if (Math.hypot(e.clientX - p.sx, e.clientY - p.sy) > (e.pointerType === "touch" ? 10 : 5)) p.moved = true;
-        if (this.pointers.size === 1 && p.moved) {
+        if (this.pointers.size === 1 && p.moved && p.drag) {
           this.anim = null; this.view.cx -= (dx * A.mapSens.pan) / this.view.s; this.view.cy += (dy * A.mapSens.pan) / this.view.s;
           this._clamp(this.view); this.dirty = this.fxDirty = this.hlDirty = true; cv.classList.add("grabbing"); this.fx.classList.add("grabbing");
         } else if (this.pointers.size === 2) {
@@ -214,7 +215,7 @@ window.AIQ = window.AIQ || {};
       const up = e => {
         const p = this.pointers.get(e.pointerId); if (!p) return;
         this.pointers.delete(e.pointerId); cv.classList.remove("grabbing"); this.fx.classList.remove("grabbing");
-        if (!p.moved && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") {
+        if ((!p.moved || !p.drag) && p.pick && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") {
           const r = cv.getBoundingClientRect(); this._tap(e.clientX - r.left, e.clientY - r.top);
         }
         this._wasPinch = this.pointers.size > 0; if (this.pointers.size === 0) this._wasPinch = false;
@@ -223,7 +224,8 @@ window.AIQ = window.AIQ || {};
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
         e.preventDefault(); const r = cv.getBoundingClientRect();
-        this.zoomBy(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), ...(A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top]), false);
+        const wc = A.keys && A.keys.mouse.zoomMid;   // Ajustes > Controles: zoom hacia el centro del mapa en vez del puntero
+        this.zoomBy(Math.exp(-(A.keys ? A.keys.wheel(e.deltaY) : e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), ...(wc ? [this.W / 2, this.H / 2] : (A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top])), false);
       }, { passive: false });
       new ResizeObserver(() => this.resize()).observe(cv);
     }

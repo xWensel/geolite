@@ -1371,7 +1371,7 @@ window.AIQ = window.AIQ || {};
       "Tu ordenador habla {os} y tú juegas en {g}. Me gusta tu estilo.|Your computer speaks {os} and you play in {g}. I like your style.|Ton ordinateur parle {os} et tu joues en {g}. J'aime ton style.|Seu computador fala {os} e você joga em {g}. Gosto do seu estilo.|Dein Computer spricht {os} und du spielst auf {g}. Gefällt mir.|Il tuo computer parla {os} e tu giochi in {g}. Mi piace il tuo stile.|Tu computadora habla {os} y tú juegas en {g}. Me gusta tu estilo.|你的电脑说{os}，你却用{g}玩。我喜欢你的风格。|네 컴퓨터 언어는 {os}, 넌 {g} 버전으로 하네. 스타일 좋아.|君のパソコンは{os}で、君は{g}で遊んでいる。いいセンスだ。|Твой компьютер говорит по-своему ({os}), а играешь ты на другом ({g}). Мне нравится твой стиль.|Język komputera: {os}. Język gry: {g}. Podoba mi się twój styl."
     ],
     gearHover: [
-      "¿Vas a tocar mis ajustes? Cuidado con la Vibración, que es la mía.|Going to touch my settings? Careful with the Vibration, that one's mine.|Tu vas toucher à mes réglages ? Attention à la Vibration, c'est la mienne.|Vai mexer nas minhas configurações? Cuidado com a Vibração, que é minha.|Willst du an meine Einstellungen? Vorsicht mit der Vibration, die gehört mir.|Vuoi toccare le mie impostazioni? Attento alla Vibrazione, è mia.|¿Vas a tocar mis ajustes? Cuidado con la Vibración, que es mía.|要动我的设置？小心震动，那是我的。|내 설정 건드리려고? 진동은 조심해. 그건 내 거야.|私の設定をいじるのか？振動には気をつけろ、あれは私のだ。|Полезешь в мои настройки? Осторожно с Вибрацией, она моя.|Będziesz grzebać w moich ustawieniach? Uważaj na Wibracje, są moje.",
+      "¿Vas a tocar mis ajustes? Cuidado con el Temblor de pantalla, que ese es mío.|Going to touch my settings? Careful with Screen shake, that one's mine.|Tu vas toucher à mes réglages ? Attention au Tremblement d'écran, c'est le mien.|Vai mexer nas minhas configurações? Cuidado com o Tremor de tela, que esse é meu.|Willst du an meine Einstellungen? Vorsicht mit dem Bildschirmwackeln, das gehört mir.|Vuoi toccare le mie impostazioni? Attento alla Scossa dello schermo, è mia.|¿Vas a tocar mis ajustes? Cuidado con el Temblor de pantalla, que ese es mío.|要动我的设置？小心屏幕震动，那是我的。|내 설정 건드리려고? 화면 흔들림은 조심해. 그건 내 거야.|私の設定をいじるのか？画面の揺れには気をつけろ、あれは私のだ。|Полезешь в мои настройки? Осторожно с тряской экрана, она моя.|Będziesz grzebać w moich ustawieniach? Uważaj na drżenie ekranu, jest moje.",
       "Ajustes… ¿Vas a bajarme el volumen? Atrévete.|Settings… Going to turn my volume down? I dare you.|Réglages… Tu vas baisser mon volume ? Chiche.|Configurações… Vai abaixar meu volume? Duvido.|Einstellungen… Willst du mich leiser stellen? Trau dich.|Impostazioni… Vuoi abbassarmi il volume? Provaci.|Ajustes… ¿Vas a bajarme el volumen? Atrévete.|设置……要调低我的音量？你敢。|설정… 내 볼륨 줄이려고? 해봐.|設定か……私の音量を下げる気か？やってみろ。|Настройки… Сделаешь меня потише? Рискни.|Ustawienia… Ściszysz mnie? No spróbuj."
     ],
     classicBack: [
@@ -2267,6 +2267,7 @@ window.AIQ = window.AIQ || {};
   }, true);
   addEventListener("contextmenu", () => {
     const S = A.core && A.core.S; if (once.rclick || !D.on || !S || S.phase !== "asking" || D.host) return;
+    if (A.keys && (A.keys.mouse.pick === 2 || A.keys.mouse.drag === 2)) return;   // v0.3.2: el derecho es tu boton de marcar o arrastrar (Ajustes > Controles): no es una travesura
     once.rclick = 1; const t = say1("rightClick"); if (t) D.say(t, { mood: "laugh", hold: holdFor(t) });
   });
 

@@ -62,7 +62,7 @@ window.AIQ = window.AIQ || {};
     if (el) return;
     el = document.createElement("div"); el.id = "osk"; el.hidden = true; el.setAttribute("role", "dialog");
     el.innerHTML = `<div class="osk-pad"><div class="osk-view"><b></b><i class="osk-caret"></i><em></em></div><div class="osk-keys"></div>
-      <div class="osk-legend k-pad"><span><i class="gl" data-gl="x"></i> <em data-t="del"></em></span><span><i class="gl" data-gl="y"></i> <em data-t="space"></em></span><span><i class="gl" data-gl="menu"></i> <em data-t="ok"></em></span><span><i class="gl" data-gl="b"></i> <em data-t="close"></em></span></div></div>`;
+      <div class="osk-legend k-pad"><span><i class="gl" data-glp="x"></i> <em data-t="del"></em></span><span><i class="gl" data-glp="y"></i> <em data-t="space"></em></span><span><i class="gl" data-gl="menu"></i> <em data-t="ok"></em></span><span><i class="gl" data-gl="b"></i> <em data-t="close"></em></span></div></div>`;
     document.body.appendChild(el); view = el.querySelector(".osk-view");
     /* las teclas no se quedan el foco: la casilla sigue activa (y el teclado fisico, si lo hay, sigue escribiendo en ella) */
     /* lo que se pulsa en el teclado es del teclado: Ajustes no lo toma por un clic fuera (se cerraba y se llevaba la casilla) */

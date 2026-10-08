@@ -12,7 +12,7 @@
 
   /* ------------------------------------------------------------------ puntero de casino */
   const PAL = { w: "#fff3cf", g: "#f8b449", r: "#ff5a4d", b: "#69c7ff", k: "#16241c" };
-  const CELL = 2;
+  let CELL = 2;                                                         // 3 con el puntero Grande (Ajustes > Controles > Raton)
   const ARROW = [
     "w..........", "ww.........", "www........", "wwww.......", "wwwww......", "wwwwww.....", "wwwwwww....", "wwwwwwww...", "wwwwwwwww..", "wwwwwwwwww.",
     "wwwwww.....", "ww.ww......", "w..www.....", "....ww.....", ".....ww....", ".....ww....",
@@ -71,6 +71,7 @@
     A.cursor.available = true;
     A.cursor.set = on => { A.cursor.on = !!on; Object.keys(SPR).forEach(k => root.style.setProperty("--c-" + k, on ? sp[k] : fb[k])); };
     A.cursor.set(true);
+    A.cursor.setSize = big => { const c = big ? 3 : 2; if (c === CELL) return; CELL = c; Object.keys(SPR).forEach(k => { sp[k] = `${sprite(k)}, ${fb[k]}`; }); for (const k in sprMemo) delete sprMemo[k]; A.cursor.set(A.cursor.on); if (A.mando && A.mando.cursorChanged) A.mando.cursorChanged(); };
     const st = document.createElement("style"); st.id = "gcurCss";
     st.textContent = `html.gcur { cursor: var(--c-def); }
 :where(html.gcur) :where(a[href], button, summary, select, label[for], [role=button], [role=switch], input[type=button], input[type=submit], input[type=checkbox], input[type=radio], input[type=range], input[type=color], input[type=file]) { cursor: var(--c-ptr); }
