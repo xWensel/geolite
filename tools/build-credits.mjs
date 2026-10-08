@@ -25,7 +25,8 @@ const row = (name, c) => {
   const [artist, lic, page] = c || [];
   return `<tr><td>${esc(name)}</td><td>${esc(artist || "—")}</td><td>${link(LIC_URL(lic || ""), lic || "—")}</td><td>${link(page, "Commons")}</td></tr>`;
 };
-const photos = Object.entries(img).map(([id, r]) => [(en[id] && en[id][0]) || id.replace(/-/g, " "), r[3]]).sort((a, b) => a[0].localeCompare(b[0], "en"));
+const TIER = { h: " · History", k: " · Key fact" };   // cada lugar lleva su foto de portada y la de su Historia (id~h) y su Dato clave (id~k)
+const photos = Object.entries(img).map(([id, r]) => { const m = /^(.*)~([hk])$/.exec(id), base = m ? m[1] : id; return [((en[base] && en[base][0]) || base.replace(/-/g, " ")) + (m ? TIER[m[2]] : ""), r[3]]; }).sort((a, b) => a[0].localeCompare(b[0], "en"));
 const flags = Object.entries(FLAGS).map(([n, r]) => [n, r[3]]).sort((a, b) => a[0].localeCompare(b[0], "en"));
 const VERSION = read("VERSION").trim();
 

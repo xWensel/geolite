@@ -259,6 +259,15 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-chap h3 em { font-style: normal; font-family: var(--mono); font-size: 13px; letter-spacing: .05em; color: rgba(242, 233, 214, .6); }
 .cx-chb p, .cx-chb h4 { margin: 0 0 10px; max-width: 70ch; font-size: 19px; line-height: 1.5; color: rgba(242, 233, 214, .92); }
 .cx-chb h4 { margin-top: 14px; font-family: var(--mono); font-weight: 400; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--cxt); }
+/* foto propia de la Historia y del Dato clave: a la derecha, el texto la rodea; clic = HD */
+.cx-chb::after { content: ""; display: block; clear: both; }
+.cx-fig { float: right; width: min(46%, 520px); margin: 4px 0 12px 22px; }
+.cx-figb { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; border-radius: 12px; overflow: hidden; cursor: zoom-in; background: #0a140f;
+  box-shadow: inset 0 0 0 2px rgba(255, 224, 138, .35), 0 6px 0 rgba(0, 0, 0, .35); }
+.cx-figb img { display: block; width: 100%; height: 100%; object-fit: cover; image-rendering: auto; animation: cx-fade .3s both; transition: transform .6s var(--spring); }
+.cx-figb:hover img { transform: scale(1.04); } .cx-figb .cx-hd { pointer-events: none; }
+.cx-fig figcaption { margin-top: 8px; font-family: var(--mono); font-size: 12px; letter-spacing: .05em; line-height: 1.4; color: rgba(242, 233, 214, .5); overflow-wrap: break-word; } .cx-fig figcaption a { color: inherit; }
+.cx-chap.silver .cx-figb { box-shadow: inset 0 0 0 2px rgba(200, 203, 216, .5), 0 6px 0 rgba(0, 0, 0, .35); } .cx-chap.gold .cx-figb { box-shadow: inset 0 0 0 2px rgba(245, 166, 35, .65), 0 6px 0 rgba(0, 0, 0, .35); }
 .cx-lockl { display: flex; align-items: flex-start; gap: 8px; font-style: italic; color: rgba(242, 233, 214, .55) !important; } .cx-lockl .ic.sm { flex: none; width: 20px; height: 20px; margin: 2px 0 0; opacity: .7; }
 .cx-load { font-family: var(--mono); font-size: 14px !important; letter-spacing: .05em; color: rgba(242, 233, 214, .55) !important; animation: blink 1.4s ease-in-out infinite; } .cx-load.err { animation: none; }
 .cx-src { margin: 0; font-family: var(--mono); font-size: 13px; letter-spacing: .05em; color: rgba(242, 233, 214, .5); } .cx-src a { color: var(--brass-lt); } .cx-src:empty { display: none; }

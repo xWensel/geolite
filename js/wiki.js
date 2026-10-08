@@ -31,6 +31,8 @@ window.AIQ = window.AIQ || {};
         const F = A.FLAGS[id.slice(2)], fl = A.media(`assets/flags/${A.mediaKey(id.slice(2))}.svg`);
         rec.img = { thumb: fl, card: fl, hd: fl, w: F[1], h: F[2], flag: true }; if (F[3]) rec.credit = { artist: F[3][0], license: F[3][1], page: F[3][2] };
       }
+      /* foto propia de la Historia (id~h) y del Dato clave (id~k): cada capitulo ensena lo que cuenta */
+      for (const t of ["h", "k"]) { const ti = I[id + "~" + t]; if (ti) (rec.tierImg = rec.tierImg || {})[t] = { card: card(id + "~" + t), hd: hdOf(id + "~" + t), w: ti[1], h: ti[2], credit: ti[3] ? { artist: ti[3][0], license: ti[3][1], page: ti[3][2] } : null }; }
       return rec;
     },
     imgOf: async id => { const I = await loadImg(); return I[id] || null; },                // la foto de una carta (sin cargar su texto completo): [origen, ancho, alto, credito]

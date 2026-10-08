@@ -64,6 +64,8 @@ def photo(item):
     try:
         im = Image.open(io.BytesIO(data)); im.load()
         im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+        if len(rec) > 4 and rec[4]:                                  # recorte opcional [izq, arriba, dcha, abajo] en fracciones (quita rotulos o bordes de escaneo)
+            l, t, r, b = rec[4]; im = im.crop((round(l * im.width), round(t * im.height), round(r * im.width), round(b * im.height)))
         if max(im.size) > 1920: im.thumbnail((1920, 1920), Image.LANCZOS)
         im.save(hd, "WEBP", quality=82, method=6)
         c = im.copy()

@@ -584,7 +584,7 @@ window.AIQ = window.AIQ || {};
     if (t.dataset.crumb) { const v = JSON.parse(t.dataset.crumb), jump = v.jump; delete v.jump; saveTop(); ui.stack = trail(v).slice(0, -1); ui.view = v; render(); if (jump) jumpTo(jump, true); A.sfx.ui(); return; }
     if (t.dataset.jump) { jumpTo(t.dataset.jump); A.sfx.card(); return; }
     if (t.dataset.step) { step(+t.dataset.step); return; }
-    if (t.dataset.light != null) { lightbox(ui.cur); return; }
+    if (t.dataset.light != null) { lightbox(ui.cur, t.dataset.light); return; }
     const v = parse(t.dataset.go); if (!v) return;
     if (t.classList.contains("cx-nv")) { ui.stack = []; ui.view = v; render(); A.sfx.card(); return; }
     if (v.k === "detail") openCard(v.id, t); else go(v, false, t);
@@ -851,7 +851,10 @@ window.AIQ = window.AIQ || {};
     const box = i => { const s = $("cxch" + i); return s && s.classList.contains("on") ? s.querySelector(".cx-chb") : null; };
     if (!rec || rec.none) { [1, 2, 3].forEach(i => { const b = box(i); if (b) b.innerHTML = `<p class="cx-load err">${esc(A.t("codex.nodesc"))}</p>`; }); return; }
     const T = tiers(rec);
-    if (tiered(id)) { [T.intro || rec.extract, T.hist, T.key].forEach((t, i) => { const b = box(i + 1); if (b) b.innerHTML = par(t) || `<p class="cx-load err">${esc(A.t("codex.nodesc"))}</p>`; }); }
+    const fig = k => { const f = rec.tierImg && rec.tierImg[k]; if (!f) return "";              // la foto de ese capitulo, a la derecha del texto; clic = HD
+      const c = f.credit ? `<figcaption>${esc(A.t("codex.photo"))}: ${f.credit.artist ? esc(f.credit.artist) + " · " : ""}<a href="${esc(f.credit.page)}" target="_blank" rel="noopener">${esc(f.credit.license || "Wikimedia Commons")}</a></figcaption>` : "";
+      return `<figure class="cx-fig"><button type="button" class="cx-figb" data-light="${k}" ${A.ttAttr(A.t("codex.hd"))}><img class="cx-photo" alt="" src="${esc(f.card)}" decoding="async"><span class="cx-hd">${A.icon("a_lens")}</span></button>${c}</figure>`; };
+    if (tiered(id)) { [T.intro || rec.extract, T.hist, T.key].forEach((t, i) => { const b = box(i + 1); if (b) b.innerHTML = (i ? fig(i === 1 ? "h" : "k") : "") + (par(t) || `<p class="cx-load err">${esc(A.t("codex.nodesc"))}</p>`); }); }
     else { const b = box(1); if (b) b.innerHTML = par(T.intro || rec.extract) + (T.hist ? `<h4>${esc(A.t("codex.tierh"))}</h4>${par(T.hist)}` : ""); }
     const ttr = rec.tierTr && (rec.tierTr.h || rec.tierTr.k);                // algun tier se tradujo a mano: se acredita y enlaza el original
     if ($("cxSrc")) $("cxSrc").innerHTML = `${esc(A.t(rec.tr || ttr ? "codex.license.tr" : "codex.license"))} · <a href="${esc((ttr && ttr.url) || rec.url || "#")}" target="_blank" rel="noopener">${esc(A.t("codex.wiki"))} ↗</a>`;
@@ -879,10 +882,11 @@ window.AIQ = window.AIQ || {};
     if (!histP.length && rest.length > 2) { const h = Math.ceil(rest.length / 2); histP = [rest.slice(0, h).join(J)]; key = rest.slice(h).join(J); }
     return { intro: intro || A.cleanText(rec.extract), hist: histP.join("\n"), key };
   }
-  function lightbox(id) {
-    const rec = memOf(id), L = $("cxLight"); if (!rec || !rec.img) return;
-    L.innerHTML = `<img class="${photo(rec.img.hd)}" alt="" src="${esc(rec.img.hd)}"><button type="button" class="cx-lx" aria-label="${esc(A.t("codex.close"))}">${A.icon("u_close")}</button><p>${rec.credit ? esc((rec.credit.artist ? rec.credit.artist + " · " : "") + (rec.credit.license || "")) : ""}</p>`;
-    const im = L.querySelector("img"); im.onerror = () => { im.onerror = null; im.src = rec.img.card; };   // build de Steam "ligero"/demo sin fotos HD: se ve la tarjeta
+  function lightbox(id, k) {                                          // k = "h" / "k": la foto de la Historia o del Dato clave; vacio = la de la carta
+    const rec = memOf(id), L = $("cxLight"), ti = k && rec && rec.tierImg && rec.tierImg[k];
+    const img = ti || (rec && rec.img), cr = ti ? ti.credit : rec && rec.credit; if (!img) return;
+    L.innerHTML = `<img class="${photo(img.hd)}" alt="" src="${esc(img.hd)}"><button type="button" class="cx-lx" aria-label="${esc(A.t("codex.close"))}">${A.icon("u_close")}</button><p>${cr ? esc((cr.artist ? cr.artist + " · " : "") + (cr.license || "")) : ""}</p>`;
+    const im = L.querySelector("img"); im.onerror = () => { im.onerror = null; im.src = img.card; };   // build de Steam "ligero"/demo sin fotos HD: se ve la tarjeta
     L.classList.remove("hidden"); L.onclick = () => L.classList.add("hidden"); A.sfx.card();
   }
 

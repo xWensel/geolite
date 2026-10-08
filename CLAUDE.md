@@ -42,7 +42,7 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 
 ## Fotos de la Enciclopedia
 - TODA carta tiene foto real, libre para uso comercial (dominio publico, CC0, CC BY o CC BY-SA) con autor y licencia en `data/wiki/img.json` (se muestran en la ficha y en `credits.html`). Nunca se usa una ilustracion de relleno en su lugar, y el aviso de tarjeta nueva y la ficha ensenan la foto del lugar.
-- Cada lugar es UNA carta con tres niveles (`id`, `id~h`, `id~k`) que comparten foto.
+- Cada lugar es UNA carta con tres niveles (`id`, `id~h`, `id~k`) y cada capitulo lleva su PROPIA foto (3 por lugar, ninguna repetida): la de portada (`id`, el lugar), la de Historia (`id~h`, algo historico de lo que cuenta el texto) y la de Dato clave (`id~k`, lo que dice el dato; si no es fotografiable, vista aerea del sitio). Siempre libre y con autor/licencia en `img.json` (5o campo opcional = recorte [izq,arriba,dcha,abajo] en fracciones). Una foto que no corresponda al lugar es inaceptable: comprobarla por categorias y descripcion de Commons y mirarla a ojo antes de aceptarla.
 - Tamanos: miniatura 320 px (`assets/wiki/th`), tarjeta 960 px (`assets/wiki/card`) y HD 1920 px (`assets/wiki/hd`). El paquete de Steam las incluye las tres (`node tools/steam-pack.mjs`): un solo paquete, sin servidores. En la web se sirven desde GitHub Pages (`js/support.js`, `A.media`).
 
 ## Arte ligado al crupier
