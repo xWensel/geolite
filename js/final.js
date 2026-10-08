@@ -117,7 +117,7 @@ window.AIQ = window.AIQ || {};
       sec(TX.deskH, n(P6(TX.desk)) + n("steamworks.js") + s("Steamworks SDK © Valve Corporation")),
       sec("", n(P6(TX.thanks)) + s(P6(TX.thanksS)), "fin-thanks"),
       sec(TX.dedic, `<div class="fin-fam"><div><p class="fin-n">Alejandra</p>${s(P6(TX.daughter))}</div><div><p class="fin-n">Alicia</p>${s(P6(TX.wife))}</div></div>
-        <p class="fin-cube" aria-label="A al cubo">A<sup>3</sup></p>`, "fin-ded"),
+        <p class="fin-cube" aria-label="A³">A<sup>3</sup></p>`, "fin-ded"),
       sec(TX.special, n("Hugiitop") + s(P6(TX.tester)), "fin-ded fin-last"),
     ].join("");
   }
