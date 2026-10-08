@@ -34,6 +34,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.29",
+      name: L("Más breve", "Shorter", "Plus bref", "Mais breve", "Kürzer", "Più breve", "", "更短", "더 짧게", "もっと短く", "Короче", "Krócej"),
+      date: "2026-10-08",
+      summary: L("Cuando Don Crupier habla en directo, ahora se queda mucho menos tiempo en pantalla y se va con su bocadillo.", "When Don Crupier speaks live, he now stays on screen much less time and leaves along with his speech bubble.", "Quand Don Crupier parle en direct, il reste maintenant bien moins longtemps à l'écran et s'en va avec sa bulle.", "Quando Don Crupier fala ao vivo, agora ele fica muito menos tempo na tela e vai embora junto com o balão.", "Wenn Don Crupier live spricht, bleibt er jetzt viel kürzer im Bild und verschwindet zusammen mit seiner Sprechblase.", "Quando Don Crupier parla in diretta, ora resta molto meno sullo schermo e se ne va insieme al suo fumetto.", "", "Don Crupier 直播说话时，现在在屏幕上停留的时间短得多，并会和对话框一起消失。", "Don Crupier가 생방송으로 말할 때 이제 화면에 훨씬 짧게 머물고 말풍선과 함께 사라집니다.", "Don Crupier が生放送で話すとき、画面に残る時間がずっと短くなり、吹き出しと一緒に消えます。", "Когда Дон Крупье говорит в эфире, он теперь остаётся на экране гораздо меньше и уходит вместе со своим облачком.", "Gdy Don Krupier mówi na żywo, zostaje teraz na ekranie dużo krócej i znika razem ze swoim dymkiem."),
+      chapters: [
+        { id: "breve", kicker: L("En directo", "Live", "En direct", "Ao vivo", "Live", "In diretta", "", "直播", "생방송", "生放送", "В эфире", "Na żywo"),
+          title: L("Don Crupier", "Don Crupier", "Don Crupier", "Don Crupier", "Don Crupier", "Don Crupier", "", "Don Crupier", "Don Crupier", "Don Crupier", "Дон Крупье", "Don Krupier"),
+          entries: [
+            E(L("Menos tiempo en pantalla", "Less time on screen", "Moins de temps à l'écran", "Menos tempo na tela", "Kürzer im Bild", "Meno tempo sullo schermo", "", "屏幕停留更短", "화면 체류 시간 단축", "画面に残る時間を短縮", "Меньше времени на экране", "Krócej na ekranie"), "change", "0.3.29", [
+              L("Su frase en directo dura lo justo: sale, la dice y se va con el bocadillo en unos pocos segundos, esté en una esquina o en el centro.", "His live line lasts just long enough: he appears, says it and leaves with the bubble within a few seconds, in a corner or in the center.", "Sa réplique en direct dure juste ce qu'il faut : il apparaît, la dit et s'en va avec sa bulle en quelques secondes, dans un coin ou au centre.", "A fala ao vivo dura o necessário: ele aparece, diz e vai embora com o balão em poucos segundos, num canto ou no centro.", "Seine Live-Zeile dauert genau so lang wie nötig: Er erscheint, sagt sie und geht in wenigen Sekunden mit der Sprechblase wieder, in einer Ecke oder in der Mitte.", "La sua battuta in diretta dura il giusto: appare, la dice e se ne va con il fumetto in pochi secondi, in un angolo o al centro.", "", "他的直播台词时长刚刚好：出现、说完，几秒钟内连同对话框一起离开，无论在角落还是中央。", "생방송 대사는 딱 필요한 만큼만 이어집니다. 구석이든 중앙이든 나타나서 말하고 몇 초 안에 말풍선과 함께 사라집니다.", "生放送のセリフは必要な長さだけ。隅でも中央でも、現れて話し、数秒で吹き出しと一緒に去ります。", "Его реплика в эфире длится ровно столько, сколько нужно: он появляется, говорит и за несколько секунд уходит вместе с облачком, будь то угол или центр.", "Jego kwestia na żywo trwa tyle, ile trzeba: pojawia się, mówi i w kilka sekund znika razem z dymkiem, w rogu lub na środku.")
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.28",
       name: L("Donde él quiera", "Wherever he wants", "Où il veut", "Onde ele quiser", "Wo er will", "Dove vuole lui", "", "随他的意", "원하는 곳에서", "彼の好きな場所で", "Где захочет", "Gdzie zechce"),
       date: "2026-10-08",

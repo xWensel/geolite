@@ -1772,7 +1772,7 @@ window.AIQ = window.AIQ || {};
     ensure(); el.classList.remove("hidden");
     let screen;
     if (!D.on && !D.host) { if (D.onHome && (homeCorner = homeCorner || pickCorner())) screen = undefined; else screen = true; }
-    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, sty: o.sty || "", pos: o.pos || "", force: true, live: true, screen, hold: holdFor(t) + 1500, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); } });   // el clic del foco al entrar en antena
+    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, sty: o.sty || "", pos: o.pos || "", force: true, live: true, screen, hold: 700 + t.length * 22, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); } });   // el clic del foco al entrar en antena
     return true;
   };
   /* tanda 16: LA SIESTA DEL CRUPIER. Duerme en su esquina de la partida, sin globo y sin reaccionar a nada (napping calla D.say); nap(false) lo despierta sin

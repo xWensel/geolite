@@ -554,7 +554,7 @@ html.reduce-motion #vivoGlove.tap .vg-ring, html.reduce-motion #vivoEye i { anim
 html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class*="st-"] p { animation: none !important; }
 
 /* donde sale el crupier cuando habla la mesa (js/dealer.js, o.pos): esquinas o centro grande, por encima de todo */
-.dealer.lvpos { position: fixed; left: auto; right: auto; top: auto; bottom: auto; z-index: 2147483000; flex-direction: column; gap: 4px; transform: none; opacity: 1; --hf: 224px; --tail: calc(var(--hf) / 2); }
+.dealer.lvpos { position: fixed; left: auto; right: auto; top: auto; bottom: auto; z-index: 2147483000; flex-direction: column; gap: 4px; transform: none; --hf: 224px; --tail: calc(var(--hf) / 2); }
 .dealer.lvpos.lv-tl { left: 24px; top: 24px; align-items: flex-start; } .dealer.lvpos.lv-bl { left: 24px; bottom: 24px; align-items: flex-start; }
 .dealer.lvpos.lv-tr { right: 24px; top: 24px; align-items: flex-end; --tail: calc(100% - var(--hf) / 2); } .dealer.lvpos.lv-br { right: 24px; bottom: 24px; align-items: flex-end; --tail: calc(100% - var(--hf) / 2); }
 .dealer.lvpos.lv-c { left: 50%; top: 50%; transform: translate(-50%, -50%); align-items: center; --hf: clamp(300px, 54vh, 520px); --tail: 50%; }
