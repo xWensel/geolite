@@ -1,0 +1,42 @@
+/* Geolite - LETRA LEGIBLE (v0.3.22). Se carga la ultima. Ningun texto baja de 16 px en Silkscreen (letra de etiquetas, rejilla de 8: a 16 queda
+   nitida) ni de 18 px en Jersey / Pixelify (mayusculas del 55 %: a 18 rozan los 10 px) a tamano de diseno (k = 1, 1280x720 / 1280x800 de la
+   Steam Deck). En pantallas mayores todo crece con --k. Lista sacada midiendo el juego real en cada pantalla (portada, Clasico, Aventura,
+   Reto diario, Perfil, notas, Ajustes, Enciclopedia, partida, presentacion de ronda y Campamento). A.squeeze tampoco baja de estos minimos.
+   :root body delante: gana a las reglas "html body" de uikit.css sin !important. */
+
+/* ---------- Silkscreen: 16 px ---------- */
+:root body .hub-back, :root body .hub-sub, :root body .scr .hub-sub, :root body .hh-ver, :root body .mc-ribbon, :root body .mc-stat,
+:root body .sb-t > i, :root body .adv-stats > span, :root body .as-asc, :root body .as-relics, :root body .as-mult,
+:root body .dr-ki em, :root body .dr-kt > i, :root body .dr-next > span, :root body .dr-other > span, :root body .dr-seed > b, :root body .dr-seed > i,
+:root body .dr-sum > i, :root body .dr-tabs > button, :root body .dr-tags > .tag, :root body .dr-tn, :root body .dr-stats i, :root body .lb-empty, :root body .lb-src > span,
+:root body .rd-h > b, :root body .rd-n > em, :root body .ac-k, :root body .tool .tl-n, :root body .ab-act,
+:root body .ch-chip > b, :root body .ch-lv, :root body .ch-new, :root body .adv-chal-h, :root body .intro-body > .tag,
+:root body .chipbtn > em, :root body .chipbtn > span, :root body .nr-buy, :root body .nr-buy .nr-p, :root body .nr-head .nr-n, :root body .nr-k, :root body .nr-k > b, :root body .nr-k > i,
+:root body .offer > .buy, :root body .offer > .of-r, :root body .tb-title .tag, :root body .tray-col > h4, :root body .tray-col > h4 b,
+:root body #settings .set-card > h3, :root body .set-nav-t > small, :root body .np-t > b, :root body .dlf-h > span, :root body .row-btn, :root body .row-btn > span { font-size: 16px; }
+
+/* ---------- Jersey / Pixelify: 18 px ---------- */
+:root body .rs-t > small, :root body #settings .set-note, :root body #cloudD, :root body .dlf-r > span,
+:root body .intro-new, :root body .ch-chip i:not(.ch-lv), :root body .go2-t > i, :root body .nr-row > p, :root body .offer > p, :root body .rd-k,
+:root body .cx-chip2 > b, :root body .cx-medal > span, :root body .dc-n, :root body .rd-h > i, :root body .dr-d, :root body .dr-sum > em, :root body .dr-try > i,
+:root body .rd-n.inf > em, :root body .pt-foot, :root body .pt-it > i, :root body .ac-t > i { font-size: 18px; }
+
+/* ---------- reglas con mas peso que las de arriba: la version de la portada, la Enciclopedia, la ruta del plan y el Campamento ---------- */
+:root body #dlg > .hh-ver { font-size: 16px; }
+:root body .cx-shell.stage .cx-chip2 b, :root body .cx-chip2 b { font-size: 18px; }
+:root body .adv-setup .rd.plan .rd-h i, :root body .dr-road2 .rd.plan .rd-h i { font-size: 18px; } :root body .dr-road2 .rd.plan .rd-h b { font-size: 16px; }
+:root body .table.mesa .offer.pc .of-r, :root body .table.mesa .tray-col h4 { font-size: 16px; }
+:root body .table.mesa .offer.pc > p, :root body .table.mesa.d1 .offer.pc > p, :root body .table.mesa.d2 .offer.pc > p { font-size: 18px; }
+:root body .table.mesa .offer.pc .buy, :root body .table.mesa.d1 .offer.pc .buy, :root body .table.mesa.d2 .offer.pc .buy, :root body .table.mesa.chest .offer.pc .buy { font-size: 16px; }
+:root body .adv-debuff i:not(.ch-lv), :root body .adv-debuff .ch-new, :root body .ch-new { font-size: 18px; }
+
+/* Ajustes: las descripciones de las pestanas a 16 px piden una columna algo mas ancha y botones mas juntos (las 6 caben sin desplazarse) */
+@media (min-width: 901px) {
+  :root body .set-nav { width: clamp(290px, 22vw, 380px); gap: 8px; }
+  :root body .set-nav button { padding: 10px 14px; gap: 12px; }
+  :root body .set-nav-ic .ic { width: 36px; height: 36px; }
+  :root body .set-nav-t small { letter-spacing: 0; line-height: 1.15; }
+}
+
+/* Reto diario: con la letra minima se pasaba unos 20 px y A.fitK lo encogia al 97 %; un poco menos de aire y cabe a tamano real */
+:root body .dr-hand { row-gap: 8px; padding-top: 10px; padding-bottom: 10px; } :root body .dr-hb { gap: 5px; }

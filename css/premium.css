@@ -346,3 +346,34 @@ html.reduce-motion .of-stamp.on { animation-timing-function: steps(1); }
 .as-asc b { color: #fff; letter-spacing: .04em; } .as-asc .as-k { display: block; margin-top: 3px; font-size: 12.5px; letter-spacing: .02em; color: rgba(242, 233, 214, .72); }
 .tb-title .tb-ascd { margin: 3px 0 0; font: 600 12px/1.25 var(--mono); letter-spacing: .02em; color: #f3d28a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 38ch; cursor: help; } .tb-title .tb-ascd b { color: #fff4d6; letter-spacing: .04em; }
 .stakes .as-mult { align-self: center; margin-left: 8px; font-family: var(--mono); font-size: 15.5px; letter-spacing: .06em; color: var(--brass-lt); white-space: nowrap; } .stakes .as-mult.off { opacity: .4; }
+
+/* ---------- Clasico v0.3.22: legible en la Steam Deck. La lista se desplaza (.scrolls: A.fitK no la encoge) y todo va a tamano real:
+   12 campanas en 2 columnas, compactas pero grandes, con la descripcion entera; el pie (niveles + Empezar) se queda fijo debajo ---------- */
+.s-camps { grid-template-rows: auto minmax(0, 1fr) auto; padding-bottom: 0; }
+.s-camps .scr-body { display: block; padding: 6px 10px 26px 4px; scroll-padding: 12px 0 18px; overscroll-behavior: contain; scrollbar-gutter: stable;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent); }
+.s-camps .scr-body::-webkit-scrollbar { width: 10px; } .s-camps .scr-body::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffe08a, #f8b449); border-radius: 999px; box-shadow: inset 0 0 0 2px #16241c; } .s-camps .scr-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, .3); border-radius: 999px; }
+html body .s-camps .camps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; margin: 0; }
+html body .s-camps .camp { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; align-items: center; padding: 12px 18px 12px 12px; min-height: 144px; border-radius: 16px; }
+html body .s-camps .camp:hover { transform: translateY(-3px); }
+html body .s-camps .camp-thumb { width: 180px; max-width: none; height: 120px; aspect-ratio: auto; border-radius: 10px; }   /* x2 de su rejilla de 90x60: nitida */
+html body .s-camps .camp-body { gap: 4px; align-self: stretch; grid-template-rows: auto 1fr auto; }
+html body .s-camps .camp-t { font-size: 34px; line-height: 1; display: flex; align-items: center; gap: 8px; }
+html body .s-camps .camp-t .ic { width: 30px; height: 30px; }
+html body .s-camps .camp-d { font-size: 22px; line-height: 1.15; color: rgba(242, 233, 214, .82); text-wrap: pretty; }
+html body .s-camps .camp-m { margin-top: 4px; gap: 14px; }
+html body .s-camps .camp-m > span { font-size: 16px; letter-spacing: .06em; }
+html body .s-camps .camp-p i { height: 6px; border-radius: 2px; }
+/* pie fijo: fieltro oscuro con filo dorado; niveles grandes (botones de 46 px, numero de 20 px) a la izquierda y Empezar a la derecha */
+.s-camps .camp-foot { position: relative; min-height: 0; margin: 0 calc(-1 * clamp(16px, calc(4 * var(--vw)), 64px)); padding: 14px clamp(16px, calc(4 * var(--vw)), 64px) clamp(14px, calc(2.2 * var(--vh)), 24px); gap: 18px 28px; flex-wrap: nowrap;
+  background: linear-gradient(180deg, rgba(6, 16, 11, .72), rgba(5, 12, 8, .94)); }
+.s-camps .camp-foot::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255, 224, 138, .55) 18%, #ffe08a 50%, rgba(255, 224, 138, .55) 82%, transparent); }
+.s-camps .camp-foot .picker { margin: 0; min-width: 0; }
+html body .s-camps .picker > span { font-size: 16px; margin-bottom: 8px; color: rgba(242, 233, 214, .7); }
+.s-camps .lrail { gap: 8px; flex-wrap: nowrap; }
+html body .s-camps .lv { width: 46px; height: 46px; font-size: 20px; border-width: 2px; flex: none; }
+.s-camps .camp-foot .startbtn { width: min(100%, 500px); flex: none; }
+html body .s-camps .sb-t > b { font-size: 30px; } html body .s-camps .sb-t > i { font-size: 16px; }
+/* ventanas estrechas: una columna y el pie en dos filas */
+@media (max-width: 1100px) { .s-camps .camp-foot { flex-wrap: wrap; } .s-camps .camp-foot .startbtn { width: 100%; } }
+@media (max-width: 899px) { html body .s-camps .camps { grid-template-columns: 1fr; } html body .s-camps .camp { grid-template-columns: 90px minmax(0, 1fr); } html body .s-camps .camp-thumb { width: 90px; height: 60px; } .s-camps .lrail { flex-wrap: wrap; } }

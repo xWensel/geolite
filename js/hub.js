@@ -69,7 +69,7 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ marco comun de las sub-pantallas (a pantalla completa, sobre el mapa) */
-  const scr = (title, inner, cls = "") => `<div class="scr ${cls}"><header class="scr-head"><button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button><h2>${title}</h2>${tools()}</header><div class="scr-body">${inner}</div></div>`;
+  const scr = (title, inner, cls = "", foot = "") => `<div class="scr ${cls}"><header class="scr-head"><button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button><h2>${title}</h2>${tools()}</header><div class="scr-body">${inner}</div>${foot}</div>`;   // foot: barra fija bajo la lista que se desplaza (Clasico)
   const startBtn = (id, big, small, primary) => `<button class="startbtn" id="${id}" ${primary ? "data-primary" : ""}><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${big}</b><i>${small}</i></span><span class="sb-ar">${A.icon("u_next", "sm")}</span></button>`;
 
   /* ------------------------------------------------------------------ Clasico: campanas */
@@ -95,10 +95,8 @@ window.AIQ = window.AIQ || {};
       document.querySelectorAll(".lv").forEach(b => (b.onclick = () => { S.startLevel = +b.dataset.lv; document.querySelectorAll(".lv").forEach(x => x.classList.toggle("sel", x === b)); const sub = $("goBtn").querySelector("i"); if (sub) sub.innerHTML = A.t("go.sub", { n: S.startLevel + 1, name: A.tx(camps.find(x => x.id === S.campId).title) }); }));
       $("goBtn").onclick = () => { A.sfx.depart(); S.ranked = null; c.newRun(); };
     };
-    c.dialog(scr(T("Clásico", "Classic"), `
-      <p class="mode-d">${A.t("mode." + mode + ".d")}</p>
-      <div class="camps">${list}</div>
-      <div class="camp-foot" id="campFoot">${foot()}</div>`, "s-camps"), "tablewrap");
+    /* v0.3.22: la lista se desplaza (.scrolls: A.fitK ya no la encoge, la letra queda a tamano real tambien en la Steam Deck) y el pie se queda fijo debajo */
+    c.dialog(scr(T("Clásico", "Classic"), `<div class="camps">${list}</div>`, "s-camps scrolls", `<div class="camp-foot" id="campFoot">${foot()}</div>`), "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
     document.querySelectorAll(".camp").forEach(b => (b.onclick = () => {
       if (b.dataset.id === S.campId) return;

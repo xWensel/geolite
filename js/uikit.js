@@ -176,7 +176,7 @@
     const w = box.width - (parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)) * sc, last = lines[lines.length - 1];
     if (!(w > 0) || last.right - last.left > w * 0.25) return null;                  // la ultima linea ya es "de verdad": no se toca
     const fs = parseFloat(cs.fontSize), ls = parseFloat(cs.letterSpacing) || 0, keep = { ls: el.style.letterSpacing, fs: el.style.fontSize };
-    const tries = []; if (ls > 0.4) tries.push([ls * 0.5, 1], [0, 1]); [0.96, 0.92].forEach(k => tries.push([ls > 0.4 ? 0 : ls, k]));
+    const tries = [], min = /Silkscreen/i.test(cs.fontFamily) ? 16 : 18; if (ls > 0.4) tries.push([ls * 0.5, 1], [0, 1]); [0.96, 0.92].forEach(k => { if (fs * k >= min - 0.05) tries.push([ls > 0.4 ? 0 : ls, k]); });   // v0.3.22: nunca por debajo de la letra minima (css/legible.css)
     return { el, n: lines.length, fs, keep, tries };
   }
   /* textos con algo de texto propio (no solo hijos), fuera de SQ_SKIP y visibles: se recorren los nodos de texto (antes, todos los elementos con closest) */
@@ -206,14 +206,15 @@
     const FIT = [
       el => { el.classList.remove("sq-short", "sq-wrap"); el.style.letterSpacing = el.style.fontSize = ""; },
       el => el.classList.add("sq-short"),
-      ...[1, 0.95, 0.9, 0.86].map(k => (el, fs) => { el.style.letterSpacing = "0px"; el.style.fontSize = (fs * k).toFixed(2) + "px"; }),
-      ...[1, 0.9, 0.8].map((k, i) => (el, fs) => { if (!i) el.classList.add("sq-wrap"); el.style.fontSize = (fs * k).toFixed(2) + "px"; }),
+      ...[1, 0.95, 0.9, 0.86].map(k => (el, fs, mn) => { el.style.letterSpacing = "0px"; el.style.fontSize = Math.max(fs * k, mn).toFixed(2) + "px"; }),
+      ...[1, 0.9, 0.8].map((k, i) => (el, fs, mn) => { if (!i) el.classList.add("sq-wrap"); el.style.fontSize = Math.max(fs * k, mn).toFixed(2) + "px"; }),
     ];
-    let fit = roots.flatMap(r => [...r.querySelectorAll(".sq-fit")]).map(el => ({ el, fs: 0 }));
+    /* mn: la letra minima (css/legible.css): se aprieta el interletrado y se parte en dos lineas, pero no se encoge por debajo */
+    let fit = roots.flatMap(r => [...r.querySelectorAll(".sq-fit")]).map(el => ({ el, fs: 0, mn: 0 }));
     for (let i = 0; i < FIT.length && fit.length; i++) {
-      fit.forEach(f => FIT[i](f.el, f.fs));
+      fit.forEach(f => FIT[i](f.el, f.fs, f.mn));
       fit = fit.filter(f => over(f.el));
-      if (i === 1) fit.forEach(f => (f.fs = parseFloat(getComputedStyle(f.el).fontSize)));   // su tamano, ya sin el prefijo
+      if (i === 1) fit.forEach(f => { const cs = getComputedStyle(f.el); f.fs = parseFloat(cs.fontSize); f.mn = Math.min(f.fs, /Silkscreen/i.test(cs.fontFamily) ? 16 : 18); });   // su tamano, ya sin el prefijo
     }
   };
 

@@ -252,13 +252,8 @@
       };
       if (A.dealer && A.dealer.forget) A.dealer.forget(wipe); else wipe();       // el crupier se despide antes (y te olvida de verdad)
     }; }
-  /* Ajustes no se escala con --k: si en una ventana pequena (1024x768 en ruso o japones) su panel no cabe, se encoge con zoom hasta que quepa
-     (en escritorio nunca hay que desplazarse); en movil se desplaza como siempre */
-  const fitSet = () => {
-    const b = document.querySelector("#settings .set-body"), p = document.querySelector("#settings .set-panes"); if (!b || !p) return;
-    b.style.zoom = ""; if (!S.settingsOpen || innerWidth < 900 || innerHeight < 520) return;
-    let z = 1; for (let i = 0; i < 6 && p.scrollHeight > p.clientHeight + 2; i++) { z = Math.max(0.7, z * p.clientHeight / p.scrollHeight * 0.99); b.style.zoom = z.toFixed(3); if (z <= 0.7) break; }
-  };
+  /* Ajustes no se escala con --k. Antes, si su panel no cabia, se encogia con zoom; desde la v0.3.22 se queda a tamano real y se desplaza */
+  const fitSet = () => { const b = document.querySelector("#settings .set-body"); if (b) b.style.zoom = ""; };   // si el panel no cabe, .set-panes se desplaza
   const fitSetSoon = () => requestAnimationFrame(fitSet);
   addEventListener("resize", fitSetSoon);
   let setFocusBack = null;
