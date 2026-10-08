@@ -47,7 +47,7 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 
 ## Arte ligado al crupier
 - El crupier (Don Crupier) es un sprite animado por capas que usa `js/crupier.js` con los datos de `js/crupier-data.js` (atlas incrustado). Las fuentes de arte (`tools/crupier/`, `tools/card_adv.py`...) se retiraron del repositorio en la v0.3.0.
-- La tarjeta del modo Aventura (`assets/gen/card_adv.webp`) lleva DENTRO al crupier de sus frases (`assets/icons/dealer_neutral.webp`); si el crupier cambia, la tarjeta se rehace en la misma entrega y se revisa que la mesa le tape el busto, la pajarita siga a la vista y el explorador no le tape la cara.
+- Las tres cartas de modo de la portada (`assets/gen/card_classic.webp`, `card_adv.webp`, `card_compete.webp`) son sencillas: UN protagonista al estilo de los logros (globo, crupier, trofeo) sobre un fondo de foco a bandas del color de su modo (turquesa, granate, morado). Nada de escenas cargadas ni de piezas de dentro del juego (mapa, chinchetas, HUD). La de Aventura es el crupier de sus frases (`assets/icons/dealer_neutral.webp`) a 1:1 de su rejilla sobre un lienzo de 102x128 (x10); si el crupier cambia, la carta se rehace en la misma entrega.
 - El icono del jefe del acto (`assets/icons/boss_hat.webp`) es la chistera del crupier. Todo el arte va a rejilla nativa y a escala entera (`image-rendering: pixelated`).
 
 ## Logros

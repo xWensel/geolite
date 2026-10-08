@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.10",
+      name: L("Cartas nuevas en la portada", "New cards on the title screen", "Nouvelles cartes sur l'écran titre", "Cartas novas na tela inicial", "Neue Karten im Hauptmenü", "Nuove carte nella schermata iniziale", "Cartas nuevas en la pantalla de inicio", "主界面的新卡牌", "타이틀 화면의 새 카드", "タイトル画面の新しいカード", "Новые карты на главном экране", "Nowe karty na ekranie tytułowym"),
+      date: "2026-10-08",
+      summary: L("Clásico, Aventura y Reto diario estrenan carta: un solo protagonista y mucha luz.", "Classic, Adventure and Daily challenge get new cards: a single star and plenty of light.", "Classique, Aventure et Défi du jour ont de nouvelles cartes : une seule vedette et beaucoup de lumière.", "Clássico, Aventura e Desafio diário ganham cartas novas: um só protagonista e muita luz.", "Klassisch, Abenteuer und Tägliche Herausforderung bekommen neue Karten: ein einziger Star und viel Licht.", "Classico, Avventura e Sfida del giorno hanno nuove carte: un solo protagonista e tanta luce.", "", "经典、冒险和每日挑战换上新卡牌：只有一个主角，满满的光。", "클래식, 모험, 일일 도전에 새 카드가 생겼습니다. 주인공 하나와 넉넉한 조명.", "クラシック、アドベンチャー、デイリーチャレンジに新しいカード。主役はひとつ、光はたっぷり。", "У «Классики», «Приключения» и «Испытания дня» новые карты: один герой и много света.", "Klasyka, Przygoda i Wyzwanie dnia mają nowe karty: jeden bohater i dużo światła."),
+      chapters: [
+        { id: "cartas", kicker: L("Portada", "Title screen", "Écran titre", "Tela inicial", "Hauptmenü", "Schermata iniziale", "Pantalla de inicio", "主界面", "타이틀 화면", "タイトル画面", "Главный экран", "Ekran tytułowy"),
+          title: L("Cartas de modo", "Mode cards", "Cartes de mode", "Cartas de modo", "Moduskarten", "Carte delle modalità", "", "模式卡牌", "모드 카드", "モードカード", "Карты режимов", "Karty trybów"),
+          intro: L("Menos es más.", "Less is more.", "Moins, c'est plus.", "Menos é mais.", "Weniger ist mehr.", "Meno è meglio.", "", "少即是多。", "적을수록 좋습니다.", "少ないほど豊か。", "Меньше значит больше.", "Mniej znaczy więcej."),
+          entries: [
+            E(L("Un protagonista por carta", "One star per card", "Une vedette par carte", "Um protagonista por carta", "Ein Star pro Karte", "Un protagonista per carta", "", "每张卡一个主角", "카드마다 주인공 하나", "1枚にひとりの主役", "Один герой на карту", "Jeden bohater na kartę"), "change", "0.3.10", [
+              L("**Clásico** es un globo terráqueo, **Aventura** es Don Crupier en persona y **Reto diario** es un trofeo, cada uno bajo un foco del color de su modo.", "**Classic** is a world globe, **Adventure** is the Dealer himself and **Daily challenge** is a trophy, each under a spotlight in its mode's colour.", "**Classique** est un globe terrestre, **Aventure** est Don Croupier en personne et **Défi du jour** est un trophée, chacun sous un projecteur à la couleur de son mode.", "**Clássico** é um globo terrestre, **Aventura** é o próprio Dom Crupiê e **Desafio diário** é um troféu, cada um sob um holofote da cor do seu modo.", "**Klassisch** ist ein Globus, **Abenteuer** ist Don Croupier persönlich und **Tägliche Herausforderung** ein Pokal, jeweils unter einem Scheinwerfer in der Farbe des Modus.", "**Classico** è un mappamondo, **Avventura** è Don Croupier in persona e **Sfida del giorno** è un trofeo, ognuno sotto un riflettore del colore della sua modalità.", "", "**经典** 是一个地球仪，**冒险** 是荷官先生本人，**每日挑战** 是一座奖杯，各自沐浴在本模式颜色的聚光灯下。", "**클래식**은 지구본, **모험**은 딜러 나리 본인, **일일 도전**은 트로피입니다. 각자 모드 색깔의 조명 아래에 있습니다.", "**クラシック**は地球儀、**アドベンチャー**はドン・ディーラー本人、**デイリーチャレンジ**はトロフィー。それぞれのモードの色のスポットライトの下に。", "**Классика** — это глобус, **Приключение** — сам Дон Крупье, а **Испытание дня** — кубок, каждый под прожектором цвета своего режима.", "**Klasyka** to globus, **Przygoda** to sam Don Krupier, a **Wyzwanie dnia** to puchar, każdy w świetle reflektora w kolorze swojego trybu."),
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.9",
       name: L("Botones de oro", "Golden buttons", "Boutons dorés", "Botões de ouro", "Goldene Knöpfe", "Pulsanti d'oro", "", "金色按钮", "황금 버튼", "金のボタン", "Золотые кнопки", "Złote przyciski"),
       date: "2026-10-08",
