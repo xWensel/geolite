@@ -31,6 +31,23 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.6",
+      name: ["Banderas en la ruleta", "Flags on the wheel"],
+      date: "2026-10-08",
+      summary: ["Las rondas de banderas estrenan ilustración y las nubes del Reto diario son iguales para todos.", "Flag rounds get their own artwork and the Daily Challenge clouds are the same for everyone."],
+      chapters: [
+        { id: "ban", kicker: ["Aventura", "Adventure"], title: ["Retoques", "Touch-ups"],
+          intro: ["Dos detalles que faltaban.", "Two missing details."],
+          entries: [
+            E(["Rondas de banderas", "Flag rounds"], "new", "0.3.6", [
+              ["Las rondas 3 y 8 (Banderas I y el jefe de Banderas II) tienen escena propia: **una ruleta con las casillas pintadas de banderas**. Antes reutilizaban la de Países.", "Rounds 3 and 8 (Flags I and the Flags II boss) have their own scene: **a roulette wheel with flag-painted pockets**. They used to borrow the Countries one."],
+            ]),
+            E(["Nubes del Reto diario", "Daily Challenge clouds"], "fix", "0.3.6", [
+              ["Con el reto de las nubes, los claros salen **en el mismo sitio para todos** en el Reto diario, como ya pasaba con las grietas, las huellas y las ventanas.", "With the clouds challenge, the gaps now appear **in the same place for everyone** in the Daily Challenge, as cracks, prints and windows already did."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.5",
       name: ["Dedicatoria", "Dedication"],
       date: "2026-10-08",

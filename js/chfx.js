@@ -741,7 +741,7 @@ void main(){
     const get = id => list.find(c => c.id === id), gl_ = !!gl, off = n => { if (E[n]) E[n].on = 0; };
     const dk = gl_ && get("dark"); if (dk) { const p = par(dk), boss = !!(A.chal.state && A.chal.state.bk), r0 = dk.slam ? Math.max(W, H, 800) : E.dark && E.dark.k > 0.01 ? E.dark.r : boss && DM.r > 0 ? DM.r : p.r; E.dark = keep(E.dark, { tr: p.r, a: p.a, warm: !!fx.halo, fast: dk.slam ? 0.16 : 0.55 }); E.dark.r = r0; if (boss) DM.r = p.r; } else off("dark");   // tanda 16: el foco se cierra en directo hasta su radio (o salta de golpe, si lo enciende la siesta)
     const bs = gl_ && get("blindspot"); if (bs) E.spot = keep(E.spot, { r: par(bs).r }); else off("spot");
-    const cl = gl_ && get("clouds"); if (cl) { if (!E.smoke || !E.smoke.on) sweepReset(); E.smoke = keep(E.smoke, { cover: par(cl).cover, hole: fx.cloudClear || 0, seed: E.smoke && E.smoke.on ? E.smoke.seed : rnd() }); } else off("smoke");
+    const cl = gl_ && get("clouds"); if (cl) { if (!E.smoke || !E.smoke.on) sweepReset(); E.smoke = keep(E.smoke, { cover: par(cl).cover, hole: fx.cloudClear || 0, seed: E.smoke && E.smoke.on ? E.smoke.seed : R("clouds")() }); } else off("smoke");   // Reto diario: los claros de las nubes en el mismo sitio para todos
     const rn = get("rain"); if (rn) { if (!(E.rain && E.rain.on)) rainOn(par(rn).dens); } else if (E.rain) { E.rain.on = 0; part("chx-wet").classList.remove("on"); say("rain", 0); }
     if (get("blur") && fx.lensR > 0) E.lens = keep(E.lens, { r: fx.lensR }); else off("lens");
     if ((get("wrongborders") && fx.trueR > 0) || (get("noborders") && fx.peekR > 0)) E.seal = keep(E.seal, { r: 110 }); else off("seal");
