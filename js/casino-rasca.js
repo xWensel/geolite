@@ -116,7 +116,7 @@ window.AIQ = window.AIQ || {};
   const foilCache = {};
   const foilData = th => foilCache[th] || (foilCache[th] = new Promise(res => { const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = NW; c.height = NH; const g = c.getContext("2d"); g.drawImage(im, 0, 0); res(g.getImageData(0, 0, NW, NH).data); }; im.onerror = () => res(null); im.src = FOIL[th]; }));
   const cellOf = new Int8Array(NW * NH).fill(-1); for (let i = 0; i < 9; i++) { const [x0, y0] = cellXY(i); for (let y = 0; y < GEO.CELL; y++) for (let x = 0; x < GEO.CELL; x++) cellOf[(y0 + y) * NW + x0 + x] = i; }
-  const preload = () => { if (preload.done) return; preload.done = 1; ["hat", "diamond", "coin", "pin"].forEach(img); ["cenefa", "coin_cur", "coin_hold", "felt_ivory", "wall", "sweat", "glove_open"].forEach(n => { new Image().src = `${AS}${n}.png`; }); };
+  const preload = () => { if (preload.done) return; preload.done = 1; ["hat", "diamond", "coin", "pin"].forEach(img); ["cenefa", "coin_cur", "coin_hold", "felt_ivory", "wall", "sweat", "hand_clap", "hand_clap_hit"].forEach(n => { new Image().src = `${AS}${n}.png`; }); };
 
   function spinRasca(o, done) {
     const cx = o.cx, TST = A.adv._rasca || {}, run = cx.run, out = o.out, R = REEL.find(r => r.id === o.rid) || REEL[0], th = R.theme, TH = THEMES[th], rec = o.rec;
@@ -129,7 +129,7 @@ window.AIQ = window.AIQ || {};
       <div class="ra-dealerbox bob"><img class="ra-dealer" src="${IC}dealer_neutral.webp" alt="" draggable="false"><img class="ra-sweat s1" src="${AS}sweat.png" alt="" draggable="false"><img class="ra-sweat s2" src="${AS}sweat.png" alt="" draggable="false"></div>
       <div class="ra-bubble"><span></span></div>
       <div class="ra-band"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div>
-      <div class="ra-glovelayer"><img class="ra-gl l" src="${AS}glove_open.png" alt="" draggable="false"><img class="ra-gl r" src="${AS}glove_open.png" alt="" draggable="false"></div>
+      <div class="ra-glovelayer"><img class="ra-gl l" src="${AS}hand_clap.png" alt="" draggable="false"><img class="ra-gl r" src="${AS}hand_clap.png" alt="" draggable="false"></div>
       <div class="ra-plaque ra-pay"></div>
       <div class="ra-card off"><img class="ra-base" src="${AS}card_${th}.png" alt="" draggable="false"><div class="ra-ct"></div><div class="ra-cf"></div><div class="ra-syms"></div><canvas class="ra-foil" width="${NW}" height="${NH}"></canvas><div class="ra-hls"></div></div>
       <div class="ra-curtain l"></div><div class="ra-curtain r"></div>
@@ -208,7 +208,9 @@ window.AIQ = window.AIQ || {};
       const my = ++clapId, run1 = (d, fn) => new Promise(res => { const t0 = performance.now(), f = now => { const p = Math.min(1, (now - t0) / d); if (my === clapId && alive()) fn(p); p < 1 && my === clapId && alive() ? requestAnimationFrame(f) : res(); }; requestAnimationFrame(f); });
       glL.style.opacity = glR.style.opacity = 1; const L0 = 860, R0 = 1360; glL.style.left = L0 + "px"; glR.style.left = R0 + "px";
       await run1(300, p => { const y = lerp(340, 120, easeOut(p)); glL.style.transform = `translate3d(0,${Math.round(y - 340)}px,0)`; glR.style.transform = `scaleX(-1) translate3d(0,${Math.round(y - 340)}px,0)`; });
-      for (let i = 0; i < n && my === clapId && alive(); i++) { await run1(130, p => { const x = lerp(0, 120, easeOut(p)); glL.style.left = L0 + x + "px"; glR.style.left = R0 - x + "px"; }); sfx.clack(); await run1(130, p => { const x = lerp(120, 0, p); glL.style.left = L0 + x + "px"; glR.style.left = R0 - x + "px"; }); }
+      // aplauso de verdad (v0.3.26): las dos manos de canto, palma contra palma, se juntan hasta tocarse; en el golpe los dedos ceden un instante
+      const hit = on => { glL.src = glR.src = `${AS}${on ? "hand_clap_hit" : "hand_clap"}.png`; }, MEET = 164;                      // 164 px: los cantos de las palmas se tocan (2 px de solape)
+      for (let i = 0; i < n && my === clapId && alive(); i++) { await run1(120, p => { const x = lerp(0, MEET, p * p); glL.style.left = L0 + x + "px"; glR.style.left = R0 - x + "px"; }); hit(true); sfx.clack(); await run1(80, () => {}); hit(false); await run1(140, p => { const x = lerp(MEET, 0, easeOut(p)); glL.style.left = L0 + x + "px"; glR.style.left = R0 - x + "px"; }); }
       await run1(300, p => { const y = lerp(120, 340, ease(p)); glL.style.transform = `translate3d(0,${Math.round(y - 340)}px,0)`; glR.style.transform = `scaleX(-1) translate3d(0,${Math.round(y - 340)}px,0)`; }); if (my === clapId) glL.style.opacity = glR.style.opacity = 0;
     }
 

@@ -106,7 +106,7 @@ img, canvas { image-rendering: pixelated; }
 /* la tele: lo que ve el jugador, en vivo, con marco de laton. Clic = dos toquecitos del guante; arrastrar = el guante le sigue */
 .tv { position: relative; z-index: 1; width: min(100%, 900px); margin: 8px 0 18px; }
 .tvf { position: relative; aspect-ratio: 16 / 10; background: #040705; box-shadow: inset 0 0 0 3px var(--brass-lt), 0 0 0 5px #2a1608, 0 0 0 8px var(--brass), 0 12px 0 rgba(0, 0, 0, .45); overflow: hidden; }
-.tvf video { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); object-fit: contain; background: #000; cursor: url("/assets/icons/vivo_glove.webp") 2 0, crosshair; touch-action: none; }
+.tvf video { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); object-fit: contain; background: #000; cursor: url("/assets/icons/vivo_hand.webp") 8 0, crosshair; touch-action: none; }
 .tvf::after { content: ""; position: absolute; inset: 3px; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px); }
 .tvhud { position: absolute; left: 12px; top: 10px; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(0, 0, 0, .6); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: #ff8a93; pointer-events: none; }
 .tvx { position: absolute; right: 10px; top: 8px; z-index: 2; font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 6px 8px; background: rgba(0, 0, 0, .65); color: var(--brass-lt); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .5); }

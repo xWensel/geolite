@@ -114,16 +114,17 @@ window.AIQ = window.AIQ || {};
     el.querySelector("b").textContent = A.pick6(EYE); requestAnimationFrame(() => el.classList.add("on"));
     if (A.sfx && A.sfx.spot) A.sfx.spot();
   }
-  /* el guante del crupier (sus pixeles, assets/icons/vivo_glove.webp, 14x22): se mueve por tu pantalla y da toquecitos en el cristal */
+  /* la mano del crupier (su derecha de dorso, sus pixeles: assets/icons/vivo_hand.webp, 25x37, y vivo_hand_tap.webp con la yema aplastada):
+     se mueve por tu pantalla y da toquecitos en el cristal con la punta del indice (columna 8,5 del sprite) */
   let gEl = null, gHide = 0;
   function glove(m) {
     if (!m) { if (gEl) gEl.classList.remove("on"); return; }
-    if (!gEl) { gEl = document.createElement("div"); gEl.id = "vivoGlove"; gEl.innerHTML = `<img src="assets/icons/vivo_glove.webp" alt=""><i class="vg-ring"></i>`; document.body.appendChild(gEl); }
+    if (!gEl) { gEl = document.createElement("div"); gEl.id = "vivoGlove"; gEl.innerHTML = `<img src="assets/icons/vivo_hand.webp" alt=""><i class="vg-ring"></i>`; new Image().src = "assets/icons/vivo_hand_tap.webp"; document.body.appendChild(gEl); }
     const dpr = devicePixelRatio || 1, k = Math.max(2, Math.round(4 * dpr)) / dpr;          // escala entera de pixel de pantalla
-    gEl.style.setProperty("--gw", (14 * k) + "px"); gEl.style.setProperty("--gh", (22 * k) + "px"); gEl.style.setProperty("--gx", (2.5 * k) + "px");
+    gEl.style.setProperty("--gw", (25 * k) + "px"); gEl.style.setProperty("--gh", (37 * k) + "px"); gEl.style.setProperty("--gx", (8.5 * k) + "px");
     const x = Math.max(0, Math.min(1, +m.x || 0)) * innerWidth, y = Math.max(0, Math.min(1, +m.y || 0)) * innerHeight;
     gEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`; gEl.classList.add("on");
-    if (m.t === "tap") { gEl.classList.remove("tap"); void gEl.offsetWidth; gEl.classList.add("tap"); if (A.sfx && A.sfx.knock) { A.sfx.knock(); setTimeout(() => A.sfx.knock(), 170); } }
+    if (m.t === "tap") { gEl.classList.remove("tap"); void gEl.offsetWidth; gEl.classList.add("tap"); const im = gEl.firstChild; [[66, 1], [167, 0], [242, 1], [343, 0]].forEach(([t, on]) => setTimeout(() => { im.src = `assets/icons/vivo_hand${on ? "_tap" : ""}.webp`; }, t)); if (A.sfx && A.sfx.knock) { A.sfx.knock(); setTimeout(() => A.sfx.knock(), 170); } }
     clearTimeout(gHide); gHide = setTimeout(() => glove(null), m.t === "tap" ? 3500 : 5000);
   }
   function hand(data) { let m; try { m = JSON.parse(data); } catch (e) { return; } if (!m || !pc) return; if (m.t === "hide") glove(null); else if (m.t === "tap" || m.t === "move") glove(m); }

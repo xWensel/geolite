@@ -17,7 +17,19 @@ window.AIQ = window.AIQ || {};
   const PRES = ["clasica", "deslizada", "baranda", "choque", "desigual", "canto", "arriba", "volcado", "peonza", "rodado"];   // el carrete de tiradas (10)
   const lerp = (a, b, t) => a + (b - a) * t, clamp = (x, a, b) => Math.max(a, Math.min(b, x)), D2R = Math.PI / 180, rnd = Math.random, J = a => (rnd() - 0.5) * a, rr = (a, b) => a + (b - a) * rnd();
   const easeOut = p => 1 - Math.pow(1 - p, 3), smooth = p => p * p * (3 - 2 * p);
-  const preload = () => { if (preload.done) return; preload.done = 1; ["cup_back", "cup_front", "dice_ivory_0", "dice_ivory_1", "dice_ivory_2", "dice_burg_0", "dice_burg_1", "dice_burg_2", "ring", "felt", "rail_h", "rail_l", "rail_r", "sh_cup", "sh_l", "sh_m", "sh_s", "cenefa"].forEach(n => { new Image().src = `assets/dados/${n}.png`; }); new Image().src = "assets/trile/glove_grab.png"; };
+  const preload = () => { if (preload.done) return; preload.done = 1; ["cup_back", "cup_front", "dice_ivory_0", "dice_ivory_1", "dice_ivory_2", "dice_burg_0", "dice_burg_1", "dice_burg_2", "ring", "felt", "rail_h", "rail_l", "rail_r", "sh_cup", "sh_l", "sh_m", "sh_s", "cenefa"].forEach(n => { new Image().src = `assets/dados/${n}.png`; }); ["reach", "half", "grab_sq", "grab"].forEach(n => { new Image().src = `assets/trile/hand_${n}.png`; }); };
+  /* la mano del crupier (la misma del trile): baja abierta, cierra, aprieta y agarra; al soltar se abre y sube. Se apoya por el centro de los nudillos */
+  const HAND = { reach: [224, 296], half: [224, 296], grab_sq: [176, 284], grab: [176, 280] };
+  const HAND_HTML = Object.entries(HAND).map(([n, [w, h]]) => `<img class="hf-${n}" src="assets/trile/hand_${n}.png" width="${w}" height="${h}" style="left:${-w / 2}px;top:${-h}px" alt="" draggable="false">`).join("");
+  function handStep(g, now, tx, ty) {
+    if (g.tv !== g.ptv) { g.ptv = g.tv; g.t0 = now; g.at = 0; }
+    if (g.tv) { if (!g.on) { g.on = 1; g.x = tx; g.y = ty - 300; } g.x += (tx - g.x) * 0.42; g.y += (ty - g.y) * 0.42; if (!g.at && Math.abs(ty - g.y) < 6) g.at = now; }
+    else if (g.on) { g.x += (tx - g.x) * 0.42; g.y += (ty - 340 - g.y) * 0.2; if (g.y < ty - 320) g.on = 0; }
+    const f = g.tv ? (!g.at ? "reach" : now - g.at < 60 ? "half" : now - g.at < 130 ? "grab_sq" : "grab") : (now - g.t0 < 70 ? "half" : "reach");
+    if (f !== g.f) { g.f = f; g.el.dataset.f = f; }
+    const d = g.on ? "block" : "none"; if (g.d !== d) { g.d = d; g.el.style.display = d; }
+    if (g.on) g.el.style.transform = `translate3d(${Math.round(g.x)}px,${Math.round(g.y)}px,0)`;
+  }
 
   /* ------------------------------------------------------------------ el resultado: la semilla decide TODO (las dos tiradas si hay empate) */
   const lvOf = m => (m <= 2 ? 1 : m <= 5 ? 2 : 3);                                   // nivel de recompensa segun el margen ganado
@@ -95,7 +107,7 @@ window.AIQ = window.AIQ || {};
       S.cup = { phi: 0, dx: 0, dy: 0, k: -1 }; S.shaking = 0; S.plan = null;
       S.dice = [0, 1].map(i => ({ S, i, el: mk("dd-die"), sh: mk("dd-sh"), n: 1 + i * 2, yaw: i, mode: "hidden", st: { x: 0, y: 0, h: 0, ax: 1, ang: 0 }, key: "", shk: "", alpha: 1, shown: -1, aShown: -1, tf: "" }));
       S.dice.forEach(d => { d.el.style.backgroundImage = `url(assets/dados/dice_${S.mat}_${d.yaw}.png)`; d.el.style.display = "none"; d.sh.style.display = "none"; });
-      S.glove = { el: mk("dd-glove", glovesEl), vis: 0, tv: 0 }; S.glove.el.innerHTML = `<img src="assets/trile/glove_grab.png" width="184" height="200" alt="" draggable="false">`;
+      S.glove = { el: mk("dd-glove", glovesEl), tv: 0, on: 0, x: 0, y: 0, f: "", t0: 0, at: 0 }; S.glove.el.innerHTML = HAND_HTML;
     }
     const coins = [0, 1, 2].map(() => mk("dd-coin", stage));
 
@@ -210,8 +222,7 @@ window.AIQ = window.AIQ || {};
         const a = S.shaking, ph = [-15, 0, 15, 0][Math.floor(now / 52) % 4];
         S.cup.phi = ph * Math.min(1, a); S.cup.dx = Math.sin(now / 37) * 5 * a; S.cup.dy = -Math.abs(Math.sin(now / 61)) * 9 * a;
       }
-      const g = S.glove; g.vis += (g.tv - g.vis) * 0.3; if (Math.abs(g.tv - g.vis) < 0.01) g.vis = g.tv;
-      if (g.vis > 0 || g.vs > 0) { g.vs = g.vis; g.el.style.opacity = g.vis; g.el.style.transform = `translate3d(${Math.round(S.px + S.cup.dx - 92)}px,${Math.round(S.py + S.cup.dy - 240 - (1 - g.vis) * 140)}px,0)`; }   // el guante sigue al cubilete mientras se ve
+      handStep(S.glove, now, S.px + S.cup.dx, S.py + S.cup.dy - 76);                        // la mano sigue al cubilete por los nudillos
       drawCup(S); S.dice.forEach(d => drawDie(d, now));
     }
     const killPend = () => { pend.forEach(e => e.rej(CANCEL)); pend.clear(); };

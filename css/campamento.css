@@ -615,7 +615,9 @@ html.reduce-motion .rou-no { display: none; }
 .rou.cups .tr-cup { position: absolute; left: 0; top: 0; width: 192px; height: 224px; will-change: transform; }
 .rou.cups .tr-cup.pick { cursor: pointer; }
 .rou.cups .tr-glovelayer { position: absolute; inset: 0; z-index: 100; pointer-events: none; clip-path: inset(452px 0 0 0); }
-.rou.cups .tr-glove { position: absolute; left: 0; top: 0; width: 184px; height: 200px; z-index: 100; will-change: transform; pointer-events: none; }
+.rou.cups .tr-glove { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 100; will-change: transform; pointer-events: none; display: none; }
+.rou.cups .tr-glove:not(.open) img { position: absolute; display: none; }
+.rou.cups .tr-glove[data-f=reach] .hf-reach, .rou.cups .tr-glove[data-f=half] .hf-half, .rou.cups .tr-glove[data-f=grab_sq] .hf-grab_sq, .rou.cups .tr-glove[data-f=grab] .hf-grab { display: block; }
 .rou.cups .tr-glove.r img { transform: scaleX(-1); }
-.rou.cups .tr-glove.open { z-index: 101; width: 184px; height: 248px; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 36px); mask-image: linear-gradient(to top, transparent 0, #000 36px); }
+.rou.cups .tr-glove.open { display: block; z-index: 101; width: 224px; height: 296px; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 36px); mask-image: linear-gradient(to top, transparent 0, #000 36px); }
 .rou.cups .tr-spin { position: absolute; left: 0; top: 0; width: 192px; height: 192px; z-index: 120; background: url(../assets/icons/coin_spin.webp) 0 0 / 4608px 192px no-repeat; image-rendering: pixelated; display: none; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .35)); }

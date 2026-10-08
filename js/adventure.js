@@ -2087,7 +2087,7 @@ window.AIQ = window.AIQ || {};
   const CUPS_CFG = [{ n: 6, dur: 640, rots: 0, feints: 0 }, { n: 9, dur: 440, rots: 2, feints: 1 }, { n: 12, dur: 310, rots: 3, feints: 2 }];   // por ficha: cambios, ms por cambio, rotaciones de tres y falsos pases
   const CUPS_SLOT = [620, 960, 1300], CUPS_GY = 790;
   let cupsStake = 0;
-  const cupsPreload = () => { if (cupsPreload.done) return; cupsPreload.done = 1; ["cup", "glove_grab", "glove_open", "coin_flat", "ring", "shadow", "felt", "cenefa"].forEach(n => { new Image().src = `assets/trile/${n}.png`; }); };
+  const cupsPreload = () => { if (cupsPreload.done) return; cupsPreload.done = 1; ["cup", "hand_reach", "hand_half", "hand_grab_sq", "hand_grab", "hand_open", "coin_flat", "ring", "shadow", "felt", "cenefa"].forEach(n => { new Image().src = `assets/trile/${n}.png`; }); };
   /* la lista de cambios (sembrada: la misma tirada baila igual); ranuras 0-1-2 de izquierda a derecha */
   function cupsMoves(seed, tier) {
     const c = CUPS_CFG[tier] || CUPS_CFG[0], rnd = A.rng(seed), pairs = [[0, 1], [1, 2], [0, 2]], mv = []; let rots = c.rots, last = "";
@@ -2125,8 +2125,12 @@ window.AIQ = window.AIQ || {};
     });
     const coin = { cup: o.coinId, show: false, el: mk("tr-coin", IMG("coin_flat", 76, 52)) };
     const spinEl = mk("tr-spin"), gloveLayer = mk("tr-glovelayer");
-    const gloves = [0, 1].map(i => ({ vis: 0, tv: 0, x: 0, y: -400, cup: null, el: mk("tr-glove" + (i ? " r" : ""), IMG("glove_grab", 184, 200), gloveLayer) }));
-    const openGlove = { vis: 0, tv: 0, x: 0, y: 0, el: mk("tr-glove open", IMG("glove_open", 184, 248)) };
+    /* la mano del crupier (su derecha de dorso; la otra, su espejo): baja abierta, cierra, aprieta y agarra; al soltar se abre y sube.
+       Cada fotograma se apoya por el centro de los nudillos (el punto que sigue al cubilete) */
+    const HAND = { reach: [224, 296], half: [224, 296], grab_sq: [176, 284], grab: [176, 280] };
+    const handHTML = Object.entries(HAND).map(([n, [w, h]]) => `<img class="hf-${n}" src="assets/trile/hand_${n}.png" width="${w}" height="${h}" style="left:${-w / 2}px;top:${-h}px" alt="" draggable="false">`).join("");
+    const gloves = [0, 1].map(i => ({ tv: 0, on: 0, x: 0, y: 0, cup: null, f: "", t0: 0, at: 0, el: mk("tr-glove" + (i ? " r" : ""), handHTML, gloveLayer) }));
+    const openGlove = { vis: 0, tv: 0, x: 0, y: 0, el: mk("tr-glove open", IMG("hand_open", 224, 296)) };
     const jokeCoin = mk("tr-coin", IMG("coin_flat", 76, 52)); jokeCoin.style.display = "none"; jokeCoin.style.zIndex = 102;
     const order = [0, 1, 2], slotOf = id => order.indexOf(id), cupTop = c => GY - ANCH + c.arc - Math.round((c.lift + c.hl * 0.11) * LIFT);
     const render = () => {
@@ -2137,10 +2141,17 @@ window.AIQ = window.AIQ || {};
       }
       const cc = cups[coin.cup];                                                              // el doblon acompana a su cubilete (arco incluido) y queda en el tapete al levantarlo
       coin.el.style.display = coin.show ? "block" : "none"; if (coin.show) coin.el.style.transform = `translate3d(${Math.round(cc.x - 38)}px,${Math.round(GY - 32 + cc.arc)}px,0)`;
+      const now = performance.now();
       for (const g of gloves) {
-        g.vis += (g.tv - g.vis) * 0.34; if (Math.abs(g.tv - g.vis) < 0.01) g.vis = g.tv;
-        if (g.cup != null) { const c = cups[g.cup], gx = c.x - 92, gy = cupTop(c) - 124; if (g.vis < 0.05 && g.tv === 1) { g.x = gx; g.y = gy - 150; } g.x += (gx - g.x) * 0.42; g.y += (gy - g.y) * 0.42; }
-        g.el.style.opacity = g.vis; g.el.style.transform = `translate3d(${Math.round(g.x)}px,${Math.round(g.y - (1 - g.vis) * 60)}px,0)`;
+        if (g.tv !== g.ptv) { g.ptv = g.tv; g.t0 = now; g.at = 0; }
+        if (g.cup != null) {
+          const c = cups[g.cup], tx = c.x, ty = cupTop(c) + 40;                                // los nudillos, 10 px de arte por debajo de la boca del cubilete
+          if (g.tv) { if (!g.on) { g.on = 1; g.x = tx; g.y = ty - 300; } g.x += (tx - g.x) * 0.42; g.y += (ty - g.y) * 0.42; if (!g.at && Math.abs(ty - g.y) < 6) g.at = now; }
+          else if (g.on) { g.x += (tx - g.x) * 0.42; g.y += (ty - 340 - g.y) * 0.2; if (g.y < ty - 320) g.on = 0; }
+        }
+        const f = g.tv ? (!g.at ? "reach" : now - g.at < 60 ? "half" : now - g.at < 130 ? "grab_sq" : "grab") : (now - g.t0 < 70 ? "half" : "reach");
+        if (f !== g.f) { g.f = f; g.el.dataset.f = f; }
+        g.el.style.display = g.on ? "block" : "none"; if (g.on) g.el.style.transform = `translate3d(${Math.round(g.x)}px,${Math.round(g.y)}px,0)`;
       }
       openGlove.vis += (openGlove.tv - openGlove.vis) * 0.3; openGlove.el.style.opacity = openGlove.vis; openGlove.el.style.transform = `translate3d(${Math.round(openGlove.x)}px,${Math.round(openGlove.y + (1 - openGlove.vis) * 70)}px,0)`;
       requestAnimationFrame(render);
@@ -2217,10 +2228,10 @@ window.AIQ = window.AIQ || {};
           release(); ov.classList.add("lose");
           if (joke) {                                                                          // el chiste del trilero: los tres vacios; suelta el doblon de entre los dedos, guina y se lo guarda
             ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh"); await sleep(800);
-            openGlove.x = 640; openGlove.y = 300; openGlove.tv = 1; jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 54}px,${openGlove.y + 112}px,0)`;
+            openGlove.x = 640; openGlove.y = 300; openGlove.tv = 1; jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 74}px,${openGlove.y + 124}px,0)`;
             A.sfx.cupWink(); sh.outcome(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([40, 20, 40]);
             sh.hold(5200); await sleep(2600);
-            await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 54, 860, e))}px,${Math.round(lerp(openGlove.y + 112, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
+            await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 74, 860, e))}px,${Math.round(lerp(openGlove.y + 124, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
             jokeCoin.style.display = "none"; A.sfx.stamp();
           } else { sh.outcome(); face("laugh"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
         }

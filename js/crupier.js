@@ -67,7 +67,7 @@ window.AIQ = window.AIQ || {};
     }
     put(c, "cards", p.c[0], p.c[1]);
     put(c, "fist", p.f[0], p.f[1]);
-    if (p.g) put(c, p.g, 0, 0);
+    if (p.g) { if (typeof p.g === "string") put(c, p.g, 0, 0); else for (const [n, dx, dy] of p.g) put(c, n, dx | 0, dy | 0); }   // la mano libre: brazo, lo que sujeta y la mano, en orden
     if (p.x) for (const [n, dx, dy] of p.x) put(c, n, hx + (dx | 0), hy + (dy | 0));
     if (p.w) for (const [y0, y1, dx] of p.w) { const band = c.getImageData(0, y0, N, y1 - y0); c.clearRect(0, y0, N, y1 - y0); c.putImageData(band, dx, y0); }
     if (p.d) darken(c, hx, hy);

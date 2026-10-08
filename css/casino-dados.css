@@ -68,7 +68,9 @@
 .rou.dice .dd-turn { position: absolute; z-index: 13; left: 1685px; top: 560px; width: 0; pointer-events: none; opacity: 0; transition: opacity .3s; }
 .rou.dice .dd-turn.on { opacity: 1; } .rou.dice .dd-turn span { position: absolute; left: -150px; width: 300px; top: 0; text-align: center; font: 900 30px/1.05 var(--serif); letter-spacing: .05em; color: #ffe9a6; text-shadow: 0 3px 0 #0a140f; animation: dd-pulse 1s steps(2) infinite; } @keyframes dd-pulse { 50% { transform: translateY(-6px); } }
 .rou.dice .dd-glovelayer { position: absolute; inset: 0; z-index: 100; pointer-events: none; clip-path: inset(442px 0 0 0); }
-.rou.dice .dd-glove { position: absolute; left: 0; top: 0; width: 184px; height: 200px; will-change: transform; opacity: 0; }
+.rou.dice .dd-glove { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; display: none; }
+.rou.dice .dd-glove img { position: absolute; display: none; }
+.rou.dice .dd-glove[data-f=reach] .hf-reach, .rou.dice .dd-glove[data-f=half] .hf-half, .rou.dice .dd-glove[data-f=grab_sq] .hf-grab_sq, .rou.dice .dd-glove[data-f=grab] .hf-grab { display: block; }
 .rou.dice .dd-hit { position: absolute; left: 1060px; top: 450px; width: 760px; height: 500px; z-index: 150; cursor: pointer; display: none; }
 .rou.dice .dd-hit.on { display: block; }
 .rou.dice .dd-coin { position: absolute; left: 0; top: 0; width: 96px; height: 96px; z-index: 120; background: url(../assets/icons/coin_spin.webp) 0 0 / 2304px 96px no-repeat; image-rendering: pixelated; display: none; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .35)); pointer-events: none; }
