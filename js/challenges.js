@@ -491,16 +491,15 @@ window.AIQ = window.AIQ || {};
     let prev = false;                                                  // las marcas sueltas de una letra tapada se van con ella
     return chars.map((ch, i) => { if (MARK.test(ch)) return prev ? "" : ch; prev = hide.has(i); return prev ? "▮" : ch; }).join("");
   }
-  /* Torre de Babel (v0.52): de los 6 idiomas originales (nunca el tuyo ni su base: es-419 -> es), el que mas aleja el nombre del tuyo (distancia
-     de edicion sin acentos ni mayusculas, relativa a su largo; empate: al azar con la semilla). null si el nombre es el mismo en todos */
+  /* Torre de Babel (v0.52): de los 6 idiomas originales (nunca el tuyo ni su base: es-419 -> es), uno al azar con la semilla entre los que
+     escriben el nombre distinto del tuyo (sin acentos ni mayusculas). null si el nombre es el mismo en todos */
   const lev = (a, b) => { const A1 = [...a], B1 = [...b]; let row = B1.map((_, j) => j + 1); for (let i = 0; i < A1.length; i++) { let prev = i, nx = [i + 1]; for (let j = 0; j < B1.length; j++) { const v = Math.min(row[j] + 1, nx[j] + 1, prev + (A1[i] === B1[j] ? 0 : 1)); prev = row[j]; nx.push(v); } row = nx.slice(1); } return A1.length ? (B1.length ? row[B1.length - 1] : A1.length) : B1.length; };
   function babelAlt(o, key) {
     const me = foldOf(A.tx(o.name)), best = []; let bd = 0;
     for (const l of BABEL_BASE) {
       if (l === A.lang || l === A.wlang() || !o.name || !o.name[l]) continue;
       const f = foldOf(o.name[l]); if (f === me) continue;
-      const d = lev(f, me) / Math.max([...f].length, [...me].length, 1);
-      if (d > bd + 1e-9) { bd = d; best.length = 0; best.push(l); } else if (Math.abs(d - bd) <= 1e-9) best.push(l);
+      best.push(l);   // cualquiera de los 6 originales cuyo nombre difiera del tuyo (antes ganaba siempre el mas lejano: casi siempre aleman o ingles)
     }
     return best.length ? best[Math.floor(A.rng(key)() * best.length)] : null;
   }
