@@ -31,6 +31,7 @@ window.AIQ.CLASSIC_TR = {
   "Central Am. Cities": ["Central American Cities", "Ciudades de Centroamérica", "Villes d'Amérique centrale", "Cidades da América Central", "Städte Mittelamerikas", "Città dell'America centrale", null, "中美洲城市", "중앙아메리카의 도시", "中央アメリカの都市", "Города Центральной Америки", "Miasta Ameryki Środkowej"],
   "South Am. Cities": ["South American Cities", "Ciudades de Sudamérica", "Villes d'Amérique du Sud", "Cidades da América do Sul", "Städte Südamerikas", "Città del Sud America", null, "南美洲城市", "남아메리카의 도시", "南アメリカの都市", "Города Южной Америки", "Miasta Ameryki Południowej"],
   "Australia": ["Australia", "Australia", "Australie", "Austrália", "Australien", "Australia", null, "澳大利亚", "호주", "オーストラリア", "Австралия", "Australia"],
+  "Greenland": ["Greenland", "Groenlandia", "Groenland", "Groenlândia", "Grönland", "Groenlandia", null, "格陵兰", "그린란드", "グリーンランド", "Гренландия", "Grenlandia"],
   "New Zealand": ["New Zealand", "Nueva Zelanda", "Nouvelle-Zélande", "Nova Zelândia", "Neuseeland", "Nuova Zelanda", null, "新西兰", "뉴질랜드", "ニュージーランド", "Новая Зеландия", "Nowa Zelandia"],
   "Malay Archipelago": ["Malay Archipelago", "Archipiélago malayo", "Archipel malais", "Arquipélago Malaio", "Malaiischer Archipel", "Arcipelago malese", null, "马来群岛", "말레이 제도", "マレー諸島", "Малайский архипелаг", "Archipelag Malajski"],
   "Cities and Places": ["Cities and Places", "Ciudades y lugares", "Villes et lieux", "Cidades e lugares", "Städte und Orte", "Città e luoghi", null, "城市与地点", "도시와 장소", "都市と場所", "Города и места", "Miasta i miejsca"],

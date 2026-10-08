@@ -120,7 +120,7 @@ window.AIQ = window.AIQ || {};
       AD("classic_capitals", "🏛️", "Gira de capitales", "Capital tour", "Termina Capitales del mundo.", "Finish World Capitals.", "classic", () => won("c-worldcapitals")),
       AD("classic_europe", "🏰", "Grand Tour", "Grand Tour", "Termina Europa.", "Finish Europe.", "classic", () => won("c-europe")),
       AD("classic_latam", "💃", "Tierra latina", "Latin spirit", "Termina Latinoamérica.", "Finish Latin America.", "classic", () => won("c-centralsouthamerica")),
-      AD("classic_usa", "🗽", "Sueño americano", "American dream", "Termina Estados Unidos.", "Finish USA.", "classic", () => won("c-usa")),
+      AD("classic_usa", "🗽", "Sueño americano", "American dream", "Termina Norteamérica.", "Finish North America.", "classic", () => won("c-usa")),
       AD("classic_asia", "🏯", "Ruta de la seda", "Silk road", "Termina Asia.", "Finish Asia.", "classic", () => won("c-asia")),
       AD("classic_oceania", "🏄", "Al fin del mundo", "Down under", "Termina Oceanía.", "Finish Oceania.", "classic", () => won("c-oceania")),
       AD("adv_act2", "🌄", "Más allá del mapa", "Beyond the map", "Completa el Acto II.", "Complete Act II.", "adv", c => c.kind === "act" && c.act >= 2),

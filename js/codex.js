@@ -98,9 +98,9 @@ window.AIQ = window.AIQ || {};
   const HOME_FIX = { "Republic of Ireland": "Ireland", "North Macedonia": "Macedonia", "Ivory Coast": "Côte d'Ivoire", "Czech Republic": "Czechia", "East Timor": "Timor-Leste", "Eswatini": "eSwatini", "DR Congo": "Dem. Rep. Congo", "Democratic Republic of the Congo": "Dem. Rep. Congo", "Republic of the Congo": "Congo", "South Sudan": "S. Sudan", "Bosnia and Herzegovina": "Bosnia and Herz.", "Dominican Republic": "Dominican Rep.", "Central African Republic": "Central African Rep.", "Equatorial Guinea": "Eq. Guinea", "Vatican City": "Vatican", "UK": "United Kingdom", "US": "United States of America" };
 
   function countryFrom(title, gameId) {
-    if (gameId === "usa") return "United States of America";
     const parts = String(title).replace(/\(.*?\)/g, "").split(","), tail = parts.length > 1 ? parts[parts.length - 1].trim().split("/")[0].trim() : "";
-    if (!tail) return null; const n = A.CODEX_COUNTRY[tail] || tail; return world.byName[n] ? n : null;
+    const n = tail && (A.CODEX_COUNTRY[tail] || tail);
+    return n && world.byName[n] ? n : gameId === "usa" ? "United States of America" : null;   // Norteamerica: Canada y Groenlandia por su coma; sin pais (estrecho de Bering), Estados Unidos
   }
   function homeFrom(f) {
     const parts = String(f || "").split(/\s+[·•]\s+/)[0].replace(/\(.*?\)/g, "").split(","); if (parts.length < 2) return null;
