@@ -1212,8 +1212,32 @@ window.AIQ = window.AIQ || {};
     ],
     /* ---- LA JUBILACION: ganas en Ascension 5 (escena, en orden), vuelve la sesion siguiente y el guino de cada nueva victoria */
     retire: [
-      "Me has ganado en la mesa más dura. Ya está. Me jubilo.|You beat me at the toughest table. That's it. I'm retiring.|Tu m'as battu à la table la plus dure. C'est fini. Je prends ma retraite.|Você me venceu na mesa mais difícil. Pronto. Vou me aposentar.|Du hast mich am härtesten Tisch geschlagen. Das war's. Ich gehe in Rente.|Mi hai battuto al tavolo più duro. Basta. Vado in pensione.|Me ganaste en la mesa más dura. Listo. Me jubilo.|你在最难的牌桌上赢了我。结束了。我退休了。|가장 어려운 테이블에서 날 이겼어. 끝이야. 은퇴할게.|一番厳しいテーブルで私に勝ったな。もう終わりだ。引退する。|Ты победил меня за самым суровым столом. Всё. Я ухожу на пенсию.|Pokonałeś mnie przy najtrudniejszym stole. Koniec. Przechodzę na emeryturę.",
+      "Quieto. No toques nada. ¿Ascensión cinco? ¿Entera?|Freeze. Don't touch anything. Ascension five? All of it?|Stop. Ne touche à rien. Ascension cinq ? En entier ?|Parado. Não toque em nada. Ascensão cinco? Inteira?|Halt. Nichts anfassen. Aufstieg fünf? Komplett?|Fermo. Non toccare niente. Ascensione cinque? Tutta?||别动。什么都别碰。进阶五？全部通关？|멈춰. 아무것도 건드리지 마. 어센션 5를? 끝까지?|待て。何も触るな。アセンション5を？最後まで？|Стоп. Ничего не трогай. Восхождение пять? Целиком?|Stój. Niczego nie dotykaj. Wniebowstąpienie pięć? Całe?",
+      "Te conocí el {d}. Desde entonces, {n} expediciones y {t} de partida. Lo tengo todo apuntado.|We met on {d}. Since then: {n} expeditions and {t} at my table. I wrote it all down.|On s'est rencontrés le {d}. Depuis : {n} expéditions et {t} de jeu. J'ai tout noté.|Te conheci em {d}. Desde então, {n} expedições e {t} de jogo. Anotei tudo.|Kennengelernt haben wir uns am {d}. Seitdem: {n} Expeditionen und {t} am Tisch. Ich habe alles notiert.|Ci siamo conosciuti il {d}. Da allora, {n} spedizioni e {t} di gioco. Ho annotato tutto.|Te conocí el {d}. Desde entonces, {n} expediciones y {t} de partida. Tengo todo anotado.|我们第一次见面是{d}。从那以后，{n}次远征，{t}的牌局。我全都记着。|우리 처음 만난 게 {d}였지. 그 뒤로 원정 {n}번, 게임 {t}. 전부 적어 뒀어.|初めて会ったのは{d}だった。それから遠征{n}回、プレイ時間{t}。全部メモしてある。|Мы познакомились {d}. С тех пор экспедиций: {n}, времени за столом: {t}. У меня всё записано.|Poznaliśmy się {d}. Od tamtej pory wypraw: {n}, czasu przy stole: {t}. Wszystko zapisałem.",
+      "Y hoy me has ganado en la mesa más dura de este casino.|And today you beat me at the toughest table in this casino.|Et aujourd'hui, tu m'as battu à la table la plus dure de ce casino.|E hoje você me venceu na mesa mais difícil deste cassino.|Und heute hast du mich am härtesten Tisch dieses Casinos geschlagen.|E oggi mi hai battuto al tavolo più duro di questo casinò.|Y hoy me ganaste en la mesa más dura de este casino.|而今天，你在这家赌场最难的牌桌上赢了我。|그리고 오늘, 이 카지노에서 가장 어려운 테이블에서 날 이겼어.|そして今日、このカジノで一番厳しいテーブルで君は私に勝った。|А сегодня я проиграл тебе за самым суровым столом этого казино.|A dziś przegrałem z tobą przy najtrudniejszym stole tego kasyna.",
+      "Un crupier sabe cuándo se acaba la partida. Me jubilo.|A dealer knows when the game is over. I'm retiring.|Un croupier sait quand la partie est finie. Je prends ma retraite.|Um crupiê sabe quando o jogo acabou. Vou me aposentar.|Ein Croupier weiß, wann das Spiel vorbei ist. Ich gehe in Rente.|Un croupier sa quando la partita è finita. Vado in pensione.||荷官知道牌局何时结束。我退休了。|딜러는 판이 끝날 때를 알아. 나 은퇴할게.|ディーラーは勝負の終わりを知っている。引退する。|Крупье знает, когда игра окончена. Я ухожу на пенсию.|Krupier wie, kiedy gra się kończy. Przechodzę na emeryturę.",
+      "Pero nadie se va de mi casino sin sus créditos. Ni siquiera yo.|But nobody leaves my casino without their credits. Not even me.|Mais personne ne quitte mon casino sans son générique. Pas même moi.|Mas ninguém sai do meu cassino sem os créditos. Nem eu.|Aber niemand verlässt mein Casino ohne Abspann. Nicht mal ich.|Ma nessuno lascia il mio casinò senza i titoli di coda. Nemmeno io.||但谁也别想不看片尾字幕就离开我的赌场。我也不例外。|하지만 내 카지노에선 아무도 엔딩 크레딧 없이 못 나가. 나조차도.|だが、エンドロールなしで私のカジノを出る者はいない。私でもな。|Но из моего казино никто не уходит без титров. Даже я.|Ale nikt nie wychodzi z mojego kasyna bez napisów końcowych. Nawet ja.",
       "Hoy cierro yo. Apaga tú la luz… no, mejor la apago yo.|Today I'm closing up. You switch off the light… no, I'd better do it.|Aujourd'hui, c'est moi qui ferme. Éteins la lumière… non, je vais le faire moi-même.|Hoje quem fecha sou eu. Apaga a luz… não, melhor eu apagar.|Heute schließe ich ab. Mach du das Licht aus… nein, besser ich.|Oggi chiudo io. Spegni tu la luce… no, meglio che la spenga io.||今天我来关门。你来关灯……不，还是我来吧。|오늘은 내가 문 닫을게. 불은 네가 꺼… 아니, 내가 끌게.|今日は私が店を閉める。明かりを消して……いや、私が消そう。|Сегодня закрываю я. Выключи свет… нет, лучше я сам.|Dziś ja zamykam. Zgaś światło… nie, lepiej ja."
+    ],
+    /* al final de los creditos (js/final.js), bajo su foco con la placa de jubilado */
+    retireEnd: [
+      "Ha sido un placer perder contigo.|It's been a pleasure losing to you.|Ce fut un plaisir de perdre contre toi.|Foi um prazer perder para você.|Es war mir ein Vergnügen, gegen dich zu verlieren.|È stato un piacere perdere con te.||输给你，是我的荣幸。|너한테 져서 영광이었어.|君に負けられて光栄だった。|Проиграть тебе было удовольствием.|Przegrać z tobą to była przyjemność.",
+      "Los jubilados también juegan. Nos vemos en la mesa.|Retirees play too. See you at the table.|Les retraités aussi jouent. On se voit à la table.|Aposentado também joga. Te vejo na mesa.|Rentner spielen auch. Wir sehen uns am Tisch.|Anche i pensionati giocano. Ci vediamo al tavolo.||退休的人也能玩。牌桌上见。|은퇴한 사람도 게임은 해. 테이블에서 보자.|引退した者も遊ぶのさ。テーブルで会おう。|Пенсионеры тоже играют. Увидимся за столом.|Emeryci też grają. Do zobaczenia przy stole."
+    ],
+    /* LA VUELTA: la siguiente vez que abres el juego (o vuelves a la portada), el cartel de "Cerrado por jubilacion", tres golpes y vuelve. En orden;
+       la segunda lleva el tiempo real que ha durado su jubilacion ({t}) y un remate de comebackAway segun sea minutos, horas o dias */
+    comeback: [
+      "¡Sorpresa! ¿De verdad creías que me había ido?|Surprise! Did you really think I was gone?|Surprise ! Tu croyais vraiment que j'étais parti ?|Surpresa! Achou mesmo que eu tinha ido embora?|Überraschung! Hast du echt geglaubt, ich wäre weg?|Sorpresa! Credevi davvero che me ne fossi andato?|¡Sorpresa! ¿De veras creías que me había ido?|惊喜！你真以为我走了？|서프라이즈! 진짜 내가 떠난 줄 알았어?|サプライズ！本当に私がいなくなったと思ったか？|Сюрприз! Неужели казалось, что я ушёл насовсем?|Niespodzianka! Serio wydawało ci się, że odszedłem?",
+      "Mi jubilación ha durado {t}.|My retirement lasted {t}.|Ma retraite a duré {t}.|Minha aposentadoria durou {t}.|Meine Rente hat {t} gedauert.|La mia pensione è durata {t}.|Mi jubilación duró {t}.|我的退休生活持续了{t}。|내 은퇴 생활은 {t} 갔어.|私の引退は{t}で終わった。|Моя пенсия продлилась {t}.|Moja emerytura trwała {t}.",
+      "Jugué al solitario. Gané. No tiene ninguna gracia ganar si no pierdes tú.|I played solitaire. I won. Winning's no fun if you're not the one losing.|J'ai joué au solitaire. J'ai gagné. Gagner n'a aucun charme si ce n'est pas toi qui perds.|Joguei paciência. Ganhei. Não tem graça ganhar se não é você que perde.|Ich habe Patience gespielt. Gewonnen. Gewinnen macht keinen Spaß, wenn nicht du verlierst.|Ho giocato a solitario. Ho vinto. Vincere non ha gusto se non sei tu a perdere.||我玩了接龙。赢了。不是你输，赢了也没意思。|솔리테어를 했어. 이겼지. 네가 안 지면 이겨도 재미없더라.|ソリティアをやった。勝った。君が負けないなら、勝っても面白くない。|Сыграл в пасьянс. Выиграл. Никакого удовольствия, если проигрываешь не ты.|Grałem w pasjansa. Wygrałem. Wygrana nie cieszy, jeśli to nie ty przegrywasz.",
+      "Además, leí la letra pequeña de mi contrato: «El crupier se jubila cuando el jugador deja de jugar». Y tú no has dejado.|Besides, I read the fine print in my contract: “The dealer retires when the player stops playing.” And you haven't stopped.|En plus, j'ai lu les petites lignes de mon contrat : « Le croupier prend sa retraite quand le joueur arrête de jouer. » Et tu n'as pas arrêté.|Além disso, li as letras miúdas do meu contrato: “O crupiê se aposenta quando o jogador para de jogar.” E você não parou.|Außerdem habe ich das Kleingedruckte in meinem Vertrag gelesen: „Der Croupier geht in Rente, wenn der Spieler aufhört zu spielen.“ Und du hast nicht aufgehört.|E poi ho letto le clausole del mio contratto: «Il croupier va in pensione quando il giocatore smette di giocare». E tu non hai smesso.|Además, leí la letra chiquita de mi contrato: «El crupier se jubila cuando el jugador deja de jugar». Y tú no has dejado.|而且，我看了合同里的小字：“荷官退休的条件是玩家不再玩。”而你没停。|게다가 계약서의 깨알 같은 글씨를 읽었지. “딜러는 플레이어가 게임을 그만둘 때 은퇴한다.” 근데 넌 안 그만뒀잖아.|それに、契約書の小さな文字を読んだんだ。「ディーラーはプレイヤーが遊ぶのをやめた時に引退する」。君はやめていない。|К тому же я прочитал мелкий шрифт в контракте: «Крупье уходит на пенсию, когда игрок перестаёт играть». А ты не перестаёшь.|Poza tym przeczytałem drobny druk w umowie: „Krupier przechodzi na emeryturę, gdy gracz przestaje grać”. A ty nie przestajesz.",
+      "Así que vuelvo a la mesa. Crupier jubilado en activo: cobro la pensión y el sueldo. Gracias por eso.|So I'm back at the table. Retired dealer, still on duty: I collect the pension and the salary. Thanks for that.|Alors je reviens à la table. Croupier retraité en activité : je touche la retraite et le salaire. Merci pour ça.|Então volto pra mesa. Crupiê aposentado na ativa: recebo a aposentadoria e o salário. Valeu por isso.|Also zurück an den Tisch. Croupier im Unruhestand: Ich kassiere Rente und Gehalt. Danke dafür.|Quindi torno al tavolo. Croupier in pensione ma in servizio: prendo pensione e stipendio. Grazie per questo.||所以我回到牌桌了。退休在岗的荷官：退休金和工资一起拿。谢谢你啊。|그래서 테이블로 돌아왔지. 은퇴했지만 현역인 딜러: 연금도 받고 월급도 받아. 고마워.|だからテーブルに戻る。現役の引退ディーラーだ。年金と給料の両取り。ありがとうな。|Так что я возвращаюсь за стол. Крупье на пенсии и при деле: получаю и пенсию, и зарплату. Спасибо тебе за это.|Więc wracam do stołu. Krupier na emeryturze, ale w pracy: biorę emeryturę i pensję. Dzięki ci za to.",
+      "Y esta vez, la Ascensión V la reparto yo. ¡Abrimos!|And this time, I'm dealing Ascension V. We're open!|Et cette fois, c'est moi qui distribue l'Ascension V. C'est ouvert !|E desta vez, quem dá as cartas na Ascensão V sou eu. Abrimos!|Und diesmal teile ich Aufstieg V aus. Wir haben geöffnet!|E stavolta l'Ascensione V la distribuisco io. Si apre!||这一次，进阶五由我来发牌。开张了！|그리고 이번엔 어센션 5, 내가 패를 돌린다. 영업 시작!|そして今度は、アセンション5の札は私が配る。開店だ！|А в этот раз Восхождение V раздаю я. Мы открыты!|A tym razem Wniebowstąpienie V rozdaję ja. Otwieramy!"
+    ],
+    comebackAway: [
+      "Ni me ha dado tiempo a quitarme la chistera.|I didn't even have time to take off my top hat.|Je n'ai même pas eu le temps d'enlever mon haut-de-forme.|Nem deu tempo de tirar a cartola.|Ich hatte nicht mal Zeit, den Zylinder abzunehmen.|Non ho fatto in tempo a togliermi il cilindro.|Ni me dio tiempo de quitarme la chistera.|我连礼帽都没来得及摘。|모자 벗을 시간도 없었어.|シルクハットを脱ぐ暇もなかった。|Я даже цилиндр снять не успел.|Nawet nie zdążyłem zdjąć cylindra.",
+      "Las he contado todas. Aquí dentro. A oscuras.|I counted every one. In here. In the dark.|Je les ai toutes comptées. Ici. Dans le noir.|Contei cada uma. Aqui dentro. No escuro.|Ich habe jede einzelne gezählt. Hier drin. Im Dunkeln.|Le ho contate tutte. Qui dentro. Al buio.||我一分一秒都数着。就在这里面。黑漆漆的。|하나하나 다 셌어. 여기 안에서. 깜깜한 데서.|全部数えたよ。この中で。真っ暗な中で。|Я считал каждую минуту. Здесь, внутри. В темноте.|Liczyłem każdą minutę. Tu, w środku. Po ciemku.",
+      "Probé la petanca. La petanca no rompe la cuarta pared.|I tried bocce. Bocce doesn't break the fourth wall.|J'ai essayé la pétanque. La pétanque ne brise pas le quatrième mur.|Tentei bocha. Bocha não quebra a quarta parede.|Ich habe Boule probiert. Boule durchbricht nicht die vierte Wand.|Ho provato le bocce. Le bocce non rompono la quarta parete.||我试过打门球。门球可打破不了第四面墙。|게이트볼도 해 봤어. 게이트볼은 제4의 벽을 안 깨더라.|ゲートボールもやってみた。ゲートボールは第四の壁を破らない。|Попробовал петанк. Петанк не ломает четвёртую стену.|Spróbowałem gry w bule. Bule nie burzą czwartej ściany."
     ],
     retireBack: [
       "Me jubilé tres días. Me aburría. He vuelto con la baraja afilada.|I retired for three days. I got bored. I'm back with a sharpened deck.|J'ai pris ma retraite pendant trois jours. Je m'ennuyais. Je suis revenu avec un jeu aiguisé.|Me aposentei por três dias. Fiquei entediado. Voltei com o baralho afiado.|Ich war drei Tage in Rente. Mir war langweilig. Ich bin zurück, mit geschärftem Kartenspiel.|Sono stato in pensione tre giorni. Mi annoiavo. Sono tornato col mazzo affilato.|Me jubilé tres días. Me aburría. Volví con la baraja afilada.|我退休了三天。太无聊了。我带着磨快的牌回来了。|사흘 은퇴했었지. 지루하더라. 날 선 카드 들고 돌아왔어.|三日だけ引退した。退屈だった。研ぎ澄ましたデッキで戻ってきたぞ。|Я был на пенсии три дня. Заскучал. Вернулся с заточенной колодой.|Byłem na emeryturze trzy dni. Nudziłem się. Wróciłem z naostrzoną talią."
@@ -1947,7 +1971,6 @@ window.AIQ = window.AIQ || {};
     if (DS.quitAt) { DS.quitAt = 0; saveStore(); return quitRet(); }                // la ultima vez saliste por el boton de encendido (js/salir.js)
     if (prevEnd === "crash") { const sm = hasSave() && A.adv.summary && A.adv.summary(); return { t: sm ? say1("quitRetCrashSave", { act: sm.act, round: sm.round }) : say1("quitRetCrash"), mood: "shock" }; }
     if (prevEnd === "x" && prevLen > 180000 && DS.visits > 4 && DS.xSaid !== DS.visits - 1 && Math.random() < 0.35) { DS.xSaid = DS.visits; saveStore(); return { t: say1("quitRetX"), mood: "angry" }; }
-    if (DS.retireBack) { DS.retireBack = 0; saveStore(); return { t: say1("retireBack"), mood: "sly" }; }   // se jubilo la ultima vez: vuelve
     if (verNote) { verNote = false; return { t: say1("newVersion", { v: A.VERSION }), mood: "laugh" }; }
     { const tn = tierNow(); if (tn > (DS.tier || 0)) { DS.tier = tn; saveStore(); return { t: nth("tierUp", tn - 1), mood: "sly", card: tn }; } }   // sube de categoria: sella tu tarjeta
     { const w = winNote(); if (w) return w; }
@@ -1970,6 +1993,7 @@ window.AIQ = window.AIQ || {};
     greeted = true; return { t: say1(isWeekend() && Math.random() < 0.4 ? "homeTimeWeekend" : timeBucket()) };
   }
   function homeBeat() {
+    if (DS.retireBack) return { scene: "comeback" };                               // se jubilo: lo primero, su vuelta con el cartel (la frase de siempre si la escena no puede)
     if (babelPend) { const b = babelPend; babelPend = null; if (Date.now() - b.at < 600000) { const o = babelBeat(b); if (o) return o; } }   // cambiaste de idioma: eso va primero
     if (entry) { const k = entry, stale = k !== "open" && Date.now() - entryAt > 10 * 60 * 1000; entry = ""; const o = !stale && opener(k); if (o && (o.t || o.chain)) return o; }
     if (verNote && homeN >= 1) { verNote = false; return { t: say1("newVersion", { v: A.VERSION }), mood: "laugh" }; }
@@ -2011,6 +2035,10 @@ window.AIQ = window.AIQ || {};
     if (!babelPend && ((afkAt && lastInput <= afkAt) || calmNow())) { homeT = setTimeout(homeTick, 2500); return; }   // te fuiste (ya te lo dijo) o acaba de hablar mucho: calma
     const corner = pickCorner(); if (!corner) { homeT = setTimeout(homeTick, 2500); return; }   // la portada no le deja hueco: lo que tocaba decir espera
     const b = homeBeat(); homeN++;
+    if (b.scene === "comeback") {
+      if (comebackScene()) { homeT = setTimeout(homeTick, 60000); return; }
+      DS.retireBack = 0; saveStore(); b.t = say1("retireBack"); b.mood = "sly";
+    }
     if (b.fake) { fakeAch(b.fake, b.n); homeT = setTimeout(homeTick, 30000 + Math.random() * 20000); return; }
     ensure(); homeCorner = corner;
     if (b.tag && !tagFix()) { homeT = setTimeout(homeTick, 5000); return; }
@@ -2471,19 +2499,23 @@ window.AIQ = window.AIQ || {};
     else if (!pass && H.led && was && H.h >= H.y && !once.h2hBack) { once.h2hBack = 1; h2hBackPend = true; }
     saveStore();
   };
-  /* la escena bajo el foco (como la de salir, sin tarjeta): sus frases de una en una y, al acabar, "after" (la jubilacion apaga la tele) */
-  function spotScene(items, after) {
+  /* la escena bajo el foco (como la de salir, sin tarjeta): sus frases de una en una (con su cara y su gesto si los traen) y, al acabar, "after"
+     (la jubilacion apaga la tele). o.pre: ms a oscuras antes de que se encienda el foco; o.setup(r) prepara la escena (el cartel de la vuelta) */
+  function spotScene(items, after, o = {}) {
     if (held || D.host || !items.length) return false;
     let r = $("qxs");
     if (!r) { r = document.createElement("div"); r.id = "qxs"; r.className = "qx hidden"; r.setAttribute("role", "dialog"); r.setAttribute("aria-modal", "true");
       r.innerHTML = `<i class="qx-dim"></i><div class="qx-in"><div class="qx-stage" id="qxsStage"><i class="qx-beam"></i><i class="qx-pool"></i></div></div>`; $("app").appendChild(r); }
-    r.className = "qx"; A.restyle(r); r.classList.add("on"); D.hold(true); A.music.muffle(true); if (A.sfx.spot) A.sfx.spot();
-    const fin = () => { r.classList.add("out"); A.music.muffle(false); setTimeout(() => { r.className = "qx hidden"; D.dock(null); D.release(); D.hold(false); const vd = $("vdDealer"); if (vd && D.on) D.anchor(vd); }, 520); };
+    r.querySelectorAll(".qx-sign").forEach(x => x.remove());
+    r.className = "qx"; A.restyle(r); r.classList.add("on"); D.hold(true); A.music.muffle(true); if (!o.pre && A.sfx.spot) A.sfx.spot();
+    if (o.setup) o.setup(r);
+    const fin = () => { r.classList.add("out"); A.music.muffle(false); setTimeout(() => { r.className = "qx hidden"; r.querySelectorAll(".qx-sign").forEach(x => x.remove()); D.dock(null); D.release(); D.hold(false); const vd = $("vdDealer"); if (vd && D.on) D.anchor(vd); }, 520); };
     setTimeout(() => {
+      if (o.pre && A.sfx.spot) A.sfx.spot();
       r.classList.add("spot"); D.dock($("qxsStage")); let k = 0;
-      const next = () => { if (k >= items.length) return after ? after(fin) : fin(); const it = items[k++]; D.say(it.t, { mood: it.mood || "sly", hold: 0, force: true, done: () => setTimeout(next, 600) }); };
+      const next = () => { if (k >= items.length) return after ? after(fin) : fin(); const it = items[k++]; D.say(it.t, { mood: it.mood || "sly", face: it.face, gesture: it.gesture, hold: 0, force: true, done: () => setTimeout(next, 600) }); };
       next();
-    }, 560);
+    }, 560 + (o.pre || 0));
     return true;
   }
 
@@ -2511,14 +2543,105 @@ window.AIQ = window.AIQ || {};
 
   /* LA JUBILACION: ganas una expedicion en Ascension 5. La primera vez, escena bajo el foco, se despide y apaga la tele (como al salir) y la sesion
      siguiente vuelve; despues, un guino en cada nueva victoria */
+  /* v0.3.3: la primera vez es EL FINAL DEL JUEGO: despedida bajo el foco con tus datos reales, chasquido que apaga el foco, la tele se apaga, los
+     creditos (js/final.js) y el juego se cierra (en la web, vuelve a la portada). La siguiente vez que veas la portada, vuelve con su cartel (comebackScene) */
+  const locOf = () => { const L = (A.LANGS || []).find(l => l.code === A.lang); return L ? L.loc : undefined; };
+  /* "61 horas", "14 horas y 22 minutos", "9 dias"... en el idioma del juego (Intl: plurales de ruso y polaco incluidos) */
+  function longDur(ms, fine) {
+    const loc = locOf(), cjk = /^(zh|ja|ko)/.test(A.lang), tight = /^(zh|ja)/.test(A.lang);
+    const u = (n, unit) => { let t; try { t = new Intl.NumberFormat(loc, { style: "unit", unit, unitDisplay: "long" }).format(n); } catch (e) { t = n + " " + unit; } return tight ? t.replace(/\s+/g, "") : t; };
+    const m = Math.max(1, Math.round(ms / 60000)), h = Math.floor(ms / 3600000), d = Math.floor(ms / 86400000);
+    if (ms < 60000) return u(Math.max(1, Math.round(ms / 1000)), "second");
+    if (ms < 3600000) return u(m, "minute");
+    if (!fine || ms >= 172800000) return ms >= 172800000 && fine ? u(d, "day") : u(h, "hour");
+    const mm = Math.floor((ms % 3600000) / 60000); if (!mm) return u(h, "hour");
+    if (cjk) return u(h, "hour") + (tight ? "" : " ") + u(mm, "minute");                   // 14小时22分钟 / 14時間22分 / 14시간 22분
+    try { return new Intl.ListFormat(loc, { type: "conjunction" }).format([u(h, "hour"), u(mm, "minute")]); } catch (e) { return u(h, "hour") + " " + u(mm, "minute"); }
+  }
+  function dateTxt(ts, year) { try { return new Date(ts).toLocaleDateString(locOf(), year || new Date(ts).getFullYear() !== new Date().getFullYear() ? { day: "numeric", month: "long", year: "numeric" } : { day: "numeric", month: "long" }); } catch (e) { return ""; } }
   function retireRun() {
     const R0 = DS.retired;
     if (R0) { R0.n++; saveStore(); const t = say1("retireAgain"); if (t) D.say(t, { mood: "shock", hold: holdFor(t) }); return !!t; }
-    DS.retired = { n: 1, ts: Date.now() }; DS.retireBack = 1; saveStore();
-    return spotScene([{ t: nth("retire", 0), mood: "shock" }, { t: nth("retire", 1), mood: "sly" }], fin => {
-      const tv = A.salir && A.salir.tv; if (!tv) return fin();
-      A.music.stop(); tv.off(() => setTimeout(() => tv.on(() => { A.music.start(); fin(); }), 1500));
+    const P = (A.profile && A.profile.get()) || {}, s = P.stats || {}, a = P.adv || {}, first = DS.first || Date.now(), now = Date.now();
+    const d = { d: dateTxt(first), n: A.fmt(advRuns()), t: longDur(DS.playMs || 0) };
+    const F = [["shock", "freeze"], ["sad", "pocket_watch"], ["sad", "hat_chest"], ["bow", "hat_off_bow"], ["sly", "twirl_moustache"], ["wink", "snap"]];
+    const items = F.map(([face, gesture], i) => ({ t: nth("retire", i, d), mood: i === 0 ? "shock" : "sly", face, gesture })).filter(x => x.t);
+    const T6 = x => A.pick6(x);
+    const stats = [
+      [T6("Primera visita|First visit|Première visite|Primeira visita|Erster Besuch|Prima visita||首次光临|첫 방문|初来店|Первый визит|Pierwsza wizyta"), dateTxt(first, true)],
+      [T6("Visitas|Visits|Visites|Visitas|Besuche|Visite||光临次数|방문|来店回数|Визиты|Wizyty"), A.fmt(DS.visits || 1)],
+      [T6("Tiempo en la mesa|Time at the table|Temps à la table|Tempo na mesa|Zeit am Tisch|Tempo al tavolo||牌桌时间|테이블에서 보낸 시간|テーブルにいた時間|Время за столом|Czas przy stole"), longDur(DS.playMs || 0)],
+      [T6("Expediciones|Expeditions|Expéditions|Expedições|Expeditionen|Spedizioni||远征|원정|遠征|Экспедиции|Wyprawy"), A.fmt(a.runs || 0)],
+      [T6("Expediciones ganadas|Expeditions won|Expéditions gagnées|Expedições vencidas|Gewonnene Expeditionen|Spedizioni vinte||远征胜利|승리한 원정|勝った遠征|Выигранные экспедиции|Wygrane wyprawy"), A.fmt(a.wins || 0)],
+      [A.T("Preguntas", "Questions"), A.fmt(s.questions || 0)],
+      [A.T("Dianas", "Bullseyes"), A.fmt(s.bulls || 0)],
+    ];
+    DS.retired = { n: 1, ts: now }; DS.retireBack = 1; saveStore();
+    return spotScene(items, fin => {
+      const r = $("qxs"); if (r) r.classList.add("unlit"); if (A.sfx.snap) A.sfx.snap();      // chasquea los dedos: el foco parpadea y se apaga
+      const tv = A.salir && A.salir.tv;
+      setTimeout(() => {
+        const credits = () => A.final ? A.final.play({
+          name: who(), stats, date: dateTxt(now, true),
+          table: A.pick6("Ascensión V|Ascension V|Ascension V|Ascensão V|Aufstieg V|Ascensione V||进阶五|어센션 5|アセンション5|Восхождение V|Wniebowstąpienie V"),
+          finale: (stage, next) => {                                    // vuelve bajo su foco, con su placa: sus dos ultimas frases
+            D.dock(stage); let k = 0;
+            const G = [["bow", "hat_off_bow"], ["wink", "hat_tip"]];
+            const one = () => {
+              if (k >= 2) { const bb = el && el.querySelector(".dl-bubble"); if (bb) bb.classList.remove("on"); return next(); }   // el globo se va; el se queda para el FIN
+              const i = k++; D.say(nth("retireEnd", i), { mood: "sly", face: G[i][0], gesture: G[i][1], hold: 0, force: true, done: () => setTimeout(one, 900) });
+            };
+            one();
+          },
+          done: () => {                                                 // la sala ya esta a oscuras: el juego se cierra; en la web, la portada (alli vuelve con su cartel)
+            saveStore(); const h = window.geoliteHost;
+            if (h && h.quit) { setTimeout(() => h.quit(), 350); return; }
+            D.dock(null); fin(); if (A.core && A.core.showHub) A.core.showHub();
+            setTimeout(() => (tv ? tv.on(() => A.music.start()) : A.music.start()), 600);
+          },
+        }) : (tv ? tv.on(fin) : fin());
+        if (!tv) return credits();
+        A.music.stop(); tv.off(() => setTimeout(credits, 1500));
+      }, 700);
     });
+  }
+  /* LA VUELTA: la portada a oscuras con el cartel colgado de "Cerrado por jubilacion", tres golpes, se enciende el foco y vuelve con lo que ha durado
+     su jubilacion. Con la ultima frase da la vuelta al cartel (ABIERTO, con bombillas), el cartel sube y se queda en la portada como siempre */
+  const SIGN = {
+    closed: "Cerrado|Closed|Fermé|Fechado|Geschlossen|Chiuso||暂停营业|영업 종료|閉店|Закрыто|Zamknięte",
+    why: "por jubilación|for retirement|pour retraite|por aposentadoria|wegen Ruhestand|per pensione||荷官退休|은퇴로 인해|引退につき|по случаю пенсии|z powodu emerytury",
+    open: "Abierto|Open|Ouvert|Aberto|Geöffnet|Aperto||营业中|영업 중|営業中|Открыто|Otwarte",
+    again: "como siempre|as always|comme toujours|como sempre|wie immer|come sempre||一如既往|언제나처럼|いつも通り|как всегда|jak zawsze",
+  };
+  function comebackScene() {
+    if (held || D.host || !D.onHome) return false;
+    const away = Math.max(0, Date.now() - ((DS.retired && DS.retired.ts) || Date.now())), k = away < 3600000 ? 0 : away < 172800000 ? 1 : 2;
+    const L = (i, d) => nth("comeback", i, d), aw = nth("comebackAway", k);
+    const F = [["laugh", "hat_pop"], ["bored", "pocket_watch"], ["bored", "cards_tap"], ["smug", "jot"], ["sly", "shuffle"], ["wink", "snap"]];
+    const items = F.map(([face, gesture], i) => ({ t: i === 1 ? L(1, { t: longDur(away, true) }) + (aw ? " " + aw : "") : L(i), mood: i ? "sly" : "laugh", face, gesture })).filter(x => x.t);
+    if (items.length < 6) return false;
+    DS.retireBack = 0; saveStore();
+    let sign = null;
+    const setup = r => {
+      r.classList.add("cb");
+      sign = document.createElement("div"); sign.className = "qx-sign";
+      sign.innerHTML = `<i class="ropes"></i><div class="qx-board"><i></i><b>${A.pick6(SIGN.closed)}</b><span>${A.pick6(SIGN.why)}</span></div>`;
+      r.appendChild(sign); setTimeout(() => sign.classList.add("swing"), 900);
+      const knock = () => { if (A.sfx.knock) A.sfx.knock(); A.haptic && A.haptic([18]); sign.classList.remove("knock", "swing"); void sign.offsetWidth; sign.classList.add("knock"); setTimeout(() => sign.classList.replace("knock", "swing"), 380); };
+      setTimeout(knock, 1700); setTimeout(knock, 2050); setTimeout(knock, 2900);
+    };
+    return spotScene(items, fin => {                                     // le da la vuelta al cartel: ABIERTO
+      if (!sign) return fin();
+      if (A.sfx.flip) A.sfx.flip(); sign.classList.remove("swing", "knock");
+      const half = [{ transform: "translateX(-50%) scaleX(1)" }, { transform: "translateX(-50%) scaleX(0)" }];
+      const a = sign.animate(half, { duration: 160, easing: "steps(4)", fill: "forwards" });
+      setTimeout(() => {
+        const b = sign.querySelector(".qx-board"); b.classList.add("open"); b.querySelector("b").textContent = A.pick6(SIGN.open); b.querySelector("span").textContent = A.pick6(SIGN.again);
+        a.cancel(); sign.animate(half.slice().reverse(), { duration: 160, easing: "steps(4)" });
+      }, 170);
+      setTimeout(() => sign.classList.add("up"), 1900);
+      setTimeout(fin, 2500);
+    }, { pre: 3700, setup });
   }
 
   /* EL MOTE: si le dijiste 3 veces "Ahora no", te pone uno segun como juegas (lo recalcula cada 5 visitas y te avisa del ascenso). Nunca sale en la

@@ -222,7 +222,7 @@ function screenChanged() {
 ipcMain.on("win:getMode", (e) => { e.returnValue = liveMode; });
 ipcMain.on("win:getScreen", (e) => { e.returnValue = screenInfo(); });
 /* boton de encendido de la portada (js/salir.js): cierra el juego entero; solo lo acepta de la ventana del juego */
-ipcMain.on("app:quit", (e) => { if (alive(win) && e.sender === win.webContents) app.quit(); });
+ipcMain.on("app:quit", (e) => { if (alive(win) && e.sender === win.webContents) { try { session.defaultSession.flushStorageData(); } catch (x) { /* sin sesion */ } app.quit(); } });   // lo ultimo guardado (la jubilacion del crupier, tu salida) llega al disco
 /* Ajustes y la tecla F: { mode, size ([w,h] fisicos o null = automatico), display }. "border" de versiones anteriores = pantalla completa */
 ipcMain.on("win:setScreen", (e, o) => {
   if (!alive(win) || e.sender !== win.webContents || !o || typeof o !== "object") return;

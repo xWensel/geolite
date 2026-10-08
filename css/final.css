@@ -1,0 +1,121 @@
+/* Geolite - el final del juego (js/final.js y la jubilacion de js/dealer.js): la sala de los creditos con sus cortinas, el rodillo, la hoja de
+   servicios, el crupier bajo su foco con su placa y el FIN; y la vuelta del crupier con el cartel de "Cerrado por jubilacion" en la portada.
+   Textos en Jersey a 27/54/81/108 px (su rejilla) y Silkscreen a 8/16 px: cada pixel de la fuente cae en su sitio. */
+
+/* ------------------------------------------------ la escena de despedida: el chasquido apaga el foco (con su parpadeo) antes que la tele */
+.qx.unlit .qx-beam, .qx.unlit .qx-pool { animation: fin-unlit .5s steps(1) forwards !important; }
+@keyframes fin-unlit { 0% { opacity: 1; } 30% { opacity: .1; } 45% { opacity: .8; } 60%, 100% { opacity: 0; } }
+
+/* ------------------------------------------------ la sala */
+.fin { position: fixed; inset: 0; z-index: 100040; display: none; overflow: hidden; background: #040705; color: var(--paper); cursor: default; user-select: none;
+  --face: clamp(176px, 30vh, 256px); }
+.fin.on { display: block; }
+.fin-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 46% 70% at 50% 50%, rgba(28, 58, 44, .55), transparent 70%); }
+.fin-scan { position: absolute; inset: 0; z-index: 4; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px); }
+.fin-vig { position: absolute; inset: 0; z-index: 4; pointer-events: none; box-shadow: inset 0 0 180px 60px #000; }
+.fin-dust u { position: absolute; left: var(--x); bottom: -6px; width: 3px; height: 3px; background: var(--brass-lt); opacity: 0; animation: fin-rise var(--d) linear var(--w) infinite; }
+@keyframes fin-rise { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: .5; } 85% { opacity: .35; } 100% { opacity: 0; transform: translate(var(--dx), -105vh); } }
+
+/* las cortinas: dos panos de terciopelo con ribete dorado que se abren al empezar y se cierran al final */
+.fin-cur { position: absolute; z-index: 3; top: 0; bottom: 0; width: max(28px, calc(50vw - 400px)); pointer-events: none;
+  background: repeating-linear-gradient(90deg, #3a0f12 0 10px, #5a171b 10px 18px, #46121a 18px 24px); }
+.fin-cur::after { content: ""; position: absolute; top: 0; bottom: 0; width: 6px; background: repeating-linear-gradient(180deg, var(--brass) 0 6px, #b3741c 6px 12px); }
+.fin-cur.l { left: 0; transform: translateX(-100%); } .fin-cur.l::after { right: 0; }
+.fin-cur.r { right: 0; transform: translateX(100%); } .fin-cur.r::after { left: 0; }
+.fin.open .fin-cur { transition: transform 1.6s cubic-bezier(.2, .8, .2, 1); transform: none; }
+.fin.open.wide .fin-cur { width: max(28px, calc(50vw - 600px)); transition: transform 1.6s cubic-bezier(.2, .8, .2, 1), width 1.4s cubic-bezier(.3, .7, .3, 1); }
+.fin.open.wide.closing .fin-cur, .fin.closing .fin-cur { transition: transform 1.3s cubic-bezier(.6, 0, .4, 1), width 1.3s cubic-bezier(.6, 0, .4, 1); width: 50.5vw; transform: none; }
+
+/* ------------------------------------------------ el rodillo (se mueve a pixel entero desde js/final.js) */
+.fin-view { position: absolute; z-index: 1; inset: 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%); }
+.fin-roll { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+.fin-roll-in { width: min(640px, calc(100vw - 32px)); margin: 0 auto; text-align: center; zoom: var(--k, 1); }
+.fin-roll section { padding: 0 0 132px; }
+.fin-roll h3 { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0 0 14px; font-family: var(--mono); font-weight: 400; font-size: 16px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--brass); text-shadow: 0 2px 0 #000; }
+.fin-roll h3::before, .fin-roll h3::after { content: ""; flex: 0 1 72px; height: 2px; background: linear-gradient(90deg, transparent, #b3741c); }
+.fin-roll h3::after { transform: scaleX(-1); }
+.fin-n { margin: 0; font-family: var(--sans); font-size: calc(54px * var(--dll, 1)); line-height: 1; color: #fff6dc; text-shadow: 0 4px 0 #000, 0 0 24px rgba(255, 214, 140, .18); text-wrap: balance; }
+.fin-n + .fin-n { margin-top: 6px; }
+.fin-s { margin: 10px 0 0; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1.12; color: rgba(242, 233, 214, .62); text-wrap: balance; }
+.fin-pip { display: block; width: 6px; height: 6px; margin: 0 auto 28px; background: var(--brass); box-shadow: 0 0 0 2px #000, 0 0 12px rgba(248, 180, 73, .6); transform: rotate(45deg); }
+.fin-open { height: calc(100vh / var(--k, 1)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 !important; margin-bottom: 40px; }
+.fin-logo { width: min(470px, 78vw); image-rendering: pixelated; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .6)) drop-shadow(0 0 36px rgba(248, 180, 73, .3)); }
+.fin-by { margin: 40px 0 10px; font-family: var(--mono); font-size: 16px; letter-spacing: .14em; color: rgba(242, 233, 214, .62); text-transform: uppercase; }
+.fin-cs { width: min(330px, 62vw); }
+.fin-cs svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .6)); }
+.fin-thanks .fin-n { font-size: calc(81px * var(--dll, 1)); color: var(--brass-lt); }
+
+.fin-cast { display: grid; gap: 14px; max-width: 560px; margin: 24px auto 0; }
+.fin-row { display: flex; align-items: center; gap: 14px; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1; }
+.fin-mug { flex: none; display: grid; place-items: center; width: 64px; height: 64px; background: #0e1d15; box-shadow: inset 0 0 0 3px var(--brass), 0 4px 0 #000; font-size: 54px; color: var(--brass); }
+.fin-mug img { display: block; width: 64px; height: 64px; image-rendering: pixelated; }
+.fin-row b { font-weight: 400; color: #fff6dc; white-space: nowrap; } .fin-row em { font-style: normal; color: var(--brass-lt); white-space: nowrap; }
+.fin-row > i { flex: 1; min-width: 16px; height: 3px; margin-top: 14px; background: repeating-linear-gradient(90deg, rgba(248, 180, 73, .55) 0 3px, transparent 3px 9px); }
+
+/* la hoja de servicios: un ticket de caja de papel con dientes pixelados arriba y abajo */
+.fin-tk { position: relative; width: min(440px, 100%); margin: 26px auto 0; padding: 30px 26px 26px; box-sizing: border-box; background: var(--paper); color: var(--ink); text-align: left;
+  -webkit-mask: linear-gradient(#000 0 0) 0 8px / 100% calc(100% - 16px) no-repeat, repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 16px) 0 0 / 100% 8px no-repeat, repeating-linear-gradient(90deg, transparent 0 8px, #000 8px 16px) 0 100% / 100% 8px no-repeat;
+          mask: linear-gradient(#000 0 0) 0 8px / 100% calc(100% - 16px) no-repeat, repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 16px) 0 0 / 100% 8px no-repeat, repeating-linear-gradient(90deg, transparent 0 8px, #000 8px 16px) 0 100% / 100% 8px no-repeat; }
+.fin-tk-h { text-align: center; font-family: var(--mono); font-size: 16px; letter-spacing: .1em; text-transform: uppercase; }
+.fin-tk-h b { display: block; font-size: 24px; } .fin-tk-h small { display: block; margin-top: 4px; font-size: 8px; letter-spacing: .2em; color: #4a6b5a; }
+.fin-tk hr { border: 0; height: 2px; margin: 16px 0; background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 10px); }
+.fin-tk-r { display: flex; align-items: baseline; gap: 8px; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1.15; }
+.fin-tk-r span { white-space: nowrap; } .fin-tk-r i { flex: 1; min-width: 12px; border-bottom: 3px dotted rgba(22, 36, 28, .35); transform: translateY(-6px); }
+.fin-tk-r b { font-weight: 400; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fin-tk-r.red { color: #b3322a; }
+.fin-tk-stamp { position: absolute; right: 18px; bottom: 58px; padding: 6px 12px 4px; font-family: var(--mono); font-weight: 700; font-size: 24px; letter-spacing: .1em; text-transform: uppercase; color: #b3322a;
+  box-shadow: inset 0 0 0 4px #b3322a; transform: rotate(-9deg); opacity: .9; mix-blend-mode: multiply; }
+.fin-tk-foot { margin: 14px 0 0; text-align: center; font-family: var(--mono); font-size: 8px; letter-spacing: .2em; color: #4a6b5a; text-transform: uppercase; }
+
+/* ------------------------------------------------ el final: el crupier (D.dock) bajo su foco, la placa y el FIN */
+.fin-end { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.fin-end-in { position: relative; display: flex; flex-direction: column; align-items: center; transform: translateY(-4vh); zoom: var(--k, 1); }
+.fin-stage { opacity: 0; } .fin-end.lit .fin-stage { opacity: 1; }
+.fin-end.lit .qx-beam { animation: qx-ignite .7s linear forwards, qx-breathe 4.2s ease-in-out .7s infinite; }
+.fin-end.lit .qx-pool { animation: qx-ignite .7s linear forwards; }
+.fin-end.lit .fin-stage .dealer { animation: qx-pop .6s cubic-bezier(.3, 1.6, .4, 1) both; }
+.fin-plate { position: relative; z-index: 2; margin-top: -6px; padding: 10px 26px 8px; text-align: center; background: #1c3a2c; opacity: 0; transform: translateY(18px);
+  box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 6px var(--brass), inset 0 0 0 9px var(--ink), 0 6px 0 rgba(0, 0, 0, .55); transition: opacity .5s, transform .6s cubic-bezier(.3, 1.5, .4, 1); }
+.fin-plate b { display: block; font-family: var(--mono); font-weight: 700; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass-lt); }
+.fin-plate span { display: block; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1; color: var(--paper); white-space: nowrap; }
+.fin-end.plated .fin-plate { opacity: 1; transform: none; }
+.fin-word { position: absolute; z-index: 3; left: 50%; top: calc(100% + 34px); transform: translateX(-50%) scale(2.6); opacity: 0; white-space: nowrap; font-family: var(--sans);
+  font-size: calc(108px * var(--dll, 1)); line-height: .8; color: var(--brass); letter-spacing: .04em; text-shadow: 0 6px 0 #6b3f0a, 0 12px 0 #000, 0 0 40px rgba(248, 180, 73, .35); }
+.fin-end.fin .fin-word { animation: fin-stamp .42s cubic-bezier(.5, 0, .8, .5) forwards; }
+@keyframes fin-stamp { 0% { opacity: 0; transform: translateX(-50%) scale(2.6); } 70% { opacity: 1; transform: translateX(-50%) scale(.94); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
+.fin-end-in.shake { animation: fin-shake .34s steps(2); }
+@keyframes fin-shake { 25% { transform: translate(4px, calc(-4vh - 3px)); } 50% { transform: translate(-4px, calc(-4vh + 2px)); } 75% { transform: translate(2px, calc(-4vh + 3px)); } }
+
+.fin-hint { position: absolute; z-index: 5; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 18px; white-space: nowrap; font-family: var(--mono); font-size: 8px;
+  letter-spacing: .18em; text-transform: uppercase; color: rgba(242, 233, 214, .42); transition: opacity .4s; }
+.fin-hint kbd { margin-right: 6px; padding: 3px 5px 2px; font: inherit; color: var(--brass); box-shadow: inset 0 0 0 1px rgba(248, 180, 73, .5); }
+.fin-hint.fast span:first-child { color: var(--brass-lt); } .fin-hint.hide { opacity: 0; }
+.fin-back { position: absolute; z-index: 5; left: 50%; bottom: 46px; transform: translateX(-50%); white-space: nowrap; font-family: var(--mono); font-size: 16px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--brass-lt); opacity: 0; transition: opacity .6s; }
+.fin-back.on { opacity: 1; animation: fin-blink 1.6s steps(2) infinite 1s; } @keyframes fin-blink { 50% { opacity: .35; } }
+
+/* ------------------------------------------------ la vuelta: el cartel colgado en la portada (dentro de la escena bajo el foco) */
+.qx-sign { position: absolute; z-index: 3; left: 50%; top: 0; transform: translateX(-50%); transform-origin: 50% 0; display: flex; flex-direction: column; align-items: center; pointer-events: none;
+  zoom: var(--k, 1); animation: fin-drop .9s cubic-bezier(.3, 1.5, .5, 1) both; }
+@keyframes fin-drop { from { transform: translateX(-50%) translateY(-110%); } }
+.qx-sign .ropes { width: 220px; height: calc(9vh / var(--k, 1)); background: linear-gradient(90deg, transparent 0 8px, #7a5a2a 8px 11px, transparent 11px calc(100% - 11px), #7a5a2a calc(100% - 11px) calc(100% - 8px), transparent 0);
+  -webkit-mask: repeating-linear-gradient(180deg, #000 0 6px, transparent 6px 8px); mask: repeating-linear-gradient(180deg, #000 0 6px, transparent 6px 8px); }
+.qx-board { position: relative; width: 300px; padding: 18px 20px 16px; box-sizing: border-box; text-align: center;
+  background: repeating-linear-gradient(180deg, #6b4423 0 22px, #5a3818 22px 25px); box-shadow: inset 0 0 0 3px #1c1008, inset 0 0 0 6px #b3741c, inset 0 0 0 9px #1c1008, 0 8px 0 rgba(0, 0, 0, .55); }
+.qx-board::before, .qx-board::after { content: ""; position: absolute; top: -6px; width: 8px; height: 8px; background: var(--brass); box-shadow: 0 0 0 2px #1c1008; }
+.qx-board::before { left: 26px; } .qx-board::after { right: 26px; }
+.qx-board b { display: block; font-family: var(--sans); font-weight: 400; font-size: calc(54px * var(--dll, 1)); line-height: 1; color: #ffd0b8; text-shadow: 0 4px 0 #1c1008; }
+.qx-board span { display: block; margin-top: 6px; font-family: var(--mono); font-size: 16px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass-lt); text-shadow: 0 2px 0 #1c1008; }
+.qx-board i { position: absolute; inset: 12px; pointer-events: none; opacity: 0; border: 4px dotted #fff3c8; }
+.qx-board.open { background: #1c3a2c; box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 6px var(--brass), inset 0 0 0 9px var(--ink), 0 8px 0 rgba(0, 0, 0, .55), 0 0 60px rgba(248, 180, 73, .35); }
+.qx-board.open b { color: var(--brass-lt); }
+.qx-board.open i { opacity: .85; animation: fin-chase .5s steps(2) infinite; } @keyframes fin-chase { 50% { border-color: var(--brass); } }
+.qx-sign.swing { animation: fin-swing 3.2s ease-in-out infinite; } @keyframes fin-swing { 0%, 100% { transform: translateX(-50%) rotate(1.4deg); } 50% { transform: translateX(-50%) rotate(-1.4deg); } }
+.qx-sign.knock { animation: fin-knock .36s steps(2); } @keyframes fin-knock { 25% { transform: translateX(calc(-50% + 5px)); } 75% { transform: translateX(calc(-50% - 5px)); } }
+.qx-sign.up { animation: none; transition: transform .9s cubic-bezier(.6, 0, .8, .3); transform: translateX(-50%) translateY(-120%); }
+.qx.cb .qx-in { padding-top: calc(9vh / var(--k, 1) + 150px); }
+
+@media (prefers-reduced-motion: reduce) { .fin-dust u, .fin .qx-beam u { animation: none; } .qx-sign.swing { animation: none; } }
+@media (max-width: 720px) { .fin-n { font-size: calc(40px * var(--dll, 1)); } .fin-thanks .fin-n { font-size: calc(54px * var(--dll, 1)); } .fin-row, .fin-tk-r, .fin-s { font-size: calc(22px * var(--dll, 1)); } }

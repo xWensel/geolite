@@ -31,6 +31,29 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.4",
+      name: ["La jubilación", "The retirement"],
+      date: "2026-10-08",
+      summary: ["Gana la Ascensión V y Don Crupier se jubila: despedida bajo el foco, créditos finales y el juego se cierra. Al volver, te espera una sorpresa.",
+        "Win Ascension V and the dealer retires: a farewell under the spotlight, the end credits and the game closes. When you come back, there's a surprise."],
+      chapters: [
+        { id: "fin", kicker: ["Ascensión V", "Ascension V"], title: ["El final del juego", "The end of the game"],
+          intro: ["La primera vez que ganas una expedición en Ascensión V, Geolite tiene su final.",
+            "The first time you win an expedition on Ascension V, Geolite gets its ending."],
+          entries: [
+            E(["La despedida", "The farewell"], "new", "0.3.4", [
+              ["La sala se apaga y Don Crupier se queda solo bajo el foco: recuerda el día en que os conocisteis, tus expediciones y tus horas en su mesa (tus datos reales), y anuncia que **se jubila**. Chasquea los dedos, el foco se apaga y la pantalla se apaga como una tele vieja.", "The room goes dark and the dealer stands alone under the spotlight: he remembers the day you met, your expeditions and your hours at his table (your real numbers), and announces he's **retiring**. He snaps his fingers, the spotlight dies and the screen switches off like an old TV."],
+            ]),
+            E(["Los créditos", "The credits"], "new", "0.3.4", [
+              ["Se abren las cortinas y suben los **créditos finales** con un vals de la banda sonora: el estudio, la banda sonora original de **Álvaro Cano**, el reparto, tu **hoja de servicios** en un ticket de caja y las licencias (Wikipedia, Wikimedia Commons, tipografías, mapa). Mantén pulsado para acelerar; **Esc** salta al final.", "The curtains open and the **end credits** roll to a waltz from the soundtrack: the studio, the original soundtrack by **Álvaro Cano**, the cast, your **service record** on a till receipt, and the licenses (Wikipedia, Wikimedia Commons, fonts, map). Hold to speed up; **Esc** skips to the end."],
+              ["Al final, Don Crupier vuelve bajo su foco con su placa de jubilado, se despide y cae el **FIN**. Al pulsar, se cierran las cortinas y **el juego se cierra**. Los textos de los créditos aún pueden cambiar.", "At the end, the dealer returns under his spotlight with his retirement plaque, says goodbye and **THE END** lands. Press and the curtains close and **the game shuts down**. The credits text may still change."],
+            ]),
+            E(["La vuelta", "The comeback"], "new", "0.3.4", [
+              ["La próxima vez que abras el juego, la portada estará a oscuras con un cartel de **«Cerrado por jubilación»**. Llaman a la puerta tres veces... y vuelve: te cuenta cuánto le ha durado la jubilación (el tiempo real que has estado fuera) y por qué no piensa irse. Al final le da la vuelta al cartel: **ABIERTO**.", "Next time you open the game, the main menu is dark with a **Closed for retirement** sign. Three knocks on the door... and he's back: he tells you how long his retirement lasted (the real time you were away) and why he's not going anywhere. Then he flips the sign: **OPEN**."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.3",
       name: ["Ajustes nuevos", "New settings"],
       date: "2026-10-08",

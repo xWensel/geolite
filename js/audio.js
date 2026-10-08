@@ -214,7 +214,7 @@ window.AIQ = window.AIQ || {};
     index() { return cur; },
     count() { return FILES.length; },
     title(i = cur) { const n = NAMES[i]; if (!n) return ""; const k = A.LANGS.findIndex(l => l.code === A.lang); return n[k] || n[1]; },
-    go(i) { if (FILES[i] != null) useTrack(i, true); },   // dev: salta a una cancion
+    go(i, quiet) { if (FILES[i] != null && A.audio.musicOn && init()) useTrack(i, !quiet); },   // salta a una cancion (quiet: sin el golpe de cambio; los creditos finales ponen el vals)
     now() { return A.music.title(); },
     stop() { if (mediaEl) mediaEl.pause(); },
     mode(m) { mode = m; if (ctx) musFilter.frequency.setTargetAtTime(m === 2 ? 12500 : 8600, ctx.currentTime, 0.15); },
@@ -613,6 +613,10 @@ window.AIQ = window.AIQ || {};
       if (k < 0) { pluck(55, t, { vol: 0.06, dur: 0.12, bright: 2, rev: 0.05 }); noise(t, 0.02, { lp: 1400, vol: 0.04 }); return; }   // borrar: mas grave y apagado
       pluck(scaleNote(3 + Math.min(k, 19), 60), t, { vol: 0.055, dur: 0.12, bright: 4, rev: 0.1 }); noise(t, 0.012, { hp: 4200, vol: 0.035 }); thump(t, { vol: 0.05, f0: 420, f1: 190, dur: 0.03 });
     }),
+    /* la jubilacion del crupier (js/final.js, js/dealer.js): tres golpes en la puerta, el chasquido que apaga el foco y el cartel que se da la vuelta */
+    knock: go(t => { thump(t, { vol: 0.42, f0: 210, f1: 80, dur: 0.11 }); noise(t, 0.035, { lp: 1300, vol: 0.16 }); }),
+    snap: go(t => { noise(t, 0.022, { hp: 2600, vol: 0.16 }); thump(t + 0.06, { vol: 0.18, f0: 160, f1: 50, dur: 0.18 }); }),
+    flip: go(t => { noise(t, 0.09, { lp: 2400, vol: 0.09, type: "bandpass", q: 0.7 }); thump(t + 0.08, { vol: 0.3, f0: 150, f1: 60, dur: 0.16 }); [72, 76, 79, 84].forEach((m, i) => bell(m, t + 0.16 + i * 0.06, { vol: 0.05, dur: 0.9, rev: 0.5 })); }),
     sign: go(t => {
       thump(t, { vol: 0.44, f0: 128, f1: 32, dur: 0.32 }); noise(t, 0.11, { lp: 1700, vol: 0.13 });
       MOTIF.forEach((m, i) => { pluck(m + 12, t + 0.14 + i * 0.1, { vol: 0.14, dur: 1.1, rev: 0.6 }); bell(m + 24, t + 0.14 + i * 0.1, { vol: 0.03, dur: 0.4, rev: 0.4 }); });

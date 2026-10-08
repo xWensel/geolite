@@ -85,6 +85,7 @@ window.AIQ = window.AIQ || {};
     if (!document.querySelector("#layer:not(.hidden) .hh")) return false;
     if ((A.codex && A.codex.isOpen && A.codex.isOpen()) || (A.podio && A.podio.isOpen && A.podio.isOpen()) || (A.nombre && A.nombre.open && A.nombre.open())) return false;
     if (A.tour && A.tour.active && A.tour.active()) return false;
+    if (A.final && A.final.active()) return false;                                     // los creditos finales: alli Esc salta al final
     const lp = $("langPop"), veil = $("veil"); return !(lp && !lp.classList.contains("hidden")) && !(veil && !veil.classList.contains("hidden"));
   }
   /* Esc en la portada: como en cualquier juego de PC, pregunta si quieres salir */
