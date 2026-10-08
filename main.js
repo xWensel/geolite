@@ -17,7 +17,9 @@ let steamClient = null;
 try {
   if (process.env.GEOLITE_NOSTEAM === "1" || process.argv.includes("--no-steam")) throw new Error("apagado (GEOLITE_NOSTEAM=1 o --no-steam)");   // desarrollo sin Steam (por ejemplo, para probar el mando)
   steamClient = require("steamworks.js").init();
-  require("steamworks.js").electronEnableSteamOverlay();
+  /* el overlay de Electron (in-process-gpu + repintado a 60 fps) es solo para Windows: en Linux el overlay de Steam entra solo y, lanzado desde el modo
+     juego de la Steam Deck, in-process-gpu dejaba la pantalla en negro y colgaba la consola entera (v0.3.33) */
+  if (process.platform === "win32") require("steamworks.js").electronEnableSteamOverlay();
   console.log("Steamworks conectado:", steamClient.localplayer.getName());
   /* App ID 480 = Spacewar, solo para desarrollar. Con Steam abierto, Steam Input toma el mando (el log de Steam lo abre y reserva XInput 0 y 1) y le
      aplica la configuracion de Spacewar ("Space War Action Set Config Sample": acciones para la API de Steam Input, que este juego no usa). El
