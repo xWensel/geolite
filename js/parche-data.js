@@ -31,6 +31,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.5",
+      name: ["Dedicatoria", "Dedication"],
+      date: "2026-10-08",
+      summary: ["Los créditos finales terminan con la dedicatoria del autor.", "The end credits now close with the author's dedication."],
+      chapters: [
+        { id: "ded", kicker: ["Créditos finales", "End credits"], title: ["Al final de todo", "At the very end"],
+          intro: ["Lo último que se lee antes de que vuelva Don Crupier.", "The last thing you read before the dealer comes back."],
+          entries: [
+            E(["Dedicatoria", "Dedication"], "new", "0.3.5", [
+              ["Después de «Gracias por jugar», el rodillo se detiene con la dedicatoria: **para Alejandra y Alicia (A³)**, y una dedicatoria especial a **Hugiitop**, el incansable beta tester del juego.", "After “Thanks for playing”, the credits stop on the dedication: **to Alejandra and Alicia (A³)**, plus a special dedication to **Hugiitop**, the game's tireless beta tester."],
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.4",
       name: ["La jubilación", "The retirement"],
       date: "2026-10-08",

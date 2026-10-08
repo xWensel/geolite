@@ -44,6 +44,11 @@ window.AIQ = window.AIQ || {};
     desk: "Electron y Chromium|Electron and Chromium|Electron et Chromium|Electron e Chromium|Electron und Chromium|Electron e Chromium||Electron 与 Chromium|Electron 및 Chromium|Electron と Chromium|Electron и Chromium|Electron i Chromium",
     thanks: "Gracias por jugar|Thanks for playing|Merci d'avoir joué|Obrigado por jogar|Danke fürs Spielen|Grazie per aver giocato||感谢游玩|플레이해 줘서 고마워|遊んでくれてありがとう|Спасибо за игру|Dzięki za grę",
     thanksS: "A ti, que has llegado hasta el final.|To you, for making it all the way to the end.|À toi, qui as tenu jusqu'au bout.|A você, que chegou até o fim.|Für dich – du hast bis zum Ende durchgehalten.|A te, che hai resistito fino alla fine.|A ti, que llegaste hasta el final.|献给一路走到最后的你。|끝까지 와 준 너에게.|最後までたどり着いた君へ。|Тебе — за весь путь до самого конца.|Tobie — za całą drogę aż do końca.",
+    dedic: "Dedicado a|Dedicated to|Dédié à|Dedicado a|Gewidmet|Dedicato a||谨献给|이 게임을 바칩니다|この作品を捧げる|Посвящается|Dedykuję",
+    daughter: "mi hija|my daughter|ma fille|minha filha|meine Tochter|mia figlia||我的女儿|내 딸|娘|моей дочери|mojej córce",
+    wife: "mi mujer|my wife|ma femme|minha esposa|meine Frau|mia moglie||我的妻子|내 아내|妻|моей жене|mojej żonie",
+    special: "Dedicatoria especial|Special dedication|Dédicace spéciale|Dedicatória especial|Besondere Widmung|Dedica speciale||特别献给|특별한 헌사|特別な感謝を|Особая благодарность|Specjalna dedykacja",
+    tester: "Mi incansable beta tester|My tireless beta tester|Mon infatigable bêta-testeur|Meu incansável beta tester|Mein unermüdlicher Betatester|Il mio instancabile beta tester||我那不知疲倦的测试员|지칠 줄 모르는 나의 베타 테스터|疲れ知らずのベータテスター|Моему неутомимому бета-тестеру|Mojemu niestrudzonemu beta testerowi",
     name: "Don Crupier|The Dealer|Don Croupier|Dom Crupiê|Don Croupier|Don Croupier||荷官先生|딜러 나리|ドン・ディーラー|Дон Крупье|Don Krupier",
     plate: "Jubilado el {d}|Retired on {d}|Retraité le {d}|Aposentado em {d}|In Rente seit dem {d}|In pensione · {d}||{d}退休|{d} 은퇴|{d} 引退|На пенсии с {d}|Na emeryturze od {d}",
     fin: "FIN|THE END|FIN|FIM|ENDE|FINE||剧终|끝|完|КОНЕЦ|KONIEC",
@@ -111,6 +116,9 @@ window.AIQ = window.AIQ || {};
       sec(TX.mapH, n(P6(TX.mapA)) + n("Natural Earth")),
       sec(TX.deskH, n(P6(TX.desk)) + n("steamworks.js") + s("Steamworks SDK © Valve Corporation")),
       sec("", n(P6(TX.thanks)) + s(P6(TX.thanksS)), "fin-thanks"),
+      sec(TX.dedic, `<div class="fin-fam"><div><p class="fin-n">Alejandra</p>${s(P6(TX.daughter))}</div><div><p class="fin-n">Alicia</p>${s(P6(TX.wife))}</div></div>
+        <p class="fin-cube" aria-label="A al cubo">A<sup>3</sup></p>`, "fin-ded"),
+      sec(TX.special, n("Hugiitop") + s(P6(TX.tester)), "fin-ded fin-last"),
     ].join("");
   }
   function locale() { const L = (A.LANGS || []).find(l => l.code === A.lang); return L ? L.loc : undefined; }
@@ -140,13 +148,17 @@ window.AIQ = window.AIQ || {};
   }
   function startRoll() {
     const r = $("finRoll"), H = r.offsetHeight, dpr = window.devicePixelRatio || 1;   // se mide una vez (nunca por fotograma) y sin transformaciones: la sala aun se esta encendiendo como una tele
-    st.end = -H + innerHeight * 0.35; st.speed = (H - innerHeight * 0.65) / ROLL_S; st.last = performance.now();
+    st.end = null; st.speed = (H - innerHeight) / ROLL_S; st.last = performance.now(); st.rest = 6;
+    /* donde se para: las dos dedicatorias centradas en pantalla. Se mide con la sala ya encendida (sin la escala de la tele) y con el zoom de la pantalla incluido */
+    const stopAt = () => { const F = r.querySelector(".fin-ded"), L = r.querySelector(".fin-last"); if (!F || !L) return -H + innerHeight * 0.35;   // las dos dedicatorias juntas, centradas
+      const a = F.getBoundingClientRect(), b = L.getBoundingClientRect(), pad = parseFloat(getComputedStyle(L).paddingBottom) * (b.height / (L.offsetHeight || 1));
+      return st.y - ((a.top + b.bottom - pad) / 2 - innerHeight / 2); };
     const tick = now => {
       if (!st || st.phase !== "roll") return;
       const dt = Math.min(0.05, (now - st.last) / 1000), k = st.fast ? 5 : 1; st.last = now;
-      if (st.hold > 0) st.hold -= dt * k; else st.y -= st.speed * dt * k;   // el logo se queda quieto un rato antes de que arranque
+      if (st.hold > 0) st.hold -= dt * k; else { if (st.end == null) st.end = stopAt(); st.y = Math.max(st.end, st.y - st.speed * dt * k); }   // el logo se queda quieto un rato antes de que arranque
       r.style.transform = `translate3d(0, ${Math.round(st.y * dpr) / dpr}px, 0)`;   // a pixel entero: el texto pixelado no se emborrona al subir
-      if (st.y <= st.end) return finale();
+      if (st.end != null && st.y <= st.end) { st.rest -= dt; if (st.rest <= 0) return finale(); }   // se queda quieta 6 s en las dedicatorias (acelerar no las acorta)
       st.raf = requestAnimationFrame(tick);
     };
     st.raf = requestAnimationFrame(tick);
