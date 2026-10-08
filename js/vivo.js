@@ -63,7 +63,7 @@ window.AIQ = window.AIQ || {};
     clearTimeout(dt); if (!queue.length) return;
     const wait = busyTill - Date.now(); if (wait > 0) { dt = setTimeout(drain, wait); return; }
     const m = queue.shift(), t = String(m.t || "").slice(0, 160); if (!t || !A.dealer || !A.dealer.live) return drain();
-    A.dealer.live(t, { mood: MOOD[m.e] || "sly", face: m.e || undefined, gest: m.g || null });
+    A.dealer.live(t, { mood: MOOD[m.e] || "sly", face: m.e || undefined, gest: m.g || null, sty: m.s || "" });
     busyTill = Date.now() + [...t].length * 40 + 1600;
     if (queue.length) dt = setTimeout(drain, busyTill - Date.now());
   }

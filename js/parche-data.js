@@ -34,6 +34,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.27",
+      name: L("A su manera", "His way", "À sa façon", "Do jeito dele", "Auf seine Art", "A modo suo", "", "他的方式", "그만의 방식", "彼のやり方", "По-своему", "Po swojemu"),
+      date: "2026-10-08",
+      summary: L("Cuando Don Crupier te habla en directo, su bocadillo puede gritar, temblar o susurrar.", "When Don Crupier speaks to you live, his speech bubble can shout, tremble or whisper.", "Quand Don Crupier te parle en direct, sa bulle peut crier, trembler ou chuchoter.", "Quando Don Crupier fala com você ao vivo, o balão dele pode gritar, tremer ou sussurrar.", "Wenn Don Crupier live zu dir spricht, kann seine Sprechblase schreien, zittern oder flüstern.", "Quando Don Crupier ti parla in diretta, il suo fumetto può gridare, tremare o sussurrare.", "", "Don Crupier 直播和你说话时，他的对话框可以大喊、颤抖或低语。", "Don Crupier가 생방송으로 말을 걸 때, 말풍선이 소리치거나 떨리거나 속삭일 수 있습니다.", "Don Crupier が生放送で話しかけるとき、吹き出しが叫んだり、震えたり、ささやいたりします。", "Когда Дон Крупье говорит с тобой в эфире, его облачко может кричать, дрожать или шептать.", "Gdy Don Krupier mówi do ciebie na żywo, jego dymek potrafi krzyczeć, drżeć albo szeptać."),
+      chapters: [
+        { id: "estilos", kicker: L("En directo", "Live", "En direct", "Ao vivo", "Live", "In diretta", "", "直播", "생방송", "生放送", "В эфире", "Na żywo"),
+          title: L("Don Crupier", "Don Crupier", "Don Crupier", "Don Crupier", "Don Crupier", "Don Crupier", "", "Don Crupier", "Don Crupier", "Don Crupier", "Дон Крупье", "Don Krupier"),
+          entries: [
+            E(L("Estilos del bocadillo", "Bubble styles", "Styles de bulle", "Estilos de balão", "Sprechblasen-Stile", "Stili del fumetto", "", "对话框样式", "말풍선 스타일", "吹き出しのスタイル", "Стили облачка", "Style dymku"), "new", "0.3.27", [
+              L("Ocho estilos: **gritando**, **tembloroso**, **susurro**, **pensando**, **siniestro**, **cantando**, **glitch** y **gran anuncio**. Solo cambian el aspecto del bocadillo; la partida sigue igual.", "Eight styles: **shouting**, **trembling**, **whisper**, **thinking**, **sinister**, **singing**, **glitch** and **grand announcement**. They only change how the bubble looks; the run stays the same.", "Huit styles : **cri**, **tremblant**, **chuchotement**, **pensif**, **sinistre**, **chanté**, **glitch** et **grande annonce**. Seul l'aspect de la bulle change ; la partie reste la même.", "Oito estilos: **gritando**, **trêmulo**, **sussurro**, **pensando**, **sinistro**, **cantando**, **glitch** e **grande anúncio**. Mudam só o visual do balão; a partida continua igual.", "Acht Stile: **schreiend**, **zitternd**, **Flüstern**, **nachdenklich**, **finster**, **singend**, **Glitch** und **große Ansage**. Sie ändern nur das Aussehen der Sprechblase; die Partie bleibt gleich.", "Otto stili: **gridato**, **tremante**, **sussurro**, **pensieroso**, **sinistro**, **cantato**, **glitch** e **grande annuncio**. Cambiano solo l'aspetto del fumetto; la partita resta uguale.", "", "八种样式：**大喊**、**颤抖**、**低语**、**沉思**、**阴森**、**歌唱**、**故障**和**隆重宣布**。只改变对话框的外观，对局不受影响。", "여덟 가지 스타일: **외침**, **떨림**, **속삭임**, **생각**, **음산함**, **노래**, **글리치**, **대발표**. 말풍선의 모양만 바뀌고 판은 그대로입니다.", "8つのスタイル：**叫ぶ**、**震える**、**ささやき**、**考え中**、**不気味**、**歌う**、**グリッチ**、**大発表**。変わるのは吹き出しの見た目だけで、ゲームはそのままです。", "Восемь стилей: **крик**, **дрожь**, **шёпот**, **раздумье**, **зловещий**, **пение**, **глитч** и **громкое объявление**. Меняется только вид облачка, партия остаётся прежней.", "Osiem stylów: **krzyk**, **drżenie**, **szept**, **zamyślenie**, **złowrogi**, **śpiew**, **glitch** i **wielkie ogłoszenie**. Zmienia się tylko wygląd dymka, rozgrywka zostaje taka sama.")
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.26",
       name: L("Su mano", "His hand", "Sa main", "A mão dele", "Seine Hand", "La sua mano", "", "他的手", "그의 손", "彼の手", "Его рука", "Jego ręka"),
       date: "2026-10-08",
