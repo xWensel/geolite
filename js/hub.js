@@ -74,16 +74,15 @@ window.AIQ = window.AIQ || {};
   const startBtn = (id, big, small, primary) => `<button class="startbtn" id="${id}" ${primary ? "data-primary" : ""}><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${big}</b><i>${small}</i></span><span class="sb-ar">${A.icon("u_next", "sm")}</span></button>`;
 
   /* ------------------------------------------------------------------ Clasico: campanas */
-  /* miniatura de cada campana: su region (antes todas usaban home = 0,0: el mismo mundo con un punto rojo en el golfo de Guinea) */
-  const THUMB = { usa: { lat: 38, lon: -97, zoom: 5.2 }, europe: { lat: 50, lon: 14, zoom: 5.4 }, asia: { lat: 27, lon: 92, zoom: 2.9 }, latam: { lat: -14, lon: -74, zoom: 2.6 }, oceania: { lat: -27, lon: 152, zoom: 3.2 }, world: { lat: 22, lon: 12, zoom: 1 } };
-  const campThumb = x => ({ ...(THUMB[(x.levels[0] || {}).region] || THUMB.world), mark: false });
+  /* portada de cada campana: minicarta pixel art (un protagonista sobre el foco de su color), assets/gen/camp_<id>.webp */
+  const campArt = x => `assets/gen/camp_${x.id.replace(/^c-/, "")}.webp`;
   function campaigns(mode) {
     const c = C(), S = c.S; S.mode = mode; const camps = A.CAMPAIGNS.filter(x => x.mode === mode);
     if (!camps.find(x => x.id === S.campId)) { S.campId = camps[0].id; S.startLevel = 0; }
     const cur = camps.find(x => x.id === S.campId), pr = c.prog(cur.id); S.startLevel = Math.min(S.startLevel, pr.unlocked - 1);
     const list = camps.map((x, i) => {
       const p = c.prog(x.id), ticks = x.levels.map((_, k) => `<i class="${p.best && k < p.unlocked ? "on" : ""}"></i>`).join(""), md = A.profile.get().medals[x.id];
-      return `<button class="camp${x.id === S.campId ? " sel" : ""}" data-id="${x.id}" style="animation-delay:${i * 60}ms"><canvas class="camp-thumb" aria-hidden="true"></canvas>
+      return `<button class="camp${x.id === S.campId ? " sel" : ""}" data-id="${x.id}" style="animation-delay:${i * 60}ms"><img class="camp-thumb" src="${campArt(x)}" alt="" aria-hidden="true" draggable="false" decoding="async">
         <span class="camp-body"><span class="camp-t">${A.tx(x.title)}${md ? ` ${A.icon("medal_" + md, "sm")}` : ""}</span><span class="camp-d">${A.tx(x.blurb)}</span>
         <span class="camp-m"><span class="camp-p">${ticks}</span><span>${p.best ? A.t("camp.best", { s: A.fmt(p.best) }) : A.t("camp.new")}</span></span></span></button>`;
     }).join("");
@@ -109,9 +108,6 @@ window.AIQ = window.AIQ || {};
       $("campFoot").innerHTML = foot(); wireFoot();
     }));
     wireFoot();
-    /* las miniaturas, un fotograma despues de ajustar la pantalla (A.fitK): no se suman a su primer fotograma y salen ya a su tamano final (antes se
-       pintaban al tamano de antes del ajuste y el navegador las estiraba) */
-    requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll(".camp").forEach((b, i) => { const cv = b.querySelector("canvas"); if (cv && camps[i]) c.map.drawThumb(cv, campThumb(camps[i])); })));
   }
 
   /* ------------------------------------------------------------------ Aventura */

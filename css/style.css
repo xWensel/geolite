@@ -371,7 +371,7 @@ button:focus-visible, .camp:focus-visible { outline: 3px solid var(--brass); out
 .camp { --c: 12px; --edge: rgba(242,233,214,.22); --fill: #121f27; display: grid; grid-template-columns: 108px 1fr; gap: 14px; align-items: center; text-align: left; padding: 10px 14px 10px 10px; transition: transform .22s var(--spring); animation: rise .45s ease both; }
 .camp:hover { transform: translateX(4px); --edge: rgba(242,233,214,.5); }
 .camp.sel { --edge: var(--brass); --fill: #2a261c; }
-.camp-thumb { width: 108px; height: 70px; display: block; border: 1px solid rgba(242,233,214,.22); }
+.camp-thumb { width: 108px; height: 70px; display: block; border: 1px solid rgba(242,233,214,.22); object-fit: cover; image-rendering: pixelated; }
 .camp-body { display: grid; gap: 2px; min-width: 0; }
 .camp-t { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 21px; letter-spacing: -.01em; line-height: 1.1; }
 .camp-d { font-size: 15.5px; color: rgba(242,233,214,.62); line-height: 1.3; }
