@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.11",
+      name: L("Ensayo general", "Dress rehearsal", "Répétition générale", "Ensaio geral", "Generalprobe", "Prova generale", "", "彩排", "리허설", "リハーサル", "Генеральная репетиция", "Próba generalna"),
+      date: "2026-10-08",
+      summary: L("Lo que el crupier te dice en directo, ensayado antes de salir.", "What the Dealer says to you live, rehearsed before it goes out.", "Ce que le croupier te dit en direct, répété avant d'être envoyé.", "O que o crupiê diz ao vivo, ensaiado antes de sair.", "Was der Croupier dir live sagt, wird vorher geprobt.", "Ciò che il croupier ti dice in diretta, provato prima di uscire.", "", "荷官的直播台词，发出前先彩排。", "딜러가 생방송으로 하는 말, 나가기 전에 리허설합니다.", "ディーラーの生放送のセリフは、送る前にリハーサル。", "То, что крупье говорит в эфире, сначала репетируется.", "To, co krupier mówi na żywo, jest najpierw próbowane."),
+      chapters: [
+        { id: "ens", kicker: L("Don Crupier", "The Dealer", "Don Croupier", "Dom Crupiê", "Don Croupier", "Don Croupier", "", "荷官先生", "딜러 나리", "ドン・ディーラー", "Дон Крупье", "Don Krupier"),
+          title: L("En directo", "Live", "En direct", "Ao vivo", "Live", "In diretta", "En vivo", "直播", "생방송", "生放送", "В эфире", "Na żywo"),
+          intro: L("Entre bastidores.", "Behind the scenes.", "En coulisses.", "Nos bastidores.", "Hinter den Kulissen.", "Dietro le quinte.", "", "幕后。", "무대 뒤.", "舞台裏。", "За кулисами.", "Za kulisami."),
+          entries: [
+            E(L("Ensayo", "Rehearsal", "Répétition", "Ensaio", "Probe", "Prova", "", "彩排", "리허설", "リハーサル", "Репетиция", "Próba"), "new", "0.3.11", [
+              L("Antes de hablarte en directo, el crupier ensaya la escena entera: la cara, el gesto y la frase letra a letra, tal como la vas a ver.", "Before speaking to you live, the Dealer rehearses the whole scene: the face, the gesture and the line letter by letter, just as you'll see it.", "Avant de te parler en direct, le croupier répète toute la scène : le visage, le geste et la phrase lettre par lettre, exactement comme tu la verras.", "Antes de falar com você ao vivo, o crupiê ensaia a cena inteira: o rosto, o gesto e a frase letra por letra, do jeito que você vai ver.", "Bevor der Croupier live mit dir spricht, probt er die ganze Szene: Gesicht, Geste und den Satz Buchstabe für Buchstabe, genau wie du ihn sehen wirst.", "Prima di parlarti in diretta, il croupier prova tutta la scena: la faccia, il gesto e la frase lettera per lettera, proprio come la vedrai.", "Antes de hablarte en vivo, el crupier ensaya la escena entera: la cara, el gesto y la frase letra por letra, tal como la vas a ver.", "在直播对你说话之前，荷官会先彩排整场戏：表情、手势和逐字出现的台词，和你看到的一模一样。", "생방송으로 말을 걸기 전에 딜러는 장면 전체를 리허설합니다. 표정, 몸짓, 한 글자씩 나오는 대사까지 당신이 보게 될 그대로.", "生放送で話しかける前に、ディーラーは場面をまるごとリハーサルする。表情、しぐさ、一文字ずつのセリフまで、あなたが見るそのままに。", "Прежде чем заговорить с тобой в эфире, крупье репетирует всю сцену: лицо, жест и фразу по буквам, ровно так, как ты её увидишь.", "Zanim krupier odezwie się do ciebie na żywo, próbuje całą scenę: minę, gest i zdanie litera po literze, dokładnie tak, jak je zobaczysz."),
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.10",
       name: L("Cartas nuevas en la portada", "New cards on the title screen", "Nouvelles cartes sur l'écran titre", "Cartas novas na tela inicial", "Neue Karten im Hauptmenü", "Nuove carte nella schermata iniziale", "Cartas nuevas en la pantalla de inicio", "主界面的新卡牌", "타이틀 화면의 새 카드", "タイトル画面の新しいカード", "Новые карты на главном экране", "Nowe karty na ekranie tytułowym"),
       date: "2026-10-08",
