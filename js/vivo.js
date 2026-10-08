@@ -36,6 +36,7 @@ window.AIQ = window.AIQ || {};
     } else if (S.camp) { o.md = "clasico"; o.sc = "partida"; o.r = S.level + 1; o.s = S.runTotal + (S.levelScore || 0); o.d = es(S.camp.name).slice(0, 12); }
     if (q && (S.phase === "asking" || S.phase === "reveal")) { o.q = es(q.clue ? q.answer : q.name); o.k = q.clue ? "clue" : q.kind || ""; }
     o.sk = S.streak || 0;
+    if (A.chfx && A.chfx.liveState) { const L = A.chfx.liveState(); o.fx = [L.lluvia, L.tormenta, L.apagon, L.terremoto].map(b => (b ? 1 : 0)).join("") + L.cristal + L.huellas + L.ventana; }   // lo que la mesa tiene puesto (sus fichas)
     return o;
   }
 
@@ -51,7 +52,7 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { fast = !!j.w; if (!fast && pc) camOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)
+      if (j && j.ok) { const was = fast; fast = !!j.w; if (!fast && pc) camOff(); if (was && !fast && A.chfx && A.chfx.liveReset) A.chfx.liveReset(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
     } catch (e) { fast = false; }
     sched(fast ? 2000 : document.hidden ? 60000 : 25000);
   }
@@ -67,10 +68,7 @@ window.AIQ = window.AIQ || {};
     if (queue.length) dt = setTimeout(drain, busyTill - Date.now());
   }
   /* las fichas de la mesa: los efectos de los retos (js/chfx.js) y el terremoto de los jackpots, con sus ajustes de siempre (temblor, destellos) */
-  function fx(k) {
-    if (k === "terremoto") { if (A.core && A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([90, 40, 140, 40, 60]); if (A.sfx && A.sfx.thunder) A.sfx.thunder(); return; }
-    if (A.chfx && A.chfx.live) A.chfx.live(k);
-  }
+  function fx(k, v) { if (A.chfx && A.chfx.live) A.chfx.live(k, v); }   // rayo, interruptores (v true/false) y contadores (v = cuantos deben quedar)
   /* LA CAMARA DEL CRUPIER (solo escritorio): la mesa pide ver la partida y el juego le manda el video de SU ventana (captura de pestana de
      Electron: nada del escritorio ni de otras ventanas) de punto a punto (WebRTC; api/vivo.js y api/mesa.js solo cruzan la oferta y la respuesta).
      Mientras dura, arriba sale el piloto "TE ESTA MIRANDO" con el crupier. Por el mismo canal llega el guante: la mesa senala y da toquecitos en tu pantalla */

@@ -146,6 +146,8 @@ html.reduce-motion #askName.ch-crazy .lt[data-cz], html.reduce-motion #askSub.ch
 #app.ch-quaking { animation: ch-quake .65s linear; }
 @keyframes ch-quake { 10% { transform: translate(-7px, 4px); } 22% { transform: translate(6px, -5px); } 34% { transform: translate(-5px, -3px); } 46% { transform: translate(4px, 4px); } 60% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, -1px); } 100% { transform: none; } }
 html.no-shake #app.ch-quaking { animation: none; }
+#app.vivo-quake { animation: ch-quake .65s linear infinite; }   /* js/chfx.js: el terremoto del directo, hasta que la mesa lo apague */
+html.no-shake #app.vivo-quake, html.reduce-motion #app.vivo-quake { animation: none; }
 #askName.ch-scroll , #askSub.ch-scroll, .split-alt .sa-n.ch-scroll { overflow: hidden; white-space: nowrap; }
 #askName .ch-marq , #askSub .ch-marq, .split-alt .sa-n .ch-marq { display: inline-block; padding-left: 100%; animation: ch-marq 3.4s linear infinite; }
 @keyframes ch-marq { to { transform: translateX(-100%); } }

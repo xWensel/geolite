@@ -4,7 +4,7 @@
      POST { op: "watch", sid }            ->  la estas mirando (45 s): esa partida pregunta cada 2 s
      POST { op: "unwatch", sid }
      POST { op: "say", sid, t, e, g }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
-     POST { op: "fx", sid, fx }           ->  lanza una ficha: rayo, tormenta, lluvia, apagon, terremoto, cristal, huellas o ventana
+     POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto (v true/false), cristal/huellas/ventana (v 0-5)
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
                                           ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas */
@@ -50,8 +50,9 @@ module.exports = async (req, res) => {
     }
     if (b.op === "fx") {                                             // una ficha: el efecto cae al momento en su partida
       const fx = String(b.fx || ""); if (!FX.includes(fx)) return res.status(400).json({ ok: false });
+      const v = typeof b.v === "boolean" ? b.v : Number.isInteger(b.v) && b.v >= 0 && b.v <= 5 ? b.v : undefined;   // interruptor o contador
       const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
-      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "fx", fx, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
+      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "fx", fx, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
       return res.status(200).json({ ok: true, live: !!st });
     }
     if (b.op === "say") {

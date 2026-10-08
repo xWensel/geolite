@@ -13,7 +13,7 @@ const num = v => (Number.isFinite(+v) ? Math.round(+v) : null);
 /* solo los campos conocidos y acotados: nada de lo que mande un cliente llega tal cual a la mesa */
 function clean(st) {
   if (!st || typeof st !== "object") return null;
-  const o = { n: cut(st.n, 20), l: cut(st.l, 8), p: cut(st.p, 8), v: cut(st.v, 12), sc: cut(st.sc, 24), md: cut(st.md, 12), ph: cut(st.ph, 12), q: cut(st.q, 60), k: cut(st.k, 16), d: cut(st.d, 12) };
+  const o = { n: cut(st.n, 20), l: cut(st.l, 8), p: cut(st.p, 8), v: cut(st.v, 12), sc: cut(st.sc, 24), md: cut(st.md, 12), ph: cut(st.ph, 12), q: cut(st.q, 60), k: cut(st.k, 16), d: cut(st.d, 12), fx: /^[01]{4}[0-5]{3}$/.test(st.fx || "") ? st.fx : "" };
   for (const k of ["r", "a", "asc", "s", "c", "h", "hm", "sk", "t0", "mt", "cam"]) { const x = num(st[k]); if (x != null) o[k] = x; }
   return o;
 }

@@ -133,6 +133,15 @@ img, canvas { image-rendering: pixelated; }
 .chip:hover:not(:disabled) { transform: translateY(-4px); }
 .chip:active:not(:disabled) { transform: translateY(1px); }
 .chip:disabled { filter: grayscale(.85) brightness(.55); }
+/* encendida (interruptor) o con su cuenta (contador): la ficha se levanta y brilla, con su placa */
+.chip.lit img { filter: drop-shadow(0 0 0 transparent) drop-shadow(0 3px 0 rgba(0, 0, 0, .55)) drop-shadow(0 0 10px rgba(241, 215, 154, .75)); transform: translateY(-4px); }
+.chip b { position: absolute; top: -4px; right: -6px; min-width: 22px; padding: 3px 4px; font-family: var(--mono); font-weight: 400; font-size: 8px; line-height: 1; text-align: center; color: var(--ink); background: var(--brass-lt); box-shadow: 0 2px 0 rgba(0, 0, 0, .5); opacity: 0; transform: scale(.6); transition: opacity .15s, transform .2s cubic-bezier(.2, 1.6, .4, 1); pointer-events: none; }
+.chip.lit b { opacity: 1; transform: none; }
+.chip.on b { color: #fff; background: #2f9a55; }
+.chip.deny { animation: deny .3s steps(2); }
+@keyframes deny { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+.trayHint { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: rgba(241, 215, 154, .45); }
+.trayHint em { font-style: normal; color: var(--brass-lt); }
 .flyer { position: fixed; z-index: 50; width: 64px; height: 64px; pointer-events: none; image-rendering: pixelated; }
 
 /* los asientos: cajas de apuesta impresas en el tapete, en arco */
@@ -234,7 +243,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
         <div class="tvtip">Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</div>
       </div>
       <div class="print"><h1>La mesa del crupier</h1><p>La casa siempre gana · en directo desde Geolite</p><i class="line"></i></div>
-      <div class="rack"><span class="lbl">Fichas · lánzalas a su asiento</span><div class="tray" id="tray"></div></div>
+      <div class="rack"><span class="lbl">Fichas · se quedan puestas hasta que las quites</span><div class="tray" id="tray"></div><span class="trayHint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></div>
       <div class="seats" id="list"></div>
     </div></div></div>
 
@@ -318,8 +327,22 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   const same = l => l === "es" || l === "es-419";
 
   /* ------------------------------------------------ fichas: los efectos de los retos del juego (js/chfx.js) */
-  const CHIPS = [["rayo", "Rayo"], ["tormenta", "Tormenta"], ["lluvia", "Lluvia"], ["apagon", "Apagón"], ["terremoto", "Terremoto"], ["cristal", "Cristal roto"], ["huellas", "Huellas"], ["ventana", "Error falso"]];
-  $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span></button>`).join("");
+  /* rayo: uno por clic · interruptores: se quedan hasta quitarlos · contadores: x1 a x5, uno a uno */
+  const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
+  const KIND_ = Object.fromEntries(CHIPS.map(c => [c[0], c[2]])), NAME_ = Object.fromEntries(CHIPS.map(c => [c[0], c[1]]));
+  $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
+  /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores) y la mesa lo adelanta al pulsar */
+  const fxs = {}, fxAt = {};
+  const parseFx = f => !f || f.length !== 7 ? null : { lluvia: f[0] === "1", tormenta: f[1] === "1", apagon: f[2] === "1", terremoto: f[3] === "1", cristal: +f[4], huellas: +f[5], ventana: +f[6] };
+  const fxOf = sid => fxs[sid] || (fxs[sid] = { lluvia: false, tormenta: false, apagon: false, terremoto: false, cristal: 0, huellas: 0, ventana: 0 });
+  function paintChips() {
+    const F = sel ? fxOf(sel) : null;
+    document.querySelectorAll(".chip").forEach(c => {
+      const id = c.dataset.fx, k = KIND_[id], v = F ? F[id] : null, lit = k === "on" ? !!v : k === "n" ? v > 0 : false;
+      c.classList.toggle("lit", lit); c.classList.toggle("on", k === "on" && !!v);
+      c.querySelector("b").textContent = k === "on" ? "ON" : k === "n" && v ? "×" + v : "";
+    });
+  }
 
   /* ------------------------------------------------ el crupier de la mesa (el mismo sprite del juego) */
   const FACES = ["sly", "laugh", "wink", "smug", "suspicious", "shock", "angry", "furious", "dare", "innocent", "puzzled", "nervous", "sad", "bored", "bow", "dark"];
@@ -360,7 +383,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
 
   /* ------------------------------------------------ los asientos */
   let list = [], sel = null, selSt = null, pollT = 0, watchT = 0;
-  const said = {}, tossed = {};                                         // sid -> lo que le has dicho / las fichas que le has lanzado (en esta sesion)
+  const said = {};                                                      // sid -> lo que le has dicho (en esta sesion)
   function enter(j) {
     $("door").classList.add("hidden"); $("app").classList.remove("hidden");
     if (!spr) { spr = mount($("face")); setupControls(); }
@@ -385,12 +408,18 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       <span class="lg2">Juega en ${esc(LANG[st.l] || st.l)}</span>
       <span class="wh">${esc(where(st))}</span>
       <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}${st.cam ? `<span class="tag cam">Cámara</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span></span>
-      ${stackHtml(x.sid)}</button>`; }).join("");
-    L.querySelectorAll(".seat").forEach(b => b.onclick = () => pick(b.dataset.sid));
-    arc();
+      </button>`; }).join("");
+    for (const x of list) { const f = parseFx(x.st.fx); if (f && !(Date.now() - (fxAt[x.sid] || 0) < 5000)) fxs[x.sid] = f; }
+    L.querySelectorAll(".seat").forEach(b => { b.onclick = () => pick(b.dataset.sid); const st = b.querySelector(".stack"); if (st) st.remove(); b.insertAdjacentHTML("beforeend", stackHtml(b.dataset.sid)); });
+    arc(); paintChips();
     if (sel) { const x = list.find(y => y.sid === sel); if (x) { selSt = x.st; renderFacts(); } else gone(); }
   }
-  const stackHtml = sid => { const t = tossed[sid]; return t && t.length ? `<span class="stack">${t.slice(-5).map((f, i) => `<img src="/mesa/fichas/${f}.webp" alt="" style="top:${-i * 5}px">`).join("")}</span>` : ""; };
+  /* las fichas que tiene puestas, apiladas junto a su asiento */
+  const stackHtml = sid => {
+    const F = fxs[sid]; if (!F) return ""; const t = [];
+    for (const [id, , k] of CHIPS) if (k === "on" && F[id]) t.push(id); else if (k === "n") for (let i = 0; i < F[id]; i++) t.push(id);
+    return t.length ? `<span class="stack">${t.slice(-8).map((f, i) => `<img src="/mesa/fichas/${f}.webp" alt="" style="top:${-i * 5}px">`).join("")}</span>` : "";
+  };
   /* en arco alrededor de la mesa: los del centro mas abajo, los de los lados suben */
   function arc() {
     const seats = [...document.querySelectorAll(".seat")]; if (!seats.length) return;
@@ -405,7 +434,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     if (sel) { camStop(); call("POST", { op: "unwatch", sid: sel }).catch(() => {}); }
     sel = sid; const x = list.find(y => y.sid === sid); selSt = x && x.st;
     document.querySelectorAll(".seat").forEach(b => b.classList.toggle("sel", b.dataset.sid === sid));
-    document.querySelectorAll(".chip").forEach(c => (c.disabled = false)); $("txt").disabled = false; $("send").disabled = false;
+    document.querySelectorAll(".chip").forEach(c => (c.disabled = false)); paintChips(); $("txt").disabled = false; $("send").disabled = false;
     quick = null; $("txt").value = ""; refresh();
     watch(); renderFacts(); renderLog(); renderCards(); spr.set(face); spr.play("hat_tip"); clink(); clink(.07);
     $("txt").focus({ preventScroll: true });
@@ -426,7 +455,12 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     tx.oninput = e => { if (e) quick = null; if (playing) stop(false); refresh(); document.querySelectorAll(".card").forEach(c => c.classList.toggle("on", +c.dataset.i === quick)); };   // si tocas el texto, ya es tuyo: llega tal cual
     tx.onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); rehearse(); } else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
     $("send").onclick = send;
-    document.querySelectorAll(".chip").forEach(c => c.onclick = () => toss(c));
+    document.querySelectorAll(".chip").forEach(c => {
+      c.onclick = () => { if (c._long) { c._long = false; return; } chipHit(c, +1); };
+      c.oncontextmenu = e => { e.preventDefault(); chipHit(c, -1); };
+      let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; chipHit(c, -1); }, 480); }, { passive: true });
+      c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
+    });
     renderCards(); renderLog();
   }
   function setFace(f) { face = f; document.querySelectorAll(".fc").forEach(c => c.classList.toggle("on", c.dataset.f === f)); spr.set(f); }
@@ -471,18 +505,34 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   }
 
   /* ------------------------------------------------ lanzar una ficha: vuela de la bandeja a su asiento y el efecto cae en su partida */
-  async function toss(c) {
-    if (!sel) return; const fx = c.dataset.fx, seat = document.querySelector(`.seat[data-sid="${sel}"]`);
-    clink(); spr.play("coin_toss");
-    if (seat) {
-      const a = c.querySelector("img").getBoundingClientRect(), b = seat.getBoundingClientRect(), f = document.createElement("img");
-      f.className = "flyer"; f.src = `/mesa/fichas/${fx}.webp`; f.style.left = a.left + "px"; f.style.top = a.top + "px"; document.body.appendChild(f);
-      const dx = b.right - 40 - a.left, dy = b.bottom - 44 - a.top, up = -Math.max(80, Math.abs(dx) * .25);
-      const an = f.animate([{ transform: "translate(0,0) scale(1) rotate(0)" }, { transform: `translate(${dx * .5}px, ${dy * .5 + up}px) scale(1.25) rotate(260deg)`, offset: .5 }, { transform: `translate(${dx}px, ${dy}px) scale(.62) rotate(540deg)` }], { duration: 620, easing: "cubic-bezier(.3,.6,.4,1)" });
-      an.onfinish = () => { f.remove(); clink(); clink(.05); (tossed[sel] = tossed[sel] || []).push(fx); const old = seat.querySelector(".stack"); if (old) old.remove(); seat.insertAdjacentHTML("beforeend", stackHtml(sel)); };
-    }
-    try { const j = await call("POST", { op: "fx", sid: sel, fx }); toast(j.ok && j.live ? `${c.title}: cae en su partida en 1-2 s.` : "Esa partida ya se ha cerrado."); }
-    catch (e) { toast("Sin conexión: la ficha no ha salido."); }
+  /* una ficha: d = +1 (clic: poner, encender o un rayo mas) o -1 (clic derecho: quitar o apagar) */
+  async function chipHit(c, d) {
+    if (!sel || c.disabled) return; const id = c.dataset.fx, k = KIND_[id], F = fxOf(sel); let v;
+    if (k === "shot") { if (d < 0) return; v = undefined; }
+    else if (k === "on") { if (d < 0 && !F[id]) return deny(c); v = d > 0 ? !F[id] : false; F[id] = v; }
+    else { const n = F[id] + d; if (n < 0 || n > 5) return deny(c); v = F[id] = n; }
+    fxAt[sel] = Date.now(); paintChips();
+    const off = k === "on" ? !v : k === "n" ? d < 0 : false;
+    fly(c, id, off);
+    try {
+      const j = await call("POST", { op: "fx", sid: sel, fx: id, v });
+      if (!(j.ok && j.live)) toast("Esa partida ya se ha cerrado.");
+      else toast(k === "shot" ? "¡Rayo! Cae en 1-2 s." : k === "on" ? `${NAME_[id]}: ${v ? "puesta. Se queda hasta que la quites." : "quitada."}` : `${NAME_[id]}: ×${v}`, 1600);
+    } catch (e) { toast("Sin conexión: la ficha no ha salido."); }
+  }
+  function deny(c) { c.classList.remove("deny"); void c.offsetWidth; c.classList.add("deny"); tone(180, 0, .09, .04); }
+  /* la ficha vuela de la bandeja a su asiento (poner) o vuelve del asiento a la bandeja (quitar) */
+  function fly(c, id, back) {
+    const seat = document.querySelector(`.seat[data-sid="${sel}"]`); clink(); spr.play(back ? "snap" : "coin_toss");
+    const done = () => { if (!seat) return; const old = seat.querySelector(".stack"); if (old) old.remove(); seat.insertAdjacentHTML("beforeend", stackHtml(sel)); };
+    if (!seat) return;
+    const a = c.querySelector("img").getBoundingClientRect(), b = seat.getBoundingClientRect(), f = document.createElement("img");
+    f.className = "flyer"; f.src = `/mesa/fichas/${id}.webp`; f.style.left = a.left + "px"; f.style.top = a.top + "px"; document.body.appendChild(f);
+    const dx = b.right - 40 - a.left, dy = b.bottom - 44 - a.top, up = -Math.max(80, Math.abs(dx) * .25);
+    const there = `translate(${dx}px, ${dy}px) scale(.62) rotate(540deg)`, mid = `translate(${dx * .5}px, ${dy * .5 + up}px) scale(1.25) rotate(260deg)`, home = "translate(0,0) scale(1) rotate(0)";
+    if (back) done();                                                   // al quitar, sale de la pila y vuelve a la bandeja
+    const an = f.animate(back ? [{ transform: there }, { transform: mid, offset: .5 }, { transform: home }] : [{ transform: home }, { transform: mid, offset: .5 }, { transform: there }], { duration: back ? 520 : 620, easing: "cubic-bezier(.3,.6,.4,1)" });
+    an.onfinish = () => { f.remove(); clink(); clink(.05); if (!back) done(); };
   }
 
   /* ------------------------------------------------ LA CAMARA: su pantalla en directo (WebRTC de punto a punto; el servidor solo cruza oferta y respuesta) */
