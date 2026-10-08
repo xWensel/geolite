@@ -40,6 +40,10 @@ window.AIQ = window.AIQ || {};
     im.src = "assets/gen/" + im.dataset.gen + ".webp";
     A.revealImg(im, () => { im.classList.add("on"); if (im.parentElement) im.parentElement.classList.add("has-gen"); });
   }));
-  A.pic = (id, cls = "") => { setTimeout(() => A.genFill(), 0); return `<span class="pic ${cls}"><img class="pic-img" alt="" data-gen="${id}" decoding="async"><i class="pic-frame"></i><i class="marq"></i></span>`; };
+  A.pic = (id, cls = "") => { setTimeout(() => A.genFill(), 0); return `<span class="pic ${cls}"><img class="pic-img" alt="" data-gen="${id}" decoding="async"><i class="pic-frame"></i>${A.bulbs()}</span>`; };
+  /* bombillas de marquesina (las de la carta de la Aventura): puntos redondos a lo largo de un rectangulo redondeado. pathLength fijo, asi que
+     siempre salen enteras y repartidas por igual, tambien en las esquinas (las antiguas, un fondo de lunares a 20 px, se cortaban en los bordes).
+     Capas: casquillo de tinta, cristal apagado y dos tandas encendidas que se turnan. Tamano, margen y densidad por CSS (--mqi, --mqb, --mqd, --mqr) */
+  A.bulbs = () => `<svg class="mqb" aria-hidden="true">${["mqb-sk", "mqb-off", "mqb-a", "mqb-a mqb-c", "mqb-b", "mqb-b mqb-c"].map(k => `<rect class="${k}" pathLength="144"/>`).join("")}</svg>`;
   A.art = () => "";
 })(window.AIQ);

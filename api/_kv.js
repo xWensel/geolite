@@ -8,5 +8,6 @@ exports.pipeline = async cmds => {
   if (!r.ok) throw new Error("kv " + r.status);
   return (await r.json()).map(x => x.result);
 };
-/* las clasificaciones del juego: la Aventura de siempre, las puntuaciones de cada dia (day-, Hoy / Ayer: cualquier partida) y el Reto diario (daily-, suma de sus 3 intentos) */
-exports.BOARD = /^(daily-\d{8}|day-\d{8}|adv-all)$/;
+/* las clasificaciones del juego: la Aventura de siempre (adv-all), la Aventura de cada dia (advd-, Hoy / Ayer de la Aventura) y el Reto diario
+   (daily-, suma de sus 3 intentos). day- (la mejor partida del dia de cualquier modo) solo se acepta de versiones anteriores del juego */
+exports.BOARD = /^(daily-\d{8}|advd-\d{8}|day-\d{8}|adv-all)$/;

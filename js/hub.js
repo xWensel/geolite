@@ -30,6 +30,7 @@ window.AIQ = window.AIQ || {};
   });
   addEventListener("resize", () => { if (document.querySelector(".hh")) fitNames(); });
   function home() {
+    pday = null;                                                      // la practica de otro dia se acaba al volver a la portada
     const c = C(), P = A.profile.get(), adv = P.adv, saved = A.adv.hasSave(), sm = saved && A.adv.summary(), cx = A.codexStats();
     /* carta del Reto diario: intento a medias, puntuacion global de hoy o los 3 intentos por estrenar */
     const today = A.rank.daily.board(), dst = A.rank.daily.get(today), dsv = A.adv.summary(true), dLive = dsv && dsv.board === today;
@@ -37,9 +38,7 @@ window.AIQ = window.AIQ || {};
       : dst.done ? `${A.fmt(dst.total)} · ${dst.done}/3`
       : A.pick6("Nuevo reto|New today|Nouveau défi|Novo desafio|Neu heute|Nuova sfida||新挑战|새 도전|新チャレンジ|Новый день|Nowe dziś");
     /* cada modo es una carta (sin indices de baraja: el marco y la ilustracion bastan); la descripcion solo sale al pasar el raton (ficha data-tt) */
-    /* bombillas de marquesina de la Aventura: puntos redondos a lo largo de un rectangulo redondeado (pathLength fijo: siempre enteras y repartidas por igual,
-       tambien en las esquinas). Capas: casquillo de tinta, cristal apagado y dos tandas encendidas que se turnan */
-    const BULBS = `<svg class="mqb" aria-hidden="true">${["mqb-sk", "mqb-off", "mqb-a", "mqb-a mqb-c", "mqb-b", "mqb-b mqb-c"].map(k => `<rect class="${k}" pathLength="144"/>`).join("")}</svg>`;
+    const BULBS = A.bulbs();                                          // bombillas de marquesina de la Aventura (js/art.js)
     const mc = (id, rank, suit, art, title, desc, meta, badge) => `<button class="mcard${id === "adventure" ? " hero" : ""}" data-mode="${id}" data-suit="${suit === "s_pin" || suit === "s_compass" ? "red" : "blk"}" ${A.ttAttr(title, desc)} aria-description="${esc(desc)}">
       ${id === "adventure" ? BULBS : ""}${badge ? `<span class="mc-ribbon">${badge}</span>` : ""}<span class="mc-win">${A.pic(art)}</span><b class="mc-name">${title}</b><span class="mc-stat sq-fit">${meta}</span></button>`;
     c.dialog(`<div class="hh">
@@ -159,19 +158,25 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ Reto diario: una expedicion al azar cada dia, la misma para todo el mundo.
      La MANO DEL DIA (baraja, ascension, regalo y ruta) sale de la semilla del dia; 3 intentos con lugares nuevos que suman la puntuacion global (A.rank.daily) */
-  let board = "today", tickT = 0;
+  let board = "today", tickT = 0, pday = null, bpage = 0;           // pday: el dia pasado que estas practicando (v0.3.19, js/otrodia.js); bpage: pagina de la tabla
   const P6 = s => A.pick6(s);
   const locOf = () => (A.LANGS.find(l => l.code === A.lang) || A.LANGS[0]).loc;
   const hms = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(v => String(v).padStart(2, "0")).join(":"); };
   const actRound = where;
   function daily() {
-    const c = C(), DY = A.rank.daily, day = DY.board();
+    const c = C(), DY = A.rank.daily, today = DY.board();
     clearInterval(tickT);
     /* intentos a medias: el de otro dia se cierra con los puntos que llevaba; el de hoy sin partida guardada (se perdio) se cierra a cero */
     let sv = A.adv.summary(true);
-    if (sv && sv.board !== day) { A.adv.abandon(true); sv = null; }
-    let st = DY.get(day);
-    if (st.live && !sv) { DY.finish(day, st.live, 0); st = DY.get(day); }
+    if (sv && sv.board !== today) { A.adv.abandon(true); sv = null; }
+    let st = DY.get(today);
+    if (st.live && !sv) { DY.finish(today, st.live, 0); st = DY.get(today); }
+    /* PRACTICA (v0.3.19): la mano de un dia pasado, elegido en el calendario de "Otro dia". Ensena lo que hiciste ese dia y cada intento se practica
+       las veces que quieras (A.adv.beginPractice): sin clasificacion, logros ni records */
+    if (pday && pday >= today) pday = null;
+    const prac = pday, day = prac || today;
+    if (prac) { sv = null; st = DY.get(prac); }
+    const dShort = DY.date(day).toLocaleDateString(locOf(), { day: "numeric", month: "long" });
     const h = DY.hand(day), deck = A.ADV.DECKS[h.deck], gift = h.gift && A.RELICS[h.gift], next = st.tries.length + 1, locked = A.adv.deckLocked(h.deck), hist = DY.stats();
     const kit = (ico, lbl, val, tip) => `<div class="dr-k" ${tip}><span class="dr-ki">${ico}</span><span class="dr-kt"><i class="sq-fit">${lbl}</i><b class="sq-fit">${val}</b></span></div>`;
     const tries = [1, 2, 3].map(k => {
@@ -179,21 +184,28 @@ window.AIQ = window.AIQ || {};
       const big = live ? A.fmt(sv ? sv.score : 0) : t ? A.fmt(t.s || 0) : "—";
       const small = live ? (sv ? actRound(sv) : "…") : t ? P6("Rondas: {r}|Rounds: {r}|Manches : {r}|Rodadas: {r}|Runden: {r}|Round: {r}||回合：{r}|라운드: {r}|ラウンド：{r}|Раунды: {r}|Rundy: {r}").replace("{r}", t.r || 0)
         : P6("Por jugar|To play|À jouer|Pendente|Offen|Da giocare||待进行|미플레이|未挑戦|Не сыграна|Do rozegrania");
+      if (prac) return `<button type="button" class="dr-try prac ${t && !t.live ? "done" : "free"}" data-k="${k}"><span class="dr-tn">${P6("Intento|Attempt|Essai|Tentativa|Versuch|Tentativo||尝试|시도|挑戦|Попытка|Podejście")} ${k}</span><b>${t && !t.live ? A.fmt(t.s || 0) : "—"}</b><i>${A.icon("u_next", "sm")}${P6("Practicar|Practice|S'entraîner|Treinar|Trainieren|Allenati||练习|연습|練習|Тренировать|Trenuj")}</i></button>`;
       return `<div class="dr-try ${cls}"><span class="dr-tn">${P6("Intento|Attempt|Essai|Tentativa|Versuch|Tentativo||尝试|시도|挑戦|Попытка|Podejście")} ${k}</span><b>${big}</b><i>${small}</i></div>`;
     }).join("");
-    const go = sv ? startBtn("dailyGo", P6("Continuar el intento {k}|Continue attempt {k}|Reprendre l'essai {k}|Continuar a tentativa {k}|Versuch {k} fortsetzen|Riprendi il tentativo {k}||继续第 {k} 次尝试|{k}번째 시도 계속하기|挑戦{k}回目を続ける|Продолжить попытку {k}|Kontynuuj podejście {k}").replace("{k}", sv.dailyTry || st.live), actRound(sv), true)
+    const go = prac ? startBtn("dailyGo", P6("Practicar el intento {k}|Practice attempt {k}|S'entraîner à l'essai {k}|Treinar a tentativa {k}|Versuch {k} trainieren|Allenati sul tentativo {k}||练习第 {k} 次尝试|{k}번째 시도 연습|挑戦{k}回目を練習|Тренировать попытку {k}|Trenuj podejście {k}").replace("{k}", 1), P6("Mismos lugares que ese día|Same places as that day|Mêmes lieux que ce jour-là|Mesmos lugares daquele dia|Dieselben Orte wie an dem Tag|Stessi luoghi di quel giorno||与那天相同的地点|그날과 같은 장소|その日と同じ場所|Те же места, что в тот день|Te same miejsca co tego dnia"), true)
+      : sv ? startBtn("dailyGo", P6("Continuar el intento {k}|Continue attempt {k}|Reprendre l'essai {k}|Continuar a tentativa {k}|Versuch {k} fortsetzen|Riprendi il tentativo {k}||继续第 {k} 次尝试|{k}번째 시도 계속하기|挑戦{k}回目を続ける|Продолжить попытку {k}|Kontynuuj podejście {k}").replace("{k}", sv.dailyTry || st.live), actRound(sv), true)
       : st.left > 0 ? startBtn("dailyGo", P6("Jugar el intento {k}|Play attempt {k}|Jouer l'essai {k}|Jogar a tentativa {k}|Versuch {k} spielen|Gioca il tentativo {k}||开始第 {k} 次尝试|{k}번째 시도 시작|挑戦{k}回目へ|Сыграть попытку {k}|Zagraj podejście {k}").replace("{k}", next), P6("Lugares y retos nuevos|New places, new challenges|Nouveaux lieux et défis|Novos lugares e desafios|Neue Orte, neue Herausforderungen|Nuovi luoghi e sfide||全新地点与挑战|새로운 장소와 도전|新しい場所とチャレンジ|Новые места и испытания|Nowe miejsca i wyzwania"), true)
       : `<div class="dr-done">${A.icon("u_star")}<span><b>${P6("¡Reto completado!|Challenge complete!|Défi terminé !|Desafio concluído!|Herausforderung geschafft!|Sfida completata!||挑战完成！|도전 완료!|チャレンジ達成！|Испытание пройдено!|Wyzwanie ukończone!")}</b><i>${P6("Mañana, otra mano|Tomorrow, a new hand|Demain, une nouvelle main|Amanhã, uma nova mão|Morgen ein neues Blatt|Domani, una nuova mano|Mañana, otra mano|明天，再发一手新牌|내일은 새로운 패|明日は新しい手札|Завтра новая раздача|Jutro nowe rozdanie")}</i></span></div>`;
     const clock = `<p class="dr-next" ${A.ttAttr(P6("Nuevo reto en|New challenge in|Nouveau défi dans|Novo desafio em|Neue Herausforderung in|Nuova sfida tra||新挑战倒计时|새 도전까지|次のチャレンジまで|Новое испытание через|Nowe wyzwanie za"), P6("El reto cambia a tu medianoche. Los intentos que no juegues hoy se pierden.|The challenge changes at your midnight. Attempts you don't play today are lost.|Le défi change à minuit, heure locale. Les essais non joués aujourd'hui sont perdus.|O desafio muda à sua meia-noite. As tentativas que você não jogar hoje se perdem.|Die Herausforderung wechselt um deine Mitternacht. Nicht gespielte Versuche verfallen.|La sfida cambia alla tua mezzanotte. I tentativi non giocati oggi vanno persi.||挑战在你当地的午夜更换。今天没用掉的尝试会作废。|도전은 현지 시간 자정에 바뀌어요. 오늘 하지 않은 시도는 사라져요.|デイリーチャレンジは現地時間の深夜0時に切り替わる。今日プレイしなかった挑戦は消える。|Испытание меняется в твою полночь. Несыгранные сегодня попытки сгорают.|Wyzwanie zmienia się o twojej północy. Niezagrane dziś podejścia przepadają."))}>${A.icon("hourglass", "sm")}<span>${P6("Nuevo reto en|Next one in|Prochain dans|Próximo em|Nächste in|Prossima tra||下次挑战|다음 도전까지|次のチャレンジまで|Новое через|Następne za")}</span><b id="drClock">${hms(DY.msToNext())}</b></p>`;
-    const tabs = [["today", P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś")], ["yday", P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj")], ["adv", T("Aventura", "Adventure")]];
+    /* vuelta a hoy desde la practica (en el sitio de la cuenta atras) */
+    const backToday = `<button type="button" class="btn-line dr-today" id="drToday">${A.icon("u_back", "sm")}<span>${P6("Volver a hoy|Back to today|Retour à aujourd'hui|Voltar para hoje|Zurück zu heute|Torna a oggi||回到今天|오늘로 돌아가기|今日に戻る|Вернуться к сегодня|Wróć do dziś")}</span></button>`;
+    /* la tabla de aqui es solo del Reto diario (la Aventura esta en la Clasificacion de la portada); en la practica, la de ese dia */
+    const tabs = prac ? [["prac", dShort]] : [["today", P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś")], ["yday", P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj")]];
+    if (prac) board = "prac"; else if (board !== "yday") board = "today";
+    const otherBtn = `<button type="button" class="dr-other" id="drOther" ${A.ttAttr(P6("Otro día|Another day|Un autre jour|Outro dia|Anderer Tag|Altro giorno||其他日期|다른 날|別の日|Другой день|Inny dzień"), A.otroDia.SUB())}>${A.icon("almanac", "sm")}<span>${P6("Otro día|Another day|Un autre jour|Outro dia|Anderer Tag|Altro giorno||其他日期|다른 날|別の日|Другой день|Inny dzień")}</span></button>`;
     const seedTip = A.ttAttr(P6("Semilla del día|Daily seed|Graine du jour|Semente do dia|Seed des Tages|Seme del giorno||今日种子|오늘의 시드|今日のシード|Зерно дня|Ziarno dnia") + " · " + DY.code(day), P6("La mano de hoy sale al azar de esta semilla y todo el mundo juega con ella: la misma mano y, en cada intento, los mismos lugares, retos y cartas.|Today's hand is dealt at random from this seed and everyone plays with it: the same hand and, in each attempt, the same places, challenges and cards.|La main du jour est tirée au hasard de cette graine et tout le monde joue avec : la même main et, à chaque essai, les mêmes lieux, défis et cartes.|A mão de hoje é sorteada a partir desta semente e todo mundo joga com ela: a mesma mão e, em cada tentativa, os mesmos lugares, desafios e cartas.|Das heutige Blatt wird zufällig aus diesem Seed gezogen, und alle spielen damit: dasselbe Blatt und in jedem Versuch dieselben Orte, Herausforderungen und Karten.|La mano di oggi esce a caso da questo seme ed è uguale per tutti: la stessa mano e, a ogni tentativo, gli stessi luoghi, sfide e carte.||今日手牌由这个种子随机发出，所有人都用它：同一手牌，每次尝试的地点、挑战和卡牌也都相同。|오늘의 패는 이 시드로 무작위로 나오고 모두가 같이 써요. 같은 패, 그리고 시도마다 같은 장소·도전·카드.|今日の手札はこのシードからランダムに配られ、全員がそれで遊ぶ。同じ手札、そして各挑戦で同じ場所・チャレンジ・カード。|Раздача дня генерируется из этого зерна, и у всех она одна: та же раздача, а в каждой попытке — те же места, испытания и карты.|Dzisiejsze rozdanie jest losowane z tego ziarna i wszyscy nim grają: to samo rozdanie i w każdym podejściu te same miejsca, wyzwania i karty."));
     c.dialog(scr(T("Reto diario", "Daily challenge"), `<div class="dr">
       <section class="dr-main">
         <div class="dr-hand">
           <div class="dr-art">${A.pic("card_compete")}</div>
           <div class="dr-hb">
-            <div class="dr-top"><span class="tag">${DY.date(day).toLocaleDateString(locOf(), { weekday: "long", day: "numeric", month: "long" })}</span><span class="dr-seed" ${seedTip}>${A.icon("dice", "sm")}<i>${P6("Semilla|Seed|Graine|Semente|Seed|Seme||种子|시드|シード|Зерно|Ziarno")}</i><b>${DY.code(day)}</b></span></div>
-            <h3 class="dr-h">${P6("La mano de hoy|Today's hand|La main du jour|A mão de hoje|Das Blatt von heute|La mano di oggi||今日手牌|오늘의 패|今日の手札|Раздача дня|Dzisiejsze rozdanie")}</h3>
+            <div class="dr-top"><span class="dr-tags"><span class="tag">${DY.date(day).toLocaleDateString(locOf(), { weekday: "long", day: "numeric", month: "long" })}</span>${prac ? `<span class="tag dr-ptag">${P6("Práctica|Practice|Entraînement|Treino|Training|Allenamento||练习|연습|練習|Тренировка|Trening")}</span>` : ""}</span><span class="dr-seedrow"><span class="dr-seed" ${seedTip}>${A.icon("dice", "sm")}<i>${P6("Semilla|Seed|Graine|Semente|Seed|Seme||种子|시드|シード|Зерно|Ziarno")}</i><b>${DY.code(day)}</b></span>${otherBtn}</span></div>
+            <h3 class="dr-h">${prac ? P6("La mano del {d}|The hand of {d}|La main du {d}|A mão de {d}|Das Blatt vom {d}|La mano del {d}||{d} 的手牌|{d}의 패|{d}の手札|Раздача за {d}|Rozdanie z {d}").replace("{d}", dShort) : P6("La mano de hoy|Today's hand|La main du jour|A mão de hoje|Das Blatt von heute|La mano di oggi||今日手牌|오늘의 패|今日の手札|Раздача дня|Dzisiejsze rozdanie")}</h3>
             <p class="dr-d">${P6("Sale al azar de la semilla del día y es la misma para todo el mundo.|Dealt at random from the day's seed, and the same for everyone.|Tirée au hasard de la graine du jour, et la même pour tout le monde.|É sorteada a partir da semente do dia e é a mesma para todo mundo.|Zufällig aus dem Seed des Tages gezogen und für alle gleich.|Esce a caso dal seme del giorno ed è la stessa per tutti.||由今日种子随机发出，所有人都一样。|오늘의 시드로 무작위로 나오며, 모두에게 똑같아요.|今日のシードからランダムに配られ、全員共通。|Выпадает случайно из зерна дня и одинакова для всех.|Losowane z ziarna dnia i takie samo dla wszystkich.")}</p>
             <div class="dr-kit">
               ${kit(A.icon(deck.ico), P6("Baraja|Deck|Paquet|Baralho|Deck|Mazzo||套牌|덱|デッキ|Колода|Talia"), A.tx(deck.n), A.ttAttr(A.tx(deck.n), A.tx(deck.d) + (locked ? "\n" + P6("Hoy la juegas aunque aún no la hayas desbloqueado.|You can play it today even if you haven't unlocked it yet.|Aujourd'hui, tu la joues même sans l'avoir débloquée.|Hoje você joga com ele mesmo sem tê-lo desbloqueado.|Heute spielst du es, auch wenn du es noch nicht freigeschaltet hast.|Oggi lo giochi anche se non l'hai ancora sbloccato.||即使尚未解锁，今天也能使用。|아직 잠금 해제하지 않았어도 오늘은 쓸 수 있어요.|まだ解放していなくても、今日は使える。|Сегодня она доступна, даже если ещё не открыта.|Dziś grasz nią, nawet jeśli nie masz jej jeszcze odblokowanej.") : "")))}
@@ -204,39 +216,67 @@ window.AIQ = window.AIQ || {};
           <div class="dr-rt"><h4 class="hub-sub">${P6("Ruta del día|Today's route|Route du jour|Rota do dia|Route des Tages|Percorso del giorno||今日路线|오늘의 경로|今日のルート|Маршрут дня|Trasa dnia")}</h4><div class="dr-road2">${A.adv.road({ size: "plan", route: h.route })}</div></div>
         </div>
         <div class="dr-play">
-          <div class="dr-sum"><i>${P6("Puntuación global|Global score|Score global|Pontuação global|Gesamtpunktzahl|Punteggio globale||总分|총점|総合スコア|Общий счёт|Wynik łączny")}</i><b>${A.fmt(st.total)}</b><em>${P6("Suma de tus 3 intentos|Sum of your 3 attempts|Somme de tes 3 essais|Soma das suas 3 tentativas|Summe deiner 3 Versuche|Somma dei tuoi 3 tentativi||你 3 次尝试的总和|시도 3번의 합계|3回の挑戦の合計|Сумма трёх попыток|Suma twoich 3 podejść")}</em></div>
+          <div class="dr-sum"><i>${prac ? P6("Tu puntuación ese día|Your score that day|Ton score ce jour-là|Sua pontuação naquele dia|Deine Punkte an dem Tag|Il tuo punteggio quel giorno||你那天的得分|그날의 점수|その日のスコア|Твой счёт в тот день|Twój wynik tego dnia") : P6("Puntuación global|Global score|Score global|Pontuação global|Gesamtpunktzahl|Punteggio globale||总分|총점|総合スコア|Общий счёт|Wynik łączny")}</i><b>${prac && !st.done ? "—" : A.fmt(st.total)}</b><em>${prac ? P6("Práctica: no cuenta para la clasificación|Practice: doesn't count for the leaderboard|Entraînement : ne compte pas pour le classement|Treino: não conta para o placar|Training: zählt nicht für die Rangliste|Allenamento: non conta per la classifica||练习：不计入排行榜|연습: 리더보드 미반영|練習：ランキング対象外|Тренировка: в таблицу не идёт|Trening: nie liczy się do rankingu") : P6("Suma de tus 3 intentos|Sum of your 3 attempts|Somme de tes 3 essais|Soma das suas 3 tentativas|Summe deiner 3 Versuche|Somma dei tuoi 3 tentativi||你 3 次尝试的总和|시도 3번의 합계|3回の挑戦の合計|Сумма трёх попыток|Suma twoich 3 podejść")}</em></div>
           <div class="dr-tries">${tries}</div>
-          <div class="dr-go">${go}${clock}</div>
+          <div class="dr-go">${go}${prac ? backToday : clock}</div>
         </div>
       </section>
-      <aside class="dr-board">
+      <aside class="dr-board${prac ? " prac" : ""}">
         <h4 class="hub-sub">${T("Clasificación", "Leaderboard")}</h4>
         <div class="dr-tabs">${tabs.map(([id, l]) => `<button type="button" class="sq-fit${id === board ? " on" : ""}" data-b="${id}">${l}</button>`).join("")}</div>
         <div class="lb" id="lb"><p class="lb-load">…</p></div>
+        <div class="pd-pager dr-pager" id="drPager"></div>
         <div class="dr-stats"><span><b class="sq-fit">${A.fmt(hist.days)}</b><i>${P6("Días jugados|Days played|Jours joués|Dias jogados|Gespielte Tage|Giorni giocati||已玩天数|플레이한 날|プレイ日数|Дней сыграно|Dni gry")}</i></span><span><b class="sq-fit">${A.fmt(hist.streak)}</b><i>${P6("Días seguidos|Days in a row|Jours d'affilée|Dias seguidos|Tage in Folge|Giorni di fila||连续天数|연속 일수|連続日数|Дней подряд|Dni z rzędu")}</i></span><span><b class="sq-fit">${A.fmt(hist.best)}</b><i>${P6("Mejor día|Best day|Meilleur jour|Melhor dia|Bester Tag|Giorno migliore||最佳一天|최고의 날|ベストの日|Лучший день|Najlepszy dzień")}</i></span></div>
-      </aside></div>`, "s-daily"), "tablewrap");
-    wireTools(); $("hubBack").onclick = () => { clearInterval(tickT); screen("home"); };
+      </aside></div>`, "s-daily" + (prac ? " s-prac" : "")), "tablewrap");
+    wireTools(); $("hubBack").onclick = () => { clearInterval(tickT); pday = null; screen("home"); };
     /* el nombre NO se cambia aqui: te lo pide el crupier al acabar tu primera partida y despues solo en Ajustes > General (js/nombre.js) */
-    document.querySelectorAll(".dr-tabs button").forEach(b => (b.onclick = () => { board = b.dataset.b; document.querySelectorAll(".dr-tabs button").forEach(x => x.classList.toggle("on", x === b)); A.sfx.ui(); loadBoard(); }));
-    if ($("dailyGo")) $("dailyGo").onclick = () => { A.sfx.depart(); clearInterval(tickT); enterRun(() => (sv ? A.adv.resume(true) : A.adv.beginDaily(day)), !!sv); };
+    document.querySelectorAll(".dr-tabs button").forEach(b => (b.onclick = () => { if (b.dataset.b === board) return; board = b.dataset.b; document.querySelectorAll(".dr-tabs button").forEach(x => x.classList.toggle("on", x === b)); A.sfx.ui(); bpage = 0; loadBoard(); }));
+    const practice = k => { A.sfx.depart(); clearInterval(tickT); enterRun(() => A.adv.beginPractice(prac, k)); };
+    if ($("dailyGo")) $("dailyGo").onclick = prac ? () => practice(1) : () => { A.sfx.depart(); clearInterval(tickT); enterRun(() => (sv ? A.adv.resume(true) : A.adv.beginDaily(day)), !!sv); };
+    document.querySelectorAll(".dr-try.prac").forEach(b => (b.onclick = () => practice(+b.dataset.k)));
+    if ($("drToday")) $("drToday").onclick = () => { pday = null; A.sfx.card(); daily(); };
+    /* "Otro dia": el calendario (js/otrodia.js). Elegir un dia pasado reparte su mano aqui mismo; elegir hoy vuelve al reto de verdad */
+    $("drOther").onclick = () => A.otroDia.open({ sel: day, from: $("drOther"), pick: b => { pday = b >= DY.board() ? null : b; bpage = 0; A.sfx.card(); daily(); } });
     /* cuenta atras hasta tu medianoche; al cambiar de dia, la pantalla se reparte sola */
-    tickT = setInterval(() => {
+    if (!prac) tickT = setInterval(() => {
       const el = $("drClock"); if (!el) return clearInterval(tickT);
       if (DY.board() !== day) { clearInterval(tickT); if (C().S.phase === "title" && C().S.hub === "daily") daily(); return; }
       el.textContent = hms(DY.msToNext());
     }, 1000);
     loadBoard();
   }
-  async function loadBoard() {
-    const el = $("lb"); if (!el) return; const DY = A.rank.daily, P = A.profile.get(), my = P.id, tab = board;
-    const b = tab === "yday" ? DY.yesterday() : tab === "adv" ? "adv-all" : DY.board(), isDay = b !== "adv-all";
-    el.innerHTML = `<p class="lb-load">…</p>`;
-    const res = await A.rank.topC(b, 8); if (tab !== board || !$("lb")) return;                    // 8 + tu puesto: cabe entero sin encoger la pantalla (la misma peticion que el podio de la portada)
-    const rows = res.rows || [], inTop = rows.some(r => r.id === my);
-    const dots = r => (isDay ? `<span class="lb-tries">${[0, 1, 2].map(i => `<i class="${r.tries && i < r.tries.length ? "on" : ""}"></i>`).join("")}</span>` : "");
-    const li = (r, n) => `<li class="${r.id === my ? "me" : ""}"><span class="lb-n">${n <= 3 ? A.icon("medal_" + ["gold", "silver", "bronze"][n - 1], "sm") : A.fmt(n)}</span><span class="lb-name">${esc(r.name || "—")}</span>${dots(r)}<b>${A.fmt(r.score)}</b></li>`;
-    const mine = res.global && res.me && !inTop ? `<li class="lb-gap" aria-hidden="true">···</li>` + li({ id: my, name: A.rank.name(), score: res.me.score, tries: isDay ? DY.get(b).tries.filter(t => !t.live) : null }, res.me.rank) : "";
-    el.innerHTML = `<p class="lb-src">${A.podio.src(res)}</p>` + (rows.length ? `<ol class="${isDay ? "dy" : ""}">${rows.map((r, i) => li(r, i + 1)).join("")}${mine}</ol>` : `<p class="lb-empty">${T("Aún no hay puntuaciones. ¡Sé el primero!", "No scores yet. Be the first!")}</p>`);
+  const BROWS = 8;                                                    // 8 por pagina + tu puesto: cabe entero sin encoger la pantalla (la primera, la misma peticion que el podio de la portada)
+  let bseq = 0, bcount = 0;
+  async function loadBoard(dir = 0) {
+    const el = $("lb"); if (!el) return; const DY = A.rank.daily, P = A.profile.get(), my = P.id, tab = board, n = ++bseq, pg = bpage;
+    const b = tab === "prac" && pday ? pday : tab === "yday" ? DY.yesterday() : DY.board();
+    if (!dir) { bcount = 0; el.innerHTML = `<p class="lb-load">…</p>`; }
+    pager(dir ? bcount : 0);
+    const res = await A.rank.topC(b, BROWS, 30000, pg * BROWS); if (n !== bseq || tab !== board || !$("lb")) return;
+    const rows = res.rows || [], inPage = rows.some(r => r.id === my);
+    const dots = r => `<span class="lb-tries">${[0, 1, 2].map(i => `<i class="${r.tries && i < r.tries.length ? "on" : ""}"></i>`).join("")}</span>`;
+    const li = (r, k, i) => `<li class="${r.id === my ? "me" : ""}" style="--i:${i}"><span class="lb-n">${k <= 3 ? A.icon("medal_" + ["gold", "silver", "bronze"][k - 1], "sm") : A.fmt(k)}</span><span class="lb-name">${esc(r.name || "—")}</span>${dots(r)}<b>${A.fmt(r.score)}</b></li>`;
+    const myPage = res.me ? Math.floor((res.me.rank - 1) / BROWS) : -1;
+    const mine = res.me && !inPage ? `<li class="lb-gap" aria-hidden="true">···</li>` + li({ id: my, name: A.rank.name(), score: res.me.score, tries: DY.get(b).tries.filter(t => !t.live) }, res.me.rank, rows.length).replace("<li class=\"me\"", `<li class="me${myPage >= 0 && myPage !== pg ? " jump" : ""}" id="lbMe"`) : "";
+    bcount = res.count || rows.length;
+    el.innerHTML = `<p class="lb-src">${A.podio.src(res)}</p>` + (rows.length ? `<ol class="dy${dir ? " turn" : ""}" style="--dx:${dir * 22}px">${rows.map((r, i) => li(r, pg * BROWS + i + 1, i)).join("")}${mine}</ol>` : `<p class="lb-empty">${T("Aún no hay puntuaciones. ¡Sé el primero!", "No scores yet. Be the first!")}</p>`);
+    const me = $("lbMe"); if (me && me.classList.contains("jump")) me.onclick = () => goBoard(myPage - pg);   // tu fila de abajo te lleva a tu pagina
+    pager(bcount);
+  }
+  /* flechas de la tabla: misma pieza que la Clasificacion de la portada (css/podio.css), de 8 en 8 */
+  function pager(count) {
+    const el = $("drPager"); if (!el) return;
+    const pages = Math.max(1, Math.ceil(count / BROWS)), a = bpage * BROWS + 1, rk = (x, y) => P6("Puestos {a}–{b}|Ranks {a}–{b}|Places {a}–{b}|Posições {a}–{b}|Plätze {a}–{b}|Posizioni {a}–{b}||第 {a}–{b} 名|{a}–{b}위|{a}～{b}位|Места {a}–{b}|Miejsca {a}–{b}").replace("{a}", A.fmt(x)).replace("{b}", A.fmt(y));
+    el.innerHTML = `<button type="button" class="pd-pg prev" id="drPrev" ${bpage > 0 ? "" : "disabled"} aria-label="${esc(rk(Math.max(1, a - BROWS), Math.max(BROWS, a - 1)))}">${A.icon("u_next")}</button>
+      <span class="pd-pgl"><b>${rk(a, a + BROWS - 1)}</b>${count > BROWS ? `<em>${P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}").replace("{n}", A.fmt(count))}</em>` : ""}</span>
+      <button type="button" class="pd-pg next" id="drNext" ${bpage < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + BROWS, a + 2 * BROWS - 1))}">${A.icon("u_next")}</button>`;
+    $("drPrev").onclick = () => goBoard(-1); $("drNext").onclick = () => goBoard(1);
+    el.classList.toggle("solo", pages < 2);                            // una sola pagina: las flechas no salen (el hueco se queda)
+  }
+  function goBoard(d) {
+    const pages = Math.max(1, Math.ceil(bcount / BROWS)), to = bpage + d;
+    if (!d || to < 0 || to >= pages) return;
+    bpage = to; A.sfx.chip(d > 0 ? 2 : 0); loadBoard(d > 0 ? 1 : -1);
   }
 
   /* ------------------------------------------------------------------ Perfil y logros */

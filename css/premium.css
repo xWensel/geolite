@@ -29,7 +29,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .mcard:hover { transform: rotate(0deg) translateY(-24px) scale(1.07); z-index: 5; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px #ffd06b, inset 0 0 0 7px #16241c, 0 26px 0 3px rgba(0, 0, 0, .45), 0 0 60px rgba(255, 208, 107, .55); }
 .mcard.hero:hover { transform: rotate(0deg) translateY(-34px) scale(1.09); }
 .mcard .ix { position: absolute; z-index: 3; } .mcard .ix.tl { left: 14px; top: 14px; } .mcard .ix.br { right: 14px; bottom: 14px; } .mcard .ix b { font-size: 26px; color: #16241c; text-shadow: 0 0 4px #f6efdc, 0 0 4px #f6efdc; } .mcard[data-suit="red"] .ix b { color: #c2372e; } .mcard .ix .ic { width: 22px; height: 22px; filter: none; }
-.mc-win { flex: 1 1 auto; min-height: 0; margin: 4px 2px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 3px #16241c; position: relative; } .mc-win .pic { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; box-shadow: none; } .mc-win .pic-frame, .mc-win .marq { display: none; }
+.mc-win { flex: 1 1 auto; min-height: 0; margin: 4px 2px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 3px #16241c; position: relative; } .mc-win .pic { position: absolute; inset: 0; aspect-ratio: auto; border-radius: 0; box-shadow: none; } .mc-win .pic-frame { display: none; }
 .mc-name { font-family: var(--serif); font-weight: 900; font-size: clamp(24px, calc(2.4 * var(--vw)), 36px); line-height: 1; padding: 0 30px 0 2px; color: #16241c; }
 .mc-desc { font-size: clamp(13px, calc(1.05 * var(--vw)), 16px); line-height: 1.2; color: #3a4a3e; min-height: 3.6em; padding-right: 26px; }
 .mc-stat { align-self: flex-start; max-width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: #f6efdc; background: #16241c; padding: 5px 9px 4px; }
@@ -49,6 +49,14 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .mqb .mqb-b { stroke-dashoffset: 2; animation-name: mqb-b; }
 .mqb .mqb-c { stroke: #fff6cf; stroke-width: calc(var(--mqb) * .45); filter: none; }    /* filamento blanco en el centro */
 @keyframes mqb-a { 50% { opacity: 0; } } @keyframes mqb-b { 0% { opacity: 0; } 50% { opacity: 1; } }
+/* v0.3.19: las mismas bombillas en las ilustraciones (A.pic: escena de la ronda, carta del Reto diario) y en tu escalon del podio. Cada sitio ajusta
+   margen (--mqi), tamano (--mqb), radio del marco (--mqr) y densidad: con pathLength 144, "0 2" son 72 bombillas, "0 3" 48 y "0 4" 36 (las encendidas, la mitad) */
+.mqb rect { rx: calc(var(--mqr, 18px) - var(--mqi)); }
+.pic { --mqi: 9px; --mqb: 6px; --mqr: 14px; } .pic .mqb { z-index: 3; } .mc-win .pic .mqb { display: none; }
+.dr-art .pic { --mqi: 7px; --mqb: 5px; }
+.dr-art .mqb rect { stroke-dasharray: 0 3; } .dr-art .mqb .mqb-a, .dr-art .mqb .mqb-b { stroke-dasharray: 0 6; } .dr-art .mqb .mqb-b { stroke-dashoffset: 3; }
+.pd-step { --mqi: 6px; --mqb: 4.5px; --mqr: 9px; }
+.pd-step .mqb rect { stroke-dasharray: 0 4; } .pd-step .mqb .mqb-a, .pd-step .mqb .mqb-b { stroke-dasharray: 0 8; } .pd-step .mqb .mqb-b { stroke-dashoffset: 4; }
 .hh-bottom { display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; }
 .hh-ver { font-family: var(--mono); font-size: 14px; letter-spacing: .05em; color: rgba(242, 233, 214, .45); }
 .chipbtn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 500; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: #ffe08a; background: #16241c; padding: 10px 18px 9px; border-radius: 999px; cursor: pointer;

@@ -15,7 +15,7 @@ window.AIQ = window.AIQ || {};
   const R = A.rank = {
     hash, ymd, week,
     dailySeed: () => R.daily.board(),
-    boards: { today: () => R.day.board(), yday: () => R.day.yesterday(), adv: "adv-all" },   // las tres del podio: mejores partidas de hoy y de ayer (cualquier modo, fecha LOCAL, ver R.day) y la Aventura de siempre; el Reto diario (R.daily) tiene las suyas
+    boards: { today: () => R.day.board(), yday: () => R.day.yesterday(), adv: "adv-all" },   // la Aventura: hoy y ayer (fecha LOCAL, ver R.day) y la de siempre; el Reto diario (R.daily) tiene las suyas
     remote: null,                                                   // null = sin comprobar, true/false = servidor disponible
   };
 
@@ -39,28 +39,30 @@ window.AIQ = window.AIQ || {};
   const post = body => (line = line.catch(() => null).then(async () => {
     try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }, 20000); return j && j.ok ? j : null; } catch (e) { return null; }
   }));
-  R.localTop = (board, n = 20) => ((A.profile.get().boards[board] || []).slice().sort((a, b) => b.score - a.score).slice(0, n));
+  R.localTop = (board, n = 20, o = 0) => ((A.profile.get().boards[board] || []).slice().sort((a, b) => b.score - a.score).slice(o, o + n));
   /* {global, rows:[{id?,name,score,tries?}], me?:{rank,score}, count?}: con el servidor, tu puesto aunque no estes entre los n primeros
      (el servidor solo devuelve el id de tu propia fila: los de los demas no se ensenan) */
-  R.top = async (board, n = 20, again) => {
-    if (await R.check()) { try { const j = await fetchJ(`/api/top?board=${encodeURIComponent(board)}&n=${n}&me=${encodeURIComponent(A.profile.get().id)}`); if (j.ok) {
+  /* o: desde que puesto (0 = el primero), para pasar paginas de la clasificacion; count = cuantos hay en la tabla */
+  R.top = async (board, n = 20, again, o = 0) => {
+    if (await R.check()) { try { const j = await fetchJ(`/api/top?board=${encodeURIComponent(board)}&n=${n}&o=${o}&me=${encodeURIComponent(A.profile.get().id)}`); if (j.ok) {
       /* tus intentos del dia no llegaron (jugaste sin red, servidor dormido, limite de envios): se reenvian una vez y se vuelve a pedir la tabla */
       const st = !again && /^daily-\d{8}$/.test(board) && R.daily.get(board);
-      if (st && st.done && (!j.me || j.me.score < st.total)) { await R.daily.submit(board); return R.top(board, n, true); }
-      const mine = !again && /^(day-\d{8}|adv-all)$/.test(board) && (A.profile.get().boards[board] || []).find(r => r.id === A.profile.get().id);   // la Aventura tambien: una expedicion que no llego al servidor se reenvia al ver la tabla
-      if (mine && (!j.me || j.me.score < mine.score)) { await post({ board, id: mine.id, name: R.name(), score: mine.score, nd: 1 }); return R.top(board, n, true); }
+      if (st && st.done && (!j.me || j.me.score < st.total)) { await R.daily.submit(board); return R.top(board, n, true, o); }
+      const mine = !again && /^(advd-\d{8}|adv-all)$/.test(board) && (A.profile.get().boards[board] || []).find(r => r.id === A.profile.get().id);   // la Aventura tambien: una expedicion que no llego al servidor se reenvia al ver la tabla
+      if (mine && (!j.me || j.me.score < mine.score)) { await post({ board, id: mine.id, name: R.name(), score: mine.score, nd: 1 }); return R.top(board, n, true, o); }
       return { global: true, rows: j.rows, me: j.me || null, count: j.count || j.rows.length };
     } } catch (e) { /* cae a local */ } }
-    return { global: false, rows: R.localTop(board, n) };
+    const all = R.localTop(board, 1e4), my = all.findIndex(r => r.id === A.profile.get().id);   // tu puesto aunque no salga en la pagina, como con el servidor
+    return { global: false, rows: all.slice(o, o + n), count: all.length, me: my < 0 ? null : { rank: my + 1, score: all[my].score } };
   };
   /* v0.14.1: la misma tabla la piden la portada (podio, js/podio.js) y el Reto diario: se guarda 30 s (age; la etiqueta de la portada acepta 5 min:
      cada peticion son 5 comandos de Redis). Enviar una puntuacion o cambiar de nombre sube R.ver y la invalida (antes de enviar y al llegar la respuesta) */
   const TC = {};
   R.ver = 0;
-  R.topC = (board, n = 8, age = 30000) => {
-    const key = board + ":" + n, c = TC[key];
+  R.topC = (board, n = 8, age = 30000, o = 0) => {
+    const key = board + ":" + n + ":" + o, c = TC[key];
     if (c && c.v === R.ver && Date.now() - c.t < age) return c.p;
-    const p = R.top(board, n); TC[key] = { p, t: Date.now(), v: R.ver };
+    const p = R.top(board, n, false, o); TC[key] = { p, t: Date.now(), v: R.ver };
     return p;
   };
   /* entrada: {score, extra:{...}}. Devuelve {rank?, record}. */
@@ -86,30 +88,29 @@ window.AIQ = window.AIQ || {};
     for (const b of [R.daily.board(), R.daily.yesterday()]) { const st = R.daily.get(b); if (st.done) jobs.push(post({ board: b, id: P.id, name, tries: st.tries.filter(t => !t.live).map(t => t.s || 0) })); }
     await Promise.all(jobs); R.ver++;
   };
-  /* v0.15.1: "Hoy" y "Ayer" del podio son PUNTUACIONES: la mejor partida de cada jugador ese dia, sea de la Aventura o de un intento del Reto diario
-     (el Reto diario ademas tiene sus propias tablas por dia, con la suma de sus 3 intentos). Fecha LOCAL, como el Reto diario. */
-  const dayKey = (d = new Date()) => "day-" + (d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate());
+  /* v0.3.19: "Hoy" y "Ayer" de la Aventura: la mejor expedicion de cada jugador ese dia (los intentos del Reto diario van a sus propias tablas,
+     con la suma de sus 3 intentos). Fecha LOCAL, como el Reto diario. */
+  const dayKey = (d = new Date()) => "advd-" + (d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate());
   R.day = {
     board: dayKey,
     yesterday: () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); },
-    /* cada partida acabada (Aventura o intento del Reto diario) pasa por aqui con su puntuacion final; el servidor y el perfil se quedan con la mejor del dia */
+    /* cada expedicion de la Aventura acabada pasa por aqui con su puntuacion final; el servidor y el perfil se quedan con la mejor del dia */
     async submit(score) {
       score = Math.max(0, Math.round(score || 0)); const board = dayKey(), P = A.profile.get();
       const list = (P.boards[board] = P.boards[board] || []), mine = list.find(r => r.id === P.id);
       if (mine) { if (score > mine.score) Object.assign(mine, { score, name: R.name(), ts: Date.now() }); } else list.push({ id: P.id, name: R.name(), score, ts: Date.now() });
-      const keep = [board, R.day.yesterday()]; Object.keys(P.boards).forEach(k => { if (/^day-\d{8}$/.test(k) && !keep.includes(k)) delete P.boards[k]; });   // solo hoy y ayer
+      const keep = [board, R.day.yesterday()]; Object.keys(P.boards).forEach(k => { if (/^(day|advd)-\d{8}$/.test(k) && !keep.includes(k)) delete P.boards[k]; });   // solo hoy y ayer (day-: las de antes, de cualquier modo)
       A.profile.save(); R.ver++;
       const global = (await R.check()) ? await post({ board, id: P.id, name: R.name(), score }) : null; R.ver++;
       return { global };
     },
-    /* las partidas de hoy y de ayer jugadas ANTES de existir estas tablas tambien cuentan: tu mejor Aventura (su fila de "adv-all" lleva la fecha
-       en que la hiciste) y los intentos cerrados del Reto diario de esos dias (P.daily). Entran como las demas (la mejor de cada dia) y suben al
-       servidor una sola vez por puntuacion (P.dayFill). Lo llama la portada una vez por sesion (js/podio.js) */
+    /* las expediciones de hoy y de ayer jugadas ANTES de existir estas tablas tambien cuentan: tu mejor Aventura (su fila de "adv-all" lleva la fecha
+       en que la hiciste). Entra como las demas (la mejor de cada dia) y sube al servidor una sola vez por puntuacion (P.dayFill).
+       Lo llama la portada una vez por sesion (js/podio.js) */
     async fill() {
       const P = A.profile.get(), days = [dayKey(), R.day.yesterday()], best = {};
       const add = (ts, s) => { const b = ts ? dayKey(new Date(ts)) : ""; if (days.includes(b) && s > (best[b] || 0)) best[b] = Math.round(s); };
       const adv = (P.boards["adv-all"] || []).find(r => r.id === P.id); if (adv) add(adv.ts, adv.score || 0);
-      for (const k in P.daily) if (/^daily-\d{8}$/.test(k)) ((P.daily[k] || {}).tries || []).forEach(t => { if (t && !t.live) add(t.ts, t.s || 0); });
       const sent = (P.dayFill = P.dayFill && typeof P.dayFill === "object" ? P.dayFill : {}), jobs = [];
       Object.keys(sent).forEach(k => { if (!days.includes(k)) delete sent[k]; });
       for (const b of days) {

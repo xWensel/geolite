@@ -251,6 +251,7 @@ window.AIQ = window.AIQ || {};
     fake(o) { if (showing || queue.length) return false; queue.push(Object.assign({ fake: true }, o)); toast(); return true; },
     busy: () => showing || queue.length > 0,
     emit(ev, ctx) {
+      if (A.adv && A.adv.isPractice && A.adv.isPractice()) return;      // la practica con la semilla de otro dia no da logros
       ctx = ctx || {}; let n = 0;
       for (const a of A.ACH) {
         if (a.ev !== ev || P.ach[a.id]) continue;

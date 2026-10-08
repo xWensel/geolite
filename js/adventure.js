@@ -7,7 +7,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const T = A.T, L = A.L, $ = id => document.getElementById(id), C = () => A.core;
-  const RUNKEY = "atlasiq.run.v2", DAILYKEY = "atlasiq.daily.v1";   // el intento del Reto diario va en su propia ranura: no pisa la expedicion guardada
+  const RUNKEY = "atlasiq.run.v2", DAILYKEY = "atlasiq.daily.v1", PRACTICEKEY = "atlasiq.practice";   // la practica no se guarda: su ranura solo existe para que nada pise las otras   // el intento del Reto diario va en su propia ranura: no pisa la expedicion guardada
   const ic = (id, cls) => A.icon(id, cls), CN = () => A.icon("coin", "cn");
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const L6 = A.L6;
@@ -247,7 +247,7 @@ window.AIQ = window.AIQ || {};
   A.adv.roundPlaces = r => poolFor(r);
   A.adv.countSeen = countSeen;
   A.adv.roundPool = r => poolFor(r).length;
-  const persist = () => { try { if (run) localStorage.setItem(slot, JSON.stringify(run)); else localStorage.removeItem(slot); } catch (e) { /* sin almacenamiento */ } };
+  const persist = () => { try { if (run) { if (!run.practice) localStorage.setItem(slot, JSON.stringify(run)); } else localStorage.removeItem(slot); } catch (e) { /* sin almacenamiento */ } };
 
   /* tanda 17: Ascensiones con identidad. A1 La casa cobra (+5 % objetivo, -1 s, +10 % precios: sube un escalon por Ascension), A2 Reglas de la casa (una regla en R5, R7, R9 y R11),
      A3 Retos afilados (+1 nivel en los actos I y II), A4 Jefes con poder (+1 reto en cada jefe, tope 5, y -1 provision: medido, ver perks-revision-2026-10) y A5 Equipaje de mano (mochila de 4, 5 con el Pacto) */
@@ -381,20 +381,20 @@ window.AIQ = window.AIQ || {};
   };
   const et = (k, p) => A.tx(ETX[k]).replace(/\{(\w+)\}/g, (m, x) => (p && p[x] != null ? p[x] : m));
 
-  A.adv.begin = function ({ deck = "explorer", asc = 0, seed, ranked = false, board = null, dailyTry = 0, route = null, gift = null } = {}) {
+  A.adv.begin = function ({ deck = "explorer", asc = 0, seed, ranked = false, board = null, dailyTry = 0, route = null, gift = null, practice = false } = {}) {
     resumedIntro = false; flashQ.length = 0;                          // nada de la expedicion anterior (la frase de reanudar, destellos pendientes)
     const d = DECKS[deck] || DECKS.explorer, bonus = gift && A.RELICS[gift] && !d.perks.includes(gift) ? A.RELICS[gift] : null;
-    slot = keyOf(!!board); payLeg(loadSlot(!!board));
+    if (practice) slot = PRACTICEKEY; else { slot = keyOf(!!board); payLeg(loadSlot(!!board)); }   // la practica no toca las ranuras guardadas (ni el intento de hoy a medias)
     /* cjk (sin runas ni sin vocales) se fija al empezar: cambiar de idioma a media expedicion no mueve los trucos ni los sobornos (ver A.chal.plan) */
     run = {
-      v: 2, seed: seed || "run-" + Math.random().toString(36).slice(2, 10), cjk: A.chal.noLatin(), deck, asc, ranked, board, dailyTry, route: route ? route.slice(0, 12) : null, gift: bonus ? gift : null,
+      v: 2, seed: seed || "run-" + Math.random().toString(36).slice(2, 10), cjk: A.chal.noLatin(), deck, asc, ranked, board, dailyTry, practice: !!practice, route: route ? route.slice(0, 12) : null, gift: bonus ? gift : null,
       act: 0, round: 0, attempt: 0, coins: d.coins, lives: d.lives + ascFx(asc).lives, maxLives: d.lives + ascFx(asc).lives,
       first: !board && !A.profile.get().adv.runs, chSeen0: !board && asc < 3 && A.dealer && A.dealer.trickSeen ? A.dealer.trickSeen() : null,
       perks: d.perks.concat(bonus ? [gift] : []), tools: {}, score: 0, cleared: 0, used: [], rerolls: 0, freeUsed: 0, shopN: 0, phase: "round", qi: 0, qn: 5, qTools: 0, rTools: 0, luckUsed: false, guardUsed: false,
       livesLostAct: 0, shieldAct: -1, leftSum: 0, roundScore: 0, rGood: 0, qTotal: 0, stats: { bulls: 0, best: 0, coinsEarned: 0 }, t0: Date.now(),
     };
     d.tools.forEach(t => addTool(t)); if (bonus && bonus.buy) bonus.buy(run);
-    persist(); A.ach.emit("adv", { kind: "start" }); A.profile.get().adv.runs++; A.profile.save();
+    persist(); A.ach.emit("adv", { kind: "start" }); if (!practice) { A.profile.get().adv.runs++; A.profile.save(); }
     startRound();
   };
   /* Reto diario: gasta uno de los 3 intentos de hoy y empieza con la mano del dia (baraja, ascension, regalo y ruta) y la semilla de ESE intento */
@@ -402,6 +402,13 @@ window.AIQ = window.AIQ || {};
     const DY = A.rank.daily, k = DY.start(board); if (!k) return false;
     const h = DY.hand(board);
     A.adv.begin({ deck: h.deck, asc: h.asc, seed: DY.trySeed(board, k), ranked: true, board, dailyTry: k, route: h.route, gift: h.gift });
+    return true;
+  };
+  /* v0.3.19: PRACTICA con la semilla de otro dia: la misma mano y el mismo intento k (lugares, retos y cartas) que se jugaron ese dia, pero sin
+     clasificacion, logros, records ni doblones, y sin gastar nada: se repite cuando quieras. No se guarda (al salir se acaba) */
+  A.adv.beginPractice = (board, k) => {
+    const h = A.rank.daily.hand(board);
+    A.adv.begin({ deck: h.deck, asc: h.asc, seed: A.rank.daily.trySeed(board, k), ranked: false, board, dailyTry: k, route: h.route, gift: h.gift, practice: true });
     return true;
   };
   /* puntos de una expedicion al cerrarla: lo sumado en las rondas + 1.000 por ronda superada + 2.500 si conquisto los tres actos, y TODO ello por el
@@ -444,7 +451,7 @@ window.AIQ = window.AIQ || {};
      Un intento del Reto diario no se tira: se cierra con los puntos que llevaba y cuenta para la puntuacion global del dia. */
   A.adv.abandon = (daily = !!(run && run.board)) => {
     const act = !!run && !!run.board === daily, r = act ? run : loadSlot(daily), key = act ? slot : keyOf(daily); payLeg(r);
-    if (daily && r && r.board && r.dailyTry) A.rank.daily.finish(r.board, r.dailyTry, Math.round((rawOf(r) + (r.inf ? r.roundScore || 0 : 0)) * ascMult(r.asc)), { r: r.cleared, won: !!r.won });
+    if (daily && r && r.board && r.dailyTry && !r.practice) A.rank.daily.finish(r.board, r.dailyTry, Math.round((rawOf(r) + (r.inf ? r.roundScore || 0 : 0)) * ascMult(r.asc)), { r: r.cleared, won: !!r.won });
     if (act) run = null;
     try { localStorage.removeItem(key); } catch (e) { /* sin almacenamiento */ }
   };
@@ -453,6 +460,7 @@ window.AIQ = window.AIQ || {};
   A.adv.summary = (daily = false) => { const r = (run && !!run.board === daily && run) || loadSlot(daily); return r ? { act: r.act + 1, round: r.round + 1, coins: r.coins, score: r.score, lives: r.lives, board: r.board || null, dailyTry: r.dailyTry || 0, inf: !!r.inf, asc: r.asc || 0 } : null; };
   A.adv.active = () => !!run;
   A.adv.isDaily = () => !!(run && run.board);
+  A.adv.isPractice = () => !!(run && run.practice);
 
   function toolMax(id) { const t = run.tools[id]; if (!t) return 0; const plus = perkList().reduce((n, p) => n + (p.toolBonus || 0), 0) + (run.sup && run.sup.kit ? 1 : 0); return t.max + plus; }
   function addTool(id) { const t = run.tools[id]; if (t) t.max++; else run.tools[id] = { max: TOOLS[id].uses, left: TOOLS[id].uses }; }
@@ -593,7 +601,8 @@ window.AIQ = window.AIQ || {};
   const dirName = brg => { const idx = Math.round((((brg % 360) + 360) % 360) / 22.5) % 16, d = has("compass16") ? DIRS16[idx] : DIRS16[Math.round(idx / 2) % 8 * 2]; return A.lang === "es" ? d[1] : d[0]; };
   /* en el Reto diario, la etiqueta del acto dice en que intento vas (en lugar del subtitulo del acto) */
   const dailyLbl = k => A.pick6("Reto diario {k}/3|Daily {k}/3|Défi quotidien {k}/3|Desafio diário {k}/3|Tagesherausforderung {k}/3|Sfida giornaliera {k}/3||每日挑战 {k}/3|일일 도전 {k}/3|デイリーチャレンジ {k}/3|Испытание дня {k}/3|Wyzwanie dnia {k}/3").replace("{k}", k);
-  const actSub = info => (run && run.board && run.dailyTry ? dailyLbl(run.dailyTry) : A.tx(info.t));
+  const pracLbl = k => A.pick6("Práctica {k}/3|Practice {k}/3|Entraînement {k}/3|Treino {k}/3|Training {k}/3|Allenamento {k}/3||练习 {k}/3|연습 {k}/3|練習 {k}/3|Тренировка {k}/3|Trening {k}/3").replace("{k}", k);
+  const actSub = info => (run && run.board && run.dailyTry ? (run.practice ? pracLbl(run.dailyTry) : dailyLbl(run.dailyTry)) : A.tx(info.t));
   /* tanda 16: DUELO CON LA BANCA. El objetivo de la ronda es la puntuacion del crupier, repartida en sus 5 respuestas (suman EXACTAMENTE el objetivo). Su chincheta cae
      despues de la tuya: la distancia sale de lo que puntua (como la tuya) y el rumbo, de la semilla. No cambia el equilibrio: solo como se ve */
   const mkDuel = T => {
@@ -1113,11 +1122,11 @@ window.AIQ = window.AIQ || {};
       run.coins += got; run.stats.coinsEarned += got;
       if (bet && bet.id === "double" && !bet.done) { bet.done = 1; if (first) { const win = Math.min(bet.stake, 40); run.coins += bet.stake + win; run.stats.coinsEarned += win; lines.push([A.tx(BETS.double.n) + " ×2", "+" + (bet.stake + win), null, "bet"]); setTimeout(() => { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2400 }); }, 1100); } }   // doblas lo apostado (+40 como mucho)
       if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); }, 1100); } }   // +2 provisiones para el modo infinito
-      A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); A.profile.get().adv.boss++; }
+      A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); if (!run.practice) A.profile.get().adv.boss++; }
       A.sfx.stamp(); setTimeout(A.sfx.clear, 300);
       const actDone = boss, winAct = actDone ? run.act + 1 : 0;
-      if (actDone) { const flawless = run.livesLostAct === 0; A.ach.emit("adv", { kind: "act", act: winAct, flawless, asc: run.asc, daily: !!run.board }); run.livesLostAct = 0; A.profile.get().adv.bestAct = Math.max(A.profile.get().adv.bestAct || 0, winAct); }
-      A.profile.get().adv.bestRound = Math.max(A.profile.get().adv.bestRound, roundNo() + 1);
+      if (actDone) { const flawless = run.livesLostAct === 0; A.ach.emit("adv", { kind: "act", act: winAct, flawless, asc: run.asc, daily: !!run.board }); run.livesLostAct = 0; if (!run.practice) A.profile.get().adv.bestAct = Math.max(A.profile.get().adv.bestAct || 0, winAct); }
+      if (!run.practice) A.profile.get().adv.bestRound = Math.max(A.profile.get().adv.bestRound, roundNo() + 1);   // la practica no cuenta para records
       run.phase = "verdict"; run.vBoss = boss; persist(); A.profile.save();
       C().verdict({
         kind: "ok", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: boss ? A.T("¡Jefe derrotado!", "Boss defeated!") : A.T("Ronda superada", "Round cleared"),
@@ -1173,7 +1182,7 @@ window.AIQ = window.AIQ || {};
   }
   function winScreen() {
     run.won = true; run.act++; run.round = 0; run.attempt = 0; run.phase = "win"; persist(); A.sfx.victory();
-    const PA = A.profile.get().adv; PA.wins++; PA.deckWins = PA.deckWins || {}; PA.deckWins[run.deck] = (PA.deckWins[run.deck] || 0) + 1; A.profile.save();
+    const PA = run.practice ? {} : A.profile.get().adv; PA.wins = (PA.wins || 0) + 1; PA.deckWins = PA.deckWins || {}; PA.deckWins[run.deck] = (PA.deckWins[run.deck] || 0) + 1; A.profile.save();
     A.ach.emit("adv", { kind: "win", deck: run.deck });
     showWinChoice();
   }
@@ -2416,7 +2425,35 @@ window.AIQ = window.AIQ || {};
   function flash(t) { const n = document.querySelector("#dlg .tb-shop"); if (!n) return; n.querySelectorAll(".shop-flash").forEach(x => x.remove()); const m = document.createElement("p"); m.className = "shop-flash"; m.textContent = t; n.appendChild(m); setTimeout(() => m.remove(), 2200); }   // flotando sobre las cartas: no empuja nada
 
   /* ---------------- fin de la expedicion ---------------- */
+  /* fin de una PRACTICA (semilla de otro dia): ni clasificacion ni records ni doblones; se compara con lo que hiciste ese dia en el mismo intento */
+  function endPractice(win) {
+    const r = run, final = finalOf(r), board = r.board, k = r.dailyTry || 1, DY = A.rank.daily, real = DY.get(board).tries[k - 1], was = real && !real.live ? real.s || 0 : null;
+    run = null; persist(); C().S.run = null; A.chal.end(); A.dealer.enable(true);
+    const fell = { r: r.cleared + 1, won: !!r.won, record: false, daily: true, retire: false };
+    A.dealer.noteRun(fell); setTimeout(() => A.dealer.react(win ? "runWin" : "runLose", fell), 900);
+    A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.lose, 300);
+    const loc = (A.LANGS.find(l => l.code === A.lang) || A.LANGS[0]).loc, d = DY.date(board).toLocaleDateString(loc, { day: "numeric", month: "long" }), sp = /^(zh|ja)$/.test(A.lang) ? "" : " ";
+    const P6 = s => A.pick6(s), fill = s => s.replace("{d}", d).replace("{k}", k).replace("{s}", A.fmt(was || 0));
+    const toBoard = () => C().showHub("daily"), again = n => () => { A.sfx.depart(); C().S.ranked = null; C().prepareRun(); A.adv.beginPractice(board, n); };
+    C().verdict({
+      kind: win ? "win" : "", level: r.cleared, tag: pracLbl(k),
+      title: win ? P6("Práctica cobrada|Practice cashed out|Entraînement encaissé|Treino recolhido|Training ausgezahlt|Allenamento incassato||练习已兑现|연습 현금화 완료|練習をキャッシュアウト|Тренировка обналичена|Trening spieniężony")
+        : P6("Fin de la práctica|Practice over|Fin de l'entraînement|Fim do treino|Training beendet|Fine dell'allenamento||练习结束|연습 종료|練習終了|Тренировка окончена|Koniec treningu"),
+      text: fill(P6("Práctica del {d}, intento {k}. No cuenta para la clasificación.|Practice of {d}, attempt {k}. It doesn't count for the leaderboard.|Entraînement du {d}, essai {k}. Il ne compte pas pour le classement.|Treino de {d}, tentativa {k}. Não conta para o placar.|Training vom {d}, Versuch {k}. Es zählt nicht für die Rangliste.|Allenamento del {d}, tentativo {k}. Non conta per la classifica.||{d} 的练习，第 {k} 次尝试。不计入排行榜。|{d} 연습, {k}번째 시도. 리더보드에는 반영되지 않아요.|{d}の練習、挑戦{k}回目。ランキングには反映されない。|Тренировка за {d}, попытка {k}. В таблицу не идёт.|Trening z {d}, podejście {k}. Nie liczy się do rankingu.")) + sp
+        + fill(was != null ? P6("Ese día hiciste {s} en este intento.|That day you scored {s} on this attempt.|Ce jour-là, tu as fait {s} à cet essai.|Naquele dia você fez {s} nesta tentativa.|An dem Tag hast du bei diesem Versuch {s} geholt.|Quel giorno hai fatto {s} in questo tentativo.||那天你这次尝试得了 {s} 分。|그날 이 시도에서 {s}점을 냈어요.|その日のこの挑戦は{s}点だった。|В тот день за эту попытку у тебя было {s}.|Tego dnia to podejście dało ci {s}.")
+          : P6("Ese día no jugaste este intento.|You didn't play this attempt that day.|Ce jour-là, tu n'as pas joué cet essai.|Naquele dia você não jogou esta tentativa.|An dem Tag hast du diesen Versuch nicht gespielt.|Quel giorno non hai giocato questo tentativo.||那天你没有玩这次尝试。|그날은 이 시도를 하지 않았어요.|その日はこの挑戦をしていない。|В тот день эта попытка не сыграна.|Tego dnia to podejście nie zostało rozegrane.")),
+      stats: [[P6("Puntos de la práctica|Practice score|Score d'entraînement|Pontos do treino|Trainingspunkte|Punti dell'allenamento||练习得分|연습 점수|練習スコア|Очки тренировки|Wynik treningu"), final],
+        ...(was != null ? [[P6("Ese día|That day|Ce jour-là|Naquele dia|An dem Tag|Quel giorno||那天|그날|その日|В тот день|Tego dnia"), was]] : []), [A.T("Rondas superadas", "Rounds cleared"), r.cleared]],
+      stamp: win ? A.T("GLORIA", "GLORY") : A.T("FIN", "END"), stampSub: win ? A.icon("u_star", "st") : A.icon("u_close", "st"), art: win ? "win" : "lose",
+      buttons: [k < 3 ? { id: "nrBtn", cls: "btn-ink", label: P6("Practicar el intento {k}|Practice attempt {k}|S'entraîner à l'essai {k}|Treinar a tentativa {k}|Versuch {k} trainieren|Allenati sul tentativo {k}||练习第 {k} 次尝试|{k}번째 시도 연습|挑戦{k}回目を練習|Тренировать попытку {k}|Trenuj podejście {k}").replace("{k}", k + 1), arrow: true, primary: true, onclick: again(k + 1) }
+        : { id: "nrBtn", cls: "btn-ink", label: P6("Volver al reto|Back to the challenge|Retour au défi|Voltar ao desafio|Zurück zur Herausforderung|Torna alla sfida||返回挑战|도전으로 돌아가기|チャレンジに戻る|Назад к испытанию|Wróć do wyzwania"), arrow: true, primary: true, onclick: toBoard },
+        ...(k < 3 ? [{ id: "lbBtn", cls: "btn-line", label: P6("Volver al reto|Back to the challenge|Retour au défi|Voltar ao desafio|Zurück zur Herausforderung|Torna alla sfida||返回挑战|도전으로 돌아가기|チャレンジに戻る|Назад к испытанию|Wróć do wyzwania"), onclick: toBoard }] : []),
+        { id: "hubBtn", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().showHub() }],
+    });
+    C().map.setStyle(mapStyleFor()); A.adv.hideBars();
+  }
   function endRun(win) {
+    if (run.practice) return endPractice(win);
     const P = A.profile.get(), bonus = run.cleared * 1000 + (run.won ? 2500 : 0), final = finalOf(run), wasRanked = run.ranked, board = run.board, daily = !!(wasRanked && board);
     /* el Reto diario tiene sus propias tablas (Hoy y Ayer): no cuenta para el record ni para la tabla "Aventura" (solo expediciones del modo Aventura) */
     if (!daily) P.adv.bestScore = Math.max(P.adv.bestScore, final);
@@ -2426,7 +2463,7 @@ window.AIQ = window.AIQ || {};
     A.profile.save();
     const hadBest = (P.records["adv-all"] || 0) > 0, rec = !daily && A.profile.record("adv-all", final);   // la primera expedicion siempre es "record": el crupier solo lo celebra si habia uno que batir
     if (!daily) A.rank.submit("adv-all", { score: final, extra: { deck: run.deck, asc: run.asc, r: run.cleared } });
-    A.rank.day.submit(final);                                                                  // "Hoy" y "Ayer" del podio: la mejor partida del dia, sea de la Aventura o del Reto diario
+    if (!daily) A.rank.day.submit(final);                                                      // "Hoy" y "Ayer" de la Aventura: la mejor expedicion del dia (el Reto diario tiene sus tablas)
     A.ach.emit("adv", { kind: "end", score: final, won: !!run.won });
     /* Reto diario: el intento se cierra y suma a la puntuacion global del dia (las partidas del formato antiguo, sin numero de intento, cuentan como el primero) */
     let day = null, sent = null;
