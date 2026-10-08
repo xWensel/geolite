@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.14",
+      name: L("Portadas centradas", "Centred covers", "Couvertures centrées", "Capas centradas", "Zentrierte Titelbilder", "Copertine centrate", "", "封面居中", "가운데 정렬된 표지", "表紙を中央に", "Обложки по центру", "Wyśrodkowane okładki"),
+      date: "2026-10-08",
+      summary: L("Las portadas del Clásico ya salen centradas en cualquier tamaño de ventana.", "Classic covers are now centred at any window size.", "Les couvertures du Classique sont désormais centrées, quelle que soit la taille de la fenêtre.", "As capas do Clássico agora ficam centradas em qualquer tamanho de janela.", "Die Titelbilder von Klassisch sind jetzt bei jeder Fenstergröße zentriert.", "Le copertine del Classico ora sono centrate con qualsiasi dimensione della finestra.", "", "经典模式的封面现在在任何窗口大小下都居中。", "이제 클래식 표지가 창 크기와 관계없이 가운데에 놓입니다.", "クラシックの表紙が、どのウィンドウサイズでも中央に表示されるようになりました。", "Обложки «Классики» теперь по центру при любом размере окна.", "Okładki Klasyki są teraz wyśrodkowane przy każdym rozmiarze okna."),
+      chapters: [
+        { id: "fix", kicker: L("Clásico", "Classic", "Classique", "Clássico", "Klassisch", "Classico", "", "经典", "클래식", "クラシック", "Классика", "Klasyka"),
+          title: L("Arreglo", "Fix", "Correctif", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          intro: L("Cada cosa en su sitio.", "Everything in its place.", "Chaque chose à sa place.", "Cada coisa no seu lugar.", "Alles an seinem Platz.", "Ogni cosa al suo posto.", "", "各归其位。", "모든 것이 제자리에.", "すべてをあるべき場所に。", "Всё на своих местах.", "Wszystko na swoim miejscu."),
+          entries: [
+            E(L("Portadas centradas", "Centred covers", "Couvertures centrées", "Capas centradas", "Zentrierte Titelbilder", "Copertine centrate", "", "封面居中", "가운데 정렬된 표지", "表紙を中央に", "Обложки по центру", "Wyśrodkowane okładki"), "fix", "0.3.14", [
+              L("El dibujo de cada portada del Clásico queda en el centro y ya no se recorta cuando la ventana es estrecha o muy ancha.", "Each Classic cover's picture sits in the centre and is no longer cropped in narrow or very wide windows.", "Le dessin de chaque couverture du Classique est au centre et n'est plus rogné dans les fenêtres étroites ou très larges.", "O desenho de cada capa do Clássico fica no centro e já não é cortado em janelas estreitas ou muito largas.", "Das Bild jedes Klassisch-Titelbilds sitzt in der Mitte und wird in schmalen oder sehr breiten Fenstern nicht mehr abgeschnitten.", "Il disegno di ogni copertina del Classico sta al centro e non viene più tagliato nelle finestre strette o molto larghe.", "", "经典模式每张封面的图案都位于中央，窗口很窄或很宽时也不再被裁切。", "클래식 표지마다 그림이 가운데에 놓이고, 창이 좁거나 아주 넓어도 더 이상 잘리지 않습니다.", "クラシックの各表紙の絵が中央に収まり、ウィンドウが狭くても広くても切れなくなりました。", "Рисунок каждой обложки «Классики» стоит по центру и больше не обрезается в узком или очень широком окне.", "Rysunek każdej okładki Klasyki jest na środku i nie jest już przycinany w wąskim ani bardzo szerokim oknie."),
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.13",
       name: L("Portadas del Clásico", "Classic covers", "Couvertures du Classique", "Capas do Clássico", "Titelbilder für Klassisch", "Copertine del Classico", "", "经典模式封面", "클래식 표지", "クラシックの表紙", "Обложки «Классики»", "Okładki Klasyki"),
       date: "2026-10-08",

@@ -197,7 +197,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .s-camps .camps { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: clamp(10px, calc(1.2 * var(--vw)), 18px); margin-bottom: 12px; }
 @media (min-width: 901px) { .s-camps .camps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }   /* escritorio: siempre 2 columnas (a 1024 caia a 1 y las 11 campanas pedian scroll) */
 .s-camps .camp { grid-template-columns: clamp(104px, calc(10 * var(--vw)), 160px) 1fr; padding: 11px 14px; border-radius: 16px; background: rgba(10, 26, 18, .82); border: 0; box-shadow: inset 0 0 0 3px rgba(242, 233, 214, .25), 0 10px 0 rgba(0, 0, 0, .35); } .s-camps .camp.sel { box-shadow: inset 0 0 0 4px #ffd06b, 0 10px 0 rgba(0, 0, 0, .35), 0 0 40px rgba(255, 208, 107, .35); }
-.s-camps .camp-thumb { width: 100%; height: clamp(76px, calc(9 * var(--vh)), 104px); border-radius: 10px; } .s-camps .camp-t { font-size: clamp(24px, calc(3.2 * var(--vh)), 34px); } .s-camps .camp-d { font-size: clamp(13px, calc(1.8 * var(--vh)), 16px); }
+.s-camps .camp-thumb { width: 100%; max-width: 160px; height: auto; aspect-ratio: 3 / 2; justify-self: center; border-radius: 10px; }   /* la portada es 3:2: con alto fijo y ancho 100% se estiraba y el recorte la descentraba */ .s-camps .camp-t { font-size: clamp(24px, calc(3.2 * var(--vh)), 34px); } .s-camps .camp-d { font-size: clamp(13px, calc(1.8 * var(--vh)), 16px); }
 .camp-foot { min-height: 96px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 12px 0; }   /* sin la sombra pegada abajo: cortaba la pantalla */ .camp-foot .startbtn { width: min(100%, 480px); margin-left: auto; }
 
 /* ---------- Competitivo ---------- */

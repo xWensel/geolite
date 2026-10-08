@@ -69,7 +69,7 @@ html[data-dev="deck"] .seg button { letter-spacing: 0; line-height: 1.05; }
    en 3 columnas x 4 filas, con la miniatura algo menor, y la pantalla se queda a tamano completo */
 html[data-dev="deck"] .s-camps .camps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 8px; }
 html[data-dev="deck"] .s-camps .camp { grid-template-columns: 78px minmax(0, 1fr); gap: 12px; padding: 10px 12px; align-items: start; }
-html[data-dev="deck"] .s-camps .camp-thumb { height: 58px; }
+html[data-dev="deck"] .s-camps .camp-thumb { height: 58px; width: auto; aspect-ratio: 3 / 2; }
 html[data-dev="deck"] .s-camps .camp-t { font-size: 24px; }
 html[data-dev="deck"] body .s-camps .camp-d { font-size: 19px; line-height: 1.12; }
 html[data-dev="deck"] body .s-camps .camp-m > span { font-size: 16px; }
