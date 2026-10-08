@@ -744,7 +744,7 @@ window.AIQ = window.AIQ || {};
   function cardHTML(id, sub) {
     const e = E[id], un = U(id), tr = tiered(id), m = medOf(id), fr = un && (pump.fr ? idsOf(id).some(x => pump.fr.has(x)) : freshOf(id));
     return `<button type="button" class="cx-card ${un ? "open" : "locked"} ${tr ? "m" + m : un ? "mx" : "m0"}${fr ? " fresh" : ""}" data-go="d:${esc(id)}" data-id="${esc(id)}" data-tf="cxCard">
-      <span class="cx-art">${un ? iconSvg(e.type) : `<span class="cx-bk">${iconSvg(e.type)}</span>`}</span>
+      <span class="cx-art">${un ? "" : `<span class="cx-bk">${iconSvg(e.type)}</span>`}</span>
       <span class="cx-pn"${un ? fsAttr(nameOf(e, memOf(id)), 18, 15.5) : ""}>${un ? esc(nameOf(e, memOf(id))) : "???"}</span>${sub ? `<span class="cx-sub">${esc(sub)}</span>` : ""}
       ${tr ? pips(m) : `<span class="cx-kind">${esc(typeLabel(e.type))}</span>`}${fr ? `<span class="cx-new">${esc(P(S.nueva))}</span>` : ""}</button>`;
   }
@@ -823,7 +823,7 @@ window.AIQ = window.AIQ || {};
     return `<div class="cx-d1">
         <div class="cx-dtop"><div class="cx-d-card">
           <div class="cx-big ${un ? "open" : "locked"} ${tr ? "m" + m : un ? "mx" : "m0"}">
-            <div class="cx-art${rec && rec.img && rec.img.flag ? " flag" : ""}">${un ? `${iconSvg(e.type)}${rec && rec.img ? `<img id="cxHero" class="${photo(rec.img.card)}" alt="" src="${esc(rec.img.card)}" decoding="async" data-light><button class="cx-hd" type="button" data-light ${A.ttAttr(A.t("codex.hd"))}>${A.icon("a_lens")}</button>` : ""}` : `<span class="cx-bk">${iconSvg(e.type)}${A.icon("lock", "q")}</span>`}</div>
+            <div class="cx-art${rec && rec.img && rec.img.flag ? " flag" : ""}">${un ? `${rec && !rec.none && !rec.img ? iconSvg(e.type) : ""}${rec && rec.img ? `<img id="cxHero" class="${photo(rec.img.card)}" alt="" src="${esc(rec.img.card)}" decoding="async" data-light><button class="cx-hd" type="button" data-light ${A.ttAttr(A.t("codex.hd"))}>${A.icon("a_lens")}</button>` : ""}` : `<span class="cx-bk">${iconSvg(e.type)}${A.icon("lock", "q")}</span>`}</div>
             <div class="cx-cap"><span class="cx-pn">${un ? esc(nameOf(e, rec)) : esc(A.t("codex.locked"))}</span><span class="cx-mt"><em>${esc(typeLabel(e.type))}</em>${tr ? pips(m) : ""}</span></div><span class="cx-foil"></span>
           </div>
           ${tr ? `<div class="cx-dmeds">${[0, 1, 2].map(i => `<span data-tt="${esc(P(S[MED[i]]) + " · " + P(S.within).replace("{km}", kmTxt(L[i])) + "\n" + (m > i ? P(S.got) : P(S.miss)))}">${medal(i, m > i)}<em>&lt; ${esc(kmTxt(L[i]))}</em></span>`).join("")}</div>` : ""}
@@ -912,15 +912,18 @@ window.AIQ = window.AIQ || {};
   async function paintThumb(id, b) {
     b = b || ($("cxMain") && $("cxMain").querySelector(`.cx-card[data-id="${CSS.escape(id)}"]`)); if (!b || !U(id)) return;
     try {
-      const rec = await loadContent(E[id], A.wlang()); if (rec.none || !b.isConnected) return;
+      const rec = await loadContent(E[id], A.wlang()); if (rec.none) return noPic(b); if (!b.isConnected) return;
       const pn = b.querySelector(".cx-pn"), nm = nameOf(E[id], rec); if (pn.textContent !== nm) { pn.textContent = nm; const f = fitFs(nm, 18, 15.5); pn.style.fontSize = f ? f + "px" : ""; }
+      if (!rec.img) noPic(b);
       if (rec.img && !b.querySelector(".cx-art img.cx-th")) {
         const im = new Image(), th = thumbOf(id, rec); im.decoding = "async"; im.alt = ""; im.className = "cx-th " + photo(rec.img.thumb);
         const dec = () => (im.decode ? im.decode() : Promise.resolve());
         im.src = th; dec().catch(() => { if (im.src.endsWith(rec.img.thumb) || th === rec.img.thumb) throw 0; im.src = rec.img.thumb; return dec(); }).then(() => thumbIn(b, im, rec.img.flag), () => {});
       }
-    } catch (x) { /* sin datos: se queda el icono */ }
+    } catch (x) { noPic(b); }   // sin datos: el icono
   }
+  /* el icono de la categoria solo cuando de verdad no hay foto: nunca de relleno mientras carga */
+  const noPic = b => { const art = b && b.querySelector(".cx-art"); if (art && !art.firstChild) art.innerHTML = iconSvg(E[b.dataset.id] ? E[b.dataset.id].type : ""); };
   /* miniatura de 320 px (tools/wiki-thumbs.py) para las cartas pequenas; si falta, la de 960 px */
   const thumbOf = (id, rec) => (rec.img && /assets\/wiki\/card\//.test(rec.img.thumb) ? A.media(`assets/wiki/th/${A.mediaKey((E[id] && E[id].parent) || id)}.webp`) : rec.img.thumb);
   /* las fotos de las cartas entran por tandas, una vez decodificadas, sin forzar el recalculo de la pagina (A.revealImg hace dos por tanda:
@@ -1137,15 +1140,16 @@ window.AIQ = window.AIQ || {};
     dealerWas = false;
   }
 
-  /* aviso de tarjeta nueva: un carrete con todo lo conseguido, tarjeta a tarjeta, como el rodillo de una tragaperras.
-     Todas van superpuestas en la misma celda, asi el aviso mide lo que la mas alta y no da saltos al cambiar. La primera
-     se queda un poco, las del medio pasan mas deprisa cuantas mas son y la ultima aguanta hasta ~7 s; con el raton encima se para */
+  /* aviso de tarjeta nueva: un monton de polaroids con todo lo conseguido, tarjeta a tarjeta (v0.3.20). Cada una cae desde un lado
+     al azar y se queda con su giro y su sitio en el monton tambien al azar, para que nunca caigan igual; su foto hace el zoom lento de
+     una diapositiva. Todas van en la misma celda, asi el aviso mide lo que la mas alta y no da saltos. La primera se queda un poco,
+     las del medio pasan mas deprisa cuantas mas son y la ultima aguanta hasta ~7 s; con el raton encima se para */
   let toastT = 0, reelT = 0;
   function toastItem(id) {
     const e = E[id], it = document.createElement("span"); it.className = "cx-ri";
     const lvl = e.parent ? e.tier : tiered(id) ? 1 : 0, what = e.parent ? A.t(e.tier === 2 ? "codex.tierh" : "codex.tierk") : typeLabel(e.type);
     const ctry = e.country && cName(e.country) ? cName(e.country) : "", pid = e.parent || id, lang = A.wlang();
-    it.innerHTML = `<span class="cx-tcard m${lvl}"><span class="cx-art">${iconSvg(e.type)}</span>${lvl ? `<span class="cx-tmed">${A.icon("medal_" + MED[lvl - 1])}</span>` : ""}</span><span class="cx-tt"><em>${esc(A.t("codex.new"))} · ${esc(what)}</em><b>${esc(nameOf(e, memOf(id)))}</b>${ctry ? `<s>${esc(ctry)}</s>` : ""}<i></i></span>`;
+    it.innerHTML = `<span class="cx-tcard m${lvl}"><span class="cx-art"></span>${lvl ? `<span class="cx-tmed">${A.icon("medal_" + MED[lvl - 1])}</span>` : ""}</span><span class="cx-tt"><em>${esc(A.t("codex.new"))} · ${esc(what)}</em><b>${esc(nameOf(e, memOf(id)))}</b>${ctry ? `<s>${esc(ctry)}</s>` : ""}<i></i></span>`;
     const info = it.querySelector("i"), say = d => { if (d) info.textContent = d; };
     /* la foto (img.json) y el dato corto llegan enseguida; el texto completo de la tarjeta mejora el nombre y la descripcion cuando carga */
     const put = (src, back, flag) => new Promise(res => {
@@ -1157,9 +1161,9 @@ window.AIQ = window.AIQ || {};
     const full = loadContent(e, lang).then(rec => { if (rec.none) return null; it.querySelector("b").textContent = nameOf(e, rec); say(rec.desc); return rec; }).catch(() => null);
     it._ready = Promise.all([A.wiki.imgOf(pid), A.wiki.loadShort(lang)]).then(([im]) => {
       say(A.cleanFact(A.wiki.factOf(pid, lang)));
-      if (im) return put(A.media(`assets/wiki/th/${A.mediaKey(pid)}.webp`), A.media(`assets/wiki/card/${A.mediaKey(pid)}.webp`), /\/(\d+px-)?(State_)?flag_of_[^\/]*$/i.test(im[0]));
-      return full.then(rec => (rec && rec.img ? put(rec.img.thumb, rec.img.card, rec.img.flag) : null));   // paises sin foto propia: su bandera
-    }).catch(() => {});
+      if (im) return put(A.media(`assets/wiki/card/${A.mediaKey(pid)}.webp`), A.media(`assets/wiki/th/${A.mediaKey(pid)}.webp`), /\/(\d+px-)?(State_)?flag_of_[^\/]*$/i.test(im[0]));
+      return full.then(rec => (rec && rec.img ? put(rec.img.card, rec.img.thumb, rec.img.flag) : null));   // paises sin foto propia: su bandera (la foto grande: la polaroid mide ~400 px)
+    }).catch(() => {}).then(() => { const art = it.querySelector(".cx-art"); if (!art.querySelector("img")) art.innerHTML = iconSvg(e.type); });   // el icono solo si de verdad no hay foto, nunca de relleno mientras carga
     return it;
   }
   /* el aviso espera (hasta 1,4 s) a que las fotos de las primeras tarjetas esten cargadas: se ve la foto, no el icono de relleno */
@@ -1174,26 +1178,46 @@ window.AIQ = window.AIQ || {};
     const n = ids.length, FIRST = 1300, END = 7000, step = Math.max(240, Math.min(900, 3800 / Math.max(1, n - 1)));
     const hold = k => n === 1 ? END : k === 0 ? FIRST : k < n - 1 ? step : Math.max(1600, END - FIRST - (n - 2) * step);
     const calm = document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.innerHTML = `<span class="cx-reel"></span>${n > 1 ? `<span class="cx-rbar">${"<u></u>".repeat(n)}</span>` : ""}`;
-    const pips2 = el.querySelectorAll(".cx-rbar u");
+    el.classList.add("pile");
+    el.innerHTML = `<span class="cx-reel"></span>${n > 1 ? `<span class="cx-cnt"></span>` : ""}`;
+    const cnt = el.querySelector(".cx-cnt"), rnd = (a, b) => a + Math.random() * (b - a);
     items.forEach(it => el.firstElementChild.appendChild(it));
+    /* donde se queda cada una: giro de -6 a 6 grados (nunca casi igual que la de debajo) y un poco descolocada */
+    let lastR = rnd(-6, 6) > 0 ? -3 : 3;
+    const rest = items.map(() => { let r; do r = rnd(-6, 6); while (Math.abs(r - lastR) < 2.5); lastR = r; return `translate(${rnd(-12, 12).toFixed(1)}px, ${rnd(-8, 6).toFixed(1)}px) rotate(${r.toFixed(2)}deg)`; });
+    items.forEach((it, j) => { it.style.transform = rest[j]; it.style.zIndex = j + 1; it.style.setProperty("--ko", `${rnd(25, 75) | 0}% ${rnd(25, 70) | 0}%`); });
+    /* de donde cae: izquierda, arriba, derecha o abajo, girando a su aire */
+    const from = () => { const side = Math.random() * 4 | 0, sp = rnd(-28, 28).toFixed(1);
+      return side === 0 ? `translate(-125%, ${rnd(-60, 40) | 0}px) rotate(${-Math.abs(sp)}deg)` : side === 1 ? `translate(${rnd(-50, 50) | 0}px, -115%) rotate(${sp}deg)`
+        : side === 2 ? `translate(120%, ${rnd(-60, 40) | 0}px) rotate(${Math.abs(sp)}deg)` : `translate(${rnd(-40, 40) | 0}px, 70%) rotate(${sp}deg) scale(1.08)`; };
     let i = 0;
-    const show = (k, from) => {
-      items.forEach((it, j) => { if (j !== k && j !== from) { it.classList.remove("on"); it.getAnimations().forEach(an => an.cancel()); } });   // por si alguna salida no llego a terminar (pestana en segundo plano)
-      items[k].classList.add("on"); pips2.forEach((u, j) => u.classList.toggle("on", j <= k));
-      if (from == null) return;
-      const p = items[from], d = Math.min(380, step - 60);
-      if (calm) { p.classList.remove("on"); return; }
-      const out = p.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(-100%)", opacity: 0 }], { duration: d, easing: "cubic-bezier(.5, 0, .75, 0)", fill: "forwards" });
-      out.onfinish = () => { p.classList.remove("on"); out.cancel(); };
-      items[k].animate([{ transform: "translateY(100%)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: d + 60, easing: "cubic-bezier(.2, .9, .3, 1.15)" });   // entra con un pelin de rebote: el "clac" del rodillo
+    const show = k => {
+      const it = items[k], d = calm ? 0 : Math.min(560, Math.max(320, step - 40));
+      items.forEach((o, j) => { if (j < k) { o.classList.remove("on"); o.classList.toggle("under", j >= k - 3); } });   // en el monton se ven las 3 de debajo; las mas viejas ya no
+      it.classList.remove("under"); it.classList.add("on", "kb"); if (cnt) cnt.textContent = `${k + 1} / ${n}`;
+      if (!d) return;
+      it.animate([{ transform: from(), opacity: 0 }, { opacity: 1, offset: .35 }, { transform: rest[k], opacity: 1 }], { duration: d, easing: "cubic-bezier(.2, .9, .3, 1.12)" });
+      const p = items[k - 1];
+      if (p) setTimeout(() => p.isConnected && p.animate([{ transform: rest[k - 1] }, { transform: `${rest[k - 1]} translate(${rnd(-4, 4).toFixed(1)}px, 3px) rotate(${rnd(-1.2, 1.2).toFixed(2)}deg)` }, { transform: rest[k - 1] }], { duration: 240, easing: "ease-out" }), d * .82);   // el golpecito a la de debajo al caer
     };
     const leave = () => { el.classList.remove("in"); el.classList.add("out"); toastT = setTimeout(() => el.classList.add("hidden"), 340); };
-    const next = () => { if (i < n - 1) { const from = i++; show(i, from); reelT = setTimeout(next, hold(i)); } else leave(); };
+    const next = () => { if (i < n - 1) { show(++i); reelT = setTimeout(next, hold(i)); } else leave(); };
+    el._leave = () => { clearTimeout(reelT); leave(); };
     el.onpointerenter = () => clearTimeout(reelT);
     el.onpointerleave = () => { clearTimeout(reelT); reelT = setTimeout(next, 700); };
     el.onclick = () => { clearTimeout(reelT); if (A.core && A.core.S && A.core.S.phase === "asking") { leave(); return; } el.classList.add("hidden"); open(ids[i]); };   // con el reloj corriendo solo se aparta
     el.classList.remove("hidden", "in", "out"); A.restyle(el); el.classList.add("in");
+    /* ancho de la polaroid segun el alto libre bajo la placa: se mide al abrir (no por fotograma) y se encoge hasta que no tape los botones de abajo */
+    el.classList.remove("slim"); el.style.removeProperty("--pw");
+    if (el.parentNode && el.parentNode.id === "leftCol" && !document.body.classList.contains("tk-on")) {
+      const col = el.parentNode.clientWidth, limit = window.innerHeight - 72, reel = el.firstElementChild;
+      let pw = Math.round(col * .9); el.classList.toggle("slim", window.innerHeight < 720);
+      for (let k = 0; k < 4; k++) {
+        el.style.setProperty("--pw", pw + "px");
+        const over = reel.getBoundingClientRect().bottom + 14 - limit; if (over <= 0) break;
+        pw = Math.max(200, Math.round(pw - over / (el.classList.contains("slim") ? .62 : .75) - 4)); if (pw === 200) { el.style.setProperty("--pw", "200px"); break; }
+      }
+    }
     show(0); reelT = setTimeout(next, hold(0));
   }
   listeners.push(added => { setTimeout(() => toast(added), 1700); });   // sin sonido propio: lo celebran los jackpots del ticket (A.sfx.jackpot)
@@ -1201,9 +1225,10 @@ window.AIQ = window.AIQ || {};
   A.codex = {
     init(w, m) { world = w; map = m; load(); build(); },
     open, close, isOpen, stats, entry: id => E[id], has: id => !!E[id],
+    toastAside() { const el = $("cxToast"); if (el && el._leave && !el.classList.contains("hidden") && !el.classList.contains("out")) el._leave(); },   // empieza otra pregunta: el monton se aparta y deja el mapa libre
     unlocked: () => order.filter(isUnlocked), total: () => order.length,
     isUnlocked: id => !!store.unlocked[id],
-    _load: (id, lang) => loadContent(E[id], lang || A.wlang()),
+    _load: (id, lang) => loadContent(E[id], lang || A.wlang()), _toast: ids => toast(ids),
     _index: () => index(), _groupStats: key => gStats(index().gs[key]), _map: () => map, _ui: () => ui,
     ids: () => order.slice(),
     regionNames: ne => (REG_OF[ne] ? REG_OF[ne].names : ""),         // nombre de la familia de un pais, "es|en|..." (sin montar el atlas)

@@ -620,6 +620,7 @@
     closeDialog(); setPrompt(); setTimer(S.limit);
     $("plate").classList.remove("hidden", "hurry"); $("pauseBtn").classList.remove("hidden"); $("factText").textContent = "";
     if (S.run) A.adv.onQuestion();
+    if (A.codex && A.codex.toastAside) A.codex.toastAside();         // el monton de tarjetas nuevas no se queda tapando el mapa con el reloj corriendo
     updateHud();
     if ((document.hidden || S.settingsOpen) && !S.paused) togglePause();    // la intro acabo con la pestana oculta o con Ajustes abierto (el reloj corria debajo): la pregunta empieza en pausa
   }

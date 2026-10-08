@@ -199,7 +199,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-card .cx-art, .cx-big .cx-art { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 8px; background: linear-gradient(160deg, var(--ink-2), var(--ink)); color: rgba(242, 233, 214, .35); }
 .cx-card .cx-art { aspect-ratio: 4 / 3; }
 .cx-art .cx-ic { position: relative; width: 46%; height: auto; image-rendering: pixelated; z-index: 0; }
-.cx-art > img.cx-th, .cx-art > img#cxHero { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; animation: cx-fade .5s both; } @keyframes cx-fade { from { opacity: 0; } }
+.cx-art > img.cx-th, .cx-art > img#cxHero { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; animation: cx-fade .5s both; } .cx-art > img#cxHero { animation: none; }   /* la foto grande sale ya puesta: sin velo ni fundido */ @keyframes cx-fade { from { opacity: 0; } }
 .cx-art.flag > img.cx-th, .cx-art.flag > img#cxHero { object-fit: contain; background: var(--ink); }   /* banderas enteras, sin recortar el centro */
 .cx-art > img.cx-photo, #cxLight > img.cx-photo { image-rendering: auto; }   /* fotos de Wikipedia/Commons: se reducen suavizadas (gana a ".cx-art img" de uikit.css); ilustraciones e iconos siguen en pixel nitido */
 .cx-pn { display: block; font-family: var(--serif); font-weight: 400; font-size: 18px; line-height: 1.02; overflow-wrap: break-word; hyphens: auto; }
@@ -280,18 +280,26 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 /* ---------- aviso de tarjeta nueva ---------- */
 .cx-toast { position: absolute; z-index: 11; right: 16px; bottom: 16px; display: flex; gap: 12px; align-items: center; text-align: left; max-width: min(420px, calc(calc(100 * var(--vw)) - 32px)); padding: 10px 16px 14px 10px; cursor: pointer; color: var(--ink); background: var(--paper); background-image: var(--paper-grain); border: 0; box-shadow: inset 0 0 0 2px var(--ink), 0 10px 0 -2px rgba(0,0,0,.35); }
 .cx-toast.hidden { display: none; } .cx-toast.in { animation: cx-toast .7s var(--spring) both; } @keyframes cx-toast { from { transform: translateX(120%) rotate(6deg); opacity: 0; } }
-.cx-tcard { --rc: #1fb3a3; position: relative; flex: none; width: 104px; aspect-ratio: 1;  padding: 3px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--rc); }
+/* v0.3.20: el aviso es un monton de polaroids. Cada tarjeta cae desde un lado al azar, con su giro y su sitio en el monton al azar
+   (js/codex.js, toastShow), y su foto hace el zoom lento de una diapositiva. Ancho --pw: lo ajusta el JS al alto libre de la ventana */
+.cx-toast.pile { display: block; padding: 12px 0 12px; background: none; box-shadow: none; border-radius: 0; }
+#leftCol .cx-toast.pile.in { animation: none; }   /* entra la primera polaroid cayendo, no el aviso entero */
+#leftCol .cx-toast.pile { width: auto; align-self: flex-start; } .cx-toast.pile .cx-ri { max-width: none; }   /* mide lo que la polaroid: el contador queda en su esquina */
+.cx-toast.pile.slim .cx-tcard { aspect-ratio: 16 / 10; } .cx-toast.pile.slim .cx-tt b { font-size: 24px; } .cx-toast.pile.slim .cx-tt i { -webkit-line-clamp: 2; }   /* ventanas bajas (960 x 600) */
+.cx-reel { position: relative; display: grid; justify-items: center; overflow: visible; }
+.cx-ri { grid-area: 1 / 1; position: relative; width: var(--pw, 90%); max-width: 100%; display: grid; gap: 8px; padding: 10px 10px 12px; text-align: left; color: var(--ink); background: var(--paper); background-image: var(--paper-grain); box-shadow: inset 0 0 0 2px var(--ink), 0 12px 18px rgba(0, 0, 0, .42); visibility: hidden; transform-origin: 50% 85%; }
+.cx-ri.on, .cx-ri.under { visibility: visible; }
+.cx-ri.under { filter: brightness(.84); } .cx-ri.under .cx-tmed { visibility: hidden; }   /* la medalla solo en la de arriba: abajo asomaban todas en la esquina */
+.cx-tcard { --rc: var(--ink); position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; box-shadow: 0 0 0 2px var(--rc); }
 .cx-tcard.m1 { --rc: #a45530; } .cx-tcard.m2 { --rc: #9095ab; } .cx-tcard.m3 { --rc: #f5a623; }
-.cx-tcard .cx-art { position: relative; width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; background: var(--ink); color: rgba(242,233,214,.5); } .cx-tcard .cx-ic { width: 60%; }
-.cx-tcard .cx-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } .cx-tcard .cx-art.flag > img { object-fit: contain; }
-.cx-tmed { position: absolute; right: -9px; bottom: -7px; width: 26px; height: 26px; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .4)); } .cx-tmed .ic { width: 100%; height: 100%; image-rendering: pixelated; }
-/* carrete del aviso: todas las tarjetas conseguidas en la misma celda (solo se ve la actual) y una barra fina con una marca por tarjeta */
-.cx-reel { flex: 1; min-width: 0; display: grid; overflow: hidden; }
-.cx-ri { grid-area: 1 / 1; display: flex; gap: 12px; align-items: center; min-width: 0; visibility: hidden; } .cx-ri.on { visibility: visible; }
-.cx-rbar { position: absolute; left: 10px; right: 16px; bottom: 4px; height: 2px; display: flex; gap: 3px; pointer-events: none; }
-.cx-rbar u { flex: 1; background: rgba(20, 35, 43, .16); text-decoration: none; transition: background .25s; } .cx-rbar u.on { background: var(--red); }
+.cx-tcard .cx-art { position: relative; width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; background: var(--ink); color: rgba(242,233,214,.5); } .cx-tcard .cx-ic { width: 34%; }
+.cx-tcard .cx-art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); transform-origin: var(--ko, 50% 50%); } .cx-tcard .cx-art.flag > img { object-fit: contain; transform: none; }
+.cx-ri.kb .cx-art:not(.flag) > img { animation: cx-kb 9s ease-out both; } @keyframes cx-kb { to { transform: scale(1.15); } }   /* el zoom lento de documental */
+.cx-tmed { position: absolute; z-index: 2; left: -10px; top: -11px; width: 44px; height: 44px; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); } .cx-tmed .ic { width: 100%; height: 100%; image-rendering: pixelated; }
+.cx-cnt { position: absolute; z-index: 99; right: 2px; bottom: 0; font-family: var(--mono); font-size: 13px; letter-spacing: .06em; color: var(--paper); background: var(--ink); padding: 5px 8px 4px; pointer-events: none; font-variant-numeric: tabular-nums; }
+html.reduce-motion .cx-ri.kb .cx-art > img { animation: none; } @media (prefers-reduced-motion: reduce) { .cx-ri.kb .cx-art > img { animation: none; } }
 .cx-toast.out { animation: cx-toast-out .34s ease-in both; } @keyframes cx-toast-out { to { transform: translateX(120%); opacity: 0; } }
-.cx-tt { display: grid; gap: 2px; min-width: 0; } .cx-tt em { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--red-deep); } .cx-tt b { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 20px; line-height: 1.05; } .cx-tt s { text-decoration: none; font-family: var(--mono); font-size: 14px; letter-spacing: .04em; color: var(--muted, #5b6a5f); } .cx-tt i { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-style: normal; font-family: var(--mono); font-size: 14px; color: var(--ink-2); }
+.cx-tt { display: grid; gap: 3px; min-width: 0; padding: 0 4px; } .cx-tt em { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--red-deep); } .cx-tt b { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 30px; line-height: .95; } .cx-tt s { text-decoration: none; font-family: var(--mono); font-size: 14px; letter-spacing: .04em; color: var(--muted, #5b6a5f); } .cx-tt i { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-style: normal; font-family: var(--mono); font-size: 14px; line-height: 1.3; color: var(--ink-2); margin-top: 2px; }
 
 /* ---------- por aspecto ---------- */
 html[data-skin="casino"] .cx-toast { border-radius: 14px; }
