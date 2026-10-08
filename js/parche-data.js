@@ -34,6 +34,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.33",
+      name: L("Créditos de demostración", "Demo credits", "Crédits de démonstration", "Créditos de demonstração", "Demo-Abspann", "Titoli di coda dimostrativi", "", "演示片尾字幕", "데모 크레딧", "デモ用クレジット", "Демо-титры", "Napisy końcowe (demo)"),
+      date: "2026-10-08",
+      summary: L("Botón temporal en Ajustes > Datos que lanza los créditos finales de la Ascensión V sin jubilar al crupier ni cerrar el juego.", "Temporary button in Settings > Data that launches the Ascension V ending credits without retiring the dealer or closing the game.", "Bouton temporaire dans Paramètres > Données qui lance les crédits de fin de l'Ascension V sans mettre le croupier à la retraite ni fermer le jeu.", "Botão temporário em Definições > Dados que inicia os créditos finais da Ascensão V sem aposentar o crupiê nem fechar o jogo.", "Vorübergehender Knopf unter Einstellungen > Daten, der den Abspann des Aufstiegs V startet, ohne den Croupier in Rente zu schicken oder das Spiel zu schließen.", "Pulsante temporaneo in Impostazioni > Dati che avvia i titoli di coda dell'Ascensione V senza mandare in pensione il croupier né chiudere il gioco.", "", "设置 > 数据中的临时按钮，可播放进阶五的结尾字幕，不会让荷官退休，也不会关闭游戏。", "설정 > 데이터의 임시 버튼으로, 딜러를 은퇴시키거나 게임을 종료하지 않고 어센션 5 엔딩 크레딧을 재생합니다.", "設定 > データにある一時的なボタン。ディーラーを引退させたりゲームを閉じたりせず、アセンション5のエンディングクレジットを流します。", "Временная кнопка в Настройки > Данные: запускает финальные титры Восхождения V, не отправляя крупье на пенсию и не закрывая игру.", "Tymczasowy przycisk w Ustawienia > Dane, który uruchamia napisy końcowe Wniebowstąpienia V bez wysyłania krupiera na emeryturę i bez zamykania gry."),
+      chapters: [
+        { id: "demo", kicker: L("Ajustes", "Settings", "Paramètres", "Definições", "Einstellungen", "Impostazioni", "", "设置", "설정", "設定", "Настройки", "Ustawienia"),
+          title: L("Datos", "Data", "Données", "Dados", "Daten", "Dati", "", "数据", "데이터", "データ", "Данные", "Dane"),
+          entries: [
+            E(L("Créditos de demostración", "Demo credits", "Crédits de démonstration", "Créditos de demonstração", "Demo-Abspann", "Titoli di coda dimostrativi", "", "演示片尾字幕", "데모 크레딧", "デモ用クレジット", "Демо-титры", "Napisy końcowe (demo)"), "new", "0.3.33", [
+              L("Botón temporal en Ajustes > Datos que lanza los créditos finales de la Ascensión V sin jubilar al crupier ni cerrar el juego.", "Temporary button in Settings > Data that launches the Ascension V ending credits without retiring the dealer or closing the game.", "Bouton temporaire dans Paramètres > Données qui lance les crédits de fin de l'Ascension V sans mettre le croupier à la retraite ni fermer le jeu.", "Botão temporário em Definições > Dados que inicia os créditos finais da Ascensão V sem aposentar o crupiê nem fechar o jogo.", "Vorübergehender Knopf unter Einstellungen > Daten, der den Abspann des Aufstiegs V startet, ohne den Croupier in Rente zu schicken oder das Spiel zu schließen.", "Pulsante temporaneo in Impostazioni > Dati che avvia i titoli di coda dell'Ascensione V senza mandare in pensione il croupier né chiudere il gioco.", "", "设置 > 数据中的临时按钮，可播放进阶五的结尾字幕，不会让荷官退休，也不会关闭游戏。", "설정 > 데이터의 임시 버튼으로, 딜러를 은퇴시키거나 게임을 종료하지 않고 어센션 5 엔딩 크레딧을 재생합니다.", "設定 > データにある一時的なボタン。ディーラーを引退させたりゲームを閉じたりせず、アセンション5のエンディングクレジットを流します。", "Временная кнопка в Настройки > Данные: запускает финальные титры Восхождения V, не отправляя крупье на пенсию и не закрывая игру.", "Tymczasowy przycisk w Ustawienia > Dane, który uruchamia napisy końcowe Wniebowstąpienia V bez wysyłania krupiera na emeryturę i bez zamykania gry.")
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.32",
       name: L("Otro juego al reintentar", "A different game on retry", "Un autre jeu au nouvel essai", "Outro jogo ao repetir", "Anderes Spiel beim Neuversuch", "Un altro gioco al nuovo tentativo", "", "重试时换一个游戏", "재도전 시 다른 게임", "やり直しで別のゲーム", "Другая игра при повторе", "Inna gra przy powtórce"),
       date: "2026-10-08",

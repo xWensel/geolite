@@ -231,6 +231,7 @@
     h.steamCloud().then(c => put(!c ? "local" : c.account && c.app ? "on" : "off")).catch(() => put("local"));
   }
   /* creditos y licencias (credits.html, tools/build-credits.mjs): pagina aparte, en el navegador del sistema en Electron (main.js abre los http externos alli) */
+  $("demoCredits").onclick = () => { A.sfx.ui(); openSettings(false); setTimeout(() => { if (A.dealer && A.dealer.demoCredits) A.dealer.demoCredits(); }, 500); };   // TEMPORAL (demos): los creditos de Ascension V sin jubilar
   $("openCredits").onclick = () => { A.sfx.ui(); A.creditos.open(); };   // v0.2.33: dentro del juego (js/creditos.js); antes, el navegador del sistema
   /* restablecer la Enciclopedia: hay que pulsar dos veces (la primera arma el boton) */
   { const rc = $("resetCodex"); let tm = 0;

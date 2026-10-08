@@ -2579,8 +2579,8 @@ window.AIQ = window.AIQ || {};
     try { return new Intl.ListFormat(loc, { type: "conjunction" }).format([u(h, "hour"), u(mm, "minute")]); } catch (e) { return u(h, "hour") + " " + u(mm, "minute"); }
   }
   function dateTxt(ts, year) { try { return new Date(ts).toLocaleDateString(locOf(), year || new Date(ts).getFullYear() !== new Date().getFullYear() ? { day: "numeric", month: "long", year: "numeric" } : { day: "numeric", month: "long" }); } catch (e) { return ""; } }
-  function retireRun() {
-    const R0 = DS.retired;
+  function retireRun(demo) {
+    const R0 = demo ? null : DS.retired;
     if (R0) { R0.n++; saveStore(); const t = say1("retireAgain"); if (t) D.say(t, { mood: "shock", hold: holdFor(t) }); return !!t; }
     const P = (A.profile && A.profile.get()) || {}, s = P.stats || {}, a = P.adv || {}, first = DS.first || Date.now(), now = Date.now();
     const d = { d: dateTxt(first), n: A.fmt(advRuns()), t: longDur(DS.playMs || 0) };
@@ -2596,7 +2596,7 @@ window.AIQ = window.AIQ || {};
       [A.T("Preguntas", "Questions"), A.fmt(s.questions || 0)],
       [A.T("Dianas", "Bullseyes"), A.fmt(s.bulls || 0)],
     ];
-    DS.retired = { n: 1, ts: now }; DS.retireBack = 1; saveStore();
+    if (!demo) { DS.retired = { n: 1, ts: now }; DS.retireBack = 1; saveStore(); }   // la demo (Ajustes) no jubila de verdad
     return spotScene(items, fin => {
       const r = $("qxs"); if (r) r.classList.add("unlit"); if (A.sfx.snap) A.sfx.snap();      // chasquea los dedos: el foco parpadea y se apaga
       const tv = A.salir && A.salir.tv;
@@ -2614,8 +2614,8 @@ window.AIQ = window.AIQ || {};
             one();
           },
           done: () => {                                                 // la sala ya esta a oscuras: el juego se cierra; en la web, la portada (alli vuelve con su cartel)
-            saveStore(); const h = window.geoliteHost;
-            if (h && h.quit) { setTimeout(() => h.quit(), 350); return; }
+            if (!demo) saveStore(); const h = window.geoliteHost;
+            if (!demo && h && h.quit) { setTimeout(() => h.quit(), 350); return; }
             D.dock(null); fin(); if (A.core && A.core.showHub) A.core.showHub();
             setTimeout(() => (tv ? tv.on(() => A.music.start()) : A.music.start()), 600);
           },
@@ -2692,6 +2692,7 @@ window.AIQ = window.AIQ || {};
 
   /* ME CAMBIAS LA VENTANA (Ajustes o F): ventana, sin bordes o pantalla completa. Sin bordes recarga el juego, asi que se apunta y lo dice
      al llegar (en la apertura o en el siguiente asomo); una vez por sesion. Tampoco cuenta como "has cambiado el tamaño" */
+  D.demoCredits = () => retireRun(true);                                                  // botón temporal de Ajustes: los créditos de la Ascensión V, sin jubilar ni cerrar
   D.noteWindow = v => { fsAt = Date.now(); if (once.win || !/^(window|full|border)$/.test(v)) return; DS.winPend = { v, at: Date.now() }; saveStore(); };
   function winNote() {
     const w = DS.winPend; if (!w || once.win) return null; DS.winPend = null; saveStore();
