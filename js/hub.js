@@ -253,7 +253,7 @@ window.AIQ = window.AIQ || {};
     const cell = (l, v, ico) => `<div class="pf-cell" ${A.ttAttr(l, CELL_TIP[ico] || "")}>${A.icon(ico)}<span>${l}</span><b>${v}</b></div>`;
     /* Logros: la UNICA pantalla que se desplaza (game.js no la encoge: clase .scrolls). A todo el ancho, por tramos de dificultad,
        con la ilustracion de cada logro, su progreso ("37 / 100", como en Steam) o la fecha en que se consiguio */
-    const ROMAN = ["I", "II", "III", "IV", "V", "✦"], prog = A.ach.progress(), got = a => !!P.ach[a.id];
+    const ROMAN = ["I", "II", "III", "IV", "V", "?"], RN = i => `<span class="ac-rn" aria-label="${ROMAN[i]}">${A.icon("tier_" + i)}</span>`, prog = A.ach.progress(), got = a => !!P.ach[a.id];
     const LOC = { pt: "pt-BR", zh: "zh-CN" }[A.lang] || A.lang || "es";
     const day = ts => { try { return new Intl.DateTimeFormat(LOC, { day: "numeric", month: "short", year: "numeric" }).format(ts); } catch (e) { return new Date(ts).toLocaleDateString(); } };
     const pct = (n, d) => Math.round((100 * n) / Math.max(1, d));
@@ -266,8 +266,8 @@ window.AIQ = window.AIQ || {};
     };
     const tiers = A.ACH_TIERS.map((t, i) => { const list = A.ACH.filter(a => a.tier === i); return { t, i, list, n: list.filter(got).length }; }).filter(x => x.list.length);
     const total = A.ach.total(), done = A.ach.count();
-    const jump = tiers.map(x => `<button class="ac-jump-b${x.n === x.list.length ? " full" : ""}" data-t="${x.i}" type="button"><span class="ac-rn">${ROMAN[x.i]}</span><span class="ac-jn"><b>${A.tx(x.t.n)}</b><em>${x.n}/${x.list.length}</em></span></button>`).join("");
-    const sec = (x, cards) => `<section class="ac-sec" id="acSec${x.i}"><header class="ac-th"><span class="ac-rn">${ROMAN[x.i]}</span><span class="ac-tn"><b>${A.tx(x.t.n)}</b><i>${A.tx(x.t.t)}</i></span><span class="ac-tc"><b>${x.n}<i>/${x.list.length}</i></b><u><s style="width:${pct(x.n, x.list.length)}%"></s></u></span></header>
+    const jump = tiers.map(x => `<button class="ac-jump-b${x.n === x.list.length ? " full" : ""}" data-t="${x.i}" type="button">${RN(x.i)}<span class="ac-jn"><b>${A.tx(x.t.n)}</b><em>${x.n}/${x.list.length}</em></span></button>`).join("");
+    const sec = (x, cards) => `<section class="ac-sec" id="acSec${x.i}"><header class="ac-th">${RN(x.i)}<span class="ac-tn"><b>${A.tx(x.t.n)}</b><i>${A.tx(x.t.t)}</i></span><span class="ac-tc"><b>${x.n}<i>/${x.list.length}</i></b><u><s style="width:${pct(x.n, x.list.length)}%"></s></u></span></header>
       <div class="ac-grid">${cards.join("")}</div></section>`;
     /* se pinta primero lo de arriba (estadisticas, resumen y el primer tramo; la pantalla aun esta entrando en fundido) y el resto llega por tandas de 12 logros, una por fotograma y ya
        ajustadas, por debajo de la vista: maquetar los 100 logros de golpe paraba el mapa de fondo unos fotogramas al abrir el Perfil */

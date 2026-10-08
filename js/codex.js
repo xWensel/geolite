@@ -18,7 +18,7 @@ window.AIQ = window.AIQ || {};
   /* iconos propios por tipo (js/icons.js) */
   const TYPE_IC = { city: "t_city", capital: "t_capital", country: "t_country", landmark: "t_landmark", nature: "t_nature", water: "t_water", strait: "t_strait", battle: "t_battle", event: "t_event", history: "chronicler", person: "t_person", curiosity: "t_curio", place: "t_place" };
   const iconSvg = t => A.icon(TYPE_IC[t] || "t_place", "cx-ic");
-  /* icono de una tarjeta relacionada: el pais descubierto lleva SU bandera pixel (assets/flags/p, tools/flags_pixel.py); t_country (la de Espana) queda de icono de la categoria */
+  /* icono de una tarjeta relacionada: el pais descubierto lleva SU bandera pixel (assets/flags/p, tools/flags_pixel.py); t_country (bandera de la casa con el mundo) queda de icono de la categoria */
   const relIcon = (e, un) => (un && e.type === "country" && e.id.startsWith("c:") && hasFlag(e.id.slice(2)) ? `<img class="ic cx-ic cx-pxf" alt="" src="assets/flags/p/${A.mediaKey(neEn[e.id.slice(2)])}.webp" decoding="async" draggable="false">` : iconSvg(e.type));
 
   /* continente de un punto (etiqueta de la ficha, pista del Pasaporte en la Aventura y continentes de los retos del mapa, js/map.js).
