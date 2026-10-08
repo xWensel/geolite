@@ -753,6 +753,32 @@ void main(){
     const bt = get("battery"); if (bt && !(E.batt && E.batt.on)) battOn(par(bt).dim, bt);
     if (gl_ && get("stormnight")) nightOn(); else off("night");
   };
+  /* EN DIRECTO (js/vivo.js): el autor lanza una ficha desde su mesa y el efecto cae sobre la partida, en cualquier pantalla con mapa. Son los de los retos,
+     con sus mismos sonidos y su Destellos suaves / Movimiento; nunca pisan un reto activo de la misma familia y lo que se queda (lluvia, cristal, huellas)
+     se va solo a los 14-25 s (o al acabar la pregunta, como siempre). Devuelve false si no hay donde pintarlo */
+  const LIVE = {
+    rayo: () => X.strike({ near: 0.6, shade: 900 }),
+    tormenta: () => { X.strike({ near: 0.25 }); later(() => X.strike({ near: 0.5 }), 420 + rnd() * 300); later(() => X.strike({ shade: 1200 }), 1500 + rnd() * 600); },
+    apagon: () => X.cut(1900, false, null, "long"),
+    lluvia: () => { if (E.rain && E.rain.on) return; rainOn(0.55); liveOff("rain", 14000); },
+    cristal: () => { if (E.crack && E.crack.on) return; crackOn(1, 1); liveOff("crack", 25000); },
+    huellas: () => { if (E.prints && E.prints.on) return; printsOn(3, 5, 1); liveOff("smudge", 25000); },
+    ventana: () => { if (E.wins) return; winsOn(1, 9000); },                      // se cierra sola a los 9 s (en la portada queda bajo las cartas)
+  };
+  function liveOff(id, ms) {
+    setTimeout(() => {
+      if (A.chal && A.chal.state && A.chal.state.on && A.chal.has && A.chal.has(id)) return;   // entretanto la pregunta trajo ese mismo reto: es suyo
+      if (id === "rain" && E.rain && E.rain.on) { E.rain.on = 0; part("chx-wet").classList.remove("on"); part("chx-drops").classList.remove("on"); say("rain", 0); }
+      if (id === "crack" && E.crack && E.crack.on) { E.crack.on = 0; part("chx-shards").classList.remove("on"); }
+      if (id === "smudge" && E.prints && E.prints.on) { E.prints.on = 0; part("chx-prints").classList.remove("on"); }
+      kick();
+    }, ms);
+  }
+  X.live = kind => {
+    if (!LIVE[kind]) return false;
+    if ((!ov || !ov.isConnected) && A.chal && A.chal.overlay) A.chal.overlay();
+    if (!ov) return false; size(); kick(); LIVE[kind](); return true;
+  };
   X.reset = () => { DM.r = 0; };
   X.clear = () => {
     timers.forEach(clearTimeout); timers.length = 0; qr = null;   // cada pregunta empieza su azar desde su semilla

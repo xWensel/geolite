@@ -613,7 +613,8 @@ window.AIQ = window.AIQ || {};
     const rects = hudPx(W, H).map(([a, b, c, d]) => [fx ? W - c : a, fy ? H - d : b, fx ? W - a : c, fy ? H - b : d]);
     return { view: [X(0), Y(H), X(W), Y(0)], rects: rects.map(([a, b, c, d]) => [X(a), Y(d), X(c), Y(b)]), key: [W, H].map(Math.round).join("x") + (fx ? "x" : "") + (fy ? "y" : "") };
   };
-  A.chal.hudZones = hudZones;                                          // para dev/maptest.js
+  A.chal.hudZones = hudZones;
+  A.chal.overlay = () => { const map = A.core && A.core.map; if (!map) return null; const ov = ensureOverlay(map); ov.classList.add("on"); return ov; };   // js/chfx.js: los efectos en directo, tambien fuera de los retos                                          // para dev/maptest.js
   /* las preguntas de la ronda, con el continente con el que se mueve cada una: la mesa de Continentes barajados las deja todas a la vista. Si la Carta de
      cambio trae otra, la mesa se reparte de nuevo para ella (cada pregunta empieza con el reparto, asi que no se nota) */
   let RPTS = { key: null, pts: null };

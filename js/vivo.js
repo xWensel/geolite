@@ -50,7 +50,7 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { fast = !!j.w; (j.m || []).forEach(m => queue.push(m)); drain(); }
+      if (j && j.ok) { fast = !!j.w; (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx) : queue.push(m)); drain(); }   // las fichas caen al momento; las frases, en orden
     } catch (e) { fast = false; }
     sched(fast ? 2000 : document.hidden ? 60000 : 25000);
   }
@@ -64,6 +64,11 @@ window.AIQ = window.AIQ || {};
     A.dealer.live(t, { mood: MOOD[m.e] || "sly", face: m.e || undefined, gest: m.g || null });
     busyTill = Date.now() + [...t].length * 40 + 1600;
     if (queue.length) dt = setTimeout(drain, busyTill - Date.now());
+  }
+  /* las fichas de la mesa: los efectos de los retos (js/chfx.js) y el terremoto de los jackpots, con sus ajustes de siempre (temblor, destellos) */
+  function fx(k) {
+    if (k === "terremoto") { if (A.core && A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([90, 40, 140, 40, 60]); if (A.sfx && A.sfx.thunder) A.sfx.thunder(); return; }
+    if (A.chfx && A.chfx.live) A.chfx.live(k);
   }
   const bye = () => { if (!URL_) return; try { navigator.sendBeacon(URL_, JSON.stringify({ sid, bye: 1 })); } catch (e) { /* da igual: caduca en 75 s */ } };
   addEventListener("pagehide", bye);

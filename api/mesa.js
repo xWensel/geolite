@@ -4,10 +4,12 @@
      POST { op: "watch", sid }            ->  la estas mirando (45 s): esa partida pregunta cada 2 s
      POST { op: "unwatch", sid }
      POST { op: "say", sid, t, e, g }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
+     POST { op: "fx", sid, fx }           ->  lanza una ficha: rayo, tormenta, lluvia, apagon, terremoto, cristal, huellas o ventana
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias) */
 const crypto = require("crypto");
 const kv = require("./_kv");
 const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
+const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "cristal", "huellas", "ventana"];
 const KEY = process.env.MESA_KEY || "";
 const same = (a, b) => { const h = x => crypto.createHash("sha256").update(String(x)).digest(); return crypto.timingSafeEqual(h(a), h(b)); };
 module.exports = async (req, res) => {
@@ -36,6 +38,12 @@ module.exports = async (req, res) => {
     const sid = b.sid, wk = "vivo:w:" + sid;
     if (b.op === "watch") { await kv.pipeline([["SET", wk, 1, "EX", 45]]); return res.status(200).json({ ok: true }); }
     if (b.op === "unwatch") { await kv.pipeline([["DEL", wk]]); return res.status(200).json({ ok: true }); }
+    if (b.op === "fx") {                                             // una ficha: el efecto cae al momento en su partida
+      const fx = String(b.fx || ""); if (!FX.includes(fx)) return res.status(400).json({ ok: false });
+      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
+      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "fx", fx, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
+      return res.status(200).json({ ok: true, live: !!st });
+    }
     if (b.op === "say") {
       const t = [...String(b.t || "").normalize("NFC").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim()].slice(0, 160).join("");
       const e = WORD.test(b.e || "") ? b.e || "" : "", g = WORD.test(b.g || "") ? b.g || "" : "";
