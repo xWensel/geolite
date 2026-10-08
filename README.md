@@ -23,6 +23,8 @@ Versión actual: ver `VERSION` (se muestra también en Ajustes). Sin build ni de
 
 El crupier es un personaje animado por capas (retrato, caras, manos, expresiones y gestos) que comenta cada ronda, se deja sobornar para quitar un reto y te la juega de vez en cuando: puede colarte un logro falso con su sello de “De broma”. Su guion existe en los 12 idiomas (`js/dealer.js`) y su arte vive en `tools/crupier/`.
 
+**En directo.** El autor puede mirar las partidas abiertas y hablar por el crupier desde su mesa privada (`/mesa`, clave `MESA_KEY` en Vercel): la frase sale en su bocadillo con el piloto rojo de EN DIRECTO. Cada partida da un latido a `api/vivo.js` cada 25 s (cada 2 s mientras la mesa la mira) con nombre, idioma, plataforma y por dónde va; nada más, con un identificador aleatorio por arranque. Se apaga en Ajustes › Datos (`js/vivo.js`); `api/mesa.js` lista las partidas y entrega lo que dices.
+
 ## El casino
 
 Cada Campamento sortea un juego de los ocho. Todos se deciden con la semilla de la partida antes de animar nada: recargar a mitad no cambia ni deshace el resultado.

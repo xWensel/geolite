@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b1712">
+<title>La mesa del crupier</title>
+<link rel="icon" href="../favicon.ico">
+<!-- La mesa del autor: ve las partidas de Geolite abiertas ahora mismo y habla por Don Crupier (api/mesa.js, js/vivo.js del juego).
+     Privada: pide la clave MESA_KEY (variable de entorno de Vercel) y la recuerda en este navegador. -->
+<style>
+@font-face { font-family: "Jersey 15"; src: url("../fonts/jersey-15-latin-400-normal.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Jersey 15"; src: url("../fonts/jersey-15-latin-ext-400-normal.woff2") format("woff2"); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: "Silkscreen"; src: url("../fonts/silkscreen-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Silkscreen"; src: url("../fonts/silkscreen-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Pixelify Sans"; src: url("../fonts/pixelify-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Pixelify Sans"; src: url("../fonts/pixelify-sans-cyrillic-wght-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; unicode-range: U+0400-045F; }
+@font-face { font-family: "Fusion Pixel ZH"; src: url("../fonts/fusion-pixel-12px-zh_hans.woff2") format("woff2"); font-display: swap; unicode-range: U+3000-303F, U+4E00-9FFF, U+FF00-FFEF; }
+@font-face { font-family: "Fusion Pixel JA"; src: url("../fonts/fusion-pixel-12px-ja.woff2") format("woff2"); font-display: swap; unicode-range: U+3040-30FF; }
+@font-face { font-family: "Fusion Pixel KO"; src: url("../fonts/fusion-pixel-12px-ko.woff2") format("woff2"); font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF; }
+:root {
+  --felt: #0f2a1d; --felt-2: #143826; --felt-deep: #0b1712; --ink: #16241c; --paper: #fdf5fd; --cream: #f2e9d6;
+  --brass: #c8963e; --brass-lt: #f1d79a; --red: #e8283a; --red-deep: #9b1422; --green: #5fc983; --dim: rgba(242, 233, 214, .55);
+  --sans: "Jersey 15", "Pixelify Sans", "Fusion Pixel ZH", "Fusion Pixel JA", "Fusion Pixel KO", system-ui, sans-serif;
+  --mono: "Silkscreen", "Pixelify Sans", "Fusion Pixel ZH", "Fusion Pixel JA", "Fusion Pixel KO", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: radial-gradient(ellipse at 50% 0%, #1d4a33 0%, var(--felt) 45%, var(--felt-deep) 100%) fixed; color: var(--cream); font-family: var(--sans); font-size: 22px; line-height: 1.15; -webkit-font-smoothing: none; }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .05; background-image: repeating-linear-gradient(0deg, #000 0 1px, transparent 1px 3px); }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+.hidden { display: none !important; }
+img, canvas { image-rendering: pixelated; }
+/* placas con esquinas cortadas, como el juego */
+.plate { background: linear-gradient(#1a3a2a, #12291d); box-shadow: inset 0 0 0 2px rgba(200, 150, 62, .55), inset 0 0 0 4px rgba(0, 0, 0, .35), 0 6px 0 rgba(0, 0, 0, .35);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
+.lbl { font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; color: var(--brass); }
+.lbl.s { font-size: 8px; }
+
+/* ---------------------------------------------------------------- puerta */
+#door { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+#door .plate { width: min(440px, 100%); padding: 28px 24px 26px; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 14px; text-align: center; }
+#door canvas, #door .dface { width: 224px; height: 224px; }
+#door h1 { margin: 0; font-weight: 400; font-size: 45px; line-height: .9; color: var(--brass-lt); text-shadow: 0 3px 0 rgba(0, 0, 0, .55); }
+#door p { margin: 0; color: var(--dim); font-size: 27px; }
+#door form { display: flex; gap: 8px; width: 100%; } #door form .btn { flex: none; }
+#door input { flex: 1; min-width: 0; padding: 10px 12px; background: #0a1510; border: 0; box-shadow: inset 0 0 0 2px rgba(200, 150, 62, .5); outline: 0; font-family: var(--mono); font-size: 16px; color: var(--brass-lt); }
+#door input:focus { box-shadow: inset 0 0 0 2px var(--brass-lt); }
+#doorErr { color: #ff8a8a; font-family: var(--mono); font-size: 8px; min-height: 10px; }
+.btn { font-family: var(--mono); font-size: 16px; text-transform: uppercase; padding: 10px 16px; color: var(--ink); background: linear-gradient(var(--brass-lt), var(--brass)); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25), 0 3px 0 rgba(0, 0, 0, .4); transition: transform .08s, filter .15s; white-space: nowrap; }
+.btn:hover { filter: brightness(1.08); } .btn:active { transform: translateY(2px); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25), 0 1px 0 rgba(0, 0, 0, .4); }
+.btn:disabled { filter: grayscale(1) brightness(.6); cursor: default; }
+.btn.red { color: #fff; background: linear-gradient(#ff4a5a, var(--red-deep)); }
+
+/* ---------------------------------------------------------------- mesa */
+#app { max-width: 1320px; margin: 0 auto; padding: 18px 16px 40px; }
+header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+header h1 { margin: 0; font-weight: 400; font-size: 54px; line-height: .9; color: var(--brass-lt); text-shadow: 0 3px 0 rgba(0, 0, 0, .55); }
+.onair { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(0, 0, 0, .35); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .45); font-family: var(--mono); font-size: 16px; color: #ff7a85; }
+.dot { width: 8px; height: 8px; background: var(--red); box-shadow: 0 0 0 2px rgba(232, 40, 58, .25); flex: none; animation: blink 1.2s steps(1) infinite; }
+.dot.off { background: #556; box-shadow: none; animation: none; }
+@keyframes blink { 0%, 64% { opacity: 1; } 65%, 100% { opacity: .18; } }
+header .sp { flex: 1; }
+#net { font-family: var(--mono); font-size: 8px; color: var(--dim); }
+#logout { font-family: var(--mono); font-size: 8px; color: var(--dim); text-decoration: underline; }
+
+.grid { display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } header h1 { font-size: 40px; } }
+
+/* monitores: una tele de circuito cerrado por partida */
+#list { display: grid; gap: 10px; }
+.empty { padding: 34px 18px; text-align: center; color: var(--dim); }
+.empty b { display: block; font-weight: 400; font-size: 27px; color: var(--cream); margin-bottom: 6px; }
+.mon { position: relative; display: grid; grid-template-columns: 48px 1fr auto; gap: 4px 12px; align-items: center; width: 100%; text-align: left; padding: 12px 14px 12px 12px; transition: transform .12s, filter .15s; }
+.mon:hover { transform: translateX(3px); filter: brightness(1.1); }
+.mon.sel { background: linear-gradient(#24503a, #173a29); box-shadow: inset 0 0 0 2px var(--brass-lt), inset 0 0 0 4px rgba(0, 0, 0, .35), 0 6px 0 rgba(0, 0, 0, .35); }
+.mon.gone { opacity: .45; }
+.flag { width: 48px; height: 32px; grid-row: span 2; background: #000 center / cover no-repeat; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
+.mon .nm { font-size: 27px; line-height: 1; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mon .nm.anon { color: var(--dim); }
+.mon .wh { font-size: 20px; color: var(--brass-lt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; grid-column: 2 / 4; }
+.mon .tg { display: flex; gap: 6px; align-items: center; justify-self: end; }
+.chip { font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 3px 5px; background: rgba(0, 0, 0, .4); color: var(--dim); white-space: nowrap; }
+.chip.live { color: #ff7a85; box-shadow: inset 0 0 0 1px rgba(232, 40, 58, .6); }
+
+/* el plato fuerte: la partida elegida */
+#stage { padding: 18px; display: grid; gap: 16px; }
+#stage.none { min-height: 420px; place-items: center; text-align: center; color: var(--dim); }
+.top { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: end; }
+@media (max-width: 640px) { .top { grid-template-columns: 1fr; justify-items: center; } }
+.cam { position: relative; width: 224px; height: 224px; background: radial-gradient(circle at 50% 70%, rgba(241, 215, 154, .16), transparent 62%); }
+.cam::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .12) 0 1px, transparent 1px 3px); }
+.cam .dface { position: absolute; inset: 0; }
+.cam .rec { position: absolute; left: 6px; top: 6px; display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 8px; color: #ff7a85; }
+/* el bocadillo, tal cual sale en el juego */
+.bub { position: relative; justify-self: start; max-width: 520px; padding: 11px 18px 13px 16px; background: var(--paper); color: var(--ink); font-size: 27px; line-height: 1.12; box-shadow: inset 0 0 0 3px var(--ink), 0 6px 0 rgba(0, 0, 0, .4);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); margin-bottom: 30px; min-width: 220px; }
+.bub .lv { display: flex; align-items: center; gap: 7px; margin: 1px 0 6px; font-family: var(--mono); font-size: 16px; line-height: 1; color: #c4152a; text-transform: uppercase; }
+.bub p { margin: 0; min-height: 1.12em; word-break: break-word; text-wrap: pretty; }
+.bub p.ph { color: rgba(22, 36, 28, .35); }
+.who h2 { margin: 0; font-weight: 400; font-size: 40px; line-height: 1; color: var(--brass-lt); overflow-wrap: anywhere; }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin-top: 10px; }
+.fact { padding: 7px 9px 8px; background: rgba(0, 0, 0, .28); box-shadow: inset 0 0 0 1px rgba(242, 233, 214, .1); }
+.fact b { display: block; font-weight: 400; font-size: 24px; line-height: 1.05; color: var(--cream); overflow-wrap: anywhere; }
+.fact.q { grid-column: 1 / -1; } .fact.q b { color: var(--brass-lt); font-size: 27px; }
+
+.say { display: grid; gap: 10px; }
+.row { display: flex; gap: 8px; align-items: stretch; }
+textarea { flex: 1; min-width: 0; resize: none; height: 76px; padding: 10px 12px; background: #0a1510; border: 0; outline: 0; box-shadow: inset 0 0 0 2px rgba(200, 150, 62, .5); font-family: var(--sans); font-size: 24px; line-height: 1.1; color: var(--cream); }
+textarea:focus { box-shadow: inset 0 0 0 2px var(--brass-lt); }
+.row .btn { display: grid; place-items: center; min-width: 120px; }
+#count { font-family: var(--mono); font-size: 8px; color: var(--dim); justify-self: end; margin-top: -4px; }
+#count.max { color: #ff8a8a; }
+.faces { display: flex; flex-wrap: wrap; gap: 6px; }
+.fc { width: 56px; height: 56px; background: rgba(0, 0, 0, .3) center / 56px 56px no-repeat; box-shadow: inset 0 0 0 1px rgba(242, 233, 214, .12); transition: transform .1s; }
+.fc:hover { transform: translateY(-2px); }
+.fc.on { box-shadow: inset 0 0 0 2px var(--brass-lt); background-color: rgba(241, 215, 154, .14); }
+select { padding: 8px 10px; background: #0a1510; border: 0; box-shadow: inset 0 0 0 2px rgba(200, 150, 62, .45); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--brass-lt); }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.qk { padding: 6px 10px; font-size: 20px; color: var(--cream); background: rgba(0, 0, 0, .3); box-shadow: inset 0 0 0 1px rgba(242, 233, 214, .14); text-align: left; transition: background .12s; }
+.qk:hover { background: rgba(241, 215, 154, .14); }
+.log { display: grid; gap: 6px; max-height: 260px; overflow: auto; }
+.lg { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; font-size: 20px; }
+.lg i { font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--dim); }
+.lg.ko b { color: #ff8a8a; font-weight: 400; }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 120px); padding: 10px 16px; background: #0a1510; box-shadow: inset 0 0 0 2px var(--brass); font-family: var(--mono); font-size: 16px; color: var(--brass-lt); transition: transform .3s cubic-bezier(.2, 1.4, .4, 1); z-index: 9; }
+.toast.on { transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .dot { animation: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="door" class="hidden">
+  <div class="plate">
+    <div class="cam"><div class="dface" id="doorFace"></div></div>
+    <h1>La mesa del crupier</h1>
+    <p>Solo para la casa. ¿La contraseña?</p>
+    <form id="doorForm" autocomplete="off"><input id="key" type="password" placeholder="CLAVE" aria-label="Clave" autocomplete="current-password"><button class="btn" type="submit">Entrar</button></form>
+    <div id="doorErr"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>La mesa del crupier</h1>
+    <span class="onair"><i class="dot" id="netDot"></i><span id="nLive">0 en antena</span></span>
+    <span class="sp"></span>
+    <span id="net"></span>
+    <button id="logout" type="button">Salir</button>
+  </header>
+  <div class="grid">
+    <div id="list"></div>
+    <section id="stage" class="plate none"><div><div class="lbl">Elige una partida</div><p style="margin:10px 0 0;color:var(--dim)">Cuando la abras, el juego te escucha cada 2 segundos.</p></div></section>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="../js/crupier-data.js"></script>
+<script src="../js/crupier.js"></script>
+<script>
+(function () {
+  const A = window.AIQ, $ = id => document.getElementById(id);
+  const KEYS = "geolite.mesa.key", API = "../api/mesa";
+  let key = ""; try { key = localStorage.getItem(KEYS) || ""; } catch (e) { /* sin almacenamiento */ }
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const fmt = n => n == null ? "—" : Math.round(n).toLocaleString("es-ES");
+  const toast = (t, ms = 2200) => { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), ms); };
+
+  /* ------------------------------------------------ los nombres de lo que manda el juego (js/vivo.js) */
+  const LANG = { es: "Español", en: "Inglés", fr: "Francés", pt: "Portugués", de: "Alemán", it: "Italiano", "es-419": "Español (Latam)", zh: "Chino", ko: "Coreano", ja: "Japonés", ru: "Ruso", pl: "Polaco" };
+  const PLAT = { web: "Web", movil: "Móvil", win: "Windows", linux: "Linux", deck: "Steam Deck", "win-demo": "Demo Win", "linux-demo": "Demo Linux", "deck-demo": "Demo Deck" };
+  const HUB = { home: "En la portada", classic: "Eligiendo campaña", adventure: "Mirando la Aventura", daily: "Mirando el Reto diario", profile: "Mirando su Perfil", patch: "Leyendo las notas del parche" };
+  const KIND = { clue: "pista", flag: "bandera", country: "país", capital: "capital", city: "ciudad", person: "personaje", event: "suceso" };
+  const ASCN = ["", "I", "II", "III", "IV", "V"];
+  function where(st) {
+    if (!st.sc || st.sc.startsWith("menu:")) return HUB[(st.sc || "").slice(5)] || "En los menús";
+    const md = { aventura: "Aventura", reto: "Reto diario", clasico: "Clásico" }[st.md] || "Partida";
+    if (st.sc === "campamento") return `${md} · Campamento tras la ronda ${st.r - 1 || 1}`;
+    const r = st.sc === "infinito" ? "modo infinito" : st.md === "clasico" ? `nivel ${st.r}` : `ronda ${st.r} de 12`;
+    const q = st.q && st.ph === "asking" ? ` · buscando ${st.q}` : st.q && st.ph === "reveal" ? ` · acaba de buscar ${st.q}` : "";
+    return `${md} · ${r}${q}`;
+  }
+  const since = t0 => { const m = Math.max(0, Math.round((Date.now() - t0) / 60000)); return m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; };
+
+  /* ------------------------------------------------ frases rapidas, en el idioma del jugador */
+  const ORD = ["es", "en", "fr", "pt", "de", "it", "es-419", "zh", "ko", "ja", "ru", "pl"];
+  const QUICK = [
+    ["laugh", "Te estoy viendo.|I can see you.|Je te vois.|Estou te vendo.|Ich sehe dich.|Ti sto guardando.|Te estoy viendo.|我看着你呢。|다 보고 있어.|見てるぞ。|Я тебя вижу.|Widzę cię."],
+    ["wink", "Hola. Sí, soy yo de verdad.|Hello. Yes, it’s really me.|Salut. Oui, c’est vraiment moi.|Olá. Sim, sou eu de verdade.|Hallo. Ja, ich bin’s wirklich.|Ciao. Sì, sono proprio io.|Hola. Sí, soy yo de verdad.|你好。没错，真的是我。|안녕. 그래, 진짜 나야.|やあ。そう、本物の私だ。|Привет. Да, это правда я.|Cześć. Tak, to naprawdę ja."],
+    ["suspicious", "¿Seguro? Piénsalo otra vez.|Sure? Think again.|Sûr ? Réfléchis encore.|Certeza? Pense de novo.|Sicher? Denk noch mal nach.|Sicuro? Pensaci ancora.|¿Seguro? Piénsalo otra vez.|确定吗？再想想。|확실해? 다시 생각해 봐.|本当に？もう一度考えてみな。|Уверен? Подумай ещё.|Na pewno? Pomyśl jeszcze raz."],
+    ["smug", "La casa siempre gana. Casi siempre.|The house always wins. Almost always.|La maison gagne toujours. Presque toujours.|A casa sempre ganha. Quase sempre.|Die Bank gewinnt immer. Fast immer.|Il banco vince sempre. Quasi sempre.|La casa siempre gana. Casi siempre.|庄家总是赢。几乎总是。|하우스는 언제나 이겨. 거의 언제나.|胴元は必ず勝つ。ほぼ必ずな。|Казино всегда выигрывает. Почти всегда.|Kasyno zawsze wygrywa. Prawie zawsze."],
+    ["laugh", "¡Uy! Eso ha estado lejos.|Oof! That was far off.|Aïe ! C’était loin.|Eita! Essa foi longe.|Autsch! Das war weit daneben.|Ahi! Era lontanissimo.|¡Uy! Eso estuvo lejos.|哎呀！差得好远。|아이고! 한참 빗나갔네.|おっと！ずいぶん遠いな。|Ой! Далековато.|Ojej! To było daleko."],
+    ["bow", "Bien jugado. No se lo digas a nadie.|Well played. Don’t tell anyone.|Bien joué. Ne le dis à personne.|Boa jogada. Não conte a ninguém.|Gut gespielt. Sag’s keinem.|Ben giocato. Non dirlo a nessuno.|Bien jugado. No le digas a nadie.|打得好。别告诉别人。|잘했어. 아무한테도 말하지 마.|お見事。誰にも言うなよ。|Хорошо сыграно. Никому не говори.|Dobrze zagrane. Nikomu nie mów."],
+    ["innocent", "¿Una pista? Qué pena, no doy pistas.|A hint? Too bad, I don’t give hints.|Un indice ? Dommage, je n’en donne pas.|Uma dica? Que pena, não dou dicas.|Ein Tipp? Schade, ich gebe keine.|Un indizio? Peccato, non ne do.|¿Una pista? Qué lástima, no doy pistas.|想要提示？可惜，我不给提示。|힌트? 안됐지만 힌트는 없어.|ヒント？残念、ヒントはやらん。|Подсказку? Жаль, я их не даю.|Podpowiedź? Szkoda, nie daję podpowiedzi."],
+    ["dare", "Venga, a por la siguiente.|Come on, next one.|Allez, à la suivante.|Vamos, para a próxima.|Los, die nächste.|Dai, la prossima.|Dale, a la que sigue.|来吧，下一题。|자, 다음 문제.|さあ、次だ。|Давай, следующий.|Dalej, następne."],
+    ["shock", "¿Sigues ahí? Te oigo respirar.|Still there? I can hear you breathing.|Tu es toujours là ? Je t’entends respirer.|Ainda está aí? Ouço você respirar.|Noch da? Ich hör dich atmen.|Ci sei ancora? Ti sento respirare.|¿Sigues ahí? Te oigo respirar.|还在吗？我听见你在呼吸。|아직 거기 있어? 숨소리 들려.|まだいるか？息づかいが聞こえるぞ。|Ты ещё тут? Я слышу, как ты дышишь.|Jesteś tam? Słyszę, jak oddychasz."],
+    ["furious", "¡Otra vez no! Me vas a arruinar la banca.|Not again! You’ll bankrupt the house.|Encore ! Tu vas ruiner la banque.|De novo não! Vai quebrar a banca.|Nicht schon wieder! Du ruinierst die Bank.|Ancora no! Mi rovinerai il banco.|¡Otra vez no! Me vas a quebrar la banca.|又来！你要让庄家破产了。|또야! 하우스 거덜 나겠네.|またか！胴元が破産しちまう。|Опять! Ты разоришь казино.|Znowu! Zrujnujesz kasyno."],
+  ];
+  const phrase = (s, l) => { const a = s.split("|"); return a[ORD.indexOf(l)] || a[1] || a[0]; };
+
+  /* ------------------------------------------------ el crupier de la mesa (el mismo sprite del juego) */
+  const FACES = ["sly", "laugh", "wink", "smug", "suspicious", "shock", "angry", "furious", "dare", "innocent", "puzzled", "nervous", "sad", "bored", "bow", "dark"];
+  const GEST = ["", "hat_tip", "hat_off_bow", "point", "finger_wag", "finger_up", "shh", "beckon", "slow_clap", "facepalm", "shrug", "twirl_moustache", "wink", "snap", "magic_pass", "coin_toss", "pocket_watch", "lean_in", "head_tilt", "hand_heart", "tantrum", "nod", "slow_blink", "turn_away", "yawn"];
+  const GNAME = { "": "Sin gesto", hat_tip: "Toca el ala", hat_off_bow: "Reverencia", point: "Señala", finger_wag: "No, no, no", finger_up: "Un momento", shh: "Chist", beckon: "Ven aquí", slow_clap: "Aplauso lento", facepalm: "Palmada en la cara", shrug: "Se encoge", twirl_moustache: "Atusa el bigote", wink: "Guiño", snap: "Chasquido", magic_pass: "Pase mágico", coin_toss: "Lanza moneda", pocket_watch: "Mira el reloj", lean_in: "Se acerca", head_tilt: "Ladea la cabeza", hand_heart: "Mano al pecho", tantrum: "Rabieta", nod: "Asiente", slow_blink: "Parpadeo lento", turn_away: "Se da la vuelta", yawn: "Bosteza" };
+  let face = "sly", gest = "", spr = null, doorSpr = null;
+  /* miniatura de cada cara: la cabeza recortada a 1:1 (56 px de sprite = 56 px de pantalla, nitida) */
+  const head = (f, el) => { const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = c.height = 56; const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(im, 36, 30, 56, 56, 0, 0, 56, 56); el.style.backgroundImage = `url(${c.toDataURL()})`; }; im.src = A.crupier.still(f, 1); };
+  const mount = (host, o) => { const s = A.crupier.mount(host, Object.assign({ round: true }, o)); s.set("sly"); return s; };
+
+  /* ------------------------------------------------ red */
+  async function call(method, body, q = "") {
+    const r = await fetch(API + q, { method, headers: { "x-mesa": key, ...(body ? { "content-type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 401) { logout("Esa no es la clave."); throw new Error("key"); }
+    if (r.status === 429) { logout("Demasiados intentos. Espera 10 minutos."); throw new Error("rate"); }
+    if (r.status === 503) { logout("La mesa está apagada: falta MESA_KEY en Vercel."); throw new Error("off"); }
+    return r.json();
+  }
+
+  /* ------------------------------------------------ puerta */
+  function logout(msg) {
+    key = ""; try { localStorage.removeItem(KEYS); } catch (e) { /* nada */ }
+    clearTimeout(pollT); $("app").classList.add("hidden"); $("door").classList.remove("hidden"); $("doorErr").textContent = msg || "";
+    if (!doorSpr) doorSpr = mount($("doorFace")); doorSpr.set(msg ? "suspicious" : "sly"); if (msg) doorSpr.play("finger_wag");
+    setTimeout(() => $("key").focus(), 50);
+  }
+  $("doorForm").addEventListener("submit", async e => {
+    e.preventDefault(); key = $("key").value.trim(); if (!key) return;
+    try { const j = await call("GET"); if (j.ok) { try { localStorage.setItem(KEYS, key); } catch (x) { /* nada */ } $("key").value = ""; enter(j); } } catch (x) { /* logout ya avisa */ }
+  });
+  $("logout").onclick = () => logout("");
+
+  /* ------------------------------------------------ lista de partidas */
+  let list = [], sel = null, selSt = null, pollT = 0, watchT = 0, failN = 0;
+  const said = {};                                                    // sid -> [{t, at, ok}] lo que le has dicho en esta sesion
+  function enter(j) { $("door").classList.add("hidden"); $("app").classList.remove("hidden"); if (j) got(j); poll(); }
+  async function poll() {
+    clearTimeout(pollT);
+    try { const j = await call("GET"); if (j.ok) { got(j); failN = 0; $("netDot").classList.remove("off"); $("net").textContent = ""; } }
+    catch (e) { if (!key) return; failN++; $("netDot").classList.add("off"); $("net").textContent = "Sin conexión con el servidor…"; }
+    if (key) pollT = setTimeout(poll, document.hidden ? 15000 : 3000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && key) poll(); });
+  function got(j) {
+    list = j.list.sort((a, b) => (a.st.t0 || 0) - (b.st.t0 || 0));
+    $("nLive").textContent = list.length === 1 ? "1 partida en antena" : list.length + " partidas en antena";
+    const L = $("list");
+    if (!list.length) L.innerHTML = `<div class="plate empty"><b>Sala vacía</b>Nadie está jugando ahora mismo. El crupier baraja solo.</div>`;
+    else L.innerHTML = list.map(x => { const st = x.st; return `<button class="plate mon${x.sid === sel ? " sel" : ""}" data-sid="${x.sid}">
+      <i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i>
+      <span class="nm${st.n ? "" : " anon"}">${esc(st.n || "Sin nombre")}</span>
+      <span class="tg">${x.w ? `<span class="chip live">● Te escucha</span>` : ""}<span class="chip">${esc(PLAT[st.p] || st.p)}</span><span class="chip">${since(st.t0)}</span></span>
+      <span class="wh">${esc(where(st))}</span></button>`; }).join("");
+    L.querySelectorAll(".mon").forEach(b => b.onclick = () => pick(b.dataset.sid));
+    if (sel) { const x = list.find(y => y.sid === sel); if (x) { selSt = x.st; renderFacts(); } else gone(); }
+  }
+
+  /* ------------------------------------------------ la partida elegida */
+  function pick(sid) {
+    if (sel === sid) return;
+    if (sel) call("POST", { op: "unwatch", sid: sel }).catch(() => {});
+    sel = sid; const x = list.find(y => y.sid === sid); selSt = x && x.st;
+    document.querySelectorAll(".mon").forEach(b => b.classList.toggle("sel", b.dataset.sid === sid));
+    watch(); renderStage();
+    if (innerWidth < 900) $("stage").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function watch() { clearTimeout(watchT); if (!sel) return; try { await call("POST", { op: "watch", sid: sel }); } catch (e) { /* reintenta */ } watchT = setTimeout(watch, 20000); }
+  addEventListener("pagehide", () => { if (sel && key) fetch(API, { method: "POST", keepalive: true, headers: { "x-mesa": key, "content-type": "application/json" }, body: JSON.stringify({ op: "unwatch", sid: sel }) }).catch(() => {}); });
+  function gone() { const s = $("stage"); if (!s.querySelector(".who")) return; s.querySelector(".who h2").insertAdjacentHTML("beforeend", ` <span class="chip">se ha ido</span>`); sel = null; clearTimeout(watchT); }
+
+  function renderStage() {
+    const s = $("stage"); s.classList.remove("none"); if (spr) { spr.destroy(); spr = null; }
+    s.innerHTML = `
+      <div class="top">
+        <div class="cam"><div class="dface" id="face"></div><span class="rec"><i class="dot"></i>CÁMARA 1</span></div>
+        <div>
+          <div class="bub"><div class="lv"><i class="dot"></i><span id="lvTag">EN DIRECTO</span></div><p id="prev" class="ph">Lo que escribas sale aquí, tal cual lo verá.</p></div>
+          <div class="who"><div class="lbl">Partida de</div><h2 id="who"></h2></div>
+        </div>
+      </div>
+      <div class="facts" id="facts"></div>
+      <div class="say">
+        <div class="lbl">Habla por el crupier</div>
+        <div class="row"><textarea id="txt" maxlength="160" placeholder="Escribe y pulsa Intro…" enterkeyhint="send"></textarea><button class="btn red" id="send" type="button">Decir</button></div>
+        <div id="count">0 / 160</div>
+        <div class="lbl s">Cara</div>
+        <div class="faces" id="faces"></div>
+        <div class="row" style="align-items:center;gap:10px"><span class="lbl s">Gesto</span><select id="gest">${GEST.map(g => `<option value="${g}">${GNAME[g]}</option>`).join("")}</select></div>
+        <div class="lbl s" id="qkL">Frases rápidas</div>
+        <div class="quick" id="quick"></div>
+      </div>
+      <div><div class="lbl s" style="margin-bottom:8px">Lo que le has dicho</div><div class="log" id="log"></div></div>`;
+    spr = mount($("face"));
+    A.crupier.ready(() => { $("faces").innerHTML = FACES.map(f => `<button class="fc${f === face ? " on" : ""}" data-f="${f}" title="${f}" ></button>`).join(""); $("faces").querySelectorAll(".fc").forEach(b => head(b.dataset.f, b));
+      $("faces").querySelectorAll(".fc").forEach(b => b.onclick = () => { face = b.dataset.f; $("faces").querySelectorAll(".fc").forEach(c => c.classList.toggle("on", c === b)); spr.set(face); }); spr.set(face); });
+    $("gest").value = gest; $("gest").onchange = e => { gest = e.target.value; if (gest) spr.play(gest); };
+    const tx = $("txt");
+    tx.oninput = () => { const n = [...tx.value].length; $("count").textContent = n + " / 160"; $("count").classList.toggle("max", n >= 160); const p = $("prev"); p.textContent = tx.value || "Lo que escribas sale aquí, tal cual lo verá."; p.classList.toggle("ph", !tx.value); spr.talk(!!tx.value); if (tx.value) spr.syl(); };
+    tx.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+    $("send").onclick = send;
+    renderFacts(); renderLog(); tx.focus();
+  }
+  function renderFacts() {
+    const st = selSt; if (!st || !$("facts")) return;
+    $("who").textContent = st.n || "Sin nombre";
+    const tag = phrase("EN DIRECTO|LIVE|EN DIRECT|AO VIVO|LIVE|IN DIRETTA|EN VIVO|直播中|생방송|生放送|В ЭФИРЕ|NA ŻYWO", st.l); $("lvTag").textContent = tag;
+    const F = [["Idioma", LANG[st.l] || st.l], ["Juega en", PLAT[st.p] || st.p], ["Lleva", since(st.t0)], ["Versión", st.v]];
+    if (st.md && st.md !== "clasico") F.push(["Ascensión", st.asc ? ASCN[st.asc] : "Sin"], ["Puntos", fmt(st.s)], ["Monedas", fmt(st.c)], ["Vidas", st.h != null ? st.h + " / " + st.hm : "—"]);
+    else if (st.md) F.push(["Puntos", fmt(st.s)], ["Campaña", st.d || "—"]);
+    if (st.md) F.push(["Racha", st.sk ? "×" + st.sk : "—"]);
+    if (st.d && st.md === "reto") F.push(["Reto", st.d]);
+    $("facts").innerHTML = `<div class="fact q"><span class="lbl s">Ahora mismo</span><b>${esc(where(st))}${st.k && st.ph === "asking" ? ` <span class="chip">${esc(KIND[st.k] || st.k)}</span>` : ""}</b></div>` +
+      F.map(([k, v]) => `<div class="fact"><span class="lbl s">${k}</span><b>${esc(v)}</b></div>`).join("");
+    const q = $("quick"), l = st.l || "es";
+    if (q.dataset.l !== l) {
+      q.dataset.l = l; $("qkL").textContent = "Frases rápidas · en " + (LANG[l] || l).toLowerCase();
+      q.innerHTML = QUICK.map(([f, s], i) => `<button class="qk" data-i="${i}">${esc(phrase(s, l))}</button>`).join("");
+      q.querySelectorAll(".qk").forEach(b => b.onclick = () => { const [f, s] = QUICK[+b.dataset.i]; $("txt").value = phrase(s, l); face = f; spr.set(f); $("faces").querySelectorAll(".fc").forEach(c => c.classList.toggle("on", c.dataset.f === f)); $("txt").oninput(); $("txt").focus(); });
+    }
+  }
+  function renderLog() {
+    const L = $("log"); if (!L) return; const a = said[sel] || [];
+    L.innerHTML = a.length ? a.slice().reverse().map(x => `<div class="lg${x.ok ? "" : " ko"}"><i>${new Date(x.at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</i><b>${esc(x.t)}</b></div>`).join("") : `<div class="lg"><i>—</i><span style="color:var(--dim)">Todavía nada. Rompe el hielo.</span></div>`;
+  }
+  async function send() {
+    const tx = $("txt"), t = tx.value.trim(); if (!t || !sel) return;
+    const b = $("send"); b.disabled = true;
+    try {
+      const j = await call("POST", { op: "say", sid: sel, t, e: face, g: gest });
+      (said[sel] = said[sel] || []).push({ t, at: Date.now(), ok: !!(j.ok && j.live) });
+      if (j.ok && j.live) { toast("En antena. Le llega en 1-2 s."); spr.set(face); if (gest) spr.play(gest); tx.value = ""; tx.oninput(); }
+      else toast(j.ok ? "Esa partida ya se ha cerrado." : "No se ha podido enviar.");
+    } catch (e) { toast("Sin conexión: no ha salido."); (said[sel] = said[sel] || []).push({ t, at: Date.now(), ok: false }); }
+    b.disabled = false; renderLog(); tx.focus();
+  }
+
+  if (key) call("GET").then(j => j.ok ? enter(j) : logout("")).catch(() => {}); else logout("");
+})();
+</script>
+</body>
+</html>

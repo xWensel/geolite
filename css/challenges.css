@@ -59,6 +59,12 @@ body.ptr-on #map { cursor: none; }
 .cr-cv.mini { transform: none; }
 .dl-bubble { position: relative; max-width: min(440px, calc(52 * var(--vw))); margin-bottom: 44px; padding: 11px 18px 13px 16px; background: #fdf5fd; color: #16241c; font-family: var(--sans); font-weight: 400; font-size: calc(27px * var(--dll, 1)); line-height: 1.12; box-shadow: inset 0 0 0 3px #16241c, 0 6px 0 rgba(0, 0, 0, .4); opacity: 0; transform: scale(.85); transform-origin: 0 100%; transition: opacity .2s, transform .3s cubic-bezier(.2, 1.6, .4, 1); clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); }
 .dl-bubble.on { opacity: 1; transform: none; } .dl-bubble p { margin: 0; min-height: 1.12em; text-wrap: pretty; } .dl-rest { visibility: hidden; }
+/* EN DIRECTO (js/vivo.js): el autor escribe por el crupier. Piloto de estudio de television: cuadrado rojo de pixel que parpadea a golpes y la etiqueta en Silkscreen a 16 px (su rejilla) */
+.dl-live { display: none; align-items: center; gap: 7px; margin: 1px 0 6px; font-family: var(--mono); font-weight: 400; font-size: 16px; line-height: 1; letter-spacing: .02em; color: #c4152a; text-transform: uppercase; white-space: nowrap; }
+.dl-bubble.live .dl-live { display: flex; } .dl-bubble.live p { text-wrap: balance; }   /* lo escrito a mano no tiene el reparto cuidado de sus frases: lineas parejas, nada de una palabra sola abajo */
+.dl-live i { width: 8px; height: 8px; flex: none; background: #e8283a; box-shadow: 0 0 0 2px rgba(232, 40, 58, .22); animation: dlLive 1.2s steps(1) infinite; }
+@keyframes dlLive { 0%, 64% { opacity: 1; } 65%, 100% { opacity: .18; } }
+html.reduce-motion .dl-live i { animation: none; }
 /* el crupier habla con la letra de lectura del juego (Jersey 15, la de los titulos y nombres), no con la de etiquetas (Silkscreen, todo mayusculas):
    27 px = 1 pixel de la fuente por pixel de pantalla (su rejilla es de 27 px), nitida. El chino/japones/coreano (Fusion Pixel, rejilla de 12 px) va a 24 px
    (x2 exacto) y el cirilico (Pixelify, mas alta que Jersey) tambien, para que no abulte mas que el resto. --dll escala todas las variantes del globo */

@@ -1626,7 +1626,7 @@ window.AIQ = window.AIQ || {};
     if (el && el.isConnected) return;
     if (el) { rehome(); return; }                                    // su pantalla se fue con el dentro: vuelve a #app con lo que estuviera diciendo (nunca se le corta)
     el = document.createElement("div"); el.id = "dealer"; el.className = "dealer";
-    el.innerHTML = `<div class="dl-bubble"><p></p></div><div class="dl-face"></div>`;
+    el.innerHTML = `<div class="dl-bubble"><b class="dl-live"><i></i><span></span></b><p></p></div><div class="dl-face"></div>`;
     $("app").appendChild(el); face = el.querySelector(".dl-face"); bubble = el.querySelector(".dl-bubble"); txt = bubble.querySelector("p");
     spr = A.crupier.mount(face);                                      // v0.32: el crupier animado (caras, boca al hablar, gestos), siempre a escala entera de pixel
     face.addEventListener("pointerdown", e => onPoke(e));
@@ -1693,7 +1693,7 @@ window.AIQ = window.AIQ || {};
     if (o.valid && !o.valid()) return;                                // la frase ya no toca (p. ej. la reaccion a una pregunta que ya paso)
     if (el) ensure();
     const left = D.busy && el ? (typing ? Infinity : doneAt + LINGER - Date.now()) : 0;   // tambien las escenas (force) esperan a que acabe la frase en curso
-    if (left > 0) { if (!pend && left !== Infinity) later(flush, left); pend = [line, o]; return; }
+    if (left > 0) { if (pend && pend[1].live && !o.live) return; if (!pend && left !== Infinity) later(flush, left); pend = [line, o]; return; }   // lo que te dice en directo no lo pisa una frase suya
     ensure(); clear(); leaving = false; clearTimeout(leaveT); const me = ++lineN; if (o.fx) D.fx(o.fx); if (o.start) o.start();
     if (!o.force && !D.host) noteSaid();
     const X = faceFor(line, o), mood = o.mood || "sly", text = o.force ? (typeof line === "string" ? line : A.tx(line)) : personal(typeof line === "string" ? line : A.tx(line));
@@ -1701,6 +1701,7 @@ window.AIQ = window.AIQ || {};
     spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " screen" + (o.screen === "pod" ? " pod" : "") : home); bubble.classList.add("on");
     if (o.camp && campBox) { const st = el.style; st.bottom = st.top = ""; face.style.width = face.style.height = face.style.display = ""; bubble.style.marginBottom = bubble.style.maxWidth = "";
       st.setProperty("--cl", campBox.l + "px"); st.setProperty("--cb", campBox.b + "px"); st.setProperty("--hf", campBox.hf + "px"); st.setProperty("--hb", campBox.hb + "px"); }
+    bubble.classList.toggle("live", !!o.live); if (o.live) bubble.querySelector(".dl-live span").textContent = A.pick6(LIVE_TAG);   // js/vivo.js: el crupier de verdad (el autor) te habla en directo
     if (o.lang) { bubble.lang = o.lang; bubble.style.setProperty("--dll", /^(zh|ja|ko|ru)/.test(o.lang) ? ".889" : "1"); } else if (bubble.lang) { bubble.removeAttribute("lang"); bubble.style.removeProperty("--dll"); }
     /* la frase entera ya maquetada desde el principio, con lo que falta por escribir invisible: el globo nace con su tamano final y ninguna palabra
        salta de linea a media escritura (y `text-wrap: pretty` reparte las lineas sin dejar una palabra sola) */
@@ -1755,6 +1756,21 @@ window.AIQ = window.AIQ || {};
   /* lo coloca dentro de un hueco de la pantalla (veredicto) sin bloquear sus reacciones */
   /* v0.32: cambia la cara (y un gesto) sin decir nada: la luz que vuelve en la trastada del apagon, una escena que lo pide */
   D.face = (e, g) => { if (!spr) return; spr.set(e, { quiet: !!g }); if (g) spr.play(g); };
+  /* EN DIRECTO (js/vivo.js): la frase la escribe en ese momento el autor desde su mesa. Sale con su piloto rojo, entra aunque no sea su pantalla
+     (en una esquina) y respeta lo de siempre: nunca corta una frase a medias (espera su turno), ni la siesta de la partida, ni la pregunta del
+     nombre, ni el tutorial, ni el arranque; si en 90 s no le dejan hablar, se pierde. o: { mood, face, gest } */
+  const LIVE_TAG = "EN DIRECTO|LIVE|EN DIRECT|AO VIVO|LIVE|IN DIRETTA|EN VIVO|直播中|생방송|生放送|В ЭФИРЕ|NA ŻYWO";
+  let liveT = 0, liveAt = 0;
+  D.live = (t, o = {}, until = Date.now() + 90000) => {
+    clearTimeout(liveT); if (!t || Date.now() > until) return false;
+    if (held || napping || napWant || tourOn() || !A.crupier || (A.core && A.core.S.booting)) { liveT = setTimeout(() => D.live(t, o, until), 1500); return false; }   // tampoco encima del aviso de fotosensibilidad del arranque
+    if (dozing) { dozing = false; afkAt = 0; D.hide(); }
+    ensure(); el.classList.remove("hidden");
+    let screen;
+    if (!D.on && !D.host) { if (D.onHome && (homeCorner = homeCorner || pickCorner())) screen = undefined; else screen = true; }
+    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, force: true, live: true, screen, hold: holdFor(t) + 1500, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); } });   // el clic del foco al entrar en antena
+    return true;
+  };
   /* tanda 16: LA SIESTA DEL CRUPIER. Duerme en su esquina de la partida, sin globo y sin reaccionar a nada (napping calla D.say); nap(false) lo despierta sin
      decir nada (quien habla luego es la escena). napLevel(l, z): l = lo inquieto que duerme (0 profundo, 1 se revuelve, 2 casi despierto), z = el ruido de 0 a 1 */
   D.nap = on => {
