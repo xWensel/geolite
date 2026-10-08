@@ -5,7 +5,9 @@
      POST { op: "unwatch", sid }
      POST { op: "say", sid, t, e, g }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
      POST { op: "fx", sid, fx }           ->  lanza una ficha: rayo, tormenta, lluvia, apagon, terremoto, cristal, huellas o ventana
-     GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias) */
+     GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
+     POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
+                                          ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas */
 const crypto = require("crypto");
 const kv = require("./_kv");
 const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
@@ -22,6 +24,7 @@ module.exports = async (req, res) => {
     if (!same(req.headers["x-mesa"] || "", KEY)) { await kv.pipeline([["INCR", bad], ["EXPIRE", bad, 600]]); return res.status(401).json({ ok: false, reason: "key" }); }
     const now = Date.now();
     if (req.method === "GET") {
+      if (req.query && req.query.rtc) { const id = String(req.query.rtc); if (!SID.test(id)) return res.status(400).json({ ok: false }); const [o] = await kv.pipeline([["GETDEL", "vivo:rtc:" + id]]); let offer = null; try { offer = JSON.parse(o); } catch (e) { /* aun no */ } return res.status(200).json({ ok: true, offer }); }
       if (req.query && req.query.log) { const [l] = await kv.pipeline([["LRANGE", "vivo:log", 0, 199]]); return res.status(200).json({ ok: true, log: (l || []).map(x => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean) }); }
       const [, ids] = await kv.pipeline([["ZREMRANGEBYSCORE", "vivo:idx", 0, now - 80000], ["ZRANGE", "vivo:idx", 0, 199, "WITHSCORES"]]);
       const sids = [], at = {}; for (let i = 0; i < (ids || []).length; i += 2) { sids.push(ids[i]); at[ids[i]] = +ids[i + 1]; }
@@ -38,6 +41,13 @@ module.exports = async (req, res) => {
     const sid = b.sid, wk = "vivo:w:" + sid;
     if (b.op === "watch") { await kv.pipeline([["SET", wk, 1, "EX", 45]]); return res.status(200).json({ ok: true }); }
     if (b.op === "unwatch") { await kv.pipeline([["DEL", wk]]); return res.status(200).json({ ok: true }); }
+    if (b.op === "cam" || b.op === "camoff" || b.op === "rtc") {     // la camara: pedirla, colgarla o devolver la respuesta WebRTC al juego
+      const ik = "vivo:in:" + sid; let msg;
+      if (b.op === "rtc") { const sdp = typeof b.sdp === "string" ? b.sdp : ""; if (!sdp || sdp.length > 20000) return res.status(400).json({ ok: false }); msg = { k: "rtc", sdp }; }
+      else msg = { k: b.op };
+      await kv.pipeline([...(b.op === "cam" ? [["DEL", "vivo:rtc:" + sid]] : []), ["RPUSH", ik, JSON.stringify(msg)], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
+      return res.status(200).json({ ok: true });
+    }
     if (b.op === "fx") {                                             // una ficha: el efecto cae al momento en su partida
       const fx = String(b.fx || ""); if (!FX.includes(fx)) return res.status(400).json({ ok: false });
       const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);

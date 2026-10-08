@@ -19,11 +19,12 @@ window.AIQ = window.AIQ || {};
   })();
   const on = () => { try { return localStorage.getItem(KEY) !== "0"; } catch (e) { return true; } };
   const plat = () => host ? (host.device === "deck" ? "deck" : /linux/i.test(navigator.userAgent) ? "linux" : "win") + (host.demo ? "-demo" : "") : matchMedia("(pointer: coarse)").matches ? "movil" : "web";
+  const camTest = () => { try { return !host && !!localStorage.getItem(KEY + ".camtest"); } catch (e) { return false; } };   // pruebas de la camara en el navegador (el mapa hace de pantalla)
   const es = v => (v && typeof v === "object" ? v.es || v.en || "" : v || "");
 
   /* por donde va: lo justo para que la mesa lo cuente ("Aventura · ronda 7 · buscando Ulan Bator") */
   function state() {
-    const C = A.core, S = C && C.S, P = A.profile && A.profile.get(), o = { n: (P && P.name) || "", l: A.lang, p: plat(), v: A.VERSION, t0 };
+    const C = A.core, S = C && C.S, P = A.profile && A.profile.get(), o = { n: (P && P.name) || "", l: A.lang, p: plat(), v: A.VERSION, t0, cam: (host && host.vivoCam) || camTest() ? 1 : 0 };   // cam: se le puede ver la pantalla (escritorio)
     if (!S) return o;
     o.ph = S.phase;
     const q = S.qs && S.qs[S.qi];
@@ -50,7 +51,7 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { fast = !!j.w; (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx) : queue.push(m)); drain(); }   // las fichas caen al momento; las frases, en orden
+      if (j && j.ok) { fast = !!j.w; if (!fast && pc) camOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)
     } catch (e) { fast = false; }
     sched(fast ? 2000 : document.hidden ? 60000 : 25000);
   }
@@ -70,14 +71,73 @@ window.AIQ = window.AIQ || {};
     if (k === "terremoto") { if (A.core && A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([90, 40, 140, 40, 60]); if (A.sfx && A.sfx.thunder) A.sfx.thunder(); return; }
     if (A.chfx && A.chfx.live) A.chfx.live(k);
   }
+  /* LA CAMARA DEL CRUPIER (solo escritorio): la mesa pide ver la partida y el juego le manda el video de SU ventana (captura de pestana de
+     Electron: nada del escritorio ni de otras ventanas) de punto a punto (WebRTC; api/vivo.js y api/mesa.js solo cruzan la oferta y la respuesta).
+     Mientras dura, arriba sale el piloto "TE ESTA MIRANDO" con el crupier. Por el mismo canal llega el guante: la mesa senala y da toquecitos en tu pantalla */
+  const ICE = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
+  let pc = null, stream = null, dcn = null, camT = 0;
+  const post = async body => { const c = new AbortController(), k = setTimeout(() => c.abort(), 8000); try { return await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }); } finally { clearTimeout(k); } };
+  const iceDone = (p, ms) => new Promise(res => { if (p.iceGatheringState === "complete") return res(); const t = setTimeout(res, ms); p.addEventListener("icegatheringstatechange", () => { if (p.iceGatheringState === "complete") { clearTimeout(t); res(); } }); });
+  async function source() {
+    if (host && host.vivoCam) { const id = await host.vivoCam(); if (!id) return null; return navigator.mediaDevices.getUserMedia({ audio: false, video: { mandatory: { chromeMediaSource: "tab", chromeMediaSourceId: id, maxWidth: 1600, maxHeight: 1000, maxFrameRate: 15 } } }); }
+    if (camTest()) { const m = document.getElementById("map"); return m && m.captureStream ? m.captureStream(15) : null; }   // pruebas en el navegador: el mapa
+    return null;
+  }
+  async function camOn() {
+    if (!URL_ || !on()) return; camOff();
+    try {
+      stream = await source(); if (!stream) return;
+      const p = pc = new RTCPeerConnection({ iceServers: ICE });
+      stream.getTracks().forEach(t => p.addTrack(t, stream));
+      dcn = p.createDataChannel("mesa"); dcn.onmessage = e => hand(e.data);
+      p.onconnectionstatechange = () => {
+        if (pc !== p) return; const st = p.connectionState;
+        if (st === "connected") { clearTimeout(camT); pilot(true); }
+        else if (st === "failed" || st === "closed") camOff();
+        else if (st === "disconnected") { clearTimeout(camT); camT = setTimeout(() => { if (pc === p && p.connectionState !== "connected") camOff(); }, 6000); }
+      };
+      await p.setLocalDescription(await p.createOffer()); await iceDone(p, 3000);
+      if (pc !== p) return;
+      await post({ sid, rtc: { type: "offer", sdp: p.localDescription.sdp } });
+      camT = setTimeout(() => { if (pc === p && p.connectionState !== "connected") camOff(); }, 45000);
+    } catch (e) { camOff(); }
+  }
+  async function camAnswer(sdp) { if (!pc || typeof sdp !== "string") return; try { await pc.setRemoteDescription({ type: "answer", sdp }); } catch (e) { camOff(); } }
+  function camOff() {
+    clearTimeout(camT); try { if (dcn) dcn.close(); } catch (e) { /* ya cerrado */ } try { if (pc) pc.close(); } catch (e) { /* ya cerrado */ }
+    if (stream) stream.getTracks().forEach(t => t.stop()); pc = dcn = stream = null; pilot(false); glove(null);
+  }
+  /* el piloto: el crupier mini, la luz roja y el aviso, en lo alto de la pantalla mientras te miran */
+  const EYE = "TE ESTÁ MIRANDO|HE’S WATCHING YOU|IL TE REGARDE|ELE ESTÁ TE OLHANDO|ER SIEHT DICH|TI STA GUARDANDO|TE ESTÁ MIRANDO|他在看着你|지켜보고 있다|見ているぞ|ОН СМОТРИТ НА ТЕБЯ|PATRZY NA CIEBIE";
+  function pilot(on_) {
+    let el = $("vivoEye");
+    if (!on_) { if (el) { el.classList.remove("on"); setTimeout(() => { if (!pc && el.isConnected) el.remove(); }, 400); } return; }
+    if (!el) { el = document.createElement("div"); el.id = "vivoEye"; el.innerHTML = `<img src="assets/icons/dealer_mini.webp" alt=""><i></i><b></b>`; document.body.appendChild(el); }
+    el.querySelector("b").textContent = A.pick6(EYE); requestAnimationFrame(() => el.classList.add("on"));
+    if (A.sfx && A.sfx.spot) A.sfx.spot();
+  }
+  /* el guante del crupier (sus pixeles, assets/icons/vivo_glove.webp, 14x22): se mueve por tu pantalla y da toquecitos en el cristal */
+  let gEl = null, gHide = 0;
+  function glove(m) {
+    if (!m) { if (gEl) gEl.classList.remove("on"); return; }
+    if (!gEl) { gEl = document.createElement("div"); gEl.id = "vivoGlove"; gEl.innerHTML = `<img src="assets/icons/vivo_glove.webp" alt=""><i class="vg-ring"></i>`; document.body.appendChild(gEl); }
+    const dpr = devicePixelRatio || 1, k = Math.max(2, Math.round(4 * dpr)) / dpr;          // escala entera de pixel de pantalla
+    gEl.style.setProperty("--gw", (14 * k) + "px"); gEl.style.setProperty("--gh", (22 * k) + "px"); gEl.style.setProperty("--gx", (2.5 * k) + "px");
+    const x = Math.max(0, Math.min(1, +m.x || 0)) * innerWidth, y = Math.max(0, Math.min(1, +m.y || 0)) * innerHeight;
+    gEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`; gEl.classList.add("on");
+    if (m.t === "tap") { gEl.classList.remove("tap"); void gEl.offsetWidth; gEl.classList.add("tap"); if (A.sfx && A.sfx.knock) { A.sfx.knock(); setTimeout(() => A.sfx.knock(), 170); } }
+    clearTimeout(gHide); gHide = setTimeout(() => glove(null), m.t === "tap" ? 3500 : 5000);
+  }
+  function hand(data) { let m; try { m = JSON.parse(data); } catch (e) { return; } if (!m || !pc) return; if (m.t === "hide") glove(null); else if (m.t === "tap" || m.t === "move") glove(m); }
+
   const bye = () => { if (!URL_) return; try { navigator.sendBeacon(URL_, JSON.stringify({ sid, bye: 1 })); } catch (e) { /* da igual: caduca en 75 s */ } };
-  addEventListener("pagehide", bye);
+  addEventListener("pagehide", () => { camOff(); bye(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && !fast) sched(800); });   // vuelves a la ventana: latido enseguida
 
   /* Ajustes > Datos: el interruptor y lo que se envia */
   const TXT = {
     t: "Don Crupier en directo|The Dealer, live|Don Croupier en direct|Dom Crupiê ao vivo|Don Croupier live|Don Croupier in diretta|Don Crupier en vivo|荷官先生直播|딜러 나리 생방송|ドン・ディーラー生放送|Дон Крупье в эфире|Don Krupier na żywo",
-    d: "A veces el autor del juego mira las partidas abiertas y habla por el crupier (verás «EN DIRECTO»). Solo se envían tu nombre, tu idioma y por dónde vas.|Now and then the game’s author watches open games and speaks through the Dealer (you’ll see “LIVE”). Only your name, language and progress are sent.|Parfois, l’auteur du jeu regarde les parties en cours et parle par la bouche du croupier (tu verras « EN DIRECT »). Seuls ton nom, ta langue et ta progression sont envoyés.|Às vezes o autor do jogo espia as partidas abertas e fala pelo crupiê (você verá “AO VIVO”). Só são enviados seu nome, seu idioma e onde você está.|Manchmal schaut der Entwickler bei laufenden Partien zu und spricht durch den Croupier (du siehst „LIVE“). Gesendet werden nur dein Name, deine Sprache und dein Spielstand.|A volte l’autore del gioco guarda le partite aperte e parla per bocca del croupier (vedrai «IN DIRETTA»). Si inviano solo il tuo nome, la tua lingua e a che punto sei.|A veces el autor del juego mira las partidas abiertas y habla por el crupier (verás «EN VIVO»). Solo se envían tu nombre, tu idioma y en qué parte vas.|游戏作者有时会观看正在进行的对局，并借荷官之口说话（你会看到“直播中”）。只发送你的名字、语言和游戏进度。|가끔 게임 제작자가 진행 중인 게임을 보며 딜러의 입을 빌려 말을 겁니다(“생방송” 표시). 이름, 언어, 진행 상황만 전송됩니다.|ときどきゲームの作者が遊んでいる様子を見て、ディーラーの口を借りて話しかけます（「生放送」と表示）。送られるのは名前、言語、進み具合だけです。|Иногда автор игры заглядывает в идущие партии и говорит устами крупье (вы увидите «В ЭФИРЕ»). Отправляются только ваше имя, язык и прогресс.|Czasem autor gry zagląda do trwających rozgrywek i mówi ustami krupiera (zobaczysz „NA ŻYWO”). Wysyłane są tylko twoje imię, język i postęp.",
+    d: "A veces el autor del juego mira las partidas abiertas: habla por el crupier (verás «EN DIRECTO»), lanza efectos y puede ver la ventana del juego mientras sale «TE ESTÁ MIRANDO». Solo se envían tu nombre, tu idioma y por dónde vas.|Now and then the game’s author watches open games: speaks through the Dealer (you’ll see “LIVE”), throws effects and can see the game window while “HE’S WATCHING YOU” is shown. Only your name, language and progress are sent.|Parfois, l’auteur du jeu regarde les parties en cours : il parle par la bouche du croupier (tu verras « EN DIRECT »), lance des effets et peut voir la fenêtre du jeu tant que « IL TE REGARDE » est affiché. Seuls ton nom, ta langue et ta progression sont envoyés.|Às vezes o autor do jogo espia as partidas abertas: fala pelo crupiê (você verá “AO VIVO”), lança efeitos e pode ver a janela do jogo enquanto aparece “ELE ESTÁ TE OLHANDO”. Só são enviados seu nome, seu idioma e onde você está.|Manchmal schaut der Entwickler bei laufenden Partien zu: Er spricht durch den Croupier (du siehst „LIVE“), wirft Effekte und kann das Spielfenster sehen, solange „ER SIEHT DICH“ angezeigt wird. Gesendet werden nur dein Name, deine Sprache und dein Spielstand.|A volte l’autore del gioco guarda le partite aperte: parla per bocca del croupier (vedrai «IN DIRETTA»), lancia effetti e può vedere la finestra del gioco finché compare «TI STA GUARDANDO». Si inviano solo il tuo nome, la tua lingua e a che punto sei.|A veces el autor del juego mira las partidas abiertas: habla por el crupier (verás «EN VIVO»), lanza efectos y puede ver la ventana del juego mientras sale «TE ESTÁ MIRANDO». Solo se envían tu nombre, tu idioma y en qué parte vas.|游戏作者有时会观看正在进行的对局：借荷官之口说话（你会看到“直播中”）、释放效果，并在显示“他在看着你”时看到游戏窗口。只发送你的名字、语言和游戏进度。|가끔 게임 제작자가 진행 중인 게임을 봅니다. 딜러의 입을 빌려 말하고(“생방송” 표시) 효과를 던지며, “지켜보고 있다”가 표시되는 동안 게임 창을 볼 수 있습니다. 이름, 언어, 진행 상황만 전송됩니다.|ときどきゲームの作者が遊んでいる様子を見ています。ディーラーの口を借りて話し（「生放送」と表示）、演出を投げ、「見ているぞ」と表示されている間はゲーム画面を見ることができます。送られるのは名前、言語、進み具合だけです。|Иногда автор игры заглядывает в идущие партии: говорит устами крупье (вы увидите «В ЭФИРЕ»), бросает эффекты и может видеть окно игры, пока горит «ОН СМОТРИТ НА ТЕБЯ». Отправляются только ваше имя, язык и прогресс.|Czasem autor gry zagląda do trwających rozgrywek: mówi ustami krupiera (zobaczysz „NA ŻYWO”), rzuca efekty i widzi okno gry, dopóki świeci „PATRZY NA CIEBIE”. Wysyłane są tylko twoje imię, język i postęp.",
   };
   function card() {
     const grid = document.querySelector('[data-pane="data"] .set-grid'); if (!grid || $("vivoCard")) return;
@@ -86,7 +146,7 @@ window.AIQ = window.AIQ || {};
     const cloud = $("cloudCard"); grid.insertBefore(c, cloud ? cloud.nextSibling : null);
     c.querySelector(".sw").addEventListener("click", () => {
       const v = !on(); try { localStorage.setItem(KEY, v ? "1" : "0"); } catch (e) { /* sin almacenamiento */ }
-      if (A.sfx && A.sfx.flip) A.sfx.flip(true); if (v) sched(300); else { clearTimeout(timer); fast = false; bye(); sched(30000); }
+      if (A.sfx && A.sfx.flip) A.sfx.flip(true); if (v) sched(300); else { clearTimeout(timer); fast = false; camOff(); bye(); sched(30000); }
       sync();
     });
     sync();

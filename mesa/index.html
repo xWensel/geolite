@@ -103,6 +103,21 @@ img, canvas { image-rendering: pixelated; }
 .whoL b { font-weight: 400; font-size: 32px; line-height: 1; color: var(--brass-lt); text-shadow: 0 2px 0 rgba(0, 0, 0, .45); overflow-wrap: anywhere; }
 .langTag { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--ink); background: var(--brass-lt); padding: 4px 6px; box-shadow: 0 2px 0 rgba(0, 0, 0, .4); }
 
+/* la tele: lo que ve el jugador, en vivo, con marco de laton. Clic = dos toquecitos del guante; arrastrar = el guante le sigue */
+.tv { position: relative; z-index: 1; width: min(100%, 900px); margin: 8px 0 18px; }
+.tvf { position: relative; aspect-ratio: 16 / 10; background: #040705; box-shadow: inset 0 0 0 3px var(--brass-lt), 0 0 0 5px #2a1608, 0 0 0 8px var(--brass), 0 12px 0 rgba(0, 0, 0, .45); overflow: hidden; }
+.tvf video { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); object-fit: contain; background: #000; cursor: url("/assets/icons/vivo_glove.webp") 2 0, crosshair; touch-action: none; }
+.tvf::after { content: ""; position: absolute; inset: 3px; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px); }
+.tvhud { position: absolute; left: 12px; top: 10px; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(0, 0, 0, .6); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: #ff8a93; pointer-events: none; }
+.tvx { position: absolute; right: 10px; top: 8px; z-index: 2; font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 6px 8px; background: rgba(0, 0, 0, .65); color: var(--brass-lt); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .5); }
+.tvmsg { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; padding: 20px; text-align: center; font-size: 27px; color: var(--dim); pointer-events: none; }
+.tvmsg i { display: block; margin: 0 auto 10px; width: 8px; height: 8px; background: var(--brass-lt); animation: blink .7s steps(1) infinite; }
+.tvtip { margin-top: 10px; text-align: center; font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: rgba(241, 215, 154, .5); }
+.felt.main.watching .print { display: none; }
+.camBtn { margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.camBtn i { width: 8px; height: 8px; background: currentColor; }
+.tag.cam { color: var(--brass-lt); }
+
 /* lo impreso en el tapete, como "BLACKJACK PAYS 3 TO 2" */
 .print { text-align: center; margin: 4px 0 14px; pointer-events: none; }
 .print h1 { margin: 0; font-weight: 400; font-size: 54px; line-height: .9; color: var(--print); letter-spacing: .01em; }
@@ -213,6 +228,10 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
           <div class="bub"><div class="lv"><i class="dot"></i><span id="lvTag">EN DIRECTO</span></div><p id="prev" class="ph">Elige un asiento y hablamos.</p></div>
           <div class="whoL" id="whoL"></div>
         </div>
+      </div>
+      <div class="tv hidden" id="tv">
+        <div class="tvf"><video id="vid" autoplay muted playsinline></video><span class="tvhud"><i class="dot"></i><span id="tvName">Cámara</span></span><button class="tvx" id="tvx" type="button">Colgar</button><div class="tvmsg" id="tvmsg"></div></div>
+        <div class="tvtip">Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</div>
       </div>
       <div class="print"><h1>La mesa del crupier</h1><p>La casa siempre gana · en directo desde Geolite</p><i class="line"></i></div>
       <div class="rack"><span class="lbl">Fichas · lánzalas a su asiento</span><div class="tray" id="tray"></div></div>
@@ -365,7 +384,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       <span class="top"><i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i><span class="nm${st.n ? "" : " anon"}">${esc(st.n || "Sin nombre")}</span></span>
       <span class="lg2">Juega en ${esc(LANG[st.l] || st.l)}</span>
       <span class="wh">${esc(where(st))}</span>
-      <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span></span>
+      <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}${st.cam ? `<span class="tag cam">Cámara</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span></span>
       ${stackHtml(x.sid)}</button>`; }).join("");
     L.querySelectorAll(".seat").forEach(b => b.onclick = () => pick(b.dataset.sid));
     arc();
@@ -383,7 +402,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   /* ------------------------------------------------ la plaza elegida */
   function pick(sid) {
     if (sel === sid) return;
-    if (sel) call("POST", { op: "unwatch", sid: sel }).catch(() => {});
+    if (sel) { camStop(); call("POST", { op: "unwatch", sid: sel }).catch(() => {}); }
     sel = sid; const x = list.find(y => y.sid === sid); selSt = x && x.st;
     document.querySelectorAll(".seat").forEach(b => b.classList.toggle("sel", b.dataset.sid === sid));
     document.querySelectorAll(".chip").forEach(c => (c.disabled = false)); $("txt").disabled = false; $("send").disabled = false;
@@ -393,7 +412,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   }
   async function watch() { clearTimeout(watchT); if (!sel) return; try { await call("POST", { op: "watch", sid: sel }); } catch (e) { /* reintenta */ } watchT = setTimeout(watch, 20000); }
   addEventListener("pagehide", () => { if (sel && key) fetch(API, { method: "POST", keepalive: true, headers: { "x-mesa": key, "content-type": "application/json" }, body: JSON.stringify({ op: "unwatch", sid: sel }) }).catch(() => {}); });
-  function gone() { toast("Se ha levantado de la mesa."); sel = null; selSt = null; clearTimeout(watchT); document.querySelectorAll(".chip").forEach(c => (c.disabled = true)); $("txt").disabled = true; $("send").disabled = true; renderFacts(); }
+  function gone() { camStop(true); toast("Se ha levantado de la mesa."); sel = null; selSt = null; clearTimeout(watchT); document.querySelectorAll(".chip").forEach(c => (c.disabled = true)); $("txt").disabled = true; $("send").disabled = true; renderFacts(); }
 
   function setupControls() {
     $("gest").innerHTML = GEST.map(g => `<option value="${g}">${GNAME[g]}</option>`).join("");
@@ -432,7 +451,9 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     else if (st.md) F.push(["Puntos", fmt(st.s)], ["Campaña", st.d || "—"], ["Racha", st.sk ? "×" + st.sk : "—"]);
     if (st.d && st.md === "reto") F.push(["Reto", st.d]);
     F0.innerHTML = `<div class="facts"><div class="fact q"><span class="lbl">Ahora mismo</span><b>${esc(where(st))}${st.k && st.ph === "asking" ? ` · ${esc(KIND[st.k] || st.k)}` : ""}</b></div>` +
-      F.map(([k, v]) => `<div class="fact"><span class="lbl">${k}</span><b>${esc(v)}</b></div>`).join("") + `</div>`;
+      F.map(([k, v]) => `<div class="fact"><span class="lbl">${k}</span><b>${esc(v)}</b></div>`).join("") + `</div>` +
+      (st.cam ? `<button class="btn camBtn" id="camBtn" type="button"><i></i>${mpc ? "Colgar la cámara" : "Ver su pantalla"}</button>` : `<p class="none" style="margin:10px 0 0;font-size:20px">Su pantalla solo se ve en la versión de escritorio.</p>`);
+    const cb = $("camBtn"); if (cb) cb.onclick = () => mpc ? camStop() : camStart();
     refresh();
   }
   function renderCards() {
@@ -463,6 +484,61 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     try { const j = await call("POST", { op: "fx", sid: sel, fx }); toast(j.ok && j.live ? `${c.title}: cae en su partida en 1-2 s.` : "Esa partida ya se ha cerrado."); }
     catch (e) { toast("Sin conexión: la ficha no ha salido."); }
   }
+
+  /* ------------------------------------------------ LA CAMARA: su pantalla en directo (WebRTC de punto a punto; el servidor solo cruza oferta y respuesta) */
+  const ICE = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
+  let mpc = null, mdc = null, camSid = null, camGen = 0;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const iceDone = (p, ms) => new Promise(res => { if (p.iceGatheringState === "complete") return res(); const t = setTimeout(res, ms); p.addEventListener("icegatheringstatechange", () => { if (p.iceGatheringState === "complete") { clearTimeout(t); res(); } }); });
+  function tvMsg(t) { $("tvmsg").innerHTML = t ? `<div><i></i>${esc(t)}</div>` : ""; }
+  function tvShow(on) { $("tv").classList.toggle("hidden", !on); document.querySelector(".felt.main").classList.toggle("watching", on); }
+  async function camStart() {
+    if (!sel) return; camStop(); const gen = ++camGen, sid = camSid = sel;
+    tvShow(true); $("tvName").textContent = "Cámara · " + ((selSt && selSt.n) || "sin nombre"); tvMsg("Llamando a su pantalla…"); renderFacts();
+    spr.play("lean_in"); clink();
+    try {
+      await call("POST", { op: "cam", sid });
+      let offer = null;
+      for (let i = 0; i < 70 && gen === camGen; i++) { await sleep(1000); const j = await call("GET", null, "?rtc=" + sid); if (j.offer) { offer = j.offer; break; } }
+      if (gen !== camGen) return;
+      if (!offer) { tvMsg("No contesta. Puede que haya apagado el directo en Ajustes o que su red no deje."); return; }
+      tvMsg("Conectando…");
+      const p = mpc = new RTCPeerConnection({ iceServers: ICE });
+      p.ontrack = e => { $("vid").srcObject = e.streams[0] || new MediaStream([e.track]); };
+      p.ondatachannel = e => { mdc = e.channel; };
+      p.onconnectionstatechange = () => {
+        if (mpc !== p) return; const st = p.connectionState;
+        if (st === "connected") { tvMsg(""); toast("Le ves la pantalla. Arriba le sale «TE ESTÁ MIRANDO»."); spr.play("slow_blink"); }
+        else if (st === "failed") { tvMsg("Su red no deja conectar la cámara."); }
+        else if (st === "disconnected") tvMsg("Se ha cortado un momento…");
+      };
+      await p.setRemoteDescription(offer); await p.setLocalDescription(await p.createAnswer()); await iceDone(p, 3000);
+      if (mpc !== p) return;
+      await call("POST", { op: "rtc", sid, sdp: p.localDescription.sdp });
+      renderFacts();
+    } catch (e) { if (gen === camGen) tvMsg("No se ha podido conectar."); }
+  }
+  function camStop(silent) {
+    camGen++; const sid = camSid; camSid = null;
+    try { if (mdc) mdc.close(); } catch (e) { /* ya cerrado */ } try { if (mpc) mpc.close(); } catch (e) { /* ya cerrado */ }
+    const had = !!mpc; mpc = mdc = null; $("vid").srcObject = null; tvShow(false); tvMsg("");
+    if (sid && !silent) call("POST", { op: "camoff", sid }).catch(() => {});
+    if (had && sel) renderFacts();
+  }
+  $("tvx").onclick = () => camStop();
+  /* el guante: coordenadas dentro de SU ventana (descontando las bandas negras del video) */
+  function at(e) {
+    const v = $("vid"), r = v.getBoundingClientRect(), vw = v.videoWidth || 16, vh = v.videoHeight || 10, k = Math.min(r.width / vw, r.height / vh), w = vw * k, h = vh * k, x0 = r.left + (r.width - w) / 2, y0 = r.top + (r.height - h) / 2;
+    const x = (e.clientX - x0) / w, y = (e.clientY - y0) / h; return x < 0 || x > 1 || y < 0 || y > 1 ? null : { x: +x.toFixed(4), y: +y.toFixed(4) };
+  }
+  const dcSend = m => { if (mdc && mdc.readyState === "open") mdc.send(JSON.stringify(m)); };
+  let down = null, lastMove = 0;
+  $("vid").addEventListener("pointerdown", e => { const p = at(e); if (!p) return; down = { x: e.clientX, y: e.clientY, moved: false }; $("vid").setPointerCapture(e.pointerId); });
+  $("vid").addEventListener("pointermove", e => {
+    if (!down) return; if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
+    if (down.moved && performance.now() - lastMove > 60) { const p = at(e); if (p) { lastMove = performance.now(); dcSend({ t: "move", ...p }); } }
+  });
+  $("vid").addEventListener("pointerup", e => { if (!down) return; const p = at(e), mv = down.moved; down = null; if (!p) return; if (!mv) { dcSend({ t: "tap", ...p }); clink(); spr.play("point"); } else dcSend({ t: "move", ...p }); });
 
   /* ------------------------------------------------ ENSAYO: la escena entera como la vera el jugador (js/dealer.js) */
   let playing = false, playT = 0;

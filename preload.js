@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld("geoliteHost", {
   /* teclado de Steam para escribir con mando (js/teclado.js): { kind: "floating" | "modal" (con text) | "cancel" | "none" } */
   steamKeyboard: (o) => ipcRenderer.invoke("steam:keyboard", o),
   steamAvailable: () => ipcRenderer.invoke("steam:available"),
+  /* la mesa del crupier mira tu partida (js/vivo.js): identificador de la captura de ESTA ventana del juego */
+  vivoCam: () => ipcRenderer.invoke("vivo:cam"),
   /* { account, app } de Steam Cloud, o null sin Steam (Ajustes > Datos) */
   steamCloud: () => ipcRenderer.invoke("steam:cloud"),
   steamUnlock: (id) => ipcRenderer.invoke("steam:unlock", id),

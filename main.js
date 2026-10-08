@@ -50,6 +50,9 @@ ipcMain.handle("steam:keyboard", async (e, o) => {
   return { kind: "none" };
 });
 ipcMain.handle("steam:available", () => !!steamClient);
+/* DON CRUPIER EN DIRECTO (js/vivo.js): la mesa del autor pide ver la partida. Solo el contenido de la ventana del juego (captura de "pestana":
+   ni el escritorio, ni otras ventanas, ni el overlay de Steam) y solo para la propia ventana del juego */
+ipcMain.handle("vivo:cam", (e) => { if (!alive(win) || e.sender !== win.webContents) return null; try { return win.webContents.getMediaSourceId(e.sender); } catch (err) { return null; } });
 /* Datos > Tus partidas (v0.3.2): si Steam Cloud esta activo en la cuenta y para el juego. Sin Steam: null (el juego dice que se guarda en este equipo) */
 ipcMain.handle("steam:cloud", () => { if (!steamClient) return null; try { return { account: !!steamClient.cloud.isEnabledForAccount(), app: !!steamClient.cloud.isEnabledForApp() }; } catch (err) { return null; } });
 ipcMain.handle("steam:unlock", (e, id) => {   // si ya esta activo no se vuelve a guardar (profile.js reenvia todos los logros al arrancar)
