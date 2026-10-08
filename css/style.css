@@ -438,7 +438,8 @@ body.vd-on #hud, body.vd-on .dock-sh, body.vd-on .rail-sh, body.vd-on .note-sh {
   .set-card > .row-sw:last-child, .set-card > .fader:last-child { padding-bottom: 0; }
   .set-note { margin-top: 8px; }
   .seg { padding: 4px; } .seg > i { top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / var(--n)); } .seg button { min-height: 34px; padding: 7px 4px; }
-  .set-pane[data-pane="general"] .set-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr); align-items: stretch; }
+  /* la tarjeta del nombre va a todo el ancho (css/nombre.css): quedan Unidades + ayudas, en 2 columnas (con 3, la de ayudas se quedaba en 240 px y su texto en una columna de 22 px a 1280x720) */
+  .set-pane[data-pane="general"] .set-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr); align-items: stretch; }
   .set-pane[data-pane="general"] .set-card:has(.row-sw) { order: 3; }
   /* v0.2.27: en Pantalla (columna estrecha) la etiqueta va encima y el selector a todo el ancho, para que el valor quepa entero sin crecer la
      tarjeta a lo ancho; la nota de la tecla F sobra (ya esta en la leyenda de abajo) */
