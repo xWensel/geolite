@@ -1516,9 +1516,14 @@ window.AIQ = window.AIQ || {};
      los suministros (Seguro, Cafe doble) y las apuestas que tocan en esa ronda (Oferta de la casa en su Campamento sorteado; Doble o nada / La apuesta
      final antes de cada jefe: salian siempre y no se pierden). Lo que ya tienes puesto (apuesta o suministro activo) no se esconde. Un juego nuevo de
      casino entra en SIDE_GAMES y en barOf. */
-  const casOf = r => { const R = run.reds && run.reds[r]; if (R) return R; const b = (run.bets || {})[r]; if (b && b.id === "red") { run.reds = run.reds || {}; run.reds[r] = b; delete run.bets[r]; return b; } return null; };   // las partidas guardadas con Rojo o negro en run.bets se mudan solas
+  const casOf = r => { const R = run.reds && run.reds[r]; if (R) return r === roundNo() && R.att != null && R.att !== (run.attempt || 0) ? null : R; const b = (run.bets || {})[r]; if (b && b.id === "red") { run.reds = run.reds || {}; run.reds[r] = b; delete run.bets[r]; return b; } return null; };   // las partidas guardadas con Rojo o negro en run.bets se mudan solas
   const CASINO = ["red", "coin", "wheel", "cups"];                              // los juegos del centro; cada ronda sortea uno (la semilla) y se queda con el
-  const casinoKind = r => { const R = casOf(r); return R && CASINO.includes(R.id) ? R.id : A.adv._casinoForce || A.rng(`${run.seed}:casino:${r}`).pick(CASINO); };   // _casinoForce: solo pruebas
+  function pickCasino(r) {                                                // tras perder provision y repetir la ronda, el Campamento ofrece OTRO juego (nunca el anterior)
+    let k = A.rng(`${run.seed}:casino:${r}`).pick(CASINO);
+    for (let a = 1, n = r === roundNo() ? run.attempt || 0 : 0; a <= n; a++) k = A.rng(`${run.seed}:casino:${r}:${a}`).pick(CASINO.filter(x => x !== k));
+    return k;
+  }
+  const casinoKind = r => { const R = casOf(r); return R && CASINO.includes(R.id) ? R.id : A.adv._casinoForce || pickCasino(r); };   // _casinoForce: solo pruebas
   const SIDE_GAMES = ["offer", "double", "final"];
   const sideRound = r => (r > LAST ? null : r % 4 === 3 ? (r === LAST ? "final" : "double") : "offer");   // la apuesta lateral que toca en la ronda r: antes de cada jefe la suya; en los demas Campamentos (desde el primero), la Oferta de la casa
   function sideOk(k, r) {

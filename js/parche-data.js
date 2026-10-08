@@ -34,6 +34,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.32",
+      name: L("Otro juego al reintentar", "A different game on retry", "Un autre jeu au nouvel essai", "Outro jogo ao repetir", "Anderes Spiel beim Neuversuch", "Un altro gioco al nuovo tentativo", "", "重试时换一个游戏", "재도전 시 다른 게임", "やり直しで別のゲーム", "Другая игра при повторе", "Inna gra przy powtórce"),
+      date: "2026-10-08",
+      summary: L("Si pierdes una provisión y repites la ronda, el Campamento ya no te ofrece el mismo juego de casino: te toca otro distinto.", "If you lose a provision and replay the round, the Camp no longer offers the same casino game: you get a different one.", "Si tu perds une provision et rejoues la manche, le Campement ne propose plus le même jeu de casino : un autre t'attend.", "Se perderes uma provisão e repetires a ronda, o Acampamento já não oferece o mesmo jogo de cassino: sai outro diferente.", "Verlierst du einen Proviant und wiederholst die Runde, bietet das Lager nicht mehr dasselbe Casinospiel an: Es kommt ein anderes.", "Se perdi una provvista e ripeti il round, l'Accampamento non propone più lo stesso gioco da casinò: ne esce un altro.", "", "如果你损失一份补给并重玩该回合，营地不会再给出同一个赌场游戏，而是换成另一个。", "식량을 잃고 라운드를 다시 하면, 캠프가 같은 카지노 게임을 내놓지 않고 다른 게임을 줍니다.", "食料を失ってラウンドをやり直すと、キャンプは同じカジノゲームを出さず、別のゲームになります。", "Если потерять запас и переиграть раунд, лагерь больше не предлагает ту же игру казино — выпадает другая.", "Jeśli stracisz zapas i powtórzysz rundę, Obóz nie oferuje już tej samej gry kasynowej: trafia się inna."),
+      chapters: [
+        { id: "casino", kicker: L("Casino", "Casino", "Casino", "Cassino", "Casino", "Casinò", "", "赌场", "카지노", "カジノ", "Казино", "Kasyno"),
+          title: L("Juego del centro", "Centre game", "Jeu du centre", "Jogo do centro", "Spiel in der Mitte", "Gioco centrale", "", "中间的游戏", "가운데 게임", "中央のゲーム", "Игра в центре", "Gra pośrodku"),
+          entries: [
+            E(L("Otro juego al reintentar", "A different game on retry", "Un autre jeu au nouvel essai", "Outro jogo ao repetir", "Anderes Spiel beim Neuversuch", "Un altro gioco al nuovo tentativo", "", "重试时换一个游戏", "재도전 시 다른 게임", "やり直しで別のゲーム", "Другая игра при повторе", "Inna gra przy powtórce"), "change", "0.3.32", [
+              L("Si pierdes una provisión y repites la ronda, el Campamento ya no te ofrece el mismo juego de casino: te toca otro distinto.", "If you lose a provision and replay the round, the Camp no longer offers the same casino game: you get a different one.", "Si tu perds une provision et rejoues la manche, le Campement ne propose plus le même jeu de casino : un autre t'attend.", "Se perderes uma provisão e repetires a ronda, o Acampamento já não oferece o mesmo jogo de cassino: sai outro diferente.", "Verlierst du einen Proviant und wiederholst die Runde, bietet das Lager nicht mehr dasselbe Casinospiel an: Es kommt ein anderes.", "Se perdi una provvista e ripeti il round, l'Accampamento non propone più lo stesso gioco da casinò: ne esce un altro.", "", "如果你损失一份补给并重玩该回合，营地不会再给出同一个赌场游戏，而是换成另一个。", "식량을 잃고 라운드를 다시 하면, 캠프가 같은 카지노 게임을 내놓지 않고 다른 게임을 줍니다.", "食料を失ってラウンドをやり直すと、キャンプは同じカジノゲームを出さず、別のゲームになります。", "Если потерять запас и переиграть раунд, лагерь больше не предлагает ту же игру казино — выпадает другая.", "Jeśli stracisz zapas i powtórzysz rundę, Obóz nie oferuje już tej samej gry kasynowej: trafia się inna.")
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.31",
       name: L("Babel de verdad", "Real Babel", "Vraie Babel", "Babel de verdade", "Echtes Babel", "Babele vera", "", "真正的巴别塔", "진짜 바벨", "本物のバベル", "Настоящий Вавилон", "Prawdziwa Babel"),
       date: "2026-10-08",
