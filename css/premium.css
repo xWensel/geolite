@@ -199,7 +199,6 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .startbtn:hover { animation-play-state: paused; }
 .startbtn:hover { transform: translateY(-4px) scale(1.02); } .startbtn:active { transform: translateY(3px); } .sb-ic .ic { width: 56px; height: 56px; animation: chip-turn 8s linear infinite; }
 .sb-t { flex: 1; display: grid; } .sb-t b { font-family: var(--serif); font-weight: 900; font-size: clamp(22px, calc(3.2 * var(--vh)), 32px); line-height: 1; } .sb-t i { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; opacity: .75; } .sb-ar .ic { width: 28px; height: 28px; }
-.resume { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: 8px; background: rgba(254, 95, 85, .18); border-radius: 14px; box-shadow: inset 0 0 0 3px var(--red); } .resume b { flex: 1; font-family: var(--mono); font-size: 15.5px; letter-spacing: .04em; } .resume .btn-ink { width: auto; } .resume > div { display: flex; gap: 8px; }
 
 /* ---------- Clasico / Extendido ---------- */
 .s-camps .camps { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: clamp(10px, calc(1.2 * var(--vw)), 18px); margin-bottom: 12px; }
@@ -313,22 +312,26 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .btn-line.danger.armed, .startbtn.armed { background: #fe5f55; color: #16241c; }
 .startbtn.armed .sb-t i { display: none; }
 
+/* partida guardada (v0.3.23): el mismo boton de ficha que "Nueva expedicion", sin banner propio. En la portada va solo y centrado;
+   en la Aventura, "Continuar" en oro y "Nueva expedicion" baja a la version de fieltro (alt), que pide doble pulsacion */
+.hh-resume { display: flex; justify-content: center; flex: 1 0 100%; margin: 0 auto; }
+.hh-resume .startbtn { width: min(100%, 620px); padding-block: 8px; } .hh-resume .sb-ic .ic { width: 48px; height: 48px; }
+.as-go { display: grid; gap: 18px; }
+.sb-t i:has(> span) { display: flex; flex-wrap: wrap; column-gap: 1.1em; } .sb-t i > span { display: inline-flex; align-items: center; gap: .35em; white-space: nowrap; } .sb-t .sb-coin { width: 18px; height: 18px; margin: 0; }
+.startbtn.alt { animation: none; color: #f6efdc; background: linear-gradient(180deg, #24493a, #16302a); box-shadow: 0 0 0 3px #16241c, 0 7px 0 3px rgba(0, 0, 0, .5), inset 0 0 0 2px rgba(248, 180, 73, .55), inset 0 -5px 0 rgba(0, 0, 0, .3); padding-block: 6px; }
+.startbtn.alt .sb-ic .ic { width: 40px; height: 40px; animation: none; } .startbtn.alt .sb-t b { font-size: clamp(19px, calc(2.6 * var(--vh)), 24px); color: #ffe08a; } .startbtn.alt .sb-t i { opacity: .7; }
+.startbtn.alt:hover { box-shadow: 0 0 0 3px #16241c, 0 9px 0 3px rgba(0, 0, 0, .5), inset 0 0 0 2px #f8b449, inset 0 -5px 0 rgba(0, 0, 0, .3), 0 0 22px 2px rgba(248, 180, 73, .35); }
+.startbtn.alt.armed { background: #fe5f55; } .startbtn.alt.armed .sb-t b { color: #16241c; }
+
 /* boton Menu en el Campamento */
 .tb-right { justify-self: end; display: flex; align-items: center; gap: 14px; }
 
-/* banner de partida guardada en la portada */
-.hh-resume { display: flex; align-items: center; gap: 16px; flex: 1 0 100%; max-width: 1000px; margin: 0 auto; padding: 12px 18px; border-radius: 16px; background: linear-gradient(90deg, rgba(90, 60, 14, .9), rgba(14, 28, 20, .92) 70%); box-shadow: inset 0 0 0 2px var(--brass), 0 0 24px rgba(248, 180, 73, .2); }
-.hh-resume .hr-ic .ic { width: 44px; height: 44px; } .hh-resume .hr-t { flex: 1; display: grid; gap: 2px; }
-.hh-resume .hr-t b { font-size: 20px; color: #ffe9b0; } .hh-resume .hr-t i { font-style: normal; font-size: 17px; color: var(--paper); opacity: .8; }   /* heredaba la tinta oscura: marron sobre marron, casi ilegible */
-@media (max-width: 720px) { .hh-resume { flex-wrap: wrap; } .hh-resume .hr-t { flex-basis: 100%; } }
 #veil { z-index: 60; }
 html[data-skin] .btn-line.danger { background: #201512; color: #ffb4a8; box-shadow: inset 0 0 0 2px rgba(254, 95, 85, .7), 0 5px 0 rgba(0, 0, 0, .35); }
 html[data-skin] .btn-line.danger.armed, html[data-skin] .startbtn.armed { background: #fe5f55; color: #16241c; }
 html[data-skin] .row-btn.danger { color: #ffb4a8; box-shadow: inset 0 0 0 2px rgba(254, 95, 85, .55); }
 html[data-skin] .row-btn.danger.armed { background: #fe5f55; color: #16241c; }
 
-.hh-resume .btn-ink, .hh-resume .btn-line { flex: 0 0 auto; width: auto; min-width: 150px; padding: 10px 18px; font-size: 18px; }
-.hh-resume .hr-t b { font-size: clamp(15px, calc(2.2 * var(--vh)), 20px); }
 /* el crupier apaga las luces de su carta si te quedas mirando el Clasico (js/dealer.js, watchCards): en dos tandas; se encienden al pasar por ella */
 .mcard.hero.sulk .mqb .mqb-a, .mcard.hero.sulk2 .mqb .mqb-b { display: none; }
 /* territorio nuevo: sello "Nuevo" junto al numero de ronda de la intro (js/adventure.js, introHtml) */

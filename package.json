@@ -1,6 +1,6 @@
 {
   "name": "geolite",
-  "version": "0.3.22",
+  "version": "0.3.23",
   "description": "Geolite - juego de geografia: haz clic lo mas cerca posible del lugar que te piden.",
   "private": true,
   "license": "UNLICENSED",

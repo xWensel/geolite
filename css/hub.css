@@ -11,7 +11,6 @@
 .mc-d { font-size: 15.5px; line-height: 1.35; color: rgba(242, 233, 214, .68); }
 
 /* ---------- Aventura: seleccion ---------- */
-.resume { --c: 12px; --edge: var(--red); --fill: #2a1a1c; display: grid; gap: 8px; padding: 14px 16px; margin: 4px 0 8px; } .resume b { font-family: var(--mono); font-size: 15.5px; font-weight: 500; letter-spacing: .04em; } .resume > div { display: flex; gap: 8px; } .resume .btn-ink { width: auto; flex: 1; }
 .decks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .deck { display: grid; gap: 3px; text-align: left; padding: 11px 12px 10px; color: var(--paper); background: #121f27; border: 1.5px solid rgba(242, 233, 214, .22); cursor: pointer; transition: transform .2s var(--spring), border-color .2s, background .2s; }
 .deck:hover:not(:disabled) { transform: translateY(-3px); border-color: rgba(242, 233, 214, .55); } .deck.sel { border-color: var(--brass); background: #2a261c; box-shadow: 0 0 0 1px var(--brass); }

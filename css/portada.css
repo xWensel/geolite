@@ -25,7 +25,7 @@
 .hh-bottom { justify-self: center; width: max-content; max-width: 100%; display: grid; justify-items: stretch; gap: clamp(10px, calc(1.8 * var(--vh)), 18px); }
 .hh-deck { display: grid; grid-template-columns: minmax(var(--cw), 1fr) minmax(var(--hw), max-content) minmax(var(--cw), 1fr); gap: var(--cg); align-items: stretch; }
 .hh-bottom .hh-resume { flex: none; box-sizing: border-box; width: auto; max-width: none; margin: 0; }   /* en una sola fila, del ancho de las placas */
-.hh-bottom:has(.hh-resume .btn-ink):has(.plq-rib.on) { row-gap: clamp(24px, calc(3.2 * var(--vh)), 32px); }   /* la cinta de tu puesto no toca el banner */
+.hh-bottom:has(.hh-resume .startbtn):has(.plq-rib.on) { row-gap: clamp(24px, calc(3.2 * var(--vh)), 32px); }   /* la cinta de tu puesto no toca el banner */
 
 .plq { --c1: #4ee3c1; --c2: #1fb3a3; --c3: #16787f; --c4: #164a5c; --glow: rgba(78, 227, 193, .5); --tilt: 0deg; --d: .3s;
   position: relative; display: flex; align-items: center; justify-content: center; gap: 11px; min-width: 0; min-height: 66px; box-sizing: border-box; padding: 8px 14px 11px;
@@ -89,8 +89,7 @@ html body #dlg > .hh-ver { font-size: 12px; }
   .hh .mqb rect { stroke-dasharray: 0 4; } .hh .mqb .mqb-a, .hh .mqb .mqb-b { stroke-dasharray: 0 8; } .hh .mqb .mqb-b { stroke-dashoffset: 4; }
   .hh .mc-name { font-size: clamp(13px, calc(4.1 * var(--vw)), 17px); }   /* "Приключение" cabe entera en un movil de 375 px */ .hh .mc-stat { font-size: 11px; letter-spacing: .02em; padding: 4px 6px 3px; } .hh .mc-ribbon { font-size: 11px; padding: 4px 8px 3px; }
   .hh-deck { gap: 8px; }
-  .hh-resume { gap: 10px 8px; padding: 10px 12px; } .hh-resume .hr-ic { display: none; }   /* sin la ficha sola en su fila: texto arriba y los dos botones a partes iguales */
-  .hh-resume .btn-ink, .hh-resume .btn-line { flex: 1 1 0; min-width: 0; padding: 9px 8px; font-size: 14px; letter-spacing: .03em; } .hh-resume .btn-ink .ar { display: none; }
+  .hh-resume .startbtn { gap: 10px; padding: 6px 14px 6px 8px; } .hh-resume .sb-ic .ic { width: 38px; height: 38px; }
   .plq { flex-direction: column; gap: 6px; min-height: 0; padding: 10px 6px 14px; text-align: center; }
   .plq::before { inset: 5px 5px 8px; }
   .plq-ic .ic { width: 36px; height: 36px; }

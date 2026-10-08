@@ -227,7 +227,7 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
   .mc-stat { font-size: 13px; padding: 3px 7px 2px; }
   .mc-ribbon { top: -9px; font-size: 13px; padding: 3px 8px 2px; }
   .chipbtn.big { font-size: 15.5px; padding: 8px 14px 7px; }
-  .hh-resume { padding: 6px 10px; gap: 10px; } .hh-resume .hr-ic { display: none; } .hh-resume .hr-t i { display: none; } .hh-resume .btn-ink, .hh-resume .btn-line { padding: 8px 14px; font-size: 15.5px; }
+  .hh-resume .startbtn { padding-block: 4px; } .hh-resume .sb-ic .ic { width: 34px; height: 34px; }
 }
 
 /* Campamento en movil horizontal: las tres cartas en una fila (se desplaza si hace falta) */
@@ -304,7 +304,7 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 /* ==== legibilidad (v0.22): tipografias pixel mas grandes y nitidas; la placa de la pregunta NO se toca ==== */
 html body { -webkit-font-smoothing: none; font-smooth: never; text-rendering: optimizeSpeed; }
 html body .brand-txt > i { font-size: 15.5px; } html body .mc-desc { font-size: 18px; line-height: 1.25; } html body .mc-stat { font-size: 15.5px; } html body .mc-ribbon { font-size: 15.5px; }
-html body .hr-t > b { font-size: 19px; } html body .hr-t > i { font-size: 17px; } html body .hh-ver { font-size: 15.5px; }
+html body .hh-ver { font-size: 15.5px; }
 html body .tag { font-size: 15.5px; } html body #plate .tag { font-size: 10.5px; }
 html body .rm-node > em { font-size: 15.5px; } html body .adv-stats > span { font-size: 15.5px; }
 html body .sb-t > i { font-size: 15.5px; } html body .mode-d { font-size: 19px; } html body .nick > span { font-size: 15.5px; } html body .dy-body > i { font-size: 19px; }

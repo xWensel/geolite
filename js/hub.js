@@ -13,6 +13,9 @@ window.AIQ = window.AIQ || {};
   const top = (back) => `<div class="menu-top">${back ? `<button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button>` : `<img class="menu-rose" src="assets/icons/logo_mark.png" alt="" draggable="false">`}${tools()}</div>`;
   const shell = (inner, back) => `<div class="menu-in hub">${top(back)}${inner}<p class="menu-foot">Geolite · v${A.VERSION}</p></div>`;
   /* donde va una partida guardada (A.adv.summary): tras el Acto III ya no hay rondas numeradas (antes decia "Acto 4 · Ronda 1") */
+  const CONT_RUN = () => A.pick6("Continuar expedición|Continue expedition|Reprendre l'expédition|Continuar expedição|Expedition fortsetzen|Riprendi la spedizione||继续远征|원정 계속하기|遠征を再開|Продолжить экспедицию|Kontynuuj wyprawę");
+  /* la linea pequena del boton de continuar (portada y Aventura): dos trozos que nunca se parten por dentro; si no caben juntos, la moneda abre la segunda linea */
+  const runLine = sv => `<span>${where(sv)}</span><span>${A.icon("coin", "sb-coin")}${sv.coins} · ${A.fmt(sv.score)} ${T("pts", "pts")}</span>`;
   const where = sv => (sv.inf ? T("Modo infinito", "Infinite mode") : sv.act > 3 ? T("Tres actos completados", "Three acts completed") : `${T("Acto", "Act")} ${sv.act} · ${T("Ronda", "Round")} ${sv.round}${sv.asc ? " · A" + sv.asc : ""}`);
 
   /* ------------------------------------------------------------------ pantalla principal */
@@ -50,7 +53,7 @@ window.AIQ = window.AIQ || {};
         ${mc("daily", "Q", "s_compass", "card_compete", T("Reto diario", "Daily challenge"), A.pick6("Una expedición al azar, la misma para todos. 3 intentos que suman.|A random expedition, the same for everyone. 3 attempts, one combined score.|Une expédition au hasard, la même pour tous. 3 essais cumulés.|Expedição aleatória, igual para todos. 3 tentativas que somam.|Zufällige Expedition, für alle gleich. 3 Versuche, eine Summe.|Spedizione a caso, uguale per tutti. 3 tentativi che si sommano.||随机远征，人人相同。3 次尝试，分数累加。|모두에게 똑같은 무작위 원정. 시도 3번의 점수를 합산.|全員共通のランダム遠征。3回の挑戦を合計。|Случайная экспедиция, одна на всех. 3 попытки, очки складываются.|Losowa wyprawa, ta sama dla wszystkich. 3 podejścia, wyniki się sumują."), dMeta)}
       </div>
       <div class="hh-bottom">
-        ${saved && sm ? `<div class="hh-resume"><span class="hr-ic">${A.icon("chip_r")}</span><span class="hr-t"><b>${T("Tienes una expedición guardada", "You have a saved expedition")}</b><i>${where(sm)} · ${sm.coins} ${T("doblones", "doubloons")} · ${A.fmt(sm.score)} ${T("pts", "pts")}</i></span><button class="btn-ink" id="homeCont" data-primary><span>${T("Continuar", "Continue")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button><button class="btn-line" id="homeNew">${T("Nueva partida", "New run")}</button></div>` : ""}
+        ${saved && sm ? `<div class="hh-resume">${startBtn("homeCont", CONT_RUN(), runLine(sm), true)}</div>` : ""}
         <div class="hh-deck">
           ${plaque("plq-codex", "codexBtn", "m_codex", A.t("codex.title"), `${A.fmt(cx.u)} / ${A.fmt(cx.t)}`, (100 * cx.u) / Math.max(1, cx.t), A.ttAttr(A.t("codex.title"), A.tip6("Fichas de lugares, historia y datos clave: se descubren acertando cerca.|Cards for places, history and key facts: found by pinning close.|Cartes de lieux, d'histoire et de faits clés : on les découvre en visant juste.|Cartas de lugares, história e dados-chave: descobertas ao acertar perto.|Karten zu Orten, Geschichte und Kernfakten: entdeckt durch genaue Treffer.|Schede di luoghi, storia e dati chiave: si scoprono colpendo vicino.||地点、历史与关键信息的卡片：准确标出即可发现。|장소, 역사, 핵심 정보 카드: 가깝게 맞히면 발견됩니다.|場所・歴史・重要な事実のカード：近くに当てると見つかる。|Карточки мест, истории и ключевых фактов: открываются точными попаданиями.|Karty miejsc, historii i kluczowych faktów: odkrywasz je celnymi trafieniami.")))}
           ${A.podio.button()}
@@ -65,12 +68,12 @@ window.AIQ = window.AIQ || {};
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
-    if ($("homeCont")) { $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); }; $("homeNew").onclick = () => { A.sfx.card(); screen("adventure"); }; }
+    if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
   }
 
   /* ------------------------------------------------------------------ marco comun de las sub-pantallas (a pantalla completa, sobre el mapa) */
   const scr = (title, inner, cls = "", foot = "") => `<div class="scr ${cls}"><header class="scr-head"><button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button><h2>${title}</h2>${tools()}</header><div class="scr-body">${inner}</div>${foot}</div>`;   // foot: barra fija bajo la lista que se desplaza (Clasico)
-  const startBtn = (id, big, small, primary) => `<button class="startbtn" id="${id}" ${primary ? "data-primary" : ""}><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${big}</b><i>${small}</i></span><span class="sb-ar">${A.icon("u_next", "sm")}</span></button>`;
+  const startBtn = (id, big, small, primary, cls = "") => `<button class="startbtn${cls ? " " + cls : ""}" id="${id}" ${primary ? "data-primary" : ""}><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${big}</b><i>${small}</i></span><span class="sb-ar">${A.icon("u_next", "sm")}</span></button>`;
 
   /* ------------------------------------------------------------------ Clasico: campanas */
   /* portada de cada campana: minicarta pixel art (un protagonista sobre el foco de su color), assets/gen/camp_<id>.webp */
@@ -116,7 +119,7 @@ window.AIQ = window.AIQ || {};
   const ascHtml = i => { if (!i) return T("Estándar", "Standard"); const x = A.adv.ascInfo(i); return `<b>«${x.n}»</b> ${x.d}${x.k ? `<span class="as-k">${x.k}</span>` : ""}`; };
   function adventure() {
     const c = C(), P = A.profile.get(), adv = P.adv, D = A.ADV.DECKS, saved = A.adv.hasSave(), TN = A.ADV.TOPIC_NAMES, R = A.RELICS;
-    const sm = saved && A.adv.summary(), runInfo = sm ? `${where(sm)} · ${sm.coins} ${T("doblones", "doubloons")} · ${A.fmt(sm.score)} ${T("pts", "pts")}` : "";
+    const sm = saved && A.adv.summary();
     const decks = Object.keys(D).map(id => {
       const d = D[id], locked = A.adv.deckLocked(id), ach = locked && A.ACH.find(a => a.id === d.unlock), [rk, su] = DECK_CARD[id];
       const lockTxt = T("Logro: ", "Achievement: ") + (ach ? A.tx(ach.name) + " · " : "") + A.pick6("Supera la Ascensión {n}.|Beat Ascension {n}.|Réussis l'Ascension {n}.|Vença a Ascensão {n}.|Schließe Aufstieg {n} ab.|Supera l'Ascensione {n}.||通过进阶 {n}。|어센션 {n} 클리어.|アセンション{n}をクリア。|Пройди Восхождение {n}.|Pokonaj Wniebowstąpienie {n}.").replace("{n}", (d.asc || 0) + (d.asc ? " «" + A.adv.ascInfo(d.asc).n + "»" : ""));   // el logro que la abre y la Ascension que pide (las barajas se ganan superando Ascensiones)
@@ -129,7 +132,6 @@ window.AIQ = window.AIQ || {};
     const ascTxt = ascHtml(advSel.asc);
     c.dialog(scr(T("Aventura", "Adventure"), `<div class="adv-setup">
       <section class="as-main">
-        ${saved ? `<div class="resume"><span class="tag">${T("Partida guardada", "Saved run")}</span><b>${runInfo}</b><div><button class="btn-ink" id="contBtn" data-primary><span>${T("Continuar", "Continue")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button><button class="btn-line danger" id="abandonBtn">${T("Descartar partida", "Discard run")}</button></div></div>` : ""}
         <h4 class="hub-sub">${T("Baraja inicial", "Starting deck")}</h4><div class="deckrow">${decks}</div>
         <h4 class="hub-sub">${T("Ruta de la expedición", "Expedition route")}</h4>${A.adv.road({ size: "plan" })}
       </section>
@@ -137,18 +139,14 @@ window.AIQ = window.AIQ || {};
         <h4 class="hub-sub">${T("Ascensión", "Ascension")}</h4><div class="stakes">${stakes}<span class="as-mult${advSel.asc ? "" : " off"}" ${A.ttAttr(T("Puntuación final", "Final score"), A.tip6("Al acabar la expedición, el total se multiplica según la Ascensión elegida. No cambia los objetivos de las rondas.|When the expedition ends, the total is multiplied by the chosen Ascension. It doesn't change the round targets.|À la fin de l'expédition, le total est multiplié selon l'Ascension choisie. Les objectifs des manches ne changent pas.|Ao fim da expedição, o total é multiplicado conforme a Ascensão escolhida. Os objetivos das rodadas não mudam.|Am Ende der Expedition wird die Summe mit dem gewählten Aufstieg multipliziert. Die Rundenziele ändern sich nicht.|Alla fine della spedizione il totale viene moltiplicato in base all'Ascensione scelta. Gli obiettivi dei round non cambiano.||远征结束时，总分会乘以所选进阶等级的倍率。不会改变各回合目标。|원정이 끝나면 선택한 어센션에 따라 총점에 배수가 곱해집니다. 라운드 목표는 그대로입니다.|遠征の終了時、合計スコアに選んだアセンションの倍率がかかります。ラウンドの目標は変わりません。|По окончании экспедиции итог умножается в зависимости от выбранного Восхождения. Цели раундов не меняются.|Po zakończeniu wyprawy suma jest mnożona przez wybrany poziom Wniebowstąpienia. Cele rund się nie zmieniają."))}>${A.pick6("Puntos|Score|Score|Pontos|Punkte|Punti||得分|점수|スコア|Очки|Wynik")} ×${A.adv.mulTxt(A.adv.ascMult(advSel.asc))}</span></div><p class="as-asc">${ascTxt}</p>
         <div class="adv-stats"><span>${T("Récord", "Best")} <b>${A.fmt(adv.bestScore)}</b></span><span>${T("Mejor ronda", "Best round")} <b>${adv.bestRound}</b></span><span>${T("Victorias", "Wins")} <b>${adv.wins}</b></span><span>${T("Expediciones", "Runs")} <b>${adv.runs}</b></span></div>
         <p class="as-relics">${A.icon("cards", "sm")}${A.RELIC_IDS.length} ${T("reliquias por descubrir", "relics to discover")}</p>
-        ${startBtn("goBtn", T("Nueva expedición", "New expedition"), A.tx(D[advSel.deck].n) + " · " + T("Ascensión", "Ascension") + " " + advSel.asc, !saved)}
+        <div class="as-go">${sm ? startBtn("contBtn", CONT_RUN(), runLine(sm), true) : ""}${startBtn("goBtn", T("Nueva expedición", "New expedition"), `<span>${A.tx(D[advSel.deck].n)}</span><span>${A.icon(STAKE_CHIP[advSel.asc], "sb-coin")}${T("Ascensión", "Ascension")} ${advSel.asc}</span>`, !saved, saved ? "alt" : "")}</div>
       </aside></div>`, "s-adv"), "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
     document.querySelectorAll(".dcard").forEach(b => (b.onclick = () => { advSel.deck = b.dataset.deck; A.sfx.card(); adventure(); }));
     document.querySelectorAll(".stake").forEach(b => (b.onclick = () => { advSel.asc = +b.dataset.asc; A.sfx.ui(); adventure(); }));
     const confirm2 = (btn, msg, act, onArm) => { let armed = false, tm = 0; const html = btn.innerHTML; btn.addEventListener("click", e => { if (armed) { clearTimeout(tm); return act(); } e.stopImmediatePropagation(); armed = true; if (onArm) onArm(); btn.classList.add("armed"); (btn.querySelector("b") || btn).textContent = msg; A.sfx.deny(); tm = setTimeout(() => { armed = false; btn.classList.remove("armed"); btn.innerHTML = html; }, 4000); }, true); };
     const funeral = () => { if (A.dealer && A.dealer.funeral) A.dealer.funeral(A.adv.summary && A.adv.summary()); };   // el crupier le hace un funeral a tu expedicion guardada
-    if (saved) {
-      $("contBtn").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };
-      $("abandonBtn").onclick = () => { A.adv.abandon(); A.sfx.deny(); adventure(); };
-      confirm2($("abandonBtn"), T("¿Seguro? Pulsa otra vez", "Sure? Press again"), () => {}, funeral);
-    }
+    if (saved) $("contBtn").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // descartarla = empezar otra (doble pulsacion y funeral del crupier)
     $("goBtn").onclick = () => { A.sfx.depart(); if (saved) A.adv.abandon(); enterRun(() => A.adv.begin({ deck: advSel.deck, asc: advSel.asc })); };
     if (saved) confirm2($("goBtn"), T("Esto borra tu partida guardada. Pulsa otra vez", "This deletes your saved run. Press again"), () => {}, funeral);
   }
