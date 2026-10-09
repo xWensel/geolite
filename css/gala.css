@@ -206,3 +206,120 @@ html.reduce-motion .gx-vd *, html.reduce-motion .gx-vd { animation-duration: 0s 
   .gx-vd-rows.two { grid-template-columns: minmax(0, 1fr); }
   .gx-vd-acts .gx-btn { flex: 1 1 auto; }
 }
+
+/* ---------------------------------------------------------------- AJUSTES (v0.3.38): el libro de la casa. Antes iba sin escalar (a 1080p ocupaba un tercio
+   de la pantalla) y con tarjetas oscuras translucidas; ahora escala con --k como el resto de pantallas, el indice ocupa 3 columnas y el contenido 9
+   sobre un panel de fieltro con marco de laton. Solo cambia el aspecto: el marcado y la logica son los de siempre (index.html, js/game.js, js/controles.js) */
+#settings { zoom: var(--k); --vh: calc(1vh / var(--k)); --vw: calc(1vw / var(--k));
+  font-family: var(--sans); color: var(--gx-txt);
+  background: url(../assets/dados/felt.png) 0 0 / 128px 128px, radial-gradient(ellipse 90% 80% at 50% 0%, #173b2b 0%, #0b1d15 55%, #050c08 100%); image-rendering: pixelated; }
+#settings::after { opacity: .035; }
+#settings .set-top { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; align-items: center; padding: 16px 40px 0; border-bottom: 0; background: none; }
+#settings .set-back { grid-column: 1 / 4; justify-self: start; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 16px 8px; border-radius: 0; clip-path: var(--gx-notch);
+  font-family: var(--sans); font-size: 24px; letter-spacing: 0; text-transform: none; color: var(--gx-ink); filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78));
+  background: linear-gradient(#fffaf0 0 4px, var(--gx-paper) 4px calc(100% - 6px), #c2b28c calc(100% - 6px)); box-shadow: inset 0 0 0 2px var(--gx-o); transition: transform .12s steps(2, end); }
+#settings .set-back:hover { transform: translateY(-2px); background: linear-gradient(#fffaf0 0 4px, #fffaf0 4px calc(100% - 6px), #c2b28c calc(100% - 6px)); }
+#settings .set-back .ic { width: 22px; height: 22px; filter: brightness(0) saturate(100%) invert(10%) sepia(18%) saturate(900%) hue-rotate(95deg); }
+html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: var(--mono); font-size: 16px; line-height: 1; padding: 3px 5px 2px; box-shadow: inset 0 0 0 2px currentColor; opacity: .75; }
+#settings .set-title { grid-column: 4 / 10; justify-self: start; gap: 14px; }
+#settings .set-title h1 { font-family: var(--serif); font-weight: 400; font-size: 56px; line-height: .9; letter-spacing: 0; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08, 0 0 20px rgba(255, 196, 100, .22); }
+#settings .set-h-ic .ic { width: 40px; height: 40px; }
+#settings .set-ver { grid-column: 10 / 13; font-size: 16px; color: var(--gx-txt-2); }
+#settings .set-body { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; padding: 14px 40px 12px; max-width: none; width: 100%; margin: 0; }
+
+/* el indice: fichas de seccion; la abierta es un naipe con el filo de laton */
+:root body #settings .set-nav { grid-column: 1 / 4; width: auto; gap: 8px; align-self: start; }
+:root body #settings .set-nav button { min-height: 76px; padding: 10px 14px 12px; gap: 14px; border-radius: 0; clip-path: var(--gx-notch); transform: none;
+  background: rgba(5, 12, 9, .5); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .28); }
+:root body #settings .set-nav button:hover:not(.on) { background: rgba(212, 160, 74, .12); transform: translateX(2px); }
+:root body #settings .set-nav button.on { background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, var(--gx-paper);
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 8px 0 0 2px var(--gx-rim), inset 0 -4px 0 2px var(--gx-paper-lo); }
+#settings .set-nav button.on::before { display: none; }
+:root body #settings .set-nav-ic .ic { width: 40px; height: 40px; }
+#settings .set-nav-t { gap: 2px; }
+#settings .set-nav-t { min-width: 0; } #settings .set-nav-t b { font-family: var(--sans); font-weight: 400; font-size: 24px; line-height: 1; color: var(--gx-txt); overflow-wrap: anywhere; }
+:root body #settings .set-nav-t small { font-family: var(--sans); font-size: 18px; letter-spacing: 0; text-transform: none; line-height: 1.1; color: var(--gx-txt-2); }
+#settings .set-nav button.on .set-nav-t b { color: var(--gx-ink); } :root body #settings .set-nav button.on .set-nav-t small { color: var(--gx-ink-2); }
+
+/* el contenido: un panel de fieltro con marco de laton; las tarjetas de antes son secciones separadas por un filete */
+#settings .set-panes { grid-column: 4 / 13; min-height: 0; padding: 18px 24px 16px; clip-path: var(--gx-notch);
+  background: radial-gradient(130% 90% at 50% 0%, var(--gx-felt-1) 0%, var(--gx-felt-2) 55%, var(--gx-felt-3) 100%);
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 6px var(--gx-rim), inset 0 0 0 8px var(--gx-o), inset 0 40px 56px -40px rgba(255, 214, 140, .14);
+  scrollbar-color: var(--gx-rim) transparent; }
+#settings .set-grid { gap: 6px 32px; }
+#settings .set-card { padding: 2px 0 14px; border-radius: 0; background: none; box-shadow: none; border-bottom: 2px solid var(--gx-line); }
+#settings .set-card:last-child, #settings .set-col > .set-card:last-child { border-bottom: 0; }
+:root body #settings .set-card > h3 { font-family: var(--mono); font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); margin: 0 0 12px; }
+#settings .set-card h3 > em { font-family: var(--sans); font-size: 18px; letter-spacing: 0; color: var(--gx-txt-2); }
+:root body #settings .set-note { font-family: var(--sans); font-size: 18px; line-height: 1.2; color: var(--gx-txt-2); margin-top: 10px; }
+#settings .set-card .row-sw, #settings .set-card .fader { padding: 9px 0; border-bottom: 2px solid var(--gx-line); }
+#settings .set-card .row-sw:last-child, #settings .set-card .fader:last-child { border-bottom: 0; }
+#settings .rs-t label, #settings .fader label, #settings .stp-l { font-family: var(--sans); font-weight: 400; font-size: 24px; line-height: 1.05; }
+:root body #settings .rs-t > small { font-family: var(--sans); font-size: 18px; line-height: 1.15; color: var(--gx-txt-2); }
+#settings .fader output { font-family: var(--sans); font-size: 22px; color: var(--gx-rim-hi); }
+
+/* interruptor, selector, deslizador, botones pequenos y casillas: los del sistema (esquinas de pixel, laton, papel) */
+#settings .sw { width: 64px; height: 34px; border-radius: 0; clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o); }
+#settings .sw i { top: 6px; left: 6px; width: 22px; height: 22px; border-radius: 0; background: #b9c6b6; box-shadow: inset 0 -3px 0 #7f8e80; }
+#settings .sw[aria-checked="true"] { background: var(--gx-gold); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 2px 0 2px var(--gx-gold-hi); }
+#settings .sw[aria-checked="true"] i { left: 36px; background: #fffaf0; box-shadow: inset 0 -3px 0 #c2b28c; }
+#settings .seg { border-radius: 0; clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o); }
+#settings .seg button { font-family: var(--sans); font-size: clamp(18px, 5.4cqw, 22px); letter-spacing: 0; text-transform: none; color: var(--gx-txt-2); padding: 8px 4px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#settings .seg.s4 button { font-size: 18px; white-space: normal; line-height: 1; hyphens: auto; overflow-wrap: anywhere; }
+#settings .seg button.on { color: var(--gx-ink); } #settings .seg button:hover:not(.on) { color: var(--gx-txt); }
+#settings .seg > i { border-radius: 0; background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
+#settings input[type=range]::-webkit-slider-runnable-track { height: 12px; border-radius: 0; background: linear-gradient(to right, var(--gx-rim) var(--p, 50%), #0b2118 var(--p, 50%)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+#settings input[type=range]::-webkit-slider-thumb { width: 22px; height: 30px; margin-top: -9px; border-radius: 0; clip-path: var(--gx-notch); background: linear-gradient(#fffaf0 0 4px, var(--gx-paper) 4px calc(100% - 5px), #c2b28c calc(100% - 5px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+#settings .ftrack { opacity: .5; }
+#settings .mini-btn, #settings .chip-t { border-radius: 0; clip-path: var(--gx-notch); font-family: var(--sans); font-size: 20px; letter-spacing: 0; text-transform: none; color: var(--gx-ink);
+  background: linear-gradient(#fffaf0 0 3px, var(--gx-paper) 3px calc(100% - 4px), #c2b28c calc(100% - 4px)); box-shadow: inset 0 0 0 2px var(--gx-o); padding: 4px 12px 6px; }
+#settings .mini-btn:hover, #settings .chip-t:hover { background: linear-gradient(#fff4c8 0 3px, var(--gx-gold) 3px calc(100% - 4px), var(--gx-gold-lo) calc(100% - 4px)); color: var(--gx-ink); }
+#settings .chip-t { width: 40px; height: 34px; padding: 0; } #settings .chip-t.on { background: linear-gradient(#fff4c8 0 3px, var(--gx-gold) 3px calc(100% - 4px), var(--gx-gold-lo) calc(100% - 4px)); }
+#settings .mini-btn.done { background: #3f9b62; color: #fff; }
+#settings .stp-c { border-radius: 0; clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o); }
+#settings .stp-b { border-radius: 0; clip-path: var(--gx-notch); background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo); }
+#settings .stp-b:hover:not(:disabled) { background: var(--gx-gold-hi); }
+#settings .stp-v { font-family: var(--sans); font-weight: 400; font-size: 24px; color: var(--gx-rim-hi); }
+#settings .stp-tag, #settings .sn-no { font-family: var(--mono); font-size: 16px; color: var(--gx-txt-2); }
+#settings .kslot { height: 28px; border-radius: 0; clip-path: var(--gx-notch); font-family: var(--mono); font-size: 16px; color: var(--gx-ink);
+  background: var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -3px 0 2px #c2b28c; }
+#settings .kb-r { padding: 2px 0; border-bottom: 2px solid var(--gx-line); } :root body #settings .kb-h { font-family: var(--sans); font-size: 18px; letter-spacing: 0; text-transform: none; color: var(--gx-txt-2); }
+#settings .kb-r > span:first-child, #settings .kb-r > b:first-child { font-family: var(--sans); font-size: 20px; }
+#settings .kslot.empty { background: #0b2118; color: var(--gx-txt-2); box-shadow: inset 0 0 0 2px var(--gx-o); }
+#settings .kslot.lock { opacity: .8; }
+
+/* Datos: los botones de la casa (papel) y los de borrar (rojo, se arman con un primer clic) */
+:root body #settings .row-btn { justify-content: center; min-height: 44px; padding: 5px 14px 7px; margin-bottom: 6px; border: 0; border-radius: 0; clip-path: var(--gx-notch);
+  font-family: var(--sans); font-size: 22px; letter-spacing: 0; text-transform: none; color: var(--gx-ink); white-space: normal; line-height: 1.05; text-align: center;
+  background: linear-gradient(#fffaf0 0 4px, var(--gx-paper) 4px calc(100% - 6px), #c2b28c calc(100% - 6px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+:root body #settings .row-btn > span { font-size: 22px; }
+:root body #settings .row-btn:hover { background: linear-gradient(#fff4c8 0 4px, var(--gx-gold) 4px calc(100% - 6px), var(--gx-gold-lo) calc(100% - 6px)); }
+:root body #settings .row-btn.danger { color: #ffd2cd; background: #2a0d0b; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-red); }
+:root body #settings .row-btn.danger:hover, :root body #settings .row-btn.danger.armed { color: #fff; background: linear-gradient(var(--gx-red-hi) 0 4px, var(--gx-red) 4px calc(100% - 6px), var(--gx-red-lo) calc(100% - 6px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+
+/* idiomas: rejilla de 6, el elegido en papel */
+#settings .langgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+#settings .langgrid button { padding: 12px 6px 10px; gap: 8px; border: 0; border-radius: 0; clip-path: var(--gx-notch); font-family: var(--sans); font-size: 20px; letter-spacing: 0; text-transform: none;
+  color: var(--gx-txt); background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .25); transform: none; }
+#settings .langgrid button:hover { background: rgba(212, 160, 74, .16); }
+#settings .langgrid button.on { color: var(--gx-ink); background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
+#settings .lang-flag { width: 40px; box-shadow: 0 0 0 2px var(--gx-o); border-radius: 0; }
+
+/* tu nombre: un papel donde se escribe */
+#settings .sn-row input { height: 52px; border-radius: 0; clip-path: var(--gx-notch); font-family: var(--sans); font-size: 26px; color: var(--gx-ink);
+  background: var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 4px 0 2px #ded2b4; }
+
+/* el pie con los atajos: teclas de papel */
+#settings .set-keys { border-top: 2px solid var(--gx-line); font-family: var(--sans); font-size: 18px; color: var(--gx-txt-2); padding: 10px 40px 14px; }
+#settings .set-keys kbd { border-radius: 0; font-family: var(--mono); font-size: 16px; color: var(--gx-ink); background: var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -2px 0 2px #c2b28c; padding: 3px 7px 2px; }
+
+/* el aviso de reasignar del crupier (#rbOv) y sus cajas: tambien carteles del sistema */
+#settings .rb-box { border-radius: 0; clip-path: var(--gx-notch); background: radial-gradient(130% 90% at 50% 0%, var(--gx-felt-1) 0%, var(--gx-felt-2) 55%, var(--gx-felt-3) 100%);
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 8px var(--gx-rim), inset 0 0 0 10px var(--gx-o); }
+
+@media (max-width: 899px), (max-height: 519px) {
+  #settings .set-top { padding: 12px 16px 0; } #settings .set-title h1 { font-size: 40px; }
+  #settings .set-body { grid-template-columns: minmax(0, 1fr); padding: 12px 16px; }
+  :root body #settings .set-nav { grid-column: 1; flex-direction: row; overflow-x: auto; } #settings .set-panes { grid-column: 1; }
+  #settings .langgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

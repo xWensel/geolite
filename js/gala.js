@@ -47,6 +47,12 @@ window.AIQ = window.AIQ || {};
       <div class="gx-acts col"><button class="gx-btn pri wide" tabindex="-1">${abc} <span class="gx-k"><kbd class="k-kb">Esc</kbd></span></button><button class="gx-btn wide" tabindex="-1">${abc}</button></div>
       <div class="gx-foot"><div class="gx-hr"></div><div class="gx-acts"><button class="gx-btn gho sm" tabindex="-1">${abc}</button></div><p class="gx-note">${abc}</p></div></section></div></div></div></div>`;
     document.body.appendChild(w); setTimeout(() => w.remove(), 900);
+    /* v0.3.38: Ajustes tambien (su primera apertura daba 11 fotogramas perdidos): se pinta el de verdad, casi invisible y sin recibir clics */
+    const sh = document.getElementById("setSh");
+    if (sh && sh.classList.contains("hidden")) {
+      sh.style.opacity = ".02"; sh.style.pointerEvents = "none"; sh.classList.remove("hidden");
+      setTimeout(() => { sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); }, 900);
+    }
   }
   /* glifo de la accion: tecla con teclado y boton con mando (css/mando.css decide cual se ve) */
   const keyHint = (kb, pad) => `<span class="gx-k"><kbd class="k-kb">${kb}</kbd>${pad ? `<i class="gl" data-gl="${pad}"></i>` : ""}</span>`;
