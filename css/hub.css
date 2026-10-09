@@ -259,10 +259,5 @@ html.reduce-motion .ach-fake.drop { animation: ach-fade .5s forwards; } html.red
 @keyframes abLbl { 0% { opacity: 0; transform: translateY(4px); } 18% { opacity: 1; transform: none; } 80% { opacity: 1; transform: translateY(-6px); } 100% { opacity: 0; transform: translateY(-9px); } }
 html.reduce-motion .ab-perk.fl0, html.reduce-motion .ab-perk.fl1, html.reduce-motion .ab-perk.fl2 { animation: abGold .6s steps(1, end) forwards; }
 html.reduce-motion .ab-perk .ab-lbl { animation: abLblRm 1.1s steps(1, end) forwards; } @keyframes abLblRm { 0%, 99% { opacity: 1; } 100% { opacity: 0; } }
-.v-lines li.vl-perk span { display: inline-flex; align-items: center; gap: 6px; color: #ffe08a; }
-.v-lines li.vl-perk .ic { width: 22px; height: 22px; image-rendering: pixelated; flex: none; }
-/* tanda 3: en el veredicto, el amuleto que se parte sale apagado */
-.v-lines li.vl-broke span { color: rgba(242, 233, 214, .6); }
-.v-lines li.vl-broke .ic { filter: grayscale(1) brightness(.75); }
 /* tanda 4: con la Mesa de minimos, el objetivo de siempre sale tachado junto al rebajado */
 .adv-goal .of-was { opacity: .6; margin-right: 3px; text-decoration-thickness: 2px; }

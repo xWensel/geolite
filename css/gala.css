@@ -129,3 +129,80 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
   .gx-pause .gx-railw, .gx-pause.solo .gx-railw { grid-column: 1 / -1; }
   .gx-pause .gx-dealer, .gx-pause .gx-spot { display: none; }
 }
+
+/* ---------------------------------------------------------------- VEREDICTO (v0.3.37): titular | ticket de caja | ficha y crupier, y los botones abajo a la derecha.
+   .vd sigue siendo la raiz que ajusta A.fitK (zoom con la escala de la pantalla); aqui se rehace entera sobre la reticula de 12 columnas */
+#dlg.verdict > .gx-vd { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) auto; column-gap: 16px; row-gap: 20px;
+  max-width: none; min-height: 100%; margin: 0; padding: 32px 40px; align-items: center; color: var(--gx-txt); text-align: left; }
+.gx-vd-head { grid-column: 1 / 5; grid-row: 1; display: grid; gap: 12px; align-content: center; min-width: 0; }
+.gx-vd-head .gx-t-xl { font-size: 72px; overflow-wrap: anywhere; text-wrap: balance; }
+.gx-vd-head .gx-lead { max-width: 30ch; }
+.gx-vd-head .gx-lead .ic { width: 22px; height: 22px; vertical-align: -4px; }
+.gx-vd-meter { position: relative; height: 16px; margin-top: 6px; background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-vd-meter i { position: absolute; inset: 0 auto 0 0; background: var(--gx-red); box-shadow: inset 0 2px 0 var(--gx-red-hi), inset 0 0 0 2px var(--gx-o); }
+.gx-vd-meter.full i { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 0 0 2px var(--gx-o); }
+.gx-vd-meter em { position: absolute; top: -6px; bottom: -6px; width: 4px; margin-left: -2px; background: var(--gx-txt); box-shadow: 0 0 0 2px var(--gx-o); }   /* el objetivo */
+.gx-vd-mid { grid-column: 5 / 9; grid-row: 1; min-width: 0; align-self: center; }
+.gx-vd.wide .gx-vd-mid { grid-column: 5 / 11; } .gx-vd.wide .gx-vd-side { grid-column: 11 / 13; }   /* diez lugares sin crupier (Clasico): el ticket gana dos columnas */
+
+/* el ticket: papel con los bordes perforados, filas como en caja y el sello encima */
+.gx-vd-ticket { display: grid; gap: 8px; padding: 26px 22px 30px; box-shadow: inset 0 -4px 0 var(--gx-paper-lo);
+  clip-path: polygon(0 8px, 2% 0, 4% 8px, 6% 0, 8% 8px, 10% 0, 12% 8px, 14% 0, 16% 8px, 18% 0, 20% 8px, 22% 0, 24% 8px, 26% 0, 28% 8px, 30% 0, 32% 8px, 34% 0, 36% 8px, 38% 0, 40% 8px, 42% 0, 44% 8px, 46% 0, 48% 8px, 50% 0, 52% 8px, 54% 0, 56% 8px, 58% 0, 60% 8px, 62% 0, 64% 8px, 66% 0, 68% 8px, 70% 0, 72% 8px, 74% 0, 76% 8px, 78% 0, 80% 8px, 82% 0, 84% 8px, 86% 0, 88% 8px, 90% 0, 92% 8px, 94% 0, 96% 8px, 98% 0, 100% 8px, 100% calc(100% - 8px), 98% 100%, 96% calc(100% - 8px), 94% 100%, 92% calc(100% - 8px), 90% 100%, 88% calc(100% - 8px), 86% 100%, 84% calc(100% - 8px), 82% 100%, 80% calc(100% - 8px), 78% 100%, 76% calc(100% - 8px), 74% 100%, 72% calc(100% - 8px), 70% 100%, 68% calc(100% - 8px), 66% 100%, 64% calc(100% - 8px), 62% 100%, 60% calc(100% - 8px), 58% 100%, 56% calc(100% - 8px), 54% 100%, 52% calc(100% - 8px), 50% 100%, 48% calc(100% - 8px), 46% 100%, 44% calc(100% - 8px), 42% 100%, 40% calc(100% - 8px), 38% 100%, 36% calc(100% - 8px), 34% 100%, 32% calc(100% - 8px), 30% 100%, 28% calc(100% - 8px), 26% 100%, 24% calc(100% - 8px), 22% 100%, 20% calc(100% - 8px), 18% 100%, 16% calc(100% - 8px), 14% 100%, 12% calc(100% - 8px), 10% 100%, 8% calc(100% - 8px), 6% 100%, 4% calc(100% - 8px), 2% 100%, 0 calc(100% - 8px)); }
+.gx-vd-ticket::before { display: none; }
+.gx-vd-th { display: grid; justify-items: center; gap: 2px; text-align: center; padding-bottom: 2px; }
+.gx-vd-rows { display: grid; gap: 6px; }
+.gx-vd-rows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }   /* diez lugares (Clasico): dos columnas para que quepa sin encoger */
+.gx-vd-ticket .gx-lead-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gx-vd-ticket .gx-lead-row span i { font-style: normal; color: var(--gx-ink-2); }
+.gx-vd-ticket .gx-lead-row.big { font-size: 26px; } .gx-vd-ticket .gx-lead-row.big b { font-size: 40px; line-height: 1; }
+.gx-vd-ticket .gx-lead-row .ic { width: 22px; height: 22px; vertical-align: -4px; margin-right: 6px; image-rendering: pixelated; }
+.gx-vd-ticket .vl-half b, .gx-vd-ticket .vl-broke { opacity: .6; } .gx-vd-ticket .vl-broke .ic { filter: grayscale(1); }
+.gx-vd-ticket .vl-bet span { color: var(--gx-gold-lo); } .gx-vd-ticket .vl-lost b { color: #c0392b; }
+.gx-vd-ticket .odo { height: 1em; }
+.gx-vd-stamp { justify-self: center; margin-top: 10px; max-width: 92%; padding: 4px 18px 0; font-family: var(--serif); font-weight: 400; font-size: 44px; line-height: .95; text-align: center; text-wrap: balance;
+  color: #c3332a; box-shadow: inset 0 0 0 4px #c3332a; transform: rotate(-7deg); mix-blend-mode: multiply; opacity: .9; }
+.gx-vd-stamp.no { color: #7b3a8f; box-shadow: inset 0 0 0 4px #7b3a8f; transform: rotate(5deg); }
+
+/* ficha (medalla) y crupier; la tarjeta del IQ en el Clasico */
+.gx-vd-side { grid-column: 9 / 13; grid-row: 1; display: grid; justify-items: center; align-content: center; gap: 14px; min-width: 0; }
+.gx-vd-medal { position: relative; width: 120px; height: 120px; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .7)); }
+.gx-vd-medal > .ic { width: 100%; height: 100%; image-rendering: pixelated; }
+.gx-vd-crown { position: absolute; top: -18%; right: -10%; width: 44%; transform: rotate(14deg); } .gx-vd-crown .ic { width: 100%; height: auto; }
+.gx-vd-dealer { width: 100%; display: grid; justify-items: center; min-height: 0; } .gx-vd-dealer:empty { display: none; }
+.gx-vd .dealer.inline { flex-direction: column; align-items: center; gap: 10px; transform: none; }
+.gx-vd .dealer.inline .dl-face { width: 224px; height: 224px; order: 2; }
+.gx-vd .dealer.inline .dl-face > .cr-cv:not(.mini) { top: auto; bottom: 0; transform: translateX(-50%); }
+.gx-vd .dealer.inline .dl-bubble { margin: 0; max-width: min(100%, 380px); font-size: calc(22px * var(--dll, 1)); text-align: center; order: 1; transform-origin: 50% 100%; padding-bottom: 20px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(50% + 10px) calc(100% - 12px), 50% 100%, calc(50% - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+.gx-vd-iq { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 14px; width: min(100%, 320px); }
+.gx-vd-iq > .ic, .gx-vd-iq > img { grid-row: span 2; width: 56px; height: 56px; image-rendering: pixelated; }
+.gx-vd-iq .odo { font-family: var(--serif); font-size: 56px; line-height: 1; height: 1em; }
+.gx-vd-iq em { grid-column: 1 / -1; padding-top: 6px; border-top: 2px dotted var(--gx-line); font-style: normal; font-size: 22px; color: #c3332a; }
+
+/* los botones: discretos a la izquierda, los de verdad a la derecha (el principal, el ultimo) */
+.gx-vd-acts { grid-column: 1 / -1; grid-row: 2; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.gx-vd-acts .gx-acts { flex-wrap: wrap; justify-content: flex-end; } .gx-vd-acts .gx-acts:last-child { margin-left: auto; }
+.gx-vd-acts .gx-acts:empty { display: none; }
+
+/* entrada: el titular desde la izquierda, el ticket sale de la caja y sus filas se imprimen una a una; el sello cae al final */
+.gx-vd.gx-in .gx-vd-mid { animation: gx-print .5s var(--gx-ease) .15s both; }
+.gx-vd.gx-in .gx-vd-in { animation: gx-pop .16s steps(2, end) var(--d, .5s) both; }
+.gx-vd.gx-in .gx-vd-stamp { animation: gx-stamp .3s steps(3, end) 1.5s both; }
+.gx-vd.gx-in .gx-vd-stamp.no { animation-name: gx-stamp-no; }
+.gx-vd.gx-in .gx-vd-medal { animation: gx-pop .2s steps(2, end) .3s both; }
+.gx-vd.gx-in .gx-vd-acts { animation: gx-fade .3s ease-out .9s both; }
+@keyframes gx-print { from { clip-path: inset(0 0 100% 0); transform: translateY(-24px); } to { clip-path: inset(0 0 -40px 0); transform: none; } }
+@keyframes gx-stamp { 0% { opacity: 0; transform: rotate(-7deg) scale(1.8); } 60% { opacity: .9; transform: rotate(-7deg) scale(.94); } 100% { opacity: .9; transform: rotate(-7deg) scale(1); } }
+@keyframes gx-stamp-no { 0% { opacity: 0; transform: rotate(5deg) scale(1.8); } 60% { opacity: .9; transform: rotate(5deg) scale(.94); } 100% { opacity: .9; transform: rotate(5deg) scale(1); } }
+html.reduce-motion .gx-vd *, html.reduce-motion .gx-vd { animation-duration: 0s !important; animation-delay: 0s !important; }
+
+/* ventana estrecha o movil: una columna (titular, ticket, crupier, botones) y se desplaza */
+@media (max-width: 899px), (max-height: 519px) {
+  #dlg.verdict > .gx-vd { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 18px 16px 24px; align-content: start; }
+  .gx-vd-head, .gx-vd-mid, .gx-vd-side, .gx-vd-acts { grid-column: 1; grid-row: auto; }
+  .gx-vd-head .gx-t-xl { font-size: 48px; }
+  .gx-vd-side { grid-template-columns: auto minmax(0, 1fr); justify-items: start; }
+  .gx-vd-medal { width: 72px; height: 72px; } .gx-vd .dealer.inline .dl-face { width: 96px; height: 96px; }
+  .gx-vd-rows.two { grid-template-columns: minmax(0, 1fr); }
+  .gx-vd-acts .gx-btn { flex: 1 1 auto; }
+}

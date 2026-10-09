@@ -622,7 +622,7 @@
   }
   function startLevel_(idx) {
     if (!S.run && A.dealer && A.dealer.noteClassic) A.dealer.noteClassic();     // juegas al Clasico: al volver a la portada, el crupier lo comenta
-    document.body.classList.remove("title-on"); S.level = idx; S.qs = lv().questions(); S.qi = 0; S.levelScore = 0; S.streak = 0; S.hits = 0; S.phase = "intro"; S.runMax0 = S.runMax;   // maximo acumulado al empezar el nivel (Reintentar vuelve a el)
+    document.body.classList.remove("title-on"); S.level = idx; S.qs = lv().questions(); S.qi = 0; S.levelScore = 0; S.log = []; S.streak = 0; S.hits = 0; S.phase = "intro"; S.runMax0 = S.runMax;   // maximo acumulado al empezar el nivel (Reintentar vuelve a el)
     closeDialog(); $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden");
     chrome(true); $("factText").textContent = ""; odoNow($("scLevel"), 0); updateHud();
     showIntro(nextQuestion);
@@ -820,6 +820,7 @@
     const ratio = sc.dist / sc.distMax;
     if (guess && ratio >= 0.75) S.hits++;
     S.levelScore += total; S.runMax += L.maxPerQ;
+    if (S.log) S.log.push({ n: A.tx(o.clue && o.answer ? o.answer : o.name), km: guess ? km : null, pts: total });   // v0.3.37: el ticket del veredicto, lugar a lugar
     A.profile.question({ km: guess ? km : null, inside: !!(guess && isC && !af && km === 0), area: !!(guess && af && km === 0), ratio, streak: S.streak, left, limit: S.limit, timeout: !guess });
 
     const tier = !guess ? 5 : isC && km === 0 ? 4 : km <= lim[2] ? 4 : km <= lim[1] ? 3 : km <= lim[0] ? 2 : km <= 2 * lim[0] ? 1 : 0;   // veredicto = los anillos: <=75 oro, <=150 plata, <=300 bronce
@@ -941,22 +942,34 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     });
   }
 
-  /* ------------------------------------------------------------ veredictos */
-  function verdict({ kind, level, tag, title, text, stats, stamp, stampSub, iq, tier, tierName, buttons, art, lines }) {
-    const idc = iq != null ? `<div class="idcard">${tier != null ? A.icon("iq_" + tier) : `<img class="ic" src="assets/icons/logo_mark.png" alt="">`}<span>${A.t("iq.label")}</span><span class="odo" id="iqNum"></span><em>${tierName}</em></div>` : "";
+  /* ------------------------------------------------------------ veredictos (v0.3.37, Naipe de gala: css/gala.css)
+     Una sola pantalla para todos (ronda superada o fallida, jefe, nivel del Clasico, fin de expedicion, Reto diario): a la izquierda el titular,
+     en el centro el ticket de caja (lugar a lugar, puntos, lo que paga la casa y el sello) y a la derecha la ficha y el crupier. Los botones van
+     abajo a la derecha y el principal, el ultimo, con su tecla. meter: [puntos, objetivo] dibuja la barra bajo el titular */
+  const TICKET_HEAD = "Casa Geolite · caja|Geolite House · cashier|Maison Geolite · caisse|Casa Geolite · caixa|Haus Geolite · Kasse|Casa Geolite · cassa||Geolite 赌场 · 收银台|Geolite 하우스 · 계산대|Geolite ハウス・会計|Дом Geolite · касса|Dom Geolite · kasa";
+  function verdict({ kind, level, tag, title, text, stats, stamp, iq, tier, tierName, buttons, art, lines, meter, places: withPlaces }) {
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     const chip = kind === "" ? "chip_r" : art === "chest" ? "chip_p" : kind === "win" ? "chip_b" : "chip_g";
-    const medal = `<div class="v-medal ${kind}">
-        <i class="v-medal-glow"></i>${art === "chest" ? `<i class="v-medal-crown">${A.icon("crown")}</i>` : ""}
-        <i class="v-medal-chip">${A.icon(chip)}</i>
-      </div>`;
-    dialog(`<div class="vd">
-      <div class="v-main">
-        <span class="tag">${tag || A.t("v.level", { n: pad2(level) })}</span>
-        <h2>${title}</h2><p>${text}</p>${lines && lines.length ? `<ul class="v-lines">${lines.map((l, i) => `<li${l[2] ? ' class="vl-perk' + (l[3] ? " vl-" + l[3] : "") + '"' : ""} style="animation-delay:${0.5 + i * 0.12}s"><span>${l[2] ? A.icon(l[2], "sm") : ""}${l[0]}</span><i></i><b>${l[1]}</b></li>`).join("")}</ul>` : ""}
-        <div class="v-stats">${stats.map((s, i) => `<div><span>${s[0]}</span><span class="odo" id="vs${i}"></span></div>`).join("")}</div>
-        <div class="v-actions">${buttons.map(b => `<button class="${b.cls}" id="${b.id}" ${b.primary ? "data-primary" : ""}><span>${b.label}</span>${b.arrow ? `<span class="ar">${A.icon("u_next", "sm")}</span>` : ""}</button>`).join("")}</div>
-      </div>
-      <div class="v-side">${medal}<div class="v-dealer" id="vdDealer"></div>${idc}</div>
+    const log = withPlaces && S.log && S.qs && S.log.length === S.qs.length ? S.log : [];   // lugar a lugar, solo si la ronda se jugo entera en esta sesion (reanudada a medias, no)
+    let d = 0; const dl = () => `style="--d:${(0.55 + 0.08 * d++).toFixed(2)}s"`;
+    const two = log.length > 6;                                                     // diez lugares (Clasico): dos columnas, sin la distancia para que el nombre quepa
+    const places = log.map(e => `<div class="gx-lead-row gx-vd-in" ${dl()}><span>${esc(e.n)}${two ? "" : e.km != null ? ` <i>· ${fmtKm(e.km)}</i>` : ` <i>· —</i>`}</span><s></s><b>${A.fmt(e.pts)}</b></div>`).join("");
+    const lineRows = (lines || []).map(l => `<div class="gx-lead-row gx-vd-in${l[2] ? " perk" : ""}${l[3] ? " " + l[3].split(" ").map(c => "vl-" + c).join(" ") : ""}" ${dl()}><span>${l[2] ? A.icon(l[2], "sm") : ""}${l[0]}</span><s></s><b>${l[1]}</b></div>`).join("");
+    const statRow = (s, i) => `<div class="gx-lead-row gx-vd-in${i === 0 ? " big" : ""}" ${dl()}><span>${s[0]}</span><s></s><b class="odo" id="vs${i}"></b></div>`;
+    const ticket = `<div class="gx-vd-ticket gx-paper"><div class="gx-vd-th"><span class="gx-eyb">${A.pick6(TICKET_HEAD)}</span><span class="gx-note">${tag || A.t("v.level", { n: pad2(level) })}</span></div>
+      ${places ? `<div class="gx-vd-rows${two ? " two" : ""}">${places}</div><div class="gx-hr"></div>` : ""}
+      ${stats.length ? statRow(stats[0], 0) : ""}${lineRows ? `<div class="gx-hr"></div><div class="gx-vd-rows">${lineRows}</div>` : ""}
+      ${stats.length > 1 ? `<div class="gx-hr"></div>${stats.slice(1).map((s, i) => statRow(s, i + 1)).join("")}` : ""}
+      ${stamp ? `<b class="gx-vd-stamp${kind === "" ? " no" : ""}">${stamp}</b>` : ""}</div>`;
+    const bar = meter && meter[1] > 1 ? `<div class="gx-vd-meter${meter[0] >= meter[1] ? " full" : ""}"><i style="width:${Math.min(100, (100 * meter[0]) / meter[1])}%"></i><em style="left:${Math.min(100, (100 * meter[1]) / Math.max(meter[0], meter[1]))}%"></em></div>` : "";
+    const idc = iq != null ? `<div class="gx-vd-iq gx-paper">${tier != null ? A.icon("iq_" + tier) : `<img class="ic" src="assets/icons/logo_mark.png" alt="">`}<span class="gx-eyb">${A.t("iq.label")}</span><b class="odo" id="iqNum"></b><em>${tierName}</em></div>` : "";
+    const order = buttons.filter(b => !b.primary).concat(buttons.filter(b => b.primary));
+    const btn = b => `<button class="gx-btn${b.primary ? " pri" : b.ghost ? " gho sm" : ""}" id="${b.id}" ${b.primary ? "data-primary" : ""}><span>${b.label}</span>${b.primary ? A.gala.keyHint("Enter", "a") : ""}</button>`;
+    dialog(`<div class="vd gx-vd gx-layer gx-in${kind === "" ? " lose" : ""}${two && !(A.dealer && A.dealer.on) ? " wide" : ""}">
+      <div class="gx-vd-head gx-from-left"><span class="gx-eyb">${tag || A.t("v.level", { n: pad2(level) })}</span><h2 class="gx-t-xl">${title}</h2><p class="gx-lead">${text}</p>${bar}</div>
+      <div class="gx-vd-mid gx-sh">${ticket}</div>
+      <div class="gx-vd-side"><div class="gx-vd-medal ${kind}">${art === "chest" ? `<i class="gx-vd-crown">${A.icon("crown")}</i>` : ""}${A.icon(chip)}</div><div class="gx-vd-dealer" id="vdDealer"></div>${idc}</div>
+      <div class="gx-vd-acts"><div class="gx-acts">${order.filter(b => b.ghost).map(btn).join("")}</div><div class="gx-acts">${order.filter(b => !b.ghost).map(btn).join("")}</div></div>
     </div>`, "verdict");
     stats.forEach((s, i) => { const el = $("vs" + i); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, s[1], { ms: 1300, delay: 700 + i * 120, tick: i === 0 && s[1] > 0 })); });
     if (iq != null) { const el = $("iqNum"); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, iq, { ms: 1400, delay: 1000 })); }
@@ -981,7 +994,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (pass) {
       A.sfx.stamp(); setTimeout(A.sfx.win, 380);
       verdict({
-        kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`,
+        kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
         stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1),
         buttons: [{ id: "nlBtn", cls: "btn-ink", label: A.t("btn.nextLevel"), arrow: true, primary: true, onclick: () => startLevel_(S.level + 1) }],
       });
@@ -999,21 +1012,21 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const btns = [];
     if (!win) btns.push({ id: "retryBtn", cls: "btn-ink", label: A.t("btn.retry"), arrow: true, primary: true, onclick: () => { S.runMax = S.runMax0 || 0; startLevel_(S.level); } });   // el intento fallido deja de contar en el maximo: el IQ y la medalla miden la pasada buena (S.clean sigue en false: Sin red exige no fallar ninguno)
     btns.push({ id: "newBtn", cls: win ? "btn-ink" : "btn-line", label: A.t("btn.newGame"), primary: win, onclick: () => { S.startLevel = 0; showTitle(); } });
-    btns.push({ id: "shareBtn", cls: "btn-line", label: A.t("share"), onclick: async () => {
+    btns.push({ id: "shareBtn", cls: "btn-line", ghost: true, label: A.t("share"), onclick: async () => {
       const text = A.t("share.text", { iq, tier: tierName, s: A.fmt(shown) }), url = A.shareUrl();
       try {
         if (navigator.share) await navigator.share({ title: "Geolite", text, url });
         else { await navigator.clipboard.writeText(text + " " + url); const sp = $("shareBtn").querySelector("span"); sp.textContent = A.t("share.copied"); setTimeout(() => (sp.textContent = A.t("share")), 1600); }
       } catch (e) { /* cancelado */ }
     } });
-    btns.push({ id: "badgeBtn", cls: "btn-line", label: A.t("btn.badge"), onclick: async () => {
+    btns.push({ id: "badgeBtn", cls: "btn-line", ghost: true, label: A.t("btn.badge"), onclick: async () => {
       const cv = await A.makeBadge(iq, tierName, `${A.tx(S.camp.title)} · ${A.fmt(shown)} ${A.t("pts")} · ${S.completed}/${S.camp.levels.length}`);
       const a = document.createElement("a"); a.download = `geolite-${iq}.png`; a.href = cv.toDataURL("image/png"); a.click();
     } });
     verdict({
       kind: win ? "win" : "", level: S.level + 1, title: win ? A.t("v.win") : A.t("v.no"),
       text: win ? A.t("win.p", { s: A.fmt(shown) }) : A.t("lf.p", { a: A.fmt(L.advance), s: A.fmt(S.levelScore) }),
-      stats: win ? [[A.t("v.total"), shown]] : [[A.t("v.points"), S.levelScore], [A.t("v.goal"), L.advance]],
+      stats: win ? [[A.t("v.total"), shown]] : [[A.t("v.points"), S.levelScore], [A.t("v.goal"), L.advance]], meter: win ? null : [S.levelScore, L.advance], places: !win,
       stamp: win ? A.t("stamp.win") : A.t("stamp.no"), stampSub: win ? A.icon("u_star", "st") : pad2(S.level + 1), iq, tier, tierName, buttons: btns,
     });
     if (A.nombre) A.nombre.maybeAsk({ won: win });                          // v0.37: fin de tu primera partida sin nombre: el crupier te lo pregunta

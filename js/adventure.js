@@ -1130,7 +1130,7 @@ window.AIQ = window.AIQ || {};
       run.phase = "verdict"; run.vBoss = boss; persist(); A.profile.save();
       C().verdict({
         kind: "ok", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: boss ? A.T("¡Jefe derrotado!", "Boss defeated!") : A.T("Ronda superada", "Round cleared"),
-        text: `${A.fmt(S.levelScore)} / ${A.fmt(Lv.advance)}`, lines,
+        text: `${A.fmt(S.levelScore)} / ${A.fmt(Lv.advance)}`, lines, meter: [S.levelScore, Lv.advance], places: true,
         stats: [[A.T("Puntos de la ronda", "Round points"), S.levelScore], [A.T("Total de la expedición", "Expedition total"), run.score], [A.T("Doblones", "Doubloons"), run.coins]],
         stamp: A.T("SUPERADA", "CLEARED"), stampSub: String(roundNo() + 1).padStart(2, "0"), art: boss ? "chest" : "win",
         buttons: [{ id: "nlBtn", cls: "btn-ink", label: boss ? A.T("Abrir el cofre del jefe", "Open the boss chest") : A.T("Al campamento", "To camp"), arrow: true, primary: true, onclick: () => { if (boss && run.act < 2 && !run.chestStuckDone && Math.random() < 0.6) { run.chestStuckDone = true; persist(); return stuckChest(); } afterVerdict(boss); } }, { id: "vdMenu", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().runMenu(), keep: true }],
@@ -1154,9 +1154,9 @@ window.AIQ = window.AIQ || {};
       C().verdict({
         kind: "", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: A.T("No llegaste al objetivo", "Target missed"),
         text: (insured ? A.pick6(SAVED_SUP) : shielded ? ic("shield", "sm") + " " + A.pick6(SAVED_PERK) : "") + (run.lives === 1 ? A.tf("Te quedaste en {s} de {a}. Te queda {n} provisión.", "You scored {s} of {a}. You have {n} provision left.", { s: A.fmt(S.levelScore), a: A.fmt(Lv.advance), n: run.lives }) : A.tf("Te quedaste en {s} de {a}. Te quedan {n} provisiones.", "You scored {s} of {a}. You have {n} provisions left.", { s: A.fmt(S.levelScore), a: A.fmt(Lv.advance), n: run.lives })),   // cada seguro con su frase: se sabe cual te ha salvado
-        lines: (conso ? [[et("conso", { p: pctOf(S.levelScore, Lv.advance) }), "+" + conso]] : []).concat(betLost),
+        lines: (conso ? [[et("conso", { p: pctOf(S.levelScore, Lv.advance) }), "+" + conso]] : []).concat(betLost), meter: [S.levelScore, Lv.advance], places: true,
         stats: [[A.T("Puntos de la ronda", "Round points"), S.levelScore], [A.T("Objetivo", "Target"), Lv.advance], [A.T("Doblones", "Doubloons"), run.coins]], stamp: A.T("FALLIDA", "FAILED"), stampSub: String(run.lives), art: "lose",
-        buttons: [{ id: "rtBtn", cls: "btn-ink", label: A.T("Reintentar con lugares nuevos", "Retry with new places"), arrow: true, primary: true, onclick: () => openShop(false) }, { id: "abBtn", cls: "btn-line", label: A.T("Abandonar", "Abandon"), onclick: () => endRun(false) }],
+        buttons: [{ id: "rtBtn", cls: "btn-ink", label: A.T("Reintentar con lugares nuevos", "Retry with new places"), arrow: true, primary: true, onclick: () => openShop(false) }, { id: "abBtn", cls: "btn-line", ghost: true, label: A.T("Abandonar", "Abandon"), onclick: () => endRun(false) }],
       });
       if (shielded && !insured) relicPay(["shield"], 2);
       const lives = run.lives; setTimeout(() => A.dealer.react("roundFail", { lives, conso }), 700);
@@ -1170,7 +1170,7 @@ window.AIQ = window.AIQ || {};
   const SAVED_SUP = "¡El Seguro de ronda te cubre: no pierdes provisión! |Round insurance covers you: no provision lost! |L'Assurance de manche te couvre : aucune provision perdue ! |O Seguro de rodada te cobre: nenhuma provisão perdida! |Die Rundenversicherung springt ein: kein Proviant verloren! |L'Assicurazione del round ti copre: nessuna provvista persa! ||回合保险为你兜底：补给不减！ |라운드 보험이 지켜 줬습니다: 식량 손실 없음! |ラウンド保険でカバー：食料は失われなかった！ |Страховка раунда покрыла провал: ни один запас не потерян! |Ubezpieczenie rundy cię kryje: żaden zapas nie przepada! ";
   /* el primer clic en "Abrir el cofre" no lo abre: el cofre (la medalla) tiembla y el crupier confiesa que lo esta sujetando; el segundo ya lo abre */
   function stuckChest() {
-    const m = document.querySelector(".v-medal"), b = $("nlBtn"), S = C().S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const m = document.querySelector(".gx-vd-medal"), b = $("nlBtn"), S = C().S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
     A.sfx.deny();
     if (!reduced) [m, b].forEach(e => e && e.animate([{ transform: "none" }, { transform: "translateX(-6px) rotate(-4deg)" }, { transform: "translateX(5px) rotate(3deg)" }, { transform: "translateX(-3px) rotate(-2deg)" }, { transform: "none" }], { duration: 420, easing: "ease-out" }));
     if (A.dealer.chestStuck) A.dealer.chestStuck();

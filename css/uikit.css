@@ -62,8 +62,6 @@ html.no-shake #app.ch-glitch #map, html.no-shake #app.ch-glitch #fx { animation-
 /* las cartas de herramienta siempre por encima del pie de pagina (su altura cambia con las pistas) */
 #toolBar.tool-bar { bottom: calc(var(--note-top, 88px) + 12px); }
 /* veredicto: cabe en pantallas de 768 px de alto y el crupier habla en su hueco, sin tapar botones */
-.v-dealer:empty { display: none; }
-.v-dealer { min-height: 96px; display: flex; align-items: flex-end; }
 .dealer.inline { position: relative; left: auto; bottom: auto; z-index: 100010; transform: translateX(-24px); }
 .dealer.inline.in { transform: none; }
 .dealer.inline .dl-face { width: 224px; height: 224px; }
@@ -95,45 +93,6 @@ body.title-on .brand-sh { opacity: 0; pointer-events: none; }
   .ticket .btn-ink { padding-top: 10px; padding-bottom: 10px; }
 }
 @media (min-width: 901px) and (max-width: 1320px) { #dlg.side { margin-top: 190px; max-height: calc(calc(100 * var(--vh)) - 200px); } }
-/* veredicto en pantallas bajas (720-820 px): todo, incluido el boton principal, cabe sin desplazarse */
-@media (max-height: 820px) {
-  .vd { padding-top: clamp(14px, calc(4 * var(--vh)), 40px); padding-bottom: clamp(14px, calc(4 * var(--vh)), 40px); }
-  .v-main { gap: 9px; } .v-main h2 { font-size: clamp(40px, calc(9.5 * var(--vh)), 84px); } .v-main > p { font-size: 17px; }
-  .v-stats { margin: 4px 0 2px; } .v-stats .odo { font-size: clamp(30px, calc(6.5 * var(--vh)), 52px); }
-  .v-medal { width: min(calc(30 * var(--vw)), 200px, calc(24 * var(--vh))); } .v-side { gap: 16px; }
-  .v-dealer { min-height: 120px; } .dealer.inline .dl-face { width: 145px; height: 145px; } .dealer.inline .dl-bubble { margin-bottom: 26px; font-size: calc(22px * var(--dll, 1)); }
-}
-/* veredicto en movil vertical (<= 900 px de ancho; el movil horizontal sigue en dos columnas, mas abajo): una sola columna con todo dentro del ancho.
-   Arriba y compactos, la ficha y la tarjeta IQ en una fila y el crupier en la suya (cara a la izquierda, globo a la derecha: sus frases largas
-   necesitan el ancho); debajo, titulo, texto, cifras y botones, que se reparten las filas en vez de salirse por la derecha */
-@media (max-width: 900px) and (min-height: 521px), (max-width: 900px) and (orientation: portrait) {
-  .vd { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 18px 16px 24px; align-content: start; max-width: 600px; }   /* tablet vertical: columna centrada, no estirada */
-  .v-side { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
-  .v-medal { flex: none; width: 92px; }
-  .idcard { order: 1; flex: 1 1 170px; width: auto; max-width: 380px; padding: 10px 14px 12px; gap: 0 12px; }
-  .idcard img.ic { width: 40px; height: 40px; } .idcard .odo { font-size: 46px; } .idcard em { margin-top: 6px; padding-top: 6px; font-size: 19px; }
-  .v-side .v-dealer { order: 2; flex: 1 1 100%; justify-items: stretch; margin: 0; }
-  .v-side .dealer.inline { flex-direction: row; align-items: center; gap: 2px; }
-  .v-side .dealer.inline .dl-face { order: 0; width: 80px; height: 80px; }
-  .v-side .dealer.inline .dl-bubble { order: 1; flex: 0 1 auto; min-width: 0; max-width: none; margin: 0; padding: 9px 12px 11px 24px; font-size: calc(20px * var(--dll, 1)); text-align: left; transform-origin: 0 50%;
-    clip-path: polygon(12px 0, 100% 0, 100% 100%, 12px 100%, 12px calc(50% + 9px), 0 50%, 12px calc(50% - 9px)); }
-  .v-main { gap: 10px; }
-  .v-main h2 { font-size: clamp(34px, calc(11 * var(--vw)), 48px); overflow-wrap: break-word; }
-  .v-main > p { font-size: 17px; }
-  .v-lines { gap: 4px; }
-  .v-stats { justify-self: stretch; gap: 10px 16px; margin: 2px 0 0; }
-  .v-stats > div { flex: 1 1 0; grid-template-rows: 1fr auto; padding-left: 12px; gap: 4px; } .v-stats > div > span:first-child { font-size: 13px; }
-  .v-stats .odo { font-size: clamp(30px, calc(9 * var(--vw)), 40px); }
-  .v-actions { justify-self: stretch; gap: 10px; margin-top: 4px; }
-  .v-actions .btn-ink, .v-actions .btn-line { flex: 1 1 auto; min-width: 0; padding: 12px 14px 11px; font-size: 13px; }
-  .v-actions [data-primary] { flex-basis: 100%; }
-}
-/* movil vertical bajo (<= 700 px de alto, p. ej. 375x667): un poco mas apretado, para que las frases largas del crupier no empujen los botones fuera */
-@media (max-width: 900px) and (max-height: 700px) and (orientation: portrait) {
-  .vd { gap: 12px; padding-top: 14px; padding-bottom: 18px; } .v-main { gap: 8px; } .v-medal { width: 80px; }
-  .v-side .dealer.inline .dl-face { width: 68px; height: 68px; }
-  .v-side .dealer.inline .dl-bubble { padding: 7px 10px 9px 22px; font-size: calc(19px * var(--dll, 1)); }
-}
 /* portada con partida guardada: el banner resta altura, las cartas y el logo se encogen para que todo quepa sin desplazarse */
 .hh:has(.hh-resume) .hh-logo { height: min(calc(17 * var(--vh)), 190px); }
 .hh:has(.hh-resume) .mcard { width: min(calc(20.5 * var(--vw)), calc(26 * var(--vh)) * .7 * 1.36, 300px); } .hh:has(.hh-resume) .mcard.hero { width: min(calc(24 * var(--vw)), calc(30 * var(--vh)) * .7 * 1.36, 340px); }
@@ -241,24 +200,9 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
   .tb-note { font-size: 15.5px; } .tb-tray { grid-template-columns: 2fr 1fr auto; } .tb-tray .go-next { grid-column: auto; width: auto; padding: 8px 16px; font-size: 16px; }
 }
 
-/* veredicto en movil horizontal: todo (y el boton) cabe sin desplazarse */
-@media (max-height: 520px) and (orientation: landscape) {
-  .vd { padding: 10px 24px; gap: 14px; align-content: center; }
-  .v-main { gap: 5px; } .v-main h2 { font-size: 34px; } .v-main > p { font-size: 15.5px; }
-  .v-stats { margin: 0; } .v-stats .odo { font-size: 30px; }
-  .v-medal { width: min(calc(20 * var(--vw)), calc(22 * var(--vh)), 160px); }
-  .v-dealer { min-height: 0; } .dealer.inline .dl-face { width: 100px; height: 100px; } .dealer.inline .dl-bubble { margin-bottom: 14px; font-size: calc(20px * var(--dll, 1)); max-width: calc(46 * var(--vw)); }
-}
-@media (max-height: 520px) and (orientation: landscape) {
-  .vd { padding-top: 6px; padding-bottom: 6px; align-content: start; } .v-main h2 { font-size: 28px; } .v-main { gap: 3px; }
-  .v-stats .odo { font-size: 24px; } .v-main .btn-ink, .v-main .btn-line { padding-top: 9px; padding-bottom: 9px; font-size: 16px; }
-  .v-main dl, .v-main .v-rows { gap: 2px; }
-}
-
 /* marca Geolite (escudo de pixel art en vez de la antigua rosa vectorial) */
 .brand-rose, .menu-rose { image-rendering: pixelated; object-fit: contain; }
 .brand-txt i { text-transform: uppercase; }
-.idcard img.ic { width: 58px; height: 58px; }
 
 /* Geolite es pixel art de verdad: nada de suavizado al ampliar logos e iconos */
 .hh-logo, .gate-logo img, .brand-rose, .menu-rose { image-rendering: pixelated; }
@@ -296,7 +240,7 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 .np-t b { white-space: normal; overflow: visible; text-overflow: clip; text-align: center; line-height: 1.15; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .np-set .np-t b { font-size: 15.5px; letter-spacing: .03em; }
 /* escudo = la Tierra con la carta y la ficha (48 px nativos): tamanos que son multiplos enteros */
-.brand-rose { width: 32px; height: 32px; } .menu-rose { width: 96px; height: 96px; } .idcard img.ic { width: 48px; height: 48px; }
+.brand-rose { width: 32px; height: 32px; } .menu-rose { width: 96px; height: 96px; }
 
 /* pixel art nitido: los recursos grandes (escenas, cartas, iconos grandes, crupier) se amplian sin suavizar; los iconos pequenos se reducen desde un original nitido */
 .pic-img, .cx-art img, .cx-bigcard img, .of-ico .ic, .tl-ico .ic, .dc-art .ic, .intro-num .ic, .nx-ic .ic, .sp-ic .ic, .dl-face, .ic.big, .mc-win img { image-rendering: pixelated; }

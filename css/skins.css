@@ -51,7 +51,7 @@ html[data-skin="casino"] .cut.ink { --edge: #0a140f; --fill: #1c3a2c; }
 html[data-skin="casino"] .cut.ink::before { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .09), inset 0 -4px 0 rgba(0, 0, 0, .25); }
 html[data-skin="casino"] .cut.paper::before { box-shadow: inset 0 -5px 0 rgba(120, 90, 40, .13); }
 html[data-skin="casino"] .ledger::after { content: ""; position: absolute; right: 12px; top: 8px; width: 18px; height: 18px; background: url("../assets/icons/heart.webp") center / contain no-repeat; opacity: .9; }
-html[data-skin="casino"] .brand-txt b, html[data-skin="casino"] #askName, html[data-skin="casino"] .lg-num, html[data-skin="casino"] .menu-in h1, html[data-skin="casino"] .tk-km, html[data-skin="casino"] .tk-total .odo, html[data-skin="casino"] .v-main h2, html[data-skin="casino"] .v-stats .odo, html[data-skin="casino"] .idcard .odo, html[data-skin="casino"] .camp-t, html[data-skin="casino"] .intro-num, html[data-skin="casino"] .intro-body h2, html[data-skin="casino"] .fader label, html[data-skin="casino"] .row-sw label, html[data-skin="casino"] .tk-title { letter-spacing: 0; font-style: normal; }
+html[data-skin="casino"] .brand-txt b, html[data-skin="casino"] #askName, html[data-skin="casino"] .lg-num, html[data-skin="casino"] .menu-in h1, html[data-skin="casino"] .tk-km, html[data-skin="casino"] .tk-total .odo, html[data-skin="casino"] .camp-t, html[data-skin="casino"] .intro-num, html[data-skin="casino"] .intro-body h2, html[data-skin="casino"] .fader label, html[data-skin="casino"] .row-sw label, html[data-skin="casino"] .tk-title { letter-spacing: 0; font-style: normal; }
 html[data-skin="casino"] #askName { font-size: clamp(26px, calc(3.2 * var(--vw)), 44px); line-height: 1.05; }
 html[data-skin="casino"] .tk-title { color: var(--red); font-size: 30px; }
 html[data-skin="casino"] .lg-num { font-size: 42px; } html[data-skin="casino"] .tk-km { font-size: 56px; }
@@ -67,7 +67,6 @@ html[data-skin="casino"] .btn-ink:hover { background: #ff7a70; transform: transl
 html[data-skin="casino"] .btn-ink::before { display: none; }
 html[data-skin="casino"] .btn-line { clip-path: none; border-radius: 10px; background: var(--teal); color: #fff; box-shadow: 0 5px 0 #0068b3; }
 html[data-skin="casino"] .btn-line:hover { background: #33b2ff; } html[data-skin="casino"] .btn-line:active { transform: translateY(4px); box-shadow: 0 1px 0 #0068b3; }
-html[data-skin="casino"] .v-actions .btn-ink { background: var(--red); color: #fff; } html[data-skin="casino"] .v-actions .btn-ink:hover { background: #ff7a70; }
 html[data-skin="casino"] #dock button, html[data-skin="casino"] #rail button, html[data-skin="casino"] .menu-gear, html[data-skin="casino"] .row-btn, html[data-skin="casino"] .langgrid button { clip-path: none; border-radius: 9px; }
 html[data-skin="casino"] .seg { border-radius: 10px; } html[data-skin="casino"] .seg > i { border-radius: 7px; }
 html[data-skin="casino"] .camp { --fill: #1a3528; --edge: #0a140f; } html[data-skin="casino"] .camp.sel { --edge: var(--brass); --fill: #2a5c46; }
@@ -75,7 +74,6 @@ html[data-skin="casino"] .camp-thumb { border-radius: 8px; border: 2px solid #0a
 html[data-skin="casino"] .menu-in { background: linear-gradient(90deg, rgba(10, 26, 18, .97), rgba(10, 26, 18, .94) 84%, rgba(10, 26, 18, 0)); }
 html[data-skin="casino"] .go { --fill: #1a3528; --edge: var(--brass); } @keyframes chip-spin { to { transform: rotate(360deg); } }
 html[data-skin="casino"] .brand-rose, html[data-skin="casino"] .menu-rose { color: var(--brass); }
-html[data-skin="casino"] .idcard { clip-path: none; border-radius: 14px; box-shadow: 0 0 0 3px #16241c inset, 0 6px 0 rgba(0, 0, 0, .5); }
 html[data-skin="casino"] .ticket { -webkit-mask: none; mask: none; border-radius: 14px; box-shadow: 0 0 0 3px #16241c inset; }
 html[data-skin="casino"] .tk-band { border-radius: 11px 11px 0 0; }
 html[data-skin="casino"] .fader label { color: var(--paper); }
