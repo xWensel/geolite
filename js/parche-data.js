@@ -34,6 +34,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.34",
+      name: L("Números de las Ascensiones centrados", "Ascension numbers centred", "Numéros des Ascensions centrés", "Números das Ascensões centrados", "Ascension-Zahlen zentriert", "Numeri delle Ascensioni centrati", "", "进阶数字居中", "어센션 숫자 가운데 정렬", "アセンションの数字を中央に", "Цифры восхождений по центру", "Cyfry wniebowstąpień wyśrodkowane"),
+      date: "2026-10-09",
+      summary: L("Las cifras de las fichas de Ascensión estaban algo bajas y ahora quedan en el centro de la ficha.", "The numbers on the Ascension chips sat a little low and now sit in the middle of the chip.", "Les chiffres des jetons d'Ascension étaient un peu bas et sont maintenant au centre du jeton.", "Os números das fichas de Ascensão estavam um pouco baixos e agora ficam no centro da ficha.", "Die Zahlen auf den Ascension-Chips saßen etwas zu tief und stehen jetzt in der Mitte des Chips.", "I numeri sulle fiches delle Ascensioni erano un po' bassi e ora sono al centro della fiche.", "", "进阶筹码上的数字原本偏低，现在位于筹码正中。", "어센션 칩의 숫자가 조금 아래쪽이었는데 이제 칩 한가운데에 놓입니다.", "アセンションのチップの数字が少し下がっていたのを、チップの中央に直しました。", "Цифры на фишках восхождений стояли чуть ниже, теперь они в центре фишки.", "Cyfry na żetonach wniebowstąpień były nieco za nisko, teraz są na środku żetonu."),
+      chapters: [
+        { id: "asc", kicker: L("Ajustes visuales", "Visual tweaks", "Retouches visuelles", "Ajustes visuais", "Optische Feinheiten", "Ritocchi visivi", "", "视觉微调", "화면 다듬기", "見た目の調整", "Визуальные правки", "Poprawki wizualne"),
+          title: L("Números de las Ascensiones centrados", "Ascension numbers centred", "Numéros des Ascensions centrés", "Números das Ascensões centrados", "Ascension-Zahlen zentriert", "Numeri delle Ascensioni centrati", "", "进阶数字居中", "어센션 숫자 가운데 정렬", "アセンションの数字を中央に", "Цифры восхождений по центру", "Cyfry wniebowstąpień wyśrodkowane"),
+          entries: [
+            E(L("Números de las Ascensiones centrados", "Ascension numbers centred", "Numéros des Ascensions centrés", "Números das Ascensões centrados", "Ascension-Zahlen zentriert", "Numeri delle Ascensioni centrati", "", "进阶数字居中", "어센션 숫자 가운데 정렬", "アセンションの数字を中央に", "Цифры восхождений по центру", "Cyfry wniebowstąpień wyśrodkowane"), "fix", "0.3.34", [
+              L("Las cifras de las fichas de Ascensión estaban algo bajas y ahora quedan en el centro de la ficha.", "The numbers on the Ascension chips sat a little low and now sit in the middle of the chip.", "Les chiffres des jetons d'Ascension étaient un peu bas et sont maintenant au centre du jeton.", "Os números das fichas de Ascensão estavam um pouco baixos e agora ficam no centro da ficha.", "Die Zahlen auf den Ascension-Chips saßen etwas zu tief und stehen jetzt in der Mitte des Chips.", "I numeri sulle fiches delle Ascensioni erano un po' bassi e ora sono al centro della fiche.", "", "进阶筹码上的数字原本偏低，现在位于筹码正中。", "어센션 칩의 숫자가 조금 아래쪽이었는데 이제 칩 한가운데에 놓입니다.", "アセンションのチップの数字が少し下がっていたのを、チップの中央に直しました。", "Цифры на фишках восхождений стояли чуть ниже, теперь они в центре фишки.", "Cyfry na żetonach wniebowstąpień były nieco za nisko, teraz są na środku żetonu."),
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.33",
       name: L("Créditos de demostración", "Demo credits", "Crédits de démonstration", "Créditos de demonstração", "Demo-Abspann", "Titoli di coda dimostrativi", "", "演示片尾字幕", "데모 크레딧", "デモ用クレジット", "Демо-титры", "Napisy końcowe (demo)"),
       date: "2026-10-08",
