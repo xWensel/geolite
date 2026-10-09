@@ -1706,7 +1706,7 @@ window.AIQ = window.AIQ || {};
     if (!o.force && !D.host) noteSaid();
     const X = faceFor(line, o), mood = o.mood || "sly", text = o.force ? (typeof line === "string" ? line : A.tx(line)) : personal(typeof line === "string" ? line : A.tx(line));
     const inline = !!el.closest("#vdDealer"), home = D.onHome && !D.host && !inline && homeCorner ? " home " + homeCorner : "";
-    spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " screen" + (o.screen === "pod" ? " pod" : "") : home); bubble.classList.add("on");
+    spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " screen" + (o.screen === "pod" ? " pod" : o.screen === "prof" ? " prof" : "") : home); bubble.classList.add("on");
     if (o.camp && campBox) { const st = el.style; st.bottom = st.top = ""; face.style.width = face.style.height = face.style.display = ""; bubble.style.marginBottom = bubble.style.maxWidth = "";
       st.setProperty("--cl", campBox.l + "px"); st.setProperty("--cb", campBox.b + "px"); st.setProperty("--hf", campBox.hf + "px"); st.setProperty("--hb", campBox.hb + "px"); }
     if (o.pos) { el.removeAttribute("style"); el.className = "dealer in lvpos lv-" + o.pos + " " + mood; document.body.appendChild(el); }   // la mesa elige donde sale: una esquina o el centro grande, por encima de todo
@@ -2300,10 +2300,10 @@ window.AIQ = window.AIQ || {};
       if (ks.length) { const k = rand(ks); flip = { k, v: vals[k] }; line = { t: say1(BOOK[k][2], { n: vals[k] }), mood: "sly" }; }
     }
     if (!line || !line.t) return;
-    setTimeout(() => { if (!document.querySelector("#dlg .s-prof")) return; if (flip) flipCell(flip); screenSay(line.t, line.mood); }, 700);
+    setTimeout(() => { if (!document.querySelector("#dlg .s-prof")) return; if (flip) flipCell(flip); screenSay(line.t, line.mood, null, "prof"); }, 700);
   };
   function flipCell(f) {
-    const b = BOOK[f.k], cell = document.querySelector(`#dlg .pf-grid .ic-${b[1]}`); const c = cell && cell.closest(".pf-cell"); if (!c) return;
+    const b = BOOK[f.k], c = document.querySelector(`#dlg .pf-stat[data-ic="${b[1]}"]`); if (!c) return;   // v0.3.41: la fila de la ficha de socio
     const S = A.core && A.core.S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
     const lab = c.querySelector("span"), val = c.querySelector("b"), was = [lab.textContent, val.textContent];
     const turn = (to, after) => {

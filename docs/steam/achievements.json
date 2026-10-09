@@ -309,18 +309,18 @@
    "polish": "Mól książkowy"
   },
   "desc": {
-   "english": "50 cards.",
-   "spanish": "50 tarjetas.",
-   "french": "50 cartes.",
-   "brazilian": "50 cartas.",
-   "german": "50 Karten.",
-   "italian": "50 carte.",
-   "latam": "50 tarjetas.",
-   "schinese": "50 张卡片。",
-   "koreana": "카드 50장.",
-   "japanese": "カード50枚。",
-   "russian": "50 карточек.",
-   "polish": "50 kart."
+   "english": "Collect 50 Encyclopedia cards.",
+   "spanish": "Consigue 50 tarjetas de la Enciclopedia.",
+   "french": "Obtiens 50 cartes de l'Encyclopédie.",
+   "brazilian": "Consiga 50 cartas da Enciclopédia.",
+   "german": "Sammle 50 Enzyklopädie-Karten.",
+   "italian": "Ottieni 50 carte dell'Enciclopedia.",
+   "latam": "Consigue 50 tarjetas de la Enciclopedia.",
+   "schinese": "获得 50 张百科全书卡片。",
+   "koreana": "도감 카드 50장 모으기.",
+   "japanese": "図鑑カードを50枚集める。",
+   "russian": "Собери 50 карточек энциклопедии.",
+   "polish": "Zdobądź 50 kart Encyklopedii."
   }
  },
  {
@@ -525,18 +525,18 @@
    "polish": "Uczony"
   },
   "desc": {
-   "english": "100 cards.",
-   "spanish": "100 tarjetas.",
-   "french": "100 cartes.",
-   "brazilian": "100 cartas.",
-   "german": "100 Karten.",
-   "italian": "100 carte.",
-   "latam": "100 tarjetas.",
-   "schinese": "100 张卡片。",
-   "koreana": "카드 100장.",
-   "japanese": "カード100枚。",
-   "russian": "100 карточек.",
-   "polish": "100 kart."
+   "english": "Collect 100 Encyclopedia cards.",
+   "spanish": "Consigue 100 tarjetas de la Enciclopedia.",
+   "french": "Obtiens 100 cartes de l'Encyclopédie.",
+   "brazilian": "Consiga 100 cartas da Enciclopédia.",
+   "german": "Sammle 100 Enzyklopädie-Karten.",
+   "italian": "Ottieni 100 carte dell'Enciclopedia.",
+   "latam": "Consigue 100 tarjetas de la Enciclopedia.",
+   "schinese": "获得 100 张百科全书卡片。",
+   "koreana": "도감 카드 100장 모으기.",
+   "japanese": "図鑑カードを100枚集める。",
+   "russian": "Собери 100 карточек энциклопедии.",
+   "polish": "Zdobądź 100 kart Encyklopedii."
   }
  },
  {
@@ -777,18 +777,18 @@
    "polish": "Dyplomata"
   },
   "desc": {
-   "english": "40 capitals.",
-   "spanish": "40 capitales.",
-   "french": "40 capitales.",
-   "brazilian": "40 capitais.",
-   "german": "40 Hauptstädte.",
-   "italian": "40 capitali.",
-   "latam": "40 capitales.",
-   "schinese": "40 座首都。",
-   "koreana": "수도 40개.",
-   "japanese": "首都40か所。",
-   "russian": "40 столиц.",
-   "polish": "40 stolic."
+   "english": "Collect 40 capitals in the Encyclopedia.",
+   "spanish": "Consigue 40 capitales en la Enciclopedia.",
+   "french": "Obtiens 40 capitales dans l'Encyclopédie.",
+   "brazilian": "Consiga 40 capitais na Enciclopédia.",
+   "german": "Sammle 40 Hauptstädte in der Enzyklopädie.",
+   "italian": "Ottieni 40 capitali nell'Enciclopedia.",
+   "latam": "Consigue 40 capitales en la Enciclopedia.",
+   "schinese": "在百科全书中收集 40 座首都。",
+   "koreana": "도감에 수도 40개 모으기.",
+   "japanese": "図鑑に首都を40か所集める。",
+   "russian": "Собери 40 столиц в энциклопедии.",
+   "polish": "Zdobądź 40 stolic w Encyklopedii."
   }
  },
  {
@@ -813,18 +813,18 @@
    "polish": "Spokojne wody"
   },
   "desc": {
-   "english": "15 seas or oceans.",
-   "spanish": "15 mares u océanos.",
-   "french": "15 mers ou océans.",
-   "brazilian": "15 mares ou oceanos.",
-   "german": "15 Meere oder Ozeane.",
-   "italian": "15 mari o oceani.",
-   "latam": "15 mares u océanos.",
-   "schinese": "15 片海洋。",
-   "koreana": "바다 또는 대양 15곳.",
-   "japanese": "海・大洋を15件。",
-   "russian": "15 морей или океанов.",
-   "polish": "15 mórz lub oceanów."
+   "english": "Collect 15 seas or oceans in the Encyclopedia.",
+   "spanish": "Consigue 15 mares u océanos en la Enciclopedia.",
+   "french": "Obtiens 15 mers ou océans dans l'Encyclopédie.",
+   "brazilian": "Consiga 15 mares ou oceanos na Enciclopédia.",
+   "german": "Sammle 15 Meere oder Ozeane in der Enzyklopädie.",
+   "italian": "Ottieni 15 mari od oceani nell'Enciclopedia.",
+   "latam": "Consigue 15 mares u océanos en la Enciclopedia.",
+   "schinese": "在百科全书中收集 15 片海洋。",
+   "koreana": "도감에 바다 또는 대양 15곳 모으기.",
+   "japanese": "図鑑に海・大洋を15件集める。",
+   "russian": "Собери 15 морей или океанов в энциклопедии.",
+   "polish": "Zdobądź 15 mórz lub oceanów w Encyklopedii."
   }
  },
  {
@@ -885,18 +885,18 @@
    "polish": "Historyk"
   },
   "desc": {
-   "english": "25 historical figures.",
-   "spanish": "25 personajes históricos.",
-   "french": "25 personnages historiques.",
-   "brazilian": "25 personagens históricos.",
-   "german": "25 historische Persönlichkeiten.",
-   "italian": "25 personaggi storici.",
-   "latam": "25 personajes históricos.",
-   "schinese": "25 位历史人物。",
-   "koreana": "역사적 인물 25명.",
-   "japanese": "歴史上の人物25人。",
-   "russian": "25 исторических личностей.",
-   "polish": "25 postaci historycznych."
+   "english": "Collect 25 historical figures in the Encyclopedia.",
+   "spanish": "Consigue 25 personajes históricos en la Enciclopedia.",
+   "french": "Obtiens 25 personnages historiques dans l'Encyclopédie.",
+   "brazilian": "Consiga 25 personagens históricos na Enciclopédia.",
+   "german": "Sammle 25 historische Persönlichkeiten in der Enzyklopädie.",
+   "italian": "Ottieni 25 personaggi storici nell'Enciclopedia.",
+   "latam": "Consigue 25 personajes históricos en la Enciclopedia.",
+   "schinese": "在百科全书中收集 25 位历史人物。",
+   "koreana": "도감에 역사적 인물 25명 모으기.",
+   "japanese": "図鑑に歴史上の人物を25人集める。",
+   "russian": "Собери 25 исторических личностей в энциклопедии.",
+   "polish": "Zdobądź 25 postaci historycznych w Encyklopedii."
   }
  },
  {
@@ -921,18 +921,18 @@
    "polish": "Kronikarz"
   },
   "desc": {
-   "english": "20 battles and events.",
-   "spanish": "20 batallas y sucesos.",
-   "french": "20 batailles et événements.",
-   "brazilian": "20 batalhas e eventos.",
-   "german": "20 Schlachten und Ereignisse.",
-   "italian": "20 battaglie ed eventi.",
-   "latam": "20 batallas y sucesos.",
-   "schinese": "20 场战役与事件。",
-   "koreana": "전투와 사건 20개.",
-   "japanese": "戦いと出来事20件。",
-   "russian": "20 битв и событий.",
-   "polish": "20 bitew i wydarzeń."
+   "english": "Collect 20 battles and events in the Encyclopedia.",
+   "spanish": "Consigue 20 batallas y sucesos en la Enciclopedia.",
+   "french": "Obtiens 20 batailles et événements dans l'Encyclopédie.",
+   "brazilian": "Consiga 20 batalhas e eventos na Enciclopédia.",
+   "german": "Sammle 20 Schlachten und Ereignisse in der Enzyklopädie.",
+   "italian": "Ottieni 20 battaglie ed eventi nell'Enciclopedia.",
+   "latam": "Consigue 20 batallas y sucesos en la Enciclopedia.",
+   "schinese": "在百科全书中收集 20 场战役与事件。",
+   "koreana": "도감에 전투와 사건 20개 모으기.",
+   "japanese": "図鑑に戦いと出来事を20件集める。",
+   "russian": "Собери 20 битв и событий в энциклопедии.",
+   "polish": "Zdobądź 20 bitew i wydarzeń w Encyklopedii."
   }
  },
  {
@@ -1065,18 +1065,18 @@
    "polish": "Profesor"
   },
   "desc": {
-   "english": "250 cards.",
-   "spanish": "250 tarjetas.",
-   "french": "250 cartes.",
-   "brazilian": "250 cartas.",
-   "german": "250 Karten.",
-   "italian": "250 carte.",
-   "latam": "250 tarjetas.",
-   "schinese": "250 张卡片。",
-   "koreana": "카드 250장.",
-   "japanese": "カード250枚。",
-   "russian": "250 карточек.",
-   "polish": "250 kart."
+   "english": "Collect 250 Encyclopedia cards.",
+   "spanish": "Consigue 250 tarjetas de la Enciclopedia.",
+   "french": "Obtiens 250 cartes de l'Encyclopédie.",
+   "brazilian": "Consiga 250 cartas da Enciclopédia.",
+   "german": "Sammle 250 Enzyklopädie-Karten.",
+   "italian": "Ottieni 250 carte dell'Enciclopedia.",
+   "latam": "Consigue 250 tarjetas de la Enciclopedia.",
+   "schinese": "获得 250 张百科全书卡片。",
+   "koreana": "도감 카드 250장 모으기.",
+   "japanese": "図鑑カードを250枚集める。",
+   "russian": "Собери 250 карточек энциклопедии.",
+   "polish": "Zdobądź 250 kart Encyklopedii."
   }
  },
  {
@@ -1461,18 +1461,18 @@
    "polish": "Zapalony podróżnik"
   },
   "desc": {
-   "english": "100 cities.",
-   "spanish": "100 ciudades.",
-   "french": "100 villes.",
-   "brazilian": "100 cidades.",
-   "german": "100 Städte.",
-   "italian": "100 città.",
-   "latam": "100 ciudades.",
-   "schinese": "100 座城市。",
-   "koreana": "도시 100곳.",
-   "japanese": "都市を100件。",
-   "russian": "100 городов.",
-   "polish": "100 miast."
+   "english": "Collect 100 cities in the Encyclopedia.",
+   "spanish": "Consigue 100 ciudades en la Enciclopedia.",
+   "french": "Obtiens 100 villes dans l'Encyclopédie.",
+   "brazilian": "Consiga 100 cidades na Enciclopédia.",
+   "german": "Sammle 100 Städte in der Enzyklopädie.",
+   "italian": "Ottieni 100 città nell'Enciclopedia.",
+   "latam": "Consigue 100 ciudades en la Enciclopedia.",
+   "schinese": "在百科全书中收集 100 座城市。",
+   "koreana": "도감에 도시 100곳 모으기.",
+   "japanese": "図鑑に都市を100件集める。",
+   "russian": "Собери 100 городов в энциклопедии.",
+   "polish": "Zdobądź 100 miast w Encyklopedii."
   }
  },
  {
@@ -1497,18 +1497,18 @@
    "polish": "Mistrz ciekawostek"
   },
   "desc": {
-   "english": "100 curiosities.",
-   "spanish": "100 curiosidades.",
-   "french": "100 curiosités.",
-   "brazilian": "100 curiosidades.",
-   "german": "100 Kuriositäten.",
-   "italian": "100 curiosità.",
-   "latam": "100 curiosidades.",
-   "schinese": "100 条趣闻。",
-   "koreana": "흥미로운 사실 100개.",
-   "japanese": "豆知識を100件。",
-   "russian": "100 любопытных фактов.",
-   "polish": "100 ciekawostek."
+   "english": "Collect 100 curiosities in the Encyclopedia.",
+   "spanish": "Consigue 100 curiosidades en la Enciclopedia.",
+   "french": "Obtiens 100 curiosités dans l'Encyclopédie.",
+   "brazilian": "Consiga 100 curiosidades na Enciclopédia.",
+   "german": "Sammle 100 Kuriositäten in der Enzyklopädie.",
+   "italian": "Ottieni 100 curiosità nell'Enciclopedia.",
+   "latam": "Consigue 100 curiosidades en la Enciclopedia.",
+   "schinese": "在百科全书中收集 100 条趣闻。",
+   "koreana": "도감에 흥미로운 사실 100개 모으기.",
+   "japanese": "図鑑に豆知識を100件集める。",
+   "russian": "Собери 100 любопытных фактов в энциклопедии.",
+   "polish": "Zdobądź 100 ciekawostek w Encyklopedii."
   }
  },
  {
@@ -1641,18 +1641,18 @@
    "polish": "Encyklopedysta"
   },
   "desc": {
-   "english": "500 cards.",
-   "spanish": "500 tarjetas.",
-   "french": "500 cartes.",
-   "brazilian": "500 cartas.",
-   "german": "500 Karten.",
-   "italian": "500 carte.",
-   "latam": "500 tarjetas.",
-   "schinese": "500 张卡片。",
-   "koreana": "카드 500장.",
-   "japanese": "カード500枚。",
-   "russian": "500 карточек.",
-   "polish": "500 kart."
+   "english": "Collect 500 Encyclopedia cards.",
+   "spanish": "Consigue 500 tarjetas de la Enciclopedia.",
+   "french": "Obtiens 500 cartes de l'Encyclopédie.",
+   "brazilian": "Consiga 500 cartas da Enciclopédia.",
+   "german": "Sammle 500 Enzyklopädie-Karten.",
+   "italian": "Ottieni 500 carte dell'Enciclopedia.",
+   "latam": "Consigue 500 tarjetas de la Enciclopedia.",
+   "schinese": "获得 500 张百科全书卡片。",
+   "koreana": "도감 카드 500장 모으기.",
+   "japanese": "図鑑カードを500枚集める。",
+   "russian": "Собери 500 карточек энциклопедии.",
+   "polish": "Zdobądź 500 kart Encyklopedii."
   }
  },
  {
@@ -1821,18 +1821,18 @@
    "polish": "Wąskie przejście"
   },
   "desc": {
-   "english": "8 straits or capes.",
-   "spanish": "8 estrechos o cabos.",
-   "french": "8 détroits ou caps.",
-   "brazilian": "8 estreitos ou cabos.",
-   "german": "8 Meerengen oder Kaps.",
-   "italian": "8 stretti o capi.",
-   "latam": "8 estrechos o cabos.",
-   "schinese": "8 个海峡或海角。",
-   "koreana": "해협 또는 곶 8곳.",
-   "japanese": "海峡・岬を8件。",
-   "russian": "8 проливов или мысов.",
-   "polish": "8 cieśnin lub przylądków."
+   "english": "Collect 8 straits or capes in the Encyclopedia.",
+   "spanish": "Consigue 8 estrechos o cabos en la Enciclopedia.",
+   "french": "Obtiens 8 détroits ou caps dans l'Encyclopédie.",
+   "brazilian": "Consiga 8 estreitos ou cabos na Enciclopédia.",
+   "german": "Sammle 8 Meerengen oder Kaps in der Enzyklopädie.",
+   "italian": "Ottieni 8 stretti o capi nell'Enciclopedia.",
+   "latam": "Consigue 8 estrechos o cabos en la Enciclopedia.",
+   "schinese": "在百科全书中收集 8 个海峡或海角。",
+   "koreana": "도감에 해협 또는 곶 8곳 모으기.",
+   "japanese": "図鑑に海峡・岬を8件集める。",
+   "russian": "Собери 8 проливов или мысов в энциклопедии.",
+   "polish": "Zdobądź 8 cieśnin lub przylądków w Encyklopedii."
   }
  },
  {
@@ -2145,18 +2145,18 @@
    "polish": "Bibliotekarz"
   },
   "desc": {
-   "english": "1,000 cards.",
-   "spanish": "1.000 tarjetas.",
-   "french": "1 000 cartes.",
-   "brazilian": "1.000 cartas.",
-   "german": "1.000 Karten.",
-   "italian": "1.000 carte.",
-   "latam": "1.000 tarjetas.",
-   "schinese": "1,000 张卡片。",
-   "koreana": "카드 1,000장.",
-   "japanese": "カード1,000枚。",
-   "russian": "1000 карточек.",
-   "polish": "1000 kart."
+   "english": "Collect 1,000 Encyclopedia cards.",
+   "spanish": "Consigue 1.000 tarjetas de la Enciclopedia.",
+   "french": "Obtiens 1 000 cartes de l'Encyclopédie.",
+   "brazilian": "Consiga 1.000 cartas da Enciclopédia.",
+   "german": "Sammle 1.000 Enzyklopädie-Karten.",
+   "italian": "Ottieni 1.000 carte dell'Enciclopedia.",
+   "latam": "Consigue 1.000 tarjetas de la Enciclopedia.",
+   "schinese": "获得 1,000 张百科全书卡片。",
+   "koreana": "도감 카드 1,000장 모으기.",
+   "japanese": "図鑑カードを1,000枚集める。",
+   "russian": "Собери 1000 карточек энциклопедии.",
+   "polish": "Zdobądź 1000 kart Encyklopedii."
   }
  },
  {
@@ -2829,18 +2829,18 @@
    "polish": "Wielka Biblioteka"
   },
   "desc": {
-   "english": "2,500 cards.",
-   "spanish": "2.500 tarjetas.",
-   "french": "2 500 cartes.",
-   "brazilian": "2.500 cartas.",
-   "german": "2.500 Karten.",
-   "italian": "2.500 carte.",
-   "latam": "2.500 tarjetas.",
-   "schinese": "2,500 张卡片。",
-   "koreana": "카드 2,500장.",
-   "japanese": "カード2,500枚。",
-   "russian": "2500 карточек.",
-   "polish": "2500 kart."
+   "english": "Collect 2,500 Encyclopedia cards.",
+   "spanish": "Consigue 2.500 tarjetas de la Enciclopedia.",
+   "french": "Obtiens 2 500 cartes de l'Encyclopédie.",
+   "brazilian": "Consiga 2.500 cartas da Enciclopédia.",
+   "german": "Sammle 2.500 Enzyklopädie-Karten.",
+   "italian": "Ottieni 2.500 carte dell'Enciclopedia.",
+   "latam": "Consigue 2.500 tarjetas de la Enciclopedia.",
+   "schinese": "获得 2,500 张百科全书卡片。",
+   "koreana": "도감 카드 2,500장 모으기.",
+   "japanese": "図鑑カードを2,500枚集める。",
+   "russian": "Собери 2500 карточек энциклопедии.",
+   "polish": "Zdobądź 2500 kart Encyklopedii."
   }
  },
  {

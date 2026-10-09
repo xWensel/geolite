@@ -1213,7 +1213,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const boot = $("boot"), gate = $("gate"); boot.classList.remove("hidden");
     let gateAt = 0; const warned = gateWarn();
     const showGate = () => { $("studio").classList.add("hidden"); gate.classList.remove("hidden"); gateAt = performance.now();
-      setTimeout(() => { if (!entered && A.gala) A.gala.warm(); }, 150); };       // v0.3.35: mientras la puerta espera el clic, la GPU prepara la pausa nueva (si no, su primera apertura daba un tiron)
+      setTimeout(() => { if (!entered && A.gala) A.gala.warm(); }, 1500); };       // v0.3.35: mientras la puerta espera el clic, la GPU prepara la pausa nueva (si no, su primera apertura daba un tiron); v0.3.41: cuando ya ha terminado de aparecer (a los 150 ms paraba su fundido medio segundo)
     let entered = false;
     const enter = () => {
       if (entered) return; entered = true; A.audio.unlock(false); requestFs();

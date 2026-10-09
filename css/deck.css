@@ -1,9 +1,6 @@
 /* Geolite - STEAM DECK (v0.2.32): letra minima. Valve pide que ningun caracter baje de 9 px a 1280x800 (recomienda 12): la letra pixel
    de las etiquetas (Silkscreen) tiene mayusculas del 63 % de su tamano, asi que en la Deck sube a 16 px exactos (el doble de su rejilla: nitida).
    Solo con html[data-dev="deck"] (index.html lo pone antes de pintar nada); en PC todo sigue igual. Reglas sacadas midiendo el juego real. */
-html[data-dev="deck"] .ac-f em { font-size: 16px; }   /* «0 / 10» hub-profile */
-html[data-dev="deck"] .ac-jn em { font-size: 16px; }   /* «0/24» hub-profile */
-html[data-dev="deck"] .ac-tn i { font-size: 16px; }   /* «Tus primeros minutos» hub-profile */
 html[data-dev="deck"] .btn-ink { font-size: 16px; }   /* «Siguiente» revelado */
 html[data-dev="deck"] .cx-chip2 em i { font-size: 16px; }   /* «/199» enciclopedia */
 html[data-dev="deck"] .cx-leg { font-size: 16px; }   /* «Sin descubrir» enciclopedia */
@@ -51,7 +48,6 @@ html[data-dev="deck"] .tk-rows dt { font-size: 16px; }   /* «Distancia» revela
 html[data-dev="deck"] body #plate .tag { font-size: 16px; }   /* «Ciudad» partida,revelado */
 html[data-dev="deck"] body .dr-board .lb-src { font-size: 16px; }   /* «Solo este equipo» hub-daily */
 html[data-dev="deck"] body .dr-go .sb-t > i { font-size: 16px; }   /* «Lugares y retos nuevos» hub-daily */
-html[data-dev="deck"] body .pf-cell > span { font-size: 16px; }   /* «Preguntas» hub-profile */
 html[data-dev="deck"] body .plq-tag > span { font-size: 16px; }   /* «0 / 4967» portada */
 html[data-dev="deck"] body .tk-total > span:first-child { font-size: 16px; }   /* «Total» revelado */
 html[data-dev="deck"] kbd { font-size: 16px; }   /* «P» ajustes-general,ajustes-sound,ajustes-vi */
@@ -67,7 +63,7 @@ html[data-dev="deck"] .seg button { letter-spacing: 0; line-height: 1.05; }
 
 /* v0.2.33: textos en Jersey / Pixelify (mayusculas del 55 % de su tamano): a 16 px se quedaban en 8,8 px; en la Deck van a 18 */
 html[data-dev="deck"] .dc-d, html[data-dev="deck"] .dr-try i, html[data-dev="deck"] .dr-road2 .rd.plan .rd-h i, html[data-dev="deck"] .dr-sum em,
-html[data-dev="deck"] .rd.plan .rd-n.inf em, html[data-dev="deck"] .tk-pin, html[data-dev="deck"] .ac-jn b, html[data-dev="deck"] .cx-chip2 em i,
+html[data-dev="deck"] .rd.plan .rd-n.inf em, html[data-dev="deck"] .tk-pin, html[data-dev="deck"] .cx-chip2 em i,
 html[data-dev="deck"] #settings .set-keys em, html[data-dev="deck"] .osk-legend, html[data-dev="deck"] .pt-lang { font-size: 18px; }
 html[data-dev="deck"] .cx-chip2 b { font-size: 20px; }
 

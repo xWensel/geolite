@@ -39,20 +39,24 @@ window.AIQ = window.AIQ || {};
   let warmed = false;
   function warm() {
     if (warmed || reduced()) return; warmed = true;
-    const w = document.createElement("div"); w.setAttribute("aria-hidden", "true");
+    const w = document.createElement("div"); w.setAttribute("aria-hidden", "true"); w.inert = true;
     w.style.cssText = "position:fixed;inset:0;opacity:.02;pointer-events:none;z-index:2147483000";
     const abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnÑñOoPpQqRrSsTtUuVvWwXxYyZz ÁáÉéÍíÓóÚúÜü¿?¡!·/.,:%+-0123456789";   // los glifos tambien se rasterizan la primera vez, a cada tamano
     w.innerHTML = `<div class="gx-pause gx-layer gx-in"><div class="gx-veil"></div><div class="gx-spot"></div><div class="gx-stage"><div class="gx-grid"><div class="gx-sh gx-railw gx-from-left"><section class="gx-pnl gx-rail">
       <div class="gx-head"><span class="gx-eyb">${abc}</span><h2 class="gx-t-l">${abc}</h2><p class="gx-lead">${abc}</p></div><div class="gx-paper"><div class="gx-lead-row"><span>${abc}</span><s></s><b>0 <small>/ 1</small></b></div><div class="gx-bar"><i style="width:40%"></i></div></div>
       <div class="gx-acts col"><button class="gx-btn pri wide" tabindex="-1">${abc} <span class="gx-k"><kbd class="k-kb">Esc</kbd></span></button><button class="gx-btn wide" tabindex="-1">${abc}</button></div>
       <div class="gx-foot"><div class="gx-hr"></div><div class="gx-acts"><button class="gx-btn gho sm" tabindex="-1">${abc}</button></div><p class="gx-note">${abc}</p></div></section></div></div></div></div>`;
-    document.body.appendChild(w); setTimeout(() => w.remove(), 900);
+    document.body.appendChild(w); setTimeout(() => w.remove(), 900 + 2 * 120);
+    /* v0.3.41: cada pieza en su propio momento (las tres a la vez paraban el fundido de la puerta): el Perfil (fichas, papel grande y su sombra)
+       120 ms despues y Ajustes otros 120 ms despues */
+    setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.profileHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.profileHtml()}</div>`); } catch (e) { /* sin perfil aun */ } }, 120);
     /* v0.3.38: Ajustes tambien (su primera apertura daba 11 fotogramas perdidos): se pinta el de verdad, casi invisible y sin recibir clics */
     const sh = document.getElementById("setSh");
-    if (sh && sh.classList.contains("hidden")) {
+    if (sh && sh.classList.contains("hidden")) setTimeout(() => {
+      if (!sh.classList.contains("hidden")) return;
       sh.style.opacity = ".02"; sh.style.pointerEvents = "none"; sh.classList.remove("hidden");
       setTimeout(() => { sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); }, 900);
-    }
+    }, 240);
   }
   /* glifo de la accion: tecla con teclado y boton con mando (css/mando.css decide cual se ve) */
   const keyHint = (kb, pad) => `<span class="gx-k"><kbd class="k-kb">${kb}</kbd>${pad ? `<i class="gl" data-gl="${pad}"></i>` : ""}</span>`;
