@@ -191,12 +191,6 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .startbtn:hover { transform: translateY(-4px) scale(1.02); } .startbtn:active { transform: translateY(3px); } .sb-ic .ic { width: 56px; height: 56px; animation: chip-turn 8s linear infinite; }
 .sb-t { flex: 1; min-width: 0; display: grid; } .sb-t b { font-family: var(--serif); font-weight: 900; font-size: clamp(22px, calc(3.2 * var(--vh)), 32px); line-height: 1; } .sb-t i { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; opacity: .75; } .sb-ar .ic { width: 28px; height: 28px; }
 
-/* ---------- Clasico / Extendido ---------- */
-.s-camps .camps { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: clamp(10px, calc(1.2 * var(--vw)), 18px); margin-bottom: 12px; }
-@media (min-width: 901px) { .s-camps .camps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }   /* escritorio: siempre 2 columnas (a 1024 caia a 1 y las 11 campanas pedian scroll) */
-.s-camps .camp { grid-template-columns: clamp(104px, calc(10 * var(--vw)), 160px) 1fr; padding: 11px 14px; border-radius: 16px; background: rgba(10, 26, 18, .82); border: 0; box-shadow: inset 0 0 0 3px rgba(242, 233, 214, .25), 0 10px 0 rgba(0, 0, 0, .35); } .s-camps .camp.sel { box-shadow: inset 0 0 0 4px #ffd06b, 0 10px 0 rgba(0, 0, 0, .35), 0 0 40px rgba(255, 208, 107, .35); }
-.s-camps .camp-thumb { width: 100%; max-width: 160px; height: auto; aspect-ratio: 3 / 2; justify-self: center; border-radius: 10px; }   /* la portada es 3:2: con alto fijo y ancho 100% se estiraba y el recorte la descentraba */ .s-camps .camp-t { font-size: clamp(24px, calc(3.2 * var(--vh)), 34px); } .s-camps .camp-d { font-size: clamp(13px, calc(1.8 * var(--vh)), 16px); }
-.camp-foot { min-height: 96px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 12px 0; }   /* sin la sombra pegada abajo: cortaba la pantalla */ .camp-foot .startbtn { width: min(100%, 480px); margin-left: auto; }
 
 /* ---------- Competitivo ---------- */
 .cp-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: clamp(16px, calc(2.6 * var(--vw)), 44px); align-items: start; }
@@ -208,7 +202,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 
 @media (max-width: 1000px) {
   .adv-setup, .cp-grid { grid-template-columns: 1fr; } .deckrow { grid-template-columns: repeat(2, 1fr); } .daily { grid-template-columns: 1fr; }
-  .scr-head { flex-wrap: wrap; } .scr-head h2 { flex-basis: 100%; order: 3; } .s-camps .camp { grid-template-columns: 1fr; }
+  .scr-head { flex-wrap: wrap; } .scr-head h2 { flex-basis: 100%; order: 3; }
 }
 
 
@@ -259,38 +253,3 @@ html.reduce-motion .of-stamp.on { animation-timing-function: steps(1); }
 .tb-title .tb-ascd { margin: 3px 0 0; font: 600 12px/1.25 var(--mono); letter-spacing: .02em; color: #f3d28a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 38ch; cursor: help; } .tb-title .tb-ascd b { color: #fff4d6; letter-spacing: .04em; }
 .stakes .as-mult { grid-column: 1 / -1; justify-self: start; align-self: center; font-family: var(--mono); font-size: 15.5px; letter-spacing: .06em; color: var(--brass-lt); white-space: nowrap; } .stakes .as-mult.off { opacity: .4; }
 
-/* ---------- Clasico v0.3.22: legible en la Steam Deck. La lista se desplaza (.scrolls: A.fitK no la encoge) y todo va a tamano real:
-   12 campanas en 2 columnas, compactas pero grandes, con la descripcion entera; el pie (niveles + Empezar) se queda fijo debajo ---------- */
-.s-camps { grid-template-rows: auto minmax(0, 1fr) auto; padding-bottom: 0; }
-.s-camps .scr-body { display: block; padding: 6px 10px 8px 4px; scroll-padding: 6px 0 8px; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-gutter: stable;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 6px, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(180deg, transparent 0, #000 6px, #000 calc(100% - 8px), transparent); }
-.s-camps .scr-body::-webkit-scrollbar { width: 10px; } .s-camps .scr-body::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffe08a, #f8b449); border-radius: 999px; box-shadow: inset 0 0 0 2px #16241c; } .s-camps .scr-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, .3); border-radius: 999px; }
-html body .s-camps .camps { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 10px 16px; margin: 0; }
-/* v0.3.35: ninguna tarjeta queda cortada a media altura. Todas las filas miden lo mismo (la mas alta), A.fitK (js/game.js, wholeRows) las estira lo justo
-   para que la lista ensene filas enteras y el desplazamiento encaja fila a fila. El relleno de abajo (8 px) es algo menos que el hueco entre filas (10 px):
-   la fila siguiente empieza 2 px por debajo del borde y nunca asoma; coincide con scroll-padding. Con 10 px entre filas y 10 px de relleno en la tarjeta
-   caben 3 filas enteras en 16:9 */
-html body .s-camps .camp { scroll-snap-align: start; }
-html body .s-camps .camp { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; align-items: center; padding: 10px 18px 10px 12px; min-height: 144px; border-radius: 16px; }
-html body .s-camps .camp:hover { transform: translateY(-3px); }
-html body .s-camps .camp-thumb { width: 180px; max-width: none; height: 120px; aspect-ratio: auto; border-radius: 10px; }   /* x2 de su rejilla de 90x60: nitida */
-html body .s-camps .camp-body { gap: 4px; align-self: stretch; grid-template-rows: auto 1fr auto; }
-html body .s-camps .camp-t { font-size: 34px; line-height: 1; display: flex; align-items: center; gap: 8px; }
-html body .s-camps .camp-t .ic { width: 30px; height: 30px; }
-html body .s-camps .camp-d { font-size: 22px; line-height: 1.15; color: rgba(242, 233, 214, .82); text-wrap: pretty; }
-html body .s-camps .camp-m { margin-top: 4px; gap: 14px; }
-html body .s-camps .camp-m > span { font-size: 16px; letter-spacing: .06em; }
-html body .s-camps .camp-p i { height: 6px; border-radius: 2px; }
-/* pie fijo: fieltro oscuro con filo dorado; niveles grandes (botones de 46 px, numero de 20 px) a la izquierda y Empezar a la derecha */
-.s-camps .camp-foot { position: relative; min-height: 0; margin: 0 calc(-1 * clamp(16px, calc(4 * var(--vw)), 64px)); padding: 14px clamp(16px, calc(4 * var(--vw)), 64px) clamp(14px, calc(2.2 * var(--vh)), 24px); gap: 18px 28px; flex-wrap: nowrap;
-  background: linear-gradient(180deg, rgba(6, 16, 11, .72), rgba(5, 12, 8, .94)); }
-.s-camps .camp-foot::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255, 224, 138, .55) 18%, #ffe08a 50%, rgba(255, 224, 138, .55) 82%, transparent); }
-.s-camps .camp-foot .picker { margin: 0; min-width: 0; }
-html body .s-camps .picker > span { font-size: 16px; margin-bottom: 8px; color: rgba(242, 233, 214, .7); }
-.s-camps .lrail { gap: 8px; flex-wrap: nowrap; }
-html body .s-camps .lv { width: 46px; height: 46px; font-size: 20px; border-width: 2px; flex: none; }
-.s-camps .camp-foot .startbtn { width: min(100%, 500px); flex: none; }
-html body .s-camps .sb-t > b { font-size: 30px; } html body .s-camps .sb-t > i { font-size: 16px; }
-/* ventanas estrechas: una columna y el pie en dos filas */
-@media (max-width: 1100px) { .s-camps .camp-foot { flex-wrap: wrap; } .s-camps .camp-foot .startbtn { width: 100%; } }
-@media (max-width: 899px) { html body .s-camps .camps { grid-template-columns: 1fr; } html body .s-camps .camp { grid-template-columns: 90px minmax(0, 1fr); } html body .s-camps .camp-thumb { width: 90px; height: 60px; } .s-camps .lrail { flex-wrap: wrap; } }

@@ -80,37 +80,66 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ Clasico: campanas */
   /* portada de cada campana: minicarta pixel art (un protagonista sobre el foco de su color), assets/gen/camp_<id>.webp */
   const campArt = x => `assets/gen/camp_${x.id.replace(/^c-/, "")}.webp`;
+  /* v0.3.46: Naipe de gala, "carta de campanas" (mesa de diseño, paso 3). 12 columnas: las 12 campanas a la vista como naipes pequenos sobre el fieltro
+     (1-7: ilustracion, nombre, sus 10 niveles y la medalla; sin desplazar, tambien en la Deck) y la ficha de papel de la elegida (8-12: ilustracion
+     grande, que es, tu record, desde que nivel empezar en diez casillas y "Jugar el nivel N"). Elegir campana o nivel solo repinta la ficha */
+  const CL_PLAY = () => A.pick6("Jugar el nivel {n}|Play level {n}|Jouer le niveau {n}|Jogar o nível {n}|Level {n} spielen|Gioca il livello {n}||开始第 {n} 关|레벨 {n} 플레이|レベル{n}をプレイ|Играть: уровень {n}|Zagraj poziom {n}");
+  /* lo que se pinta, sin tocar el estado (tambien lo usa el precalentamiento de la puerta, A.gala.warm) */
+  const clMedal = id => A.profile.get().medals[id];
+  const clFicha = (camps, campId, start) => {
+      const c = C(), x = camps.find(y => y.id === campId), p = c.prog(x.id), md = clMedal(x.id), n = x.levels.length, done = md ? n : Math.max(0, p.unlocked - 1);
+      const lv = x.levels.map((_, i) => `<button type="button" class="cl-lv${i === start ? " on" : ""}" data-lv="${i}" ${i >= p.unlocked ? "disabled" : ""} aria-pressed="${i === start}">${i + 1}</button>`).join("");
+      return `<img class="cl-big" src="${campArt(x)}" alt="" aria-hidden="true" draggable="false">
+        <div class="cl-ft"><h3 class="gx-t-m">${A.tx(x.title)}</h3>${md ? `<span class="cl-md">${A.icon("medal_" + md)}</span>` : ""}</div>
+        <p class="gx-note cl-d">${A.tx(x.blurb)}</p>
+        <div class="cl-rec"><div class="gx-lead-row"><span>${A.pick6("Mejor puntuación|Best score|Meilleur score|Melhor pontuação|Bestwert|Miglior punteggio||最高分|최고 점수|ベストスコア|Лучший счёт|Najlepszy wynik")}</span><s></s><b>${p.best ? A.fmt(p.best) : "—"}</b></div>
+          <div class="gx-lead-row"><span>${A.pick6("Niveles superados|Levels cleared|Niveaux réussis|Níveis superados|Geschaffte Level|Livelli superati||已通过关卡|클리어한 레벨|クリアしたレベル|Пройдено уровней|Ukończone poziomy")}</span><s></s><b>${done} / ${n}</b></div></div>
+        <div class="cl-start"><span class="gx-eyb">${A.t("title.from")}</span><div class="cl-lvs">${lv}</div></div>
+        <div class="cl-go"><button type="button" class="gx-btn pri" id="goBtn" data-primary><span>${CL_PLAY().replace("{n}", start + 1)}</span>${A.gala.keyHint("Enter", "a")}</button></div>`;
+  };
+  function clHtml(mode, campId, start) {
+    const c = C(), camps = A.CAMPAIGNS.filter(x => x.mode === mode), medal = clMedal;
+    const pips = (x, p) => `<span class="cl-pips">${x.levels.map((_, k) => `<i class="${p.best && k < p.unlocked ? "on" : ""}"></i>`).join("")}</span>`;
+    const cards = camps.map(x => {
+      const p = c.prog(x.id), md = medal(x.id);
+      return `<button type="button" class="cl-card${x.id === campId ? " sel" : ""}" data-id="${x.id}" aria-pressed="${x.id === campId}"><img class="cl-art" src="${campArt(x)}" alt="" aria-hidden="true" draggable="false" decoding="async">
+        <b>${A.tx(x.title)}</b>${pips(x, p)}${md ? `<span class="cl-md">${A.icon("medal_" + md)}</span>` : ""}</button>`;
+    }).join("");
+    const counts = ["gold", "silver", "bronze"].map(m => `<span class="cl-mc" ${A.ttAttr(A.pick6("Medallas|Medals|Médailles|Medalhas|Medaillen|Medaglie||奖牌|메달|メダル|Медали|Medale"), "")}>${A.icon("medal_" + m)}<b>${camps.filter(x => medal(x.id) === m).length}</b></span>`).join("");
+    return `<div class="gx-veil"></div><section class="cl-screen gx-stage s-classic" aria-labelledby="clH" data-nosq>
+      <div class="gx-grid cl-grid">
+        <header class="cl-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+          <h2 class="gx-t-l cl-h" id="clH"><span class="cl-hic">${A.icon("globe")}</span>${T("Clásico", "Classic")}</h2>
+          <span class="cl-meds">${counts}<span class="cl-of">${A.pick6("de {n} campañas|of {n} campaigns|sur {n} campagnes|de {n} campanhas|von {n} Kampagnen|su {n} campagne||共 {n} 个战役|캠페인 {n}개 중|{n}キャンペーン中|из {n} кампаний|z {n} kampanii").replace("{n}", camps.length)}</span></span>${tools()}</header>
+        <div class="gx-sh cl-left"><section class="gx-pnl cl-mesa"><div class="cl-cards" id="clCards">${cards}</div></section></div>
+        <div class="gx-sh cl-right"><div class="gx-paper cl-ficha" id="clFicha">${clFicha(camps, campId, start)}</div></div>
+      </div></section>`;
+  }
   function campaigns(mode) {
     const c = C(), S = c.S; S.mode = mode; const camps = A.CAMPAIGNS.filter(x => x.mode === mode);
     if (!camps.find(x => x.id === S.campId)) { S.campId = camps[0].id; S.startLevel = 0; }
-    const cur = camps.find(x => x.id === S.campId), pr = c.prog(cur.id); S.startLevel = Math.min(S.startLevel, pr.unlocked - 1);
-    const list = camps.map((x, i) => {
-      const p = c.prog(x.id), ticks = x.levels.map((_, k) => `<i class="${p.best && k < p.unlocked ? "on" : ""}"></i>`).join(""), md = A.profile.get().medals[x.id];
-      return `<button class="camp${x.id === S.campId ? " sel" : ""}" data-id="${x.id}" style="animation-delay:${i * 60}ms"><img class="camp-thumb" src="${campArt(x)}" alt="" aria-hidden="true" draggable="false" decoding="async">
-        <span class="camp-body"><span class="camp-t">${A.tx(x.title)}${md ? ` ${A.icon("medal_" + md, "sm")}` : ""}</span><span class="camp-d">${A.tx(x.blurb)}</span>
-        <span class="camp-m"><span class="camp-p">${ticks}</span><span>${p.best ? A.t("camp.best", { s: A.fmt(p.best) }) : A.t("camp.new")}</span></span></span></button>`;
-    }).join("");
-    /* el pie (niveles + boton) se repinta solo: al elegir campana o nivel NO se rehace la pantalla (las tarjetas reaparecian y las miniaturas parpadeaban) */
-    const foot = () => {
-      const cu = camps.find(x => x.id === S.campId), pu = c.prog(cu.id); let picker = "";
-      if (pu.unlocked > 1) { for (let i = 0; i < cu.levels.length; i++) picker += `<button class="lv${i === S.startLevel ? " sel" : ""}" data-lv="${i}" ${i >= pu.unlocked ? "disabled" : ""}>${i + 1}</button>`; picker = `<div class="picker"><span>${A.t("title.from")}</span><div class="lrail">${picker}</div></div>`; }
-      return picker + startBtn("goBtn", A.t("go.label"), A.t("go.sub", { n: S.startLevel + 1, name: A.tx(cu.title) }), true);
-    };
-    const wireFoot = () => {
-      document.querySelectorAll(".lv").forEach(b => (b.onclick = () => { S.startLevel = +b.dataset.lv; document.querySelectorAll(".lv").forEach(x => x.classList.toggle("sel", x === b)); const sub = $("goBtn").querySelector("i"); if (sub) sub.innerHTML = A.t("go.sub", { n: S.startLevel + 1, name: A.tx(camps.find(x => x.id === S.campId).title) }); }));
+    { const pr = c.prog(S.campId); S.startLevel = Math.min(S.startLevel, pr.unlocked - 1); }
+    c.dialog(clHtml(mode, S.campId, S.startLevel), "tablewrap");
+    wireTools(); $("hubBack").onclick = () => screen("home");
+    /* una palabra que no cabe en su naipe ("Исторические"): la letra baja de punto en punto, nunca por debajo de los 18 px de la Deck */
+    document.querySelectorAll(".cl-card b").forEach(b => { for (let f = 20; f > 18 && b.scrollWidth > b.clientWidth + 1; ) b.style.fontSize = --f + "px"; });
+    if (A.coverMap) A.coverMap("classic", true, () => !!document.querySelector("#dlg .cl-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
+    const wireFicha = () => {
+      document.querySelectorAll(".cl-lv").forEach(b => (b.onclick = () => {
+        if (+b.dataset.lv === S.startLevel) return;
+        S.startLevel = +b.dataset.lv; A.sfx.ui();
+        document.querySelectorAll(".cl-lv").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+        const l = $("goBtn").querySelector("span"); if (l) l.textContent = CL_PLAY().replace("{n}", S.startLevel + 1);
+      }));
       $("goBtn").onclick = () => { A.sfx.depart(); S.ranked = null; c.newRun(); };
     };
-    /* v0.3.22: la lista se desplaza (.scrolls: A.fitK ya no la encoge, la letra queda a tamano real tambien en la Steam Deck) y el pie se queda fijo debajo.
-       v0.3.35 (.rows): siempre filas enteras a la vista, nunca una tarjeta cortada (A.fitK, js/game.js) */
-    c.dialog(scr(T("Clásico", "Classic"), `<div class="camps">${list}</div>`, "s-camps scrolls rows", `<div class="camp-foot" id="campFoot">${foot()}</div>`), "tablewrap");
-    wireTools(); $("hubBack").onclick = () => screen("home");
-    document.querySelectorAll(".camp").forEach(b => (b.onclick = () => {
-      if (b.dataset.id === S.campId) return;
-      S.campId = b.dataset.id; S.startLevel = 0; c.save();
-      document.querySelectorAll(".camp").forEach(x => { x.classList.toggle("sel", x === b); x.style.animation = "none"; });
-      $("campFoot").innerHTML = foot(); wireFoot();
-    }));
-    wireFoot();
+    $("clCards").onclick = e => {
+      const b = e.target.closest(".cl-card"); if (!b || b.dataset.id === S.campId) return;
+      S.campId = b.dataset.id; S.startLevel = 0; c.save(); A.sfx.card();
+      document.querySelectorAll(".cl-card").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-pressed", on); });
+      $("clFicha").innerHTML = clFicha(camps, S.campId, S.startLevel); wireFicha();
+    };
+    wireFicha();
   }
 
   /* ------------------------------------------------------------------ Aventura */
@@ -400,11 +429,13 @@ window.AIQ = window.AIQ || {};
 
   function screen(id) {
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
-    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); }
+    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); }
     ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
   }
   /* el Reto diario de hoy tal cual, sin cerrar nada (precalentamiento de la puerta): sin ids, es una copia */
   const dailyHtml = () => { const DY = A.rank.daily, today = DY.board(); let sv = A.adv.summary(true); if (sv && sv.board !== today) sv = null; return dyHtml(sv, DY.get(today), null, today).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
-  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, dailyHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
+  /* el Clasico tal cual (precalentamiento de la puerta), sin tocar la campana ni el nivel elegidos: sin ids, es una copia */
+  const classicHtml = () => { const S = C().S, camps = A.CAMPAIGNS.filter(x => x.mode === "classic"), id = camps.some(x => x.id === S.campId) ? S.campId : camps[0].id; return clHtml("classic", id, Math.min(S.startLevel || 0, C().prog(id).unlocked - 1)).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
+  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, dailyHtml, classicHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
 })(window.AIQ);

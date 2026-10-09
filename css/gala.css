@@ -416,7 +416,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .dia-meta { justify-self: stretch; display: flex; justify-content: flex-end; align-items: center; gap: 12px; min-width: 0; overflow: hidden; } .dia-meta > * { flex: none; } .dia-meta > .dia-date { flex: 0 1 auto; }   /* sin sitio, la fecha se corta (nunca pisa el titulo) */
 .dia-date { font-size: 22px; color: var(--gx-txt-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .dia-date::first-letter { text-transform: uppercase; }
-.dia-seed { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 2px 14px 4px 10px; clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .55); font-size: 22px; color: var(--gx-rim-hi); white-space: nowrap; cursor: help; }
+.dia-seed { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 2px 14px 4px 10px; background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .55); font-size: 22px; color: var(--gx-rim-hi); white-space: nowrap; cursor: help; }
 .dia-seed .ic { width: 24px; height: 24px; image-rendering: pixelated; } .dia-seed b { font-weight: 400; letter-spacing: .06em; }
 .dia-ptag { align-self: center; padding: 4px 12px 6px; clip-path: var(--gx-notch); background: var(--gx-rim); color: var(--gx-ink); font-size: 20px; box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo); white-space: nowrap; }
 .dia-other .ic, .dia-today .ic { width: 22px; height: 22px; image-rendering: pixelated; }
@@ -426,7 +426,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .dia-mesa { height: 100%; display: grid; grid-template-rows: auto auto auto 1fr; gap: 12px; padding: 18px 22px 20px; min-height: 0; }
 .dia-mh { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-width: 0; } .dia-mh h3 { cursor: help; white-space: nowrap; } .dia-mh .dia-date { text-align: right; }
 .dia-mano { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.dia-nk { display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto 1fr; align-items: center; gap: 8px 12px; padding: 12px 16px 16px; min-width: 0; }
+.dia-nk { display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto 1fr; align-items: center; gap: 8px 12px; padding: 12px 16px 16px; min-width: 0; clip-path: none; }   /* piezas pequenas con contorno: sin recorte (no se nota y cuesta en la primera apertura) */
 .dia-art, .dia-asc { position: relative; display: block; width: 48px; height: 48px; }
 .dia-art .ic, .dia-asc .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; }
 .dia-asc em { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-family: var(--serif); font-size: 28px; line-height: 1; color: #3a2404; text-shadow: 0 2px 0 #ffe9a8; }
@@ -436,7 +436,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 /* la ruta del dia: el plano de la Aventura con las piezas del sistema (esquinas de pixel, fieltro y laton) */
 .dia-ruta .rd.plan { --s: 36px; --sb: 44px; --gap: 6px; gap: 12px; margin: 0; }
 .dia-ruta .rd.plan .rd-n.inf em { display: none; }   /* solo el simbolo (su nombre, en la ayuda): "Бесконечный" ensanchaba la columna y los jefes se salian */
-.dia-ruta .rd.plan .rd-act, .dia-ruta .rd.plan .rd-inf { border-radius: 0; clip-path: var(--gx-notch); padding: 8px 12px 8px; background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
+.dia-ruta .rd.plan .rd-act, .dia-ruta .rd.plan .rd-inf { border-radius: 0; padding: 8px 12px 8px; background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
 .dia-ruta .rd.plan .rd-h b { font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); }
 .dia-ruta .rd.plan .rd-h i { font-family: var(--sans); font-size: 18px; }
 .dia-ruta .rd.plan .rd-ic { border-radius: 0; }   /* casillas pequenas sin recorte: a este tamano el escalon apenas se ve y cada recorte cuesta en la primera apertura */
@@ -495,4 +495,58 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
   .dia-head { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; } .dia-meta { grid-column: 1 / -1; grid-row: 2; justify-self: start; flex-wrap: wrap; } .dia-head .menu-tools { grid-column: 3; grid-row: 1; } .dia-h { font-size: 40px; }
   .dia-left, .dia-right { grid-column: 1; grid-row: auto; } .dia-mano { grid-template-columns: minmax(0, 1fr); } .dia-ruta { overflow-x: auto; }
   .dia-int { grid-template-columns: minmax(0, 1fr); } .dia-tot { justify-items: start; } .dia-board { height: auto; } .dia-screen .dia-board .lb { overflow: visible; }
+}
+
+/* ---------------------------------------------------------------- CLASICO (v0.3.46): carta de campanas (js/hub.js, campaigns). 12 columnas: los 12 naipes de
+   campana sobre el fieltro (1-7) y la ficha de papel de la elegida (8-12) con su nivel de salida y el boton. Sin desplazar: cabe tambien en la Deck */
+.cl-screen { z-index: 1; }
+.cl-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
+.cl-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 24px; min-width: 0; }
+.cl-head #hubBack .ic { width: 22px; height: 22px; }
+.cl-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.cl-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
+.cl-meds { justify-self: end; display: flex; align-items: center; gap: 18px; min-width: 0; }
+.cl-mc { display: inline-flex; align-items: center; gap: 6px; font-size: 28px; color: var(--gx-ttl); }
+.cl-mc .ic { width: 36px; height: 36px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(2, 6, 4, .6)); } .cl-mc b { font-weight: 400; font-variant-numeric: tabular-nums; }
+.cl-of { font-size: 20px; color: var(--gx-txt-2); white-space: nowrap; }
+.cl-head .menu-tools { grid-column: 4; }
+
+.cl-left { grid-column: 1 / 8; grid-row: 2; min-width: 0; min-height: 0; }
+.cl-mesa { height: 100%; padding: 18px 20px 20px; min-height: 0; }
+.cl-cards { height: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 12px; }
+.cl-card { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px; min-width: 0; min-height: 0; padding: 8px 8px 10px; border: 0; cursor: pointer; text-align: left;
+  background: var(--gx-card); color: var(--gx-ink); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); font-family: var(--sans);
+  transition: transform .18s cubic-bezier(.2, .9, .3, 1); }   /* sin clip-path: con su contorno oscuro de 2 px el escalon no se ve, y recortar 12 naipes costaba 5 fotogramas al abrir */
+.cl-art { display: block; width: 100%; height: 100%; min-height: 0; object-fit: cover; image-rendering: pixelated; box-shadow: 0 0 0 2px var(--gx-o); }
+.cl-card b { height: 2em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 400; font-size: 20px; line-height: 1; min-width: 0; }   /* dos lineas: cortado con "…", en ruso "Eventos" y "Personajes" quedaban iguales */
+.cl-pips { display: flex; gap: 3px; } .cl-pips i { flex: 1 1 0; height: 8px; background: #ded2b4; box-shadow: inset 0 0 0 2px var(--gx-o); } .cl-pips i.on { background: var(--gx-gold-lo); }   /* niveles jugados: ocre oscuro, que se distinga del papel */
+.cl-card .cl-md { position: absolute; right: 4px; top: 4px; }
+.cl-md .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); }
+.cl-card:hover:not(.sel) { transform: translateY(-2px); }
+.cl-card.sel { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -4px 0 var(--gx-rim-lo), inset 0 0 0 2px var(--gx-o); cursor: default; }
+.cl-card.sel .cl-pips i { background: #e8c27a; } .cl-card.sel .cl-pips i.on { background: var(--gx-ink); }
+.cl-card:focus { outline: none; }
+.cl-card:focus-visible::after, html[data-input="pad"] .cl-card:focus::after { content: ""; position: absolute; inset: 4px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+
+.cl-right { grid-column: 8 / 13; grid-row: 2; min-width: 0; min-height: 0; }
+.cl-ficha { height: 100%; display: grid; grid-template-rows: auto auto auto 1fr auto auto; gap: 10px; padding: 16px 20px 18px; min-height: 0; }
+.cl-big { justify-self: center; display: block; width: 270px; height: 180px; image-rendering: pixelated; box-shadow: 0 0 0 3px var(--gx-o); }
+.cl-ft { display: flex; align-items: center; gap: 12px; min-width: 0; } .cl-ft .gx-t-m { color: var(--gx-ink); text-shadow: none; overflow-wrap: break-word; min-width: 0; } .cl-ft .cl-md .ic { width: 40px; height: 40px; }
+.cl-d { color: #3f5045; text-wrap: pretty; }
+.cl-rec { display: grid; gap: 2px; align-content: start; } .cl-rec .gx-lead-row { font-size: 20px; }
+.cl-start { display: grid; gap: 8px; }
+.cl-lvs { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+.cl-lv { position: relative; display: grid; place-items: center; height: 40px; padding: 0; border: 0; cursor: pointer; font-family: var(--sans); font-size: 22px; line-height: 1; color: var(--gx-ink);
+  background: #ede3c9; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -3px 0 2px var(--gx-paper-lo); transition: transform .15s cubic-bezier(.2, .9, .3, 1); }
+.cl-lv:hover:not(:disabled):not(.on) { transform: translateY(-2px); }
+.cl-lv:disabled { cursor: default; background: #0b2118; color: rgba(185, 198, 182, .35); box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .18); }
+.cl-lv.on { cursor: default; background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -3px 0 var(--gx-rim-lo), inset 0 0 0 2px var(--gx-o); }
+.cl-lv:focus { outline: none; }
+.cl-lv:focus-visible::after, html[data-input="pad"] .cl-lv:focus::after { content: ""; position: absolute; inset: 3px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.cl-go { justify-self: end; }
+@media (max-width: 899px), (max-height: 519px) {                                  /* movil: una columna y la pantalla entera se desplaza */
+  .cl-screen { overflow-y: auto; }
+  .cl-grid { position: static; padding: 14px 16px 20px; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 12px; }
+  .cl-head { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; } .cl-meds { grid-column: 1 / -1; grid-row: 2; justify-self: start; } .cl-head .menu-tools { grid-column: 3; grid-row: 1; } .cl-h { font-size: 40px; }
+  .cl-left, .cl-right { grid-column: 1; grid-row: auto; } .cl-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; } .cl-ficha { height: auto; }
 }
