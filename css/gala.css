@@ -17,6 +17,7 @@
   --gx-red: #fe5f55; --gx-red-hi: #ffa59b; --gx-red-lo: #9e2a26;
   --gx-gold: #f8b449; --gx-gold-hi: #fff0b8; --gx-gold-lo: #b5651b;
   --gx-line: rgba(243, 237, 220, .14);
+  --gx-card: linear-gradient(180deg, #fffaec 0, #f6efdc 26%, #efe4c8 100%); --gx-print: rgba(181, 101, 27, .34);   /* naipe: cartulina lisa (sin grano) y su filete impreso */
   --gx-p: 2px;                                                     /* un pixel del sistema (2 px de diseno: 2 a escala 1, 3 a 1,5) */
   --gx-notch: polygon(2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px), 0 2px, 2px 2px);
   --gx-in: .42s; --gx-out: .18s; --gx-ease: cubic-bezier(.2, 1.1, .4, 1); --gx-ease-out: cubic-bezier(.4, 0, 1, 1);
@@ -38,14 +39,15 @@
 /* ---------------------------------------------------------------- superficies */
 .gx-sh { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
 .gx-pnl { position: relative; clip-path: var(--gx-notch); padding: 26px 26px 24px;
-  background: url(../assets/dados/felt.png) 0 0 / 128px 128px, radial-gradient(130% 90% at 50% 0%, var(--gx-felt-1) 0%, var(--gx-felt-2) 55%, var(--gx-felt-3) 100%);
+  background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(130% 90% at 50% 0%, var(--gx-felt-1) 0%, var(--gx-felt-2) 55%, var(--gx-felt-3) 100%);
   box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 6px var(--gx-rim), inset 0 0 0 8px var(--gx-o), inset 0 40px 56px -40px rgba(255, 214, 140, .14); image-rendering: pixelated; }
 .gx-pnl > * { position: relative; z-index: 1; }
 .gx-pnl::before { content: ""; position: absolute; inset: 2px; z-index: 0; pointer-events: none;
   background: linear-gradient(var(--gx-o), var(--gx-o)) 0 0 / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 100% 0 / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 0 100% / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 100% 100% / 2px 2px no-repeat,
     linear-gradient(var(--gx-rim-hi), var(--gx-rim-hi)) 2px 0 / calc(100% - 4px) 2px no-repeat, linear-gradient(var(--gx-rim-lo), var(--gx-rim-lo)) 2px 100% / calc(100% - 4px) 2px no-repeat; }
 .gx-paper { position: relative; clip-path: var(--gx-notch); padding: 16px 18px 18px; color: var(--gx-ink); --gx-txt-2: var(--gx-ink-2); --gx-line: rgba(22, 36, 28, .16); --gx-acc: var(--gx-gold-lo);
-  background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); image-rendering: pixelated; }
+  background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
+.gx-paper::after { content: ""; position: absolute; inset: 8px 8px 10px; pointer-events: none; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-print); }
 .gx-paper::before { content: ""; position: absolute; inset: 2px; pointer-events: none;
   background: linear-gradient(var(--gx-o), var(--gx-o)) 0 0 / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 100% 0 / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 0 100% / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 100% 100% / 2px 2px no-repeat, linear-gradient(#fffaf0, #fffaf0) 2px 0 / calc(100% - 4px) 2px no-repeat; }
 
@@ -85,7 +87,7 @@
 @keyframes gx-focus { 50% { opacity: .3; } }
 
 /* ---------------------------------------------------------------- velo, foco de luz y entrada (Foco con movimiento mixto) */
-.gx-veil { position: absolute; inset: 0; background: url(../assets/dados/felt.png) 0 0 / 128px 128px, radial-gradient(ellipse 90% 80% at 62% 8%, #173b2b 0%, #0b1d15 52%, #050c08 100%); image-rendering: pixelated; }
+.gx-veil { position: absolute; inset: 0; background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(ellipse 90% 80% at 62% 8%, #173b2b 0%, #0b1d15 52%, #050c08 100%); image-rendering: pixelated; }
 .gx-spot { position: absolute; top: 0; pointer-events: none; opacity: 0;
   background: radial-gradient(ellipse 55% 100% at 50% 0%, rgba(255, 226, 160, .2), rgba(255, 226, 160, .07) 55%, transparent 80%); }
 .gx-layer.gx-in .gx-veil { animation: gx-fade .26s ease-out both; }
@@ -111,11 +113,13 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
 #veil.gx { display: block; background: none; text-align: left; }
 .gx-pause .gx-railw { grid-column: 1 / 5; grid-row: 1; min-height: 0; }
 .gx-pause.solo .gx-railw { grid-column: 5 / 9; }                                  /* sin crupier (Clasico, Campamento): el carril va al centro */
-.gx-pause .gx-rail { height: 100%; min-height: 0; display: grid; grid-template-rows: auto auto 1fr auto; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.gx-pause .gx-grid { top: 24px; bottom: 24px; }
+.gx-pause .gx-rail { height: 100%; min-height: 0; display: grid; grid-template-rows: auto auto 1fr auto; grid-template-columns: minmax(0, 1fr); gap: 12px; padding-top: 22px; padding-bottom: 20px; }   /* cabe en 16:9 en los 12 idiomas (en ruso, la entradilla ocupa 3 lineas) */
 .gx-pause .gx-rail > *, .gx-pause .gx-paper > * { min-width: 0; } .gx-pause .gx-t-l, .gx-pause .gx-lead { overflow-wrap: anywhere; }
 .gx-pause.solo .gx-railw { align-self: center; } .gx-pause.solo .gx-rail { height: auto; }      /* centrado, el carril mide lo que lleva: sin hueco vacio */
-.gx-pause .gx-head { display: grid; gap: 8px; }
-.gx-pause .gx-hearts { display: flex; gap: 4px; margin-top: 2px; } .gx-pause .gx-hearts .ic { width: 28px; height: 28px; }
+.gx-pause .gx-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; } .gx-pause .gx-head > * { grid-column: 1 / -1; }
+.gx-pause .gx-head .gx-eyb { grid-column: 1; grid-row: 1; align-self: center; }                 /* los corazones, en la esquina del encabezado */
+.gx-pause .gx-head .gx-hearts { grid-column: 2; grid-row: 1; display: flex; gap: 4px; } .gx-pause .gx-hearts .ic { width: 28px; height: 28px; }
 .gx-pause .gx-paper { display: grid; gap: 10px; }
 .gx-pause .gx-menu { align-self: start; }
 .gx-pause .gx-foot { display: grid; gap: 10px; }
@@ -148,7 +152,7 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
 /* el ticket: papel con los bordes perforados, filas como en caja y el sello encima */
 .gx-vd-ticket { display: grid; gap: 8px; padding: 26px 22px 30px; box-shadow: inset 0 -4px 0 var(--gx-paper-lo);
   clip-path: polygon(0 8px, 2% 0, 4% 8px, 6% 0, 8% 8px, 10% 0, 12% 8px, 14% 0, 16% 8px, 18% 0, 20% 8px, 22% 0, 24% 8px, 26% 0, 28% 8px, 30% 0, 32% 8px, 34% 0, 36% 8px, 38% 0, 40% 8px, 42% 0, 44% 8px, 46% 0, 48% 8px, 50% 0, 52% 8px, 54% 0, 56% 8px, 58% 0, 60% 8px, 62% 0, 64% 8px, 66% 0, 68% 8px, 70% 0, 72% 8px, 74% 0, 76% 8px, 78% 0, 80% 8px, 82% 0, 84% 8px, 86% 0, 88% 8px, 90% 0, 92% 8px, 94% 0, 96% 8px, 98% 0, 100% 8px, 100% calc(100% - 8px), 98% 100%, 96% calc(100% - 8px), 94% 100%, 92% calc(100% - 8px), 90% 100%, 88% calc(100% - 8px), 86% 100%, 84% calc(100% - 8px), 82% 100%, 80% calc(100% - 8px), 78% 100%, 76% calc(100% - 8px), 74% 100%, 72% calc(100% - 8px), 70% 100%, 68% calc(100% - 8px), 66% 100%, 64% calc(100% - 8px), 62% 100%, 60% calc(100% - 8px), 58% 100%, 56% calc(100% - 8px), 54% 100%, 52% calc(100% - 8px), 50% 100%, 48% calc(100% - 8px), 46% 100%, 44% calc(100% - 8px), 42% 100%, 40% calc(100% - 8px), 38% 100%, 36% calc(100% - 8px), 34% 100%, 32% calc(100% - 8px), 30% 100%, 28% calc(100% - 8px), 26% 100%, 24% calc(100% - 8px), 22% 100%, 20% calc(100% - 8px), 18% 100%, 16% calc(100% - 8px), 14% 100%, 12% calc(100% - 8px), 10% 100%, 8% calc(100% - 8px), 6% 100%, 4% calc(100% - 8px), 2% 100%, 0 calc(100% - 8px)); }
-.gx-vd-ticket::before { display: none; }
+.gx-vd-ticket::before, .gx-vd-ticket::after { display: none; }   /* el ticket es de caja: sin filete de naipe */
 .gx-vd-th { display: grid; justify-items: center; gap: 2px; text-align: center; padding-bottom: 2px; }
 .gx-vd-rows { display: grid; gap: 6px; }
 .gx-vd-rows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }   /* diez lugares (Clasico): dos columnas para que quepa sin encoger */
@@ -212,7 +216,7 @@ html.reduce-motion .gx-vd *, html.reduce-motion .gx-vd { animation-duration: 0s 
    sobre un panel de fieltro con marco de laton. Solo cambia el aspecto: el marcado y la logica son los de siempre (index.html, js/game.js, js/controles.js) */
 #settings { zoom: var(--k); --vh: calc(1vh / var(--k)); --vw: calc(1vw / var(--k));
   font-family: var(--sans); color: var(--gx-txt);
-  background: url(../assets/dados/felt.png) 0 0 / 128px 128px, radial-gradient(ellipse 90% 80% at 50% 0%, #173b2b 0%, #0b1d15 55%, #050c08 100%); image-rendering: pixelated; }
+  background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(ellipse 90% 80% at 50% 0%, #173b2b 0%, #0b1d15 55%, #050c08 100%); image-rendering: pixelated; }
 #settings::after { opacity: .035; }
 #settings .set-top { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; align-items: center; padding: 16px 40px 0; border-bottom: 0; background: none; }
 #settings .set-back { grid-column: 1 / 4; justify-self: start; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 16px 8px; border-radius: 0; clip-path: var(--gx-notch);
@@ -232,7 +236,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 :root body #settings .set-nav button { min-height: 76px; padding: 10px 14px 12px; gap: 14px; border-radius: 0; clip-path: var(--gx-notch); transform: none;
   background: rgba(5, 12, 9, .5); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .28); }
 :root body #settings .set-nav button:hover:not(.on) { background: rgba(212, 160, 74, .12); transform: translateX(2px); }
-:root body #settings .set-nav button.on { background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, var(--gx-paper);
+:root body #settings .set-nav button.on { background: var(--gx-card);
   box-shadow: inset 0 0 0 2px var(--gx-o), inset 8px 0 0 2px var(--gx-rim), inset 0 -4px 0 2px var(--gx-paper-lo); }
 #settings .set-nav button.on::before { display: none; }
 :root body #settings .set-nav-ic .ic { width: 40px; height: 40px; }
@@ -302,7 +306,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 #settings .langgrid button { padding: 12px 6px 10px; gap: 8px; border: 0; border-radius: 0; clip-path: var(--gx-notch); font-family: var(--sans); font-size: 20px; letter-spacing: 0; text-transform: none;
   color: var(--gx-txt); background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .25); transform: none; }
 #settings .langgrid button:hover { background: rgba(212, 160, 74, .16); }
-#settings .langgrid button.on { color: var(--gx-ink); background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
+#settings .langgrid button.on { color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
 #settings .lang-flag { width: 40px; box-shadow: 0 0 0 2px var(--gx-o); border-radius: 0; }
 
 /* tu nombre: un papel donde se escribe */
@@ -310,7 +314,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
   background: var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 4px 0 2px #ded2b4; }
 
 /* el pie con los atajos: teclas de papel */
-#settings .set-keys { border-top: 2px solid var(--gx-line); font-family: var(--sans); font-size: 18px; color: var(--gx-txt-2); padding: 10px 40px 14px; }
+#settings .set-keys { border-top: 2px solid var(--gx-line); font-family: var(--sans); font-size: 18px; color: var(--gx-txt-2); padding: 10px 40px 14px calc(88px + (100% - 256px) / 4); justify-content: flex-start; }   /* bajo el panel (columna 4): la esquina de abajo a la izquierda es del crupier */
 #settings .set-keys kbd { border-radius: 0; font-family: var(--mono); font-size: 16px; color: var(--gx-ink); background: var(--gx-paper); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -2px 0 2px #c2b28c; padding: 3px 7px 2px; }
 
 /* el aviso de reasignar del crupier (#rbOv) y sus cajas: tambien carteles del sistema */
@@ -322,4 +326,5 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
   #settings .set-body { grid-template-columns: minmax(0, 1fr); padding: 12px 16px; }
   :root body #settings .set-nav { grid-column: 1; flex-direction: row; overflow-x: auto; } #settings .set-panes { grid-column: 1; }
   #settings .langgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #settings .set-keys { padding: 10px 16px 12px; justify-content: center; }
 }

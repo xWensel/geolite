@@ -1645,26 +1645,32 @@ window.AIQ = window.AIQ || {};
     if (!el || el.classList.contains("camp") || el.classList.contains("lvpos")) return;      // en el Campamento su sitio lo mide campRoom
     const bs = bubble.style, fs = face.style;
     const reset = () => { el.style.bottom = el.style.top = ""; fs.width = fs.height = fs.display = ""; bs.marginBottom = bs.maxWidth = ""; };
+    const CS = A.core && A.core.S, setP = CS && CS.settingsOpen ? document.querySelector("#settings .set-panes") : null;   // v0.3.40: con Ajustes abierto (su expediente en Datos) no pisa el panel de la derecha
     if (el.classList.contains("home") && !D.host) {                                 // en el inicio: el hueco libre a su lado de la portada (homeRoom)
       reset(); const room = homeRoom(homeCorner), top = homeTop(); if (top > HOME_TOP) el.style.top = top + "px"; el.style.setProperty("--hf", Math.max(A.crupier.snap(Math.min(256, room)).css, 112) + "px"); el.style.setProperty("--hb", Math.min(380, room) + "px"); return;
     }
-    if (D.host || !D.on || el.classList.contains("inline") || el.classList.contains("big")) return reset();
+    if (D.host || (!D.on && !setP) || el.classList.contains("inline") || el.classList.contains("big")) return reset();
     const app = $("app"); if (!app) return reset();
     const R = app.getBoundingClientRect(), box = id => { const e = $(id); if (!e || e.classList.contains("hidden")) return null; const r = e.getBoundingClientRect(); return r.width > 1 && r.height > 1 ? r : null; };
     const hits = (r, x0, x1) => r && r.left < x1 && r.right > x0;
-    const sheet = A.marcador && A.marcador.avoidRect ? A.marcador.avoidRect() : null;   // v0.2.15: el ticket (pegado al marcador o en hoja), a su derecha: no lo pisa
+    const sheet = setP ? setP.getBoundingClientRect() : A.marcador && A.marcador.avoidRect ? A.marcador.avoidRect() : null;   // v0.2.15: el ticket (pegado al marcador o en hoja), a su derecha: no lo pisa
     const L = R.left + 16, cap = x => (sheet && sheet.left > x ? sheet.left - 12 - x : Infinity);
     const mob = innerWidth <= 720, maxS = Math.max(0, Math.min(mob ? 170 : 384, cap(L)));
-    const top = [box("plate"), box("advBar"), box("cxToast")].filter(r => hits(r, L, L + maxS + 360)).reduce((m, r) => Math.max(m, r.bottom), R.top) + 10;   // v0.32: tampoco pisa el aviso de tarjeta nueva
+    const nav = setP && document.querySelector("#settings .set-nav");
+    const top = [box("plate"), box("advBar"), box("cxToast"), nav ? nav.getBoundingClientRect() : null].filter(r => hits(r, L, L + maxS + 360)).reduce((m, r) => Math.max(m, r.bottom), R.top) + 10;   // v0.32: tampoco pisa el aviso de tarjeta nueva
     const lows = [box("dock"), box("note"), box("toolBar")]; if (sheet) lows.push(sheet);
     let floor = R.bottom - 8; for (const r of lows) if (hits(r, L, L + maxS)) floor = Math.min(floor, r.top - 8);
     const sn = A.crupier.snap(Math.min(maxS, floor - top), mob ? 0 : Math.floor(3 * (devicePixelRatio || 1) + 0.25));   // v0.32: x3 si cabe, si no x2 o x1 (pixel entero)
-    let sz = sn.css; const noFace = sz < 84 || cap(L + sz + 4) < 150;                // sin sitio para el globo entre la cara y la hoja: habla solo con el globo
-    if (noFace) { sz = 0; fs.display = "none"; } else { fs.display = ""; fs.width = fs.height = sz + "px"; }
+    let sz = sn.css, noFace = sz < 84 || cap(L + sz + 4) < 150, x0 = L, room = 0, bh = 90;   // sin sitio para el globo entre la cara y la hoja: habla solo con el globo
+    for (let pass = 0; ; pass++) {
+      if (noFace) { sz = 0; fs.display = "none"; } else { fs.display = ""; fs.width = fs.height = sz + "px"; }
+      x0 = L + (noFace ? 0 : sz + 4); room = Math.max(Math.min(150, cap(x0)), Math.min(mob ? innerWidth * 0.62 : 440, R.right - 12 - x0, cap(x0)));
+      bs.maxWidth = room + "px";
+      bh = bubble.offsetHeight || 90;                                              // alto real: el globo ya lleva la frase entera (lo que falta, invisible)
+      if (pass || noFace || !setP || bh + 74 <= floor - top) break;
+      noFace = true;                                                               // v0.3.40: en Ajustes a 16:9 bajo, junto a su cara el globo salia estrecho y pisaba el indice: solo el globo, mas ancho
+    }
     el.style.bottom = Math.max(0, R.bottom - floor) + "px";
-    const x0 = L + (noFace ? 0 : sz + 4), room = Math.max(Math.min(150, cap(x0)), Math.min(mob ? innerWidth * 0.62 : 440, R.right - 12 - x0, cap(x0)));
-    bs.maxWidth = room + "px";
-    const bh = bubble.offsetHeight || 90;                                          // alto real: el globo ya lleva la frase entera (lo que falta, invisible)
     let bFloor = floor; for (const r of lows) if (hits(r, x0, x0 + room)) bFloor = Math.min(bFloor, r.top - 8);
     const minM = noFace ? 0 : mob ? 20 : 74, want = Math.max(minM, floor - bFloor), maxM = Math.max(0, floor - top - bh);
     bs.marginBottom = Math.min(want, maxM) + "px";                                    // si no cabe del todo, antes pisa las herramientas que la placa

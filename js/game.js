@@ -1058,15 +1058,15 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (run && !prac) rows.push(`<div class="gx-lead-row"><span>${A.pick6("Doblones|Doubloons|Doublons|Dobrões|Dublonen|Dobloni||金币|도블론|ダブロン|Дублоны|Dublony")}</span><s></s><b>${A.fmt(run.coins || 0)}</b></div>`);
     const hearts = run && !run.inf && run.lives > 0 ? `<div class="gx-hearts" aria-label="${A.pick6("Provisiones|Provisions|Provisions|Provisões|Proviant|Provviste||补给|식량|食料|Запасы|Zapasy")}: ${run.lives}">${A.icon("heart").repeat(Math.min(run.lives, 9))}</div>` : "";
     const withDealer = S.phase === "asking" && adv && A.dealer && A.dealer.on && innerWidth > 899 && innerHeight > 519;
-    const exitBtn = prac ? `<button class="gx-btn wide" id="saveExitBtn">${A.pick6("Salir de la práctica|Leave practice|Quitter l'entraînement|Sair do treino|Training verlassen|Esci dall'allenamento||退出练习|연습 나가기|練習をやめる|Выйти из тренировки|Wyjdź z treningu")}</button>`
-      : adv ? `<button class="gx-btn wide" id="saveExitBtn">${A.T("Guardar y salir al menú", "Save and exit to menu")}</button>` : `<button class="gx-btn wide" id="exitBtn">${A.T("Salir al menú", "Exit to menu")}</button>`;
+    const exitBtn = prac ? `<button class="gx-btn wide" id="saveExitBtn"><span>${A.pick6("Salir de la práctica|Leave practice|Quitter l'entraînement|Sair do treino|Training verlassen|Esci dall'allenamento||退出练习|연습 나가기|練習をやめる|Выйти из тренировки|Wyjdź z treningu")}</span></button>`
+      : adv ? `<button class="gx-btn wide" id="saveExitBtn"><span>${A.T("Guardar y salir al menú", "Save and exit to menu")}</span></button>` : `<button class="gx-btn wide" id="exitBtn"><span>${A.T("Salir al menú", "Exit to menu")}</span></button>`;
     v.className = "gx"; v._gx = null;
     v.innerHTML = `<div class="gx-pause${withDealer ? "" : " solo"}"><div class="gx-veil"></div>${withDealer ? `<div class="gx-spot"></div>` : ""}
       <div class="gx-stage"><div class="gx-grid"><div class="gx-sh gx-railw gx-from-left"><section class="gx-pnl gx-rail" aria-labelledby="pvTitle">
         <div class="gx-head"><span class="gx-eyb">${mode}</span><h2 class="gx-t-l" id="pvTitle">${A.t("pause.h")}</h2>${L ? `<p class="gx-lead">${$("lvlText").textContent}</p>` : ""}${hearts}</div>
         ${rows.length ? `<div class="gx-paper">${rows.join("")}</div>` : "<div></div>"}
         <div class="gx-acts col gx-menu"><button class="gx-btn pri wide" id="resBtn" data-primary><span>${A.t("btn.resume")}</span>${A.gala.keyHint("Esc", "b")}</button>
-          <button class="gx-btn wide" id="pvSet">${A.t("set.title")}</button>${exitBtn}</div>
+          <button class="gx-btn wide" id="pvSet"><span>${A.t("set.title")}</span></button>${exitBtn}</div>
         <div class="gx-foot"><div class="gx-hr"></div>${adv && !prac ? `<div class="gx-acts"><button class="gx-btn gho sm" id="newRunBtn">${newLbl}</button></div>` : ""}<p class="gx-note">${note}</p></div>
       </section></div></div>${withDealer ? `<div class="gx-dealer" id="pvDealer"></div>` : ""}</div></div>`;
     if (withDealer) { A.dealer.dock($("pvDealer")); v._dealer = true; }
