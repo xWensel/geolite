@@ -1,5 +1,5 @@
 /*
- * Geolite - Clasificacion en la portada (v0.14.1). Un boton del menu principal (al lado de la Enciclopedia) despliega un PODIO: se abre
+ * Geolite - Clasificacion en la portada (v0.14.1; pantalla completa en Naipe de gala desde la v0.3.39). Un boton del menu principal abre un PODIO: se abre
  * siempre en la tabla de la Aventura, la principal. Dos filas de pestanas (v0.3.19): el modo (Aventura | Reto diario) y, debajo y colgando de el,
  * su periodo: la Aventura tiene Historico, Hoy y Ayer (solo expediciones de la Aventura) y el Reto diario Hoy y Ayer (suma de sus 3 intentos), js/rank.js.
  * Los 3 primeros suben al podio (oro, plata y bronce, con la corona del primero), la lista va de 5 en 5 con flechas (4.o-8.o, 9.o-13.o... hasta el
@@ -47,8 +47,9 @@ window.AIQ = window.AIQ || {};
   };
 
   /* ------------------------------------------------------------------ el podio */
-  const tabsHtml = () => `<div class="pd-modes" role="tablist">${MODES().map(([id, ic, l]) => `<button type="button" role="tab" class="pd-mode${id === mode ? " on" : ""}" data-m="${id}" aria-selected="${id === mode}"><span class="pd-mi">${A.icon(ic)}</span><span class="sq-fit">${l}</span></button>`).join("")}</div>
-    <div class="dr-tabs pd-tabs pd-per-${mode}" role="tablist">${PERS(mode).map(([id, l]) => `<button type="button" role="tab" class="sq-fit${id === per ? " on" : ""}" data-p="${id}" aria-selected="${id === per}">${l}</button>`).join("")}</div>`;
+  /* v0.3.39 (Naipe de gala): los dos selectores del sistema, en la cabecera: el modo y su periodo */
+  const tabsHtml = () => `<div class="gx-seg pd-modes" role="tablist">${MODES().map(([id, ic, l]) => `<button type="button" role="tab" class="pd-mode${id === mode ? " on" : ""}" data-m="${id}" aria-selected="${id === mode}"><span class="pd-mi">${A.icon(ic)}</span><span>${l}</span></button>`).join("")}</div>
+    <div class="gx-seg pd-tabs" role="tablist">${PERS(mode).map(([id, l]) => `<button type="button" role="tab" class="${id === per ? "on" : ""}" data-p="${id}" aria-selected="${id === per}">${l}</button>`).join("")}</div>`;
   function wireTabs() {
     const p = $("podio"); if (!p) return;
     p.querySelectorAll(".pd-mode").forEach(b => (b.onclick = () => {
@@ -64,46 +65,35 @@ window.AIQ = window.AIQ || {};
   /* al cambiar de modo, la fila de periodos se reparte con los suyos (la Aventura tiene Historico; el Reto diario, solo Hoy y Ayer) */
   function retab() {
     const t = $("pdTabs"); if (!t) return;
-    t.innerHTML = tabsHtml(); wireTabs(); if (A.squeeze) A.squeeze(t);
+    t.innerHTML = tabsHtml(); wireTabs();
     const on = t.querySelector(".pd-mode.on"); if (on) on.focus({ preventScroll: true });
     load();
   }
+  /* v0.3.39: pantalla completa (antes, un panel que salia de la placa): podio de fichas apiladas a la izquierda y la pizarra de papel a la derecha.
+     Entra y sale con la fisica comun (js/gala.js). El crupier la sigue leyendo por sus clases (js/dealer.js podSay): .podio es la pizarra */
   function open() {
     const layer = $("layer"); if (!layer || isOpen() || !document.querySelector(".hh")) return;
     mode = "adv"; per = "all"; back = document.activeElement;
     const btn = $("rankBtn"); if (btn) btn.setAttribute("aria-expanded", "true");
-    const close6 = A.t("codex.close");
-    layer.insertAdjacentHTML("beforeend", `<div class="pd-wrap" id="pdWrap"><div class="pd-veil" id="pdVeil" role="button" aria-label="${esc(close6)}"></div>
-      <section class="podio" id="podio" role="dialog" aria-modal="true" aria-labelledby="pdH" tabindex="-1">
-        <header class="pd-head"><span class="pd-ic">${A.icon("m_rank")}</span><h3 id="pdH">${TITLE()}</h3><button type="button" class="pd-x" id="pdX" aria-label="${esc(close6)}">${A.icon("u_close")}</button></header>
-        <div class="pd-tabset" id="pdTabs">${tabsHtml()}</div>
+    layer.insertAdjacentHTML("beforeend", `<div class="pd-wrap" id="pdWrap"><div class="gx-veil"></div>
+      <section class="pd-screen gx-stage" id="podio" role="dialog" aria-modal="true" aria-labelledby="pdH" tabindex="-1">
+        <header class="pd-head"><button type="button" class="gx-btn sm pd-x" id="pdX">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+          <h2 class="gx-t-l" id="pdH"><span class="pd-ic">${A.icon("m_rank")}</span>${TITLE()}</h2>
+          <div class="pd-tabset" id="pdTabs">${tabsHtml()}</div></header>
         <div class="pd-body wait" id="pdBody">${body(null)}</div>
       </section></div>`);
     /* como con Ajustes: el crupier del inicio se aparta mientras miras la tabla y vuelve al cerrarla */
     if (A.dealer && A.dealer.homeTease) { dealerWas = !!A.dealer.onHome; if (dealerWas) A.dealer.homeTease(false); }
-    $("pdVeil").onclick = () => close(); $("pdX").onclick = () => close();
-    wireTabs();
-    fit(); A.sfx.card();
-    const p = $("podio"); p.focus({ preventScroll: true }); if (A.squeeze) A.squeeze($("pdTabs"));
+    $("pdX").onclick = () => close();
+    wireTabs(); A.sfx.card();
+    const w = $("pdWrap"); w._gx = A.gala.enter(w, { focus: w.querySelector(".pd-mode.on"), noRestore: true });
     load();
-  }
-  /* se despliega desde el propio boton y, en escritorio, nunca se sale de la pantalla (si no cabe, se encoge entero: nada de barras) */
-  function fit() {
-    const p = $("podio"), w = $("pdWrap"); if (!p || !w) return;
-    /* offsetHeight/offsetLeft van en px propios del panel (sin su zoom ni la animacion de entrada): x zoom = px de pantalla */
-    const desk = innerWidth >= 900 && innerHeight >= 520, k = desk ? A.uiK() : 1;
-    let z = k; p.style.zoom = z;
-    if (desk) { const h = p.offsetHeight * z, room = innerHeight - 24; if (h > room) { z = +(k * room / h).toFixed(3); p.style.zoom = z; } }
-    const btn = $("rankBtn"); if (!btn) return;
-    const a = btn.getBoundingClientRect(), o = w.getBoundingClientRect();
-    p.style.setProperty("--ox", Math.round((a.left + a.width / 2 - o.left) / z - p.offsetLeft) + "px");
-    p.style.setProperty("--oy", Math.round((a.top - o.top) / z - p.offsetTop) + "px");
   }
   function close(silent) {
     seq++; sfxT.forEach(clearTimeout); sfxT = [];
     const w = $("pdWrap"); if (!w) return;
-    ["pdWrap", "podio", "pdVeil", "pdBody", "pdX"].forEach(id => { const el = $(id); if (el) el.removeAttribute("id"); });   // ya cerrado: se puede volver a abrir mientras se va
-    w.classList.add("out"); setTimeout(() => w.remove(), 220);
+    ["pdWrap", "podio", "pdBody", "pdX"].forEach(id => { const el = $(id); if (el) el.removeAttribute("id"); });   // ya cerrado: se puede volver a abrir mientras se va
+    if (w._gx) w._gx.close(() => w.remove()); else w.remove();
     const btn = $("rankBtn"); if (btn) btn.setAttribute("aria-expanded", "false");
     if (dealerWas && A.dealer && A.dealer.homeTease && document.querySelector(".hh")) A.dealer.homeTease(true); dealerWas = false;
     if (!silent) A.sfx.ui();
@@ -125,34 +115,37 @@ window.AIQ = window.AIQ || {};
   const rk = (a, b) => RANKS().replace("{a}", A.fmt(a)).replace("{b}", A.fmt(b));
   const pagerHtml = () => {
     const a = 4 + page * PER, cnt = (first && (first.count || (first.rows || []).length)) || 0;
-    return `<button type="button" class="pd-pg prev" id="pdPrev" ${page > 0 ? "" : "disabled"} aria-label="${esc(rk(Math.max(4, a - PER), Math.max(8, a - 1)))}">${A.icon("u_next")}</button>
+    return `<button type="button" class="gx-btn sm pd-pg prev" id="pdPrev" ${page > 0 ? "" : "disabled"} aria-label="${esc(rk(Math.max(4, a - PER), Math.max(8, a - 1)))}">${A.icon("u_next")}</button>
       <span class="pd-pgl"><b>${rk(a, a + PER - 1)}</b>${cnt > 3 ? `<em>${OF().replace("{n}", A.fmt(cnt))}</em>` : ""}</span>
-      <button type="button" class="pd-pg next" id="pdNext" ${page < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + PER, a + 2 * PER - 1))}">${A.icon("u_next")}</button>`;
+      <button type="button" class="gx-btn sm pd-pg next" id="pdNext" ${page < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + PER, a + 2 * PER - 1))}">${A.icon("u_next")}</button>`;
   };
   /* contenido: origen y fecha, podio (2.o, 1.o, 3.o), lista de 5 con sus flechas y el pie (tu puesto, lo que te falta para el podio o como entrar).
      res = null: esperando al servidor (mismas medidas, sin nadie: al llegar, los escalones suben desde el suelo) */
   function body(res) {
     const rows = (res && res.rows) || [], day = mode === "daily", my = A.profile.get().id, meI = rows.findIndex(r => r.id === my), b = boardOf(mode, per);
+    /* cada puesto es una pila de fichas: su alto mide la puntuacion (la del primero, la mas alta); sin nadie, una ficha suelta */
+    const top = rows[0] ? Math.max(1, rows[0].score) : 1, MEDAL = ["", "medal_gold", "medal_silver", "medal_bronze"];
     const col = n => {
-      const r = rows[n - 1], me = !!r && r.id === my;
-      return `<div class="pd-col p${n}${r ? "" : " empty"}${me ? " me" : ""}"><span class="pd-who">${n === 1 ? `<span class="pd-crown">${A.icon("crown")}</span>` : ""}<b class="pd-name">${r ? esc(r.name || "—") : "—"}</b><span class="pd-score">${r ? A.fmt(r.score) : "&nbsp;"}</span>${r ? dots(r) : ""}</span>
-        <span class="pd-step">${me ? A.bulbs() : ""}<em>${n}</em></span></div>`;
+      const r = rows[n - 1], me = !!r && r.id === my, h = r ? 28 + Math.round(196 * Math.min(1, r.score / top)) : 14;
+      return `<div class="pd-col p${n}${r ? "" : " empty"}${me ? " me" : ""}" style="--h:${h - (h % 7)}px"><span class="pd-who">${n === 1 ? `<span class="pd-crown">${A.icon("crown")}</span>` : ""}<span class="pd-medal">${A.icon(MEDAL[n])}</span><b class="pd-name">${r ? esc(r.name || "—") : "—"}</b><span class="pd-score">${r ? A.fmt(r.score) : "&nbsp;"}</span>${r ? dots(r) : ""}</span>
+        <span class="pd-step"><i class="pd-chips"></i>${me ? A.bulbs() : ""}<em>${n}</em></span></div>`;
     };
     /* pie: fuera de los 8 -> tu fila con tu puesto mundial (pulsarla lleva a tu pagina); dentro -> lo que te falta para el podio (o que ya estas); sin puntuacion -> como entrar */
     let foot = "";
     if (res) {
       if (meI < 0 && res.me) foot = `<ol class="lb pd-list pd-me${day ? " dy" : ""}" id="pdMe"><li class="lb-gap" aria-hidden="true">···</li>${li({ id: my, name: A.rank.name(), score: res.me.score, tries: day ? A.rank.daily.get(b).tries.filter(t => !t.live) : null }, res.me.rank, 0, my)}</ol>`;
       else if (meI < 0) foot = `<p class="pd-hint"><span>${per === "yday" ? P6("Ayer no jugaste|You didn't play yesterday|Tu n'as pas joué hier|Você não jogou ontem|Gestern hast du nicht gespielt|Ieri non hai giocato||你昨天没玩|어제는 플레이하지 않았어요|昨日はプレイしていない|Вчера игры не было|Wczoraj cię nie było")
-        : P6("Todavía no estás aquí|You're not on the board yet|Tu n'es pas encore au classement|Você ainda não está no placar|Du stehst noch nicht in der Liste|Non sei ancora in classifica||你还没有上榜|아직 순위에 없어요|まだランクインしていない|Тебя пока нет в таблице|Jeszcze cię tu nie ma")}</span>${per === "yday" ? "" : `<button type="button" class="btn-ink" id="pdPlay"><span>${P6("Jugar|Play|Jouer|Jogar|Spielen|Gioca||开始游戏|플레이|プレイ|Играть|Graj")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button>`}</p>`;
+        : P6("Todavía no estás aquí|You're not on the board yet|Tu n'es pas encore au classement|Você ainda não está no placar|Du stehst noch nicht in der Liste|Non sei ancora in classifica||你还没有上榜|아직 순위에 없어요|まだランクインしていない|Тебя пока нет в таблице|Jeszcze cię tu nie ma")}</span>${per === "yday" ? "" : `<button type="button" class="gx-btn pri sm" id="pdPlay"><span>${P6("Jugar|Play|Jouer|Jogar|Spielen|Gioca||开始游戏|플레이|プレイ|Играть|Graj")}</span></button>`}</p>`;
       else if (res.global && meI < 3) foot = `<p class="pd-hint top">${A.icon("u_star", "sm")}<span>${P6("¡Estás en el podio!|You're on the podium!|Tu es sur le podium !|Você está no pódio!|Du stehst auf dem Podest!|Sei sul podio!||你登上了领奖台！|시상대에 올랐어요!|表彰台に乗った！|Ты на пьедестале!|Jesteś na podium!")}</span></p>`;
       else if (res.global) foot = `<p class="pd-hint"><span>${P6("A {n} pts del podio|{n} pts from the podium|À {n} pts du podium|A {n} pts do pódio|{n} Pkt. bis zum Podest|A {n} punti dal podio||距领奖台还差 {n} 分|시상대까지 {n}점|表彰台まであと{n}点|До пьедестала {n} очк.|Do podium brakuje {n} pkt").replace("{n}", A.fmt(Math.max(1, rows[2].score - rows[meI].score + 1)))}</span></p>`;
     }
     const when = per === "all" ? "" : dayOf(b);
-    return `<p class="lb-src pd-src">${res ? src(res) : "<span>…</span>"}${when ? `<span class="pd-day">${esc(when)}</span>` : ""}</p>
-      <div class="pd-stage">${col(2)}${col(1)}${col(3)}</div>
-      <ol class="lb pd-list${day ? " dy" : ""}" id="pdList">${listHtml(rows.slice(3, 3 + PER), 4, res)}</ol>
-      <div class="pd-pager${res && pages > 1 ? "" : " solo"}" id="pdPager">${pagerHtml()}</div>
-      <div class="pd-foot">${foot}</div>`;
+    return `<div class="pd-left gx-from-left"><p class="lb-src pd-src">${res ? src(res) : "<span>…</span>"}${when ? `<span class="pd-day">${esc(when)}</span>` : ""}</p>
+        <div class="pd-stage">${col(2)}${col(1)}${col(3)}</div></div>
+      <div class="podio pd-board gx-paper"><div class="pd-bh${day ? " dy" : ""}"><span>#</span><span>${P6("Jugador|Player|Joueur|Jogador|Spieler|Giocatore||玩家|플레이어|プレイヤー|Игрок|Gracz")}</span>${day ? `<span>${P6("Intentos|Attempts|Essais|Tentativas|Versuche|Tentativi||尝试|시도|挑戦|Попытки|Podejścia")}</span>` : ""}<span>${P6("Puntos|Points|Points|Pontos|Punkte|Punti||分数|점수|ポイント|Очки|Punkty")}</span></div>
+        <ol class="lb pd-list${day ? " dy" : ""}" id="pdList">${listHtml(rows.slice(3, 3 + PER), 4, res)}</ol>
+        <div class="pd-pager${res && pages > 1 ? "" : " solo"}" id="pdPager">${pagerHtml()}</div>
+        <div class="pd-foot">${foot}</div></div>`;
   }
   async function load() {
     const el = $("pdBody"); if (!el) return;
@@ -168,7 +161,6 @@ window.AIQ = window.AIQ || {};
     /* los escalones aterrizan de bronce a oro: una ficha cada uno, cada vez mas aguda (el tuyo, moneda) */
     const rows = res.rows || [], my = A.profile.get().id;
     [[3, 430], [2, 530], [1, 630]].forEach(([p, ms], k) => { const r = rows[p - 1]; if (r) sfxT.push(setTimeout(() => { if (n === seq) (r.id === my ? A.sfx.coin(k) : A.sfx.chip(k)); }, ms)); });
-    fit();
   }
   function wirePager() {
     const pv = $("pdPrev"), nx = $("pdNext"), me = $("pdMe");
@@ -204,7 +196,6 @@ window.AIQ = window.AIQ || {};
     else if (e.key === "PageDown" || e.key === "PageUp") { e.preventDefault(); e.stopPropagation(); goPage(page + (e.key === "PageDown" ? 1 : -1)); }
     else if (e.key === "Enter" || e.key === " ") e.stopPropagation();
   }, true);
-  addEventListener("resize", () => { if (isOpen()) fit(); });
 
   A.podio = { button, wire, open, close, reset, isOpen, src, dayOf };
 })(window.AIQ);
