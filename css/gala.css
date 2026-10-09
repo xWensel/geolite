@@ -707,7 +707,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .tb-deck:focus { outline: none; } .gx-camp .tb-deck:focus-visible, html[data-input="pad"] .gx-camp .tb-deck:focus { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px var(--gx-rim), 3px 3px 0 0 #0f3727, 6px 6px 0 0 #0f3727; }
 
 /* la Barra: suministro, juego de casino y apuesta en la misma placa (icono, nombre y precio arriba; lo que hace, debajo a todo lo ancho;
-   los botones de elegir, si hay varios, en su propia linea). Bombillas solo en la del juego de casino, que es un cartel */
+   los botones de elegir, si hay varios, en su propia linea). El juego de casino, ademas, con su tapete y su cenefa */
 .gx-camp .tb-sup { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; min-width: 0; margin: 0; }
 .gx-camp .tb-sup.no-cas { grid-template-columns: repeat(2, minmax(0, 1fr)); } .gx-camp .tb-sup.no-cas .sup-void { display: none; }
 .gx-camp .sup-void { display: block; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .18); }   /* hueco: esa ronda no toca apuesta */
@@ -754,14 +754,36 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .sup.done.lose { filter: saturate(.6) brightness(.9); }
 .gx-camp .sup.spinning .sp-ic .ic { animation: bt-spin .28s linear infinite; }
 @keyframes bt-spin { to { transform: rotate(360deg); } }
-/* el juego de casino: el unico cartel de la Barra, con su fila de bombillas que se encienden a turnos (solo opacidad: no repinta la placa) */
-.gx-camp .sup.cas { padding-top: 20px; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim); background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(120% 100% at 50% 0%, #2e4320, #13261b 72%); }
-.gx-camp .sup.cas::before, .gx-camp .sup.cas::after { content: ""; position: absolute; left: 10px; right: 10px; top: 5px; height: 10px; pointer-events: none;
-  background: radial-gradient(circle, #fff3c4 0 2px, #f8b449 2.5px 3.5px, #6b4410 4px 4.5px, transparent 5px) 0 0 / 20px 10px repeat-x; }
-.gx-camp .sup.cas::after { background-position: 10px 0; animation: cp-bulbs 1.1s ease-in-out infinite alternate; }
-.gx-camp .sup.cas::before { animation: cp-bulbs 1.1s ease-in-out infinite alternate-reverse; }
-@keyframes cp-bulbs { from { opacity: .25; } to { opacity: 1; } }
-.gx-camp .sup.cas.done::before, .gx-camp .sup.cas.done::after { animation: none; opacity: .6; }
+/* el juego de casino: el cartel de la Barra. Cada juego con su tapete y su cenefa arriba y abajo (v0.3.49, usuario: "cada juego tenia su cuadrado
+   representativo con su color"), dentro del marco de laton de la placa de gala */
+.gx-camp .sup.cas { --sb: none; --sb2: var(--sb); padding: 20px 12px 18px; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim);
+  background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(120% 100% at 50% 0%, #2e4320, #13261b 72%); }
+.gx-camp .sup.cas::before { content: ""; position: absolute; left: 4px; right: 4px; top: 4px; bottom: 4px; pointer-events: none; image-rendering: pixelated;
+  background: var(--sb) top left / var(--sbs, 100% 10px) repeat-x, var(--sb2) bottom left / var(--sbs2, var(--sbs, 100% 10px)) repeat-x; }
+.gx-camp .sup.cas .sp-ic .ic { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .55)); }
+.gx-camp .sup.cas.done.win { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-gold-hi), 0 0 0 0 transparent; }
+/* Rojo o negro: fieltro verde, casillas rojas y negras y el cero verde en el centro */
+.gx-camp .sup.bt-red { background: radial-gradient(ellipse at 50% 40%, #1d7a45 0%, #0b3a21 78%);
+  --sb: repeating-linear-gradient(90deg, #c8322a 0 12px, #14161d 12px 24px); --sb2: repeating-linear-gradient(90deg, #14161d 0 12px, #c8322a 12px 24px); --sbs: 100% 10px; }
+.gx-camp .sup.bt-red::after { content: ""; position: absolute; left: 50%; top: 4px; width: 12px; height: 10px; margin-left: -6px; background: #1fa65a; box-shadow: 0 0 6px #6dffa0; pointer-events: none; }
+/* Moneda al aire: azul de noche y el canto estriado de la moneda */
+.gx-camp .sup.bt-coin { background: radial-gradient(ellipse at 50% 40%, #28508a 0%, #0e2147 80%); --sb: repeating-linear-gradient(90deg, #f6c453 0 3px, #8a5a12 3px 6px); --sbs: 100% 10px; }
+/* Ruleta de premios: ciruela y los colores de la rueda */
+.gx-camp .sup.bt-wheel { background: radial-gradient(ellipse at 50% 40%, #6a2878 0%, #2a0f33 80%); --sbs: 100% 10px;
+  --sb: repeating-linear-gradient(90deg, #f2b63d 0 12px, #1f9a58 12px 24px, #c9362c 24px 36px, #23252e 36px 48px); --sb2: repeating-linear-gradient(90deg, #23252e 0 12px, #c9362c 12px 24px, #1f9a58 24px 36px, #f2b63d 36px 48px); }
+/* Los tres cubiletes: burdeos y rombos de oro (el diamante del crupier) */
+.gx-camp .sup.bt-cups { background: radial-gradient(ellipse at 50% 40%, #8a1f3f 0%, #3b0a1e 80%); --sb: url(../assets/trile/cenefa.png); --sbs: 12px 10px; }
+/* Duelo de dados: verde azulado de mesa de dados */
+.gx-camp .sup.bt-dice { background: radial-gradient(ellipse at 50% 40%, #138079 0%, #06302f 80%); --sb: url(../assets/dados/cenefa.png); --sbs: 66px 10px; }
+/* El globo: el cielo del atardecer */
+.gx-camp .sup.bt-globo { background: linear-gradient(180deg, #1f2f86 0%, #4a3fa8 40%, #b8488a 78%, #ff9a5e 100%); --sb: url(../assets/globo/cenefa_top.png); --sbs: 24px 11px; --sb2: url(../assets/globo/cenefa_bot.png); --sbs2: 24px 9px; }
+.gx-camp .sup.bt-globo .sp-t > b { text-shadow: 0 2px 0 #1a0a40; } .gx-camp .sup.bt-globo .sp-t > i { color: #f3eddc; text-shadow: 0 1px 0 rgba(26, 10, 64, .8); }
+/* Lluvia de fichas: azul de agua */
+.gx-camp .sup.bt-plk { background: radial-gradient(ellipse at 50% 40%, #12909e 0%, #07323d 82%); --sb: url(../assets/plinko/cenefa.png); --sbs: 16px 10px; }
+/* Rasca y gana: carton crema del boleto, con la letra en tinta */
+.gx-camp .sup.bt-rasca { background: radial-gradient(ellipse at 50% 38%, #fbf1d4 0%, #e7d4a2 55%, #c4a468 100%); --sb: url(../assets/rasca/cenefa.png); --sbs: 12px 10px; }
+.gx-camp .sup.bt-rasca .sp-t > b { color: #4a2308; text-shadow: 0 1px 0 rgba(255, 255, 255, .7); } .gx-camp .sup.bt-rasca .sp-t > i { color: rgba(58, 32, 10, .88); }
+.gx-camp .sup.bt-rasca .bt-res, .gx-camp .sup.bt-rasca .bt-res b { color: #4a2308; } .gx-camp .sup.bt-rasca.done.win .bt-res b { color: #8a1f3f; }
 
 /* la mochila: reliquias, herramientas y provisiones dentro de la reticula */
 .gx-camp .tb-tray { display: flex; align-items: flex-start; gap: 26px; min-width: 0; margin: 0; padding: 10px 18px 10px; }
@@ -869,10 +891,10 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 
 /* reducir movimiento: sin cartas que botan ni se reparten, bombillas quietas, sin luz que late ni ficha que gira */
 html.reduce-motion .gx-camp .offer.pc { animation: none; }
-html.reduce-motion .gx-camp .sup.cas::before, html.reduce-motion .gx-camp .sup.cas::after, html.reduce-motion .gx-camp > .go2-wrap::before, html.reduce-motion .gx-camp .go2-chip .bc-base,
+html.reduce-motion .gx-camp > .go2-wrap::before, html.reduce-motion .gx-camp .go2-chip .bc-base,
 html.reduce-motion .gx-camp .tr-relic.swap-pick .tr-face, html.reduce-motion .gx-camp .sup.fresh .sp-on, html.reduce-motion .gx-camp .sup.spinning .sp-ic .ic { animation: none; }
 html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
-@media (prefers-reduced-motion: reduce) { .gx-camp .offer.pc, .gx-camp .sup.cas::before, .gx-camp .sup.cas::after, .gx-camp > .go2-wrap::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .gx-camp .offer.pc, .gx-camp > .go2-wrap::before { animation: none; } }
 
 /* movil y ventanas muy pequenas (aqui la pantalla se desplaza): todo en una columna */
 @media (max-width: 899px), (max-height: 519px) {
