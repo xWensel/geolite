@@ -1684,6 +1684,8 @@ window.AIQ = window.AIQ || {};
   const REDN = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
   const colorOf = n => (n === 0 ? "green" : REDN.has(n) ? "red" : "black");
   let rouOpen = false;
+  /* v0.3.35: con un juego de casino abierto, el crupier de la esquina se calla y se va (js/dealer.js, D.casino): nunca dos crupieres en pantalla */
+  const tableOn = on => { try { A.dealer.casino(on); } catch (e) { /* sin crupier */ } };
   /* el salto del verde apostado y acertado: actos I y II, al Campamento de la ronda 1 del acto siguiente (sin jefe ni cofre); en el III, al jefe final */
   function greenSkip() {
     const last = run.act + 1 >= 3;
@@ -1753,7 +1755,7 @@ window.AIQ = window.AIQ || {};
     const { pick, n, skip } = o, out = colorOf(n), win = pick === out, zero = out === "green", S = C().S, app = $("app");
     const reduced = !!(S && S.reduce);
     if (!app) return done();
-    rouOpen = true;
+    rouOpen = true; tableOn(true);
     const cw = Math.max(60, Math.min(116, Math.round(innerHeight * 0.125), Math.round(innerWidth / 7)));   // casilla entera en px: pixel art
     const F0 = A.adv._rouForce || {}, plan = rouBuild(reduced ? "classic" : F0.kind || rouPick(), WHEEL.indexOf(n), F0.dir || (Math.random() < 0.5 ? 1 : -1), cw);   // el final y la direccion de este giro (_rouForce: solo pruebas)
     const { path, dir, SF, F: SEND, NC, K } = plan, S0 = SEND - dir * plan.r0, T_IN = 0.34;      // casilla final y punto de salida; el puntero para en el centro de la casilla
@@ -1774,10 +1776,10 @@ window.AIQ = window.AIQ || {};
     addEventListener("keydown", block, true);
     let closed = false, revealed = false, t0 = 0, last = S0, lastT = 0, lastTick = 0, cur = -1, fast = false, evI = 0;
     const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, {}) : null;                               // v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js)
-    const cleanup = () => { if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); rouOpen = false; };
+    const cleanup = () => { if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); rouOpen = false; tableOn(false); };
     const close = () => {
       if (closed) return; closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out");
-      setTimeout(() => { ov.remove(); rouOpen = false; done(); }, reduced ? 0 : 280);
+      setTimeout(() => { ov.remove(); rouOpen = false; tableOn(false); done(); }, reduced ? 0 : 280);
     };
     const bail = e => { try { console.error("ruleta", e); } catch (x) { /* nada */ } if (closed) return; closed = true; cleanup(); ov.remove(); done(); };   // pase lo que pase, el Campamento nunca se queda bloqueado
     const hit = px => { if (!reduced) band.animate([{ transform: "translateY(0)" }, { transform: `translateY(${px}px)` }, { transform: `translateY(${-px * 0.375}px)` }, { transform: "translateY(0)" }], { duration: 300, easing: "ease-out" }); };   // el golpe del tope
@@ -1796,10 +1798,10 @@ window.AIQ = window.AIQ || {};
       ov.classList.add("flash");
       setTimeout(() => {
         A.dealer.enable(true);
-        if (zero && win) { A.sfx.jackpot(2); if (A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([40, 40, 80]); A.dealer.say(A.dealer.line(o.last ? "betGreenFinal" : "betGreenWin"), { mood: "angry", face: "furious", gesture: o.last ? "tremble_body" : "stamp", fx: "shake", hold: 3400 }); }
-        else if (zero) { A.sfx.rouZero(); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(2); A.dealer.say(A.dealer.line("betGreenLose"), { mood: "laugh", face: "laugh", gesture: "fan_self", hold: 2600 }); }
-        else if (win) { A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2200 }); }
-        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { mood: "laugh", hold: 2200 }); }
+        if (zero && win) { A.sfx.jackpot(2); if (A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([40, 40, 80]); A.dealer.say(A.dealer.line(o.last ? "betGreenFinal" : "betGreenWin"), { table: true, mood: "angry", face: "furious", gesture: o.last ? "tremble_body" : "stamp", fx: "shake", hold: 3400 }); }
+        else if (zero) { A.sfx.rouZero(); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(2); A.dealer.say(A.dealer.line("betGreenLose"), { table: true, mood: "laugh", face: "laugh", gesture: "fan_self", hold: 2600 }); }
+        else if (win) { A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
+        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2200 }); }
       }, 150);
       setTimeout(() => { ov.addEventListener("click", close); ov.classList.add("skippable"); }, 600);
       setTimeout(close, zero ? 2900 : 2300);                                                      // el cero se queda mas: hay que verlo
@@ -1903,7 +1905,7 @@ window.AIQ = window.AIQ || {};
   function rouShell(cls, html, vars, done) {
     const app = $("app"), S = C().S, reduced = !!(S && S.reduce);
     if (!app) { done(); return null; }
-    rouOpen = true;
+    rouOpen = true; tableOn(true);
     const ov = document.createElement("div"); ov.id = "rouOv"; ov.className = "rou spin " + cls;
     Object.keys(vars).forEach(k => ov.style.setProperty(k, vars[k])); ov.innerHTML = html + '<u class="rou-wash"></u>'; app.appendChild(ov);
     const block = e => { e.preventDefault(); e.stopPropagation(); }; addEventListener("keydown", block, true);
@@ -1911,8 +1913,8 @@ window.AIQ = window.AIQ || {};
     /* v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js). sh.waiting(true) = el juego espera al jugador (sin botones y a x1); sh.outcome() = llega el resultado (a x1, sin botones); sh.hooks.skip = salto propio del juego */
     const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, sh.hooks) : null;
     sh.waiting = on => { if (ctl) ctl.waiting(on); }; sh.outcome = () => { if (ctl) ctl.outcome(); };
-    sh.close = () => { if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out"); setTimeout(() => { ov.remove(); rouOpen = false; done(); }, reduced ? 0 : 280); };
-    sh.bail = e => { try { console.error("casino", e); } catch (x) { /* nada */ } if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.remove(); rouOpen = false; done(); };
+    sh.close = () => { if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out"); setTimeout(() => { ov.remove(); rouOpen = false; tableOn(false); done(); }, reduced ? 0 : 280); };
+    sh.bail = e => { try { console.error("casino", e); } catch (x) { /* nada */ } if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.remove(); rouOpen = false; tableOn(false); done(); };
     sh.hold = ms => { sh.outcome(); setTimeout(() => { ov.addEventListener("click", sh.close); ov.classList.add("skippable"); }, 600); setTimeout(sh.close, ms); };   // sh.hold llega siempre al final: por si algun juego no avisa del resultado
     return sh;
   }
@@ -1972,9 +1974,9 @@ window.AIQ = window.AIQ || {};
       if (A.haptic) A.haptic([edge ? 60 : 30]);
       setTimeout(() => {
         A.dealer.enable(true);
-        if (edge) { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([40, 40, 80]); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", face: "furious", gesture: "stamp", fx: "shake", hold: 3000 }); }
-        else if (win) { A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2200 }); }
-        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { mood: "laugh", hold: 2200 }); }
+        if (edge) { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([40, 40, 80]); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", face: "furious", gesture: "stamp", fx: "shake", hold: 3000 }); }
+        else if (win) { A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
+        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2200 }); }
       }, 150);
       sh.hold(edge ? 3000 : 2300);
     };
@@ -2037,9 +2039,9 @@ window.AIQ = window.AIQ || {};
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
-        if (info.tone === "good") { A.sfx.jackpot(info.jp || 1); if (A.core.jpShake) A.core.jpShake(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2400 }); }
-        else if (info.tone === "bad") { A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betLose"), { mood: "laugh", hold: 2400 }); }
-        else { A.sfx.deny(); A.dealer.say(A.dealer.line("betLose"), { mood: "sly", hold: 2200 }); }
+        if (info.tone === "good") { A.sfx.jackpot(info.jp || 1); if (A.core.jpShake) A.core.jpShake(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2400 }); }
+        else if (info.tone === "bad") { A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2400 }); }
+        else { A.sfx.deny(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "sly", hold: 2200 }); }
       }, 150);
       sh.hold(info.jp === 3 ? 3200 : 2800);
     };

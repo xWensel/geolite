@@ -522,7 +522,7 @@
   const fitRun = (d, el) => {
     if (!el) { if (A.squeeze) A.squeeze(d); return; }
     const base = uiK(); el.style.removeProperty("--k");
-    if (el.classList.contains("scrolls")) { if (A.squeeze) A.squeeze(el); return; }                    // pantalla con desplazamiento (solo el Perfil): a tamano completo
+    if (el.classList.contains("scrolls")) { if (A.squeeze) A.squeeze(el); if (el.classList.contains("rows")) wholeRows(el, base); return; }   // pantalla con desplazamiento (Perfil y Clasico): a tamano completo
     const over = () => {
       const b = el.querySelector(".scr-body");
       if (b) { const ch = b.clientHeight, sh = b.scrollHeight; return sh > ch + 2 ? ch / sh : 1; }      // en px, no en %: con un 1,5 % de margen quedaba una barra de desplazamiento de unos pocos px
@@ -548,6 +548,39 @@
     kMemo.delete(ck); kMemo.set(ck, k); if (kMemo.size > 60) kMemo.delete(kMemo.keys().next().value);
   };
   const kMemo = new Map();                                                     // solo en esta sesion: con otro CSS saldria otra k
+  /* v0.3.35: lista con desplazamiento por filas (.scrolls.rows, el Clasico): nunca deja una tarjeta cortada a media altura. Las filas miden lo mismo
+     (grid-auto-rows: 1fr) y aqui se estiran lo justo para que n filas enteras llenen el hueco entre la cabecera y el pie; el desplazamiento encaja fila
+     a fila (scroll-snap, css/premium.css). Si a la k de la ventana las filas quedarian muy estiradas (mas de un 20 %), se baja la k de la pantalla lo
+     justo para que quepa una fila mas, nunca por debajo de 1 (la letra minima de la Steam Deck); si ni a 1 cabe, se queda la k de la ventana.
+     Cada prueba de k es una maquetacion entera: la k se calcula de una vez (la pantalla mide V/k en px del lienzo y lo que no es la lista, c, no cambia
+     con k: el hueco a k es V/k - c) y se comprueba; el resultado se recuerda entre sesiones por ventana, escala, idioma y version */
+  const ROWS_KEY = "atlasiq.rowsk";
+  let rowsMemo = null;
+  const wholeRows = (el, base) => {
+    const b = el.querySelector(":scope > .scr-body"), l = b && b.firstElementChild; if (!l) return;
+    const fit = k => {
+      if (k === base) el.style.removeProperty("--k"); else el.style.setProperty("--k", k.toFixed(3));
+      l.style.removeProperty("grid-auto-rows");
+      const cb = getComputedStyle(b), cl = getComputedStyle(l), rows = cl.gridTemplateRows.split(" ").map(parseFloat), g = parseFloat(cl.rowGap) || 0;
+      const track = b.clientHeight, pad = (parseFloat(cb.paddingTop) || 0) + (parseFloat(cb.paddingBottom) || 0), R = Math.max(...rows);
+      const n = Math.max(1, Math.floor((track - pad + g) / (R + g)));
+      return { N: rows.length, R, n, g, pad, track, h: (track - pad - (n - 1) * g) / n };   // h: lo que mide cada fila estirada
+    };
+    if (!rowsMemo) { try { rowsMemo = JSON.parse(localStorage.getItem(ROWS_KEY) || "{}") || {}; } catch (e) { rowsMemo = {}; } }
+    const ck = [A.VERSION, innerWidth, innerHeight, base.toFixed(3), A.lang].join("|"), hint = rowsMemo[ck];
+    let k = hint && hint >= 1 && hint <= base ? hint : base, m = fit(k);
+    if (!hint && base > 1 && m.R > 0 && m.n < m.N && m.h > m.R * 1.2) {
+      const t = m.n + 1, V = el.clientHeight * base, c = el.clientHeight - m.track, need = t * (m.R + m.g) - m.g + m.pad, k1 = Math.floor((V / (need + c)) * 1000) / 1000;
+      if (k1 >= 1) {                                                                                   // a k1 caben t filas (con el alto de fila de ahora, que a menor k solo puede bajar)
+        let mk = fit(k1); k = k1;
+        if (mk.n < t && k > 1) { k = Math.max(1, Math.floor(k * 970) / 1000); mk = fit(k); }
+        if (mk.n >= t) m = mk; else { k = base; m = fit(base); }
+      }
+    }
+    if (hint !== k) { rowsMemo[ck] = k; const ks = Object.keys(rowsMemo); if (ks.length > 24) delete rowsMemo[ks[0]]; try { localStorage.setItem(ROWS_KEY, JSON.stringify(rowsMemo)); } catch (e) { /* sin almacenamiento */ } }
+    if (!(m.R > 0) || m.n >= m.N) return;                                                              // caben todas: sin desplazamiento
+    l.style.gridAutoRows = Math.floor(m.h * 100) / 100 + "px";
+  };
   let fitT = 0; const fitSoon = () => { clearTimeout(fitT); fitT = setTimeout(() => { requestAnimationFrame(fitK); }, 60); };
   /* una pantalla que se completa poco a poco y ajusta ella misma lo que anade (el Perfil): lo que hay ahora cuenta como ya ajustado */
   A.fitMark = () => queueMicrotask(() => { const d = $("dlg"); if (!d || !d.isConnected) return; fitNew = dlgNew; fitLast = fitSig(d, d.querySelector(":scope > " + FIT.split(", ").join(", :scope > "))); });

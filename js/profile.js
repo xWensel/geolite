@@ -224,15 +224,52 @@ window.AIQ = window.AIQ || {};
   };
 
   const queue = []; let showing = false;
+  /* v0.3.35: EL AVISO TIENE SU ZONA, nunca tapa titulos ni HUD. En partida va bajo la placa (#leftCol, como siempre). Fuera de ella:
+     - Campamento (y Cofre del jefe): la mesa no tiene hueco libre, asi que ocupa el sitio del titulo y el titulo se aparta mientras dura (body.ach-title)
+     - pantallas con cabecera (Clasico, Aventura, Reto diario, Perfil, Notas): en la cabecera, entre el titulo y el engranaje
+     - portada (y lo que se abra encima): bajo el boton de apagar, sin llegar al logo ni al panel de la Clasificacion
+     - el resto (veredicto...): arriba a la izquierda, que esta libre
+     Si cambia la pantalla con el aviso a la vista (del veredicto al Campamento, a la partida...), se recoloca. Saber la zona no mide nada (solo clases y
+     nodos): solo se mide al cambiar de zona */
+  let zoneSig = "", zoneT = 0;
+  function zoneOf() {
+    const pl = document.getElementById("plate"), lay = document.getElementById("layer"), d = document.getElementById("dlg");
+    if (pl && !pl.classList.contains("hidden")) return "run";
+    if (!d || !lay || lay.classList.contains("hidden")) return "free";
+    if (d.querySelector(".tb-head .tb-title")) return "camp";
+    const h = d.querySelector(".scr-head h2"); if (h) return "scr|" + h.textContent;
+    return d.classList.contains("home") && document.getElementById("quitBtn") ? (document.getElementById("pdWrap") ? "home|pd" : "home") : "free";
+  }
+  function place(el) {
+    const sig = zoneOf(); if (sig === zoneSig && el.isConnected) return; zoneSig = sig;
+    const st = el.style, col = el.parentElement, d = document.getElementById("dlg"), R = e => e.getBoundingClientRect();
+    document.body.classList.toggle("ach-title", sig === "camp");
+    el.classList.toggle("free", sig !== "run");
+    st.left = st.top = st.width = "";
+    if (sig === "run" || !col) return;
+    const C0 = R(col), z = C0.width / (col.offsetWidth || C0.width) || 1, W = Math.min(420, innerWidth - 32);   // z: por si #leftCol llevara zoom
+    let x = C0.left, y = C0.top, w = W;                                                                       // en px de pantalla
+    if (sig === "camp") { const t = R(d.querySelector(".tb-head .tb-title")); x = t.left; y = t.top; w = Math.min(W, t.width); }
+    else if (sig.startsWith("scr|")) {
+      const hd = d.querySelector(".scr-head"), h2 = hd.querySelector("h2"), tl = hd.querySelector(".menu-tools"), H = R(hd), rg = document.createRange(); rg.selectNodeContents(h2);
+      const a = R(rg).right + 24, b = (tl ? R(tl).left : H.right) - 24; w = Math.max(200, Math.min(W, b - a));
+      x = Math.min(Math.max(a, H.left + (H.width - w) / 2), b - w); st.width = Math.round(w / z) + "px"; y = H.top + (H.height - el.offsetHeight * z) / 2;   // el alto, ya con su ancho
+    } else if (sig.startsWith("home")) {
+      const q = R(document.getElementById("quitBtn")), lg = d.querySelector(".hh-logo"), pd = document.getElementById("podio"); x = q.left; y = q.bottom + 12;
+      const edge = Math.min(lg ? R(lg).left : Infinity, pd ? R(pd).left : Infinity); if (edge < Infinity) w = Math.max(200, Math.min(W, edge - 16 - x));
+    }
+    st.width = Math.round(w / z) + "px"; st.left = Math.round((x - C0.left) / z) + "px"; st.top = Math.round((y - C0.top) / z) + "px";
+  }
   function toast() {
     if (showing || !queue.length) return; showing = true;
     const a = queue.shift(); if (a.fake) return fakeToast(a);
     let el = document.getElementById("achToast");
     if (!el) { el = document.createElement("div"); el.id = "achToast"; el.className = "ach-toast hidden"; (document.getElementById("leftCol") || document.getElementById("app")).appendChild(el); }
     el.innerHTML = `<span class="ach-ico">${A.badge(a.id)}</span><span class="ach-t"><em>${A.T("Logro desbloqueado", "Achievement unlocked")}</em><b>${A.tx(a.name)}</b><i>${A.tx(a.desc)}</i></span>`;
-    el.classList.remove("hidden", "in"); A.restyle(el); el.classList.add("in"); A.sfx.ach();
+    el.classList.remove("hidden", "in"); zoneSig = ""; place(el); A.restyle(el); el.classList.add("in"); A.sfx.ach();
+    clearInterval(zoneT); zoneT = setInterval(() => place(el), 250);              // la pantalla puede cambiar con el aviso a la vista
     if (A.dealer && A.dealer.noteAch) A.dealer.noteAch(a);                       // el crupier lo comenta a veces (js/dealer.js)
-    setTimeout(() => { el.classList.add("hidden"); showing = false; setTimeout(toast, 250); }, 4600);
+    setTimeout(() => { clearInterval(zoneT); el.classList.add("hidden"); document.body.classList.remove("ach-title"); showing = false; setTimeout(toast, 250); }, 4600);
   }
   /* EL LOGRO FALSO del crupier (js/dealer.js): identico a un aviso de verdad (mismo sonido), con su cara en la ficha; al segundo le cae el sello
      "De broma", el crupier se rie y el aviso se tuerce y se cae. No pasa por P.ach, ni por el contador ni por Steam. Va en #app (se ve tambien en el inicio) */

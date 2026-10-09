@@ -327,6 +327,11 @@ html body .tour-txt { font-size: 19px; } html body .dl-bubble p { font-size: inh
 #leftCol .ach-toast { width: 100%; padding: 8px 12px 8px 8px; gap: 10px; margin: 0; z-index: 8; pointer-events: none; }   /* solo aviso: no se come los clics del mapa que tiene debajo (una sonda se perdia) */
 #leftCol .ach-toast.in { animation: ach-in-l .6s var(--spring) both; } @keyframes ach-in-l { from { transform: translateX(-130%); opacity: 0; } }
 #leftCol .ach-toast .ach-ico { transform: scale(.75); transform-origin: left center; margin-right: -10px; } #leftCol .ach-t i { display: none; }
+/* v0.3.35: fuera de la partida el aviso va a la zona libre de cada pantalla (js/profile.js, place): la cabecera, bajo el boton de apagar o el sitio
+   del titulo del Campamento, que se aparta mientras dura. Entra cayendo desde arriba */
+#leftCol .ach-toast.free { position: absolute; z-index: 8; }
+#leftCol .ach-toast.free.in { animation: ach-in-t .6s var(--spring) both; } @keyframes ach-in-t { from { transform: translateY(-140%); opacity: 0; } }
+#dlg .tb-head .tb-title { transition: opacity .2s; } body.ach-title #dlg .tb-head .tb-title { opacity: 0; }
 /* aviso de enciclopedia: tambien a la izquierda (antes tapaba el marcador y el ticket a la derecha) */
 #leftCol .cx-toast { position: relative; width: 100%; max-width: none; right: auto; bottom: auto; top: auto; margin: 0; z-index: 8; }
 #leftCol .cx-toast.in { animation: cx-in-l .6s var(--spring) both; } @keyframes cx-in-l { from { transform: translateX(-130%) rotate(0); opacity: 0; } }

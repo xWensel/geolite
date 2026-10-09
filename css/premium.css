@@ -347,11 +347,16 @@ html.reduce-motion .of-stamp.on { animation-timing-function: steps(1); }
 /* ---------- Clasico v0.3.22: legible en la Steam Deck. La lista se desplaza (.scrolls: A.fitK no la encoge) y todo va a tamano real:
    12 campanas en 2 columnas, compactas pero grandes, con la descripcion entera; el pie (niveles + Empezar) se queda fijo debajo ---------- */
 .s-camps { grid-template-rows: auto minmax(0, 1fr) auto; padding-bottom: 0; }
-.s-camps .scr-body { display: block; padding: 6px 10px 26px 4px; scroll-padding: 12px 0 18px; overscroll-behavior: contain; scrollbar-gutter: stable;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent); }
+.s-camps .scr-body { display: block; padding: 6px 10px 8px 4px; scroll-padding: 6px 0 8px; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-gutter: stable;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 6px, #000 calc(100% - 8px), transparent); mask-image: linear-gradient(180deg, transparent 0, #000 6px, #000 calc(100% - 8px), transparent); }
 .s-camps .scr-body::-webkit-scrollbar { width: 10px; } .s-camps .scr-body::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffe08a, #f8b449); border-radius: 999px; box-shadow: inset 0 0 0 2px #16241c; } .s-camps .scr-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, .3); border-radius: 999px; }
-html body .s-camps .camps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; margin: 0; }
-html body .s-camps .camp { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; align-items: center; padding: 12px 18px 12px 12px; min-height: 144px; border-radius: 16px; }
+html body .s-camps .camps { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 10px 16px; margin: 0; }
+/* v0.3.35: ninguna tarjeta queda cortada a media altura. Todas las filas miden lo mismo (la mas alta), A.fitK (js/game.js, wholeRows) las estira lo justo
+   para que la lista ensene filas enteras y el desplazamiento encaja fila a fila. El relleno de abajo (8 px) es algo menos que el hueco entre filas (10 px):
+   la fila siguiente empieza 2 px por debajo del borde y nunca asoma; coincide con scroll-padding. Con 10 px entre filas y 10 px de relleno en la tarjeta
+   caben 3 filas enteras en 16:9 */
+html body .s-camps .camp { scroll-snap-align: start; }
+html body .s-camps .camp { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; align-items: center; padding: 10px 18px 10px 12px; min-height: 144px; border-radius: 16px; }
 html body .s-camps .camp:hover { transform: translateY(-3px); }
 html body .s-camps .camp-thumb { width: 180px; max-width: none; height: 120px; aspect-ratio: auto; border-radius: 10px; }   /* x2 de su rejilla de 90x60: nitida */
 html body .s-camps .camp-body { gap: 4px; align-self: stretch; grid-template-rows: auto 1fr auto; }

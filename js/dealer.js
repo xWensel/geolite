@@ -1683,12 +1683,13 @@ window.AIQ = window.AIQ || {};
     return { e: A.crupier.expr(e), g: g || null };
   }
   const LINGER = 1000;                                                // SIEMPRE un segundo mas: al acabar cada frase se queda antes de irse o de pasar a la siguiente (intro incluida)
-  let held = false, napping = false, napWant = 0;                                                   // v0.37: mientras te pregunta el nombre (js/nombre.js) solo habla esa escena (o.force)
+  let held = false, napping = false, napWant = 0, atTable = false;                                                   // v0.37: mientras te pregunta el nombre (js/nombre.js) solo habla esa escena (o.force)
   const flush = () => { const p = pend; pend = null; if (p) D.say(p[0], p[1]); if (!typing) D.hide(); };   // si la que esperaba ya no toca, la anterior se va igual
   /* dice una frase con voz arcade y maquina de escribir. Nunca se le corta a media frase ni se le quita su segundo de mas: si aun esta escribiendo
      (o acaba de terminar), la nueva espera su turno (si llegan varias, solo la ultima). Solo las escenas forzadas (o.force, js/nombre.js) entran ya.
      o.fx: efecto de pantalla (rabieta) que sale justo cuando empieza la frase; o.start, igual: aviso de que por fin empieza (si esperaba turno) */
   D.say = (line, o = {}) => {
+    if (atTable && !o.table) return;                                  // v0.3.35: con un juego de casino abierto solo habla la mesa (nunca dos crupieres en pantalla)
     if (!o.live && !o.force && A.vivoQuiet && A.vivoQuiet()) return;      // el autor habla por el: sus frases automaticas callan mientras el esta en la mesa y 90 s despues
     if (!o.force && (held || napping || napWant || (!D.on && !D.onHome))) return;
     if (o.valid && !o.valid()) return;                                // la frase ya no toca (p. ej. la reaccion a una pregunta que ya paso)
@@ -1768,7 +1769,7 @@ window.AIQ = window.AIQ || {};
   let liveT = 0, liveAt = 0;
   D.live = (t, o = {}, until = Date.now() + 90000) => {
     clearTimeout(liveT); if (!t || Date.now() > until) return false;
-    if (held || napping || napWant || tourOn() || !A.crupier || (A.core && A.core.S.booting)) { liveT = setTimeout(() => D.live(t, o, until), 1500); return false; }   // tampoco encima del aviso de fotosensibilidad del arranque
+    if (held || atTable || napping || napWant || tourOn() || !A.crupier || (A.core && A.core.S.booting)) { liveT = setTimeout(() => D.live(t, o, until), 1500); return false; }   // tampoco encima del aviso de fotosensibilidad del arranque
     if (dozing) { dozing = false; afkAt = 0; D.hide(); }
     ensure(); el.classList.remove("hidden");
     let screen;
@@ -1945,6 +1946,11 @@ window.AIQ = window.AIQ || {};
   D.pick = (key, d) => say1(key, d);                                    // js/nombre.js: una frase de la bolsa (sin repetir), con tu nombre puesto
   /* js/nombre.js: mientras te pregunta el nombre, calla todo lo demas (lo que estaba diciendo y lo que iba a decir) */
   D.hold = on => { held = !!on; if (held) { pend = null; if (!speaking()) { clear(); D.hide(); } } };   // si esta a media frase la acaba: la escena le recoge (D.dock) y habla despues
+  /* v0.3.35: NUNCA DOS CRUPIERES EN PANTALLA. Al abrir un juego de casino (js/adventure.js: rouShell y la ruleta de Rojo o negro) el de la esquina se calla
+     y se va en el acto: es el mismo crupier, que se sienta a la mesa. Lo que decia y lo que esperaba turno se cancelan y nada lo trae de vuelta hasta que
+     se cierra el juego (ni el Campamento ni el directo, que espera). En los juegos sin crupier propio (Rojo o negro, Moneda, Ruleta de premios) el resultado
+     lo comenta el desde su esquina: esas frases llevan o.table */
+  D.casino = on => { atTable = !!on; if (!atTable || !el) return; leaving = false; clearTimeout(leaveT); D.hide(); };
 
   /* ---------------------------------------------------------------- pantalla principal */
   const HOME_CORNERS = ["home-tl", "home-tr"];
@@ -2368,7 +2374,7 @@ window.AIQ = window.AIQ || {};
     return { l: Math.round(R.left - A0.left + 6), b: Math.round(A0.bottom - R.bottom + 4 + lift), hf, hb: Math.min(380, room) };
   }
   function campSay(t, mood, o2) {
-    if (!t || held || D.host || tourOn() || HOME_MQ.matches || phase() !== "shop") return false;
+    if (!t || held || atTable || D.host || tourOn() || HOME_MQ.matches || phase() !== "shop") return false;
     const box = campRoom(o2 && o2.wide); if (!box) return false;
     ensure(); campBox = box; campSpoke = true; el.classList.remove("hidden"); D.say(t, { mood: mood || "sly", hold: holdFor(t), force: true, camp: true, done: o2 && o2.done, start: o2 && o2.start }); return true;
   }

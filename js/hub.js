@@ -100,8 +100,9 @@ window.AIQ = window.AIQ || {};
       document.querySelectorAll(".lv").forEach(b => (b.onclick = () => { S.startLevel = +b.dataset.lv; document.querySelectorAll(".lv").forEach(x => x.classList.toggle("sel", x === b)); const sub = $("goBtn").querySelector("i"); if (sub) sub.innerHTML = A.t("go.sub", { n: S.startLevel + 1, name: A.tx(camps.find(x => x.id === S.campId).title) }); }));
       $("goBtn").onclick = () => { A.sfx.depart(); S.ranked = null; c.newRun(); };
     };
-    /* v0.3.22: la lista se desplaza (.scrolls: A.fitK ya no la encoge, la letra queda a tamano real tambien en la Steam Deck) y el pie se queda fijo debajo */
-    c.dialog(scr(T("Clásico", "Classic"), `<div class="camps">${list}</div>`, "s-camps scrolls", `<div class="camp-foot" id="campFoot">${foot()}</div>`), "tablewrap");
+    /* v0.3.22: la lista se desplaza (.scrolls: A.fitK ya no la encoge, la letra queda a tamano real tambien en la Steam Deck) y el pie se queda fijo debajo.
+       v0.3.35 (.rows): siempre filas enteras a la vista, nunca una tarjeta cortada (A.fitK, js/game.js) */
+    c.dialog(scr(T("Clásico", "Classic"), `<div class="camps">${list}</div>`, "s-camps scrolls rows", `<div class="camp-foot" id="campFoot">${foot()}</div>`), "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
     document.querySelectorAll(".camp").forEach(b => (b.onclick = () => {
       if (b.dataset.id === S.campId) return;
