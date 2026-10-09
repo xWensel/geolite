@@ -29,19 +29,19 @@ window.AIQ = window.AIQ || {};
     const close6 = A.t("codex.close");
     const wk = (() => { const f = firstDay(), base = new Date(2024, 0, 7); return [0, 1, 2, 3, 4, 5, 6].map(i => { const d = new Date(base); d.setDate(7 + ((f + i) % 7)); return `<span>${esc(fmtD(d, { weekday: "narrow" }))}</span>`; }).join(""); })();   // 7-1-2024 fue domingo
     layer.insertAdjacentHTML("beforeend", `<div class="od-wrap" id="odWrap"><div class="od-veil" id="odVeil" role="button" aria-label="${esc(close6)}"></div>
-      <section class="od" id="od" role="dialog" aria-modal="true" aria-labelledby="odH" tabindex="-1">
-        <header class="od-head"><span class="od-ic">${A.icon("almanac")}</span><div class="od-ht"><h3 id="odH">${TITLE()}</h3><p>${SUB()}</p></div><button type="button" class="pd-x" id="odX" aria-label="${esc(close6)}">${A.icon("u_close")}</button></header>
+      <section class="od gx-pnl" id="od" role="dialog" aria-modal="true" aria-labelledby="odH" tabindex="-1">
+        <header class="od-head"><span class="od-ic">${A.icon("almanac")}</span><div class="od-ht"><h3 id="odH">${TITLE()}</h3><p>${SUB()}</p></div><button type="button" class="gx-btn sm od-x" id="odX" aria-label="${esc(close6)}">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button></header>
         <div class="od-body">
           <div class="od-cal">
-            <div class="od-nav"><button type="button" class="pd-pg prev" id="odPrev" aria-label="${esc(P6("Mes anterior|Previous month|Mois précédent|Mês anterior|Vorheriger Monat|Mese precedente||上个月|이전 달|前の月|Предыдущий месяц|Poprzedni miesiąc"))}">${A.icon("u_next")}</button><b id="odMonth"></b><button type="button" class="pd-pg next" id="odNext" aria-label="${esc(P6("Mes siguiente|Next month|Mois suivant|Próximo mês|Nächster Monat|Mese successivo||下个月|다음 달|次の月|Следующий месяц|Następny miesiąc"))}">${A.icon("u_next")}</button></div>
+            <div class="od-nav"><button type="button" class="gx-btn sm pd-pg prev" id="odPrev" aria-label="${esc(P6("Mes anterior|Previous month|Mois précédent|Mês anterior|Vorheriger Monat|Mese precedente||上个月|이전 달|前の月|Предыдущий месяц|Poprzedni miesiąc"))}">${A.icon("u_next")}</button><b id="odMonth"></b><button type="button" class="gx-btn sm pd-pg next" id="odNext" aria-label="${esc(P6("Mes siguiente|Next month|Mois suivant|Próximo mês|Nächster Monat|Mese successivo||下个月|다음 달|次の月|Следующий месяц|Następny miesiąc"))}">${A.icon("u_next")}</button></div>
             <div class="od-wk" aria-hidden="true">${wk}</div>
             <div class="od-grid" id="odGrid" role="grid"></div>
           </div>
           <aside class="od-side">
-            <div class="od-day" id="odDay" aria-live="polite"></div>
+            <div class="od-day gx-paper" id="odDay" aria-live="polite"></div>
             <form class="od-code" id="odForm" autocomplete="off">
               <label for="odIn">${P6("Código de semilla|Seed code|Code de graine|Código da semente|Seed-Code|Codice del seme||种子代码|시드 코드|シードコード|Код зерна|Kod ziarna")}</label>
-              <div class="od-row"><span class="od-in">${A.icon("dice", "sm")}<input id="odIn" maxlength="8" spellcheck="false" autocapitalize="characters" placeholder="ABC-123"></span><button type="submit" class="btn-line" id="odFind">${P6("Buscar|Find|Chercher|Buscar|Suchen|Cerca||查找|찾기|探す|Найти|Szukaj")}</button></div>
+              <div class="od-row"><span class="od-in">${A.icon("dice", "sm")}<input id="odIn" maxlength="8" spellcheck="false" autocapitalize="characters" placeholder="ABC-123"></span><button type="submit" class="gx-btn sm" id="odFind">${P6("Buscar|Find|Chercher|Buscar|Suchen|Cerca||查找|찾기|探す|Найти|Szukaj")}</button></div>
               <p class="od-msg" id="odMsg"></p>
             </form>
           </aside>
@@ -101,7 +101,7 @@ window.AIQ = window.AIQ || {};
       <div class="od-hand"><span ${A.ttAttr(A.tx(deck.n), A.tx(deck.d))}>${A.icon(deck.ico)}</span>${gift ? `<span ${A.ttAttr(A.tx(gift.n), A.tx(gift.d))}>${A.icon(h.gift)}</span>` : ""}<em>${A.tx(deck.n)}${h.asc ? ` · ${A.T("Ascensión", "Ascension")} ${h.asc}` : ""}</em></div>
       <div class="od-res"><i>${today ? P6("Hoy llevas|So far today|Aujourd'hui|Hoje você tem|Heute bisher|Oggi finora||今天目前|오늘 지금까지|今日の合計|Сегодня пока|Dziś masz") : P6("Tu puntuación ese día|Your score that day|Ton score ce jour-là|Sua pontuação naquele dia|Deine Punkte an dem Tag|Il tuo punteggio quel giorno||你那天的得分|그날의 점수|その日のスコア|Твой счёт в тот день|Twój wynik tego dnia")}</i>
         ${st.done ? `<b>${A.fmt(st.total)}</b><span class="od-tries">${tries}</span>` : `<b class="none">${today ? P6("Aún no has jugado|Not played yet|Pas encore joué|Ainda não jogou|Noch nicht gespielt|Non ancora giocato||还没玩|아직 안 했어요|まだプレイしていない|Ещё не сыграно|Jeszcze nie grano") : P6("No lo jugaste|You didn't play it|Tu ne l'as pas joué|Você não jogou|Nicht gespielt|Non l'hai giocato||你没玩过|플레이하지 않았어요|プレイしていない|Не сыграно|Nie zagrano")}</b>`}</div>
-      <button type="button" class="btn-ink od-go" id="odGo"><span>${today ? P6("Ir al reto de hoy|Go to today's challenge|Aller au défi du jour|Ir ao desafio de hoje|Zur heutigen Herausforderung|Vai alla sfida di oggi||前往今日挑战|오늘의 도전으로|今日のチャレンジへ|К испытанию дня|Do dzisiejszego wyzwania") : P6("Practicar este día|Practice this day|S'entraîner sur ce jour|Treinar este dia|Diesen Tag trainieren|Allenati su questo giorno||练习这一天|이 날 연습하기|この日を練習|Тренировать этот день|Trenuj ten dzień")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button>`;
+      <button type="button" class="gx-btn pri wide od-go" id="odGo"><span>${today ? P6("Ir al reto de hoy|Go to today's challenge|Aller au défi du jour|Ir ao desafio de hoje|Zur heutigen Herausforderung|Vai alla sfida di oggi||前往今日挑战|오늘의 도전으로|今日のチャレンジへ|К испытанию дня|Do dzisiejszego wyzwania") : P6("Practicar este día|Practice this day|S'entraîner sur ce jour|Treinar este dia|Diesen Tag trainieren|Allenati su questo giorno||练习这一天|이 날 연습하기|この日を練習|Тренировать этот день|Trenuj ten dzień")}</span><span class="ar">${A.icon("u_next", "sm")}</span></button>`;
     $("odGo").onclick = () => { const pick = o.pick; close(true); if (pick) pick(b); };
   }
   /* el codigo de una semilla -> su dia (se prueban los dos ultimos anos; el codigo sale de la semilla, no al reves) */

@@ -72,12 +72,6 @@
 .adv-setup .rd.plan .rd-ic .ic { width: 28px; height: 28px; } .adv-setup .rd.plan .rd-n.boss .rd-ic .ic { width: 40px; height: 40px; }
 .adv-setup .rd.plan .rd-h i { font-size: 16px; } .adv-setup .rd.plan .rd-n.inf .rd-ic b { font-size: 30px; }
 /* Reto diario: el mismo plano, mas pequeno (con el orden barajado del dia) */
-.dr-road2 .rd.plan { --s: 34px; --sb: 40px; --gap: 6px; gap: 8px; }
-.dr-road2 .rd.plan .rd-act { padding: 7px 9px 7px; gap: 7px; border-radius: 11px; }
-.dr-road2 .rd.plan .rd-h b { font-size: 10px; } .dr-road2 .rd.plan .rd-h i { font-size: 14px; }
-.dr-road2 .rd.plan .rd-ic { border-radius: 8px; } .dr-road2 .rd.plan .rd-ic .ic { width: 27px; height: 27px; } .dr-road2 .rd.plan .rd-n.boss .rd-ic .ic { width: 36px; height: 36px; }
-.dr-road2 .rd.plan .rd-n em { font-size: 10px; margin-top: 4px; }
-.dr-road2 .rd.plan .rd-n.inf .rd-ic b { font-size: 26px; }
 
 /* ---------------------------------------------------------------- CAMPAMENTO */
 /* lo que va en una sola linea no necesita el reparto "pretty" de #dlg (que se queda para las descripciones): maquetar sale mas barato */

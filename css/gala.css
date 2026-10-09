@@ -403,3 +403,96 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
   .pf-book { height: auto; } .pf-rows { overflow: visible; }
   .pf-row { grid-template-columns: 48px minmax(0, 1fr); } .pf-chip { width: 48px; height: 48px; } .pf-mt { grid-column: 2; justify-items: start; } .pf-bh { grid-template-columns: 40px minmax(0, 1fr); } .pf-bc { grid-column: 1 / -1; justify-items: start; }
 }
+
+/* ---------------------------------------------------------------- RETO DIARIO (v0.3.45): la mano sobre la mesa (js/hub.js, daily). 12 columnas: la mesa de
+   fieltro (1-8) con la mano del dia en tres naipes que dicen que hace cada carta, la ruta y los tres intentos como fichas que se gastan; la pizarra de
+   papel (9-12) con Hoy y Ayer, tus cifras y la cuenta atras. Mayusculas espaciadas solo en encabezados de seccion */
+.dia-screen { z-index: 1; }
+.dia-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
+.dia-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 24px; min-width: 0; }
+.dia-head #hubBack .ic { width: 22px; height: 22px; }
+.dia-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.dia-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
+.dia-meta { justify-self: stretch; display: flex; justify-content: flex-end; align-items: center; gap: 12px; min-width: 0; overflow: hidden; } .dia-meta > * { flex: none; } .dia-meta > .dia-date { flex: 0 1 auto; }   /* sin sitio, la fecha se corta (nunca pisa el titulo) */
+.dia-date { font-size: 22px; color: var(--gx-txt-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dia-date::first-letter { text-transform: uppercase; }
+.dia-seed { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 2px 14px 4px 10px; clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .55); font-size: 22px; color: var(--gx-rim-hi); white-space: nowrap; cursor: help; }
+.dia-seed .ic { width: 24px; height: 24px; image-rendering: pixelated; } .dia-seed b { font-weight: 400; letter-spacing: .06em; }
+.dia-ptag { align-self: center; padding: 4px 12px 6px; clip-path: var(--gx-notch); background: var(--gx-rim); color: var(--gx-ink); font-size: 20px; box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo); white-space: nowrap; }
+.dia-other .ic, .dia-today .ic { width: 22px; height: 22px; image-rendering: pixelated; }
+.dia-head .menu-tools { grid-column: 4; }
+
+.dia-left { grid-column: 1 / 9; grid-row: 2; min-width: 0; min-height: 0; }
+.dia-mesa { height: 100%; display: grid; grid-template-rows: auto auto auto 1fr; gap: 12px; padding: 18px 22px 20px; min-height: 0; }
+.dia-mh { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-width: 0; } .dia-mh h3 { cursor: help; white-space: nowrap; } .dia-mh .dia-date { text-align: right; }
+.dia-mano { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dia-nk { display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto 1fr; align-items: center; gap: 8px 12px; padding: 12px 16px 16px; min-width: 0; }
+.dia-art, .dia-asc { position: relative; display: block; width: 48px; height: 48px; }
+.dia-art .ic, .dia-asc .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; }
+.dia-asc em { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-family: var(--serif); font-size: 28px; line-height: 1; color: #3a2404; text-shadow: 0 2px 0 #ffe9a8; }
+.dia-nt { display: grid; gap: 2px; min-width: 0; overflow: hidden; }
+.dia-nt b { min-width: 0; font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; color: var(--gx-ink); }
+.dia-nk > i { grid-column: 1 / -1; align-self: start; font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }   /* mas de 4 lineas (algun idioma): el resto, en la ayuda del naipe */
+/* la ruta del dia: el plano de la Aventura con las piezas del sistema (esquinas de pixel, fieltro y laton) */
+.dia-ruta .rd.plan { --s: 36px; --sb: 44px; --gap: 6px; gap: 12px; margin: 0; }
+.dia-ruta .rd.plan .rd-n.inf em { display: none; }   /* solo el simbolo (su nombre, en la ayuda): "Бесконечный" ensanchaba la columna y los jefes se salian */
+.dia-ruta .rd.plan .rd-act, .dia-ruta .rd.plan .rd-inf { border-radius: 0; clip-path: var(--gx-notch); padding: 8px 12px 8px; background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
+.dia-ruta .rd.plan .rd-h b { font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); }
+.dia-ruta .rd.plan .rd-h i { font-family: var(--sans); font-size: 18px; }
+.dia-ruta .rd.plan .rd-ic { border-radius: 0; }   /* casillas pequenas sin recorte: a este tamano el escalon apenas se ve y cada recorte cuesta en la primera apertura */
+.dia-ruta .rd.plan .rd-ic .ic { width: 32px; height: 32px; } .dia-ruta .rd.plan .rd-n.boss .rd-ic .ic { width: 40px; height: 40px; }
+.dia-ruta .rd.plan .rd-n em { font-size: 16px; margin-top: 4px; }
+
+/* los tres intentos: tres fichas */
+.dia-int { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 20px; min-height: 0; }
+.dia-fichas { display: flex; gap: 18px; }
+.dia-fi { position: relative; display: grid; justify-items: center; align-content: end; gap: 2px; min-width: 96px; padding: 4px 2px 2px; border: 0; background: none; color: var(--gx-txt); font-family: var(--sans); text-align: center; }
+.dia-chip { position: relative; display: block; width: 64px; height: 64px; transition: transform .2s cubic-bezier(.2, .9, .3, 1); }
+.dia-chip .ic { display: block; width: 64px; height: 64px; image-rendering: pixelated; filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .6)); }
+.dia-chip em { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-family: var(--serif); font-size: 34px; line-height: 1; color: #fff; text-shadow: 0 3px 0 rgba(0, 0, 0, .55); }
+.dia-fi b { font-weight: 400; font-size: 26px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dia-fi i { display: inline-flex; align-items: center; gap: 4px; font-style: normal; font-size: 18px; line-height: 1.1; color: var(--gx-txt-2); white-space: nowrap; }
+.dia-fi i .ic { width: 16px; height: 16px; }
+.dia-fi.used .dia-chip .ic { filter: grayscale(.55) brightness(.72) drop-shadow(0 4px 0 rgba(2, 6, 4, .6)); }
+.dia-fi.next .dia-chip { filter: drop-shadow(0 0 12px rgba(255, 207, 102, .6)); } .dia-fi.next i { color: var(--gx-rim-hi); }
+.dia-fi.free { opacity: .55; }
+.dia-fi.live .dia-chip { animation: dia-live 1.6s ease-in-out infinite; } .dia-fi.live i { color: #ff9d94; }
+@keyframes dia-live { 50% { transform: translateY(-4px); } }
+button.dia-fi { cursor: pointer; } button.dia-fi:hover .dia-chip { transform: translateY(-4px); } button.dia-fi i { color: var(--gx-rim-hi); }
+button.dia-fi:focus { outline: none; }
+button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::after { content: ""; position: absolute; inset: -4px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.dia-tot { display: grid; justify-items: end; gap: 10px; min-width: 0; }
+.dia-sum { display: flex; align-items: baseline; gap: 12px; cursor: help; } .dia-sum span { font-size: 20px; color: var(--gx-txt-2); }
+.dia-sum b { font-family: var(--serif); font-weight: 400; font-size: 56px; line-height: .85; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08, 0 0 20px rgba(255, 196, 100, .22); font-variant-numeric: tabular-nums; }
+.dia-go { display: grid; justify-items: end; gap: 4px; } .dia-sub { font-size: 18px; color: var(--gx-txt-2); text-align: right; text-wrap: balance; }
+.dia-done { display: flex; align-items: center; gap: 12px; padding: 8px 18px 10px 12px; clip-path: var(--gx-notch); background: rgba(212, 160, 74, .16); box-shadow: inset 0 0 0 2px var(--gx-rim); }
+.dia-done .ic { width: 40px; height: 40px; } .dia-done span { display: grid; } .dia-done b { font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1; color: var(--gx-ttl); } .dia-done i { font-style: normal; font-size: 18px; color: var(--gx-txt-2); }
+/* la pizarra del dia */
+.dia-right { grid-column: 9 / 13; grid-row: 2; min-width: 0; min-height: 0; }
+.dia-board { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto auto; gap: 10px; padding: 14px 16px 16px; }
+.dia-board .dr-tabs { display: flex; } .dia-board .dr-tabs button { flex: 1 1 0; justify-content: center; min-width: 0; }
+.dia-screen .dia-board .lb { margin: 0; min-height: 0; overflow: hidden; }
+.dia-screen .dia-board .lb-src, .dia-screen .dia-board .lb-load, .dia-screen .dia-board .lb-empty { margin: 0 0 4px; display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 18px; letter-spacing: 0; text-transform: none; color: var(--gx-ink-2); }
+.dia-screen .dia-board .lb-src .ic { width: 22px; height: 22px; margin: 0; }
+.dia-screen .dia-board .lb ol { display: grid; gap: 0; }
+.dia-screen .dia-board .lb li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; min-height: 32px; padding: 1px 8px; border-radius: 0; background: none; border-bottom: 2px solid var(--gx-line); font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--gx-ink); }
+.dia-screen .dia-board .lb li .lb-n { opacity: 1; font-size: 18px; color: var(--gx-ink-2); text-align: center; } .dia-screen .dia-board .lb li .lb-n .ic { width: 24px; height: 24px; margin: 0; }
+.dia-screen .dia-board .lb .lb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--sans); font-size: 20px; }
+.dia-screen .dia-board .lb-tries { display: inline-flex; gap: 4px; } .dia-screen .dia-board .lb-tries i { width: 9px; height: 9px; background: #ded2b4; box-shadow: inset 0 0 0 2px var(--gx-o); } .dia-screen .dia-board .lb-tries i.on { background: var(--gx-red); }
+.dia-screen .dia-board .lb li b { font-weight: 400; font-variant-numeric: tabular-nums; }
+.dia-screen .dia-board .lb li.me { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo); border-bottom: 0; }
+.dia-screen .dia-board .lb li.me .lb-n { color: var(--gx-ink); }
+.dia-screen .dia-board .lb li.lb-gap { display: block; min-height: 0; padding: 0; border: 0; background: none; text-align: center; line-height: .8; letter-spacing: .3em; color: var(--gx-ink-2); }
+.dia-screen .dia-board .lb li.jump { cursor: pointer; }
+.dia-screen .dia-board .dr-pager .pd-pgl { font-size: 20px; color: var(--gx-ink); } .dia-screen .dia-board .dr-pager .pd-pgl em { color: var(--gx-ink-2); }
+.dia-stats { display: grid; gap: 2px; } .dia-stats .gx-lead-row { font-size: 18px; } .dia-stats .gx-lead-row s { transform: translateY(-4px); }
+.dia-clock { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 18px; color: var(--gx-ink-2); cursor: help; }
+.dia-clock .ic { width: 28px; height: 28px; image-rendering: pixelated; } .dia-clock b { margin-left: auto; font-family: var(--sans); font-weight: 400; font-size: 26px; color: var(--gx-ink); font-variant-numeric: tabular-nums; }
+.dia-today { justify-self: start; }
+@media (max-width: 899px), (max-height: 519px) {                                  /* movil: una columna y la pantalla entera se desplaza */
+  .dia-screen { overflow-y: auto; }
+  .dia-grid { position: static; padding: 14px 16px 20px; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 12px; }
+  .dia-head { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; } .dia-meta { grid-column: 1 / -1; grid-row: 2; justify-self: start; flex-wrap: wrap; } .dia-head .menu-tools { grid-column: 3; grid-row: 1; } .dia-h { font-size: 40px; }
+  .dia-left, .dia-right { grid-column: 1; grid-row: auto; } .dia-mano { grid-template-columns: minmax(0, 1fr); } .dia-ruta { overflow-x: auto; }
+  .dia-int { grid-template-columns: minmax(0, 1fr); } .dia-tot { justify-items: start; } .dia-board { height: auto; } .dia-screen .dia-board .lb { overflow: visible; }
+}

@@ -53,8 +53,6 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
    margen (--mqi), tamano (--mqb), radio del marco (--mqr) y densidad: con pathLength 144, "0 2" son 72 bombillas, "0 3" 48 y "0 4" 36 (las encendidas, la mitad) */
 .mqb rect { rx: calc(var(--mqr, 18px) - var(--mqi)); }
 .pic { --mqi: 9px; --mqb: 6px; --mqr: 14px; } .pic .mqb { z-index: 3; } .mc-win .pic .mqb { display: none; }
-.dr-art .pic { --mqi: 7px; --mqb: 5px; }
-.dr-art .mqb rect { stroke-dasharray: 0 3; } .dr-art .mqb .mqb-a, .dr-art .mqb .mqb-b { stroke-dasharray: 0 6; } .dr-art .mqb .mqb-b { stroke-dashoffset: 3; }
 .pd-step { --mqi: 6px; --mqb: 4.5px; --mqr: 9px; }
 .pd-step .mqb rect { stroke-dasharray: 0 4; } .pd-step .mqb .mqb-a, .pd-step .mqb .mqb-b { stroke-dasharray: 0 8; } .pd-step .mqb .mqb-b { stroke-dashoffset: 4; }
 .hh-bottom { display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; }

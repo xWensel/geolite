@@ -46,17 +46,19 @@ window.AIQ = window.AIQ || {};
       <div class="gx-head"><span class="gx-eyb">${abc}</span><h2 class="gx-t-l">${abc}</h2><p class="gx-lead">${abc}</p></div><div class="gx-paper"><div class="gx-lead-row"><span>${abc}</span><s></s><b>0 <small>/ 1</small></b></div><div class="gx-bar"><i style="width:40%"></i></div></div>
       <div class="gx-acts col"><button class="gx-btn pri wide" tabindex="-1">${abc} <span class="gx-k"><kbd class="k-kb">Esc</kbd></span></button><button class="gx-btn wide" tabindex="-1">${abc}</button></div>
       <div class="gx-foot"><div class="gx-hr"></div><div class="gx-acts"><button class="gx-btn gho sm" tabindex="-1">${abc}</button></div><p class="gx-note">${abc}</p></div></section></div></div></div></div>`;
-    document.body.appendChild(w); setTimeout(() => w.remove(), 900 + 2 * 120);
+    document.body.appendChild(w); setTimeout(() => w.remove(), 900 + 3 * 400);
     /* v0.3.41: cada pieza en su propio momento (las tres a la vez paraban el fundido de la puerta): el Perfil (fichas, papel grande y su sombra)
-       120 ms despues y Ajustes otros 120 ms despues */
-    setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.profileHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.profileHtml()}</div>`); } catch (e) { /* sin perfil aun */ } }, 120);
+       a los 400 ms, Ajustes a los 800 y el Reto diario a los 1.200: cada una en su momento, sin juntar sus parones */
+    setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.profileHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.profileHtml()}</div>`); } catch (e) { /* sin perfil aun */ } }, 400);
+    /* v0.3.45: y el Reto diario de hoy (sus esquinas de pixel se recortan la primera vez a su medida: su primera apertura perdia ~24 fotogramas) */
+    setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.dailyHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.dailyHtml()}</div>`); } catch (e) { /* sin reto aun */ } }, 1200);
     /* v0.3.38: Ajustes tambien (su primera apertura daba 11 fotogramas perdidos): se pinta el de verdad, casi invisible y sin recibir clics */
     const sh = document.getElementById("setSh");
     if (sh && sh.classList.contains("hidden")) setTimeout(() => {
       if (!sh.classList.contains("hidden")) return;
       sh.style.opacity = ".02"; sh.style.pointerEvents = "none"; sh.classList.remove("hidden");
       setTimeout(() => { sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); }, 900);
-    }, 240);
+    }, 800);
   }
   /* v0.3.43: pasar pagina en una lista (Clasificacion, Reto diario). La lista vieja sale hacia un lado y la nueva entra del otro A LA VEZ, solo con
      transform y opacity (la GPU las mueve sin rehacer la pagina) y una curva continua: nada de steps(), que daba saltos de unas 11 imagenes por

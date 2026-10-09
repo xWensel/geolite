@@ -10,17 +10,6 @@ html[data-dev="deck"] .cx-sum-l > em { font-size: 16px; }   /* «0 / 4967 medall
 html[data-dev="deck"] .dc-d { font-size: 16px; }   /* «Logro: Ascensión II · Su» hub-adventure */
 html[data-dev="deck"] .dc-kit em { font-size: 16px; }   /* «4» hub-adventure */
 html[data-dev="deck"] .dlf-r span { font-size: 16px; }   /* «Visitas» ajustes-data */
-html[data-dev="deck"] .dr-kt i { font-size: 16px; }   /* «Baraja» hub-daily */
-html[data-dev="deck"] .dr-next { font-size: 16px; }   /* «Nuevo reto en» hub-daily */
-html[data-dev="deck"] .dr-road2 .rd.plan .rd-h b { font-size: 16px; }   /* «Acto I» hub-daily */
-html[data-dev="deck"] .dr-road2 .rd.plan .rd-h i { font-size: 16px; }   /* «Las rutas conocidas» hub-daily */
-html[data-dev="deck"] .dr-road2 .rd.plan .rd-n em { font-size: 16px; }   /* «Infinito» hub-daily */
-html[data-dev="deck"] .dr-seed { font-size: 16px; }   /* «Semilla» hub-daily */
-html[data-dev="deck"] .dr-stats i { font-size: 16px; }   /* «Días seguidos» hub-daily */
-html[data-dev="deck"] .dr-sum i { font-size: 16px; }   /* «Puntuación global» hub-daily */
-html[data-dev="deck"] .dr-tabs button { font-size: 16px; }   /* «Ayer» hub-daily */
-html[data-dev="deck"] .dr-tn { font-size: 16px; }   /* «Intento 1» hub-daily */
-html[data-dev="deck"] .dr-try i { font-size: 16px; }   /* «Por jugar» hub-daily */
 html[data-dev="deck"] .lg-label, html[data-dev="deck"] .lg-row { font-size: 16px; }   /* «Puntos del nivel» partida,revelado */
 html[data-dev="deck"] .np-t em { font-size: 16px; }   /* «1/21» ajustes-sound */
 html[data-dev="deck"] .plate-top { font-size: 16px; }   /* «Nº 01 / 10» partida,revelado */
@@ -46,8 +35,6 @@ html[data-dev="deck"] .stp-tag { font-size: 16px; }   /* «Personalizado» ajust
 html[data-dev="deck"] .tk-pin { font-size: 16px; }   /* «Tu chincheta:» revelado */
 html[data-dev="deck"] .tk-rows dt { font-size: 16px; }   /* «Distancia» revelado */
 html[data-dev="deck"] body #plate .tag { font-size: 16px; }   /* «Ciudad» partida,revelado */
-html[data-dev="deck"] body .dr-board .lb-src { font-size: 16px; }   /* «Solo este equipo» hub-daily */
-html[data-dev="deck"] body .dr-go .sb-t > i { font-size: 16px; }   /* «Lugares y retos nuevos» hub-daily */
 html[data-dev="deck"] body .plq-tag > span { font-size: 16px; }   /* «0 / 4967» portada */
 html[data-dev="deck"] body .tk-total > span:first-child { font-size: 16px; }   /* «Total» revelado */
 html[data-dev="deck"] kbd { font-size: 16px; }   /* «P» ajustes-general,ajustes-sound,ajustes-vi */
@@ -62,7 +49,7 @@ html[data-dev="deck"] .seg[data-seg="units"] button.on, html[data-dev="deck"] .s
 html[data-dev="deck"] .seg button { letter-spacing: 0; line-height: 1.05; }
 
 /* v0.2.33: textos en Jersey / Pixelify (mayusculas del 55 % de su tamano): a 16 px se quedaban en 8,8 px; en la Deck van a 18 */
-html[data-dev="deck"] .dc-d, html[data-dev="deck"] .dr-try i, html[data-dev="deck"] .dr-road2 .rd.plan .rd-h i, html[data-dev="deck"] .dr-sum em,
+html[data-dev="deck"] .dc-d, 
 html[data-dev="deck"] .rd.plan .rd-n.inf em, html[data-dev="deck"] .tk-pin, html[data-dev="deck"] .cx-chip2 em i,
 html[data-dev="deck"] #settings .set-keys em, html[data-dev="deck"] .osk-legend, html[data-dev="deck"] .pt-lang { font-size: 18px; }
 html[data-dev="deck"] .cx-chip2 b { font-size: 20px; }
