@@ -1163,9 +1163,11 @@ window.AIQ = window.AIQ || {};
       im.src = src;
     });
     const full = loadContent(e, lang).then(rec => { if (rec.none) return null; it.querySelector("b").textContent = nameOf(e, rec); say(rec.desc); return rec; }).catch(() => null);
-    it._ready = Promise.all([A.wiki.imgOf(pid), A.wiki.loadShort(lang)]).then(([im]) => {
+    /* Historia (id~h) y Dato clave (id~k) ensenan su propia foto, no la de la portada del lugar */
+    it._ready = Promise.all([A.wiki.imgOf(id), A.wiki.imgOf(pid), A.wiki.loadShort(lang)]).then(([own, base]) => {
       say(A.cleanFact(A.wiki.factOf(pid, lang)));
-      if (im) return put(A.media(`assets/wiki/card/${A.mediaKey(pid)}.webp`), A.media(`assets/wiki/th/${A.mediaKey(pid)}.webp`), /\/(\d+px-)?(State_)?flag_of_[^\/]*$/i.test(im[0]));
+      const im = own || base, k = A.mediaKey(own ? id : pid);
+      if (im) return put(A.media(`assets/wiki/card/${k}.webp`), A.media(`assets/wiki/th/${k}.webp`), /\/(\d+px-)?(State_)?flag_of_[^\/]*$/i.test(im[0]));
       return full.then(rec => (rec && rec.img ? put(rec.img.card, rec.img.thumb, rec.img.flag) : null));   // paises sin foto propia: su bandera (la foto grande: la polaroid mide ~400 px)
     }).catch(() => {}).then(() => { const art = it.querySelector(".cx-art"); if (!art.querySelector("img")) art.innerHTML = iconSvg(e.type); });   // el icono solo si de verdad no hay foto, nunca de relleno mientras carga
     return it;
