@@ -250,6 +250,7 @@ window.AIQ = window.AIQ || {};
     const el = $("lb"); if (!el) return; const DY = A.rank.daily, P = A.profile.get(), my = P.id, tab = board, n = ++bseq, pg = bpage;
     const b = tab === "prac" && pday ? pday : tab === "yday" ? DY.yesterday() : DY.board();
     if (!dir) { bcount = 0; el.innerHTML = `<p class="lb-load">…</p>`; }
+    else el.style.position = "relative";                               // A.gala.turn pone la copia de la lista vieja encima, en su sitio
     pager(dir ? bcount : 0);
     const res = await A.rank.topC(b, BROWS, 30000, pg * BROWS); if (n !== bseq || tab !== board || !$("lb")) return;
     const rows = res.rows || [], inPage = rows.some(r => r.id === my);
@@ -258,7 +259,10 @@ window.AIQ = window.AIQ || {};
     const myPage = res.me ? Math.floor((res.me.rank - 1) / BROWS) : -1;
     const mine = res.me && !inPage ? `<li class="lb-gap" aria-hidden="true">···</li>` + li({ id: my, name: A.rank.name(), score: res.me.score, tries: DY.get(b).tries.filter(t => !t.live) }, res.me.rank, rows.length).replace("<li class=\"me\"", `<li class="me${myPage >= 0 && myPage !== pg ? " jump" : ""}" id="lbMe"`) : "";
     bcount = res.count || rows.length;
-    el.innerHTML = `<p class="lb-src">${A.podio.src(res)}</p>` + (rows.length ? `<ol class="dy${dir ? " turn" : ""}" style="--dx:${dir * 22}px">${rows.map((r, i) => li(r, pg * BROWS + i + 1, i)).join("")}${mine}</ol>` : `<p class="lb-empty">${T("Aún no hay puntuaciones. ¡Sé el primero!", "No scores yet. Be the first!")}</p>`);
+    const ol = el.querySelector("ol.dy"), items = rows.map((r, i) => li(r, pg * BROWS + i + 1, i)).join("") + mine;
+    if (dir && ol && rows.length) A.gala.turn(ol, items, dir);          // v0.3.43: pasar pagina fluido (A.gala.turn), sin rehacer la tabla
+    else el.innerHTML = `<p class="lb-src">${A.podio.src(res)}</p>` + (rows.length ? `<ol class="dy">${items}</ol>` : `<p class="lb-empty">${T("Aún no hay puntuaciones. ¡Sé el primero!", "No scores yet. Be the first!")}</p>`);
+    [pg - 1, pg + 1].forEach(q => { if (q >= 0 && q * BROWS < bcount) A.rank.topC(b, BROWS, 30000, q * BROWS); });   // la pagina de al lado, pedida ya
     const me = $("lbMe"); if (me && me.classList.contains("jump")) me.onclick = () => goBoard(myPage - pg);   // tu fila de abajo te lleva a tu pagina
     pager(bcount);
   }
@@ -266,6 +270,12 @@ window.AIQ = window.AIQ || {};
   function pager(count) {
     const el = $("drPager"); if (!el) return;
     const pages = Math.max(1, Math.ceil(count / BROWS)), a = bpage * BROWS + 1, rk = (x, y) => P6("Puestos {a}–{b}|Ranks {a}–{b}|Places {a}–{b}|Posições {a}–{b}|Plätze {a}–{b}|Posizioni {a}–{b}||第 {a}–{b} 名|{a}–{b}위|{a}～{b}位|Места {a}–{b}|Miejsca {a}–{b}").replace("{a}", A.fmt(x)).replace("{b}", A.fmt(y));
+    const pv = $("drPrev"), nx = $("drNext");
+    if (pv && nx) {                                                   // v0.3.43: las flechas se quedan (el foco del mando y del teclado no se pierde)
+      pv.disabled = bpage <= 0; nx.disabled = bpage >= pages - 1; pv.setAttribute("aria-label", rk(Math.max(1, a - BROWS), Math.max(BROWS, a - 1))); nx.setAttribute("aria-label", rk(a + BROWS, a + 2 * BROWS - 1));
+      el.querySelector(".pd-pgl").innerHTML = `<b>${rk(a, a + BROWS - 1)}</b>${count > BROWS ? `<em>${P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}").replace("{n}", A.fmt(count))}</em>` : ""}`;
+      el.classList.toggle("solo", pages < 2); return;
+    }
     el.innerHTML = `<button type="button" class="gx-btn sm pd-pg prev" id="drPrev" ${bpage > 0 ? "" : "disabled"} aria-label="${esc(rk(Math.max(1, a - BROWS), Math.max(BROWS, a - 1)))}">${A.icon("u_next")}</button>
       <span class="pd-pgl"><b>${rk(a, a + BROWS - 1)}</b>${count > BROWS ? `<em>${P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}").replace("{n}", A.fmt(count))}</em>` : ""}</span>
       <button type="button" class="gx-btn sm pd-pg next" id="drNext" ${bpage < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + BROWS, a + 2 * BROWS - 1))}">${A.icon("u_next")}</button>`;

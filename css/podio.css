@@ -69,8 +69,7 @@ html body .pd-src { margin: 0; display: flex; align-items: center; gap: 8px; fle
 .pd-board .pd-list li.lb-gap { display: block; min-height: 0; padding: 0; border: 0; text-align: center; line-height: .8; letter-spacing: .3em; color: var(--gx-ink-2); animation: none; }
 .pd-board .lb-tries { display: inline-flex; gap: 4px; } .pd-board .lb-tries i { width: 10px; height: 10px; background: #ded2b4; box-shadow: inset 0 0 0 2px var(--gx-o); } .pd-board .lb-tries i.on { background: var(--gx-red); }
 .pd-body.wait .pd-board .pd-list li { animation: none; }
-.pd-board .pd-list.turn li { animation: pd-turn .26s steps(3, end) both; animation-delay: calc(var(--i, 0) * 40ms); }
-@keyframes pd-turn { from { opacity: 0; transform: translateX(var(--dx, 22px)); } }
+.pd-board .pd-list.turned li { animation: none; }   /* v0.3.43: al pasar pagina la lista entera se desliza (A.gala.turn), fluida; las filas no vuelven a aparecer a saltos */
 
 /* paginas: flechas de papel y el tramo de puestos en medio */
 .pd-pager { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }

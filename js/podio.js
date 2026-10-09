@@ -119,6 +119,17 @@ window.AIQ = window.AIQ || {};
       <span class="pd-pgl"><b>${rk(a, a + PER - 1)}</b>${cnt > 3 ? `<em>${OF().replace("{n}", A.fmt(cnt))}</em>` : ""}</span>
       <button type="button" class="gx-btn sm pd-pg next" id="pdNext" ${page < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + PER, a + 2 * PER - 1))}">${A.icon("u_next")}</button>`;
   };
+  /* v0.3.43: al pasar pagina las flechas se quedan (antes se rehacian y el foco del mando o del teclado se perdia): solo cambian su estado y la etiqueta */
+  function refreshPager() {
+    const pv = $("pdPrev"), nx = $("pdNext"), pg = $("pdPager"); if (!pv || !nx || !pg) return;
+    const a = 4 + page * PER, cnt = (first && (first.count || (first.rows || []).length)) || 0;
+    pv.disabled = page <= 0; nx.disabled = page >= pages - 1;
+    pv.setAttribute("aria-label", rk(Math.max(4, a - PER), Math.max(8, a - 1))); nx.setAttribute("aria-label", rk(a + PER, a + 2 * PER - 1));
+    const l = pg.querySelector(".pd-pgl"); if (l) l.innerHTML = `<b>${rk(a, a + PER - 1)}</b>${cnt > 3 ? `<em>${OF().replace("{n}", A.fmt(cnt))}</em>` : ""}`;
+    pg.classList.toggle("solo", pages < 2);
+  }
+  /* la pagina de al lado se pide ya: al pulsar la flecha llega al instante (A.rank.topC la guarda 30 s) y nunca se ven huecos con "…" */
+  const prefetch = () => { const b = boardOf(mode, per); [page - 1, page + 1].forEach(q => { if (q > 0 && q < pages) A.rank.topC(b, PER, 30000, 3 + q * PER); }); };
   /* contenido: origen y fecha, podio (2.o, 1.o, 3.o), lista de 5 con sus flechas y el pie (tu puesto, lo que te falta para el podio o como entrar).
      res = null: esperando al servidor (mismas medidas, sin nadie: al llegar, los escalones suben desde el suelo) */
   function body(res) {
@@ -157,7 +168,7 @@ window.AIQ = window.AIQ || {};
     first = res; pages = Math.max(1, Math.ceil(((res.count || (res.rows || []).length) - 3) / PER));
     el.innerHTML = body(res); el.classList.remove("wait");
     const play = $("pdPlay"); if (play) play.onclick = () => A.hub.screen(mode === "daily" ? "daily" : "adventure");   // hub.screen quita el podio (reset)
-    wirePager();
+    wirePager(); prefetch();
     /* los escalones aterrizan de bronce a oro: una ficha cada uno, cada vez mas aguda (el tuyo, moneda) */
     const rows = res.rows || [], my = A.profile.get().id;
     [[3, 430], [2, 530], [1, 630]].forEach(([p, ms], k) => { const r = rows[p - 1]; if (r) sfxT.push(setTimeout(() => { if (n === seq) (r.id === my ? A.sfx.coin(k) : A.sfx.chip(k)); }, ms)); });
@@ -172,21 +183,20 @@ window.AIQ = window.AIQ || {};
       me.classList.toggle("jump", to !== page); me.onclick = () => goPage(to);
     }
   }
-  /* pasar pagina: el podio se queda; la lista entra desde el lado hacia el que vas. Si el servidor tarda, huecos con "…" mientras llega */
+  /* pasar pagina: el podio se queda; la lista vieja sale hacia un lado y la nueva entra del otro, fluida (A.gala.turn). Si el servidor tarda, huecos
+     con "…" mientras llega (con la pagina de al lado pedida de antemano, casi nunca) */
   async function goPage(p) {
     const list = $("pdList"); if (!list || !first || p < 0 || p >= pages || p === page) return;
     const dir = p > page ? 1 : -1, n = ++seq, t = tab(), from = 4 + p * PER, b = boardOf(mode, per); page = p;
     sfxT.forEach(clearTimeout); sfxT = []; A.sfx.chip(dir > 0 ? 2 : 0);
-    $("pdPager").innerHTML = pagerHtml(); wirePager(); $("pdPager").classList.toggle("solo", pages < 2);
-    list.style.setProperty("--dx", dir * 22 + "px");
+    refreshPager(); wirePager();
     const req = p === 0 ? Promise.resolve(first) : A.rank.topC(b, PER, 30000, 3 + p * PER);
     const quick = await Promise.race([req, new Promise(r => setTimeout(r, 120))]);
     if (n !== seq || t !== tab() || !$("pdList")) return;
-    list.classList.add("turn");                                       // las filas nuevas entran ya sin la espera de la apertura del panel
-    if (!quick) list.innerHTML = listHtml(null, from, null);
-    const got = quick || (await req);
-    if (n !== seq || t !== tab() || !$("pdList")) return;
-    list.innerHTML = listHtml(p === 0 ? (got.rows || []).slice(3, 3 + PER) : got.rows || [], from, got);
+    const rowsOf = got => (p === 0 ? (got.rows || []).slice(3, 3 + PER) : got.rows || []);
+    A.gala.turn(list, quick ? listHtml(rowsOf(quick), from, quick) : listHtml(null, from, null), dir);
+    if (!quick) { const got = await req; if (n !== seq || t !== tab() || !$("pdList")) return; list.innerHTML = listHtml(rowsOf(got), from, got); }
+    prefetch();
   }
 
   /* teclado: Esc cierra; AvPag / RePag pasan de pagina; Intro y espacio no llegan al menu de debajo (Intro pulsaba "Continuar" de la partida guardada) */

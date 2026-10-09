@@ -58,8 +58,27 @@ window.AIQ = window.AIQ || {};
       setTimeout(() => { sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); }, 900);
     }, 240);
   }
+  /* v0.3.43: pasar pagina en una lista (Clasificacion, Reto diario). La lista vieja sale hacia un lado y la nueva entra del otro A LA VEZ, solo con
+     transform y opacity (la GPU las mueve sin rehacer la pagina) y una curva continua: nada de steps(), que daba saltos de unas 11 imagenes por
+     segundo. La copia vieja se pone encima en su sitio exacto (el padre tiene que ser su offsetParent) y se quita al terminar */
+  let turnOld = null;
+  function turn(list, html, dir) {
+    if (turnOld) { turnOld.getAnimations().forEach(a => a.finish()); }                       // pasar rapido: la anterior termina ya
+    list.getAnimations().forEach(a => a.cancel());
+    const host = list.offsetParent;
+    if (reduced() || !list.animate || !host || !list.children.length) { list.innerHTML = html; return; }
+    const old = list.cloneNode(true); old.removeAttribute("id"); old.setAttribute("aria-hidden", "true"); old.inert = true; old.classList.add("turned");   // sin la entrada de sus filas (la copia no debe reaparecer)
+    old.style.cssText += `;position:absolute;left:${list.offsetLeft}px;top:${list.offsetTop}px;width:${list.offsetWidth}px;height:${list.offsetHeight}px;margin:0;pointer-events:none;z-index:1`;
+    host.appendChild(old); turnOld = old;
+    list.innerHTML = html; list.classList.add("turned");
+    const dx = 56 * dir;
+    /* casi en relevo: la vieja ya se ha desvanecido cuando entra la nueva (si se cruzan a media opacidad, los nombres se pisan) */
+    old.animate([{ transform: "translateX(0)", opacity: 1 }, { opacity: 0, offset: .5 }, { transform: `translateX(${-dx}px)`, opacity: 0 }], { duration: 170, easing: "cubic-bezier(.5, 0, .9, .5)", fill: "forwards" })
+      .onfinish = () => { old.remove(); if (turnOld === old) turnOld = null; };
+    list.animate([{ transform: `translateX(${dx}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 280, delay: 100, easing: "cubic-bezier(.16, .84, .3, 1)", fill: "backwards" });
+  }
   /* glifo de la accion: tecla con teclado y boton con mando (css/mando.css decide cual se ve) */
   const keyHint = (kb, pad) => `<span class="gx-k"><kbd class="k-kb">${kb}</kbd>${pad ? `<i class="gl" data-gl="${pad}"></i>` : ""}</span>`;
 
-  A.gala = { enter, keyHint, warm, OUT_MS, get warmed() { return warmed; } };
+  A.gala = { enter, keyHint, warm, turn, OUT_MS, get warmed() { return warmed; } };
 })(window.AIQ);

@@ -91,5 +91,5 @@ button.dr-try { border: 0; font: inherit; color: inherit; cursor: pointer; trans
 .dr-go .dr-today .ic { width: 18px; height: 18px; margin: 0; }
 .s-prac .dr-hand { box-shadow: inset 0 0 0 3px rgba(176, 122, 208, .6), 0 10px 0 rgba(0, 0, 0, .35); }
 .dr-pager { margin: 0; }
-.dr-board .lb ol.turn li { animation: pd-turn .3s var(--spring) both; animation-delay: calc(var(--i, 0) * 35ms); }
+/* v0.3.43: pasar pagina en la tabla del Reto diario: la lista entera se desliza (A.gala.turn, js/gala.js) */
 .dr-board .lb li.jump { cursor: pointer; transition: transform .25s var(--spring); } .dr-board .lb li.jump:hover { transform: translateY(-2px); }
