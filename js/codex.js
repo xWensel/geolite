@@ -478,8 +478,8 @@ window.AIQ = window.AIQ || {};
     root.innerHTML = `
       <div class="cx-shell">
         <header class="cx-head">
-          <button class="cx-back" id="cxBack" type="button">${A.icon("u_back", "sm")}<b></b></button>
-          <div class="cx-ttl"><h2 data-cx="title"></h2><nav class="cx-crumb" id="cxCrumb"></nav></div>
+          <button class="gx-btn sm cx-back" id="cxBack" type="button">${A.icon("u_back")}<b></b>${A.gala.keyHint("Esc", "b")}</button>
+          <div class="cx-ttl"><h2 class="gx-t-l"><span class="cx-tic">${A.icon("m_codex")}</span><span data-cx="title"></span></h2><nav class="cx-crumb" id="cxCrumb"></nav></div>
           <label class="cx-search">${A.icon("lens", "sm")}<input id="cxSearch" type="search" autocomplete="off" spellcheck="false"></label>
         </header>
         <div class="cx-body">
@@ -489,7 +489,7 @@ window.AIQ = window.AIQ || {};
             <div class="cx-zoom"><button type="button" data-zoom="in" data-tip="tip.in" data-key="+">${A.icon("u_plus")}</button><button type="button" data-zoom="out" data-tip="tip.out" data-key="−">${A.icon("u_minus")}</button><button type="button" data-zoom="home" data-tip="tip.home" data-key="0">${A.icon("u_home")}</button></div></div>
         </div>
         <div class="cx-light hidden" id="cxLight"></div>
-      </div>`;
+      </div><div class="cx-brk" aria-hidden="true"></div><div class="cx-pw" aria-hidden="true"><i></i><i></i><b></b></div>`;   // v0.3.50: el visor (escuadras de laton) y el encendido y apagado del aparato
     $("app").appendChild(root);
     $("cxBack").onclick = () => back();
     let qT = 0;
@@ -577,7 +577,7 @@ window.AIQ = window.AIQ || {};
     const t = trail(ui.view), cur = ui.view, same = (a, b) => a.k === b.k && a.c === b.c && a.g === b.g;
     if (t.length && same(t[t.length - 1], cur)) t.pop();
     $("cxCrumb").innerHTML = t.map(x => `<a data-crumb="${esc(JSON.stringify(x))}">${esc(viewName(x))}</a>`).join("<i>›</i>") + (cur.k === "home" ? "" : `<i>›</i><b>${esc(viewName(cur))}</b>`);
-    $("cxBack").querySelector("b").textContent = ui.view.k === "home" && !ui.stack.length ? A.T("Menú", "Menu") : A.t("codex.back");
+    $("cxBack").querySelector("b").textContent = ui.view.k === "home" && !ui.stack.length ? A.t("codex.close") : A.t("codex.back");   // como en el resto de pantallas: Cerrar (o Volver dentro), con su tecla Esc
   }
   function onClick(e) {
     const t = e.target.closest("[data-go], [data-crumb], [data-jump], [data-step], [data-light]"); if (!t) return;
@@ -707,7 +707,7 @@ window.AIQ = window.AIQ || {};
           <h2>${known ? esc(gName(g)) : "???"}</h2>
           <div class="cx-gh-s"><em class="cx-pct">${pctOf(s)} %</em><span>${esc(placesTxt(s))}</span>${medCounts(s, scaleOf([g]))}</div>${mbar(s)}
           ${known ? `<p class="cx-gh-d" id="cxGhd"></p>` : `<p class="cx-gh-d">${esc(P(S.lockedCHint).replace("{km}", kmTxt(300)))}</p>`}
-          ${c && U(c) ? `<button type="button" class="cx-readc" data-go="d:${esc(c)}">${A.icon("m_codex", "sm")}${esc(P(S.read))}${tiered(c) ? pips(cm) : ""}</button>` : ""}</div>
+          ${c && U(c) ? `<button type="button" class="gx-btn sm cx-readc" data-go="d:${esc(c)}">${A.icon("m_codex", "sm")}${esc(P(S.read))}${tiered(c) ? pips(cm) : ""}</button>` : ""}</div>
       </header>`;
     const secs = SECS.map((sec, i) => { const ids = g.all.filter(id => (SEC_OF[E[id].type] ?? 1) === i); return ids.length ? secHTML(sec, ids) : ""; }).join("");
     return head + secs;
@@ -814,7 +814,7 @@ window.AIQ = window.AIQ || {};
     const un = U(id), rec = un ? memOf(id) : null, tr = tiered(id), m = medOf(id), L = limits(id), g = index().gs[e.g];
     const rel = relatedOf(e).map(x => { const o = E[x], u = U(x); return `<button class="cx-rel ${u ? "" : "lk"}" data-go="d:${esc(x)}" type="button">${relIcon(o, u)}<span>${u ? esc(nameOf(o, memOf(x))) : "???"}</span>${tiered(x) ? pips(medOf(x)) : ""}</button>`; }).join("");
     const where = g ? (g.sea ? regName(g.reg) : gKnown(g) ? gName(g) : "???") : "";
-    const nav = g && g.all.length > 1 && g.all.includes(id) ? `<span class="cx-steps"><button type="button" class="cx-step" data-step="-1" aria-label="${esc(P(S.prev))}">‹</button><em>${g.all.indexOf(id) + 1} / ${g.all.length}</em><button type="button" class="cx-step" data-step="1" aria-label="${esc(P(S.next))}">›</button></span>` : "";
+    const nav = g && g.all.length > 1 && g.all.includes(id) ? `<span class="cx-steps"><button type="button" class="gx-btn gho sm cx-step" data-step="-1" aria-label="${esc(P(S.prev))}">‹</button><em>${g.all.indexOf(id) + 1} / ${g.all.length}</em><button type="button" class="gx-btn gho sm cx-step" data-step="1" aria-label="${esc(P(S.next))}">›</button></span>` : "";
     const chaps = tr ? [0, 1, 2].map(i => { const has = U([id, id + "~h", id + "~k"][i]);
         return `<section class="cx-chap ${MED[i]}${has ? " on" : ""}" id="cxch${i + 1}"><h3>${medal(i, has)}<b>${esc(i ? A.t(i === 1 ? "codex.tierh" : "codex.tierk") : P(e.type === "country" ? S.chap1c : S.chap1))}</b><em>&lt; ${esc(kmTxt(L[i]))}</em></h3>
           <div class="cx-chb">${has ? `<p class="cx-load">${esc(A.T("Cargando…", "Loading…"))}</p>` : `<p class="cx-lockl">${A.icon("lock", "sm")}${esc(A.core && A.core.S && A.core.S.units === "mi" ? A.t("codex.hint.tier").replace(/\{km\}\s*(?:km|公里|км)/, A.fmtDist(L[i])) : A.t("codex.hint.tier", { km: L[i] }))}</p>`}</div></section>`; }).join("")
@@ -1085,7 +1085,18 @@ window.AIQ = window.AIQ || {};
   /* ---------------- abrir / cerrar / aviso de tarjeta nueva ---------------- */
   /* el crupier de la portada no habla encima de la Enciclopedia: se retira al abrirla y vuelve a asomar al cerrarla (como con el podio, js/podio.js) */
   let dealerWas = false;
+  /* v0.3.50 (usuario): el aparato se enciende al abrirlo (la linea de fosforo y la pantalla que se abre) y se apaga al cerrarlo (se cierra en una
+     linea y se va en un punto). Solo transform y opacidad sobre capas propias (css/codex.css, .cx-pw); con "reducir movimiento", sin efecto */
+  let pwT = 0, shutT = 0;
+  const pwStill = () => { const S2 = A.core && A.core.S; return !!(S2 && S2.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches; };
+  function power(on) {
+    const r = $("codex"); if (!r) return; clearTimeout(pwT); r.classList.remove("pw-on", "pw-off"); if (pwStill()) return;
+    A.restyle(r); r.classList.add(on ? "pw-on" : "pw-off");
+    if (on) pwT = setTimeout(() => r.classList.remove("pw-on"), 520);
+  }
   function open(id) {
+    const fresh = !isOpen() || !!shutT;                                  // cerrada (o apagandose): se vuelve a encender
+    if (shutT) { clearTimeout(shutT); shutT = 0; $("codex").classList.remove("pw-off"); }
     if (!isOpen() && A.dealer && A.dealer.homeTease) { dealerWas = !!A.dealer.onHome; if (dealerWas) A.dealer.homeTease(false); }
     if (!isOpen()) { mapSave(); ui.flown = false; }
     buildUI(); const root = $("codex"); root.classList.remove("hidden"); document.body.classList.add("cx-on"); labels();
@@ -1094,7 +1105,7 @@ window.AIQ = window.AIQ || {};
     ui.q = ""; $("cxSearch").value = "";
     render(); root.tabIndex = -1;
     requestAnimationFrame(() => setTimeout(() => { if (isOpen()) root.focus({ preventScroll: true }); }, 0));   // el foco, ya pintada: dado al instante obligaba a maquetar la Enciclopedia entera a medio abrir
-    A.sfx.card();
+    if (fresh) { power(true); (A.sfx.devOn || A.sfx.card)(); } else A.sfx.card();
     ui.lockN = 0;
     if (!id && A.dealer && A.dealer.codexOpen) setTimeout(() => { if (isOpen() && !ui.cur) A.dealer.codexOpen({ stats, tease }); }, 900);   // el crupier: tu ritmo, o te ensena una bloqueada
   }
@@ -1136,9 +1147,16 @@ window.AIQ = window.AIQ || {};
     }
     return false;
   }
-  function close() { const was = isOpen(), r = $("codex"); if (r) r.classList.add("hidden");
+  /* cerrar: el aparato se apaga (~0,3 s) y despues se recoge todo; mientras se apaga no se puede pulsar nada (css/codex.css, .pw-off) */
+  function close() {
+    if (!isOpen() || shutT) return;
+    if (pwStill()) return shut();
+    power(false); if (A.sfx.devOff) A.sfx.devOff();
+    shutT = setTimeout(() => { shutT = 0; const r = $("codex"); if (r) r.classList.remove("pw-off"); shut(true); }, 300);
+  }
+  function shut(quiet) { const was = isOpen(), r = $("codex"); if (r) r.classList.add("hidden");
     pump.tok++; cancelAnimationFrame(pump.raf); pump.raf = 0; pump.q = []; if (io) io.disconnect(); silQueue.length = 0; cancelAnimationFrame(silT); silT = 0;   // nada sigue trabajando con ella cerrada
-    if ($("cxLight")) $("cxLight").classList.add("hidden"); document.body.classList.remove("cx-on"); if (A.coverMap) A.coverMap("codex", false); if (was) mapRestore(); ui.cur = null; if (was) A.sfx.ui(); if (A.codexOnClose) A.codexOnClose();
+    if ($("cxLight")) $("cxLight").classList.add("hidden"); document.body.classList.remove("cx-on"); if (A.coverMap) A.coverMap("codex", false); if (was) mapRestore(); ui.cur = null; if (was && !quiet) A.sfx.ui(); if (A.codexOnClose) A.codexOnClose();
     const S2 = A.core && A.core.S;
     if (dealerWas && A.dealer && A.dealer.homeTease && document.querySelector(".hh") && S2 && S2.phase === "title" && !S2.settingsOpen) A.dealer.homeTease(true);
     dealerWas = false;

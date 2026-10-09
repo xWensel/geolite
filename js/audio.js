@@ -439,6 +439,21 @@ window.AIQ = window.AIQ || {};
     }),
     /* carta que se desliza (UI) y ficha que cae */
     card: go(t => { noise(t, 0.05, { lp: 2600, vol: 0.08, type: "bandpass", q: 0.8 }); noise(t + 0.04, 0.03, { hp: 3000, vol: 0.04 }); }),
+    /* v0.3.50: la Enciclopedia es un aparato. Al encenderlo: el clic del interruptor, el zumbido que sube de la pantalla al calentarse y un pitido
+       corto de "listo"; al apagarlo, el clic y el zumbido que cae. Flojito y nunca igual (tono y volumen al azar dentro de un margen) */
+    devOn: go(t => {
+      const r = Math.random; noise(t, 0.012, { hp: 3200, vol: 0.05 + 0.02 * r() }); thump(t, { vol: 0.12, f0: 110, f1: 60, dur: 0.1 });
+      const os = ctx.createOscillator(), g = ctx.createGain(), f = 1500 + 400 * r(); os.type = "sine"; os.frequency.setValueAtTime(180, t + 0.03); os.frequency.exponentialRampToValueAtTime(f, t + 0.3);
+      os.connect(g).connect(sfxBus); env(g, t + 0.03, 0.02, 0.018, 0.3); os.start(t + 0.03); os.stop(t + 0.4);
+      noise(t + 0.05, 0.28, { hp: 1600, vol: 0.012, sweepTo: 6500 });
+      chirp(88 + Math.round(2 * r()), t + 0.32, 0.012, 0.05); pluck(93, t + 0.33, { vol: 0.02, dur: 0.12, bright: 3, rev: 0.15 });
+    }),
+    devOff: go(t => {
+      const r = Math.random; noise(t, 0.01, { hp: 3000, vol: 0.045 + 0.02 * r() });
+      const os = ctx.createOscillator(), g = ctx.createGain(); os.type = "sine"; os.frequency.setValueAtTime(1300 + 300 * r(), t); os.frequency.exponentialRampToValueAtTime(90, t + 0.24);
+      os.connect(g).connect(sfxBus); env(g, t, 0.01, 0.02, 0.24); os.start(t); os.stop(t + 0.32);
+      thump(t + 0.2, { vol: 0.1, f0: 90, f1: 45, dur: 0.12 });
+    }),
     chip: go((t, k = 0) => { bell(84 + Math.round(k * 7), t, { vol: 0.05, dur: 0.25, rev: 0.2 }); noise(t, 0.01, { hp: 5000, vol: 0.04 }); }),
     /* zoom sensorial: silbido de aire continuo cuyo tono y volumen siguen la velocidad del zoom */
     zoomVel: (() => {

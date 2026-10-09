@@ -100,7 +100,7 @@ i.uic { display: contents; } .uic .ic, .menu-gear .ic { width: 28px; height: 28p
 html[data-skin="casino"] .mc-d, html[data-skin="casino"] .camp-d, html[data-skin="casino"] .mode-d, html[data-skin="casino"] .deck i, html[data-skin="casino"] .ach i, html[data-skin="casino"] .daily i, html[data-skin="casino"] .tk-from, html[data-skin="casino"] .set-note { font-size: 17px; line-height: 1.25; }
 html[data-skin="casino"] .lb li, html[data-skin="casino"] .nick input, html[data-skin="casino"] .board-sel { font-size: 18px; }
 html[data-skin="casino"] #factText, html[data-skin="casino"] #lvlText { font-size: 19px; }
-html[data-skin="casino"] .cx-sec p { font-size: 20px; line-height: 1.5; } html[data-skin="casino"] .cx-fact { font-size: 22px; } html[data-skin="casino"] .camp-t { font-size: 25px; }
+html[data-skin="casino"] .camp-t { font-size: 25px; }
 html[data-skin="casino"] .ach b { font-size: 19px; } html[data-skin="casino"] .tk-perks > div { font-size: 15.5px; }
 
 /* ---------- ilustraciones (js/art.js) ---------- */
@@ -114,7 +114,7 @@ html[data-skin="casino"] .ach b { font-size: 19px; } html[data-skin="casino"] .t
 .btn-ink .ar .ic, .btn-line .ar .ic { width: 22px; height: 22px; margin: 0; } kbd .ic.sm { width: 14px; height: 14px; margin: 0; vertical-align: -2px; filter: none; }
 .ic.badge { width: 100%; height: 100%; } .ach:not(.got) .ic { filter: grayscale(1) brightness(.6); }
 .cx-art .ic.q { position: absolute; right: 8%; bottom: 8%; width: 30%; height: auto; opacity: .95; filter: none; } .cx-card.locked .cx-ic { opacity: .35; }
-.cx-x .ic.sm, .cx-hd .ic.sm { margin-right: 6px; } .cx-lx .ic { width: 34px; height: 34px; } .tag .ic.sm { width: 16px; height: 16px; margin-right: 5px; }
+.cx-lx .ic { width: 34px; height: 34px; } .tag .ic.sm { width: 16px; height: 16px; margin-right: 5px; }
 @media (max-width: 760px) { .intro-in.adv { flex-direction: column; } .intro-art { width: min(calc(80 * var(--vw)), 330px); } }
 
 /* ---------- ilustraciones generadas (encima de la version vectorial, si existen) ---------- */
@@ -168,13 +168,6 @@ html[data-skin="casino"] .ach b { font-size: 19px; } html[data-skin="casino"] .t
 /* tienda = mesa de fieltro con palos geograficos de fondo */
 .tool-bar { bottom: 98px; } .tool.pc-hand { padding-top: 40px; width: 108px; } .tool.pc-hand .ix.tl { left: 9px; top: 8px; grid-auto-flow: column; align-items: center; gap: 4px; } .tool.pc-hand .ix .ic { width: 17px; height: 17px; }
 .tool.pc-hand .ix b { font-size: 20px; line-height: 1; }
-/* Enciclopedia: indices de carta de poker */
-.cx-card .ix, .cx-bigcard .ix { z-index: 3; } .cx-card .ix.tl { left: 9px; top: 8px; } .cx-card .ix.br { right: 9px; bottom: 30px; }
-.cx-card .ix b, .cx-bigcard .ix b { font-size: 19px; text-shadow: 0 0 3px #f6efdc, 0 0 3px #f6efdc; color: #16241c; } .cx-card .ix.red b, .cx-bigcard .ix.red b { color: #c2372e; } .cx-card .ix .ic, .cx-bigcard .ix .ic { width: 15px; height: 15px; }
-.cx-card .cx-no, .cx-bigcard .cx-no { display: none; }
-.cx-card.locked .ix, .cx-bigcard.locked .ix { opacity: .45; filter: grayscale(1); }
-.cx-bigcard .ix.tl { left: 20px; top: 20px; } .cx-bigcard .ix.br { right: 20px; bottom: 56px; } .cx-bigcard .ix b { font-size: 24px; } .cx-bigcard .ix .ic { width: 20px; height: 20px; }
-.cx-card.open .cx-art { background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .07) 0 1.5px, transparent 1.5px 16px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .07) 0 1.5px, transparent 1.5px 16px), radial-gradient(ellipse at 50% 28%, #35a56a, #17553a 78%); }
 
 /* Campamento: suministros de la proxima ronda */
 /* v0.19: EL LOGRO FALSO del crupier (js/profile.js, fakeToast): igual que uno de verdad hasta que le cae el sello "De broma"; luego se tuerce y se cae */

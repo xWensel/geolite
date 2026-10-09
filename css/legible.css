@@ -16,11 +16,10 @@
 /* ---------- Jersey / Pixelify: 18 px ---------- */
 :root body .rs-t > small, :root body #settings .set-note, :root body #cloudD, :root body .dlf-r > span,
 :root body .intro-new, :root body .ch-chip i:not(.ch-lv), :root body .rd-k,
-:root body .cx-chip2 > b, :root body .cx-medal > span, :root body .rd-h > i, :root body .rd-n.inf > em, :root body .pt-foot, :root body .pt-it > i { font-size: 18px; }
+:root body .rd-h > i, :root body .rd-n.inf > em, :root body .pt-foot, :root body .pt-it > i { font-size: 18px; }
 
 /* ---------- reglas con mas peso que las de arriba: la version de la portada, la Enciclopedia, la ruta del plan y el Campamento ---------- */
 :root body #dlg > .hh-ver { font-size: 16px; }
-:root body .cx-shell.stage .cx-chip2 b, :root body .cx-chip2 b { font-size: 18px; }
 :root body .adv-debuff i:not(.ch-lv), :root body .adv-debuff .ch-new, :root body .ch-new { font-size: 18px; }
 
 /* Ajustes: las descripciones de las pestanas a 16 px piden una columna algo mas ancha y botones mas juntos (las 6 caben sin desplazarse) */

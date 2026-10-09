@@ -2,11 +2,6 @@
    de las etiquetas (Silkscreen) tiene mayusculas del 63 % de su tamano, asi que en la Deck sube a 16 px exactos (el doble de su rejilla: nitida).
    Solo con html[data-dev="deck"] (index.html lo pone antes de pintar nada); en PC todo sigue igual. Reglas sacadas midiendo el juego real. */
 html[data-dev="deck"] .btn-ink { font-size: 16px; }   /* «Siguiente» revelado */
-html[data-dev="deck"] .cx-chip2 em i { font-size: 16px; }   /* «/199» enciclopedia */
-html[data-dev="deck"] .cx-leg { font-size: 16px; }   /* «Sin descubrir» enciclopedia */
-html[data-dev="deck"] .cx-medal > em { font-size: 16px; }   /* «< 300 km» enciclopedia */
-html[data-dev="deck"] .cx-nv i { font-size: 16px; }   /* «0» enciclopedia */
-html[data-dev="deck"] .cx-sum-l > em { font-size: 16px; }   /* «0 / 4967 medallas y tarj» enciclopedia */
 html[data-dev="deck"] .dlf-r span { font-size: 16px; }   /* «Visitas» ajustes-data */
 html[data-dev="deck"] .lg-label, html[data-dev="deck"] .lg-row { font-size: 16px; }   /* «Puntos del nivel» partida,revelado */
 html[data-dev="deck"] .np-t em { font-size: 16px; }   /* «1/21» ajustes-sound */
@@ -47,9 +42,8 @@ html[data-dev="deck"] .seg[data-seg="units"] button.on, html[data-dev="deck"] .s
 html[data-dev="deck"] .seg button { letter-spacing: 0; line-height: 1.05; }
 
 /* v0.2.33: textos en Jersey / Pixelify (mayusculas del 55 % de su tamano): a 16 px se quedaban en 8,8 px; en la Deck van a 18 */
-html[data-dev="deck"] .rd.plan .rd-n.inf em, html[data-dev="deck"] .tk-pin, html[data-dev="deck"] .cx-chip2 em i,
+html[data-dev="deck"] .rd.plan .rd-n.inf em, html[data-dev="deck"] .tk-pin,
 html[data-dev="deck"] #settings .set-keys em, html[data-dev="deck"] .osk-legend, html[data-dev="deck"] .pt-lang { font-size: 18px; }
-html[data-dev="deck"] .cx-chip2 b { font-size: 20px; }
 
 /* v0.2.34: retos de cuarta pared sin imitar al sistema (en una consola, un aviso falso se confundiria con uno real) */
 /* No responde: paneles de la mesa en vez de ventanas de Windows */
