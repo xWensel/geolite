@@ -266,9 +266,9 @@ window.AIQ = window.AIQ || {};
   function pager(count) {
     const el = $("drPager"); if (!el) return;
     const pages = Math.max(1, Math.ceil(count / BROWS)), a = bpage * BROWS + 1, rk = (x, y) => P6("Puestos {a}–{b}|Ranks {a}–{b}|Places {a}–{b}|Posições {a}–{b}|Plätze {a}–{b}|Posizioni {a}–{b}||第 {a}–{b} 名|{a}–{b}위|{a}～{b}位|Места {a}–{b}|Miejsca {a}–{b}").replace("{a}", A.fmt(x)).replace("{b}", A.fmt(y));
-    el.innerHTML = `<button type="button" class="pd-pg prev" id="drPrev" ${bpage > 0 ? "" : "disabled"} aria-label="${esc(rk(Math.max(1, a - BROWS), Math.max(BROWS, a - 1)))}">${A.icon("u_next")}</button>
+    el.innerHTML = `<button type="button" class="gx-btn sm pd-pg prev" id="drPrev" ${bpage > 0 ? "" : "disabled"} aria-label="${esc(rk(Math.max(1, a - BROWS), Math.max(BROWS, a - 1)))}">${A.icon("u_next")}</button>
       <span class="pd-pgl"><b>${rk(a, a + BROWS - 1)}</b>${count > BROWS ? `<em>${P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}").replace("{n}", A.fmt(count))}</em>` : ""}</span>
-      <button type="button" class="pd-pg next" id="drNext" ${bpage < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + BROWS, a + 2 * BROWS - 1))}">${A.icon("u_next")}</button>`;
+      <button type="button" class="gx-btn sm pd-pg next" id="drNext" ${bpage < pages - 1 ? "" : "disabled"} aria-label="${esc(rk(a + BROWS, a + 2 * BROWS - 1))}">${A.icon("u_next")}</button>`;
     $("drPrev").onclick = () => goBoard(-1); $("drNext").onclick = () => goBoard(1);
     el.classList.toggle("solo", pages < 2);                            // una sola pagina: las flechas no salen (el hueco se queda)
   }

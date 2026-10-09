@@ -34,6 +34,20 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.42",
+      name: L("Tabla del Reto diario", "Daily challenge board", "Tableau du Défi quotidien", "Quadro do Desafio diário", "Tafel der Tagesherausforderung", "Tabella della Sfida giornaliera", "", "每日挑战排行榜", "일일 도전 순위표", "デイリーチャレンジの順位表", "Таблица испытания дня", "Tabela wyzwania dnia"),
+      date: "2026-10-09",
+      summary: L("Arreglo pequeño: la línea de puestos y las flechas de la tabla del Reto diario vuelven a verse.", "Small fix: the ranks line and the arrows of the Daily challenge board are visible again.", "Petit correctif : la ligne des places et les flèches du tableau du Défi quotidien sont de nouveau visibles.", "Pequena correção: a linha de posições e as setas do quadro do Desafio diário voltam a aparecer.", "Kleine Korrektur: Die Platzierungszeile und die Pfeile der Tafel der Tagesherausforderung sind wieder sichtbar.", "Piccola correzione: la riga delle posizioni e le frecce della tabella della Sfida giornaliera tornano visibili.", "", "小修复：每日挑战排行榜的名次行和箭头重新可见。", "작은 수정: 일일 도전 순위표의 순위 줄과 화살표가 다시 보입니다.", "小さな修正：デイリーチャレンジの順位表の順位行と矢印がまた見えるように。", "Небольшое исправление: строка мест и стрелки таблицы испытания дня снова видны.", "Drobna poprawka: wiersz miejsc i strzałki tabeli wyzwania dnia znów są widoczne."),
+      chapters: [
+        { id: "gala", kicker: L("Interfaz", "Interface", "Interface", "Interface", "Oberfläche", "Interfaccia", "", "界面", "인터페이스", "インターフェース", "Интерфейс", "Interfejs"),
+          title: L("Naipe de gala", "Gala Card", "Carte de gala", "Carta de gala", "Galakarte", "Carta di gala", "", "盛装纸牌", "갈라 카드", "ガラ・カード", "Карта для гала", "Karta galowa"),
+          entries: [
+            E(L("Tabla del Reto diario", "Daily challenge board", "Tableau du Défi quotidien", "Quadro do Desafio diário", "Tafel der Tagesherausforderung", "Tabella della Sfida giornaliera", "", "每日挑战排行榜", "일일 도전 순위표", "デイリーチャレンジの順位表", "Таблица испытания дня", "Tabela wyzwania dnia"), "fix", "0.3.42", [
+              L("Desde la v0.3.39, «Puestos 1–8 de 11» salía oscuro sobre el fieltro y las flechas habían perdido su botón. Ya se leen como en la Clasificación.", "Since v0.3.39, \"Ranks 1–8 of 11\" showed dark on the felt and the arrows had lost their button. They now read like in the Leaderboard.", "Depuis la v0.3.39, « Places 1–8 sur 11 » apparaissait sombre sur le tapis et les flèches avaient perdu leur bouton. Elles se lisent désormais comme dans le Classement.", "Desde a v0.3.39, \"Posições 1–8 de 11\" aparecia escuro sobre o feltro e as setas tinham perdido o botão. Agora aparecem como no Placar.", "Seit v0.3.39 war „Plätze 1–8 von 11“ dunkel auf dem Filz und die Pfeile hatten ihre Schaltfläche verloren. Jetzt sehen sie aus wie in der Rangliste.", "Dalla v0.3.39, «Posizioni 1–8 su 11» appariva scuro sul tappeto e le frecce avevano perso il pulsante. Ora si leggono come nella Classifica.", "", "自 v0.3.39 起，“第 1–8 名 共 11 人”在绒布上显示得很暗，箭头也没了按钮。现在和排行榜一样清楚。", "v0.3.39부터 '1–8위 / 11명'이 펠트 위에서 어둡게 보였고 화살표의 버튼이 사라졌습니다. 이제 리더보드처럼 잘 보입니다.", "v0.3.39から「1～8位 / 11人」がフェルトの上で暗く表示され、矢印のボタンも消えていました。ランキングと同じように見えるようになりました。", "С версии 0.3.39 «Места 1–8 из 11» были тёмными на сукне, а стрелки потеряли кнопку. Теперь всё видно, как в рейтинге.", "Od wersji 0.3.39 „Miejsca 1–8 z 11” wyświetlały się ciemno na suknie, a strzałki straciły przycisk. Teraz widać je jak w rankingu."),
+            ]) ] },
+      ],
+    },
+    {
       id: "0.3.41",
       name: L("Libro de logros", "Achievement book", "Livre des succès", "Livro de conquistas", "Erfolgsbuch", "Libro degli obiettivi", "", "成就之书", "업적 책", "実績ブック", "Книга достижений", "Księga osiągnięć"),
       date: "2026-10-09",

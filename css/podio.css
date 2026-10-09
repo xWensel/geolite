@@ -79,6 +79,7 @@ html body .pd-src { margin: 0; display: flex; align-items: center; gap: 8px; fle
 .pd-pg:disabled { cursor: default; filter: saturate(.2) brightness(.7); transform: none; }
 .pd-pgl { display: flex; align-items: baseline; justify-content: center; gap: 10px; min-width: 0; font-family: var(--sans); font-size: 22px; white-space: nowrap; color: var(--gx-ink); }
 .pd-pgl b { font-weight: 400; } .pd-pgl em { font-style: normal; color: var(--gx-ink-2); }
+.dr-pager .pd-pgl { color: var(--gx-txt); } .dr-pager .pd-pgl em { color: var(--gx-txt-2); }   /* el Reto diario la usa sobre fieltro oscuro (v0.3.39 la dejo en tinta de papel: no se veia) */
 
 /* pie: tu puesto si no sales en la pagina, lo que te falta para el podio o como entrar */
 .pd-foot:empty { display: none; }
