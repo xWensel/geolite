@@ -144,39 +144,99 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ Aventura */
   let advSel = { deck: "explorer", asc: 0 };
-  const DECK_CARD = { explorer: ["A", "s_compass"], historian: ["K", "s_peak"], navigator: ["Q", "s_palm"], blind: ["J", "s_pin"] };
   const STAKE_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_boss"];
-  /* tanda 17: cada Ascension tiene nombre y una linea (A.adv.ascInfo, js/adventure.js); ascTexts: texto plano de los globos, ascHtml: el parrafo de la seleccion */
+  /* tanda 17: cada Ascension tiene nombre y una linea (A.adv.ascInfo, js/adventure.js); ascTexts: texto plano de los globos */
   const ascTexts = () => [T("Estándar", "Standard")].concat([1, 2, 3, 4, 5].map(i => { const x = A.adv.ascInfo(i); return `«${x.n}»: ${x.d}${x.k ? " " + x.k : ""}`; }));
-  const ascHtml = i => { if (!i) return T("Estándar", "Standard"); const x = A.adv.ascInfo(i); return `<b>«${x.n}»</b> ${x.d}${x.k ? `<span class="as-k">${x.k}</span>` : ""}`; };
-  function adventure() {
-    const c = C(), P = A.profile.get(), adv = P.adv, D = A.ADV.DECKS, saved = A.adv.hasSave(), TN = A.ADV.TOPIC_NAMES, R = A.RELICS;
-    const sm = saved && A.adv.summary();
+  /* v0.3.47: Naipe de gala, "la mesa de salida" (mesa de diseño, paso 3). 12 columnas: la mesa de fieltro (1-8) con las cuatro barajas como naipes
+     (retrato, que trae, kit, doblones y provisiones y, si esta cerrada, como se abre) y la ruta; el boleto de papel (9-12) con las seis fichas de
+     Ascension y lo que hace la elegida, tus cifras y los botones (con partida guardada, "Continuar" manda y "Nueva expedicion" queda en segundo plano).
+     Elegir baraja o Ascension solo cambia lo suyo: la pantalla no se rehace */
+  const AV_STD = () => A.pick6("Sin reglas extra: la expedición de siempre.|No extra rules: the usual expedition.|Sans règles en plus : l'expédition habituelle.|Sem regras extras: a expedição de sempre.|Keine Zusatzregeln: die übliche Expedition.|Nessuna regola extra: la solita spedizione.||没有额外规则：一如往常的远征。|추가 규칙 없음: 평소와 같은 원정.|追加ルールなし：いつもの遠征。|Без дополнительных правил: обычная экспедиция.|Bez dodatkowych zasad: zwykła wyprawa.");
+  const avHtml = (sm, saved) => {
+    const P = A.profile.get(), adv = P.adv, D = A.ADV.DECKS;
     const decks = Object.keys(D).map(id => {
-      const d = D[id], locked = A.adv.deckLocked(id), ach = locked && A.ACH.find(a => a.id === d.unlock), [rk, su] = DECK_CARD[id];
-      const lockTxt = T("Logro: ", "Achievement: ") + (ach ? A.tx(ach.name) + " · " : "") + A.pick6("Supera la Ascensión {n}.|Beat Ascension {n}.|Réussis l'Ascension {n}.|Vença a Ascensão {n}.|Schließe Aufstieg {n} ab.|Supera l'Ascensione {n}.||通过进阶 {n}。|어센션 {n} 클리어.|アセンション{n}をクリア。|Пройди Восхождение {n}.|Pokonaj Wniebowstąpienie {n}.").replace("{n}", (d.asc || 0) + (d.asc ? " «" + A.adv.ascInfo(d.asc).n + "»" : ""));   // el logro que la abre y la Ascension que pide (las barajas se ganan superando Ascensiones)
+      const d = D[id], locked = A.adv.deckLocked(id), ach = locked && A.ACH.find(a => a.id === d.unlock);
+      /* como se abre, dicho claro (antes: "Supera la Ascension 0"); el logro que la abre, en la ayuda */
+      const how = !locked ? "" : d.asc ? A.pick6("Gana una expedición en Ascensión {n} o más.|Win an expedition at Ascension {n} or higher.|Gagne une expédition en Ascension {n} ou plus.|Vença uma expedição na Ascensão {n} ou mais.|Gewinne eine Expedition auf Aufstieg {n} oder höher.|Vinci una spedizione all'Ascensione {n} o superiore.||在进阶 {n} 或更高赢下一次远征。|어센션 {n} 이상에서 원정 승리.|アセンション{n}以上で遠征に勝つ。|Победи на Восхождении {n} или выше.|Wygraj wyprawę na Wniebowstąpieniu {n} lub wyżej.").replace("{n}", d.asc)
+        : A.pick6("Gana una expedición.|Win an expedition.|Gagne une expédition.|Vença uma expedição.|Gewinne eine Expedition.|Vinci una spedizione.||赢下一次远征。|원정 한 번 승리.|遠征に1回勝つ。|Выиграй экспедицию.|Wygraj wyprawę.");
       const kit = [...d.tools.map(t => `<span class="kt" ${A.kitTip("tool", t)}>${A.icon(A.ADV.TOOLS[t].ico, "kit")}</span>`), ...d.perks.map(p => `<span class="kt" ${A.kitTip("perk", p)}>${A.icon(p, "kit")}</span>`)].join("");
-      const stat = `<em><span class="dc-stat">${A.icon("coin", "dc-ic")}${d.coins}</span><span class="dc-stat">${A.icon("heart", "dc-ic")}${d.lives}</span></em>`;
-      return `<button class="dcard${advSel.deck === id ? " sel" : ""}${locked ? " lock" : ""}" data-deck="${id}" ${locked ? "disabled" : ""} data-suit="${su === "s_pin" || su === "s_compass" ? "red" : "blk"}"><span class="dc-art felt">${A.icon(d.ico)}${locked ? `<i class="dc-lock">${A.icon("lock")}</i>` : ""}</span><b class="dc-n">${A.tx(d.n)}</b><span class="dc-d">${locked ? lockTxt : A.tx(d.d)}</span><span class="dc-kit">${locked ? "" : kit}${stat}</span></button>`;
+      return `<button type="button" class="av-dk${advSel.deck === id ? " sel" : ""}${locked ? " lk" : ""}" data-deck="${id}" ${locked ? 'aria-disabled="true"' : ""} aria-pressed="${advSel.deck === id}">
+        <span class="av-art">${A.icon(d.ico)}${locked ? `<i class="av-lock">${A.icon("lock")}</i>` : ""}</span><b>${A.tx(d.n)}</b><i class="av-dd">${A.tx(d.d)}</i>
+        <span class="av-kit">${kit}<span class="av-sts"><span class="av-st" ${A.ttAttr(T("Doblones", "Doubloons"), "")}>${A.icon("coin")}${d.coins}</span><span class="av-st" ${A.ttAttr(T("Provisiones", "Provisions"), "")}>${A.icon("heart")}${d.lives}</span></span></span>
+        ${locked ? `<span class="av-how" ${ach ? A.ttAttr(T("Logro", "Achievement"), A.tx(ach.name)) : ""}><span class="gx-eyb">${A.pick6("Se abre|Unlocks|Se débloque|Desbloqueia|Freischaltung|Si sblocca||解锁条件|해금 조건|解放条件|Открывается|Odblokowanie")}</span>${how}</span>` : ""}</button>`;
     }).join("");
     const ASC_TXT = ascTexts();
-    let stakes = ""; for (let i = 0; i <= 5; i++) stakes += `<button class="stake${advSel.asc === i ? " sel" : ""}" data-asc="${i}" ${i > adv.asc ? "disabled" : ""} ${A.ttAttr(T("Ascensión", "Ascension") + " " + i, i > adv.asc ? A.tip6("Bloqueada: supera la ascensión anterior para desbloquearla.|Locked: beat the previous ascension to unlock it.|Verrouillée : réussis l'Ascension précédente pour la débloquer.|Bloqueada: vença a ascensão anterior para desbloqueá-la.|Gesperrt: schließe die vorige Stufe ab, um sie freizuschalten.|Bloccata: supera l'ascensione precedente per sbloccarla.||已锁定：通过上一级进阶即可解锁。|잠김: 이전 어센션을 클리어하면 열립니다.|ロック中：前のアセンションをクリアすると解除。|Заблокировано: пройди предыдущее восхождение, чтобы открыть.|Zablokowane: pokonaj poprzednie wniebowstąpienie, żeby odblokować.") : ASC_TXT[i])}>${A.icon(STAKE_CHIP[i])}<b>${i}</b></button>`;
-    const ascTxt = ascHtml(advSel.asc);
-    c.dialog(scr(T("Aventura", "Adventure"), `<div class="adv-setup">
-      <section class="as-main">
-        <h4 class="hub-sub">${T("Baraja inicial", "Starting deck")}</h4><div class="deckrow">${decks}</div>
-        <h4 class="hub-sub">${T("Ruta de la expedición", "Expedition route")}</h4>${A.adv.road({ size: "plan" })}
-      </section>
-      <aside class="as-side">
-        <h4 class="hub-sub">${T("Ascensión", "Ascension")}</h4><div class="stakes">${stakes}<span class="as-mult${advSel.asc ? "" : " off"}" ${A.ttAttr(T("Puntuación final", "Final score"), A.tip6("Al acabar la expedición, el total se multiplica según la Ascensión elegida. No cambia los objetivos de las rondas.|When the expedition ends, the total is multiplied by the chosen Ascension. It doesn't change the round targets.|À la fin de l'expédition, le total est multiplié selon l'Ascension choisie. Les objectifs des manches ne changent pas.|Ao fim da expedição, o total é multiplicado conforme a Ascensão escolhida. Os objetivos das rodadas não mudam.|Am Ende der Expedition wird die Summe mit dem gewählten Aufstieg multipliziert. Die Rundenziele ändern sich nicht.|Alla fine della spedizione il totale viene moltiplicato in base all'Ascensione scelta. Gli obiettivi dei round non cambiano.||远征结束时，总分会乘以所选进阶等级的倍率。不会改变各回合目标。|원정이 끝나면 선택한 어센션에 따라 총점에 배수가 곱해집니다. 라운드 목표는 그대로입니다.|遠征の終了時、合計スコアに選んだアセンションの倍率がかかります。ラウンドの目標は変わりません。|По окончании экспедиции итог умножается в зависимости от выбранного Восхождения. Цели раундов не меняются.|Po zakończeniu wyprawy suma jest mnożona przez wybrany poziom Wniebowstąpienia. Cele rund się nie zmieniają."))}>${A.pick6("Puntos|Score|Score|Pontos|Punkte|Punti||得分|점수|スコア|Очки|Wynik")} ×${A.adv.mulTxt(A.adv.ascMult(advSel.asc))}</span></div><p class="as-asc">${ascTxt}</p>
-        <div class="adv-stats"><span>${T("Récord", "Best")} <b>${A.fmt(adv.bestScore)}</b></span><span>${T("Mejor ronda", "Best round")} <b>${adv.bestRound}</b></span><span>${T("Victorias", "Wins")} <b>${adv.wins}</b></span><span>${T("Expediciones", "Runs")} <b>${adv.runs}</b></span></div>
-        <p class="as-relics">${A.icon("cards", "sm")}${A.RELIC_IDS.length} ${T("reliquias por descubrir", "relics to discover")}</p>
-        <div class="as-go">${sm ? startBtn("contBtn", CONT_RUN(), runLine(sm), true) : ""}${startBtn("goBtn", T("Nueva expedición", "New expedition"), `<span>${A.tx(D[advSel.deck].n)}</span><span>${A.icon(STAKE_CHIP[advSel.asc], "sb-coin")}${T("Ascensión", "Ascension")} ${advSel.asc}</span>`, !saved, saved ? "alt" : "")}</div>
-      </aside></div>`, "s-adv"), "tablewrap");
+    const chips = [0, 1, 2, 3, 4, 5].map(i => `<button type="button" class="av-asc${advSel.asc === i ? " on" : ""}" data-asc="${i}" ${i > adv.asc ? 'aria-disabled="true"' : ""} aria-pressed="${advSel.asc === i}" ${A.ttAttr(T("Ascensión", "Ascension") + " " + i, i > adv.asc ? A.tip6("Bloqueada: supera la ascensión anterior para desbloquearla.|Locked: beat the previous ascension to unlock it.|Verrouillée : réussis l'Ascension précédente pour la débloquer.|Bloqueada: vença a ascensão anterior para desbloqueá-la.|Gesperrt: schließe die vorige Stufe ab, um sie freizuschalten.|Bloccata: supera l'ascensione precedente per sbloccarla.||已锁定：通过上一级进阶即可解锁。|잠김: 이전 어센션을 클리어하면 열립니다.|ロック中：前のアセンションをクリアすると解除。|Заблокировано: пройди предыдущее восхождение, чтобы открыть.|Zablokowane: pokonaj poprzednie wniebowstąpienie, żeby odblokować.") : ASC_TXT[i])}>${A.icon(STAKE_CHIP[i])}<em>${i}</em></button>`).join("");
+    const stat = (l, v) => `<div class="gx-lead-row"><span>${l}</span><s></s><b>${v}</b></div>`;
+    const newSub = `${A.tx(D[advSel.deck].n)} · A${advSel.asc}`;
+    const NEW = T("Nueva expedición", "New expedition");
+    const go = sm
+      ? `<button type="button" class="gx-btn pri wide" id="contBtn" data-primary><span>${CONT_RUN()}</span>${A.gala.keyHint("Enter", "a")}</button><span class="av-sub">${runLine(sm)}</span>
+        <button type="button" class="gx-btn gho sm wide av-new" id="goBtn"><span class="av-bl">${NEW}</span><span class="av-ns" id="avNewSub">${newSub}</span></button>`
+      : `<button type="button" class="gx-btn pri wide" id="goBtn" data-primary><span class="av-bl">${NEW}</span>${A.gala.keyHint("Enter", "a")}</button><span class="av-sub" id="avNewSub">${newSub}</span>`;
+    return `<div class="gx-veil"></div><section class="av-screen gx-stage s-adv" aria-labelledby="avH" data-nosq>
+      <div class="gx-grid av-grid">
+        <header class="av-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+          <h2 class="gx-t-l av-h" id="avH"><span class="av-hic">${A.icon("boss_hat")}</span>${T("Aventura", "Adventure")}</h2>
+          <span class="av-rel">${A.icon("cards")}<span>${A.RELIC_IDS.length} ${T("reliquias por descubrir", "relics to discover")}</span></span>${tools()}</header>
+        <div class="gx-sh av-left"><section class="gx-pnl av-mesa">
+          <h3 class="gx-eyb av-mh">${T("Baraja inicial", "Starting deck")}</h3>
+          <div class="av-decks" id="avDecks">${decks}</div>
+          <div class="av-ruta dia-ruta">${A.adv.road({ size: "plan" })}</div>
+        </section></div>
+        <div class="gx-sh av-right"><div class="gx-paper av-boleto">
+          <span class="gx-eyb">${T("Ascensión", "Ascension")}</span>
+          <div class="av-chips" id="avChips">${chips}</div>
+          <div class="av-ad" id="avAd">${avAsc()}</div>
+          <div class="av-stats">${stat(T("Récord", "Best"), adv.bestScore ? A.fmt(adv.bestScore) : "—")}${stat(T("Mejor ronda", "Best round"), adv.bestRound ? adv.bestRound + " / 12" : "—")}${stat(T("Victorias", "Wins"), A.fmt(adv.wins))}${stat(T("Expediciones", "Runs"), A.fmt(adv.runs))}</div>
+          <div class="av-go">${go}</div>
+        </div></div>
+      </div></section>`;
+  };
+  /* la Ascension elegida: su nombre, lo que hace, lo que cobra la casa y cuanto multiplica la puntuacion final */
+  const avAsc = () => {
+    const i = advSel.asc, x = i ? A.adv.ascInfo(i) : null;
+    return `<span class="av-ax"><span>${T("Ascensión", "Ascension")} ${i}</span><span ${A.ttAttr(T("Puntuación final", "Final score"), A.tip6("Al acabar la expedición, el total se multiplica según la Ascensión elegida. No cambia los objetivos de las rondas.|When the expedition ends, the total is multiplied by the chosen Ascension. It doesn't change the round targets.|À la fin de l'expédition, le total est multiplié selon l'Ascension choisie. Les objectifs des manches ne changent pas.|Ao fim da expedição, o total é multiplicado conforme a Ascensão escolhida. Os objetivos das rodadas não mudam.|Am Ende der Expedition wird die Summe mit dem gewählten Aufstieg multipliziert. Die Rundenziele ändern sich nicht.|Alla fine della spedizione il totale viene moltiplicato in base all'Ascensione scelta. Gli obiettivi dei round non cambiano.||远征结束时，总分会乘以所选进阶等级的倍率。不会改变各回合目标。|원정이 끝나면 선택한 어센션에 따라 총점에 배수가 곱해집니다. 라운드 목표는 그대로입니다.|遠征の終了時、合計スコアに選んだアセンションの倍率がかかります。ラウンドの目標は変わりません。|По окончании экспедиции итог умножается в зависимости от выбранного Восхождения. Цели раундов не меняются.|Po zakończeniu wyprawy suma jest mnożona przez wybrany poziom Wniebowstąpienia. Cele rund się nie zmieniają."))}>${A.pick6("Puntos|Score|Score|Pontos|Punkte|Punti||得分|점수|スコア|Очки|Wynik")} ×${A.adv.mulTxt(A.adv.ascMult(i))}</span></span>
+      <b>${x ? "«" + x.n + "»" : T("Estándar", "Standard")}</b><i>${x ? x.d + (x.k ? " " + x.k : "") : AV_STD()}</i>`;
+  };
+  /* que todo quepa sin cortar letras (en pocas lecturas de la maqueta, de una vez):
+     - el nombre de la baraja en una linea si cabe a 18 px o mas ("Исследователь"); si no, a su tamano en dos lineas ("Слепой авантюрист")
+     - la descripcion, entera; si no cabe (algun idioma), los retratos bajan a 64 px (escala exacta) y, si aun asi no cabe, se corta en una linea
+       entera con "…" y la entera va en la ayuda del naipe */
+  const avFit = () => {
+    const nm = [...document.querySelectorAll(".av-dk > b")];
+    nm.forEach(b => (b.style.whiteSpace = "nowrap")); const ws = nm.map(b => [b.scrollWidth, b.clientWidth]);
+    nm.forEach((b, i) => { b.style.whiteSpace = ""; const [w, cw] = ws[i], f = Math.floor(24 * cw / w); if (w > cw + 1 && f >= 18) b.style.fontSize = f + "px"; });
+    nm.forEach(b => { for (let f = parseFloat(b.style.fontSize) || 24; f > 18 && b.scrollWidth > b.clientWidth + 1; ) b.style.fontSize = --f + "px"; });   // una palabra sola que no cabe
+    const dd = [...document.querySelectorAll(".av-dd")], over = () => dd.filter(e => e.scrollHeight > e.clientHeight + 1);
+    if (!over().length) return;
+    $("avDecks").classList.add("tight");
+    const cut = over().map(e => [e, parseFloat(getComputedStyle(e).lineHeight) || 21, e.clientHeight]);
+    cut.forEach(([e, lh, h]) => { const n = Math.max(1, Math.floor((h + 1) / lh)); e.classList.add("trim"); e.style.webkitLineClamp = n; e.style.maxHeight = n * lh + "px"; e.setAttribute("data-tt", e.textContent); });
+  };
+  function adventure() {
+    const c = C(), D = A.ADV.DECKS, saved = A.adv.hasSave(), sm = saved && A.adv.summary();
+    if (A.adv.deckLocked(advSel.deck)) advSel.deck = "explorer";
+    if (advSel.asc > A.profile.get().adv.asc) advSel.asc = 0;
+    c.dialog(avHtml(sm, saved), "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
-    document.querySelectorAll(".dcard").forEach(b => (b.onclick = () => { advSel.deck = b.dataset.deck; A.sfx.card(); adventure(); }));
-    document.querySelectorAll(".stake").forEach(b => (b.onclick = () => { advSel.asc = +b.dataset.asc; A.sfx.ui(); adventure(); }));
-    const confirm2 = (btn, msg, act, onArm) => { let armed = false, tm = 0; const html = btn.innerHTML; btn.addEventListener("click", e => { if (armed) { clearTimeout(tm); return act(); } e.stopImmediatePropagation(); armed = true; if (onArm) onArm(); btn.classList.add("armed"); (btn.querySelector("b") || btn).textContent = msg; A.sfx.deny(); tm = setTimeout(() => { armed = false; btn.classList.remove("armed"); btn.innerHTML = html; }, 4000); }, true); };
+    avFit();
+    if (A.coverMap) A.coverMap("adventure", true, () => !!document.querySelector("#dlg .av-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
+    const sub = () => { const el = $("avNewSub"); if (el) el.textContent = `${A.tx(D[advSel.deck].n)} · A${advSel.asc}`; };
+    $("avDecks").onclick = e => {
+      const b = e.target.closest(".av-dk"); if (!b || b.dataset.deck === advSel.deck) return;
+      if (b.classList.contains("lk")) return A.sfx.deny();   // cerrada: su ayuda dice como se abre (sin "disabled": la ayuda no saldria)
+      advSel.deck = b.dataset.deck; A.sfx.card();
+      document.querySelectorAll(".av-dk").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-pressed", on); }); sub();
+    };
+    $("avChips").onclick = e => {
+      const b = e.target.closest(".av-asc"); if (!b || +b.dataset.asc === advSel.asc) return;
+      if (b.getAttribute("aria-disabled")) return A.sfx.deny();
+      advSel.asc = +b.dataset.asc; A.sfx.ui();
+      document.querySelectorAll(".av-asc").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+      $("avAd").innerHTML = avAsc(); sub();
+    };
+    const confirm2 = (btn, msg, act, onArm) => { let armed = false, tm = 0; const lbl = btn.querySelector(".av-bl") || btn, was = lbl.textContent; btn.addEventListener("click", e => { if (armed) { clearTimeout(tm); return act(); } e.stopImmediatePropagation(); armed = true; if (onArm) onArm(); btn.classList.add("armed"); lbl.textContent = msg; A.sfx.deny(); tm = setTimeout(() => { armed = false; btn.classList.remove("armed"); lbl.textContent = was; }, 4000); }, true); };
     const funeral = () => { if (A.dealer && A.dealer.funeral) A.dealer.funeral(A.adv.summary && A.adv.summary()); };   // el crupier le hace un funeral a tu expedicion guardada
     if (saved) $("contBtn").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // descartarla = empezar otra (doble pulsacion y funeral del crupier)
     $("goBtn").onclick = () => { A.sfx.depart(); if (saved) A.adv.abandon(); enterRun(() => A.adv.begin({ deck: advSel.deck, asc: advSel.asc })); };
@@ -429,7 +489,7 @@ window.AIQ = window.AIQ || {};
 
   function screen(id) {
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
-    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); }
+    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); }
     ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
   }
@@ -437,5 +497,7 @@ window.AIQ = window.AIQ || {};
   const dailyHtml = () => { const DY = A.rank.daily, today = DY.board(); let sv = A.adv.summary(true); if (sv && sv.board !== today) sv = null; return dyHtml(sv, DY.get(today), null, today).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
   /* el Clasico tal cual (precalentamiento de la puerta), sin tocar la campana ni el nivel elegidos: sin ids, es una copia */
   const classicHtml = () => { const S = C().S, camps = A.CAMPAIGNS.filter(x => x.mode === "classic"), id = camps.some(x => x.id === S.campId) ? S.campId : camps[0].id; return clHtml("classic", id, Math.min(S.startLevel || 0, C().prog(id).unlocked - 1)).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
-  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, dailyHtml, classicHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
+  /* la Aventura tal cual (precalentamiento de la puerta), sin tocar la baraja ni la Ascension elegidas: sin ids, es una copia */
+  const adventureHtml = () => { const sv = A.adv.hasSave(); return avHtml(sv && A.adv.summary(), sv).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
+  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, dailyHtml, classicHtml, adventureHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
 })(window.AIQ);

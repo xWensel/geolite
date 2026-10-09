@@ -25,7 +25,7 @@ kbd { font-family: var(--mono); font-size: .85em; }
 /* alto contraste: ademas del filter (contrast+saturate) que aplica game.js sobre body, refuerza bordes y foco */
 .hi-contrast button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .hi-contrast .seg button.on { box-shadow: 0 0 0 2px #fff inset; }
-.hi-contrast .mcard, .hi-contrast .camp, .hi-contrast .dcard { box-shadow: 0 0 0 1.5px rgba(255,255,255,.5); }
+.hi-contrast .mcard, .hi-contrast .camp { box-shadow: 0 0 0 1.5px rgba(255,255,255,.5); }
 ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: rgba(242,233,214,.25); } ::-webkit-scrollbar-track { background: transparent; }
 
 #app { position: fixed; inset: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, rgba(60, 140, 150, .22), transparent 70%), linear-gradient(#12414f, #092632); }

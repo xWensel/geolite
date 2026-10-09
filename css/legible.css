@@ -5,8 +5,8 @@
    :root body delante: gana a las reglas "html body" de uikit.css sin !important. */
 
 /* ---------- Silkscreen: 16 px ---------- */
-:root body .hub-back, :root body .hub-sub, :root body .scr .hub-sub, :root body .hh-ver, :root body .mc-ribbon, :root body .mc-stat,
-:root body .sb-t > i, :root body .adv-stats > span, :root body .as-asc, :root body .as-relics, :root body .as-mult,
+:root body .hub-back, :root body .hh-ver, :root body .mc-ribbon, :root body .mc-stat,
+:root body .sb-t > i,
 :root body .lb-empty, :root body .lb-src > span,
 :root body .rd-h > b, :root body .rd-n > em, :root body .tool .tl-n, :root body .ab-act,
 :root body .ch-chip > b, :root body .ch-lv, :root body .ch-new, :root body .adv-chal-h, :root body .intro-body > .tag,
@@ -17,12 +17,11 @@
 /* ---------- Jersey / Pixelify: 18 px ---------- */
 :root body .rs-t > small, :root body #settings .set-note, :root body #cloudD, :root body .dlf-r > span,
 :root body .intro-new, :root body .ch-chip i:not(.ch-lv), :root body .go2-t > i, :root body .nr-row > p, :root body .offer > p, :root body .rd-k,
-:root body .cx-chip2 > b, :root body .cx-medal > span, :root body .dc-n, :root body .rd-h > i, :root body .rd-n.inf > em, :root body .pt-foot, :root body .pt-it > i { font-size: 18px; }
+:root body .cx-chip2 > b, :root body .cx-medal > span, :root body .rd-h > i, :root body .rd-n.inf > em, :root body .pt-foot, :root body .pt-it > i { font-size: 18px; }
 
 /* ---------- reglas con mas peso que las de arriba: la version de la portada, la Enciclopedia, la ruta del plan y el Campamento ---------- */
 :root body #dlg > .hh-ver { font-size: 16px; }
 :root body .cx-shell.stage .cx-chip2 b, :root body .cx-chip2 b { font-size: 18px; }
-:root body .adv-setup .rd.plan .rd-h i { font-size: 18px; }
 :root body .table.mesa .offer.pc .of-r, :root body .table.mesa .tray-col h4 { font-size: 16px; }
 :root body .table.mesa .offer.pc > p, :root body .table.mesa.d1 .offer.pc > p, :root body .table.mesa.d2 .offer.pc > p { font-size: 18px; }
 :root body .table.mesa .offer.pc .buy, :root body .table.mesa.d1 .offer.pc .buy, :root body .table.mesa.d2 .offer.pc .buy, :root body .table.mesa.chest .offer.pc .buy { font-size: 16px; }

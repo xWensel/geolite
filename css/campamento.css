@@ -67,10 +67,6 @@
 .rd.plan .rd-inf .rd-row { justify-content: center; }
 .rd.plan .rd-n.inf em { font-family: var(--serif); font-size: 14px; letter-spacing: 0; color: rgba(255, 217, 138, .75); white-space: nowrap; }
 .rd.plan .rd-n.inf .rd-ic b { font-size: 34px; }
-.adv-setup .rd.plan { --s: 36px; --sb: 44px; --gap: 6px; gap: 10px; margin-top: 2px; }
-.adv-setup .rd.plan .rd-act { padding: 9px 9px 8px; gap: 9px; }
-.adv-setup .rd.plan .rd-ic .ic { width: 28px; height: 28px; } .adv-setup .rd.plan .rd-n.boss .rd-ic .ic { width: 40px; height: 40px; }
-.adv-setup .rd.plan .rd-h i { font-size: 16px; } .adv-setup .rd.plan .rd-n.inf .rd-ic b { font-size: 30px; }
 /* Reto diario: el mismo plano, mas pequeno (con el orden barajado del dia) */
 
 /* ---------------------------------------------------------------- CAMPAMENTO */

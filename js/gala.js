@@ -46,13 +46,14 @@ window.AIQ = window.AIQ || {};
       <div class="gx-head"><span class="gx-eyb">${abc}</span><h2 class="gx-t-l">${abc}</h2><p class="gx-lead">${abc}</p></div><div class="gx-paper"><div class="gx-lead-row"><span>${abc}</span><s></s><b>0 <small>/ 1</small></b></div><div class="gx-bar"><i style="width:40%"></i></div></div>
       <div class="gx-acts col"><button class="gx-btn pri wide" tabindex="-1">${abc} <span class="gx-k"><kbd class="k-kb">Esc</kbd></span></button><button class="gx-btn wide" tabindex="-1">${abc}</button></div>
       <div class="gx-foot"><div class="gx-hr"></div><div class="gx-acts"><button class="gx-btn gho sm" tabindex="-1">${abc}</button></div><p class="gx-note">${abc}</p></div></section></div></div></div></div>`;
-    document.body.appendChild(w); setTimeout(() => w.remove(), 900 + 4 * 400);
+    document.body.appendChild(w); setTimeout(() => w.remove(), 900 + 5 * 400);
     /* v0.3.41: cada pieza en su propio momento (las tres a la vez paraban el fundido de la puerta): el Perfil (fichas, papel grande y su sombra)
        a los 400 ms, Ajustes a los 800 y el Reto diario a los 1.200: cada una en su momento, sin juntar sus parones */
     setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.profileHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.profileHtml()}</div>`); } catch (e) { /* sin perfil aun */ } }, 400);
     /* v0.3.45: y el Reto diario de hoy (sus esquinas de pixel se recortan la primera vez a su medida: su primera apertura perdia ~24 fotogramas) */
     setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.dailyHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.dailyHtml()}</div>`); } catch (e) { /* sin reto aun */ } }, 1200);
     setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.classicHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.classicHtml()}</div>`); } catch (e) { /* sin clasico aun */ } }, 1600);   // v0.3.46: y el Clasico
+    setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.adventureHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.adventureHtml()}</div>`); } catch (e) { /* sin aventura aun */ } }, 2000);   // v0.3.47: y la Aventura
     /* v0.3.38: Ajustes tambien (su primera apertura daba 11 fotogramas perdidos): se pinta el de verdad, casi invisible y sin recibir clics */
     const sh = document.getElementById("setSh");
     if (sh && sh.classList.contains("hidden")) setTimeout(() => {

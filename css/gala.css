@@ -550,3 +550,72 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
   .cl-head { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; } .cl-meds { grid-column: 1 / -1; grid-row: 2; justify-self: start; } .cl-head .menu-tools { grid-column: 3; grid-row: 1; } .cl-h { font-size: 40px; }
   .cl-left, .cl-right { grid-column: 1; grid-row: auto; } .cl-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; } .cl-ficha { height: auto; }
 }
+
+/* ---------------------------------------------------------------- AVENTURA (v0.3.47): la mesa de salida (js/hub.js, adventure). 12 columnas: la mesa de fieltro
+   (1-8) con las cuatro barajas como naipes (retrato, que trae, kit, doblones y provisiones y, si esta cerrada, como se abre) y la ruta; el boleto de papel
+   (9-12) con las seis fichas de Ascension, lo que hace la elegida, tus cifras y los botones. Sin desplazar: cabe tambien en la Deck */
+.av-screen { z-index: 1; }
+.av-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
+.av-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 24px; min-width: 0; }
+.av-head #hubBack .ic { width: 22px; height: 22px; }
+.av-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.av-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
+.av-rel { justify-self: end; display: inline-flex; align-items: center; gap: 10px; min-width: 0; font-size: 22px; color: var(--gx-txt-2); }
+.av-rel .ic { flex: none; width: 32px; height: 32px; image-rendering: pixelated; } .av-rel span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.av-head .menu-tools { grid-column: 4; }
+
+.av-left { grid-column: 1 / 9; grid-row: 2; min-width: 0; min-height: 0; }
+.av-mesa { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 16px 16px 18px; min-height: 0; }
+.av-mh { margin: 0; }   /* el mismo rotulo que "Ascension" en el boleto */
+/* los cuatro naipes comparten filas (subgrid): retratos, nombres, kits y "se abre" a la misma altura en los cuatro */
+.av-decks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: auto auto minmax(0, 1fr) auto auto; gap: 6px 10px; min-height: 0; }
+.av-dk { position: relative; grid-row: 1 / span 5; display: grid; grid-template-rows: subgrid; min-width: 0; min-height: 0; padding: 12px 10px 14px; border: 0; cursor: pointer; text-align: left;
+  background: var(--gx-card); color: var(--gx-ink); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); font-family: var(--sans);
+  transition: transform .18s cubic-bezier(.2, .9, .3, 1); }   /* sin clip-path, como los naipes del Clasico: con su contorno oscuro el escalon no se ve */
+.av-art { justify-self: center; display: block; width: 96px; height: 96px; }
+.av-art > .ic { display: block; width: 96px; height: 96px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .35)); }
+.av-lock { position: absolute; right: 8px; top: 8px; }   /* en la esquina del naipe */ .av-lock .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
+.av-dk > b { align-self: start; min-width: 0; font-weight: 400; font-size: 24px; line-height: 1; text-wrap: balance; }
+.av-dd { align-self: stretch; min-height: 0; font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; overflow: hidden; }
+.av-dd.trim { align-self: start; display: -webkit-box; -webkit-box-orient: vertical; }   /* no cabe ni con retratos de 64: lineas enteras y "…" (js/hub.js, avFit) */
+.av-decks.tight .av-art, .av-decks.tight .av-art > .ic { width: 64px; height: 64px; }
+.av-kit { display: flex; align-items: center; gap: 2px; min-height: 28px; }   /* kit y doblones/provisiones en una linea (3 cartas como mucho: cabe) */
+.av-kit .ic.kit { display: block; width: 28px; height: 28px; image-rendering: pixelated; }
+.av-sts { display: inline-flex; gap: 6px; margin-left: auto; padding-left: 4px; }
+.av-st { display: inline-flex; align-items: center; gap: 2px; font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums; } .av-st .ic { width: 20px; height: 20px; image-rendering: pixelated; }
+.av-how { display: grid; gap: 2px; padding-top: 6px; border-top: 2px dashed rgba(22, 36, 28, .25); font-size: 18px; line-height: 1.1; color: var(--gx-ink); text-wrap: pretty; cursor: help; }
+.av-how .gx-eyb { color: var(--gx-gold-lo); }
+.av-dk:hover:not(.sel):not(.lk) { transform: translateY(-2px); }
+.av-dk.sel { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -4px 0 var(--gx-rim-lo), inset 0 0 0 2px var(--gx-o); cursor: default; } .av-dk.sel .av-dd { color: var(--gx-ink); }
+.av-dk.lk { background: #d9cfb3; cursor: default; } .av-dk.lk .av-art > .ic { filter: grayscale(1) brightness(.75); opacity: .7; } .av-dk.lk .av-kit { opacity: .75; }
+.av-dk:focus { outline: none; }
+.av-dk:focus-visible::after, html[data-input="pad"] .av-dk:focus::after { content: ""; position: absolute; inset: 4px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.av-ruta { min-width: 0; }
+
+.av-right { grid-column: 9 / 13; grid-row: 2; min-width: 0; min-height: 0; }
+.av-boleto { height: 100%; display: grid; grid-template-rows: auto auto auto auto minmax(0, 1fr); gap: 12px; padding: 16px 20px 18px; min-height: 0; }
+.av-chips { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.av-asc { position: relative; display: grid; place-items: center; height: 60px; padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--sans); transition: transform .15s cubic-bezier(.2, .9, .3, 1); }
+.av-asc .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .45)); }
+.av-asc em { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-family: var(--serif); font-size: 30px; line-height: 1; color: #fff; text-shadow: 0 3px 0 rgba(0, 0, 0, .55); }
+.av-asc:hover:not(.on):not([aria-disabled]) { transform: translateY(-2px); }
+.av-asc.on { background: rgba(212, 160, 74, .35); box-shadow: inset 0 -4px 0 var(--gx-rim-lo); cursor: default; }
+.av-asc[aria-disabled] { cursor: default; } .av-asc[aria-disabled] .ic { filter: grayscale(1) brightness(.7); opacity: .55; } .av-asc[aria-disabled] em { opacity: .6; }
+.av-asc:focus { outline: none; }
+.av-asc:focus-visible::after, html[data-input="pad"] .av-asc:focus::after { content: ""; position: absolute; inset: 2px; box-shadow: inset 0 0 0 2px var(--gx-ink); animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.av-ad { display: grid; gap: 4px; padding: 10px 14px 12px; background: #efe4c8; box-shadow: inset 0 0 0 2px rgba(22, 36, 28, .2); min-width: 0; }
+.av-ax { display: flex; justify-content: space-between; gap: 12px; font-size: 18px; line-height: 1.1; color: var(--gx-gold-lo); } .av-ax > span:last-child { white-space: nowrap; cursor: help; }
+.av-ad b { font-weight: 400; font-size: 26px; line-height: 1; color: var(--gx-ink); text-wrap: balance; }
+.av-ad i { font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; }
+.av-stats { display: grid; gap: 2px; } .av-stats .gx-lead-row { font-size: 20px; } .av-stats .gx-lead-row s { transform: translateY(-4px); }
+.av-go { align-self: end; display: grid; gap: 8px; min-width: 0; }
+.av-sub { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; font-size: 18px; line-height: 1.1; color: var(--gx-ink-2); text-align: center; }
+.av-sub > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; } .av-sub .sb-coin { width: 18px; height: 18px; margin: 0; image-rendering: pixelated; }
+.av-new .av-ns { flex: none; font-size: 18px; opacity: .8; white-space: nowrap; } .av-new.armed .av-ns { display: none; }
+@media (max-width: 899px), (max-height: 519px) {                                  /* movil: una columna y la pantalla entera se desplaza */
+  .av-screen { overflow-y: auto; }
+  .av-grid { position: static; padding: 14px 16px 20px; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 12px; }
+  .av-head { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; } .av-rel { grid-column: 1 / -1; grid-row: 2; justify-self: start; } .av-head .menu-tools { grid-column: 3; grid-row: 1; } .av-h { font-size: 40px; }
+  .av-left, .av-right { grid-column: 1; grid-row: auto; } .av-decks { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; } .av-dk { grid-row: auto; grid-template-rows: auto auto 1fr auto auto; }
+  .av-ruta { overflow-x: auto; } .av-boleto { height: auto; }
+}

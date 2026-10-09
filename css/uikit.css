@@ -69,10 +69,7 @@ html.no-shake #app.ch-glitch #map, html.no-shake #app.ch-glitch #fx { animation-
 body.vd-on .cx-toast { display: none; }
 /* la marca del HUD sobra en el menu principal (ya esta el logo grande) */
 body.title-on .brand-sh { opacity: 0; pointer-events: none; }
-/* Aventura: la carta elegida ya no tapa el titulo "Baraja inicial" */
-.deckrow { padding-top: 14px; }
 @media (max-width: 1000px) {
-  .deckrow { grid-template-columns: repeat(4, minmax(0, 1fr)); } .dcard { padding: 24px 8px 8px; } .dc-d { font-size: 14px; }
   /* Campamento en pantallas medianas: cabecera en dos filas, cartas mas pequenas y bandeja compacta */
   .tb-head { grid-template-columns: 1fr auto; row-gap: 6px; } .tb-head .route { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
   .tb-right .tb-menu span { display: none; }
@@ -80,7 +77,6 @@ body.title-on .brand-sh { opacity: 0; pointer-events: none; }
   .tb-tray { grid-template-columns: 1fr auto auto; } .tb-tray .go-next { grid-column: 1 / -1; min-width: 0; width: 100%; }
   .offer .of-ctr { max-width: 94%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
-@media (max-width: 600px) { .deckrow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* ticket de resultado: por debajo del marcador (antes lo tapaba en pantallas de 720-800 px de alto) y compacto si falta altura */
 @media (min-width: 901px) {
   #dlg.side { place-self: start end; margin: 148px 24px 0 0; max-height: calc(calc(100 * var(--vh)) - 160px); overflow-y: auto; scrollbar-width: none; }
@@ -223,9 +219,6 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 /* portada: solo el engranaje (arriba a la derecha) */
 .menu-tools { gap: 0; }
 
-/* seleccion de baraja sin indices A K Q J */
-.dcard { padding: 12px 12px 12px; } .deckrow { padding-top: 6px; }
-@media (max-width: 1000px) { .dcard { padding: 8px; } }
 
 /* cartas sin indices (A K Q J, numeros ni palos) en ninguna parte: se libera el hueco de las esquinas */
 .ix { display: none !important; }
@@ -243,14 +236,14 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 .brand-rose { width: 32px; height: 32px; } .menu-rose { width: 96px; height: 96px; }
 
 /* pixel art nitido: los recursos grandes (escenas, cartas, iconos grandes, crupier) se amplian sin suavizar; los iconos pequenos se reducen desde un original nitido */
-.pic-img, .cx-art img, .cx-bigcard img, .of-ico .ic, .tl-ico .ic, .dc-art .ic, .intro-num .ic, .nx-ic .ic, .sp-ic .ic, .dl-face, .ic.big, .mc-win img { image-rendering: pixelated; }
+.pic-img, .cx-art img, .cx-bigcard img, .of-ico .ic, .tl-ico .ic, .intro-num .ic, .nx-ic .ic, .sp-ic .ic, .dl-face, .ic.big, .mc-win img { image-rendering: pixelated; }
 
 /* ==== legibilidad (v0.22): tipografias pixel mas grandes y nitidas; la placa de la pregunta NO se toca ==== */
 html body { -webkit-font-smoothing: none; font-smooth: never; text-rendering: optimizeSpeed; }
 html body .brand-txt > i { font-size: 15.5px; } html body .mc-desc { font-size: 18px; line-height: 1.25; } html body .mc-stat { font-size: 15.5px; } html body .mc-ribbon { font-size: 15.5px; }
 html body .hh-ver { font-size: 15.5px; }
 html body .tag { font-size: 15.5px; } html body #plate .tag { font-size: 10.5px; }
-html body .rm-node > em { font-size: 15.5px; } html body .adv-stats > span { font-size: 15.5px; }
+html body .rm-node > em { font-size: 15.5px; }
 html body .sb-t > i { font-size: 15.5px; } html body .mode-d { font-size: 19px; } html body .nick > span { font-size: 15.5px; } html body .dy-body > i { font-size: 19px; }
 html body .lb-src, html body .lb-empty { font-size: 15.5px; } html body .camp-d { font-size: 19px; } html body .camp-m > span { font-size: 15.5px; } html body .pf-cell > span { font-size: 15.5px; }
 html body .ach > i { font-size: 18px; } html body .ach-t > i { font-size: 18px; } html body .ach-t > em { font-size: 15.5px; }
@@ -305,9 +298,6 @@ body.tk-on .rail-sh { display: none; }
 
 /* ==== v0.23: pantallas de menu centradas en vertical (antes se pegaban arriba) y estadisticas en 2x2 con la letra mayor ==== */
 .scr-body { display: flex; flex-direction: column; } .scr-body::before, .scr-body::after { content: ""; flex: 1 0 0; }
-.hub .adv-stats, .adv-stats { grid-template-columns: repeat(2, 1fr); gap: 10px 14px; }
-.adv-stats span { line-height: 1.2; }
-.adv-stats b { font-size: 26px; }
 
 /* ==== v0.25: el crupier asoma de vez en cuando en el inicio (arriba a la izquierda o a la derecha), sin tapar ni bloquear nada ==== */
 /* en la franja libre a un lado de la portada, con el globo encima y la cola hacia el. js/dealer.js (homeRoom) mide el hueco y fija --hf (retrato) y --hb (globo) */
