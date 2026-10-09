@@ -1,11 +1,5 @@
 /* Geolite - Lluvia de fichas (v0.2.50): la carta de la Barra y la mesa de 1920x1080 (se escala con K/4, K entero: cada pixel del arte = K pixeles de pantalla).
    Maqueta aprobada en tools/art/plinko. Todo cuelga de .rou.plk (la capa que comparten las pantallas de casino: rouShell). */
-.table.mesa .sup.bet.bt-plk { background: radial-gradient(ellipse at 50% 40%, #12909e 0%, #07323d 82%); --sc: #35b8c6; }
-.table.mesa .sup.bet.bt-plk::before { background: url(../assets/plinko/cenefa.png) top left / 16px 10px repeat-x, url(../assets/plinko/cenefa.png) bottom left / 16px 10px repeat-x; image-rendering: pixelated; }
-.table.mesa .sup.bet.bt-plk .bt-pl { background: #e8a91e; color: #3a2606; text-shadow: none; }
-.table.mesa .sup.bet.bt-plk .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-plk .bt-stake:hover { filter: brightness(1.25); }
-.table.mesa .sup.bet.bt-plk .ic-bet_plinko { filter: none; }
-.table.mesa .sup.bet.bt-plk.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
 .rp-plk { background: #35b8c6; }
 
 .rou.plk { background: radial-gradient(ellipse at 50% 40%, rgba(3, 26, 34, .98), rgba(1, 8, 12, 1) 85%); }

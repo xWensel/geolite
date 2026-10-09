@@ -1,11 +1,5 @@
 /* Geolite - Duelo de dados (v0.2.49): la carta de la Barra y la mesa de 1920x1080 (se escala con K/4, K entero: cada pixel del arte = K pixeles de pantalla).
    Maqueta aprobada en tools/art/dados. Todo cuelga de .rou.dice (la capa que comparten las pantallas de casino: rouShell). */
-.table.mesa .sup.bet.bt-dice { background: radial-gradient(ellipse at 50% 40%, #138079 0%, #06302f 80%); --sc: #4fd0c0; }
-.table.mesa .sup.bet.bt-dice::before { background: url(../assets/dados/cenefa.png) top left / 66px 10px repeat-x, url(../assets/dados/cenefa.png) bottom left / 66px 10px repeat-x; image-rendering: pixelated; }
-.table.mesa .sup.bet.bt-dice .bt-di { background: #e8a91e; color: #3a2606; text-shadow: none; }
-.table.mesa .sup.bet.bt-dice .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-dice .bt-stake:hover { filter: brightness(1.25); }
-.table.mesa .sup.bet.bt-dice .ic-bet_dados { filter: none; }
-.table.mesa .sup.bet.bt-dice.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
 .rp-dice { background: #2ca89a; }
 
 .rou.dice { background: radial-gradient(ellipse at 50% 40%, rgba(5, 34, 38, .98), rgba(1, 7, 8, 1) 85%); }

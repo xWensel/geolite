@@ -57,24 +57,9 @@
 .tk-cx.l1 b, .tk-cx.l2 b, .tk-cx.l3 b { animation: tkwin .45s var(--jd, 0s) both; } @keyframes tkwin { 0% { opacity: 0; transform: scale(.4); } 60% { opacity: 1; transform: scale(1.3); } 100% { transform: none; } }
 
 /* ---------- tienda / campamento ---------- */
-.shop { display: grid; gap: 14px; align-content: start; min-height: 100%; padding: clamp(18px, calc(4 * var(--vw)), 44px) clamp(16px, calc(5 * var(--vw)), 70px) 30px; color: var(--paper); max-width: 1100px; margin: 0 auto; }
-.shop header { display: grid; gap: 8px; justify-items: start; } .shop header .tag { background: var(--red); }
-.shop h2 { margin: 0; font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 900; font-size: clamp(38px, calc(6 * var(--vw)), 72px); line-height: .95; letter-spacing: -.02em; } .coins { font-family: var(--mono); font-weight: 700; font-size: 26px; color: var(--brass); }
-.route { display: flex; gap: 6px; align-items: center; } .route i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .3); display: grid; place-items: center; font-style: normal; font-size: 14px; } .route i.done { background: var(--brass); border-color: var(--brass); } .route i.cur { background: var(--red); border-color: var(--red); animation: blink 1s ease-in-out infinite; } .route i.boss { border-radius: 4px; }
+.coins { font-family: var(--mono); font-weight: 700; font-size: 26px; color: var(--brass); }
 .shop-flash { margin: 0; font-family: var(--mono); font-size: 15.5px; letter-spacing: .06em; color: var(--brass); } .shop-flash { color: var(--red); animation: rise .3s both; }
-.offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
-.offer { --rc: #9aa7a0; position: relative; display: grid; gap: 6px; align-content: start; text-align: center; padding: 14px 12px 12px; background: #12271d; box-shadow: inset 0 0 0 3px var(--rc), 0 10px 0 -3px rgba(0, 0, 0, .4); transition: transform .25s var(--spring); animation: rise .5s var(--spring) both; }
-.offer:nth-child(2) { animation-delay: .06s; } .offer:nth-child(3) { animation-delay: .12s; } .offer:nth-child(4) { animation-delay: .18s; } .offer:nth-child(5) { animation-delay: .24s; }
-.offer:hover { transform: translateY(-6px) rotate(-.6deg); } .offer.r1 { --rc: #4c9fb0; } .offer.r2 { --rc: #e8b23a; } .offer.otool { --rc: #6c8cff; } .offer.life { --rc: #fe5f55; }
-.offer.sold { opacity: .35; filter: grayscale(1); pointer-events: none; } .offer.no { animation: nope .35s; } @keyframes nope { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-.of-r { font-family: var(--mono); font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--rc); } .of-ico { font-size: 46px; line-height: 1.1; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .4)); }
-.offer b { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 20px; line-height: 1.05; } .offer b em { font-style: normal; font-family: var(--mono); font-size: 14px; color: var(--brass); display: block; } .offer p { margin: 0; font-size: 15.5px; line-height: 1.35; color: rgba(242, 233, 214, .75); min-height: 4.1em; }
-.buy { font-family: var(--mono); font-weight: 700; font-size: 17px; color: var(--ink); background: var(--brass); padding: 9px 10px 8px; cursor: pointer; transition: transform .2s var(--spring), background .2s; } .buy:hover:not(:disabled) { transform: scale(1.06); background: #ffd06b; } .buy:disabled { background: rgba(255, 255, 255, .15); color: rgba(255, 255, 255, .6); cursor: default; }
-.inv { display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 10px; padding: 12px 14px; background: rgba(255, 255, 255, .05); } .inv h4 { margin: 0 0 6px; font-family: var(--mono); font-weight: 500; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--brass); } .hearts { font-size: 24px; }
-.inv-perk { position: relative; width: 46px; height: 46px; display: grid; place-items: center; font-size: 26px; background: rgba(255, 255, 255, .1); cursor: pointer; transition: transform .2s var(--spring); } .inv-perk:hover { transform: translateY(-3px); background: rgba(254, 95, 85, .35); }
-.inv-perk em { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-style: normal; font-family: var(--mono); font-size: 13px; white-space: nowrap; color: var(--brass); opacity: 0; transition: opacity .2s; } .inv-perk:hover em { opacity: 1; }
-.inv-tool { position: relative; width: 46px; height: 46px; display: grid; place-items: center; font-size: 24px; background: rgba(108, 140, 255, .18); } .inv-tool b { position: absolute; right: 2px; bottom: 0; font-family: var(--mono); font-size: 14px; }
-.shop footer { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; margin-top: 4px; } .shop footer .btn-ink { width: auto; min-width: 240px; } .shop footer .btn-line { width: auto; }
+@keyframes nope { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
 /* ---------- efectos de clic ---------- */
 .ping { position: absolute; z-index: 30; width: 0; height: 0; pointer-events: none; }
@@ -104,29 +89,25 @@ i.uic { display: contents; } .uic .ic, .menu-gear .ic { width: 28px; height: 28p
 .hp { display: inline-block; margin-right: 2px; } .hp .ic { width: 22px; height: 22px; } .hp:not(.on) .ic { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .3)); }   /* la provision perdida tiene su propio corazon vacio (heart_empty) */ .hearts .hp .ic { width: 30px; height: 30px; } .ab-hearts { display: flex; }
 .ab-coins { display: inline-flex; align-items: center; } .ab-coins b { font-weight: 700; }
 .ab-perk .ic { width: 26px; height: 26px; }
-.of-ico { display: grid; place-items: center; height: 92px; background: radial-gradient(circle at 50% 55%, rgba(255, 255, 255, .16), transparent 62%); } .of-ico .ic { width: 72px; height: 72px; transition: transform .3s var(--spring); } .offer:hover .of-ico .ic { transform: scale(1.12) rotate(-5deg); }
-.inv-perk .ic, .inv-tool .ic { width: 34px; height: 34px; } .tl-ico .ic { width: 38px; height: 38px; } .tool.on .ic { filter: none; }
+.tl-ico .ic { width: 38px; height: 38px; } .tool.on .ic { filter: none; }
 .adv-debuff span .ic { width: 52px; height: 52px; }
 .ach-i .ic { width: 34px; height: 34px; } .ach-ico .ic { width: 46px; height: 46px; }
 .tk-perks span .ic { width: 20px; height: 20px; } .tk-coins .ic { width: 1.3em; height: 1.3em; }
 .coin-fly .ic { width: 30px; height: 30px; } #factText .ic.sm { margin-right: 8px; }
 .route i.boss .ic { width: 15px; height: 15px; filter: none; } .intro-num .ic.big { width: 150px; height: 150px; }
-.shop .coins { display: inline-flex; align-items: center; } .shop .coins .ic { width: 34px; height: 34px; margin-right: 10px; }
-.buy .ic.cn { width: 1.15em; height: 1.15em; }
 
 /* Jersey 15 es de cuerpo pequeno: se sube el texto de lectura en el aspecto Casino */
-html[data-skin="casino"] .mc-d, html[data-skin="casino"] .camp-d, html[data-skin="casino"] .mode-d, html[data-skin="casino"] .deck i, html[data-skin="casino"] .offer p, html[data-skin="casino"] .ach i, html[data-skin="casino"] .daily i, html[data-skin="casino"] .tk-from, html[data-skin="casino"] .set-note { font-size: 17px; line-height: 1.25; }
+html[data-skin="casino"] .mc-d, html[data-skin="casino"] .camp-d, html[data-skin="casino"] .mode-d, html[data-skin="casino"] .deck i, html[data-skin="casino"] .ach i, html[data-skin="casino"] .daily i, html[data-skin="casino"] .tk-from, html[data-skin="casino"] .set-note { font-size: 17px; line-height: 1.25; }
 html[data-skin="casino"] .lb li, html[data-skin="casino"] .nick input, html[data-skin="casino"] .board-sel { font-size: 18px; }
 html[data-skin="casino"] #factText, html[data-skin="casino"] #lvlText { font-size: 19px; }
 html[data-skin="casino"] .cx-sec p { font-size: 20px; line-height: 1.5; } html[data-skin="casino"] .cx-fact { font-size: 22px; } html[data-skin="casino"] .camp-t { font-size: 25px; }
-html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] .ach b { font-size: 19px; } html[data-skin="casino"] .tk-perks > div { font-size: 15.5px; }
+html[data-skin="casino"] .ach b { font-size: 19px; } html[data-skin="casino"] .tk-perks > div { font-size: 15.5px; }
 
 /* ---------- ilustraciones (js/art.js) ---------- */
 .art { display: block; width: 100%; height: auto; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .4)); }
 .art.bare { filter: none; } .art.bare .art-b { display: none; }
 .intro-in.adv { align-items: center; } .intro-art { flex: none; width: min(calc(42 * var(--vw)), 470px); transform: rotate(2deg); animation: rise .6s .5s var(--spring) both; }
 .v-art { width: min(100%, 420px); margin-bottom: 14px; transform: rotate(-2deg); animation: rise .6s .4s var(--spring) both; }
-.shop header { grid-template-columns: 1fr minmax(220px, 340px); grid-template-areas: "tag art" "title art" "top art"; align-items: start; column-gap: 24px; } .shop header .tag { grid-area: tag; } .shop header h2 { grid-area: title; }
 .mode-card.hero { position: relative; overflow: hidden; }
 .ic.gem { display: inline-block; width: 14px; height: 14px; margin-left: 1px; vertical-align: -2px; filter: none; }
 .stamp b .ic.st { width: .95em; height: .95em; display: inline-block; vertical-align: -.1em; filter: none; }
@@ -134,7 +115,7 @@ html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] 
 .ic.badge { width: 100%; height: 100%; } .ach:not(.got) .ic { filter: grayscale(1) brightness(.6); }
 .cx-art .ic.q { position: absolute; right: 8%; bottom: 8%; width: 30%; height: auto; opacity: .95; filter: none; } .cx-card.locked .cx-ic { opacity: .35; }
 .cx-x .ic.sm, .cx-hd .ic.sm { margin-right: 6px; } .cx-lx .ic { width: 34px; height: 34px; } .tag .ic.sm { width: 16px; height: 16px; margin-right: 5px; }
-@media (max-width: 760px) { .intro-in.adv { flex-direction: column; } .intro-art { width: min(calc(80 * var(--vw)), 330px); } .shop header { grid-template-columns: 1fr; grid-template-areas: "art" "tag" "title" "top"; } }
+@media (max-width: 760px) { .intro-in.adv { flex-direction: column; } .intro-art { width: min(calc(80 * var(--vw)), 330px); } }
 
 /* ---------- ilustraciones generadas (encima de la version vectorial, si existen) ---------- */
 .pic { position: relative; display: block; border-radius: 14px; overflow: hidden; background: #123420; box-shadow: 0 0 0 4px #16241c, 0 10px 0 4px rgba(0, 0, 0, .4); aspect-ratio: 8 / 5; }
@@ -157,22 +138,8 @@ html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] 
 .pc[data-suit="red"] .ix b { color: #c2372e; }
 
 /* oferta = carta de poker */
-.offer.pc { --rc: #b7bfc4; background: #f6efdc; color: #16241c; border-radius: 16px; padding: 30px 12px 14px; gap: 7px;
-  box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px var(--rc), inset 0 0 0 7px #16241c, 0 12px 0 3px rgba(0, 0, 0, .42); }
-.offer.pc.r1 { --rc: #4fb6a0; } .offer.pc.r2 { --rc: #c78bf0; } .offer.pc.otool { --rc: #6c8cff; } .offer.pc.life { --rc: #fe5f55; }
-.offer.pc.r3 { --rc: #ffd95a; }   /* la legendaria (Pan de oro): marco, placa, terciopelo, halo y brillo en css/campamento.css */
-.offer.pc .of-r { color: #4a6b5a; font-size: 14px; } .offer.pc.r2 .of-r { color: #8a3fc0; }
-.offer.pc .of-ico { height: 100px; margin: 0 4px; border: 3px solid #16241c; border-radius: 10px; background-color: #17553a; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .12), inset 0 -10px 18px rgba(0, 0, 0, .3); }
-.offer.pc .of-ico .ic { width: 74px; height: 74px; }
-.offer.pc b:not(.ix b) { color: #16241c; } .offer.pc p { color: #3a4a3e; min-height: 4.4em; }
-.offer.pc em { color: #b3322a; }
-.offer.pc.r2::after { content: ""; position: absolute; inset: 0; border-radius: 16px; pointer-events: none; mix-blend-mode: color-dodge; opacity: .35;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .8) 46%, rgba(160, 220, 255, .7) 52%, transparent 66%) 0 0 / 250% 100%; animation: holo 3.4s linear infinite; }
 @keyframes holo { to { background-position: -250% 0; } }
 /* etiqueta de precio: ficha colgando bajo la carta */
-.offer.pc .buy { position: relative; margin-top: 6px; border-radius: 999px; background: #16241c; color: #ffe08a; box-shadow: 0 0 0 2px #ffe08a inset, 0 5px 0 rgba(0, 0, 0, .35); display: inline-flex; align-items: center; justify-content: center; }
-.offer.pc .buy:hover:not(:disabled) { background: #1c3a2c; transform: translateY(-2px) scale(1.05); } .offer.pc .buy:disabled { background: #b8c2b4; color: #5f6e64; box-shadow: none; }
-.offer.pc:hover { transform: translateY(-8px) rotate(-1.2deg); }
 
 /* mano de herramientas: cartas en abanico abajo, como la mano de Balatro */
 .tool-bar { gap: 0; bottom: 74px; align-items: flex-end; }
@@ -199,16 +166,8 @@ html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] 
 @keyframes chip-turn { to { transform: rotate(360deg); } }
 
 /* tienda = mesa de fieltro con palos geograficos de fondo */
-.shop { position: relative; background:
-  var(--ic-suits) 0 0 / 150px 150px, radial-gradient(ellipse at 50% -10%, rgba(53, 165, 106, .55), transparent 65%), #10251f; background-blend-mode: soft-light, normal, normal; }
-.shop::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5; background:
-  repeating-linear-gradient(0deg, rgba(255, 255, 255, .035) 0 1.5px, transparent 1.5px 40px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0 1.5px, transparent 1.5px 40px); }
-.shop > * { position: relative; }
-.inv-perk { background: #f6efdc; border-radius: 8px; box-shadow: 0 0 0 2px #16241c, inset 0 0 0 3px #c78bf0; } .inv { background: rgba(10, 40, 30, .7); box-shadow: inset 0 0 0 2px rgba(255, 224, 138, .25); }
-.shop .coins { color: #ffe08a; text-shadow: 0 3px 0 rgba(0, 0, 0, .5); }
 .tool-bar { bottom: 98px; } .tool.pc-hand { padding-top: 40px; width: 108px; } .tool.pc-hand .ix.tl { left: 9px; top: 8px; grid-auto-flow: column; align-items: center; gap: 4px; } .tool.pc-hand .ix .ic { width: 17px; height: 17px; }
 .tool.pc-hand .ix b { font-size: 20px; line-height: 1; }
-.offer.pc .buy { width: 72%; margin: 6px auto 0; }
 /* Enciclopedia: indices de carta de poker */
 .cx-card .ix, .cx-bigcard .ix { z-index: 3; } .cx-card .ix.tl { left: 9px; top: 8px; } .cx-card .ix.br { right: 9px; bottom: 30px; }
 .cx-card .ix b, .cx-bigcard .ix b { font-size: 19px; text-shadow: 0 0 3px #f6efdc, 0 0 3px #f6efdc; color: #16241c; } .cx-card .ix.red b, .cx-bigcard .ix.red b { color: #c2372e; } .cx-card .ix .ic, .cx-bigcard .ix .ic { width: 15px; height: 15px; }
@@ -218,14 +177,6 @@ html[data-skin="casino"] .offer b { font-size: 23px; } html[data-skin="casino"] 
 .cx-card.open .cx-art { background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .07) 0 1.5px, transparent 1.5px 16px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .07) 0 1.5px, transparent 1.5px 16px), radial-gradient(ellipse at 50% 28%, #35a56a, #17553a 78%); }
 
 /* Campamento: suministros de la proxima ronda */
-.tb-sup { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 1px 0 2px; }
-.sup { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 6px; flex: 1 1 0; min-width: 180px; max-width: 390px; padding: 4px 8px; text-align: left; color: #f6efdc; background: rgba(10, 26, 18, .82); border: 0; border-radius: 8px; cursor: pointer; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .16); transition: transform .15s, box-shadow .15s; }
-.sup:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2px #ffd98a; } .sup.on { background: rgba(38, 92, 70, .85); box-shadow: inset 0 0 0 2px #5fd6b8; }
-.sp-ic { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; background: #17553a; box-shadow: inset 0 0 0 2px #16241c; } .sp-ic .ic { width: 19px; height: 19px; }
-.sp-t { display: grid; gap: 1px; min-width: 0; } .sp-t b { font-family: var(--serif); font-size: 14.5px; font-weight: 800; color: #fff; } .sp-t i { font-style: normal; font-size: 11.5px; line-height: 1.1; opacity: .8; }
-.sup em { font-style: normal; font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; color: #ffd98a; display: inline-flex; align-items: center; gap: 3px; } .sup em .ic { width: 13px; height: 13px; }
-@media (max-width: 700px) { .sup { min-width: 100%; max-width: none; } }
-.tb-note { margin-bottom: 6px; } .tb-sup { margin-top: 3px; }
 /* v0.19: EL LOGRO FALSO del crupier (js/profile.js, fakeToast): igual que uno de verdad hasta que le cae el sello "De broma"; luego se tuerce y se cae */
 .ach-toast.ach-fake { z-index: 100005; }
 .ach-stamp { position: absolute; right: -14px; top: 50%; padding: 2px 10px 0; border: 3px solid #d8352a; color: #d8352a; background: rgba(246, 239, 220, .9); font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; opacity: 0; transform: translateY(-50%) rotate(-12deg) scale(2.4); pointer-events: none; }

@@ -92,14 +92,7 @@ html:lang(zh), html:lang(ja), html:lang(ko), html:lang(ru) { --dll: .889; }
 .ab-chal { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px; }
 
 /* campamento: proxima ronda y perks que ayudan */
-.tb-next { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 10px; }
-.tb-next-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .tb-next-row.far { opacity: .72; }
-.tb-next-h { font-family: var(--mono); font-weight: 700; font-size: 15.5px; letter-spacing: .05em; text-transform: uppercase; color: #ffd98a; margin-right: 4px; } .tb-next-none { font-family: var(--mono); font-size: 15.5px; opacity: .65; }
-.offer.counter { box-shadow: 0 0 0 3px #5fd6b8, 0 0 26px rgba(95, 214, 184, .55); z-index: 4; }
 /* la carta recorta su contenido (overflow: hidden en premium.css): si hace counter, deja que la etiqueta sobresalga por arriba */
-.table .offer.pc.counter { overflow: visible; }
-.offer .of-ctr { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); z-index: 6; display: inline-flex; align-items: center; gap: 6px; padding: 2px 12px 2px 4px; border-radius: 999px; background: #16241c; box-shadow: inset 0 0 0 2px #5fd6b8; color: #9ff3dc; font-family: var(--mono); font-weight: 700; font-size: 14px; letter-spacing: .04em; white-space: nowrap; max-width: calc(100% + 20px); overflow: hidden; text-overflow: ellipsis; }
-.offer .of-ctr .ic { width: 22px; height: 22px; } .offer.pc .of-ctr em { font-style: normal; color: inherit; }
 
 /* sacudida de "glitch" cuando el crupier toca la mesa */
 #app.ch-glitch #map, #app.ch-glitch #fx { animation: ch-glitch .55s steps(6, end); }
@@ -168,7 +161,6 @@ html.no-shake #app.vivo-quake, html.reduce-motion #app.vivo-quake { animation: n
 #askSub.ch-nocountry, .split-alt .sa-n.ch-nocountry { letter-spacing: .12em; opacity: .55; font-style: normal; }
 
 /* ---------------------------------------------------------------- Campamento: proxima ronda / jefe (v0.18) */
-.tb-next { gap: 5px; }
 .nx-card { display: grid; gap: 5px; padding: 6px 10px 7px; border-radius: 10px; background: rgba(10, 26, 18, .82); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .14); }
 .nx-card.boss { background: linear-gradient(180deg, rgba(86, 24, 40, .9), rgba(20, 8, 10, .9)); box-shadow: inset 0 0 0 3px #fe5f55, 0 0 26px rgba(254, 95, 85, .32); }
 .nx-card.far { opacity: .75; padding: 4px 10px; }
@@ -325,9 +317,7 @@ html.no-shake #app.vivo-quake, html.reduce-motion #app.vivo-quake { animation: n
 html.reduce-motion .ch-chip.ctr-pop, html.reduce-motion #app.chx-punch { animation: none; }
 /* etiqueta "Ayuda contra X": si no cabe en la carta, A.squeeze (uikit.js) quita "Ayuda contra" y deja icono + nombre del reto; nunca "..." */
 .sq-short .sq-pre { display: none; }
-.offer .of-ctr.sq-wrap { white-space: normal; hyphens: auto; overflow-wrap: anywhere; text-align: center; line-height: 1.02; border-radius: 12px; padding-top: 3px; padding-bottom: 3px; }
 /* "vender N" de las reliquias del Campamento: encima de la reliquia (debajo se salia de la pantalla y quedaba cortado) */
-.table .inv-perk em { bottom: auto; top: -21px; padding: 1px 6px; border-radius: 6px; background: #16241c; box-shadow: 0 0 0 1px rgba(255, 217, 138, .5); z-index: 3; }
 /* fichas de "Despues" (Ojo en el cielo): un nombre largo parte linea en vez de salirse de la pantalla */
 .nx-chips .ch-chip { max-width: 100%; min-width: 0; } .nx-chips .ch-chip > b { white-space: normal; overflow-wrap: anywhere; min-width: 0; }
 

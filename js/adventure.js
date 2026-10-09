@@ -554,7 +554,7 @@ window.AIQ = window.AIQ || {};
     };
   }
   function startRound(keep) {
-    run.phase = "round";
+    run.phase = "round"; if (A.coverMap) A.coverMap("camp", false);   // sales del Campamento: el mapa vuelve a dibujarse al instante
     if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; run.calmOn = false; refillTools(); }
     const Lv = roundLevel(keep), S = C().S;
     S.run = run; S.camp = { id: "adv", mode: "adventure", title: { es: "Aventura", en: "Adventure" }, home: { lat: 20, lon: 10, zoom: 1 }, levels: [Lv] };
@@ -1243,10 +1243,11 @@ window.AIQ = window.AIQ || {};
         newAct: run.round === 0 && run.act > 0 && !run.attempt, cheapest: costs.length ? Math.min(...costs) : 0 });
     }
   }
-  /* "proxima ronda" del Campamento: el tema de la ronda (o el jefe) y cada truco en dos lineas: nombre y soborno arriba, lo que hace debajo.
+  /* "proxima ronda" del Campamento: el tema de la ronda (o el jefe) y cada truco con su nombre y su soborno arriba y lo que hace debajo.
      v0.35 (usuario): antes cada truco ocupaba tres lineas (el soborno debajo) y no decia de que tema era la ronda. En el jefe, su nombre en grande
-     y en la linea pequena, entre "Jefe del acto" y el objetivo, el tema. Con el Ojo en el cielo, debajo, la ronda siguiente en una linea.
-     v0.35: ya no dice que reliquia frena cada truco (ni las cartas contra que truco sirven): el jugador tiene que leer y atar cabos. */
+     y, en la linea pequena, "Jefe del acto" y el tema. Con el Ojo en el cielo, debajo, cada ronda siguiente en una fila.
+     v0.35: ya no dice que reliquia frena cada truco (ni las cartas contra que truco sirven): el jugador tiene que leer y atar cabos.
+     v0.3.48 (mesa de diseno, Campamento A): es el boleto de papel de la columna derecha; el objetivo, en su fila de ticket, y Barajar al pie */
   const nextHtml = () => {
     const r = roundNo(), rows = [r]; if (has("spy")) for (let k = 1; k <= 2 && r + k <= LAST; k++) rows.push(r + k);   // tanda 9: el Ojo en el cielo ve dos rondas mas   // tras la ronda 12 no hay mas trucos (antes el Ojo en el cielo ensenaba una "Ronda 1" que no existe)
     const dot = "<i>·</i>";
@@ -1256,15 +1257,20 @@ window.AIQ = window.AIQ || {};
       const kick = [main ? A.T("Próxima ronda", "Next round") : A.T("Después", "Then"), cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + ((rr % 4) + 1)].concat(named ? [topic] : []).join(dot);
       const badge = `<span class="nr-badge">${ic(cf.boss ? BOSS_IC : TOPIC_ICON[d.topic])}</span>`;
       const count = `<span class="nr-n">${n ? n + " " + (n === 1 ? A.T("reto", "challenge") : A.T("retos", "challenges")) : A.T("Sin retos", "No challenges")}</span>`;
-      if (!main) return `<div class="nr far${cf.boss ? " boss" : ""}"><div class="nr-head">${badge}<div class="nr-ttl"><span class="nr-k">${kick}</span><b class="nr-name">${name}</b></div><div class="nr-chips">${cf.list.map(c => A.chal.chip(c, true)).join("")}</div>${n ? "" : count}</div></div>`;   // v0.3.23: sus fichas ya dicen cuantos retos trae
-      const shuffle = n ? `<button class="chipbtn nr-shuffle" id="chalReroll" type="button" data-tt="${A.T("Barajar: el crupier elige otros retos para la próxima ronda", "Reshuffle: the dealer picks other challenges for the next round")}">${ic("dice", "sm")}<span>${A.T("Barajar", "Reshuffle")}</span>${freeShuf() ? `<em class="nr-free">${ic("spyhole", "sm")}${A.tx(H_FREE)}</em>` : `<em>${CN()}${chalRerollCost()}</em>`}</button>` : "";
+      const kickF = [A.T("Después", "Then"), cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + ((rr % 4) + 1)].join(dot);   // v0.3.48: en una linea (el tema del jefe, en su globo)
+      if (!main) return `<div class="nr far${cf.boss ? " boss" : ""}"${named ? ` data-tt="${topic.replace(/"/g, "&quot;")}"` : ""}>${badge}<span class="nr-ttl"><span class="nr-k">${kickF}</span><b class="nr-name">${name}</b></span><span class="nr-chips">${n ? cf.list.map(c => A.chal.chip(c, true)).join("") : count}</span></div>`;   // v0.3.23: sus fichas ya dicen cuantos retos trae
+      const shuffle = n ? `<button class="gx-btn gho sm nr-shuffle" id="chalReroll" type="button" data-tt="${A.T("Barajar: el crupier elige otros retos para la próxima ronda", "Reshuffle: the dealer picks other challenges for the next round")}">${ic("dice")}<span>${A.T("Barajar", "Reshuffle")}</span>${freeShuf() ? `<em class="nr-free">${ic("spyhole")}${A.tx(H_FREE)}</em>` : `<em>${CN()}${chalRerollCost()}</em>`}</button>` : "";
       const lis = cf.list.map(c => { const hd = c.hid && !c.up, dd = hd ? { kind: "rule", ico: BOSS_IC, n: A.chal.tl("ui_faceDown"), d: A.chal.tl(cf.combo && cf.combo.k === "collector" ? "ui_faceDownColl" : "ui_faceDownWheel") } : A.CHAL[c.id];
-        return `<li class="nr-row k-${dd.kind}"><span class="nr-ic">${ic(dd.ico)}</span><b class="nr-rn">${A.tx(dd.n)}${c.isNew ? ` <span class="ch-new">${A.tx(A.chal.NEW_TAG)}</span>` : ""} <i class="ch-lv">${"●".repeat(c.lv || 1)}</i></b>${c.sealed ? `<em class="nr-have nr-seal">${A.tx(c.sealBy === "pact" ? BT.pact : c.sealBy === "offer" ? BT.sold : BT.seal)}</em>` : ""}<button class="nr-buy${c.sealed ? " hidden" : ""}" type="button" data-r="${rr}" data-id="${c.id}" data-tt="${A.T("Sobornar al crupier: quita este reto de la próxima ronda. Cada soborno encarece los siguientes.", "Bribe the dealer: removes this challenge from the next round. Each bribe makes the next ones pricier.")}">${A.T("Sobornar", "Bribe")}<span class="nr-p">${CN()}${bribePrice(c, cf.boss)}</span></button><p>${A.tx(dd.d)}</p></li>`; }).join("")
+        return `<li class="nr-row k-${dd.kind}"><span class="nr-ic">${ic(dd.ico)}</span><b class="nr-rn">${A.tx(dd.n)}${c.isNew ? ` <span class="ch-new">${A.tx(A.chal.NEW_TAG)}</span>` : ""} <i class="ch-lv">${"●".repeat(c.lv || 1)}</i></b>${c.sealed ? `<em class="nr-have nr-seal">${A.tx(c.sealBy === "pact" ? BT.pact : c.sealBy === "offer" ? BT.sold : BT.seal)}</em>` : ""}<button class="nr-buy${c.sealed ? " hidden" : ""}" type="button" data-r="${rr}" data-id="${c.id}" data-tt="${A.T("Sobornar al crupier: quita este reto de la próxima ronda. Cada soborno encarece los siguientes.", "Bribe the dealer: removes this challenge from the next round. Each bribe makes the next ones pricier.")}"><span>${A.T("Sobornar", "Bribe")}</span><em class="nr-p">${CN()}${bribePrice(c, cf.boss)}</em></button><p>${A.tx(dd.d)}</p></li>`; }).join("")
         + done.map(id => `<li class="nr-row done"><span class="nr-ic">${ic(A.CHAL[id].ico)}</span><b class="nr-rn">${A.tx(A.CHAL[id].n)}</b><em class="nr-have">${A.T("Sobornado", "Bribed")}</em></li>`).join("")
         + (cf.nulled || []).map(id => `<li class="nr-row done"><span class="nr-ic">${ic(A.CHAL[id].ico)}</span><b class="nr-rn">${A.tx(A.CHAL[id].n)}</b><em class="nr-have">${A.tx(NULLED)}</em></li>`).join("");   // los que quita tu Comodin
-      return `<div class="nr${cf.boss ? " boss" : ""}"><div class="nr-head">${badge}<div class="nr-ttl"><span class="nr-k">${kick}${dot}${A.T("Objetivo", "Target")} ${baseTarget() > target() && rr === roundNo() ? `<s class="of-was">${A.fmt(baseTarget())}</s> ` : ""}<b>${A.fmt(target())}</b></span><b class="nr-name">${name}</b></div>${count}${shuffle}</div>${lis ? `<ul class="nr-list n${Math.min(6, n + done.length)}">${lis}</ul>` : `<p class="nr-clean">${A.T("Ronda limpia: solo tú y el mapa.", "A clean round: just you and the map.")}</p>`}</div>`;
+      const goal = `${baseTarget() > target() && rr === roundNo() ? `<s class="of-was">${A.fmt(baseTarget())}</s> ` : ""}${A.fmt(target())}`;
+      const kick1 = [A.T("Próxima ronda", "Next round"), cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + ((rr % 4) + 1)].join(dot);   // el tema del jefe, bajo su nombre (en el rotulo eran tres lineas)
+      return `<div class="nr${cf.boss ? " boss" : ""}"><span class="gx-eyb nr-k">${kick1}</span><div class="nr-head">${badge}<span class="nr-ttl"><b class="nr-name">${name}</b>${named ? `<i class="nr-sub">${topic}</i>` : ""}</span></div>
+        <div class="gx-lead-row nr-goal"><span>${A.T("Objetivo", "Target")}</span><s></s><b>${goal}</b></div>
+        ${lis ? `<ul class="nr-list">${lis}</ul>` : `<p class="nr-clean">${A.T("Ronda limpia: solo tú y el mapa.", "A clean round: just you and the map.")}</p>`}${shuffle}</div>`;
     }).join("");
-    return `<div class="tb-next">${html}</div>`;
+    return `<div class="tb-next gx-paper">${html}</div>`;
   };
   /* v0.3.1: sobornar es caro y el crupier sube la tarifa. Base: 3 + 2 por nivel del truco (+1 si es de mapa), el doble en el jefe, y sube con el acto
      y la ascension como todo lo demas. Cada soborno pagado en la expedicion encarece los siguientes un 50 % del precio base (barajar no lo reinicia).
@@ -1301,6 +1307,7 @@ window.AIQ = window.AIQ || {};
      duerme. El tamano llega por ResizeObserver en pixeles reales: nada se mide por fotograma. Con "reducir movimiento", un brillo quieto (salvo
      en la secuencia del cofre) */
   const GLINT = `<span class="lg-halo"></span><span class="lg-clip"><canvas></canvas></span>`;
+  const ASC_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_boss"];   // la ficha de cada Ascension (como en js/hub.js)
   const RMQ = matchMedia("(prefers-reduced-motion: reduce)");           // una sola consulta: leer .matches no cuesta nada
   const Gold = (() => {
     const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], WH = [255, 255, 255], G0 = [255, 246, 200], G1 = [255, 217, 90], PER = 3.6, DUR = 0.9;
@@ -1453,18 +1460,24 @@ window.AIQ = window.AIQ || {};
     /* v0.3.23: con la mesa llena (tight) la bandeja y los huecos se aprietan para que todo quepa a tamano real en 1280x800 (css/campamento.css) */
     const chip = chest ? ic("chest") : A.blind(cf.boss ? "boss" : run.round === 0 ? "small" : "big", cf.boss ? BOSS_IC : run.round === 0 ? "s_pin" : "s_compass");
     const goB = chest ? A.T("Continuar sin elegir", "Continue without picking") : doom ? DOOM : A.T("Siguiente ronda", "Next round");
-    const goI = chest ? `${A.pick6(TAKE)} ${CN()}+${gain(chestSkip())}` : cf.boss ? A.T("Jefe del acto", "Act boss") + (cf.combo ? " · " + A.tx(cf.combo.n) : "") : A.T("Ronda", "Round") + " " + (run.round + 1) + " · " + topic;
-    C().dialog(`<div class="table mesa d${dense}${chest ? " chest" : ""}${run.stock.length > 3 ? " many" : ""}${full >= 2 && !chest ? " tight" : ""}">
-      <header class="tb-head"><div class="tb-title"><span class="tag">${A.tx(info.n)} · ${actSub(info)}</span><h2>${chest ? A.T("Cofre del jefe", "Boss chest") : A.T("Campamento", "Camp")}</h2>${run.asc ? `<p class="tb-ascd" ${A.ttAttr("A" + run.asc + " · " + A.adv.ascInfo(run.asc).n, A.adv.ascInfo(run.asc).d + (A.adv.ascInfo(run.asc).k ? " " + A.adv.ascInfo(run.asc).k : ""))}><b>A${run.asc} · ${A.adv.ascInfo(run.asc).n}</b></p>` : ""}</div>
-        ${routeHtml()}<div class="tb-right"><button class="chipbtn tb-menu" id="shopMenu" type="button">${A.icon("u_pause", "sm")}<span>${A.T("Menú", "Menu")}</span></button><div class="tb-coins" id="shopCoins">${CN()}<b>${run.coins}</b></div></div></header>
-      ${nextHtml()}
+    const goI = chest ? `${A.pick6(TAKE)} ${CN()}+${gain(chestSkip())}` : cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + (run.round + 1);   // v0.3.48: el tema y el nombre del jefe ya estan en el boleto, justo encima
+    /* v0.3.48: Naipe de gala, "el boleto de la ronda" (mesa de diseno, Campamento A). 12 columnas: el fieltro (1-8) con las cartas rectas y del mismo
+       tamano, la Barra en tres placas iguales y la mochila; a la derecha (9-12) el boleto de papel de la proxima ronda y, debajo, el boton.
+       La descripcion de las cartas va siempre entera (usuario): si no cabe, la mesa entera baja de escala (A.fitK), nunca se corta */
+    const ascI = run.asc ? A.adv.ascInfo(run.asc) : null;
+    const ascChip = ascI ? `<span class="tb-asc" ${A.ttAttr(A.T("Ascensión", "Ascension") + " " + run.asc + " · " + ascI.n, ascI.d + (ascI.k ? " " + ascI.k : ""))}>${ic(ASC_CHIP[run.asc])}<em>${run.asc}</em></span>` : "";
+    C().dialog(`<div class="table mesa gx-camp d${dense}${chest ? " chest" : ""}${run.stock.length > 3 ? " many" : ""}${full >= 2 && !chest ? " tight" : ""}">
+      <header class="tb-head"><div class="tb-title"><span class="gx-eyb tag">${A.tx(info.n)} · ${actSub(info)}</span><span class="tb-trow"><h2 class="gx-t-m">${chest ? A.T("Cofre del jefe", "Boss chest") : A.T("Campamento", "Camp")}</h2>${ascChip}</span></div>
+        ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins">${CN()}<b>${run.coins}</b></div></div></header>
+      <section class="tb-shop gx-pnl">${note ? `<p class="tb-note">${note}</p>` : ""}<section class="offers" style="--n:${Math.max(1, run.stock.length)}">${cards}${chest ? "" : `<div class="tb-actions"><button class="tb-deck" id="rerollBtn" type="button"><span class="tb-dk">${ic("dice")}</span><span>${A.T("Cambiar cartas", "New cards")}</span><em>${rc ? CN() + rc : A.T("gratis", "free")}</em></button></div>`}</section></section>
       ${chest ? "" : supHtml()}
-      <section class="tb-shop">${note ? `<p class="tb-note">${note}</p>` : ""}<section class="offers">${cards}${chest ? "" : `<div class="tb-actions"><button class="chipbtn" id="rerollBtn" type="button">${ic("dice", "sm")}<span>${A.T("Cambiar cartas", "New cards")}</span><em>${rc ? CN() + rc : A.T("gratis", "free")}</em></button></div>`}</section></section>
-      <footer class="tb-tray">
-        <div class="tray-col tr-relics"><h4>${A.T("Reliquias", "Relics")} <b>${B.length}/${slots}</b>${pactSeal}</h4><div class="tray-row">${relics}</div></div>
-        <div class="tray-col tr-tools"><h4>${A.T("Herramientas", "Tools")}</h4><div class="tray-row">${tools}</div></div>
-        <div class="tray-col tr-prov"><h4>${A.T("Provisiones", "Provisions")} <b>${run.lives}/${run.maxLives}</b></h4><div class="tray-row hearts">${hearts()}</div></div>
-        <button class="go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span><span class="go2-ar">${A.icon("u_next", "sm")}</span></button></footer></div>`, "tablewrap");
+      <footer class="tb-tray gx-pnl">
+        <div class="tray-col tr-relics"><h4 class="gx-eyb">${A.T("Reliquias", "Relics")} <b>${B.length}/${slots}</b>${pactSeal}</h4><div class="tray-row">${relics}</div></div>
+        <div class="tray-col tr-tools"><h4 class="gx-eyb">${A.T("Herramientas", "Tools")}</h4><div class="tray-row">${tools}</div></div>
+        <div class="tray-col tr-prov"><h4 class="gx-eyb">${A.T("Provisiones", "Provisions")} <b>${run.lives}/${run.maxLives}</b></h4><div class="tray-row hearts">${hearts()}</div></div></footer>
+      ${nextHtml()}
+      <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button></div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
+    if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
     Gold.mount($("dlg"));                                                // el brillo de oro de las legendarias (mesa y mochila)
     document.querySelectorAll(".offer").forEach((el, i) => { const btn = el.querySelector(".buy"); if (btn) btn.onclick = () => buy(el, chest); if (!chest) el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && A.dealer.campHover) A.dealer.campHover(i); }); });
     /* la mochila: pasar el raton abre la carta grande (con su boton de vender); un clic la deja fija. Con una carta de la mesa esperando
@@ -2471,6 +2484,7 @@ window.AIQ = window.AIQ || {};
     C().map.setStyle(mapStyleFor()); A.adv.hideBars();
   }
   function endRun(win) {
+    if (A.coverMap) A.coverMap("camp", false);
     if (run.practice) return endPractice(win);
     const P = A.profile.get(), bonus = run.cleared * 1000 + (run.won ? 2500 : 0), final = finalOf(run), wasRanked = run.ranked, board = run.board, daily = !!(wasRanked && board);
     /* el Reto diario tiene sus propias tablas (Hoy y Ayer): no cuenta para el record ni para la tabla "Aventura" (solo expediciones del modo Aventura) */

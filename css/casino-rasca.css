@@ -1,14 +1,5 @@
 /* Geolite - Rasca y gana (v0.2.52): la carta de la Barra (tarjeta marfil con cenefa de laminas de plata) y la mesa de 1920x1080 (se escala con K/4, K entero: cada pixel del arte = K pixeles de pantalla).
    Maqueta aprobada en tools/art/rasca (maqueta.css). Todo cuelga de .rou.rasca (la capa que comparten las pantallas de casino: rouShell). */
-.table.mesa .sup.bet.bt-rasca { background: radial-gradient(ellipse at 50% 38%, #fbf1d4 0%, #e7d4a2 55%, #c4a468 100%); --sc: #8a5a30; }
-.table.mesa .sup.bet.bt-rasca::before { background: url(../assets/rasca/cenefa.png) top left / 12px 10px repeat-x, url(../assets/rasca/cenefa.png) bottom left / 12px 10px repeat-x; image-rendering: pixelated; }
-.table.mesa .sup.bet.bt-rasca .sp-ic { background: radial-gradient(circle at 50% 36%, #8a5a30, #2a1408 84%); }
-.table.mesa .sup.bet.bt-rasca .sp-t b { color: #4a2308; text-shadow: 0 1px 0 rgba(255, 255, 255, .7); }
-.table.mesa .sup.bet.bt-rasca .sp-t > i { color: rgba(58, 32, 10, .88); }
-.table.mesa .sup.bet.bt-rasca .bt-ra { background: #8a1f3f; color: #ffe9a6; text-shadow: none; }
-.table.mesa .sup.bet.bt-rasca .bt-stake { cursor: pointer; }
-.table.mesa .sup.bet.bt-rasca .bt-stake:hover { filter: brightness(1.25); }
-.table.mesa .sup.bet.bt-rasca .ic-bet_rasca { filter: none; }
 
 .rou.rasca .ra-stage { --amb: #ffd27a; --gold: #ffd95a; position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; image-rendering: pixelated; user-select: none; touch-action: none; }
 .rou.rasca .ra-stage img, .rou.rasca .ra-stage canvas { image-rendering: pixelated; display: block; }
@@ -159,12 +150,8 @@ html.reduce-motion .rou.rasca .ra-dealerbox.bob .ra-dealer, html.reduce-motion .
 .rou.rasca .rou-wash { display: none; }
 .rou.rasca .ra-stage { overflow: hidden; }
 .rou.rasca.out .ra-stage { transition: none; }
-.table.mesa .sup.bet.bt-rasca.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
 .rp-rasca { background: #c9a35e; }
 html.ra-pad #padCur { display: none; }
-.table.mesa .sup.bet.bt-rasca .bt-res, .table.mesa .sup.bet.bt-rasca.win .bt-res { color: #4a2308; text-shadow: none; }
-.table.mesa .sup.bet.bt-rasca .bt-res b { color: #4a2308; text-shadow: 0 1px 0 rgba(255, 255, 255, .7); }
-.table.mesa .sup.bet.bt-rasca.done.win .bt-res b { color: #8a1f3f; }
 .rou.rasca .ra-pill, .rou.rasca .ra-stage.scratching .ra-pill { cursor: default; } .rou.rasca .ra-pill:hover { filter: none; }
 .rou.rasca .ra-row[data-tier="x5"] .ra-ics span { box-shadow: inset 0 0 0 3px #1d0a3d, 0 0 0 4px #ffd95a, 0 0 0 8px #1d0a3d; }
 html.soft-flash .rou.rasca .ra-stage.flash::after { animation-name: ra-flash-soft; }

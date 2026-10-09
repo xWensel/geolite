@@ -1,12 +1,5 @@
 /* Geolite - El globo (v0.2.51): la carta de la Barra y la mesa. La escena corre a 640x360 px nativos (canvas) y se muestra a un factor ENTERO n (x3 en 1920x1080); el escenario de 1920x1080
    (HUD y marco) se escala con n/3, de modo que el canvas siempre llena el escenario. Maqueta aprobada en tools/art/globo. Todo cuelga de .rou.globo (la capa de rouShell). */
-.table.mesa .sup.bet.bt-globo { background: linear-gradient(180deg, #1f2f86 0%, #4a3fa8 40%, #b8488a 78%, #ff9a5e 100%); --sc: #ffb88a; }
-.table.mesa .sup.bet.bt-globo::before { background: url(../assets/globo/cenefa_top.png) top left / 24px 11px repeat-x, url(../assets/globo/cenefa_bot.png) bottom left / 24px 9px repeat-x; image-rendering: pixelated; }
-.table.mesa .sup.bet.bt-globo .bt-gl { background: #e8a91e; color: #3a2606; text-shadow: none; }
-.table.mesa .sup.bet.bt-globo .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-globo .bt-stake:hover { filter: brightness(1.25); }
-.table.mesa .sup.bet.bt-globo .ic-bet_globo { filter: none; }
-.table.mesa .sup.bet.bt-globo .sp-t b { text-shadow: 0 2px 0 #1a0a40; } .table.mesa .sup.bet.bt-globo .sp-t > i { text-shadow: 0 1px 0 rgba(26, 10, 64, .8); }
-.table.mesa .sup.bet.bt-globo.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
 .rp-globo { background: #ff9a5e; }
 
 .rou.globo { background: #05051a; }

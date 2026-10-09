@@ -55,9 +55,9 @@
 @keyframes pkSold { 0% { transform: none; } 30% { transform: translateY(-6px) scale(1.02); opacity: 1; } 100% { transform: translateY(30px) scale(.82) rotate(4deg); opacity: 0; } }
 @keyframes pkCoin { 50% { transform: scale(1.35); background: #ffd98a; color: #16241c; } }
 /* la carta pequena mientras se lee la grande: levantada, con el aro dorado */
-.table.mesa .tr-relic .tr-face.pk-on, .table.mesa .tr-tool.pk-on .tr-face { transform: translateY(-14px); box-shadow: 0 0 0 2px #16241c, inset 0 0 0 3px var(--rc, #6c8cff), 0 0 0 5px #ffd98a, 0 0 24px 5px rgba(255, 208, 107, .55), 0 10px 0 rgba(0, 0, 0, .35); }
-.table.mesa .tr-tool { cursor: pointer; } .table.mesa .tr-tool .tr-face { cursor: pointer; } .table.mesa .tr-tool:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 10px; }
-.table.mesa .tr-tool:hover .tr-face { transform: translateY(-6px) rotate(-2deg); }
+.table.mesa .tr-relic .tr-face.pk-on, .table.mesa .tr-tool.pk-on .tr-face { transform: translateY(-6px); box-shadow: inset 0 0 0 2px #0a140f, inset 0 0 0 4px var(--rc, #6c8cff), 0 0 0 3px #f8b449, 0 0 18px 3px rgba(255, 208, 107, .5); }
+.table.mesa .tr-tool { cursor: pointer; } .table.mesa .tr-tool .tr-face { cursor: pointer; } .table.mesa .tr-tool:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.table.mesa .tr-tool:hover .tr-face { transform: translateY(-4px); }
 .ab-perk { cursor: pointer; } .ab-perk.pk-on { box-shadow: 0 0 0 2px #ffd95a, 0 0 0 4px rgba(255, 217, 90, .3); }
 html.reduce-motion .pk-felt .ic, html.reduce-motion .pk-gold, html.reduce-motion .pk-card.r2::after { animation: none; }
 @media (prefers-reduced-motion: reduce) { .pk-felt .ic, .pk-gold, .pk-card.r2::after { animation: none; } }

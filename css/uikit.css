@@ -69,14 +69,6 @@ html.no-shake #app.ch-glitch #map, html.no-shake #app.ch-glitch #fx { animation-
 body.vd-on .cx-toast { display: none; }
 /* la marca del HUD sobra en el menu principal (ya esta el logo grande) */
 body.title-on .brand-sh { opacity: 0; pointer-events: none; }
-@media (max-width: 1000px) {
-  /* Campamento en pantallas medianas: cabecera en dos filas, cartas mas pequenas y bandeja compacta */
-  .tb-head { grid-template-columns: 1fr auto; row-gap: 6px; } .tb-head .route { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
-  .tb-right .tb-menu span { display: none; }
-  .table .offers { gap: 10px; } .table .offer.pc { --w: min(calc(30 * var(--vw)), calc(40 * var(--vh)) * .78, 300px); }
-  .tb-tray { grid-template-columns: 1fr auto auto; } .tb-tray .go-next { grid-column: 1 / -1; min-width: 0; width: 100%; }
-  .offer .of-ctr { max-width: 94%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-}
 /* ticket de resultado: por debajo del marcador (antes lo tapaba en pantallas de 720-800 px de alto) y compacto si falta altura */
 @media (min-width: 901px) {
   #dlg.side { place-self: start end; margin: 148px 24px 0 0; max-height: calc(calc(100 * var(--vh)) - 160px); overflow-y: auto; scrollbar-width: none; }
@@ -104,17 +96,8 @@ body.title-on .brand-sh { opacity: 0; pointer-events: none; }
 /* Comun a movil y a ventanas de escritorio bajas (<=760px de alto, p. ej. 720p/768p):
  * NO se apila la bandeja aqui (eso multiplicaria su alto x3, que es justo lo que
  * se queria evitar) - solo texto/tarjetas mas compactos. */
-@media (max-width: 700px), (max-height: 760px) {
-  .tb-note { font-size: 17px; } .tray-row { flex-wrap: wrap; }
-  .table .offers { flex: none; flex-wrap: wrap; } .table .offer.pc { --w: min(calc(44 * var(--vw)), 260px); height: auto; }
-  .tb-head { grid-template-columns: minmax(0, 1fr) auto; } .tb-head .route { display: none; } .tb-right { gap: 8px; } .tb-coins { padding: 4px 12px 4px 6px; } .tb-coins b { font-size: 22px; } .tb-coins .ic { width: 28px; height: 28px; }
-  .tb-next-row { max-width: 100%; }
-}
 /* Solo en movil de verdad (ancho estrecho): aqui si hace falta apilar la bandeja
  * en 2 filas porque 4 columnas no caben de ancho, aunque sea mas alta. */
-@media (max-width: 700px) {
-  .tb-tray { grid-template-columns: 1fr 1fr; margin: 0 -14px; padding-left: 14px; padding-right: 14px; } .tb-tray .go-next { grid-column: 1 / -1; min-width: 0; width: 100%; }
-}
 /* movil y tablet: el ticket es una hoja inferior sobre el pie de pagina; mientras se ve, el resto del HUD de partida se aparta */
 @media (max-width: 900px) {
   body.tk-on #advBar, body.tk-on #toolBar, body.tk-on .rail-sh { display: none; }
@@ -127,7 +110,6 @@ body.title-on .brand-sh { opacity: 0; pointer-events: none; }
   #dlg.side .tk-title { font-size: 20px; margin-top: 10px; } #dlg.side .tk-km { font-size: 34px; margin-top: 0; } #dlg.side .tk-total { margin: 4px 0 6px; } #dlg.side .tk-total .odo { font-size: 30px; }
   body.tk-on #lvlText { display: none; }
 }
-@media (max-width: 480px) { .tb-title h2 { font-size: 26px; white-space: nowrap; } .tb-title .tag { font-size: 13px; } }
 /* el pais bajo el nombre: bien visible en todas las preguntas (antes era una linea diminuta) */
 #askSub, html[data-skin="casino"] #askSub { font-family: var(--serif); font-style: normal; font-weight: 800; font-size: clamp(19px, calc(2.1 * var(--vw)), 28px); letter-spacing: .01em; color: #1d6b42; margin-top: 3px; line-height: 1.1; }
 html[data-skin="casino"] #askSub { font-family: inherit; }
@@ -186,15 +168,6 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 }
 
 /* Campamento en movil horizontal: las tres cartas en una fila (se desplaza si hace falta) */
-@media (max-height: 520px) and (orientation: landscape) {
-  .table { padding-top: 8px; gap: 4px; }
-  .table .offers { flex-wrap: nowrap; gap: 8px; padding: 6px 0; }
-  .table .offer.pc, .table.chest .offer.pc { --w: min(calc(29 * var(--vw)), 200px); height: auto; padding: 26px 8px 8px; transform: none !important; animation: none; }
-  .table .offer.pc .of-ico { min-height: 44px; max-height: 70px; flex: none; height: 62px; }
-  .table .offer.pc .of-n { font-size: 18px; } .table .offer.pc p { font-size: 14px; } .table .offer.pc .buy { font-size: 16px; padding: 4px 8px; }
-  .table .offer.pc .of-r { font-size: 13px; } .table .ix b { font-size: 18px; } .table .ix.br { display: none; }
-  .tb-note { font-size: 15.5px; } .tb-tray { grid-template-columns: 2fr 1fr auto; } .tb-tray .go-next { grid-column: auto; width: auto; padding: 8px 16px; font-size: 16px; }
-}
 
 /* marca Geolite (escudo de pixel art en vez de la antigua rosa vectorial) */
 .brand-rose, .menu-rose { image-rendering: pixelated; object-fit: contain; }
@@ -226,7 +199,6 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
    El nombre tiene un hueco de dos lineas centrado; si una palabra no cabe, js/adventure.js (fitToolNames) reduce la letra. .aim = el reticulo (no el raton) esta encima */
 .tool.pc-hand { width: 128px; margin: 0 -3px; padding: 10px 10px 8px; grid-template-columns: minmax(0, 1fr); }   /* minmax(0,..): una palabra larga no ensancha la columna, desborda y la letra se reduce */
 .tool.pc-hand .tl-n { display: grid; align-items: center; justify-self: stretch; width: 100%; height: 34px; line-height: 17px; text-align: center; text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: manual; }
-.table .offer.pc { padding-top: clamp(16px, calc(2.6 * var(--vh)), 26px); }
 
 /* titulos de cancion completos (antes se cortaban con "..." en Ajustes) */
 .np-t { flex-wrap: wrap; row-gap: 2px; min-height: 30px; align-content: center; }
@@ -253,7 +225,6 @@ html body .set-card > h3 { font-size: 15.5px; } html body .langgrid > button { f
 html body .adv-chal-h { font-size: 15.5px; } html body .ab-act { font-size: 15.5px; } html body .ch-chip > b { font-size: 15.5px; } html body .ch-chip .ch-lv { font-size: 14px; }
 html body .tk-band > span { font-size: 15.5px; } html body .tk-from { font-size: 19px; } html body .tk-total > span { font-size: 15.5px; } html body .tk-cx > span, html body .tk-cx > b { font-size: 15.5px; }
 html body .nx-n, html body .nx-none, html body .nx-hint, html body .nx-have, html body .ch-buy { font-size: 15.5px; } html body .nx-body > p { font-size: 18px; }
-html body .tb-note { font-size: 19px; } html body .sp-t > i { font-size: 17px; } html body .of-r { font-size: 15.5px; } html body .offer > p { font-size: 18px; line-height: 1.2; } html body .tray-col > h4 { font-size: 15.5px; } html body .inv-perk > em { font-size: 15.5px; }
 html body .tour-txt { font-size: 19px; } html body .dl-bubble p { font-size: inherit; }
 
 /* ==== v0.22: columna izquierda (placa de la pregunta, marcador de partida y logros) para dejar libre el mapa ==== */
@@ -317,16 +288,8 @@ body.tk-on .rail-sh { display: none; }
 
 /* ==== Campamento sin desplazarse (escritorio): las cartas SIEMPRE en una fila (con 4-5 cartas se estrechan en vez de bajar a otra fila),
    y la bandeja de reliquias/herramientas tampoco se parte en dos lineas. A.fitK encoge el conjunto si aun asi no cabe. ==== */
-@media (min-width: 900px) and (min-height: 520px) {
-  .table .offers { flex-wrap: nowrap; }
-  .table .offer.pc { flex: 0 1 var(--w); min-width: 0; }
-  .table .tray-row { flex-wrap: nowrap; }
-}
 /* mientras se reparten, las cartas entran desde abajo: en escritorio no deben hacer aparecer (y parpadear) una barra de desplazamiento */
 @media (min-width: 900px) and (min-height: 520px) { #dlg.tablewrap { overflow: hidden; } }
-/* movil: el cofre usaba el ancho de escritorio (21vw = cartas de ~80 px con el texto recortado) */
-@media (max-width: 700px) { .table.chest .offer.pc { --w: min(calc(44 * var(--vw)), 260px); } }
-@media (max-width: 1000px) { .table .offer .of-ctr { max-width: calc(100% + 8px); } }
 
 .lb-tries { display: inline-flex; gap: 3px; align-self: center; } .lb-tries i { width: 8px; height: 8px; border-radius: 50%; background: rgba(242, 233, 214, .2); } .lb-tries i.on { background: #ffe08a; }
 .lb li.me .lb-tries i { background: rgba(22, 36, 28, .25); } .lb li.me .lb-tries i.on { background: #16241c; }

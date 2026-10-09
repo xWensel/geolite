@@ -1,8 +1,8 @@
-/* ==== v0.35: Campamento premium y ruta de la expedicion ====
+/* ==== v0.35: ruta de la expedicion, pan de oro de las legendarias y pantallas de los juegos de la Barra ====
    - Ruta (A.adv.road en js/adventure.js): "bar" arriba del Campamento (12 rondas + infinito, lo jugado en oro, la proxima con la chincheta)
      y "plan" en las pantallas de Aventura y Reto diario (un panel por acto). El jefe es la chistera del crupier (assets/icons/boss_hat.webp).
-   - Campamento (.table.mesa): proxima ronda compacta con su tema, suministros en placas de casino, cartas grandes con la letra ajustada
-     a su hueco, mochila de cartas pequenas (clic: levantar y vender) y el boton de "estoy listo" con la ficha de la ronda que viene.
+   - La mesa del Campamento (.table.mesa) esta en css/gala.css (CAMPAMENTO, v0.3.48: Naipe de gala). Aqui se quedan el marco de oro de la
+     legendaria (en la mesa y en la mochila), su secuencia al elegirla en el cofre y las pantallas de los juegos de casino.
    Todo en px del lienzo de 1280x720: la escala la pone --k (zoom), como en el resto de menus. */
 
 /* ---------------------------------------------------------------- RUTA: comun */
@@ -69,192 +69,7 @@
 .rd.plan .rd-n.inf .rd-ic b { font-size: 34px; }
 /* Reto diario: el mismo plano, mas pequeno (con el orden barajado del dia) */
 
-/* ---------------------------------------------------------------- CAMPAMENTO */
-/* lo que va en una sola linea no necesita el reparto "pretty" de #dlg (que se queda para las descripciones): maquetar sale mas barato */
-.rd, .tb-head, .nr-head, .nr-rn, .nr-buy, .tray-col h4, .tr-card, .sp-t b, .sup em, .go2, .of-r, .tb-actions { text-wrap: wrap; }
-.table.mesa { gap: 7px; padding-top: 8px; }
-.table.mesa .tb-head { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; }
-.table.mesa .tb-head > .rd { grid-column: 2; grid-row: 1; justify-self: center; }
-.table.mesa .tb-head > .tb-right { grid-column: 3; grid-row: 1; }
-.table.mesa .tb-title { min-width: 0; } .table.mesa .tb-title .tag { white-space: normal; }
-.table.mesa .tb-title h2 { font-size: 38px; margin-top: 4px; }
-
-/* proxima ronda: el tema (o el jefe) arriba y cada reto en dos lineas: nombre y soborno, y debajo lo que hace */
-.table.mesa .tb-next { display: flex; flex-direction: column; gap: 6px; margin: 0; }
-.nr { display: flex; flex-direction: column; gap: 6px; padding: 7px 10px 8px; border-radius: 14px; background: rgba(10, 26, 18, .86);
-  box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 2px rgba(255, 217, 138, .26), 0 6px 0 rgba(0, 0, 0, .35); }
-.nr.boss { background: linear-gradient(180deg, rgba(92, 24, 40, .94), rgba(30, 10, 14, .94)); box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 3px #fe5f55, 0 0 26px rgba(254, 95, 85, .3), 0 6px 0 rgba(0, 0, 0, .35); }
-.nr-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.nr-badge { flex: none; display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 10px; background: #17553a;
-  box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 2px #ffd98a, inset 0 -4px 0 rgba(0, 0, 0, .25), 0 4px 0 rgba(0, 0, 0, .35); }
-.nr-badge .ic { width: 33px; height: 33px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
-.nr.boss .nr-badge { background: radial-gradient(circle at 50% 38%, #c03a4f, #6e1a28 72%); box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 3px #fe5f55, 0 4px 0 rgba(0, 0, 0, .35); }
-.nr.boss .nr-badge .ic { width: 38px; height: 38px; }
-.nr-ttl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.nr-k { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #f8b449; line-height: 1.15; }
-.nr-k i { font-style: normal; margin: 0 7px; opacity: .55; } .nr-k b { color: #fff; font-weight: 400; }
-.nr.boss .nr-k { color: #ff9d94; }
-.nr-name { font-family: var(--serif); font-weight: 900; font-size: 24px; line-height: 1; color: #fff; text-shadow: 0 3px 0 rgba(5, 12, 8, .6); }
-.nr-n { flex: none; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; color: #ffd98a; background: #16241c; box-shadow: inset 0 0 0 2px #ffd98a; white-space: nowrap; }
-.nr.boss .nr-n { color: #ff9d94; box-shadow: inset 0 0 0 2px #fe5f55; }
-.nr-shuffle.chipbtn { flex: none; font-size: 12px; padding: 7px 14px 6px; gap: 8px; white-space: nowrap; }
-.nr-shuffle .ic { width: 20px; height: 20px; } .nr-shuffle em { display: inline-flex; align-items: center; gap: 3px; } .nr-shuffle em .ic { width: 14px; height: 14px; }
-.nr-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.nr-list.n1 { grid-template-columns: minmax(0, 1fr); } .nr-list.n2, .nr-list.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* 4 retos: 2x2 (en 4 columnas se partian los nombres) */
-.nr-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "ic name buy" "ic desc desc"; column-gap: 10px; row-gap: 2px; align-items: center;
-  padding: 5px 7px 6px 6px; border-radius: 10px; background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
-.nr-ic { grid-area: ic; align-self: start; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #17553a; box-shadow: 0 0 0 2px #0a140f; }
-.nr-ic .ic { width: 23px; height: 23px; image-rendering: pixelated; }
-.nr-row.k-map .nr-ic { background: #27306b; } .nr-row.k-ptr .nr-ic { background: #6b2f4e; } .nr-row.k-rule .nr-ic { background: #6b5a1f; } .nr-row.k-wall .nr-ic { background: #6b1f4f; }
-.nr-rn { grid-area: name; min-width: 0; font-family: var(--serif); font-weight: 800; font-size: 18px; line-height: 1.05; color: #fff; }
-.nr-rn .ch-lv { font-style: normal; font-size: 12px; letter-spacing: 2px; color: #ffd98a; margin-left: 2px; }
-.nr-row > p { grid-area: desc; margin: 0; font-family: var(--serif); font-size: 15.5px; line-height: 1.12; color: rgba(243, 237, 220, .9); }
-/* sobornar: a la altura del nombre del reto, estrecho */
-.nr-buy { grid-area: buy; justify-self: end; display: inline-flex; align-items: center; gap: 6px; padding: 3px 3px 3px 10px; border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #ffd98a; background: #16241c;
-  box-shadow: inset 0 0 0 2px #f8b449, 0 3px 0 rgba(0, 0, 0, .45); transition: transform .14s var(--spring); }
-.nr-buy:hover { transform: translateY(-2px) scale(1.04); } .nr-buy:active { transform: scale(.97); }
-.nr-p { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px 1px 5px; border-radius: 999px; background: #f8b449; color: #16241c; font-weight: 700; font-size: 13px; letter-spacing: .02em; }
-.nr-p .ic { width: 15px; height: 15px; }
-.nr-row.done { opacity: .55; grid-template-areas: "ic name buy"; } .nr-have { grid-area: buy; font-style: normal; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #5fd6b8; }
-.nr-clean { margin: 0; font-family: var(--serif); font-size: 17px; color: rgba(243, 237, 220, .75); }
-/* despues (Ojo en el cielo): la ronda siguiente en una linea */
-.nr.far { padding: 4px 10px 4px; opacity: .82; }
-.nr.far .nr-badge { width: 28px; height: 28px; border-radius: 7px; } .nr.far .nr-badge .ic { width: 22px; height: 22px; }
-/* tanda 9 (S10): mochila llena: la carta elegida brilla y las reliquias de la mochila esperan a que elijas cual dejas */
-/* tanda 13: el hueco del Pacto (lacrado), el Pacto que no se puede vender y los botones de la Oferta */
-/* 0.2.23: el Pacto no ocupa hueco: lacre de cera junto al contador de Reliquias (sin cambiar la altura del titulo) */
-.table.mesa .tr-relic.tr-pact { flex: none; align-self: center; width: 26px; height: 26px; margin: -8px 0 -8px 2px; }
-.table.mesa .tr-pact .tr-face { border-radius: 50%; background: radial-gradient(circle at 36% 32%, #ff7b6b, #c2372e 48%, #8e1f19 78%); box-shadow: 0 0 0 2px #16241c, inset 0 0 0 2px rgba(255, 217, 138, .55), inset -2px -3px 0 rgba(0, 0, 0, .25), 0 2px 0 rgba(0, 0, 0, .4); }
-.table.mesa .tr-pact .tr-face .ic { width: 18px; height: 18px; filter: drop-shadow(0 1px 0 rgba(22, 36, 28, .5)); }
-.table.mesa .tr-relic.tr-pact:hover .tr-face { transform: translateY(-2px) rotate(-8deg); } .table.mesa .tr-relic.tr-pact:hover .tr-face .ic { transform: none; }
-.table.mesa .tr-relic.tr-pact .tr-face.pk-on { transform: translateY(-3px) scale(1.1); box-shadow: 0 0 0 2px #16241c, inset 0 0 0 2px rgba(255, 217, 138, .55), 0 0 0 4px #ffd98a, 0 0 14px 3px rgba(255, 208, 107, .5); }
-.table.mesa .tr-slot.pact { position: relative; } .table.mesa .tr-slot.pact::after { content: ""; position: absolute; right: 4px; bottom: 4px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff7b6b, #a8231b 70%); box-shadow: 0 0 0 1.5px #16241c; }
-.table.mesa .tr-sell.off { opacity: .55; cursor: not-allowed; font-size: 11px; }
-.table.mesa .sup.bet .bt-n { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; background: #8e2a26; min-width: 38px; } .table.mesa .sup.bet .bt-n span { font: 700 11px/1 var(--mono, monospace); color: #ffd98a; display: inline-flex; align-items: center; gap: 2px; } .table.mesa .sup.bet .bt-n span .ic { width: 12px; height: 12px; }
-/* tanda 12 (S11): la vitrina, una cuarta carta con la legendaria del acto */
-.offer.pc.vit .of-r { color: #b8741a; }
-.offer.swap-src { box-shadow: 0 0 0 3px #f8b449, 0 0 26px rgba(248, 180, 73, .55); }
-.tr-relic.swap-pick .tr-face { outline: 3px solid #c2372e; outline-offset: 1px; animation: swap-pick 1s ease-in-out infinite; cursor: pointer; }
-.tr-relic.swap-pick::after { content: attr(data-sv); position: absolute; top: -10px; left: 50%; transform: translateX(-50%); padding: 0 6px 0 19px; border-radius: 999px; background: #c2372e url(../assets/icons/coin.webp) 4px 50% / 12px 12px no-repeat; image-rendering: pixelated; color: #ffd98a; font: 800 12px/1.4 var(--mono, monospace); white-space: nowrap; box-shadow: 0 0 0 2px #16241c; pointer-events: none; }   /* 0.2.21: lo que cobras al venderla (antes "⇄") */
-@keyframes swap-pick { 50% { outline-color: #ffd98a; } }
-html.reduce-motion .tr-relic.swap-pick .tr-face { animation: none; }
-.nr.far .nr-k { font-size: 10px; } .nr.far .nr-chips .ch-chip { padding-top: 1px; padding-bottom: 1px; }
-.nr.far .nr-name { font-size: 18px; } .nr.far .nr-ttl { flex: 0 1 auto; }
-.nr-chips { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
-
-/* suministros: placas de casino (tapete con costura dorada). Comprado: placa de oro con el sello de la casa */
-.table.mesa .tb-sup { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; margin: 2px 0 4px; }
-.table.mesa .sup-void { display: block; }
-.table.mesa .sup { --c1: #2c7353; --c2: #1b5640; --c3: #0f3727; --sc: #4fb6a0;
-  position: relative; display: flex; flex: 1 1 0; align-items: center; gap: 10px; min-width: 0; max-width: none; min-height: 48px; padding: 6px 12px 8px 8px;
-  border: 0; border-radius: 12px; cursor: pointer; text-align: left; color: #f6efdc; background: var(--c2);
-  box-shadow: 0 0 0 2px #0a140f, inset 0 3px 0 var(--c1), inset 0 -5px 0 var(--c3), 0 5px 0 2px #0a140f; transition: transform .2s var(--spring), box-shadow .2s; }
-.table.mesa .sup::before { content: ""; position: absolute; inset: 5px 5px 8px; border-radius: 8px; border: 2px dashed rgba(255, 255, 255, .18); pointer-events: none; }
-.table.mesa .sup:hover { transform: translateY(-3px); box-shadow: 0 0 0 2px #0a140f, inset 0 3px 0 var(--c1), inset 0 -5px 0 var(--c3), 0 8px 0 2px #0a140f, 0 0 22px rgba(255, 208, 107, .35); }
-.table.mesa .sup:active { transform: translateY(2px); }
-/* tanda 11: la apuesta de la Barra, en tapete rojo; Rojo o negro gira su ruleta y deja el resultado */
-.table.mesa .sup.bet { --c1: #b8433b; --c2: #8e2a26; --c3: #5c1714; --sc: #ff8a70; }
-.table.mesa .sup.bet::before { border-color: rgba(255, 220, 190, .22); }
-.table.mesa .sup.bet .sp-t > i { color: rgba(255, 236, 220, .86); }
-.table.mesa .sup.bet.on { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
-.table.mesa .sup.bet .bt-pick { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; flex: none; }
-.table.mesa .sup.bet .bt-c { padding: 5px 10px 4px; border: 0; border-radius: 8px; font: 900 13px/1 var(--serif); letter-spacing: .03em; text-transform: uppercase; color: #fff; cursor: pointer; box-shadow: 0 0 0 2px #0a140f, inset 0 2px 0 rgba(255, 255, 255, .25), 0 3px 0 2px #0a140f; transition: transform .15s var(--spring); }
-.table.mesa .sup.bet .bt-cr { background: #d63a2f; } .table.mesa .sup.bet .bt-cb { background: #1d1f26; }
-.table.mesa .sup.bet .bt-c:hover { transform: translateY(-2px); } .table.mesa .sup.bet .bt-c:active { transform: translateY(1px); }
-.table.mesa .sup.bet.spinning .sp-ic .ic { animation: bt-spin .28s linear infinite; }
-@keyframes bt-spin { to { transform: rotate(360deg); } }
-.table.mesa .sup.bet .bt-res { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; font-style: normal; font-family: var(--serif); font-size: 13px; color: #ffe2cf; }
-.table.mesa .sup.bet .bt-res b { font-weight: 900; font-size: 16px; letter-spacing: .04em; text-transform: uppercase; }
-.table.mesa .sup.bet.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; } .table.mesa .sup.bet.win .bt-res, .table.mesa .sup.bet.win .sp-t b, .table.mesa .sup.bet.win .sp-t > i { color: #16241c; text-shadow: none; }
-.table.mesa .sup.bet.done { cursor: default; } .table.mesa .sup.bet.done:hover { transform: none; }
-html.reduce-motion .table.mesa .sup.bet.spinning .sp-ic .ic { animation: none; }
-.nr-seal { color: #ff8a70 !important; }
-.table.mesa .sup.sp-cafe { --sc: #3fb59a; } .table.mesa .sup.sp-kit { --sc: #6c8cff; } .table.mesa .sup.sp-seguro { --sc: #fe5f55; }
-.table.mesa .sp-ic { position: relative; z-index: 1; flex: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 50% 36%, var(--sc), #0f2a1e 82%);
-  box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 2px rgba(255, 217, 138, .55); }
-.table.mesa .sp-ic .ic { width: 24px; height: 24px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
-.table.mesa .sp-t { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1 1 auto; }
-.table.mesa .sp-t b { font-family: var(--serif); font-weight: 900; font-size: 17px; line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
-.table.mesa .sp-t > i { font-style: normal; font-family: var(--serif); font-size: 14px; line-height: 1.08; color: rgba(243, 237, 220, .82); }
-.table.mesa .sup em { position: relative; z-index: 1; flex: none; font-style: normal; }
-.table.mesa .sp-p { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px 2px 5px; border-radius: 999px; font-family: var(--mono); font-size: 14px; letter-spacing: .02em; color: #ffd98a; background: #0a140f; box-shadow: inset 0 0 0 2px #f8b449; white-space: nowrap; }
-.table.mesa .sp-p .ic { width: 17px; height: 17px; }
-.table.mesa .sup.on { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; color: #16241c; }
-.table.mesa .sup.on::before { border-color: rgba(22, 36, 28, .32); }
-.table.mesa .sup.on .sp-t b { color: #16241c; text-shadow: none; } .table.mesa .sup.on .sp-t > i { color: rgba(22, 36, 28, .78); }
-.table.mesa .sp-on { padding: 3px 8px 2px; border-radius: 6px; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #b3322a; background: rgba(255, 255, 255, .28);
-  box-shadow: inset 0 0 0 2px #b3322a; transform: rotate(-8deg); }
-.table.mesa .sup.fresh .sp-on { animation: sp-stamp .32s cubic-bezier(.3, 1.5, .5, 1) both; }
-@keyframes sp-stamp { from { transform: rotate(-8deg) scale(1.9); opacity: 0; } to { transform: rotate(-8deg) scale(1); opacity: 1; } }
-
-/* la mesa: cartas grandes. Cada carta toma el alto del hueco (hasta 318 px) con proporcion de naipe; la letra baja un escalon (d1, d2) cuando
-   la mesa va llena. Sin container queries: hacian que cada maquetacion del Campamento costara el doble */
-.table.mesa .tb-shop { position: relative; flex: 1 1 0; min-height: 220px; display: flex; flex-direction: column; }
-.table.mesa .tb-note { position: relative; z-index: 3; margin: 2px 0 8px; font-size: 18px; }   /* sin que la carta del centro (levantada) le pise el texto */
-.table.mesa .offers { flex: 1 1 0; min-height: 0; display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: 24px; padding: 16px 0 6px; }
-.table.mesa .offer.pc { flex: 0 1 auto; width: auto; min-width: 0; height: min(100%, 318px); max-height: none; aspect-ratio: 222 / 318; padding: 13px 12px 12px; gap: 5px; }
-.table.mesa.chest .offer.pc { height: min(100%, 352px); aspect-ratio: 246 / 352; }
-.table.mesa .offer.pc .of-r { font-size: 10px; letter-spacing: .12em; }
-.table.mesa .offer.pc .of-ico { flex: 1 1 0; min-height: 32px; }
-.table.mesa .offer.pc .of-n { font-size: 21px; line-height: 1; }
-.table.mesa .offer.pc > p { min-height: 0; font-size: 15.5px; line-height: 1.1; }
-.table.mesa .offer.pc .buy { font-size: 18px; padding: 6px 8px; margin-top: 3px; white-space: nowrap; }
-.table.mesa.d1 .offer.pc .of-n { font-size: 19px; } .table.mesa.d1 .offer.pc > p { font-size: 14px; } .table.mesa.d1 .offer.pc .buy { font-size: 16px; }
-.table.mesa.d2 .offer.pc .of-n { font-size: 17px; } .table.mesa.d2 .offer.pc > p { font-size: 12.5px; } .table.mesa.d2 .offer.pc .buy { font-size: 15px; }
-.table.mesa.chest .offer.pc .buy { font-size: 15px; width: auto; min-width: 84%; max-width: 100%; padding-inline: 12px; justify-content: safe center; }   /* crece con su texto y, si aun no cabe ("Prendre gratuitement" se salia 30 px), A.squeeze lo aprieta (.sq-fit) */
-.table.mesa.chest .offer.pc .buy.sq-wrap { white-space: normal; line-height: 1.1; }
-.table.mesa .tb-actions .chipbtn { font-size: 13px; padding: 7px 18px 6px; }   /* v0.3.23: Cambiar cartas va en la fila de las cartas, como un mazo (abajo, en la seccion v0.3.23) */
-.table.mesa .shop-flash { position: absolute; left: 50%; top: 2px; z-index: 6; transform: translateX(-50%); margin: 0; padding: 6px 16px 5px; border-radius: 999px; white-space: nowrap;
-  font-family: var(--mono); font-size: 13px; letter-spacing: .06em; color: #ff9d94; background: #16241c; box-shadow: inset 0 0 0 2px #fe5f55, 0 5px 0 rgba(0, 0, 0, .4); }
-
-/* la bandeja: tu mochila a la vista y el boton de estoy listo */
-.table.mesa .tb-tray { display: flex; align-items: flex-end; gap: 28px; padding-top: 9px; padding-bottom: 11px; }
-.table.mesa .tray-col h4 { display: flex; align-items: baseline; gap: 6px; margin: 0 0 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: #f8b449; }
-.table.mesa .tray-col h4 b { font-weight: 400; color: #fff; }
-.table.mesa .tray-row { display: flex; align-items: flex-end; gap: 9px; min-height: 0; }
-.table.mesa .tr-card { position: relative; flex: none; width: 56px; height: 72px; }
-.table.mesa .tr-face { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 10px; cursor: pointer; background: #f6efdc;
-  box-shadow: 0 0 0 2px #16241c, inset 0 0 0 3px var(--rc, #b7bfc4), inset 0 -5px 0 rgba(22, 36, 28, .12), 0 5px 0 rgba(0, 0, 0, .45); transition: transform .22s var(--spring), box-shadow .2s; }
-.table.mesa .tr-face .ic { width: 44px; height: 44px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(22, 36, 28, .35)); transition: transform .3s var(--spring); }
-.table.mesa .tr-relic { --rc: #b7bfc4; } .table.mesa .tr-relic.r1 { --rc: #4fb6a0; } .table.mesa .tr-relic.r2 { --rc: #c78bf0; } .table.mesa .tr-relic.r3 { --rc: #ffd95a; }
-.table.mesa .tr-relic:hover .tr-face { transform: translateY(-6px) rotate(-2deg); } .table.mesa .tr-relic:hover .tr-face .ic { transform: scale(1.08); }
-.table.mesa .tr-relic.sel .tr-face { transform: translateY(-14px); box-shadow: 0 0 0 2px #16241c, inset 0 0 0 3px var(--rc), 0 0 0 5px #ffd98a, 0 0 24px 5px rgba(255, 208, 107, .55), 0 10px 0 rgba(0, 0, 0, .35); }
-.table.mesa .tr-face:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-/* vender: aparece encima de la reliquia levantada (oculto del todo mientras no, tambien para el tabulador) */
-.table.mesa .tr-sell { position: absolute; left: 50%; bottom: calc(100% + 20px); z-index: 7; transform: translate(-50%, 8px); opacity: 0; visibility: hidden; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-  padding: 4px 4px 4px 11px; border: 0; border-radius: 999px; cursor: pointer; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #16241c; background: #fe5f55;
-  box-shadow: 0 0 0 2px #16241c, 0 5px 0 rgba(0, 0, 0, .45); transition: transform .2s var(--spring), opacity .15s, visibility 0s .2s; }
-.table.mesa .tr-sell span { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px 0 5px; border-radius: 999px; color: #ffd98a; background: #16241c; font-size: 13px; } .table.mesa .tr-sell .ic { width: 14px; height: 14px; }
-.table.mesa .tr-relic.sel .tr-sell { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: transform .2s var(--spring), opacity .15s, visibility 0s; }
-.table.mesa .tr-sell:hover { background: #ff7a6e; } .table.mesa .tr-sell:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.table.mesa .tr-slot { flex: none; width: 56px; height: 72px; box-sizing: border-box; border-radius: 10px; border: 2px dashed rgba(255, 224, 138, .3); background: rgba(255, 224, 138, .04); }
-.table.mesa .tr-tool .tr-face { --rc: #6c8cff; cursor: default; } .table.mesa .tr-tool .tr-face .ic { width: 40px; height: 40px; margin-top: -9px; }
-.table.mesa .tr-pips { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 3px; }
-.table.mesa .tr-pips i { width: 7px; height: 7px; border-radius: 2px; background: #c2372e; box-shadow: 0 0 0 1px #16241c; }
-.table.mesa .tr-none { font-style: normal; font-family: var(--serif); font-size: 17px; color: rgba(243, 237, 220, .55); padding-bottom: 24px; }
-.table.mesa .tr-prov .hearts { gap: 4px; padding-bottom: 14px; } .table.mesa .tr-prov .hearts .hp .ic { width: 34px; height: 34px; }
-
-/* estoy listo: la ficha de la ronda que viene. El brillo late en una capa aparte (solo opacidad: no repinta el boton en cada fotograma) */
-.go2 { position: relative; margin-left: auto; align-self: center; display: flex; align-items: center; gap: 12px; min-width: 330px; max-width: 430px; padding: 8px 20px 8px 10px; border: 0; border-radius: 999px; cursor: pointer; text-align: left;
-  color: #16241c; background: linear-gradient(180deg, #ffe08a, #f8b449); box-shadow: 0 0 0 3px #16241c, 0 8px 0 3px rgba(0, 0, 0, .5), inset 0 -6px 0 rgba(140, 80, 0, .25); transition: transform .2s var(--spring); }
-.go2::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; pointer-events: none; box-shadow: 0 0 26px 4px rgba(248, 180, 73, .65); opacity: 0; will-change: opacity; animation: go2-glow 2.4s ease-in-out infinite; }
-@keyframes go2-glow { 50% { opacity: 1; } }
-.go2:hover { transform: translateY(-4px) scale(1.02); } .go2:hover::after { animation-play-state: paused; opacity: 1; } .go2:active { transform: translateY(3px); }
-.go2:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
-.go2-chip { flex: none; display: flex; align-items: center; justify-content: center; width: 58px; height: 58px; }
-.go2-chip > .ic { width: 58px; height: 58px; }
-.go2-chip .ic.blindchip { width: 58px; height: 58px; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .45)); }
-.go2-chip .bc-base { animation: chip-turn 9s linear infinite; }
-.go2-t { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
-.go2-t b { font-family: var(--serif); font-weight: 900; font-size: 28px; line-height: .95; }
-.go2-t i { font-style: normal; font-family: var(--serif); font-size: 15.5px; line-height: 1.05; opacity: .82; display: inline-flex; align-items: center; gap: 3px; flex-wrap: wrap; }
-.go2-t i .ic { width: 16px; height: 16px; }
-.go2-ar .ic { width: 26px; height: 26px; }
-.go2.doom { color: #1a0a0c; background: linear-gradient(180deg, #ff9184, #fe5f55); box-shadow: 0 0 0 3px #16241c, 0 8px 0 3px rgba(0, 0, 0, .5), inset 0 -6px 0 rgba(120, 10, 20, .3); }
-.go2.doom::after { box-shadow: 0 0 26px 4px rgba(254, 95, 85, .65); }
-.go2.skip { background: linear-gradient(180deg, #eef2f0, #b9c4c0); } .go2.skip::after { animation: none; }
-
+.rd { text-wrap: wrap; }
 /* ---------------------------------------------------------------- PAN DE ORO (v0.51): la carta legendaria
    Marco de oro con bisel de pixel (luz arriba a la izquierda, sombra abajo a la derecha), placa de laton que pisa el borde de arriba (R_NAMES[3]),
    terciopelo de joyero detras del icono, halo de oro a dos pasos que late a saltos y el brillo que la barre (lienzo .lg-clip, js/adventure.js: Gold).
@@ -306,124 +121,11 @@ html.reduce-motion .table.mesa .sup.bet.spinning .sp-ic .ic { animation: none; }
 @media (prefers-reduced-motion: reduce) { .lg-halo::after { animation: none; } }
 
 /* reducir movimiento (Ajustes o el sistema): sin chincheta que bota, ficha que gira ni brillo que late */
-html.reduce-motion .rd.bar .rd-n.next::after, html.reduce-motion .go2-chip .bc-base, html.reduce-motion .table.mesa .sup.fresh .sp-on { animation: none; }
-html.reduce-motion .go2::after { animation: none; opacity: .6; }
+html.reduce-motion .rd.bar .rd-n.next::after { animation: none; }
 
-/* ---------------------------------------------------------------- v0.3.23: la mesa cargada, a tamano real en la Steam Deck
-   Con el Ojo en el cielo, 3 retos, la Barra entera y 4 cartas, A.fitK encogia la mesa (al 79 % en aleman) y su letra bajaba de 16 px.
-   Ahora cabe a k = 1 en 1280x800 con la letra minima (16 px Silkscreen / 18 px Jersey, css/legible.css): la Ascension en una linea (el resto,
-   en su globo), las rondas de despues en una fila baja, la Barra sin aire de sobra y, con 4 cartas, cartas anchas y el mazo de Cambiar cartas
-   a su lado en vez de debajo */
-.table.mesa .tb-title .tb-ascd { display: block; max-width: none; margin-top: 1px; font: 400 18px/1.05 var(--serif); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.table.mesa .tb-title .tb-ascd b { font-weight: 400; }
-.table.mesa .tb-title h2 { line-height: 1; }
-.table.mesa .tb-title .tag { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; letter-spacing: .06em; }   /* "Acto II · Mas alla del mapa" en una linea */
 .rd.bar .rd-k { font-size: 18px; }
-.table.mesa .nr-rn .ch-lv, .table.mesa .nr-chips .ch-chip .ch-lv { font-size: 18px; letter-spacing: 1px; line-height: 1; }
-/* sobornar: la misma pastilla, mas estrecha (con 3 retos el nombre se partia y los puntos del nivel bajaban de linea) */
-.table.mesa .nr-buy { gap: 5px; padding: 2px 2px 2px 9px; font: 700 18px/1 var(--serif); letter-spacing: .05em; } .table.mesa .nr-p { padding: 1px 6px 0 4px; font-family: var(--mono); letter-spacing: .02em; }   /* en Jersey, como los botones de la Barra: mas estrecha */
-.table.mesa .nr-row { column-gap: 8px; }
-/* despues (Ojo en el cielo): una fila baja; "Despues · Ronda 3" y el tema en una linea, y sus fichas al lado (ya dicen cuantos retos trae) */
-.nr.far { padding: 5px 10px; }
-.nr.far .nr-head { gap: 10px; }
-.nr.far .nr-ttl { flex: 0 100 auto; flex-direction: row; align-items: baseline; flex-wrap: wrap; column-gap: 10px; row-gap: 0; }   /* si no cabe, el titulo se parte antes que las fichas */
-.table.mesa .nr.far .nr-k { font-size: 16px; white-space: nowrap; }
-.nr.far .nr-name { font-size: 20px; line-height: 1; white-space: nowrap; }
-.table.mesa .nr.far .nr-k { letter-spacing: .01em; }
-.table.mesa .nr.far { padding-left: 8px; padding-right: 8px; }
-.nr.far .nr-chips { flex: 1 1 auto; gap: 5px 4px; justify-content: flex-end; }
-/* sus fichas, con la letra de los nombres de los retos de arriba (Jersey es mas estrecha que Silkscreen: caben las tres en la fila) */
-.table.mesa .nr-chips .ch-chip, .table.mesa .nr-chips .ch-chip > b { font-family: var(--serif); font-size: 18px; font-weight: 400; letter-spacing: .01em; }
-.table.mesa .nr-chips .ch-chip { padding: 2px 6px 2px 4px; gap: 3px; } .table.mesa .nr-chips .ch-chip .ic { width: 16px; height: 16px; }
-/* la Barra: la misma placa, con la letra minima y menos relleno */
-/* arriba el icono, el nombre y el precio (o los botones de la apuesta: si no caben junto al nombre, bajan a su propia linea) y debajo la descripcion
-   a todo lo ancho: con 18 px, el hueco de al lado del icono se quedaba en 3-4 lineas */
-.table.mesa .sup { flex-wrap: wrap; align-content: center; column-gap: 9px; row-gap: 2px; min-height: 0; padding: 6px 10px 8px 8px; }
-.table.mesa .sup::before { inset: 4px 4px 7px; }
-.table.mesa .sp-t { display: contents; }
-.table.mesa .sp-t > b { order: 1; flex: 1 1 110px; position: relative; z-index: 1; min-width: 0; }
-.table.mesa .sup > em, .table.mesa .sup > .bt-pick { order: 2; margin-left: auto; }
-.table.mesa .sp-t > i { order: 3; flex: 1 1 100%; position: relative; z-index: 1; padding-left: 43px; }
-.table.mesa .sup.bet .bt-pick .bt-n { flex-direction: row; gap: 5px; min-width: 0; padding: 3px 7px 2px; }
-.table.mesa .sp-t b { font-size: 18px; }
-.table.mesa .sp-t > i { font-size: 18px; line-height: .98; }
-.table.mesa .sp-p { font-size: 16px; }
-.table.mesa .sp-on { font-size: 16px; }
-.table.mesa .sup.bet.cas { min-height: 0; padding: 15px 12px 15px 10px; }
-.table.mesa .sup.bet.cas .sp-t b { font-size: 20px; }
-.table.mesa .sup.bet .bt-pick .bt-c { font-size: 18px; padding: 4px 8px 3px; }
-.table.mesa .sup.bet .bt-n span { font-size: 16px; } .table.mesa .sup.bet .bt-n span .ic { width: 14px; height: 14px; }
-.table.mesa .sup.bet .bt-res { font-size: 18px; } .table.mesa .sup.bet .bt-res b { font-size: 18px; }
-/* las cartas: nombre a 18 px tambien en la mesa llena */
-.table.mesa.d2 .offer.pc .of-n { font-size: 18px; } .table.mesa .offer.pc .of-n em { font-size: 16px; }
-/* 4 cartas: mas anchas y bajas (la letra no cambia) y Cambiar cartas como un mazo boca abajo a la derecha */
-@media (min-width: 900px) and (min-height: 520px) {
-  /* las cartas toman el ancho que la letra necesita (en ruso, con la proporcion de naipe se quedaban en 2 palabras por linea y se cortaban) */
-  .table.mesa .offer.pc { flex: 0 1 256px; aspect-ratio: auto; }
-  .table.mesa.chest .offer.pc { flex-basis: 272px; aspect-ratio: auto; }
-  .table.mesa.many .offers { gap: 15px; }
-  .table.mesa.many .offer.pc { flex-basis: 246px; padding: 11px 11px 10px; gap: 4px; }
-  .table.mesa.many .offer.pc > p { line-height: 1.02; }
-  /* Cambiar cartas: un mazo boca abajo al final de la fila (antes, una pastilla abajo a la derecha: con 4 cartas bajaba a su propia linea) */
-  .table.mesa .offers > .tb-actions { flex: none; align-self: stretch; display: flex; align-items: center; margin-left: 4px; padding: 0; }
-  .table.mesa #rerollBtn { flex-direction: column; justify-content: center; gap: 8px; width: 118px; height: min(100%, 200px); padding: 12px 8px; border-radius: 14px; white-space: normal; text-align: center; line-height: 1.1;
-    background: repeating-linear-gradient(45deg, rgba(255, 217, 138, .1) 0 4px, transparent 4px 10px), #17553a;
-    box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 3px #ffd98a, inset 0 0 0 6px #0f3727, 4px 4px 0 0 #0f3727, 4px 4px 0 2px #0a140f, 8px 8px 0 0 #0f3727, 8px 8px 0 2px #0a140f; }
-  .table.mesa #rerollBtn:hover { transform: translateY(-3px) rotate(-1deg); }
-  .table.mesa #rerollBtn .ic { width: 36px; height: 36px; }
-  .table.mesa #rerollBtn > span { color: #fff; }
-  /* mesa llena (Ojo en el cielo, 3 retos, avisos): menos aire entre bloques, la descripcion de cada reto tambien bajo su icono y la bandeja mas baja */
-  .table.mesa.tight { gap: 4px; padding-top: 5px; }
-  .table.mesa.tight .tb-title h2 { font-size: 32px; margin-top: 1px; }
-  .table.mesa.tight .nr { padding-top: 5px; padding-bottom: 6px; gap: 4px; }
-  .table.mesa.tight .nr:not(.far) .nr-badge { width: 36px; height: 36px; } .table.mesa.tight .nr:not(.far) .nr-badge .ic { width: 28px; height: 28px; }
-  .table.mesa.tight .nr:not(.far) .nr-name { font-size: 22px; }
-  .table.mesa.tight .nr-row > p { line-height: 1.04; }
-  .table.mesa.tight .nr.far .nr-k i { margin: 0 4px; }
-  .table.mesa.tight .nr.far { padding-top: 4px; padding-bottom: 4px; }
-  .table.mesa.tight .nr-row { grid-template-areas: "ic name buy" "desc desc desc"; row-gap: 3px; padding: 5px 7px 6px; }
-  .table.mesa.tight .nr-row.done { grid-template-areas: "ic name buy"; }
-  .table.mesa.tight .nr-ic { align-self: center; }
-  .table.mesa.tight .sup { padding-left: 9px; } .table.mesa.tight .sp-t > i { padding-left: 0; }   /* la Barra: igual, su descripcion tambien bajo el icono */
-  .table.mesa.tight .sup.bet.cas { padding: 13px 12px 13px 11px; }
-  .table.mesa.tight .sp-ic { width: 32px; height: 32px; }
-  .table.mesa.tight .offer.pc .of-ico { min-height: 26px; }
-  .table.mesa.tight .offer.pc { gap: 3px; padding-bottom: 9px; }
-  .table.mesa.tight .offer.pc .buy { padding-top: 4px; padding-bottom: 4px; margin-top: 2px; }
-  .table.mesa.tight .tb-tray { padding-top: 4px; padding-bottom: 5px; }
-  .table.mesa.tight .tray-col h4 { margin-bottom: 3px; }
-  .table.mesa.tight .tr-card, .table.mesa.tight .tr-slot { width: 50px; height: 62px; }
-  .table.mesa.tight .tr-face .ic { width: 40px; height: 40px; } .table.mesa.tight .tr-tool .tr-face .ic { width: 36px; height: 36px; margin-top: -8px; }
-  .table.mesa.tight .tr-prov .hearts { padding-bottom: 10px; }
-  .table.mesa.tight .go2 { padding-top: 5px; padding-bottom: 5px; }
-  .table.mesa.tight .go2-chip, .table.mesa.tight .go2-chip > .ic, .table.mesa.tight .go2-chip .ic.blindchip { width: 54px; height: 54px; }
-}
-
-/* movil y ventanas muy pequenas (aqui la pantalla se desplaza): todo en columna */
-@media (max-width: 899px), (max-height: 519px) {
-  .table.mesa .tb-head { grid-template-columns: minmax(0, 1fr) auto; }
-  .table.mesa .tb-head > .rd { grid-column: 1 / -1; grid-row: 2; justify-self: start; max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
-  .table.mesa .tb-head > .tb-right { grid-column: 2; }
-  .table.mesa .tb-sup { grid-template-columns: minmax(0, 1fr); } .table.mesa .sup-void { display: none; }
-  .table.mesa .tb-shop { flex: none; min-height: 0; }
-  .table.mesa .offers { flex: none; flex-wrap: wrap; gap: 22px 12px; }   /* entre filas, sitio para la placa de la legendaria (sobresale por arriba) */
-  .table.mesa .offer.pc, .table.mesa.chest .offer.pc { flex: 0 0 min(44vw, 230px); height: auto; aspect-ratio: auto; }
-  .table.mesa .offers > .tb-actions { flex: 0 0 100%; display: flex; justify-content: center; padding: 4px 0 6px; }
-  .table.mesa .tb-tray { flex-wrap: wrap; gap: 14px 22px; }
-  .table.mesa .go2 { min-width: 0; width: 100%; margin-left: 0; }
-  .nr-head { flex-wrap: wrap; } .nr-list { grid-template-columns: minmax(0, 1fr); }
-}
 @media (max-width: 700px) { .rd.plan { grid-template-columns: minmax(0, 1fr); } }
-
-.table.mesa .tr-relic .tr-face { position: relative; }   /* 0.2.21: fuera las marcas de cargas de los amuletos (no se gastan desde la 0.2.5) */
-/* tanda 4: la Ventaja de la mochila lleva un sello dorado (solo cabe una) */
-.table.mesa .tr-relic.vtg .tr-face::after { content: ""; position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; background: #ffd95a; box-shadow: 0 0 0 1px #16241c, inset -2px -2px 0 #c46a1b, inset 1px 1px 0 #fff6c8; pointer-events: none; }
-.nr-k .of-was { opacity: .6; margin-right: 3px; text-decoration-thickness: 2px; }
-
 /* ---------------------------------------------------------------- v0.73: la ruleta lineal de Rojo o negro (banda a pantalla completa, rueda europea con cero) */
-.table.mesa .sup.bet .bt-cg { background: #1b8a4a; }
-.table.mesa .sup.bet .bt-pick { gap: 5px; } .table.mesa .sup.bet .bt-c { padding: 5px 8px 4px; font-size: 12px; }
-.table.mesa .sup.bet.zero.lose .bt-res b { color: #8fe6b0; }
 .rou { --cw: 96px; position: absolute; inset: 0; z-index: 100000; display: grid; place-items: center; pointer-events: auto; overflow: hidden;
   background: radial-gradient(ellipse at 50% 50%, rgba(12, 7, 7, .9), rgba(2, 4, 3, .97) 82%); animation: rou-bg .3s ease-out both; }
 @keyframes rou-bg { from { opacity: 0; } }
@@ -493,34 +195,7 @@ html.reduce-motion .rou, html.reduce-motion .rou * { animation: none !important;
 .rou.flash .rou-wash { animation: rou-wash .55s ease-out; } @keyframes rou-wash { 0% { opacity: 1; } 100% { opacity: 0; } }
 html.reduce-motion .rou-no { display: none; }
 
-/* ---------------------------------------------------------------- v0.2.9: el centro de la Barra, mesa de juegos de casino. Cada juego, su fieltro y su cenefa; los suministros y las apuestas, sin luces */
-.table.mesa .tb-sup { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
-.table.mesa .tb-sup.no-cas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .table.mesa .tb-sup.no-cas .sup-void { display: none; }
-.table.mesa .sup.sp-cafe:not(.on) { --c1: #b27544; --c2: #7d4a24; --c3: #4a2810; --sc: #e2a463; }   /* el Cafe doble, color cafe: el verde es del tapete de la ruleta */
-.table.mesa .sup.bet.cas { --gc: #f6c453; --gd: #0a140f; min-height: 74px; padding: 22px 16px 22px 12px; overflow: hidden; color: #fff;
-  box-shadow: 0 0 0 2px var(--gd), inset 0 0 0 3px var(--gc), inset 0 0 0 5px var(--gd), 0 0 24px rgba(255, 200, 70, .45), 0 5px 0 2px var(--gd); }
-.table.mesa .sup.bet.cas::before { inset: 0; border: 0; border-radius: 12px; background: var(--sb) top / 100% 10px no-repeat, var(--sb2, var(--sb)) bottom / 100% 10px no-repeat; opacity: .96; }
-.table.mesa .sup.bet.cas .sp-t b { color: #ffd24a; text-shadow: 0 2px 0 #000; letter-spacing: .05em; text-transform: uppercase; font-size: 19px; }
-.table.mesa .sup.bet.cas .sp-t > i { color: rgba(255, 255, 255, .86); }
-.table.mesa .sup.bet.cas .sp-ic { box-shadow: 0 0 0 2px var(--gd), inset 0 0 0 3px var(--gc), 0 0 12px rgba(255, 200, 70, .55); }
-.table.mesa .sup.bet.cas:hover { box-shadow: 0 0 0 2px var(--gd), inset 0 0 0 3px var(--gc), inset 0 0 0 5px var(--gd), 0 0 34px rgba(255, 215, 90, .75), 0 8px 0 2px var(--gd); }
-.table.mesa .sup.bet.cas.done { cursor: default; }
-/* Rojo o negro: fieltro verde, cenefa de casillas rojas y negras y el cero verde en el centro */
-.table.mesa .sup.bet.bt-red { background: radial-gradient(ellipse at 50% 40%, #1d7a45 0%, #0b3a21 78%);
-  --sb: repeating-linear-gradient(90deg, #c8322a 0 12px, #14161d 12px 24px); --sb2: repeating-linear-gradient(90deg, #14161d 0 12px, #c8322a 12px 24px); }
-.table.mesa .sup.bet.bt-red::after { content: ""; position: absolute; left: 50%; top: 0; width: 12px; height: 10px; margin-left: -6px; background: #1fa65a; box-shadow: 0 0 6px #6dffa0; z-index: 2; }
-/* Moneda al aire: fieltro azul de noche y canto de moneda estriado (el cordoncillo) */
-.table.mesa .sup.bet.bt-coin { background: radial-gradient(ellipse at 50% 40%, #28508a 0%, #0e2147 80%);
-  --sb: repeating-linear-gradient(90deg, #f6c453 0 3px, #8a5a12 3px 6px); }
-.table.mesa .sup.bet.bt-coin .bt-ch { background: #e8a91e; color: #3a2606; text-shadow: none; } .table.mesa .sup.bet.bt-coin .bt-ct { background: #3f7fd4; }
-.table.mesa .sup.bet.bt-coin .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-coin .bt-stake:hover { filter: brightness(1.25); }
-/* Ruleta de premios: fieltro ciruela y cenefa con los colores de la rueda */
-.table.mesa .sup.bet.bt-wheel { background: radial-gradient(ellipse at 50% 40%, #6a2878 0%, #2a0f33 80%);
-  --sb: repeating-linear-gradient(90deg, #f2b63d 0 12px, #1f9a58 12px 24px, #c9362c 24px 36px, #23252e 36px 48px); --sb2: repeating-linear-gradient(90deg, #23252e 0 12px, #c9362c 12px 24px, #1f9a58 24px 36px, #f2b63d 36px 48px); }
-.table.mesa .sup.bet.bt-wheel .bt-cs { background: #e8a91e; color: #3a2606; text-shadow: none; }
-.table.mesa .sup.bet.bt-coin.done.win, .table.mesa .sup.bet.bt-wheel.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
-.table.mesa .sup.bet.cas.done.win .bt-res, .table.mesa .sup.bet.cas.done.win .sp-t b, .table.mesa .sup.bet.cas.done.win .sp-t > i { color: #fff; }
-@media (max-width: 899px), (max-height: 519px) { .table.mesa .tb-sup, .table.mesa .tb-sup.no-cas { grid-template-columns: minmax(0, 1fr); } .table.mesa .sup-void { display: none; } }
+/* ---------------------------------------------------------------- v0.2.9: los juegos de casino de la Barra (sus pantallas). Desde la v0.3.48, sus placas del Campamento son todas iguales (css/gala.css, CAMPAMENTO) */
 
 /* las pantallas de Moneda al aire y de Ruleta de premios (comparten la capa .rou de Rojo o negro) */
 .rc-coin { --cc: #d9a21f; --ch: #ffe08a; --cs: #8a5a12; } .rc-good { --cc: #1f9a58; --ch: #6fe6a0; --cs: #0f5f33; } .rc-bad { --cc: #c9362c; --ch: #ee6a52; --cs: #8c2320; } .rc-none { --cc: #5d6470; --ch: #8a93a2; --cs: #3a4049; }
@@ -561,11 +236,6 @@ html.reduce-motion .rou-no { display: none; }
 .rou.wheel, .rou.coin { background: radial-gradient(ellipse at 50% 50%, rgba(14, 6, 18, .96), rgba(3, 2, 6, .99) 85%); }
 /* ---------------------------------------------------------------- v0.2.48: Los tres cubiletes (el trile). Fieltro burdeos y cenefa de rombos de oro (el ♦ del crupier);
    la mesa es un escenario fijo de 1920x1080 con el arte a x4 (se escala con transform: scale(K/4), K entero, para que el pixel art quede nitido) */
-.table.mesa .sup.bet.bt-cups { background: radial-gradient(ellipse at 50% 40%, #8a1f3f 0%, #3b0a1e 80%); --sc: #b0405a; }
-.table.mesa .sup.bet.bt-cups::before { background: url(../assets/trile/cenefa.png) top left / 12px 10px repeat-x, url(../assets/trile/cenefa.png) bottom left / 12px 10px repeat-x; image-rendering: pixelated; }
-.table.mesa .sup.bet.bt-cups .bt-cu { background: #e8a91e; color: #3a2606; text-shadow: none; }
-.table.mesa .sup.bet.bt-cups .bt-stake { cursor: pointer; } .table.mesa .sup.bet.bt-cups .bt-stake:hover { filter: brightness(1.25); }
-.table.mesa .sup.bet.bt-cups.done.win { --c1: #ffe9a6; --c2: #f8b449; --c3: #b8741a; }
 .rp-cups { background: #b0405a; }
 .rou.cups { background: radial-gradient(ellipse at 50% 40%, rgba(40, 8, 22, .98), rgba(4, 1, 8, 1) 85%); }
 .rou.cups .rou-wash { --wc: rgba(255, 217, 90, .5); } .rou.cups.lose .rou-wash { --wc: rgba(0, 0, 0, .4); } .rou.cups.joke .rou-wash { --wc: rgba(138, 31, 63, .55); }

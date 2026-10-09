@@ -1708,7 +1708,8 @@ window.AIQ = window.AIQ || {};
     const inline = !!el.closest("#vdDealer"), home = D.onHome && !D.host && !inline && homeCorner ? " home " + homeCorner : "";
     spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " screen" + (o.screen === "pod" ? " pod" : o.screen === "prof" ? " prof" : "") : home); bubble.classList.add("on");
     if (o.camp && campBox) { const st = el.style; st.bottom = st.top = ""; face.style.width = face.style.height = face.style.display = ""; bubble.style.marginBottom = bubble.style.maxWidth = "";
-      st.setProperty("--cl", campBox.l + "px"); st.setProperty("--cb", campBox.b + "px"); st.setProperty("--hf", campBox.hf + "px"); st.setProperty("--hb", campBox.hb + "px"); }
+      st.setProperty("--cl", (campBox.l || 0) + "px"); st.setProperty("--cb", campBox.b + "px"); st.setProperty("--hf", campBox.hf + "px"); st.setProperty("--hb", campBox.hb + "px");
+      el.classList.toggle("seat", campBox.r != null); if (campBox.r != null) st.setProperty("--cr", campBox.r + "px"); }   // seat: sentado a la derecha de la mochila (css/gala.css)
     if (o.pos) { el.removeAttribute("style"); el.className = "dealer in lvpos lv-" + o.pos + " " + mood; document.body.appendChild(el); }   // la mesa elige donde sale: una esquina o el centro grande, por encima de todo
     else if (el.parentNode === document.body) (D.host || $("app")).appendChild(el);
     bubble.className = bubble.className.replace(/\s*\bst-\w+/g, ""); if (o.sty) bubble.classList.add("st-" + o.sty);   // estilo del bocadillo que elige la mesa (gritando, susurro...)
@@ -2371,6 +2372,15 @@ window.AIQ = window.AIQ || {};
      haces: dudar entre cartas, intentar comprar sin fondos, barajar, tu reliquia de siempre, irte sin comprar. Nunca dice que carta sirve para que */
   let campAt = 0, doubtN = 0, doubtLast = -1, doubtSaid = false, fundsSaid = false, campBox = null, campSpoke = false;
   function campRoom(wide) {
+    /* v0.3.48 (Naipe de gala): las cartas llenan el fieltro de lado a lado. Se sienta en el rincon derecho de la mochila, junto al boton (el busto en el
+       hueco libre tras tus provisiones) y el globo crece hacia arriba y a la izquierda, sobre la Barra, solo mientras habla (sin hueco, esa vez no habla) */
+    const tray = !wide && document.querySelector("#dlg .table.mesa.gx-camp .tb-tray"), ap = $("app");
+    if (tray && ap) {
+      const T = tray.getBoundingClientRect(), L = (tray.lastElementChild || tray).getBoundingClientRect(), A0 = ap.getBoundingClientRect(), k = A.uiK ? A.uiK() : 1;
+      const room = Math.floor(T.right - L.right + 40 * k), sn = A.crupier.snap(Math.min(224, Math.round(T.height + 30 * k))), hf = sn.css;   // +40: se apoya un poco sobre el final de la ultima columna (el rotulo de Provisiones) mientras habla
+      if (!sn.k || hf > room) return null;
+      return { r: Math.round(A0.right - T.right + 10 * k), b: Math.round(A0.bottom - T.bottom + 6 * k), hf, hb: Math.min(420, Math.round(T.width * 0.55)) };
+    }
     const of = document.querySelector("#dlg .offers"), first = of && of.querySelector(".offer"), app = $("app"); if (!of || !first || !app) return null;
     const R = of.getBoundingClientRect(), f = wide ? { left: R.left + (R.width - wide) / 2 } : first.getBoundingClientRect(), A0 = app.getBoundingClientRect(), k = A.uiK ? A.uiK() : 1;   // wide: la mesa esta vacia salvo una carta de ese ancho en el centro (la legendaria)
     /* v0.36: que no tape (casi) nada. Se sienta en el hueco libre de la izquierda, un poco mas arriba que antes: sus pies quedan por encima de la mochila y del

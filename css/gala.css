@@ -619,3 +619,270 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
   .av-left, .av-right { grid-column: 1; grid-row: auto; } .av-decks { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; } .av-dk { grid-row: auto; grid-template-rows: auto auto 1fr auto auto; }
   .av-ruta { overflow-x: auto; } .av-boleto { height: auto; }
 }
+
+/* ---------------------------------------------------------------- CAMPAMENTO (v0.3.48): el boleto de la ronda (js/adventure.js, renderShop). 12 columnas:
+   el fieltro (1-8) con las cartas rectas y del mismo tamano, la Barra en tres placas iguales y la mochila; a la derecha (9-12) el boleto de papel
+   de la proxima ronda y, debajo, el boton. La descripcion de cada carta va siempre entera (usuario): si no cabe, crece la fila y A.fitK baja la escala
+   de la mesa entera; nunca se corta. Fieltro opaco: el mapa de detras deja de dibujarse (A.coverMap). El marco de oro de la legendaria y su
+   secuencia en el cofre siguen en css/campamento.css (PAN DE ORO) */
+.table.mesa.gx-camp { position: relative; height: 100%; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto minmax(min-content, 1fr) auto auto;
+  column-gap: 16px; row-gap: 12px; padding: 12px 40px 16px; text-align: left; color: var(--gx-txt); font-family: var(--sans);
+  background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(ellipse 90% 80% at 50% 0%, #173b2b 0%, #0b1d15 52%, #050c08 100%); image-rendering: pixelated; }
+.gx-camp > .tb-head { grid-column: 1 / -1; grid-row: 1; }
+.gx-camp > .tb-shop { grid-column: 1 / 9; grid-row: 2; }
+.gx-camp > .tb-sup { grid-column: 1 / 9; grid-row: 3; }
+.gx-camp > .tb-tray { grid-column: 1 / 9; grid-row: 4; }
+.gx-camp > .tb-next { grid-column: 9 / 13; grid-row: 2 / 4; }
+.gx-camp > .go2-wrap { grid-column: 9 / 13; grid-row: 4; }
+.gx-camp.chest > .tb-shop { grid-row: 2 / 4; }
+.gx-camp .no { animation: nope .35s; }   /* sin doblones: la pieza tiembla (hub.css) */
+
+/* cabecera: el acto y el titulo (con la ficha de la Ascension), la ruta y, a la derecha, el menu y los doblones */
+.gx-camp .tb-head { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; min-width: 0; }
+.gx-camp .tb-title { display: grid; gap: 2px; min-width: 0; }
+.gx-camp .tb-title .tag { margin: 0; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: none; box-shadow: none; border-radius: 0; }
+.gx-camp .tb-trow { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.gx-camp .tb-trow h2 { white-space: nowrap; }
+.gx-camp .tb-asc { position: relative; flex: none; width: 32px; height: 32px; cursor: help; }
+.gx-camp .tb-asc .ic { display: block; width: 32px; height: 32px; filter: drop-shadow(0 2px 0 rgba(2, 6, 4, .6)); }
+.gx-camp .tb-asc em { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-family: var(--serif); font-size: 20px; line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .6); }
+.gx-camp .tb-head > .rd { justify-self: center; }
+.gx-camp .tb-right { justify-self: end; display: flex; align-items: center; gap: 12px; }
+.gx-camp .tb-menu .ic { width: 20px; height: 20px; }
+.gx-camp .tb-coins { display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 18px 2px 12px; clip-path: var(--gx-notch); background: #0b2118;
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-rim), inset 0 0 0 7px var(--gx-o); }
+.gx-camp .tb-coins .ic { width: 32px; height: 32px; }
+.gx-camp .tb-coins b { font-family: var(--serif); font-weight: 400; font-size: 36px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; }
+.gx-camp .rd.bar .rd-ic { border-radius: 0; }   /* casillas de la ruta con esquina de pixel (sin recorte: pequenas y con contorno) */
+
+/* la tienda: las cartas rectas y del mismo tamano (filas compartidas: arte, nombre, texto y precio a la misma altura) y el mazo de Cambiar cartas */
+.gx-camp .tb-shop { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 14px 14px; }
+.gx-camp .tb-note { margin: 0; font-size: 20px; line-height: 1.1; color: var(--gx-acc); text-align: center; text-wrap: balance; }
+.gx-camp .shop-flash { position: absolute; left: 50%; top: 6px; z-index: 6; transform: translateX(-50%); margin: 0; padding: 4px 14px 6px; white-space: nowrap; font-family: var(--sans); font-size: 20px; letter-spacing: 0;
+  color: #fff; background: var(--gx-red); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-camp .offers { flex: 1 1 auto; display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)) auto; grid-template-rows: auto auto 1fr auto; column-gap: 12px; row-gap: 6px; padding: 0; }   /* 1fr = nunca por debajo de su texto */
+.gx-camp .offers > .tb-empty { grid-column: 1 / -1; grid-row: 1 / -1; align-self: center; margin: 0; font-size: 24px; text-align: center; color: var(--gx-txt-2); }
+.gx-camp .offer.pc { --rc: #b7bfc4; --rcd: #56665a; --i: 0; position: relative; grid-row: 1 / span 4; display: grid; grid-template-rows: subgrid; justify-items: stretch; min-width: 0; width: auto; height: auto; max-height: none; margin: 0; padding: 10px 10px 10px;
+  overflow: visible; border: 0; border-radius: 0; transform: none; text-align: center; color: var(--gx-ink); cursor: default;
+  background: linear-gradient(var(--rc), var(--rc)) 0 0 / 100% 6px no-repeat, var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo);
+  animation: cp-deal .5s var(--gx-ease) both, cp-bob 5.2s ease-in-out infinite; animation-delay: calc(var(--i) * 90ms), calc(var(--i) * 420ms + .6s); transition: transform .18s var(--gx-ease); }
+.gx-camp .offers > :nth-child(2) { --i: 1; } .gx-camp .offers > :nth-child(3) { --i: 2; } .gx-camp .offers > :nth-child(4) { --i: 3; } .gx-camp .offers > :nth-child(5) { --i: 4; }
+@keyframes cp-deal { from { opacity: 0; translate: 46px -34px; rotate: 5deg; } }   /* repartidas desde el mazo; acaban rectas */
+@keyframes cp-bob { 50% { translate: 0 -3px; } }
+.gx-camp .offer.pc:hover:not(.sold) { transform: translateY(-6px); z-index: 4; }
+.gx-camp .offer.pc.r1 { --rc: #4fb6a0; --rcd: #17765f; } .gx-camp .offer.pc.r2 { --rc: #c78bf0; --rcd: #7a3fb0; } .gx-camp .offer.pc.r3 { --rc: #ffd95a; --rcd: #8a5a12; }
+.gx-camp .offer.pc.otool { --rc: #6c8cff; --rcd: #2d55a8; } .gx-camp .offer.pc.life { --rc: #fe5f55; --rcd: #9e2a26; }
+/* la rareza, como etiqueta sobre el arte (la de la legendaria es su placa de laton, en css/campamento.css) */
+.gx-camp .offer.pc .of-r { position: absolute; left: 10px; top: 10px; z-index: 2; max-width: calc(100% - 20px); padding: 2px 8px 4px; font-family: var(--sans); font-size: 18px; line-height: 1; letter-spacing: 0; text-transform: none; text-align: left;
+  color: var(--gx-ink); background: var(--rc); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-camp .offer.pc .of-ico { position: relative; display: grid; place-items: center; height: 64px; min-height: 0; margin: 0; padding: 18px 0 0; border: 0; border-radius: 0; overflow: hidden;
+  background: url(../assets/dados/felt.png) 0 0 / 32px 32px, #1a4533; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 6px 0 rgba(0, 0, 0, .22); }
+.gx-camp .offer.pc .of-ico .ic { position: static; width: 40px; height: 40px; transform: none; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.gx-camp .offer.pc .of-n { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1; text-wrap: balance; }
+.gx-camp .offer.pc .of-n em { display: block; margin-top: 2px; font-style: normal; font-size: 18px; color: var(--rcd); }
+.gx-camp .offer.pc > p { align-self: start; margin: 0; font-size: 18px; line-height: 1.12; color: #3f5045; text-wrap: pretty; }
+.gx-camp .offer.pc .buy { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 36px; margin: 0; padding: 0 10px 2px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap;
+  font-family: var(--sans); font-size: 24px; line-height: 1; color: var(--gx-ttl); background: #0b2118; clip-path: var(--gx-notch);
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); transition: transform .12s steps(2, end), filter .12s; }
+.gx-camp .offer.pc .buy .ic { width: 22px; height: 22px; }
+.gx-camp .offer.pc .buy:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
+.gx-camp .offer.pc .buy:disabled { cursor: default; opacity: .7; }
+.gx-camp .offer.pc .buy:focus { outline: none; } .gx-camp .offer.pc .buy:focus-visible, html[data-input="pad"] .gx-camp .offer.pc .buy:focus { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px var(--gx-o); }
+.gx-camp.chest .offer.pc .buy { color: var(--gx-ink); background: linear-gradient(var(--gx-gold-hi) 0 4px, var(--gx-gold) 4px calc(100% - 6px), var(--gx-gold-lo) calc(100% - 6px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-camp .offer.pc.sold { opacity: .45; filter: grayscale(.7); animation: none; }
+.gx-camp .offer.swap-src { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo), 0 0 0 3px var(--gx-gold), 0 0 22px rgba(248, 180, 73, .55); }
+/* la legendaria: su marco de oro (campamento.css), botando suave como las demas (antes a saltos) */
+.gx-camp .offers > .offer.pc.r3 { animation-timing-function: var(--gx-ease), ease-in-out; }
+.gx-camp .offer.pc.r3 .of-ico { padding-top: 0; }
+.table.mesa.gx-camp .offer.pc.r3 .of-r { left: -10px; right: -10px; width: fit-content; margin-inline: auto; translate: none; max-width: calc(100% + 20px); padding: 3px 8px 4px; font-weight: 400; letter-spacing: .02em; white-space: normal; text-align: center; line-height: 1.05; }   /* la placa de laton pisa el borde y sobresale un poco; con "vende una..." parte en dos lineas */   /* la placa de laton cabe en la carta */
+/* el mazo de Cambiar cartas, boca abajo al final de la fila */
+.gx-camp .offers > .tb-actions { grid-row: 1 / -1; display: flex; align-items: center; min-width: 0; padding: 0; }
+.gx-camp .tb-deck { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 88px; height: min(100%, 200px); padding: 12px 6px 14px; margin-right: 6px; border: 0; cursor: pointer; text-align: center;
+  color: var(--gx-txt); font-family: var(--sans); font-size: 18px; line-height: 1.05; background: repeating-linear-gradient(45deg, rgba(255, 217, 138, .1) 0 4px, transparent 4px 10px), #17553a;
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim), inset 0 0 0 6px #0f3727, 3px 3px 0 0 #0f3727, 3px 3px 0 2px var(--gx-o), 6px 6px 0 0 #0f3727, 6px 6px 0 2px var(--gx-o); transition: transform .18s var(--gx-ease); }
+.gx-camp .tb-deck:hover { transform: translateY(-3px); }
+.gx-camp .tb-deck .tb-dk .ic { width: 36px; height: 36px; }
+.gx-camp .tb-deck em { display: inline-flex; align-items: center; gap: 2px; padding: 2px 8px 3px 4px; font-style: normal; font-size: 20px; color: var(--gx-ink); background: var(--gx-gold); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-camp .tb-deck em .ic { width: 18px; height: 18px; }
+.gx-camp .tb-deck:focus { outline: none; } .gx-camp .tb-deck:focus-visible, html[data-input="pad"] .gx-camp .tb-deck:focus { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px var(--gx-rim), 3px 3px 0 0 #0f3727, 6px 6px 0 0 #0f3727; }
+
+/* la Barra: suministro, juego de casino y apuesta en la misma placa (icono, nombre y precio arriba; lo que hace, debajo a todo lo ancho;
+   los botones de elegir, si hay varios, en su propia linea). Bombillas solo en la del juego de casino, que es un cartel */
+.gx-camp .tb-sup { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; min-width: 0; margin: 0; }
+.gx-camp .tb-sup.no-cas { grid-template-columns: repeat(2, minmax(0, 1fr)); } .gx-camp .tb-sup.no-cas .sup-void { display: none; }
+.gx-camp .sup-void { display: block; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .18); }   /* hueco: esa ronda no toca apuesta */
+.gx-camp .sup { --pc: #0f2a1e; position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-rows: auto auto auto; align-content: start; align-items: center; gap: 2px 8px;
+  min-width: 0; min-height: 0; max-width: none; margin: 0; padding: 8px 10px 10px; border: 0; border-radius: 0; cursor: pointer; text-align: left; color: var(--gx-txt); font-family: var(--sans); transform: none;
+  clip-path: var(--gx-notch); background: url(../assets/dados/felt.png) 0 0 / 32px 32px, var(--pc); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .45); transition: filter .15s; }
+.gx-camp .sup::before, .gx-camp .sup::after { content: none; }
+.gx-camp .sup:hover:not(.done) { filter: brightness(1.08); }
+.gx-camp .sup:focus { outline: none; } .gx-camp .sup:focus-visible, html[data-input="pad"] .gx-camp .sup:focus { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fff; }
+.gx-camp .sp-ic { grid-column: 1; grid-row: 1; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 0; background: none; box-shadow: none; }
+.gx-camp .sp-ic .ic { width: 32px; height: 32px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.gx-camp .sp-t { display: contents; }
+.gx-camp .sp-t > b { grid-column: 2; grid-row: 1; min-width: 0; font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1; color: var(--gx-ttl); text-shadow: 0 2px 0 rgba(0, 0, 0, .4); text-transform: none; letter-spacing: 0; }
+.gx-camp .sp-t > i { grid-column: 1 / -1; grid-row: 2; font-style: normal; font-size: 18px; line-height: 1.12; color: var(--gx-txt-2); text-wrap: pretty; }
+.gx-camp .sup > em { grid-column: 3; grid-row: 1; justify-self: end; font-style: normal; }
+.gx-camp .sup > .bt-pick { grid-column: 1 / -1; grid-row: 3; justify-self: end; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; }
+.gx-camp .sp-p { display: inline-flex; align-items: center; gap: 2px; height: 28px; padding: 0 8px 1px 4px; font-family: var(--sans); font-size: 20px; color: var(--gx-ink); background: var(--gx-gold);
+  box-shadow: inset 0 0 0 2px var(--gx-o); white-space: nowrap; }
+.gx-camp .sp-p .ic { width: 18px; height: 18px; }
+.gx-camp .sup .bt-stake { cursor: pointer; } .gx-camp .sup .bt-stake:hover { filter: brightness(1.12); }
+.gx-camp .sup .bt-go { color: var(--gx-ink); }
+/* comprado o apostado: la placa pasa a papel y le cae el sello de la casa */
+.gx-camp .sup.on { --pc: #efe4c8; color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
+.gx-camp .sup.on .sp-t > b { color: var(--gx-ink); text-shadow: none; } .gx-camp .sup.on .sp-t > i { color: var(--gx-ink-2); }
+.gx-camp .sp-on { padding: 2px 8px 3px; font-family: var(--sans); font-size: 18px; color: #b3322a; background: rgba(255, 255, 255, .35); box-shadow: inset 0 0 0 2px #b3322a; transform: rotate(-6deg); white-space: nowrap; }
+.gx-camp .sup.fresh .sp-on { animation: sp-stamp .32s cubic-bezier(.3, 1.5, .5, 1) both; }
+@keyframes sp-stamp { from { transform: rotate(-6deg) scale(1.9); opacity: 0; } to { transform: rotate(-6deg) scale(1); opacity: 1; } }
+/* los botones de las apuestas: papel; rojo, negro y verde en la ruleta; cara y cruz en la moneda */
+.gx-camp .sup .bt-c { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; padding: 0 10px 2px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap;
+  font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; letter-spacing: 0; text-transform: none; text-shadow: none; color: var(--gx-ink); clip-path: var(--gx-notch);
+  background: linear-gradient(#fffaf0 0 3px, var(--gx-paper) 3px calc(100% - 4px), #c2b28c calc(100% - 4px)); box-shadow: inset 0 0 0 2px var(--gx-o); transition: transform .12s steps(2, end); }
+.gx-camp .sup .bt-c:hover { transform: translateY(-2px); } .gx-camp .sup .bt-c:active { transform: translateY(1px); }
+.gx-camp .sup .bt-c:focus { outline: none; } .gx-camp .sup .bt-c:focus-visible, html[data-input="pad"] .gx-camp .sup .bt-c:focus { box-shadow: inset 0 0 0 2px #fff; }
+.gx-camp .sup .bt-cr { color: #fff; background: #c8322a; } .gx-camp .sup .bt-cb { color: #fff; background: #1d1f26; } .gx-camp .sup .bt-cg { color: #fff; background: #1b8a4a; }
+.gx-camp .sup .bt-ct { color: #fff; background: #3f7fd4; }
+.gx-camp .sup .bt-ch, .gx-camp .sup .bt-di, .gx-camp .sup .bt-gl, .gx-camp .sup .bt-pl, .gx-camp .sup .bt-ra, .gx-camp .sup .bt-cu, .gx-camp .sup .bt-cs {
+  background: linear-gradient(var(--gx-gold-hi) 0 3px, var(--gx-gold) 3px calc(100% - 4px), var(--gx-gold-lo) calc(100% - 4px)); }
+.gx-camp .sup .bt-n { gap: 6px; } .gx-camp .sup .bt-n span { display: inline-flex; align-items: center; gap: 2px; font-size: 18px; color: var(--gx-ink-2); }
+.gx-camp .sup .bt-n span .ic { width: 16px; height: 16px; }
+.gx-camp .sup .bt-res { display: grid; justify-items: end; gap: 2px; font-family: var(--sans); font-size: 18px; line-height: 1.05; color: var(--gx-txt-2); text-align: right; }
+.gx-camp .sup .bt-res b { font-weight: 400; font-size: 20px; color: var(--gx-ttl); text-transform: none; letter-spacing: 0; }
+.gx-camp .sup.done { cursor: default; }
+.gx-camp .sup.done.win { --pc: #3b2c12; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-gold); } .gx-camp .sup.done.win .bt-res b { color: var(--gx-gold); }
+.gx-camp .sup.done.lose { filter: saturate(.6) brightness(.9); }
+.gx-camp .sup.spinning .sp-ic .ic { animation: bt-spin .28s linear infinite; }
+@keyframes bt-spin { to { transform: rotate(360deg); } }
+/* el juego de casino: el unico cartel de la Barra, con su fila de bombillas que se encienden a turnos (solo opacidad: no repinta la placa) */
+.gx-camp .sup.cas { padding-top: 20px; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim); background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(120% 100% at 50% 0%, #2e4320, #13261b 72%); }
+.gx-camp .sup.cas::before, .gx-camp .sup.cas::after { content: ""; position: absolute; left: 10px; right: 10px; top: 5px; height: 10px; pointer-events: none;
+  background: radial-gradient(circle, #fff3c4 0 2px, #f8b449 2.5px 3.5px, #6b4410 4px 4.5px, transparent 5px) 0 0 / 20px 10px repeat-x; }
+.gx-camp .sup.cas::after { background-position: 10px 0; animation: cp-bulbs 1.1s ease-in-out infinite alternate; }
+.gx-camp .sup.cas::before { animation: cp-bulbs 1.1s ease-in-out infinite alternate-reverse; }
+@keyframes cp-bulbs { from { opacity: .25; } to { opacity: 1; } }
+.gx-camp .sup.cas.done::before, .gx-camp .sup.cas.done::after { animation: none; opacity: .6; }
+
+/* la mochila: reliquias, herramientas y provisiones dentro de la reticula */
+.gx-camp .tb-tray { display: flex; align-items: flex-start; gap: 26px; min-width: 0; margin: 0; padding: 10px 18px 10px; }
+.gx-camp .tray-col { display: grid; gap: 4px; min-width: 0; }
+.gx-camp .tray-col > h4 { display: flex; align-items: center; gap: 6px; margin: 0; white-space: nowrap; }
+.gx-camp .tray-col > h4 b { font-family: var(--serif); font-weight: 400; font-size: 20px; line-height: 1; letter-spacing: 0; color: var(--gx-txt); }
+.gx-camp .tray-row { display: flex; align-items: flex-end; gap: 8px; min-height: 0; }
+.gx-camp .tr-card { position: relative; flex: none; width: 48px; height: 60px; }
+.gx-camp .tr-face { position: relative; display: grid; place-items: center; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 0; cursor: pointer; background: var(--gx-card);
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--rc, #b7bfc4), inset 0 -4px 0 4px rgba(22, 36, 28, .1); transition: transform .18s var(--gx-ease); }
+.gx-camp .tr-face .ic { width: 36px; height: 36px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(22, 36, 28, .35)); }
+.gx-camp .tr-relic { --rc: #b7bfc4; } .gx-camp .tr-relic.r1 { --rc: #4fb6a0; } .gx-camp .tr-relic.r2 { --rc: #c78bf0; } .gx-camp .tr-relic.r3 { --rc: #ffd95a; }
+.gx-camp .tr-relic:hover .tr-face, .gx-camp .tr-face.pk-on { transform: translateY(-4px); }
+.gx-camp .tr-face:focus { outline: none; } .gx-camp .tr-face:focus-visible, html[data-input="pad"] .gx-camp .tr-face:focus { box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px var(--rc, #b7bfc4); }
+.gx-camp .tr-slot { flex: none; position: relative; width: 48px; height: 60px; background: rgba(10, 20, 15, .35); box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .22); }
+.gx-camp .tr-slot.pact::after { content: ""; position: absolute; right: 4px; bottom: 4px; width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff7b6b, #a8231b 70%); box-shadow: 0 0 0 2px var(--gx-o); }   /* el hueco del Pacto, lacrado */
+.gx-camp .tr-tool .tr-face { --rc: #6c8cff; cursor: default; } .gx-camp .tr-tool .tr-face .ic { width: 32px; height: 32px; margin-top: -10px; }
+.gx-camp .tr-pips { position: absolute; left: 0; right: 0; bottom: 7px; display: flex; justify-content: center; gap: 2px; }
+.gx-camp .tr-pips i { width: 6px; height: 6px; background: #c2372e; box-shadow: 0 0 0 1px var(--gx-o); }
+.gx-camp .tr-none { font-style: normal; font-size: 18px; color: var(--gx-txt-2); padding-bottom: 18px; }
+.gx-camp .tr-prov .hearts { gap: 4px; align-items: center; height: 60px; }
+.gx-camp .tr-prov .hearts .hp .ic { width: 30px; height: 30px; }
+/* el Pacto, fuera de los huecos: lacre de cera junto al contador */
+.gx-camp .tr-relic.tr-pact { flex: none; align-self: center; width: 22px; height: 22px; margin: -6px 0 -6px 2px; }
+.gx-camp .tr-pact .tr-face { border-radius: 50%; background: radial-gradient(circle at 36% 32%, #ff7b6b, #c2372e 48%, #8e1f19 78%); box-shadow: 0 0 0 2px var(--gx-o), inset 0 0 0 2px rgba(255, 217, 138, .55); }
+.gx-camp .tr-pact .tr-face .ic { width: 16px; height: 16px; }
+/* la Ventaja lleva un sello dorado (solo cabe una) */
+.gx-camp .tr-relic.vtg .tr-face::after { content: ""; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--gx-gold); box-shadow: 0 0 0 2px var(--gx-o); }
+/* mochila llena: las reliquias esperan a que elijas cual vendes (con lo que te dan por ella) */
+.gx-camp .tr-relic.swap-pick .tr-face { outline: 3px solid #c2372e; outline-offset: 1px; animation: swap-pick 1s ease-in-out infinite; cursor: pointer; }
+.gx-camp .tr-relic.swap-pick::after { content: attr(data-sv); position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 3; padding: 0 6px 1px 20px; white-space: nowrap; pointer-events: none;
+  font-family: var(--sans); font-size: 16px; line-height: 1.2; color: #fff; background: #c2372e url(../assets/icons/coin.webp) 4px 50% / 13px 13px no-repeat; box-shadow: 0 0 0 2px var(--gx-o); }
+@keyframes swap-pick { 50% { outline-color: #ffd98a; } }
+
+/* el boleto de la proxima ronda (papel, columna derecha): el tema o el jefe, el objetivo en su fila, cada reto con su soborno y Barajar al pie */
+.gx-camp > .tb-next { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 16px 18px 18px; }
+.gx-camp > .tb-next:has(> .nr.boss:first-child) { background: linear-gradient(#c2372e, #c2372e) 0 0 / 100% 6px no-repeat, var(--gx-card); }
+.gx-camp .nr { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0; }
+.gx-camp .nr-k { display: block; } .gx-camp .nr-k i { font-style: normal; margin: 0 6px; opacity: .55; }
+.gx-camp .nr-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.gx-camp .nr-badge { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 0; background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.gx-camp .nr-badge .ic { width: 30px; height: 30px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.gx-camp .nr-ttl { display: grid; gap: 2px; min-width: 0; }
+.gx-camp .nr-sub { font-style: normal; font-size: 18px; line-height: 1.1; color: var(--gx-ink-2); }
+.gx-camp .nr-name { min-width: 0; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: .95; color: var(--gx-ink); text-shadow: none; text-wrap: balance; }
+.gx-camp .nr-goal { font-size: 22px; } .gx-camp .nr-goal .of-was { opacity: .55; margin-right: 4px; text-decoration-thickness: 2px; }
+.gx-camp .nr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.gx-camp .nr-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "ic name buy" "ic desc desc"; gap: 3px 10px; align-items: center; padding: 8px 0 10px; border-top: 2px solid var(--gx-line); border-radius: 0; background: none; box-shadow: none; }
+.gx-camp .nr-ic { grid-area: ic; align-self: start; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 0; background: #17553a; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-camp .nr-ic .ic { width: 22px; height: 22px; image-rendering: pixelated; }
+.gx-camp .nr-row.k-map .nr-ic { background: #27306b; } .gx-camp .nr-row.k-ptr .nr-ic { background: #6b2f4e; } .gx-camp .nr-row.k-rule .nr-ic { background: #6b5a1f; } .gx-camp .nr-row.k-wall .nr-ic { background: #6b1f4f; }
+.gx-camp .nr-rn { grid-area: name; min-width: 0; font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1; color: var(--gx-ink); }
+.gx-camp .nr-rn .ch-lv { font-style: normal; font-size: 18px; letter-spacing: 1px; line-height: 1; color: var(--gx-gold-lo); margin-left: 2px; }
+.gx-camp .nr-row > p { grid-area: desc; margin: 0; font-size: 18px; line-height: 1.12; color: #3f5045; text-wrap: pretty; }
+.gx-camp .nr-buy { grid-area: buy; justify-self: end; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 4px 0 10px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap;
+  font-family: var(--sans); font-size: 18px; line-height: 1; letter-spacing: 0; text-transform: none; color: var(--gx-txt); clip-path: var(--gx-notch);
+  background: linear-gradient(#2f6a4f 0 3px, #1a4533 3px calc(100% - 4px), #0b2118 calc(100% - 4px)); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); transition: transform .12s steps(2, end); }
+.gx-camp .nr-buy:hover { transform: translateY(-2px); } .gx-camp .nr-buy:active { transform: translateY(1px); }
+.gx-camp .nr-buy:focus { outline: none; } .gx-camp .nr-buy:focus-visible, html[data-input="pad"] .gx-camp .nr-buy:focus { box-shadow: inset 0 0 0 2px #fff; }
+.gx-camp .nr-p { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px 1px 4px; font-style: normal; font-size: 18px; color: var(--gx-ink); background: var(--gx-gold); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.gx-camp .nr-p .ic { width: 16px; height: 16px; }
+.gx-camp .nr-have { grid-area: buy; justify-self: end; font-style: normal; font-family: var(--mono); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: #17765f; white-space: nowrap; }
+.gx-camp .nr-have.nr-seal { color: #b3322a; }
+.gx-camp .nr-row.done { opacity: .6; grid-template-areas: "ic name buy"; }
+.gx-camp .nr-clean { margin: 0; font-size: 20px; line-height: 1.15; color: var(--gx-ink-2); }
+.gx-camp .nr-shuffle { justify-self: start; margin-top: 2px; } .gx-camp .nr-shuffle .ic { width: 22px; height: 22px; }
+.gx-camp .nr-shuffle em { display: inline-flex; align-items: center; gap: 2px; font-style: normal; } .gx-camp .nr-shuffle em .ic { width: 18px; height: 18px; }
+/* el jefe: su nombre en rojo y su casilla con la chistera */
+.gx-camp .nr.boss .nr-k { color: #b3322a; } .gx-camp .nr.boss .nr-name { color: #8e1f19; }
+.gx-camp .nr.boss .nr-badge { background: radial-gradient(circle at 50% 38%, #c03a4f, #6e1a28 72%); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fe5f55; }
+/* despues (Ojo en el cielo): cada ronda siguiente en una fila baja, con sus fichas */
+.gx-camp .nr.far { grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 4px 10px; padding-top: 10px; border-top: 2px dashed var(--gx-line); }
+.gx-camp .nr.far .nr-badge { width: 30px; height: 30px; } .gx-camp .nr.far .nr-badge .ic { width: 22px; height: 22px; }
+.gx-camp .nr.far .nr-ttl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; min-width: 0; }
+.gx-camp .nr.far .nr-k { font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-gold-lo); }
+.gx-camp .nr.far .nr-name { font-size: 20px; }
+.gx-camp .nr.far .nr-chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.gx-camp .nr.far .nr-n { font-size: 18px; color: var(--gx-ink-2); }
+.gx-camp .nr-chips .ch-chip, .gx-camp .nr-chips .ch-chip > b { font-family: var(--serif); font-size: 18px; font-weight: 400; letter-spacing: .01em; text-transform: none; }
+.gx-camp .nr-chips .ch-chip { padding: 2px 6px 3px 4px; gap: 3px; border-radius: 0; } .gx-camp .nr-chips .ch-chip .ic { width: 16px; height: 16px; } .gx-camp .nr-chips .ch-chip .ch-lv { font-size: 16px; letter-spacing: 1px; }
+
+/* estoy listo: abajo a la derecha, con la ficha de la ronda que viene. Su luz late detras (solo opacidad) */
+.gx-camp > .go2-wrap { position: relative; isolation: isolate; display: flex; min-width: 0; }
+/* la sombra dura y la luz, detras del boton y sin filtro (un drop-shadow sobre la luz que late se repintaria en cada fotograma) */
+.gx-camp > .go2-wrap::after { content: ""; position: absolute; inset: 4px 0 -4px; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); background: rgba(2, 6, 4, .78); }
+.gx-camp > .go2-wrap::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; box-shadow: 0 0 24px 4px rgba(248, 180, 73, .6); opacity: 0; will-change: opacity; animation: go2-glow 2.4s ease-in-out infinite; }
+.gx-camp > .go2-wrap:has(.go2.doom)::before { box-shadow: 0 0 24px 4px rgba(254, 95, 85, .6); } .gx-camp > .go2-wrap:has(.go2.skip)::before { animation: none; }
+@keyframes go2-glow { 50% { opacity: 1; } }
+.gx-camp .go2 { flex: 1 1 auto; justify-content: flex-start; gap: 12px; min-width: 0; max-width: none; min-height: 0; margin: 0; padding: 8px 18px 10px 12px; white-space: normal; }
+.gx-camp .go2-chip { flex: none; display: grid; place-items: center; width: 56px; height: 56px; }
+.gx-camp .go2-chip > .ic, .gx-camp .go2-chip .ic.blindchip { width: 56px; height: 56px; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .4)); }
+.gx-camp .go2-chip .bc-base { animation: chip-turn 9s linear infinite; }
+.gx-camp .go2-t { flex: 1 1 auto; display: grid; gap: 4px; min-width: 0; }
+.gx-camp .go2-t b { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: .95; }
+.gx-camp .go2-t i { font-style: normal; font-size: 18px; line-height: 1.1; opacity: .85; }
+.gx-camp .go2-t i .ic { width: 16px; height: 16px; vertical-align: -2px; }
+.gx-camp .go2.doom { --h: var(--gx-red-hi); --m: var(--gx-red); --l: var(--gx-red-lo); color: #fff; }
+.gx-camp .go2.skip { --h: #fffaf0; --m: var(--gx-paper); --l: #c2b28c; }
+.gx-camp.lg-seq > .go2-wrap { opacity: 0; transition: opacity .3s; }
+
+/* el crupier sentado a la mesa: en el rincon derecho de la mochila, junto al boton, con el globo hacia arriba y a la izquierda (js/dealer.js, campRoom) */
+.dealer.camp.seat { left: auto; right: var(--cr); align-items: flex-end; }
+.dealer.camp.seat .dl-bubble { transform-origin: calc(100% - var(--hf) / 2) 100%;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - var(--hf) / 2 + 10px) calc(100% - 12px), calc(100% - var(--hf) / 2) 100%, calc(100% - var(--hf) / 2 - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+
+/* reducir movimiento: sin cartas que botan ni se reparten, bombillas quietas, sin luz que late ni ficha que gira */
+html.reduce-motion .gx-camp .offer.pc { animation: none; }
+html.reduce-motion .gx-camp .sup.cas::before, html.reduce-motion .gx-camp .sup.cas::after, html.reduce-motion .gx-camp > .go2-wrap::before, html.reduce-motion .gx-camp .go2-chip .bc-base,
+html.reduce-motion .gx-camp .tr-relic.swap-pick .tr-face, html.reduce-motion .gx-camp .sup.fresh .sp-on, html.reduce-motion .gx-camp .sup.spinning .sp-ic .ic { animation: none; }
+html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
+@media (prefers-reduced-motion: reduce) { .gx-camp .offer.pc, .gx-camp .sup.cas::before, .gx-camp .sup.cas::after, .gx-camp > .go2-wrap::before { animation: none; } }
+
+/* movil y ventanas muy pequenas (aqui la pantalla se desplaza): todo en una columna */
+@media (max-width: 899px), (max-height: 519px) {
+  .table.mesa.gx-camp { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 14px 16px 20px; }
+  .gx-camp > * { grid-column: 1 !important; grid-row: auto !important; }
+  .gx-camp .tb-head { grid-template-columns: minmax(0, 1fr) auto; } .gx-camp .tb-head > .rd { grid-column: 1 / -1; grid-row: 2; justify-self: start; max-width: 100%; overflow-x: auto; }
+  .gx-camp .tb-head > .tb-right { grid-column: 2; grid-row: 1; }
+  .gx-camp .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: auto; row-gap: 12px; }
+  .gx-camp .offer.pc { grid-row: auto; grid-template-rows: 64px auto 1fr auto; } .gx-camp .offers > .tb-actions { grid-column: 1 / -1; grid-row: auto; justify-content: center; }
+  .gx-camp .tb-deck { flex-direction: row; width: auto; height: auto; }
+  .gx-camp .tb-sup, .gx-camp .tb-sup.no-cas { grid-template-columns: minmax(0, 1fr); } .gx-camp .sup-void { display: none; }
+  .gx-camp .tb-tray { flex-wrap: wrap; }
+}
