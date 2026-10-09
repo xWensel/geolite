@@ -304,13 +304,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .row-btn.danger { color: #ffb4a8; box-shadow: inset 0 0 0 2px rgba(254, 95, 85, .55); }
 .row-btn.danger.armed { background: #fe5f55; color: #16241c; animation: none; }
 
-/* menu de pausa / guardar y salir */
-#veil .pv { display: grid; gap: 8px; justify-items: center; max-width: min(520px, calc(92 * var(--vw))); }
-#veil .pv h2 { margin: 0; } #veil .pv > p { margin: 4px 0 18px; font-size: 19px; line-height: 1.35; }
-#veil .pv-btns { display: grid; gap: 12px; width: min(420px, calc(90 * var(--vw))); }
-#veil .pv-btns .btn-ink, #veil .pv-btns .btn-line { width: 100%; justify-content: center; font-size: 19px; padding: 14px 18px; }
-.btn-line.danger { color: #ffb4a8; box-shadow: inset 0 0 0 2px rgba(254, 95, 85, .55); }
-.btn-line.danger.armed, .startbtn.armed { background: #fe5f55; color: #16241c; }
+.startbtn.armed { background: #fe5f55; color: #16241c; }
 .startbtn.armed .sb-t i { display: none; }
 
 /* partida guardada (v0.3.23): el mismo boton de ficha que "Nueva expedicion", sin banner propio. En la portada va solo y centrado;
@@ -328,8 +322,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .tb-right { justify-self: end; display: flex; align-items: center; gap: 14px; }
 
 #veil { z-index: 60; }
-html[data-skin] .btn-line.danger { background: #201512; color: #ffb4a8; box-shadow: inset 0 0 0 2px rgba(254, 95, 85, .7), 0 5px 0 rgba(0, 0, 0, .35); }
-html[data-skin] .btn-line.danger.armed, html[data-skin] .startbtn.armed { background: #fe5f55; color: #16241c; }
+html[data-skin] .startbtn.armed { background: #fe5f55; color: #16241c; }
 html[data-skin] .row-btn.danger { color: #ffb4a8; box-shadow: inset 0 0 0 2px rgba(254, 95, 85, .55); }
 html[data-skin] .row-btn.danger.armed { background: #fe5f55; color: #16241c; }
 

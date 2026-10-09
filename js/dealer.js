@@ -1742,6 +1742,7 @@ window.AIQ = window.AIQ || {};
     if (speaking()) { pend = null; leaving = false; clearTimeout(leaveT); } else { clear(); D.busy = false; bubble.classList.remove("on"); }
     D.host = host || null; if (host) host.appendChild(el); else $("app").appendChild(el);
     el.classList.toggle("big", !!host); el.classList.remove("camp", "screen"); if (host) el.classList.remove("inline", "home", ...HOME_CORNERS);   // lo del Campamento o del Perfil no le sigue
+    fitCorner();                                                      // v0.3.35: en un hueco ajeno se quita la altura y el tamano que le dio la esquina (en la pausa flotaba 76 px); de vuelta, los recalcula
   };
   /* se retira SIN cortarle: si esta a media frase la acaba donde este (con su segundo de mas) y luego se va; nada de lo que esperaba turno le sigue */
   let leaving = false, leaveT = 0, lineN = 0, released = 0;
