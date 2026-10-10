@@ -600,7 +600,7 @@ window.AIQ = window.AIQ || {};
   A.adv.startInfinite = startInfinite;
   A.adv.isInfinite = () => !!(run && run.inf);
   A.adv.infDone = () => !!(run && run.inf && run.infOver);
-  function mapStyleFor() { return A.MAPSTYLES[A.skin] || A.MAPSTYLES.casino; }
+  function mapStyleFor() { return A.mesas.style(); }                 // v0.3.62: la mesa que lleva puesta el jugador (js/skins.js)
   const DIRS16 = [["N", "N"], ["NNE", "NNE"], ["NE", "NE"], ["ENE", "ENE"], ["E", "E"], ["ESE", "ESE"], ["SE", "SE"], ["SSE", "SSE"], ["S", "S"], ["SSW", "SSO"], ["SW", "SO"], ["WSW", "OSO"], ["W", "O"], ["WNW", "ONO"], ["NW", "NO"], ["NNW", "NNO"]];
   const dirName = brg => { const idx = Math.round((((brg % 360) + 360) % 360) / 22.5) % 16, d = has("compass16") ? DIRS16[idx] : DIRS16[Math.round(idx / 2) % 8 * 2]; return A.lang === "es" ? d[1] : d[0]; };
   /* en el Reto diario, la etiqueta del acto dice en que intento vas (en lugar del subtitulo del acto) */

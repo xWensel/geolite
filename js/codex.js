@@ -1098,7 +1098,7 @@ window.AIQ = window.AIQ || {};
     const fresh = !isOpen() || !!shutT;                                  // cerrada (o apagandose): se vuelve a encender
     if (shutT) { clearTimeout(shutT); shutT = 0; $("codex").classList.remove("pw-off"); }
     if (!isOpen() && A.dealer && A.dealer.homeTease) { dealerWas = !!A.dealer.onHome; if (dealerWas) A.dealer.homeTease(false); }
-    if (!isOpen()) { mapSave(); ui.flown = false; }
+    if (!isOpen()) { mapSave(); ui.flown = false; if (map && map.setStyle && A.MAPSTYLES && A.MAPSTYLES.casino && map.sk !== A.MAPSTYLES.casino) map.setStyle(A.MAPSTYLES.casino); }   // v0.3.62: el aparato tiene su propia pantalla; la mesa del jugador vuelve al cerrarlo
     buildUI(); const root = $("codex"); root.classList.remove("hidden"); document.body.classList.add("cx-on"); labels();
     if (id && E[id]) { const pid = E[id].parent || id, v = { k: "detail", id: pid, ch: E[id].tier || 0 }; ui.stack = trail(v); ui.view = v; }
     else if (ui.view.k === "detail" || ui.view.k === "search") { ui.view = { k: "home" }; ui.stack = []; }        // vuelve a donde lo dejaste (Resumen, continente o pais); una carta suelta, no
@@ -1156,7 +1156,7 @@ window.AIQ = window.AIQ || {};
   }
   function shut(quiet) { const was = isOpen(), r = $("codex"); if (r) r.classList.add("hidden");
     pump.tok++; cancelAnimationFrame(pump.raf); pump.raf = 0; pump.q = []; if (io) io.disconnect(); silQueue.length = 0; cancelAnimationFrame(silT); silT = 0;   // nada sigue trabajando con ella cerrada
-    if ($("cxLight")) $("cxLight").classList.add("hidden"); document.body.classList.remove("cx-on"); if (A.coverMap) A.coverMap("codex", false); if (was) mapRestore(); ui.cur = null; if (was && !quiet) A.sfx.ui(); if (A.codexOnClose) A.codexOnClose();
+    if ($("cxLight")) $("cxLight").classList.add("hidden"); document.body.classList.remove("cx-on"); if (A.coverMap) A.coverMap("codex", false); if (was) mapRestore(); if (was && map && map.setStyle && A.mesas) { const st = A.mesas.style(); if (map.sk !== st) map.setStyle(st); } ui.cur = null; if (was && !quiet) A.sfx.ui(); if (A.codexOnClose) A.codexOnClose();
     const S2 = A.core && A.core.S;
     if (dealerWas && A.dealer && A.dealer.homeTease && document.querySelector(".hh") && S2 && S2.phase === "title" && !S2.settingsOpen) A.dealer.homeTease(true);
     dealerWas = false;

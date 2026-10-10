@@ -75,7 +75,7 @@ window.AIQ = window.AIQ || {};
     setHighlight(name) { this.marks = { ...this.marks, highlight: name || null }; this.fxDirty = this.hlDirty = true; }
     setPick(on) { this.pickEnabled = on; this.fxDirty = true; for (const c of [this.cv, this.fx]) c.classList.toggle("aiming", on); }
     setQuality(q) { this.quality = q; this.resize(true); }
-    setStyle() {}
+    setStyle() {} stopDrift() {} snap() { return null; }
     setAnchor() {}
     static supported() { return true; }
 

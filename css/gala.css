@@ -350,8 +350,8 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .pf-since { font-size: 18px; line-height: 1.1; color: var(--gx-ink-2); }
 .pf-stat { font-size: 18px; line-height: 1.05; }
 .pf-stat s { transform: translateY(-4px); }
-.pf-idx { display: grid; gap: 4px; align-content: start; min-height: 0; overflow-y: auto; padding: 2px; }
-.pf-ix { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 38px; padding: 3px 14px 3px 10px; border: 0; cursor: pointer; text-align: left;
+.pf-idx { display: grid; gap: 3px; align-content: start; min-height: 0; overflow-y: auto; padding: 2px; }   /* v0.3.62: ocho filas (con Mesas): a 16:9 caben sin desplazar */
+.pf-ix { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 36px; padding: 3px 14px 3px 10px; border: 0; cursor: pointer; text-align: left;
   font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--gx-txt); clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
 .pf-ix .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
 .pf-ix span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -962,3 +962,51 @@ html.sala-on .vignette { display: none; }                                  /* la
 @keyframes mq-latido { 0% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 36% { opacity: 0; } 100% { opacity: 0; } }
 html.reduce-motion #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; }
 @media (prefers-reduced-motion: reduce) { #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; } }
+
+/* ---------------------------------------------------------------- MESAS DEL MAPA (v0.3.62): la pagina "Mesas" del libro del Perfil (js/hub.js, mesasPage)
+   y el estreno de una mesa recien ganada (js/mesas.js). El catalogo y lo que es tuyo: js/skins.js (A.mesas).
+   La pagina: seis tarjetas en dos columnas, cada una con la captura de su mesa, lo que es (o como se gana, si aun no es tuya) y su estado.
+   La que llevas puesta va enmarcada en laton; las que no tienes, en gris, como los logros sin conseguir */
+.ms-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; align-content: start; min-height: 0; padding: 4px 2px 0; }
+.ms-card { position: relative; display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; margin: 0; border: 0; text-align: left; font: inherit; color: var(--gx-ink);
+  background: none; box-shadow: inset 0 0 0 2px var(--gx-line); cursor: pointer; }
+.ms-card.lk, .ms-card.on { cursor: default; }
+.ms-card.got:hover, .ms-card.got.pad-hov { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.ms-card.on { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-rim), inset 0 0 0 7px var(--gx-o); }
+.ms-card:focus { outline: none; }
+.ms-card:focus-visible::after, html[data-input="pad"] .ms-card:focus::after { content: ""; position: absolute; inset: 9px; box-shadow: 0 0 0 2px var(--gx-o); animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.ms-th { position: relative; display: block; aspect-ratio: 16 / 9; box-shadow: 0 0 0 2px var(--gx-o), 0 4px 0 2px rgba(22, 36, 28, .3); }
+.ms-th img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ms-card.lk .ms-th img { filter: grayscale(1) brightness(.56) contrast(.9); }
+.ms-tx { display: grid; gap: 5px; min-width: 0; justify-items: start; }
+.ms-tx b { font-family: var(--sans); font-weight: 400; font-size: 26px; line-height: 1; color: var(--gx-ink); overflow-wrap: anywhere; }
+.ms-tx i { font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; overflow-wrap: anywhere; }
+/* el estado, como una etiqueta sobre la captura (abajo a la izquierda): en uso = laton; usar = papel; cerrada = tinta */
+.ms-st { position: absolute; left: 6px; bottom: 6px; max-width: calc(100% - 12px); font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; padding: 5px 7px 4px;
+  color: var(--gx-ink); background: var(--gx-paper); box-shadow: 0 0 0 2px var(--gx-o); }
+.ms-card.on .ms-st { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
+.ms-card.lk .ms-st { color: var(--gx-paper-lo); background: var(--gx-ink); }
+.ms-note { margin: 10px 2px 0; font-size: 18px; line-height: 1.15; color: var(--gx-ink-2); }
+@media (max-width: 899px), (max-height: 519px) { .ms-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* el estreno. La portada se aparta (y vuelve) con un fundido, y con ella la luz de la sala, que vive dentro de #layer: la mesa se ve entera.
+   La capa va encima de #layer (z 4) y debajo de avisos, pausa y Ajustes; el crupier, delante de todo */
+body.ms-on #layer { opacity: 0; pointer-events: none; }
+body.ms-on #layer, body.ms-off #layer { transition: opacity .28s ease; }
+.ms-est { position: absolute; inset: 0; z-index: 8; overflow: hidden; }
+.ms-old { position: absolute; left: 0; overflow: hidden; transform-origin: 0 50%; will-change: transform; }
+.ms-old-in { position: absolute; left: 0; top: 0; transform-origin: 0 50%; will-change: transform; }
+.ms-shot { position: absolute; left: 0; display: block; }
+.ms-veil { position: absolute; inset: 0; background: #020908; opacity: 0; will-change: opacity; }
+.ms-beam { position: absolute; left: 0; opacity: 0; will-change: transform, opacity;
+  background: linear-gradient(90deg, transparent, rgba(255, 230, 172, .13) 20%, rgba(255, 240, 200, .38) 50%, rgba(255, 230, 172, .13) 80%, transparent); }
+.ms-plw { position: absolute; left: 40px; right: 40px; bottom: 44px; display: grid; justify-items: center; visibility: hidden; }
+.ms-est.plac .ms-plw { visibility: visible; }
+.ms-plac { width: max-content; min-width: 480px; max-width: min(760px, 100%); display: grid; gap: 10px; justify-items: center; text-align: center; padding: 24px 32px 24px; }
+.ms-plac .gx-t-l { color: var(--gx-ink); text-shadow: none; text-wrap: balance; }
+.ms-how { margin: 0; font-size: 22px; line-height: 1.15; color: #3f5045; text-wrap: balance; }
+.ms-more { margin: 0; font-size: 18px; line-height: 1.15; color: var(--gx-ink-2); text-wrap: balance; }
+.ms-plac .gx-acts { margin-top: 6px; flex-wrap: wrap; justify-content: center; }
+.ms-plac .gx-note { text-wrap: balance; }
+.ms-est.gx-layer.gx-in .ms-plw > .gx-sh { animation: ms-rise var(--gx-in) var(--gx-ease) both; }
+@keyframes ms-rise { from { opacity: 0; transform: translateY(40px); } }

@@ -71,6 +71,7 @@ window.AIQ = window.AIQ || {};
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
+    if (A.mesas && A.mesas.check) A.mesas.check();                    // v0.3.62: si has ganado una mesa del mapa, la casa la estrena (js/mesas.js)
   }
 
   /* ------------------------------------------------------------------ marco comun de las sub-pantallas (a pantalla completa, sobre el mapa) */
@@ -418,6 +419,15 @@ window.AIQ = window.AIQ || {};
   };
   const NEAR = () => A.pick6("A punto|Almost there|Presque|Quase lá|Fast geschafft|Quasi fatto||即将达成|거의 다 왔어요|あと少し|Почти|Prawie");
   let pfPage = null;                                                    // pagina abierta del libro (se recuerda mientras dure la sesion)
+  /* v0.3.62: la pagina "Mesas" del libro (el catalogo, js/skins.js) */
+  const MESAS_T = () => A.pick6("Mesas|Tables|Tables|Mesas|Tische|Tavoli||牌桌|테이블|テーブル|Столы|Stoły");
+  const MESAS_TX = {
+    eyb: "Se ganan en la mesa|Won at the table|Elles se gagnent à la table|Ganham-se na mesa|Am Tisch verdient|Si vincono al tavolo||在牌桌上赢来|테이블에서 따내는 것|テーブルで勝ち取る|Выигрываются за столом|Wygrywa się je przy stole",
+    on: "En uso|In use|Utilisée|Em uso|Im Einsatz|In uso||使用中|사용 중|使用中|Выбран|W użyciu",
+    use: "Usar|Use|Utiliser|Usar|Benutzen|Usa||使用|사용|使う|Выбрать|Użyj",
+    lk: "Cerrada|Locked|Fermée|Fechada|Gesperrt|Chiuso||未解锁|잠김|未解放|Закрыт|Zamknięty",
+    note: "Una mesa solo cambia el aspecto del mapa: los países, las reglas y la puntuación son los mismos.|A table only changes how the map looks: countries, rules and scoring stay the same.|Une table ne change que l'apparence de la carte : pays, règles et score restent les mêmes.|Uma mesa só muda a aparência do mapa: países, regras e pontuação são os mesmos.|Ein Tisch ändert nur das Aussehen der Karte: Länder, Regeln und Punkte bleiben gleich.|Un tavolo cambia solo l'aspetto della mappa: paesi, regole e punteggio restano gli stessi.||牌桌只改变地图的外观：国家、规则和计分都不变。|테이블은 지도의 모습만 바꿉니다. 나라, 규칙, 점수는 그대로입니다.|テーブルが変えるのは地図の見た目だけ。国もルールもスコアも同じです。|Стол меняет только вид карты: страны, правила и очки остаются прежними.|Stół zmienia tylko wygląd mapy: kraje, zasady i punktacja są te same.",
+  };
   /* lo que se pinta (tambien para el precalentamiento de la puerta, A.gala.warm: la primera apertura perdia fotogramas) y la pagina del libro */
   function pfBuild() {
     const P = A.profile.get(), s = P.stats, avg = s.questions - s.timeouts > 0 ? Math.round(s.km / (s.questions - s.timeouts)) : 0, st = A.codexStats();
@@ -440,7 +450,7 @@ window.AIQ = window.AIQ || {};
     const near = A.ACH.filter(a => !got(a) && !a.secret && prog[a.id] && prog[a.id][0] > 0 && prog[a.id][0] < prog[a.id][1])
       .sort((a, b) => prog[b.id][0] / prog[b.id][1] - prog[a.id][0] / prog[a.id][1]).slice(0, 3);
     const total = A.ach.total(), done = A.ach.count();
-    if (pfPage == null || (pfPage !== "near" && !tiers.some(x => x.i === pfPage))) { const open = tiers.find(x => x.n < x.list.length); pfPage = open ? open.i : tiers[0].i; }
+    if (pfPage == null || (pfPage !== "near" && pfPage !== "mesas" && !tiers.some(x => x.i === pfPage))) { const open = tiers.find(x => x.n < x.list.length); pfPage = open ? open.i : tiers[0].i; }
     const row = a => {
       const g = got(a), hid = a.secret && !g, pr = !g && prog[a.id];
       const badge = hid ? `<span class="ic badge">${A.icon(A.ACH_FRAME[a.ev] || "blank_boss", "bd-base")}${A.icon("lock", "bd-in")}</span>` : A.badge(a.id);
@@ -449,7 +459,20 @@ window.AIQ = window.AIQ || {};
         : pr ? `<b>${A.fmt(pr[0])} / ${A.fmt(pr[1])}</b><span class="gx-bar"><i style="width:${pct(pr[0], pr[1])}%"></i></span>` : "";
       return `<li class="pf-row${g ? " got" : ""}${hid ? " hid" : ""}"><span class="pf-chip">${badge}</span><span class="pf-tx"><b>${hid ? "???" : esc(A.tx(a.name))}</b><i>${how}</i></span><span class="pf-mt">${meta}</span></li>`;
     };
+    /* v0.3.62: las mesas del mapa. Cada una con su captura, lo que es (o como se gana, si aun no es tuya) y su estado; la que llevas, en laton.
+       El estado va sobre la captura: asi el texto tiene sitio para cuatro lineas y las seis caben a 16:9 en los 12 idiomas */
+    const mesasPage = () => {
+      const M = A.mesas, cur = M.current(), n = M.count(), tot = M.list.length, tx = k => esc(A.pick6(MESAS_TX[k]));
+      const card = m => {
+        const own = M.owned(m.id), on = m.id === cur;
+        return `<button type="button" class="ms-card${on ? " on" : own ? " got" : " lk"}" data-mesa="${m.id}"${own ? "" : ' aria-disabled="true"'}${on ? ' aria-pressed="true"' : ""}><span class="ms-th"><img src="assets/mesas/${m.id}.webp" alt="" width="640" height="360" decoding="async"><em class="ms-st">${tx(on ? "on" : own ? "use" : "lk")}</em></span>
+          <span class="ms-tx"><b>${esc(M.name(m.id))}</b><i>${esc(own ? M.desc(m.id) : M.how(m.id))}</i></span></button>`;
+      };
+      return `<header class="pf-bh"><span class="pf-bic">${A.icon("chip_g")}</span><span class="pf-bt"><span class="gx-eyb">${tx("eyb")}</span><h3 class="gx-t-m">${MESAS_T()}</h3></span><span class="pf-bc"><b>${n}<i> / ${tot}</i></b><span class="gx-bar"><i style="width:${pct(n, tot)}%"></i></span></span></header>
+        <div class="gx-hr"></div><div class="ms-grid" id="msGrid">${M.list.map(card).join("")}</div><p class="ms-note">${tx("note")}</p>`;
+    };
     const book = () => {
+      if (pfPage === "mesas") return mesasPage();
       const x = pfPage === "near" ? null : tiers.find(t => t.i === pfPage), list = x ? x.list : near;
       const ic = x ? A.icon("tier_" + x.i) : A.icon("u_star"), sub = x ? A.tx(x.t.t) : A.pick6("Los que tienes más cerca|The ones you're closest to|Ceux qui sont tout près|Os que estão mais perto|Die du fast hast|Quelli più vicini||最接近达成的|가장 가까운 업적|もう少しの実績|Ближе всего|Najbliżej");
       const cnt = x ? `<span class="pf-bc"><b>${x.n}<i> / ${x.list.length}</i></b><span class="gx-bar"><i style="width:${pct(x.n, x.list.length)}%"></i></span></span>` : "";
@@ -470,7 +493,7 @@ window.AIQ = window.AIQ || {};
             <b class="pf-name">${esc(nm)}</b>${since ? `<span class="pf-since">${since}</span>` : ""}<div class="gx-hr"></div>
             ${stat("a_pin", T("Preguntas", "Questions"), A.fmt(s.questions))}${stat("a_target", T("Dianas", "Bullseyes"), A.fmt(s.bulls))}${stat("a_lens", T("Error medio", "Avg. error"), A.fmtDist(avg))}
             ${stat("a_flame", T("Mejor racha", "Best streak"), A.fmt(s.bestStreak))}${stat("m_codex", T("Enciclopedia", "Encyclopedia"), A.fmt(st.u) + " / " + A.fmt(st.t))}${stat("crown", T("Récord aventura", "Adventure best"), A.fmt(P.adv.bestScore))}</div>
-          <nav class="pf-idx" id="pfIdx" aria-label="${T("Logros", "Achievements")}">${ix("near", "u_star", NEAR(), near.length, " hot")}${tiers.map(x => ix(x.i, "tier_" + x.i, A.tx(x.t.n), `${x.n} / ${x.list.length}`, x.n === x.list.length ? " full" : "")).join("")}</nav>
+          <nav class="pf-idx" id="pfIdx" aria-label="${T("Logros", "Achievements")}">${ix("near", "u_star", NEAR(), near.length, " hot")}${tiers.map(x => ix(x.i, "tier_" + x.i, A.tx(x.t.n), `${x.n} / ${x.list.length}`, x.n === x.list.length ? " full" : "")).join("")}${ix("mesas", "chip_g", MESAS_T(), `${A.mesas.count()} / ${A.mesas.list.length}`, A.mesas.count() === A.mesas.list.length ? " full" : "")}</nav>
         </div>
         <div class="gx-sh pf-right"><div class="gx-paper pf-book" id="pfBook">${book()}</div></div>
       </div></section>`;
@@ -480,8 +503,16 @@ window.AIQ = window.AIQ || {};
     const v = pfBuild(); C().dialog(v.html, "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
     $("pfIdx").onclick = e => {
-      const b = e.target.closest(".pf-ix"); if (!b) return; const p = b.dataset.p === "near" ? "near" : +b.dataset.p; if (p === pfPage) return;
+      const b = e.target.closest(".pf-ix"); if (!b) return; const p = b.dataset.p === "near" || b.dataset.p === "mesas" ? b.dataset.p : +b.dataset.p; if (p === pfPage) return;
       pfPage = p; A.sfx.card(); document.querySelectorAll(".pf-ix").forEach(x => x.classList.toggle("on", x === b)); $("pfBook").innerHTML = v.book();
+    };
+    /* elegir mesa: las tuyas se ponen al pulsarlas (el mapa de detras cambia al momento); las cerradas no hacen nada */
+    $("pfBook").onclick = e => {
+      const c = e.target.closest(".ms-card"); if (!c) return; const id = c.dataset.mesa;
+      if (!A.mesas.owned(id)) { if (A.sfx.buzz) A.sfx.buzz(0); return; }
+      if (id === A.mesas.current() || !A.mesas.use(id)) return;
+      if (A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]);
+      $("pfBook").innerHTML = v.book(); const again = $("pfBook").querySelector(`.ms-card[data-mesa="${id}"]`); if (again) again.focus({ preventScroll: true });
     };
     if (A.coverMap) A.coverMap("profile", true, () => !!document.querySelector("#dlg .pf-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
     if (A.dealer && A.dealer.profile) A.dealer.profile();              // su libreta: lo que ha cambiado desde tu ultima visita, o una casilla que se da la vuelta
@@ -489,6 +520,7 @@ window.AIQ = window.AIQ || {};
 
   function screen(id) {
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
+    if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
     ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();

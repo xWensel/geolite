@@ -888,6 +888,12 @@ window.AIQ = window.AIQ || {};
     babelMany: [
       "¿Buscas un idioma en el que yo sea simpático? No existe.|Looking for a language where I'm nice? There isn't one.|Tu cherches une langue où je suis sympa ? Elle n'existe pas.|Procurando uma língua em que eu seja simpático? Não existe.|Suchst du eine Sprache, in der ich nett bin? Gibt es nicht.|Cerchi una lingua in cui io sia simpatico? Non esiste.||在找一种我会变得和善的语言？不存在的。|내가 친절해지는 언어를 찾는 거야? 그런 건 없어.|私が優しくなる言語を探してるのか？そんなものはない。|Ищешь язык, на котором я буду милым? Такого нет.|Szukasz języka, w którym będę miły? Nie ma takiego."
     ],
+    /* ---- el estreno de una mesa del mapa (v0.3.62, js/mesas.js): {mesa} es su nombre */
+    mesaNew: [
+      "Has ganado en mi sala. Supongo que te has ganado una mesa de verdad.|You won in my room. I suppose you've earned a proper table.|Tu as gagné dans ma salle. J'imagine que tu as mérité une vraie table.|Você ganhou no meu salão. Acho que mereceu uma mesa de verdade.|Du hast in meinem Saal gewonnen. Dann hast du dir wohl einen richtigen Tisch verdient.|Hai vinto nella mia sala. Suppongo che ti sia meritato un tavolo vero.||你在我的厅里赢了。看来你配得上一张真正的牌桌。|내 홀에서 이겼군. 제대로 된 테이블 하나쯤은 받을 만하지.|私のホールで勝ったな。本物のテーブルをもらう資格はあるだろう。|Победа в моём зале. Похоже, настоящий стол теперь твой.|Wygrana w mojej sali. No dobrze, prawdziwy stół jest twój.",
+      "{mesa}. No se la abro a cualquiera. A ti tampoco, pero has insistido.|{mesa}. I don't open it for just anyone. Not for you either, but you insisted.|{mesa}. Je ne l'ouvre pas à n'importe qui. À toi non plus, mais tu as insisté.|{mesa}. Não abro para qualquer um. Para você também não, mas você insistiu.|{mesa}. Den öffne ich nicht für jeden. Für dich auch nicht, aber du hast nicht lockergelassen.|{mesa}. Non lo apro a chiunque. Nemmeno a te, ma hai insistito.||{mesa}。我可不是随便给人开的。本来也不给你开，可你太坚持了。|{mesa}. 아무한테나 열어 주는 게 아니야. 너한테도 안 열 생각이었는데, 워낙 끈질겨서.|{mesa}。誰にでも開けるわけじゃない。君にも開けるつもりはなかったが、しつこいからな。|{mesa}. Я не открываю его кому попало. Тебе тоже не собирался, но ты слишком упорствуешь.|{mesa}. Nie otwieram go byle komu. Tobie też nie zamierzałem, ale nie dajesz za wygraną.",
+      "Mesa nueva. El paño es mío, las fichas son mías y el mapa también. Tú solo eliges dónde perder.|New table. The felt is mine, the chips are mine and so is the map. You just pick where to lose.|Nouvelle table. Le tapis est à moi, les jetons sont à moi et la carte aussi. Toi, tu choisis juste où perdre.|Mesa nova. O pano é meu, as fichas são minhas e o mapa também. Você só escolhe onde perder.|Neuer Tisch. Das Tuch gehört mir, die Chips gehören mir und die Karte auch. Du suchst dir nur aus, wo du verlierst.|Tavolo nuovo. Il panno è mio, le fiches sono mie e la mappa pure. Tu scegli solo dove perdere.||新牌桌。台呢是我的，筹码是我的，地图也是我的。你只管挑在哪儿输。|새 테이블이야. 펠트도 내 거, 칩도 내 거, 지도도 내 거. 넌 어디서 질지만 고르면 돼.|新しいテーブルだ。フェルトも私のもの、チップも私のもの、地図もだ。君はどこで負けるか選ぶだけでいい。|Новый стол. Сукно моё, фишки мои, и карта тоже. Тебе остаётся выбрать, где проиграть.|Nowy stół. Sukno jest moje, żetony są moje i mapa też. Ty tylko wybierasz, gdzie przegrać.",
+    ],
     /* ---- me han actualizado: la primera vez tras una version nueva ({v}) */
     newVersion: [
       "Versión {v}. Me han actualizado mientras no mirabas. Frases nuevas; tu puntería, la de siempre.|Version {v}. They updated me while you weren't looking. New lines; your aim, same as ever.|Version {v}. On m'a mis à jour pendant que tu ne regardais pas. Nouvelles répliques ; ta visée, toujours la même.|Versão {v}. Me atualizaram enquanto você não olhava. Falas novas; sua mira, a de sempre.|Version {v}. Man hat mich aktualisiert, während du nicht hingeschaut hast. Neue Sprüche, deine Treffsicherheit die alte.|Versione {v}. Mi hanno aggiornato mentre non guardavi. Battute nuove; la tua mira, quella di sempre.|Versión {v}. Me actualizaron mientras no mirabas. Frases nuevas; tu puntería, la de siempre.|{v}版本。趁你不注意，我被更新了。台词是新的，你的准头还是老样子。|{v} 버전. 네가 안 보는 사이에 업데이트됐어. 대사는 새것, 네 조준 실력은 그대로.|バージョン{v}。君が見ていない間にアップデートされた。台詞は新しく、君の腕前はいつも通り。|Версия {v}. Меня обновили, пока ты не смотрел. Фразы новые, а меткость у тебя прежняя.|Wersja {v}. Zaktualizowali mnie, kiedy nie patrzyłeś. Nowe teksty; twoja celność bez zmian.",
@@ -1577,6 +1583,7 @@ window.AIQ = window.AIQ || {};
     quitAskCount: ["bored"], quitAskStays: ["sly", "preen"], poke: ["shock", "hat_pop"], "poke#0": ["puzzled"], "poke#1": ["laugh"],
     "poke#2": ["angry", "finger_wag"], "poke#3": ["angry", "turn_away"], pokeMemory: ["sad"], sulk: ["angry", "snap"], sulkBack: ["sly", "snap"],
     babelOld: ["puzzled", "scratch_head"], babelNew: ["sly", "preen"], "babelNew#1": ["wink", "preen"], babelMany: ["sly", "fan_self"],
+    mesaNew: ["sly", "hat_tip"], "mesaNew#1": ["smug", "fan_open"], "mesaNew#2": ["sly", "shuffle"],
     newVersion: ["sly", "preen"], "newVersion#1": ["wink", "shh"], fakeAch: ["laugh"], "fakeAch#0": ["smug", "slow_clap"], fakeAchIdle: ["sly"],
     fakeAchDoor: ["smug"], trickDebut: ["sly", "fan_open"], trickHouse: ["smug", "twirl_moustache"], "trickHouse#1": ["smug", "hand_heart"],
     trickYou: ["sly", "shuffle"], "trickYou#1": ["sly", "card_reveal"], trickVet: ["angry", "turn_away"], bossNamed: ["dare", "hat_low"],
@@ -2061,7 +2068,7 @@ window.AIQ = window.AIQ || {};
     if (!D.onHome) return;
     if (dozing) { if (lastInput > afkAt) wakeUp(); homeT = setTimeout(homeTick, dozing ? 1000 : 16000 + Math.random() * 10000); return; }   // traspuesto: al volver se despierta de golpe
     const S = A.core && A.core.S;
-    if (!document.querySelector(".hh") || phase() !== "title" || (S && (S.booting || S.settingsOpen)) || D.busy || tourOn()) { homeT = setTimeout(homeTick, 2500); return; }   // solo en el inicio, sin pisar a nadie
+    if (!document.querySelector(".hh") || phase() !== "title" || (S && (S.booting || S.settingsOpen)) || D.busy || tourOn() || (A.mesas && A.mesas.busy)) { homeT = setTimeout(homeTick, 2500); return; }   // solo en el inicio, sin pisar a nadie (ni al estreno de una mesa: ahi presenta la mesa, D.mesa)
     if (afkAt && lastInput > afkAt) {                                                  // vuelves tras el "¿sigues ahi?": a veces, el logro falso de mirar el techo
       const idle = Math.round((lastInput - afkFrom) / 1000); afkAt = 0;
       if (idle >= 60 && fakeOk()) { fakeAch("idle", idle); homeT = setTimeout(homeTick, 30000 + Math.random() * 20000); return; }
@@ -2098,6 +2105,8 @@ window.AIQ = window.AIQ || {};
      La proxima vez que abras el juego te lo recuerda nada mas llegar (quitReturn) */
   D.noteQuit = on => { DS.quitAt = on ? Date.now() : 0; saveStore(); };
   /* js/salir.js: una frase suelta en la portada, en una esquina concreta (al rondar el boton de salir asoma justo debajo, arriba a la izquierda) */
+  /* presenta la mesa recien estrenada (js/mesas.js) */
+  D.mesa = name => D.homeSay(say1("mesaNew", { mesa: name }), "sly");
   D.homeSay = (t, mood, corner) => {
     if (!t || held || !D.onHome || D.busy || D.host || tourOn()) return false;
     const c = HOME_CORNERS.includes(corner) ? corner : homeCorner || rand(HOME_CORNERS);

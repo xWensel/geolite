@@ -495,7 +495,7 @@
 
   /* ------------------------------------------------------------ menu principal */
   function showTitle(screen) {
-    document.body.classList.add("title-on"); S.phase = "title"; S.camp = null; S.run = null; S.tool = null; S.ranked = null; A.adv.hideBars(); map.setStyle(A.MAPSTYLES[S.skin] || A.MAPSTYLES.casino); map.setPick(false); map.clearMarks(); map.setHome({ lat: 0, lon: 0, zoom: 1 });
+    document.body.classList.add("title-on"); S.phase = "title"; S.camp = null; S.run = null; S.tool = null; S.ranked = null; A.adv.hideBars(); map.setStyle(A.mesas.style()); map.setPick(false); map.clearMarks(); map.setHome({ lat: 0, lon: 0, zoom: 1 });
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("veil").classList.add("hidden"); $("intro").classList.add("hidden");
     chrome(false); $("factText").textContent = ""; A.music.mode(0); A.music.moment("home"); map.startDrift(); openSettings(false);
     renderMenu(screen);

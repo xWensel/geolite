@@ -89,7 +89,7 @@ void main(){
   float n=texture(u_blurN,uv).r;
   float ao=smoothstep(0.60,0.97,n);
   c*=mix(1.0-u_fx.x,1.0,ao);
-  if(u_style==1){                                   // casino: cara de carta con brillo suave
+  if(u_style>=1){                                   // casino y mesas de pano: cara de carta con brillo suave
     c*=1.0+0.05*uv.y; c=mix(c,vec3(1.0),0.05*smoothstep(0.6,1.0,n));
   }
   c+=(hash(f)-0.5)*u_fx.y;
@@ -143,7 +143,7 @@ precision highp float;
 uniform vec2 u_center; uniform float u_scale; uniform vec2 u_res; uniform float u_dpr; uniform float u_time; uniform int u_style;
 uniform sampler2D u_blurN; uniform sampler2D u_blurW; uniform sampler2D u_swirl;
 uniform vec3 u_oTop; uniform vec3 u_oBot; uniform vec3 u_shallow; uniform vec3 u_grid; uniform vec3 u_tropic;
-uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3; uniform float u_calm;
+uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3; uniform float u_calm; uniform vec4 u_felt;
 uniform vec4 u_gp; // stepA, stepB, tB, gridAlpha
 out vec4 o;
 const float D2R=0.017453292519943295;
@@ -173,6 +173,14 @@ void main(){
   float w=texture(u_blurW,uv).r; float n=texture(u_blurN,uv).r;
   float shal=clamp(smoothstep(0.03,0.42,w)*0.70+smoothstep(0.02,0.5,n)*0.30,0.0,1.0);
   if(u_style==1){ ocean=mix(texture(u_swirl,uv).rgb,mix(u_sw1,u_sw2,0.5),u_calm*0.45); ocean=mix(ocean,u_shallow,shal*0.55); }   // u_calm: en partida el remolino baja la voz (js/casa.js)
+  else if(u_style==2){                                          // v0.3.62, mesa de pano: liso y quieto. u_felt = (pelo, sombra de contacto, luz de costa, lampara)
+    ocean=mix(u_oBot,u_oTop,uv.y)+u_felt.w*exp(-r*r*2.4);
+    ocean=mix(ocean,u_shallow,shal*u_felt.z);
+    ocean*=1.0-u_felt.y*smoothstep(0.02,0.55,n);                 // las piezas apoyan en el pano: sombra de contacto pegada a la costa
+    vec2 px=floor(frag/u_dpr);
+    float fib=(hash(px)-0.5)*0.62+(hash(floor(px*vec2(0.5,1.0))+17.0)-0.5)*0.38;   // pelo fino del fieltro: a tamano de pixel y quieto (nada de grano ampliado)
+    ocean*=1.0+u_felt.x*fib;
+  }
   else ocean=mix(ocean,u_shallow,shal);
   // reticula con dos niveles de detalle fundidos
   float ga=gridLevel(u_gp.x,wp,lonDeg,latDeg,pxPerDeg);
@@ -665,6 +673,9 @@ void main(){
       };
     }
     setStyle(st) { this.sk = st; this.ms = this._prepStyle(st); if (this.T && this.T.swirl) this.T.swirl.ok = false; this._silKey = null; this.dirty = this.fxDirty = true; }
+    stopDrift() { clearTimeout(this._dT); this.drift = null; }
+    /* una foto del mapa tal como se ve (el estreno de una mesa, js/mesas.js): se pinta y se copia en la misma tarea, antes de que el navegador componga */
+    snap() { try { const c = document.createElement("canvas"); c.width = this.cv.width; c.height = this.cv.height; this._drawGL(performance.now()); c.getContext("2d").drawImage(this.cv, 0, 0); return c; } catch (e) { return null; } }
     setAnchor(px, py) { this.zc = [px, py]; }
 
     /* ---------- GL: programas, geometria y buffers ---------- */
@@ -1418,7 +1429,7 @@ void main(){
       if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(P.ocean.u.u_swirl, 2); }
       this._u(P.ocean, "u_center", v.cx, v.cy); this._u(P.ocean, "u_scale", sc); this._u(P.ocean, "u_res", sw, sh); this._u(P.ocean, "u_dpr", dpr * RS); this._setDist(P.ocean);
       this._u(P.ocean, "u_oTop", ...ms.oTop); this._u(P.ocean, "u_oBot", ...ms.oBot); this._u(P.ocean, "u_shallow", ...ms.shallow); this._u(P.ocean, "u_grid", ...ms.grid); this._u(P.ocean, "u_tropic", ...ms.tropic);
-      this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA);
+      this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(P.ocean, "u_felt", f[0], f[1], f[2], f[3]); }
       this._u(P.ocean, "u_time", this.fxOn === false ? 0 : now / 1000); gl.uniform1i(P.ocean.u.u_style, st.style || 0);
       this._u(P.ocean, "u_sw1", ...ms.sw[0]); this._u(P.ocean, "u_sw2", ...ms.sw[1]); this._u(P.ocean, "u_sw3", ...ms.sw[2]);
       { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", this._calm); }   // la calma entra poco a poco (~0,7 s)
