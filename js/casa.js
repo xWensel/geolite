@@ -300,7 +300,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(n);
     const top = Math.max(n, o.fuerza | 0), g = gapMs(), LZ = [0.3, 0.46, 0.74];
     /* con cada golpe la lampara sube un punto mas; tras el tercero, el barrido de luz */
-    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); destello(k); if (k === 3) { setTimeout(barrido, 60); if (A.amb) setTimeout(() => A.amb.applause(1), 320); } };   // el premio gordo: barrido de luz y aplausos
+    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); destello(k); if (k === 3) { setTimeout(barrido, 60); } };   // el premio gordo: barrido de luz
     for (let k = 1; k <= n; k++) { if (k === 1) golpe(1); else setTimeout(() => golpe(k), (k - 1) * g); }
   }
   /* perdida: la apuesta que se va. Sonido de perder (o el que traiga quien llama), un temblor seco y la lampara que baja */

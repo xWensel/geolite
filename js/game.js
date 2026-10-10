@@ -1025,7 +1025,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     p.best = Math.max(p.best, shown); p.bestIq = Math.max(p.bestIq, iq); save();
     if (pass && S.level === S.camp.levels.length - 1) return endScreen(true, iq);
     if (pass) {
-      A.sfx.stamp(); setTimeout(A.sfx.win, 380); setTimeout(() => A.amb.applause(0.8), 900);   // nivel superado: la sala aplaude
+      A.sfx.stamp(); setTimeout(A.sfx.win, 380);
       verdict({
         kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
         stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1),
@@ -1041,7 +1041,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }
-    if (win) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); setTimeout(() => A.amb.applause(1), 900); setTimeout(() => A.amb.applause(0.8), 2300); }
+    if (win) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
     const btns = [];
     if (!win) btns.push({ id: "retryBtn", cls: "btn-ink", label: A.t("btn.retry"), arrow: true, primary: true, onclick: () => { S.runMax = S.runMax0 || 0; startLevel_(S.level); } });   // el intento fallido deja de contar en el maximo: el IQ y la medalla miden la pasada buena (S.clean sigue en false: Sin red exige no fallar ninguno)
     btns.push({ id: "newBtn", cls: win ? "btn-ink" : "btn-line", label: A.t("btn.newGame"), primary: win, onclick: () => { S.startLevel = 0; showTitle(); } });

@@ -1128,7 +1128,7 @@ window.AIQ = window.AIQ || {};
       if (bet && bet.id === "double" && !bet.done) { bet.done = 1; if (first) { const win = Math.min(bet.stake, 40); run.coins += bet.stake + win; run.stats.coinsEarned += win; lines.push([A.tx(BETS.double.n) + " ×2", "+" + (bet.stake + win), null, "bet"]); setTimeout(() => { A.casa.premio(3); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2400 }); }, 1100); } }   // doblas lo apostado (+40 como mucho)
       if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => A.casa.premio(3), 1100); } }   // +2 provisiones para el modo infinito
       A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); if (!run.practice) A.profile.get().adv.boss++; }
-      A.sfx.stamp(); setTimeout(A.sfx.clear, 300); setTimeout(() => A.amb.applause(boss ? 1 : 0.8), 850);   // ronda superada: la sala aplaude
+      A.sfx.stamp(); setTimeout(A.sfx.clear, 300);
       if (boss) A.music.moment(run.act + 1 === 3 && !run.won ? "win" : run.inf ? "inf" : "a" + Math.min(3, run.act + 2));   // jefe derrotado: su tema se va; entra la cancion del acto que viene (o la de la victoria)
       const actDone = boss, winAct = actDone ? run.act + 1 : 0;
       if (actDone) { const flawless = run.livesLostAct === 0; A.ach.emit("adv", { kind: "act", act: winAct, flawless, asc: run.asc, daily: !!run.board }); run.livesLostAct = 0; if (!run.practice) A.profile.get().adv.bestAct = Math.max(A.profile.get().adv.bestAct || 0, winAct); }
@@ -1187,7 +1187,7 @@ window.AIQ = window.AIQ || {};
     else { run.round++; run.attempt = 0; openShop(false); }
   }
   function winScreen() {
-    run.won = true; run.act++; run.round = 0; run.attempt = 0; run.phase = "win"; persist(); A.sfx.victory(); A.music.moment("win"); setTimeout(() => A.amb.applause(1), 700); setTimeout(() => A.amb.applause(0.9), 2200);   // tres actos completados: la cancion de la victoria
+    run.won = true; run.act++; run.round = 0; run.attempt = 0; run.phase = "win"; persist(); A.sfx.victory(); A.music.moment("win");   // tres actos completados: la cancion de la victoria
     const PA = run.practice ? {} : A.profile.get().adv; PA.wins = (PA.wins || 0) + 1; PA.deckWins = PA.deckWins || {}; PA.deckWins[run.deck] = (PA.deckWins[run.deck] || 0) + 1; A.profile.save();
     A.ach.emit("adv", { kind: "win", deck: run.deck });
     showWinChoice();

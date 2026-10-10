@@ -94,7 +94,6 @@ window.AIQ = window.AIQ || {};
     later(() => {
       el.classList.add("plac"); live.gala = A.gala.enter(el, { noRestore: true });
       if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([18, 40, 30]);
-      later(() => { if (A.amb && A.amb.applause) A.amb.applause(0.8); }, 380);
       later(() => { if (A.dealer && A.dealer.mesa) A.dealer.mesa(M.name(id)); }, 520);
     }, PLAC);
     el.querySelector("#msKeep").onclick = () => { if (!live || !live.gala) return; A.sfx.ui && A.sfx.ui(); end(true); };

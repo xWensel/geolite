@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.77",
+      name: L("Sin aplausos", "No applause", "Sans applaudissements", "Sem aplausos", "Ohne Applaus", "Senza applausi", "", "没有掌声", "박수 없음", "拍手なし", "Без аплодисментов", "Bez braw"),
+      date: "2026-10-10",
+      summary: L("La sala ya no aplaude: se acabaron las palmadas al superar una ronda, al ganar un duelo y con el premio gordo.", "The room no longer applauds: no more clapping when you clear a round, win a duel or hit the jackpot.", "La salle n'applaudit plus : fini les claquements de mains quand tu réussis une manche, gagnes un duel ou décroches le jackpot.", "A sala não aplaude mais: acabaram as palmas ao superar uma rodada, ganhar um duelo ou levar o prêmio gordo.", "Der Saal applaudiert nicht mehr: kein Klatschen mehr bei geschaffter Runde, gewonnenem Duell oder großem Gewinn.", "La sala non applaude più: niente più battimani quando superi un round, vinci un duello o centri il jackpot.", "", "大厅不再鼓掌：通过回合、赢下对决或中大奖时，不会再有拍手声。", "이제 관객이 박수 치지 않습니다. 라운드를 넘기거나 대결에서 이기거나 잭팟이 터져도 박수 소리가 나지 않아요.", "場内はもう拍手しません。ラウンドを突破したときも、勝負に勝ったときも、大当たりのときも、拍手は鳴りません。", "Зал больше не аплодирует: ни за пройденный раунд, ни за выигранную дуэль, ни за джекпот.", "Sala już nie klaszcze: koniec z oklaskami po przejściu rundy, wygranym pojedynku i głównej wygranej."),
+      chapters: [
+        { id: "sonido", kicker: L("Sonido", "Sound", "Son", "Som", "Klang", "Suono", "", "声音", "사운드", "サウンド", "Звук", "Dźwięk"),
+          title: L("La sala, sin palmas", "The room, without clapping", "La salle, sans claquements", "A sala, sem palmas", "Der Saal ohne Klatschen", "La sala, senza battimani", "", "大厅，没有拍手", "박수 없는 홀", "拍手のない場内", "Зал без хлопков", "Sala bez klaskania"),
+          entries: [
+            E(L("Los aplausos, fuera", "Applause, gone", "Les applaudissements, supprimés", "Os aplausos, fora", "Der Applaus entfällt", "Gli applausi, via", "", "掌声，取消", "박수 소리 삭제", "拍手を削除", "Аплодисменты убраны", "Oklaski usunięte"), "out", "0.3.77", [
+              L("Quitados del todo: al superar una ronda o un nivel, al cerrar la aventura, al ganar un duelo, con el premio gordo y al estrenar una mesa del mapa. Quedan las fanfarrias y el sonido de fichas y cartas de la sala.", "Removed entirely: when you clear a round or a level, finish the adventure, win a duel, hit the jackpot or unlock a map table. The fanfares and the room's chips and cards remain.", "Supprimés entièrement : en réussissant une manche ou un niveau, en terminant l'aventure, en gagnant un duel, avec le jackpot et en débloquant une table de carte. Restent les fanfares et les jetons et cartes de la salle.", "Removidos por completo: ao superar uma rodada ou nível, concluir a aventura, ganhar um duelo, levar o prêmio gordo e estrear uma mesa do mapa. Ficam as fanfarras e o som de fichas e cartas da sala.", "Komplett entfernt: bei geschaffter Runde oder Stufe, zum Abschluss des Abenteuers, bei gewonnenem Duell, beim großen Gewinn und beim Freischalten eines Kartentischs. Die Fanfaren und die Chips und Karten der Sala bleiben.", "Rimossi del tutto: al superamento di un round o livello, a fine avventura, vincendo un duello, con il jackpot e sbloccando un tavolo della mappa. Restano le fanfare e i suoni di fiche e carte della sala.", "", "已彻底移除：通过回合或关卡、完成冒险、赢下对决、中大奖以及解锁地图牌桌时都不会再有。号角声和大厅里的筹码、纸牌声仍然保留。", "완전히 제거했습니다. 라운드나 레벨을 넘길 때, 모험을 끝낼 때, 대결에서 이길 때, 잭팟이 터질 때, 지도 테이블을 얻을 때 모두 해당합니다. 팡파르와 홀의 칩·카드 소리는 그대로예요.", "完全に削除しました。ラウンドやレベルの突破、冒険の完走、勝負の勝利、大当たり、マップテーブルの獲得のいずれでも鳴りません。ファンファーレと、場内のチップやカードの音は残ります。", "Убраны полностью: при пройденном раунде или уровне, завершении приключения, победе в дуэли, джекпоте и получении стола на карте. Фанфары и звуки фишек и карт в зале остаются.", "Usunięte całkowicie: po przejściu rundy lub poziomu, ukończeniu przygody, wygranym pojedynku, głównej wygranej i zdobyciu stołu na mapie. Zostają fanfary oraz dźwięki żetonów i kart w sali."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.76",
       name: L("La lámpara de la caja", "The cashier's lamp", "La lampe de la caisse", "A luminária do caixa", "Die Lampe der Kasse", "La lampada della cassa", "", "账台的灯", "계산대의 램프", "会計のランプ", "Лампа кассы", "Lampa kasy"),
       date: "2026-10-10",

@@ -743,46 +743,14 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ el ambiente de la sala (v0.3.56, el sonido de la casa 3b) */
   /* Debajo de la musica, la sala: fichas y cartas y alguna copa, sueltas y de tarde en tarde. Cada sitio suena distinto (A.amb.place; lo llama
      js/casa.js, que ya sabe en que pantalla estas): el salon de la portada, la sala que baja la voz mientras piensas, la caja, la barra del
-     Campamento y el silencio cuando llega el jefe. Y la sala aplaude (A.amb.applause) al superar una ronda y con el premio gordo.
+     Campamento y el silencio cuando llega el jefe.
      v0.3.58: NO hay fondo continuo. El murmullo sintetizado y la ruleta lejana (ruido filtrado los dos) sonaban a viento y a ruido blanco, y
      demasiado fuerte (usuario): fuera. Debajo de la musica solo quedan sonidos sueltos y reconocibles; nada de ruido sostenido.
      Sin cargar el juego:
-      - los aplausos se calculan UNA vez en un hilo aparte (Worker, ambRender) y despues solo se reproducen: tres tandas;
       - las fichas y cartas son reales (assets/sfx/sala.mp3: 28 sonidos de "Casino Audio" de Kenney, CC0, en un solo archivo; SALA dice donde esta
         cada uno). Si no cargara, se sintetizan como antes;
       - los detalles sueltos los lanza un reloj de medio segundo que solo corre mientras el ambiente se oye.
      Ajustes > Sonido > Ambiente regula su nivel (60 % de fabrica). */
-  function ambRender() {
-    const rnd = Math.random, TAU = Math.PI * 2, SQ2 = Math.SQRT2;
-    /* paso de banda (RBJ, pico a 0 dB): el mismo filtro que el de WebAudio */
-    const biq = fs => { let b0 = 0, a1 = 0, a2 = 0, x1 = 0, x2 = 0, y1 = 0, y2 = 0; return {
-      set(f, q) { const w = TAU * f / fs, al = Math.sin(w) / (2 * q), a0 = 1 + al; b0 = al / a0; a1 = -2 * Math.cos(w) / a0; a2 = (1 - al) / a0; },
-      zero() { x1 = x2 = y1 = y2 = 0; },
-      run(x) { const y = b0 * (x - x2) - a1 * y1 - a2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y; return y; } }; };
-    /* los aplausos (v0.3.68): una sala de unas 30 personas, cada una con SU ritmo. Antes eran 900 palmadas al azar en 2,6 s (350 por segundo): una
-       cortina de ruido, "mas ruido que aplauso" (usuario). Ahora cada persona aplaude de 2,4 a 4 veces por segundo, con su cadencia, su distancia
-       (casi todas lejos, alguna cerca y fuerte), su sitio en el estereo y su momento de empezar y de parar; cada palmada es un chasquido seco y
-       corto (resonancia de manos ahuecadas, ~4 ms) que se oye suelto. Tres tandas; cada una sale con su tramo fuerte a 0,2 de valor eficaz y el
-       nivel final lo pone el juego */
-    const FA = 22050, AD = 3.0, AN = Math.round((AD + 0.5) * FA), claps = [];
-    for (let v = 0; v < 3; v++) {
-      const l = new Float32Array(AN), r = new Float32Array(AN), bq = biq(FA), bq2 = biq(FA), NP = 26 + Math.floor(rnd() * 10);
-      for (let p = 0; p < NP; p++) {
-        const dist = 0.12 + 0.88 * Math.pow(rnd(), 3), start = Math.pow(rnd(), 1.6) * 0.7, stop = AD * (0.5 + 0.5 * rnd()), per = 1 / (2.4 + rnd() * 1.6);
-        const a = (rnd() * 1.6 - 0.8 + 1) * Math.PI / 4, pl = Math.cos(a) * SQ2, pr = Math.sin(a) * SQ2, f1 = 1100 + rnd() * 1200, f2 = 2600 + rnd() * 1800, q = 1.8 + rnd() * 1.4;
-        for (let t0 = start + rnd() * per; t0 < stop; t0 += per * (0.86 + rnd() * 0.28)) {
-          const fall = t0 > stop - 0.6 ? Math.max(0, (stop - t0) / 0.6) : 1, amp = dist * fall * (0.6 + 0.8 * rnd()), s0 = Math.round(t0 * FA), at = 0.0006 * FA, tau = (0.0028 + rnd() * 0.0035) * FA, ns = Math.round(at + tau * 6);
-          bq.set(f1 * (0.9 + rnd() * 0.2), q); bq.zero(); bq2.set(f2 * (0.9 + rnd() * 0.2), q + 0.8); bq2.zero();
-          for (let k = 0; k < ns && s0 + k < AN; k++) { const e = k < at ? k / at : Math.exp(-(k - at) / tau), x = rnd() * 2 - 1, y = (bq.run(x) + 0.55 * bq2.run(x)) * e * amp; l[s0 + k] += y * pl; r[s0 + k] += y * pr; }
-        }
-      }
-      let sum = 0, cnt = 0; for (let n = Math.round(0.3 * FA); n < Math.round(1.8 * FA); n++) { sum += l[n] * l[n] + r[n] * r[n]; cnt += 2; }
-      const g = 0.2 / Math.sqrt(sum / cnt + 1e-12); for (let n = 0; n < AN; n++) { l[n] = Math.tanh(l[n] * g) * 0.95; r[n] = Math.tanh(r[n] * g) * 0.95; }
-      claps.push([l, r]);
-    }
-    return { fa: FA, claps };
-  }
-  const AMB_WORKER = `const ambRender = ${ambRender.toString()};\nonmessage = () => { const o = ambRender(); postMessage(o, [].concat(...o.claps.map(c => [c[0].buffer, c[1].buffer]))); };`;
   /* donde esta cada sonido de assets/sfx/sala.mp3: [inicio, duracion] en segundos (tools: el archivo se monto con 90 ms de silencio entre sonidos) */
   const SALA = { chip: [[0.09, 0.256], [0.436, 0.227], [0.753, 0.256], [1.099, 0.213], [1.401, 0.285], [1.776, 0.17], [2.036, 0.371], [2.496, 0.227], [2.814, 0.184], [3.088, 0.208], [3.385, 0.17], [3.645, 0.227], [3.962, 0.266]],
     mano: [[4.317, 0.616], [5.024, 0.546], [5.66, 0.227], [5.977, 0.356], [6.423, 0.834], [7.347, 0.46]], carta: [[7.897, 0.601], [8.588, 0.584], [9.262, 0.598], [9.95, 0.457], [10.497, 0.689], [11.276, 0.456], [11.822, 0.766]], baraja: [[12.678, 0.721], [13.489, 3.063]] };
@@ -796,24 +764,13 @@ window.AIQ = window.AIQ || {};
     fuera: { lvl: 0, lp: 500, chips: 0, glass: 0, ice: 0, deck: 0 },     // la Enciclopedia: un aparato, fuera de la sala
   };
   A.audio.vol.amb = 0.6;
-  let amb = null, ambPlace = "salon", ambTimer = 0, lastClap = -1;
+  let amb = null, ambPlace = "salon", ambTimer = 0;
   const ambWanted = () => A.audio.sfxOn && A.audio.vol.amb > 0.005;
   const ambLevel = P => (ambWanted() ? P.lvl * 0.55 * 0.9 * A.audio.vol.amb : 0);
   function ambBuild() {
     if (amb || !ctx) return;
     const mk = (f, sendTo) => { const g = ctx.createGain(), lp = ctx.createBiquadFilter(); g.gain.value = 0; lp.type = "lowpass"; lp.frequency.value = f; g.connect(lp).connect(master); if (sendTo) { const s = ctx.createGain(); s.gain.value = sendTo; lp.connect(s).connect(revIn); } return { g, lp }; };
-    /* dos caminos: los detalles (con su sala) y los aplausos */
-    amb = { ev: mk(1800, 0.5), re: mk(3200, 0.25), bufs: null, sprite: null, n: { chips: 0, glass: 0, ice: 0, deck: 0 }, P: PLACES.fuera };
-    try {
-      const w = new Worker(URL.createObjectURL(new Blob([AMB_WORKER], { type: "text/javascript" })));
-      w.onmessage = e => {
-        const o = e.data, buf = (ch, fs) => { const b = ctx.createBuffer(2, ch[0].length, fs); b.copyToChannel(ch[0], 0); b.copyToChannel(ch[1], 1); return b; };
-        amb.bufs = { claps: o.claps.map(c => buf(c, o.fa)) };
-        w.terminate(); ambApply();
-      };
-      w.onerror = () => w.terminate();
-      w.postMessage(0);
-    } catch (e) { /* sin Worker: no hay aplausos; los detalles siguen */ }
+    amb = { ev: mk(1800, 0.5), sprite: null, n: { chips: 0, glass: 0, ice: 0, deck: 0 }, P: PLACES.fuera };
     fetch(A.media("assets/sfx/sala.mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { amb.sprite = b; }).catch(() => { /* sin el archivo, las fichas se sintetizan */ });
   }
   /* el sitio manda: nivel y timbre. Cuando llega el jefe la sala se calla de golpe; en lo demas, cambia en medio segundo largo */
@@ -822,7 +779,6 @@ window.AIQ = window.AIQ || {};
     if (!amb) { if (lvl > 0 && ctx.state === "running") ambBuild(); if (!amb) return; }
     const t = ctx.currentTime, tc = ambPlace === "jefe" ? 0.12 : 0.6; amb.P = P;
     amb.ev.g.gain.setTargetAtTime(lvl, t, tc); amb.ev.lp.frequency.setTargetAtTime(P.lp, t, tc);
-    amb.re.g.gain.setTargetAtTime(ambWanted() ? 0.045 * A.audio.vol.amb : 0, t, 0.1);   // los aplausos: de fondo, flojos, sin tapar la fanfarria (v0.3.68, usuario)
     if (lvl > 0 && !ambTimer) { const now = ctx.currentTime; amb.n = { chips: now + 1 + Math.random() * 2, glass: now + 3 + Math.random() * 6, ice: now + 2 + Math.random() * 5, deck: now + 20 + Math.random() * 30 }; ambTimer = setInterval(ambTick, 500); }
     else if (lvl <= 0 && ambTimer) { clearInterval(ambTimer); ambTimer = 0; }
   }
@@ -849,15 +805,7 @@ window.AIQ = window.AIQ || {};
     place(key) { if (PLACES[key]) ambPlace = key; ambApply(); },
     refresh: ambApply,
     get where() { return ambPlace; },
-    get ready() { return !!(amb && amb.bufs); },
-    /* la sala aplaude. k: cuanto (0,8 una ronda superada; 1 un jefe o el premio gordo). Nunca dos veces la misma tanda, ni a la misma altura */
-    applause(k = 1) {
-      if (!amb || !amb.bufs || !ambWanted() || ctx.state !== "running" || document.hidden) return;
-      let v = Math.floor(Math.random() * 3); if (v === lastClap) v = (v + 1 + Math.floor(Math.random() * 2)) % 3; lastClap = v;
-      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = amb.bufs.claps[v]; s.playbackRate.value = 0.96 + Math.random() * 0.09; g.gain.value = k * (0.9 + Math.random() * 0.2);
-      s.connect(g).connect(amb.re.g); s.start(ctx.currentTime + 0.02);
-    },
-  };
+      };
 
   /* el motor de sonido (abrir el dispositivo de audio y preparar la reverb: ~50 ms de golpe) se monta ya, detras de la pantalla de carga.
      Antes se montaba con el primer sonido (la intro del estudio o el primer clic) y ese fotograma se quedaba parado. Sin gesto del jugador
