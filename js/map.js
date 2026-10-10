@@ -143,7 +143,7 @@ precision highp float;
 uniform vec2 u_center; uniform float u_scale; uniform vec2 u_res; uniform float u_dpr; uniform float u_time; uniform int u_style;
 uniform sampler2D u_blurN; uniform sampler2D u_blurW; uniform sampler2D u_swirl;
 uniform vec3 u_oTop; uniform vec3 u_oBot; uniform vec3 u_shallow; uniform vec3 u_grid; uniform vec3 u_tropic;
-uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3;
+uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3; uniform float u_calm;
 uniform vec4 u_gp; // stepA, stepB, tB, gridAlpha
 out vec4 o;
 const float D2R=0.017453292519943295;
@@ -172,7 +172,7 @@ void main(){
   ocean+=0.06*exp(-r*r*3.0);
   float w=texture(u_blurW,uv).r; float n=texture(u_blurN,uv).r;
   float shal=clamp(smoothstep(0.03,0.42,w)*0.70+smoothstep(0.02,0.5,n)*0.30,0.0,1.0);
-  if(u_style==1){ ocean=texture(u_swirl,uv).rgb; ocean=mix(ocean,u_shallow,shal*0.55); }
+  if(u_style==1){ ocean=mix(texture(u_swirl,uv).rgb,mix(u_sw1,u_sw2,0.5),u_calm*0.45); ocean=mix(ocean,u_shallow,shal*0.55); }   // u_calm: en partida el remolino baja la voz (js/casa.js)
   else ocean=mix(ocean,u_shallow,shal);
   // reticula con dos niveles de detalle fundidos
   float ga=gridLevel(u_gp.x,wp,lonDeg,latDeg,pxPerDeg);
@@ -215,7 +215,10 @@ vec3 swirl(vec2 frag){
 }
 void main(){ o=vec4(swirl(gl_FragCoord.xy),1.0); }`;
 
-  /* post-proceso: efecto de zoom sensorial + (casino) monitor CRT + viñeta y grano */
+  /* post-proceso: efecto de zoom sensorial + (casino) monitor CRT + viñeta y grano.
+     v0.3.52 (la casa): tubo mas suave para que manden la lampara y el fieltro: curva 0,045 -> 0,03, lineas de barrido al 5 % (antes 10),
+     mascara RGB al 1,5 % (antes 3,5), resplandor de fosforo y desvio de color mas flojos. La curva se usa tambien en los clics (_crt) */
+  const CRT_K = 0.03;
   const FS_POST = `#version 300 es
 precision highp float;
 uniform sampler2D u_scene; uniform vec2 u_res; uniform vec2 u_zc; uniform float u_zv; uniform vec2 u_pv; uniform float u_vig; uniform float u_grain; uniform vec3 u_tint; uniform float u_time;
@@ -224,7 +227,7 @@ out vec4 o;
 ${NOISE}
 void main(){
   vec2 frag=gl_FragCoord.xy; vec2 uv=frag/u_res;
-  if(u_crt>0.5){ vec2 q=uv*2.0-1.0; q*=1.0+dot(q,q)*0.045; uv=q*0.5+0.5; }
+  if(u_crt>0.5){ vec2 q=uv*2.0-1.0; q*=1.0+dot(q,q)*${CRT_K}; uv=q*0.5+0.5; }
   vec2 suv=uv;                                                  // la escena ya viene girada (Ruleta, Mundo del reves): aqui solo la curva CRT
   float inside=step(0.0,suv.x)*step(suv.x,1.0)*step(0.0,suv.y)*step(suv.y,1.0);
   vec2 fr=uv*u_res;
@@ -240,17 +243,17 @@ void main(){
     for(int i=0;i<N;i++){ float t=float(i)/float(N-1)-0.5; col+=texture(u_scene,suv+off*t/u_res).rgb; }
     col/=float(N);
   }
-  float ca=min(lenPx,12.0)*0.00035+u_crt*0.0011*(1.0-u_lite);
+  float ca=min(lenPx,12.0)*0.00035+u_crt*0.0007*(1.0-u_lite);
   if(ca>0.0005){
     vec2 dir=normalize(toC+vec2(0.0001)); vec2 cav=dir*ca*u_res.y/u_res*0.5;
     col.r=texture(u_scene,suv+cav).r; col.b=texture(u_scene,suv-cav).b;
   }
   if(u_crt>0.5){
     float sl=0.5+0.5*sin(fr.y*3.14159265/(1.5*u_dpr));
-    col*=0.90+0.10*sl;                                          // lineas de barrido
-    float tri=fract(fr.x/(3.0*u_dpr)); col*=0.965+0.035*vec3(step(tri,0.34),step(0.34,tri)*step(tri,0.67),step(0.67,tri));   // mascara RGB
+    col*=0.95+0.05*sl;                                          // lineas de barrido
+    float tri=fract(fr.x/(3.0*u_dpr)); col*=0.985+0.015*vec3(step(tri,0.34),step(0.34,tri)*step(tri,0.67),step(0.67,tri));   // mascara RGB
     if(u_lite<0.5){ vec3 bl=vec3(0.0); for(int i=0;i<6;i++){ float a=float(i)*1.0472; bl+=texture(u_scene,suv+vec2(cos(a),sin(a))*3.5*u_dpr/u_res).rgb; } bl/=6.0;
-    col+=max(bl-0.72,0.0)*0.55; }                                 // resplandor de fosforo
+    col+=max(bl-0.72,0.0)*0.4; }                                  // resplandor de fosforo
     }
   vec2 q2=uv-0.5; float v=1.0-u_vig*smoothstep(0.30,0.95,length(q2*vec2(1.05,1.0))+min(abs(zvA)*0.01,0.04));
   col*=v*u_tint;
@@ -947,14 +950,14 @@ void main(){
       return e;
     }
     _orient() { const e = this._eff(), sx = 1 - 2 * e.mx; return { c: Math.cos(e.oa), s: Math.sin(e.oa), sx: Math.abs(sx) < 0.02 ? 0.02 : sx, on: e.on }; }
-    /* pantalla CRT del casino: el post-proceso curva la imagen (q *= 1 + 0,045·|q|², con q de -1 a 1 en cada eje). Los clics y todo lo que se dibuja
+    /* pantalla CRT del casino: el post-proceso curva la imagen (q *= 1 + CRT_K·|q|², con q de -1 a 1 en cada eje; 0,045 hasta la v0.3.51). Los clics y todo lo que se dibuja
        encima (chinchetas, sondas, etiquetas, la lupa de fronteras) pasan por la misma curva: antes, cerca de los bordes, el clic y la chincheta caian
        de 33 a 65 px lejos de la tierra que se veia. inv: de la imagen sin curvar a la pantalla (Newton, 4 pasos) */
     _crt(x, y, inv) {
       if (!this.sk || !this.sk.crt) return [x, y];
       const qx = (2 * x) / this.W - 1, qy = (2 * y) / this.H - 1, r2 = qx * qx + qy * qy; if (!r2) return [x, y];
-      let f = 1 + 0.045 * r2;
-      if (inv) { const rs = Math.sqrt(r2); let r = rs; for (let i = 0; i < 4; i++) r -= (r + 0.045 * r * r * r - rs) / (1 + 0.135 * r * r); f = r / rs; }
+      let f = 1 + CRT_K * r2;
+      if (inv) { const rs = Math.sqrt(r2); let r = rs; for (let i = 0; i < 4; i++) r -= (r + CRT_K * r * r * r - rs) / (1 + 3 * CRT_K * r * r); f = r / rs; }
       return [((qx * f + 1) * this.W) / 2, ((qy * f + 1) * this.H) / 2];
     }
     /* pantalla -> escena: la curva CRT y despues el giro del mapa (del reves, espejo, ruleta), en el mismo orden que el post-proceso */
@@ -1418,6 +1421,7 @@ void main(){
       this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA);
       this._u(P.ocean, "u_time", this.fxOn === false ? 0 : now / 1000); gl.uniform1i(P.ocean.u.u_style, st.style || 0);
       this._u(P.ocean, "u_sw1", ...ms.sw[0]); this._u(P.ocean, "u_sw2", ...ms.sw[1]); this._u(P.ocean, "u_sw3", ...ms.sw[2]);
+      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", this._calm); }   // la calma entra poco a poco (~0,7 s)
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       gl.bindVertexArray(this.vaoFill);
@@ -1489,7 +1493,7 @@ void main(){
       const fxk = this.fxOn === false ? 0 : 1;
       this._u(P.post, "u_zv", this.zv * fxk); this._u(P.post, "u_pv", this.pv[0] * dpr * 0.06 * fxk, -this.pv[1] * dpr * 0.06 * fxk);
       this._u(P.post, "u_crt", st.crt ? 1 : 0); this._u(P.post, "u_lite", this.lite ? 1 : 0); this._u(P.post, "u_dpr", dpr);
-      this._u(P.post, "u_vig", st.vignette); this._u(P.post, "u_grain", st.postGrain); this._u(P.post, "u_tint", ...st.tint); this._u(P.post, "u_time", now / 1000);
+      this._u(P.post, "u_vig", st.vignette * (this.vigK == null ? 1 : this.vigK)); this._u(P.post, "u_grain", st.postGrain); this._u(P.post, "u_tint", ...st.tint); this._u(P.post, "u_time", now / 1000);   // vigK: con la luz de la sala (js/casa.js) la vineta del mapa pesa la mitad
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 

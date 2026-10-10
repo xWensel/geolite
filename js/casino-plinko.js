@@ -311,7 +311,7 @@ window.AIQ = window.AIQ || {};
       plate("t" + tier(res.t), `×${fm(res.t)}`, `${res.stake} × ${fm(res.t)} = ${fm(res.x)}`, (net > 0 ? "+" + net : net < 0 ? "−" + -net : "±0") + (res.x % 10 ? "  " + tr(U.frac) : ""));
       A.sfx.plkLand(res.slot % 3 + (lv ? 2 : 0), root);
       if (lv === 0) { if (res.coins < res.stake) A.sfx.lose(); ov.classList.add("lose"); }
-      else { if (lv >= 2) ov.classList.add("lv" + lv); A.sfx.jackpot(lv); if (A.core.jpShake) A.core.jpShake(lv); if (A.haptic) A.haptic(lv === 3 ? [40, 40, 80] : [30, 30, 60]); bump(8 * lv); if (lv >= 2) rainChips(lv === 3 ? 26 : 9, true); }
+      else { if (lv >= 2) ov.classList.add("lv" + lv); A.casa.premio(lv); bump(8 * lv); if (lv >= 2) rainChips(lv === 3 ? 26 : 9, true); }
       flash(); s.classList.add("flash"); hint(null);
       say(sit, 4, false, sit === "plkMax" ? { face: "shock", g: "tantrum" } : null);
       await sleep(600); await speechIdle(); sh.hold(2600);                                                                                       // la ultima frase se oye entera antes de cerrar (tocar la pantalla tambien cierra)

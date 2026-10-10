@@ -43,7 +43,10 @@ window.AIQ = window.AIQ || {};
   A.pic = (id, cls = "") => { setTimeout(() => A.genFill(), 0); return `<span class="pic ${cls}"><img class="pic-img" alt="" data-gen="${id}" decoding="async"><i class="pic-frame"></i>${A.bulbs()}</span>`; };
   /* bombillas de marquesina (las de la carta de la Aventura): puntos redondos a lo largo de un rectangulo redondeado. pathLength fijo, asi que
      siempre salen enteras y repartidas por igual, tambien en las esquinas (las antiguas, un fondo de lunares a 20 px, se cortaban en los bordes).
-     Capas: casquillo de tinta, cristal apagado y dos tandas encendidas que se turnan. Tamano, margen y densidad por CSS (--mqi, --mqb, --mqd, --mqr) */
-  A.bulbs = () => `<svg class="mqb" aria-hidden="true">${["mqb-sk", "mqb-off", "mqb-a", "mqb-a mqb-c", "mqb-b", "mqb-b mqb-c"].map(k => `<rect class="${k}" pathLength="144"/>`).join("")}</svg>`;
+     Capas: casquillo de tinta y cristal apagado (fijos) y tres tandas encendidas, cada una en su propio svg: solo cambia su opacidad, asi el
+     compositor las enciende sin repintar nada. v0.3.52 (la casa): persecucion de tres pasos con un solo reloj para todas las bombillas del juego
+     (A.casa.MQ_P); --mq-s las pone en fase con el reloj del documento al nacer. Tamano, margen y densidad por CSS (--mqi, --mqb, --mqr) */
+  A.bulbs = () => { const P = (A.casa && A.casa.MQ_P) || 1140, s = -Math.round(performance.now() % P), r = k => `<rect class="${k}" pathLength="144"/>`;
+    return `<span class="mqw" aria-hidden="true" style="--mq-s:${s}ms"><svg class="mqb mq-base">${r("mqb-sk")}${r("mqb-off")}</svg>${[1, 2, 3].map(k => `<svg class="mqb mq-lit l${k}">${r("mqb-on mqb-h2")}${r("mqb-on mqb-h1")}${r("mqb-on")}${r("mqb-on mqb-c")}</svg>`).join("")}</span>`; };
   A.art = () => "";
 })(window.AIQ);

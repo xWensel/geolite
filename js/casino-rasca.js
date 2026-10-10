@@ -274,9 +274,9 @@ window.AIQ = window.AIQ || {};
     const wash = (col, ms = 650) => { if (reduced) return; const soft = document.documentElement.classList.contains("soft-flash"), c = soft ? col.replace(/([\d.]+)\)$/, (m, a) => (+a * 0.4).toFixed(2) + ")") : col, w = Q(".ra-wash"); w.style.setProperty("--wc", c); w.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, easing: "ease-out" }); };
     const lights = ms => { band.classList.add("fast"); later(() => band.classList.remove("fast"), ms); };
     function reward(lv, tier) {
-      A.sfx.jackpot(lv); if (A.core.jpShake) A.core.jpShake(lv); if (A.haptic) A.haptic(lv === 3 ? [40, 40, 80] : lv === 2 ? [30, 30, 60] : [20]);
+      A.casa.premio(lv);
       wash(["", "rgba(255,217,90,.35)", "rgba(255,200,70,.55)", "rgba(255,230,120,.8)"][lv], [0, 500, 750, 1300][lv]); lights([0, 900, 1500, 2600][lv]); emitFx(R.fx, lv);
-      if (tier.id === "x100") later(() => { A.sfx.jackpot(2); if (A.core.jpShake) A.core.jpShake(2); wash("rgba(255,255,255,.7)", 900); emitFx(R.fx, 3); }, 1100);
+      if (tier.id === "x100") later(() => { A.sfx.jackpot(2); A.casa.impacto(2); wash("rgba(255,255,255,.7)", 900); emitFx(R.fx, 3); }, 1100);
     }
 
     /* ---- la lamina: rascar pixel a pixel ---- */

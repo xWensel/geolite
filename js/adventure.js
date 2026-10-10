@@ -1006,7 +1006,7 @@ window.AIQ = window.AIQ || {};
     const el = document.querySelector(`#advBar .ab-perk[data-id="${f.id}"]`), k = flashK++ % 4, asking = C().S.phase === "asking";
     flashOn[f.id] = { f, t: performance.now() }; if (el) flashPaint(el, f);
     if (f.snd) f.snd(); else if (f.lv === 0) A.sfx.chip(0.15 + Math.random() * 0.7); else { A.sfx.coin(k); if (f.lv === 2) setTimeout(() => A.sfx.chip(0.4 + Math.random() * 0.5), 120); }
-    if (f.lv === 2 && !asking && C().jpShake) C().jpShake(1);                           // nada tiembla mientras respondes
+    if (f.lv === 2 && !asking) A.casa.impacto(1);                           // nada tiembla mientras respondes
     run.relicSeen = run.relicSeen || {}; const rk = run.act + ":" + run.round;
     if (A.RELICS[f.id].amulet) amuGripe(f.id, 0);                                         // 0.2.5: un amuleto le estropea un reto: se queja nombrando los dos
     else if (!run.relicSeen[f.id] && run.relicSaidR !== rk && !run.inf && A.dealer.react("relic", { p: A.tx(A.RELICS[f.id].n) })) { run.relicSeen[f.id] = 1; run.relicSaidR = rk; }   // solo cuenta si de verdad habla (si estaba ocupado, lo intenta la siguiente)
@@ -1027,7 +1027,7 @@ window.AIQ = window.AIQ || {};
   function relicPay(ids, lv = 1) {
     ids = ids.filter(Boolean); if (!ids.length) return;
     ids.forEach((id, i) => setTimeout(() => { A.sfx.coin(i % 4); if (lv === 2) setTimeout(() => A.sfx.chip(0.4 + Math.random() * 0.5), 120); }, 520 + i * 120));
-    setTimeout(() => { if (C().jpShake) C().jpShake(1); }, 560);
+    setTimeout(() => A.casa.impacto(1), 560);
     run.relicSeen = run.relicSeen || {}; const id = ids.find(x => !run.relicSeen[x]); if (id) run.relicSeen[id] = 1;   // el veredicto ya habla de ella: el crupier no la presenta luego
   }
   /* renderBars rehace la barra: lo que acaba de lucirse (en los ultimos 700 ms) se vuelve a pintar en el icono nuevo */
@@ -1110,7 +1110,7 @@ window.AIQ = window.AIQ || {};
       const tb = Math.max(Lv.advance, baseTarget()), lt = loot(S.levelScore, tb, boss), mh = has("marginHalf"), mg = mh ? Math.floor(lt.margin / 2) : lt.margin, x = { coins: lt.base + mg }, lines = [[A.T("Ronda superada", "Round cleared"), "+" + lt.base]];
       if (lt.margin) lines.push([et("margin", { p: pctOf(S.levelScore - tb, tb) }) + (mh ? " · ½" : ""), "+" + mg, mh ? "minbet" : null, mh ? "half" : null]);   // la Mesa de minimos paga la mitad del margen
       if (mh && S.levelScore < tb) lines.push([A.tx(A.RELICS.minbet.n) + " · " + A.tx(SAVED_BY), "", "minbet"]);
-      if (has("midas") && !mh && S.levelScore < tb) { lines.push([A.tx(A.RELICS.philosopher.n) + " · " + A.tx(SAVED_BY), "", "philosopher"]); setTimeout(() => { A.sfx.jackpot(2); if (A.core.jpShake) A.core.jpShake(2); }, 1100); }   // tanda 12: Midas te ha salvado   // ha decidido la ronda   // cuanto mas por encima del objetivo, mas doblones
+      if (has("midas") && !mh && S.levelScore < tb) { lines.push([A.tx(A.RELICS.philosopher.n) + " · " + A.tx(SAVED_BY), "", "philosopher"]); setTimeout(() => A.casa.premio(2), 1100); }   // tanda 12: Midas te ha salvado   // ha decidido la ronda   // cuanto mas por encima del objetivo, mas doblones
       const cap = sumFlag("interest") || 2, interest = Math.min(cap, Math.floor(run.coins / 10));
       if (interest) { x.coins += interest; lines.push([A.T("Interés (1 por cada 10)", "Interest (1 per 10)"), "+" + interest, interest > 2 ? (perkList().find(p => p.interest) || {}).id : null]); }   // por encima de 2, es el Banquero
       perkList().forEach(p => { if (p.clear) { const y = { coins: 0 }, tx = p.clear(y, run); if (y.coins) { x.coins += y.coins; lines.push([A.tx(p.n), tx || "+" + y.coins, p.id]); } } });
@@ -1120,8 +1120,8 @@ window.AIQ = window.AIQ || {};
       if (rb && rb.id === "red" && rb.win && rb.att === (run.attempt || 0) && !rb.paid) { const extra = Math.ceil(x.coins * 0.5); x.coins += extra; rb.paid = 1; lines.push([A.tx(BETS.red.n) + " · +50 %", "+" + extra, null, "bet"]); }
       const got = gain(x.coins); if (got !== x.coins) lines.push([A.T("Doblones ×2", "Doubloons ×2"), "+" + (got - x.coins), (perkList().find(p => p.coinX) || {}).id]);
       run.coins += got; run.stats.coinsEarned += got;
-      if (bet && bet.id === "double" && !bet.done) { bet.done = 1; if (first) { const win = Math.min(bet.stake, 40); run.coins += bet.stake + win; run.stats.coinsEarned += win; lines.push([A.tx(BETS.double.n) + " ×2", "+" + (bet.stake + win), null, "bet"]); setTimeout(() => { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2400 }); }, 1100); } }   // doblas lo apostado (+40 como mucho)
-      if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); }, 1100); } }   // +2 provisiones para el modo infinito
+      if (bet && bet.id === "double" && !bet.done) { bet.done = 1; if (first) { const win = Math.min(bet.stake, 40); run.coins += bet.stake + win; run.stats.coinsEarned += win; lines.push([A.tx(BETS.double.n) + " ×2", "+" + (bet.stake + win), null, "bet"]); setTimeout(() => { A.casa.premio(3); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2400 }); }, 1100); } }   // doblas lo apostado (+40 como mucho)
+      if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => A.casa.premio(3), 1100); } }   // +2 provisiones para el modo infinito
       A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); if (!run.practice) A.profile.get().adv.boss++; }
       A.sfx.stamp(); setTimeout(A.sfx.clear, 300);
       const actDone = boss, winAct = actDone ? run.act + 1 : 0;
@@ -1476,7 +1476,7 @@ window.AIQ = window.AIQ || {};
         <div class="tray-col tr-tools"><h4 class="gx-eyb">${A.T("Herramientas", "Tools")}</h4><div class="tray-row">${tools}</div></div>
         <div class="tray-col tr-prov"><h4 class="gx-eyb">${A.T("Provisiones", "Provisions")} <b>${run.lives}/${run.maxLives}</b></h4><div class="tray-row hearts">${hearts()}</div></div></footer>
       ${nextHtml()}
-      <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button></div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
+      <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
     Gold.mount($("dlg"));                                                // el brillo de oro de las legendarias (mesa y mochila)
     document.querySelectorAll(".offer").forEach((el, i) => { const btn = el.querySelector(".buy"); if (btn) btn.onclick = () => buy(el, chest); if (!chest) el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && A.dealer.campHover) A.dealer.campHover(i); }); });
@@ -1612,7 +1612,7 @@ window.AIQ = window.AIQ || {};
       el.querySelectorAll("[data-n]").forEach(btn => (btn.onclick = e => {
         e.stopPropagation(); const retos = pickSealed(r, +btn.dataset.n, "oferta"), pay = retos.reduce((m, c) => m + offerPay(c), 0);
         run.bets = run.bets || {}; run.bets[r] = { id: "offer", retos, pay }; run.coins += pay; persist(); renderShop(false);
-        A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "laugh", hold: 2400 });   // lluvia de monedas
+        A.casa.premio(1); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "laugh", hold: 2400 });   // lluvia de monedas
       }));
       el.onclick = () => { const b = (run.bets || {})[r]; if (!b || b.id !== "offer") return; if (run.coins < b.pay) { A.sfx.deny(); shake(el); return; } run.coins -= b.pay; delete run.bets[r]; A.sfx.sell(); persist(); renderShop(false); };   // en la misma visita, te echas atras devolviendo lo cobrado
       return;
@@ -1811,9 +1811,9 @@ window.AIQ = window.AIQ || {};
       ov.classList.add("flash");
       setTimeout(() => {
         A.dealer.enable(true);
-        if (zero && win) { A.sfx.jackpot(2); if (A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([40, 40, 80]); A.dealer.say(A.dealer.line(o.last ? "betGreenFinal" : "betGreenWin"), { table: true, mood: "angry", face: "furious", gesture: o.last ? "tremble_body" : "stamp", fx: "shake", hold: 3400 }); }
-        else if (zero) { A.sfx.rouZero(); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(2); A.dealer.say(A.dealer.line("betGreenLose"), { table: true, mood: "laugh", face: "laugh", gesture: "fan_self", hold: 2600 }); }
-        else if (win) { A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
+        if (zero && win) { A.casa.premio(2, { fuerza: 3 }); A.dealer.say(A.dealer.line(o.last ? "betGreenFinal" : "betGreenWin"), { table: true, mood: "angry", face: "furious", gesture: o.last ? "tremble_body" : "stamp", fx: "shake", hold: 3400 }); }
+        else if (zero) { A.sfx.rouZero(); A.casa.perdida({ fuerza: 2 }); A.dealer.say(A.dealer.line("betGreenLose"), { table: true, mood: "laugh", face: "laugh", gesture: "fan_self", hold: 2600 }); }
+        else if (win) { A.casa.premio(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
         else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2200 }); }
       }, 150);
       setTimeout(() => { ov.addEventListener("click", close); ov.classList.add("skippable"); }, 600);
@@ -1987,8 +1987,8 @@ window.AIQ = window.AIQ || {};
       if (A.haptic) A.haptic([edge ? 60 : 30]);
       setTimeout(() => {
         A.dealer.enable(true);
-        if (edge) { A.sfx.jackpot(3); if (A.core.jpShake) A.core.jpShake(3); if (A.haptic) A.haptic([40, 40, 80]); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", face: "furious", gesture: "stamp", fx: "shake", hold: 3000 }); }
-        else if (win) { A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
+        if (edge) { A.casa.premio(3); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", face: "furious", gesture: "stamp", fx: "shake", hold: 3000 }); }
+        else if (win) { A.casa.premio(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
         else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2200 }); }
       }, 150);
       sh.hold(edge ? 3000 : 2300);
@@ -2052,8 +2052,8 @@ window.AIQ = window.AIQ || {};
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
-        if (info.tone === "good") { A.sfx.jackpot(info.jp || 1); if (A.core.jpShake) A.core.jpShake(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2400 }); }
-        else if (info.tone === "bad") { A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2400 }); }
+        if (info.tone === "good") { A.casa.premio(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2400 }); }
+        else if (info.tone === "bad") { A.casa.perdida(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2400 }); }
         else { A.sfx.deny(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "sly", hold: 2200 }); }
       }, 150);
       sh.hold(info.jp === 3 ? 3200 : 2800);
@@ -2235,7 +2235,7 @@ window.AIQ = window.AIQ || {};
         hint(null); ov.classList.add("hush"); bubble.classList.remove("on"); A.sfx.cupDrum(900); await sleep(950);
         attach(gloves[0], pickId); await sleep(180); A.sfx.cupLift(); await lift(pickId, 1, 420); A.sfx.rouStop();
         if (win) {
-          coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); A.sfx.jackpot(1); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([30, 30, 60]); ov.classList.add("win", "flash");
+          coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); A.casa.premio(1); ov.classList.add("win", "flash");
           const c = cups[pickId], x = c.x - 96, y0 = GY - 150; spinEl.style.display = "block"; let f = 0;                      // la doblon del juego (24 fotogramas) sale hacia el espectador y cae
           await run(reduced ? 300 : 900, p => { const h = Math.sin(Math.PI * p) * 150; spinEl.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y0 - h)}px,0)`; const nf = Math.floor(p * 36) % 24; if (nf !== f) { f = nf; spinEl.style.backgroundPositionX = -nf * 192 + "px"; } });
           spinEl.style.display = "none"; sh.outcome(); plate("win", A.tx(BT.won), "×2", "+" + rec.pay); say("betWin");
@@ -2249,7 +2249,7 @@ window.AIQ = window.AIQ || {};
           if (joke) {                                                                          // el chiste del trilero: los tres vacios; suelta el doblon de entre los dedos, guina y se lo guarda
             ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh"); await sleep(800);
             openGlove.x = 640; openGlove.y = 300; openGlove.tv = 1; jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 74}px,${openGlove.y + 124}px,0)`;
-            A.sfx.cupWink(); sh.outcome(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.sfx.lose(); if (A.core.jpShake) A.core.jpShake(1); if (A.haptic) A.haptic([40, 20, 40]);
+            A.sfx.cupWink(); sh.outcome(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.casa.perdida();
             sh.hold(5200); await sleep(2600);
             await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 74, 860, e))}px,${Math.round(lerp(openGlove.y + 124, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
             jokeCoin.style.display = "none"; A.sfx.stamp();
@@ -2285,7 +2285,7 @@ window.AIQ = window.AIQ || {};
     const void_ = '<i class="sup-void"></i>', red = betHtml(casinoKind(r)), slot = id => (!id ? "" : SIDE_GAMES.includes(id) ? betHtml(id) : card(SUPS.find(x => x.id === id))) || void_;
     const [L, R] = barOf(r);
     supFresh = null;
-    return `<div class="tb-sup${red ? "" : " no-cas"}">${slot(L)}${red || ""}${slot(R)}</div>`;   // izquierda, un suministro; derecha, la apuesta que toque (o hueco); centro, el juego de casino (si la casa ya abre las apuestas)
+    return `<div class="tb-sup${red ? "" : " no-cas"}">${slot(L)}${red || ""}${slot(R)}${A.bulbs()}</div>`;   // v0.3.52: la Barra, con las bombillas de la casa   // izquierda, un suministro; derecha, la apuesta que toque (o hueco); centro, el juego de casino (si la casa ya abre las apuestas)
   }
   function wireSup() {
     document.querySelectorAll("[data-sup]").forEach(b => (b.onclick = () => {
@@ -2343,7 +2343,7 @@ window.AIQ = window.AIQ || {};
       run.paid = run.paid || {}; run.paidAt = run.paidAt || {}; run.paid[s.id] = c; run.paidAt[s.id] = run.shopKey;
       if (p.buy) p.buy(run); if (p.r === 3 && chest) run.legAch = 1;
       if (p.r === 3) (run.legAct = run.legAct || {})[run.act] = s.id;
-      if (p.pact) setTimeout(() => { A.sfx.stamp(); if (A.core.jpShake) A.core.jpShake(2); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "sly", hold: 2400 }); }, 200);   // trato hecho: un hueco lacrado mas   // tanda 12: la legendaria de este acto   // Botin legendario: solo la del cofre del jefe. Se concede en la tienda (openShop): su aviso no tapa la secuencia
+      if (p.pact) setTimeout(() => { A.sfx.stamp(); A.casa.impacto(2); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "sly", hold: 2400 }); }, 200);   // trato hecho: un hueco lacrado mas   // tanda 12: la legendaria de este acto   // Botin legendario: solo la del cofre del jefe. Se concede en la tienda (openShop): su aviso no tapa la secuencia
     } else {
       const c = cardCost(s);
       if (!run.tools[s.id] && Object.keys(run.tools).length >= 4) { A.sfx.deny(); shake(el); flash(A.T("Solo 4 herramientas distintas.", "Only 4 different tools.")); return; }
@@ -2413,7 +2413,7 @@ window.AIQ = window.AIQ || {};
          doblones y la carta ya van por el compositor y el sonido llega un fotograma despues (el oido lo acepta; al reves, no). Los golpes 2 y 3, al compas del sonido */
       const gap = A.audio.jpGap * 1000;
       const hit = n => {
-        if (C().jpShake) C().jpShake(n + 1);
+        A.casa.impacto(n + 1);
         el.classList.add("hit"); setTimeout(() => el.classList.remove("hit"), 150);
         if (g) g.sweep(0.38);
         if (!rm) legCoins(fx, fxX, fxY, [3, 5, 9][n]);
@@ -2451,7 +2451,7 @@ window.AIQ = window.AIQ || {};
     } catch (e) { console.error(e); end(); }
   }
   A.adv.busy = () => legOn !== 0;                                        // la legendaria del cofre se esta luciendo (js/game.js: Esc no abre el menu)
-  function sell(id, chest) { const k = run.perks.indexOf(id); if (k < 0 || (isPact(id) && bagN() > baseSlots())) return; const v = sellValue(id); if (id === "hoard" && run.hucha) { const t = run.hucha >= 20 ? 3 : run.hucha >= 10 ? 2 : 1; A.sfx.jackpot(t); if (A.core.jpShake) A.core.jpShake(t); run.hucha = 0; }   // se rompe: llueven monedas
+  function sell(id, chest) { const k = run.perks.indexOf(id); if (k < 0 || (isPact(id) && bagN() > baseSlots())) return; const v = sellValue(id); if (id === "hoard" && run.hucha) { const t = run.hucha >= 20 ? 3 : run.hucha >= 10 ? 2 : 1; A.casa.premio(t); run.hucha = 0; }   // se rompe: llueven monedas
     run.perks.splice(k, 1); run.coins += v; if (run.paid) delete run.paid[id]; if (A.RELICS[id].sell) A.RELICS[id].sell(run); A.sfx.sell(); persist(); renderShop(!!chest); }   // sell: lo que la reliquia dio al comprarla se va con ella (Corazon de explorador)
   function flash(t) { const n = document.querySelector("#dlg .tb-shop"); if (!n) return; n.querySelectorAll(".shop-flash").forEach(x => x.remove()); const m = document.createElement("p"); m.className = "shop-flash"; m.textContent = t; n.appendChild(m); setTimeout(() => m.remove(), 2200); }   // flotando sobre las cartas: no empuja nada
 

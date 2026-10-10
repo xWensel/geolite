@@ -230,7 +230,7 @@ window.AIQ = window.AIQ || {};
     function fireEv(e) {
       if (e.k === "land") A.sfx.diceLand(clamp(e.s / 190, 0.25, 1));
       else if (e.k === "rail") { A.sfx.diceRail(); const r = Q(".dd-rail-h"); r.classList.remove("hit"); void r.offsetWidth; r.classList.add("hit"); }
-      else if (e.k === "clack") A.sfx.diceClack(); else if (e.k === "slam") { A.sfx.diceSlam(); if (A.core.jpShake) A.core.jpShake(1); }
+      else if (e.k === "clack") A.sfx.diceClack(); else if (e.k === "slam") { A.sfx.diceSlam(); A.casa.impacto(1); }
       else if (e.k === "rattle") A.sfx.diceRattle(0.8); else if (e.k === "lift") A.sfx.cupLift(); else if (e.k === "stop") A.sfx.diceTick();
     }
     const runPlan = (S, P) => waitFor(res => { P.resolve = res; P.ei = 0; P.t0 = performance.now(); P.done = false; S.plan = P; S.shaking = 0; P.dice.forEach((dd, i) => { dd.d = S.dice[i]; dd.d.n = dd.val; }); });
@@ -286,7 +286,7 @@ window.AIQ = window.AIQ || {};
       await runPlan(S, P);
       A.sfx.diceTick(); const total = vals[0] + vals[1]; tot(isP ? "P" : "D", total);
       if (vals[0] === 1 && vals[1] === 1) { A.sfx.diceSnake(); say("diceSnake", 3); }                                   // reaccion a la propia tirada: ojos de serpiente, doble seis, el doce de la banca, un siete
-      else if (total === 12) { A.sfx.diceBoom(); if (A.core.jpShake) A.core.jpShake(isP ? 2 : 1); say(isP ? "diceBoxcars" : "diceDealer12", 3); }
+      else if (total === 12) { A.sfx.diceBoom(); A.casa.impacto(isP ? 2 : 1); say(isP ? "diceBoxcars" : "diceDealer12", 3); }
       else if (total === 7 && rnd() < 0.8) say("diceSeven", 1, true);
       await sleep(isP ? 700 : 600);
     }
@@ -309,8 +309,8 @@ window.AIQ = window.AIQ || {};
         const th = res.throws[res.throws.length - 1], lv = res.level; ov.classList.remove("hush"); sh.outcome();
         if (res.win) {
           tot("D", th.dt, "lose"); tot("P", th.pt, "win"); face("shock");
-          if (lv >= 2) ov.classList.add("lv" + lv); ov.classList.add("win"); flash(); A.sfx.jackpot(lv); if (A.core.jpShake) A.core.jpShake(lv); if (A.haptic) A.haptic(lv === 3 ? [40, 40, 80] : [30, 30, 60]);
-          if (lv === 3) setTimeout(() => { if (alive()) { flash(); A.sfx.jackpot(2); if (A.core.jpShake) A.core.jpShake(2); } }, 520);
+          if (lv >= 2) ov.classList.add("lv" + lv); ov.classList.add("win"); flash(); A.casa.premio(lv);
+          if (lv === 3) setTimeout(() => { if (alive()) { flash(); A.sfx.jackpot(2); } }, 520);   // el eco del doble seis: el temblor ya crece con los golpes del premio
           plate("win" + (lv >= 2 ? " l" + lv : ""), tr(U.win), "×2", "+" + pay + " · " + tr(U["lv" + lv])); if (lv >= 2) fireCoins(lv === 3 ? 3 : 1);
           say(lv === 1 ? "diceWinSmall" : lv === 3 ? "diceWinBig" : (th.pt - th.dt <= 3 ? "diceWinSmall" : "diceWinBig"), 4);
         } else {

@@ -10,7 +10,7 @@
     quality: "auto", settingsOpen: false, lastTimeStr: "", intro: true, reduce: false, booting: true, skin: "casino",
     hub: "home", ranked: null, run: null, tool: null, hits: 0,
     cursor: true, tips: true, songToast: true, setTab: "general",
-    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n",
+    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n", luces: "full",
   };
   const prog = id => (S.prog[id] = S.prog[id] || { unlocked: 1, best: 0, bestIq: 0 });
   function load() {
@@ -26,6 +26,7 @@
       S.contrast = !!d.contrast; S.colorblind = ["protan", "deutan", "tritan"].includes(d.colorblind) ? d.colorblind : "off"; S.qSize = ["l", "xl"].includes(d.qSize) ? d.qSize : "n";
       S.shake = d.shake !== false; S.bgAudio = d.bgAudio !== false; S.curSize = d.curSize === "l" ? "l" : "n";   // v0.3.2: el temblor de pantalla ya no apaga la vibracion del mando (tiene la suya en Controles)
       S.flashSeen = !!d.flashSeen;
+      S.luces = ["soft", "off"].includes(d.luces) ? d.luces : "full";                       // v0.3.52: Luces de la sala (js/casa.js)
       /* v0.3.2: Movimiento en tres niveles (antes "Reducir movimiento" + "Destellos suaves", que se bloqueaba con el primero) */
       S.motion = ["full", "soft", "min"].includes(d.motion) ? d.motion : d.reduce ? "min" : d.softFlash ? "soft" : "full";
       S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
@@ -33,7 +34,7 @@
     } catch (e) { A.lang = A.detectLang(); }
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize })); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
   }
 
   const lv = () => S.camp.levels[S.level];
@@ -60,6 +61,7 @@
   A.codex.init(world, map); A.pointer.init(map);
   map.quality = S.quality; map.resize(true); A.applySkin(S.skin, map);
   applyMotion(); applySens(); applyVisualFX(); applyQSize(); applyShake();
+  A.casa.init(map, S.luces);                                              // la luz de la sala y el director de golpes (js/casa.js)
   map.animateTo(map.home(), 0);
   A.cursor.set(S.cursor); if (A.cursor.setSize) A.cursor.setSize(S.curSize === "l"); A.tt.enable(S.tips);
 
@@ -202,7 +204,7 @@
       const k = f.dataset.range, v = S[k === "pan" ? "panSens" : "zoomSens"], inp = f.querySelector("input");
       inp.value = v; inp.style.setProperty("--p", ((v - inp.min) / (inp.max - inp.min)) * 100 + "%"); f.querySelector("output").textContent = v + "%";
     }
-    segSet(document.querySelector('[data-seg="gfx"]'), S.quality);
+    segSet(document.querySelector('[data-seg="gfx"]'), S.quality); segSet(document.querySelector('[data-seg="luces"]'), S.luces); $("lucesNote").textContent = A.t("luz.d." + S.luces);
     segSet(document.querySelector('[data-seg="units"]'), S.units);
     segSet(document.querySelector('[data-seg="cb"]'), S.colorblind);
     segSet(document.querySelector('[data-seg="qsize"]'), S.qSize); segSet(document.querySelector('[data-seg="motion"]'), S.motion); segSet(document.querySelector('[data-seg="cursz"]'), S.curSize);
@@ -375,7 +377,7 @@
       if (!rs.classList.contains("armed")) { rs.classList.add("armed"); rs.textContent = A.t("set.reset.ask"); A.sfx.ui(); clearTimeout(tm); tm = setTimeout(() => { rs.classList.remove("armed"); syncSettings(); }, 4000); return; }
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
-      S.quality = "auto"; map.setQuality("auto"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
+      S.quality = "auto"; map.setQuality("auto"); S.luces = "full"; A.casa.set("full"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
       S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
@@ -436,6 +438,10 @@
   document.querySelector('[data-seg="gfx"]').addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.quality) return;
     S.quality = b.dataset.v; save(); A.sfx.ui(); map.setQuality(S.quality); syncSettings();
+  });
+  document.querySelector('[data-seg="luces"]').addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.dataset.v === S.luces) return;
+    S.luces = b.dataset.v; save(); A.sfx.ui(); A.casa.set(S.luces); syncSettings();
   });
   document.querySelector('[data-seg="units"]').addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.units) return;
@@ -850,8 +856,7 @@
     if (up) setTimeout(() => { if (still() && A.sfx.flag) A.sfx.flag(fl.length); }, FLAG_AT);
     if (cxr.level) setTimeout(() => {
       if (!still()) return;
-      A.sfx.jackpot(cxr.level); A.haptic.jackpot(cxr.level);
-      for (let k = 1; k <= cxr.level; k++) setTimeout(() => jpShake(k), (k - 1) * JP_MS);
+      A.casa.premio(cxr.level);                                                  // la casa: jackpots, un temblor por golpe que crece y la vibracion (js/casa.js)
     }, JP_AT);
     if (adv && adv.coins) coinFx(adv.coins);
     /* la caja de la racha (Aventura y Reto diario): "on" se enciende o sube de nivel, "broken" se agrieta (perdiste una racha de 2 o mas), "off" se queda
@@ -964,9 +969,10 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const bar = meter && meter[1] > 1 ? `<div class="gx-vd-meter${meter[0] >= meter[1] ? " full" : ""}"><i style="width:${Math.min(100, (100 * meter[0]) / meter[1])}%"></i><em style="left:${Math.min(100, (100 * meter[1]) / Math.max(meter[0], meter[1]))}%"></em></div>` : "";
     const idc = iq != null ? `<div class="gx-vd-iq gx-paper">${tier != null ? A.icon("iq_" + tier) : `<img class="ic" src="assets/icons/logo_mark.png" alt="">`}<span class="gx-eyb">${A.t("iq.label")}</span><b class="odo" id="iqNum"></b><em>${tierName}</em></div>` : "";
     const order = buttons.filter(b => !b.primary).concat(buttons.filter(b => b.primary));
-    const btn = b => `<button class="gx-btn${b.primary ? " pri" : b.ghost ? " gho sm" : ""}" id="${b.id}" ${b.primary ? "data-primary" : ""}><span>${b.label}</span>${b.primary ? A.gala.keyHint("Enter", "a") : ""}</button>`;
+    const btn = b => { const h = `<button class="gx-btn${b.primary ? " pri" : b.ghost ? " gho sm" : ""}" id="${b.id}" ${b.primary ? "data-primary" : ""}><span>${b.label}</span>${b.primary ? A.gala.keyHint("Enter", "a") : ""}</button>`;
+      return b.primary ? `<span class="gx-mq">${h}${A.bulbs()}</span>` : h; };                   // v0.3.52: el boton principal con las bombillas de la casa
     dialog(`<div class="vd gx-vd gx-layer gx-in${kind === "" ? " lose" : ""}${two && !(A.dealer && A.dealer.on) ? " wide" : ""}">
-      <div class="gx-vd-head gx-from-left"><span class="gx-eyb">${tag || A.t("v.level", { n: pad2(level) })}</span><h2 class="gx-t-xl">${title}</h2><p class="gx-lead">${text}</p>${bar}</div>
+      <div class="gx-vd-head gx-from-left"><span class="gx-eyb">${tag || A.t("v.level", { n: pad2(level) })}</span><h2 class="gx-t-xl">${title}</h2><p class="gx-lead">${text}</p>${bar}${A.bulbs()}</div>
       <div class="gx-vd-mid gx-sh">${ticket}</div>
       <div class="gx-vd-side"><div class="gx-vd-medal ${kind}">${art === "chest" ? `<i class="gx-vd-crown">${A.icon("crown")}</i>` : ""}${A.icon(chip)}</div><div class="gx-vd-dealer" id="vdDealer"></div>${idc}</div>
       <div class="gx-vd-acts"><div class="gx-acts">${order.filter(b => b.ghost).map(btn).join("")}</div><div class="gx-acts">${order.filter(b => !b.ghost).map(btn).join("")}</div></div>

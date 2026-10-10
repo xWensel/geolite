@@ -908,3 +908,28 @@ html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
   .gx-camp .tb-sup, .gx-camp .tb-sup.no-cas { grid-template-columns: minmax(0, 1fr); } .gx-camp .sup-void { display: none; }
   .gx-camp .tb-tray { flex-wrap: wrap; }
 }
+
+/* ===================================================================================================== LA SALA (v0.3.52, js/casa.js)
+   La luz de la sala: una capa fija por encima de las pantallas y el HUD y por debajo de avisos, pausa, Ajustes, crupier y mesas. Es una imagen
+   pequena (una celda por cada 2-4 px) escalada sin suavizar: bandas de pixel. Cambia con un fundido cuando cambia la pantalla; nada por fotograma */
+#sala { position: absolute; inset: 0; z-index: 7; pointer-events: none; overflow: hidden; }
+#sala.hidden { display: none; }
+#sala canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; transition: opacity .55s ease; will-change: opacity; }
+#sala canvas.on { opacity: 1; }
+#sala::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .3s ease; background: radial-gradient(ellipse 75% 70% at 50% 47%, transparent 58%, rgba(2, 9, 8, .42) 100%); }
+#sala.neutral::before { opacity: 1; }                                       /* entre una pantalla y otra: penumbra neutra mientras llega la luz nueva */
+#sala.neutral canvas { transition-duration: .28s; }
+html.sala-soft #sala::before { background: radial-gradient(ellipse 75% 70% at 50% 47%, transparent 58%, rgba(2, 9, 8, .22) 100%); }
+html.sala-on .vignette { display: none; }                                  /* la vineta de siempre vuelve con las luces apagadas */
+
+/* bombillas de la casa en las piezas clave (A.bulbs, js/art.js): el cartel de la ronda, el boton principal del veredicto y del Campamento y la Barra */
+.gx-vd-head { position: relative; align-self: center; }
+.gx-vd-head > .mqw > .mqb { --mqi: -18px; --mqb: 7px; --mqr: -10px; left: -16px; width: calc(100% + 26px); }   /* a la derecha no pasa del medianil: no roza el ticket */
+.gx-vd.lose .gx-vd-head .mq-lit { display: none; }                         /* ronda fallida: el cartel se queda apagado */
+.gx-mq { position: relative; display: inline-flex; }
+.gx-mq > .mqw > .mqb { --mqi: -8px; --mqb: 6px; --mqr: -3px; }
+.gx-camp > .go2-wrap > .mqw > .mqb { --mqi: -7px; --mqb: 6px; --mqr: -2px; z-index: 2; }
+.gx-camp > .go2-wrap:has(.go2.skip) .mq-lit { display: none; }
+.gx-camp .tb-sup { position: relative; }
+.gx-camp .tb-sup > .mqw > .mqb { --mqi: -6px; --mqb: 5px; --mqr: -1px; z-index: 2; }
+@media (max-width: 899px), (max-height: 519px) { .gx-camp .tb-sup > .mqw, .gx-camp > .go2-wrap > .mqw { display: none; } }

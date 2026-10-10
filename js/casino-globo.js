@@ -456,7 +456,7 @@ window.AIQ = window.AIQ || {};
       run.coins += F.pay; if (F.pay > F.stake) run.stats.coinsEarned += F.pay - F.stake; rec.cashM = m; rec.pay = F.pay; cx.persist();      // se cobra en el acto: recargar despues no lo deshace
       BL = { B: Object.assign(newB(), { liv: BC.liv, oy: 0, face: "l", mode: "ok" }), t: 0 }; BL.B.oy = BC.oy; BC.ghost = true; sfx.engine.stop();
       const l = tier(m); F.lvl = l; sfx.cash(l); const amp = [3, 6, 12, 22][l]; kick(amp, [250, 450, 700, 1100][l]); wash(["rgba(255,217,90,.25)", "rgba(255,217,90,.4)", "rgba(255,217,90,.6)", "rgba(255,240,170,.85)"][l]); coinRain([4, 14, 34, 80][l]);
-      if (l >= 1) { A.sfx.jackpot(l); if (A.core.jpShake) A.core.jpShake(l); if (A.haptic) A.haptic(l >= 3 ? [40, 40, 80] : [30, 30, 60]); }
+      if (l >= 1) A.casa.premio(l);
       if (l >= 2) frameEl.classList.add("fast"), setTimeout(() => frameEl.classList.remove("fast"), 900 + l * 500);
       react(how === "auto" ? "gbAuto" : how === "ceiling" ? "gbCeiling" : "gbCash" + l);
       Q(".gb-ghostlbl").textContent = tr(U.ghost); Q(".gb-ghostlbl").classList.add("on"); mult.classList.add("ghost");

@@ -86,7 +86,7 @@ html body #dlg > .hh-ver { font-size: 12px; }
   .hh .hh-cards { flex-wrap: nowrap; gap: 8px; }
   .hh .hh-cards > .mcard { width: calc((100 * var(--vw) - 48px) * .32); padding: 8px; gap: 6px; border-radius: 14px; }
   .hh .hh-cards > .mcard.hero { width: calc((100 * var(--vw) - 48px) * .36); --mqi: 8.5px; --mqb: 4px; padding: 13px; }   /* bombillas mas pequenas y la mitad de juntas */
-  .hh .mqb rect { stroke-dasharray: 0 4; } .hh .mqb .mqb-a, .hh .mqb .mqb-b { stroke-dasharray: 0 8; } .hh .mqb .mqb-b { stroke-dashoffset: 4; }
+  .hh .mqb rect { stroke-dasharray: 0 4; } .hh .mqb .mqb-on { stroke-dasharray: 0 12; } .hh .mqb.l2 .mqb-on { stroke-dashoffset: -4; } .hh .mqb.l3 .mqb-on { stroke-dashoffset: -8; }
   .hh .mc-name { font-size: clamp(13px, calc(4.1 * var(--vw)), 17px); }   /* "Приключение" cabe entera en un movil de 375 px */ .hh .mc-stat { font-size: 11px; letter-spacing: .02em; padding: 4px 6px 3px; } .hh .mc-ribbon { font-size: 11px; padding: 4px 8px 3px; }
   .hh-deck { gap: 8px; }
   .hh-resume .startbtn { gap: 10px; padding: 6px 14px 6px 8px; } .hh-resume .sb-ic .ic { width: 38px; height: 38px; }
