@@ -10,7 +10,9 @@ window.AIQ = window.AIQ || {};
   const ALIAS = { steadyhand: "steady" };
   A.icon = (id, cls = "") => {
     id = ALIAS[id] || id;
-    return `<img class="ic ic-${id} ${cls}" src="assets/icons/${id}.webp" alt="" draggable="false" decoding="async" onerror="AIQ._icErr(this)">`;
+    const fx = A.ficha ? A.ficha.attr(id) : "";   // ficha lisa: se dibuja al pixel real de la pantalla (js/ficha.js)
+    if (fx) A.ficha.soon();
+    return `<img class="ic ic-${id} ${fx ? "ic-fx " : ""}${cls}" src="assets/icons/${id}.webp" alt="" draggable="false" decoding="${fx ? "sync" : "async"}" onerror="AIQ._icErr(this)"${fx}>`;
   };
   A._icErr = im => { im.style.visibility = "hidden"; };
 

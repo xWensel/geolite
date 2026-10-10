@@ -6,7 +6,7 @@
 img.ic { display: block; object-fit: contain; image-rendering: auto; filter: drop-shadow(0 2px 0 rgba(8, 20, 14, .55)); user-select: none; -webkit-user-drag: none; }
 .ic.sm { width: 22px; height: 22px; display: inline-block; vertical-align: middle; margin-right: 6px; } .ic.cn { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -.28em; margin-right: .25em; }
 .ic.blindchip { position: relative; display: block; } .ic.blindchip .bc-base { position: absolute; inset: 0; width: 100%; height: 100%; } .ic.blindchip .bc-in { position: absolute; left: 22%; top: 22%; width: 56%; height: 56%; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); }
-.ic.badge { position: relative; display: block; width: 100%; height: 100%; } .ic.badge .bd-base { position: absolute; inset: 0; width: 100%; height: 100%; } .ic.badge .bd-in { position: absolute; left: 12.5%; top: 10.9375%; width: 75%; height: 75%;}   /* 48 px de ilustracion sobre la ficha de 64 (pixel 8,7): misma rejilla y mismo pixel (tools/ach_pixel.py) */
+.ic.badge { position: relative; display: block; width: 100%; height: 100%; } .ic.badge .bd-base { position: absolute; inset: 0; width: 100%; height: 100%; } .ic.badge .bd-in { position: absolute; left: 12.5%; top: 12.5%; width: 75%; height: 75%;}   /* 48 px de ilustracion centrados sobre la ficha de 64 (pixel 8,8): la ficha es un circulo centrado (js/ficha.js) */
 .ach:not(.got) .ic { filter: grayscale(1) brightness(.55); }
 
 /* ---------- pantalla de inicio: cuatro cartas sobre el mapa ---------- */

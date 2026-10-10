@@ -89,7 +89,7 @@ def preview(ids, path):
         sh.alpha_composite(Image.open(SRC / f"ach_{id}.webp").convert("RGBA").resize((128, 128), Image.LANCZOS), (x0 + 4, y0 + 6))
         now = Image.open(OUT / f"ach_{id}.webp").convert("RGBA"); sh.alpha_composite(now.resize((128, 128), Image.NEAREST), (x0 + c + 4, y0 + 6))
         b = Image.open(OUT / "blank_big.webp").convert("RGBA").resize((64, 64), Image.NEAREST)
-        b.alpha_composite(now.resize((48, 48), Image.NEAREST), (8, 7))
+        b.alpha_composite(now.resize((48, 48), Image.NEAREST), (8, 8))
         sh.alpha_composite(b.resize((128, 128), Image.NEAREST), (x0 + 2 * c + 4, y0 + 6))
     sh.save(path)
 
