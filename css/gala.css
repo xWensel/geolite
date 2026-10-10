@@ -817,8 +817,14 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
   font-family: var(--sans); font-size: 16px; line-height: 1.2; color: #fff; background: #c2372e url(../assets/icons/coin.webp) 4px 50% / 13px 13px no-repeat; box-shadow: 0 0 0 2px var(--gx-o); }
 @keyframes swap-pick { 50% { outline-color: #ffd98a; } }
 
-/* el boleto de la proxima ronda (papel, columna derecha): el tema o el jefe, el objetivo en su fila, cada reto con su soborno y Barajar al pie */
-.gx-camp > .tb-next { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 16px 18px 18px; }
+/* el boleto de la proxima ronda (papel, columna derecha): el tema o el jefe y el objetivo, fijos arriba (.nr-top); debajo (.nr-body), cada reto con su
+   soborno, Barajar y las rondas del Ojo en el cielo. v0.3.64: mide SIEMPRE lo que su hueco (contain: size: su contenido ya no estira las filas de la
+   mesa ni la hace bajar de escala). Si no cabe, js/adventure.js (ticketFit) lo aprieta (.c1, luego .c2) y, si ni asi, el cuerpo se desplaza (.sc) */
+.gx-camp > .tb-next { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; margin: 0; padding: 16px 18px 18px; contain: size; }
+.gx-camp .nr-top { flex: none; }
+.gx-camp .nr-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; padding-bottom: 2px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scroll-behavior: smooth; scrollbar-width: none; }
+.gx-camp .nr-body::-webkit-scrollbar { display: none; }
+.gx-camp .nr-body > * { flex: none; }
 .gx-camp > .tb-next:has(> .nr.boss:first-child) { background: linear-gradient(#c2372e, #c2372e) 0 0 / 100% 6px no-repeat, var(--gx-card); }
 .gx-camp .nr { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0; }
 .gx-camp .nr-k { display: block; } .gx-camp .nr-k i { font-style: normal; margin: 0 6px; opacity: .55; }
@@ -848,13 +854,13 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .nr-have.nr-seal { color: #b3322a; }
 .gx-camp .nr-row.done { opacity: .6; grid-template-areas: "ic name buy"; }
 .gx-camp .nr-clean { margin: 0; font-size: 20px; line-height: 1.15; color: var(--gx-ink-2); }
-.gx-camp .nr-shuffle { justify-self: start; margin-top: 2px; } .gx-camp .nr-shuffle .ic { width: 22px; height: 22px; }
+.gx-camp .nr-shuffle { align-self: flex-start; max-width: 100%; flex-wrap: wrap; row-gap: 2px; margin-top: 2px; }   /* en ruso, "gratis" baja a otra linea en vez de salirse del papel */ .gx-camp .nr-shuffle .ic { width: 22px; height: 22px; }
 .gx-camp .nr-shuffle em { display: inline-flex; align-items: center; gap: 2px; font-style: normal; } .gx-camp .nr-shuffle em .ic { width: 18px; height: 18px; }
 /* el jefe: su nombre en rojo y su casilla con la chistera */
 .gx-camp .nr.boss .nr-k { color: #b3322a; } .gx-camp .nr.boss .nr-name { color: #8e1f19; }
 .gx-camp .nr.boss .nr-badge { background: radial-gradient(circle at 50% 38%, #c03a4f, #6e1a28 72%); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fe5f55; }
 /* despues (Ojo en el cielo): cada ronda siguiente en una fila baja, con sus fichas */
-.gx-camp .nr.far { grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 4px 10px; padding-top: 10px; border-top: 2px dashed var(--gx-line); }
+.gx-camp .nr.far { grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 4px 10px; margin-top: 2px; padding-top: 10px; border-top: 2px dashed var(--gx-line); }
 .gx-camp .nr.far .nr-badge { width: 30px; height: 30px; } .gx-camp .nr.far .nr-badge .ic { width: 22px; height: 22px; }
 .gx-camp .nr.far .nr-ttl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; min-width: 0; }
 .gx-camp .nr.far .nr-k { font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-gold-lo); }
@@ -863,6 +869,35 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .nr.far .nr-n { font-size: 18px; color: var(--gx-ink-2); }
 .gx-camp .nr-chips .ch-chip, .gx-camp .nr-chips .ch-chip > b { font-family: var(--serif); font-size: 18px; font-weight: 400; letter-spacing: .01em; text-transform: none; }
 .gx-camp .nr-chips .ch-chip { padding: 2px 6px 3px 4px; gap: 3px; border-radius: 0; } .gx-camp .nr-chips .ch-chip .ic { width: 16px; height: 16px; } .gx-camp .nr-chips .ch-chip .ch-lv { font-size: 16px; letter-spacing: 1px; }
+/* boleto apretado (.c1): los mismos textos al mismo tamano, con menos aire entre filas (cuatro retos de dos lineas caben sin desplazarse) */
+.gx-camp > .tb-next.c1 { gap: 6px; padding-top: 14px; padding-bottom: 16px; }
+.gx-camp > .tb-next.c1 .nr { gap: 5px; } .gx-camp > .tb-next.c1 .nr-body { gap: 6px; }
+.gx-camp > .tb-next.c1 .nr-top .nr-badge { width: 30px; height: 30px; } .gx-camp > .tb-next.c1 .nr-top .nr-badge .ic { width: 22px; height: 22px; }
+.gx-camp > .tb-next.c1 .nr-top .nr-name { font-size: 24px; }
+.gx-camp > .tb-next.c1 .nr-row { gap: 2px 10px; padding: 4px 0 6px; } .gx-camp > .tb-next.c1 .nr-row > p { line-height: 1.05; }
+.gx-camp > .tb-next.c1 .nr-buy { height: 28px; }
+.gx-camp > .tb-next.c1 .nr-shuffle { min-height: 36px; margin-top: 0; padding-top: 2px; padding-bottom: 4px; }
+.gx-camp > .tb-next.c1 .nr.far { margin-top: 0; padding-top: 6px; }
+/* muy apretado (.c2): el ultimo paso antes de desplazarse (unos 35 px mas con cuatro retos) */
+.gx-camp > .tb-next.c2 { gap: 5px; padding-top: 12px; padding-bottom: 14px; }
+.gx-camp > .tb-next.c2 .nr { gap: 4px; } .gx-camp > .tb-next.c2 .nr-body { gap: 4px; }
+.gx-camp > .tb-next.c2 .nr-row { gap: 1px 10px; padding: 3px 0 4px; }
+.gx-camp > .tb-next.c2 .nr-buy { height: 26px; } .gx-camp > .tb-next.c2 .nr-p { height: 22px; }
+.gx-camp > .tb-next.c2 .nr-shuffle { min-height: 32px; padding-top: 1px; padding-bottom: 3px; }
+.gx-camp > .tb-next.c2 .nr.far { padding-top: 4px; }
+/* boleto que se desplaza (.sc): los bordes se funden por donde queda papel (.up, .dn), una barra fina en el margen y la pestana con los que faltan */
+.gx-camp > .tb-next.sc .nr-body { --fu: 0px; --fd: 0px; --ft: 0px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fu), #000 calc(100% - var(--fd)), transparent calc(100% - var(--ft))); mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fu), #000 calc(100% - var(--fd)), transparent calc(100% - var(--ft))); }
+.gx-camp > .tb-next.sc.up .nr-body { --fu: 16px; } .gx-camp > .tb-next.sc.dn .nr-body { --fd: 58px; --ft: 26px; }   /* tras la pestana no se lee nada: el papel ya esta en blanco a su altura */
+.gx-camp .nr-bar { display: none; position: absolute; z-index: 2; right: 12px; width: 4px; pointer-events: none; background: rgba(22, 36, 28, .12); }
+.gx-camp .nr-bar b { position: absolute; left: 0; right: 0; top: 0; background: var(--gx-ink-2); will-change: transform; }
+.gx-camp > .tb-next.sc .nr-bar { display: block; }
+.gx-camp .nr-more { display: none; position: absolute; z-index: 3; left: 50%; bottom: 14px; transform: translateX(-50%); align-items: center; gap: 6px; height: 24px; margin: 0; padding: 0 10px 1px; border: 0; border-radius: 0; cursor: pointer;
+  font-family: var(--sans); font-size: 18px; line-height: 1; color: var(--gx-paper); background: var(--gx-ink); clip-path: var(--gx-notch); }
+.gx-camp > .tb-next.sc.dn .nr-more { display: inline-flex; }
+.gx-camp .nr-more:hover { filter: brightness(1.5); } .gx-camp .nr-more:focus { outline: none; }
+.gx-camp .nr-more i { width: 10px; height: 6px; background: currentColor; clip-path: polygon(0 0, 100% 0, 100% 2px, 8px 2px, 8px 4px, 6px 4px, 6px 100%, 4px 100%, 4px 4px, 2px 4px, 2px 2px, 0 2px); animation: nr-more 1s steps(1, end) infinite; }
+.gx-camp .nr-more b { font-weight: 400; } .gx-camp .nr-more b:empty { display: none; }
+@keyframes nr-more { 50% { transform: translateY(2px); } }
 
 /* estoy listo: abajo a la derecha, con la ficha de la ronda que viene. Su luz late detras (solo opacidad) */
 .gx-camp > .go2-wrap { position: relative; isolation: isolate; display: flex; min-width: 0; }
@@ -891,7 +926,8 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 /* reducir movimiento: sin cartas que botan ni se reparten, bombillas quietas, sin luz que late ni ficha que gira */
 html.reduce-motion .gx-camp .offer.pc { animation: none; }
 html.reduce-motion .gx-camp > .go2-wrap::before, html.reduce-motion .gx-camp .go2-chip .bc-base,
-html.reduce-motion .gx-camp .tr-relic.swap-pick .tr-face, html.reduce-motion .gx-camp .sup.fresh .sp-on, html.reduce-motion .gx-camp .sup.spinning .sp-ic .ic { animation: none; }
+html.reduce-motion .gx-camp .tr-relic.swap-pick .tr-face, html.reduce-motion .gx-camp .sup.fresh .sp-on, html.reduce-motion .gx-camp .sup.spinning .sp-ic .ic, html.reduce-motion .gx-camp .nr-more i { animation: none; }
+html.reduce-motion .gx-camp .nr-body { scroll-behavior: auto; }
 html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
 html.reduce-motion .gx-camp .offer.pc, html.reduce-motion .gx-camp > .go2-wrap::before { animation: none; }
 
@@ -899,6 +935,7 @@ html.reduce-motion .gx-camp .offer.pc, html.reduce-motion .gx-camp > .go2-wrap::
 @media (max-width: 899px), (max-height: 519px) {
   .table.mesa.gx-camp { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding: 14px 16px 20px; }
   .gx-camp > * { grid-column: 1 !important; grid-row: auto !important; }
+  .gx-camp > .tb-next { contain: none; } .gx-camp .nr-body { overflow: visible; }   /* aqui el boleto mide lo que su contenido (se desplaza la pagina) */
   .gx-camp .tb-head { grid-template-columns: minmax(0, 1fr) auto; } .gx-camp .tb-head > .rd { grid-column: 1 / -1; grid-row: 2; justify-self: start; max-width: 100%; overflow-x: auto; }
   .gx-camp .tb-head > .tb-right { grid-column: 2; grid-row: 1; }
   .gx-camp .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: auto; row-gap: 12px; }

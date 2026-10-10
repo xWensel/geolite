@@ -552,6 +552,7 @@
     /* primero se quitan las lineas "de 3 letras" (A.squeeze), luego se mide */
     for (let i = 0; i < 8; i++) { if (A.squeeze) A.squeeze(el); const r = over(); if (r >= 1) break; k = Math.max(0.55, k * r * 0.985); el.style.setProperty("--k", k.toFixed(3)); if (k <= 0.55) break; }
     kMemo.delete(ck); kMemo.set(ck, k); if (kMemo.size > 60) kMemo.delete(kMemo.keys().next().value);
+    const nx = el.querySelector(":scope > .tb-next"); if (nx && A.adv.ticketFit) A.adv.ticketFit(nx);   // el boleto del Campamento se aprieta o se desplaza por dentro: nunca cambia la k de la mesa
   };
   const kMemo = new Map();                                                     // solo en esta sesion: con otro CSS saldria otra k
   /* v0.3.35: lista con desplazamiento por filas (.scrolls.rows, el Clasico): nunca deja una tarjeta cortada a media altura. Las filas miden lo mismo

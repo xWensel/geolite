@@ -1272,11 +1272,31 @@ window.AIQ = window.AIQ || {};
         + (cf.nulled || []).map(id => `<li class="nr-row done"><span class="nr-ic">${ic(A.CHAL[id].ico)}</span><b class="nr-rn">${A.tx(A.CHAL[id].n)}</b><em class="nr-have">${A.tx(NULLED)}</em></li>`).join("");   // los que quita tu Comodin
       const goal = `${baseTarget() > target() && rr === roundNo() ? `<s class="of-was">${A.fmt(baseTarget())}</s> ` : ""}${A.fmt(target())}`;
       const kick1 = [A.T("Próxima ronda", "Next round"), cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + ((rr % 4) + 1)].join(dot);   // el tema del jefe, bajo su nombre (en el rotulo eran tres lineas)
-      return `<div class="nr${cf.boss ? " boss" : ""}"><span class="gx-eyb nr-k">${kick1}</span><div class="nr-head">${badge}<span class="nr-ttl"><b class="nr-name">${name}</b>${named ? `<i class="nr-sub">${topic}</i>` : ""}</span></div>
-        <div class="gx-lead-row nr-goal"><span>${A.T("Objetivo", "Target")}</span><s></s><b>${goal}</b></div>
-        ${lis ? `<ul class="nr-list">${lis}</ul>` : `<p class="nr-clean">${A.T("Ronda limpia: solo tú y el mapa.", "A clean round: just you and the map.")}</p>`}${shuffle}</div>`;
+      return `<div class="nr nr-top${cf.boss ? " boss" : ""}"><span class="gx-eyb nr-k">${kick1}</span><div class="nr-head">${badge}<span class="nr-ttl"><b class="nr-name">${name}</b>${named ? `<i class="nr-sub">${topic}</i>` : ""}</span></div>
+        <div class="gx-lead-row nr-goal"><span>${A.T("Objetivo", "Target")}</span><s></s><b>${goal}</b></div></div>
+        <div class="nr-body">${lis ? `<ul class="nr-list">${lis}</ul>` : `<p class="nr-clean">${A.T("Ronda limpia: solo tú y el mapa.", "A clean round: just you and the map.")}</p>`}${shuffle}`;   // .nr-body se cierra tras las filas de "Despues"
     }).join("");
-    return `<div class="tb-next gx-paper">${html}</div>`;
+    return `<div class="tb-next gx-paper">${html}</div><i class="nr-bar" aria-hidden="true"><b></b></i><button class="nr-more" type="button" tabindex="-1" aria-hidden="true"><i></i><b></b></button></div>`;
+  };
+  /* v0.3.64: el boleto mide SIEMPRE lo que su hueco (contain: size, css/gala.css): ya no estira la mesa ni la hace bajar de escala (antes, con 4 retos
+     la mesa entera caia al 88 % y con 6 al 71 %, por debajo de la letra minima). Arriba, fijos, el tema y el objetivo; debajo, .nr-body con los retos,
+     Barajar y las rondas del Ojo en el cielo. Si no caben a tamano normal, el boleto se aprieta (.c1 y, si hace falta, .c2: menos aire, la misma letra);
+     si ni asi, el cuerpo se desplaza (.sc): bordes que se funden, barra fina y la pestana "+n" con los que quedan debajo. Lo llama A.fitK cada vez que ajusta
+     la mesa (js/game.js) */
+  const ticketMore = nx => {
+    const b = nx.querySelector(".nr-body"), sc = nx.classList.contains("sc"), y = b.scrollTop, max = b.scrollHeight - b.clientHeight, dn = sc && y < max - 2;
+    nx.classList.toggle("up", sc && y > 2); nx.classList.toggle("dn", dn); if (!sc) return;
+    const br = b.getBoundingClientRect(), edge = br.bottom - 0.09 * br.height; let n = 0; if (dn) b.querySelectorAll(".nr-row, .nr.far").forEach(e => { if (e.getBoundingClientRect().top > edge) n++; });   // los que no ensenan ni su nombre
+    const t = n ? "+" + n : "", lb = nx.querySelector(".nr-more b"); if (lb.textContent !== t) lb.textContent = t;
+    const th = nx.querySelector(".nr-bar b"), H = b.clientHeight, h = Math.max(24, Math.round(H * H / b.scrollHeight)); th.style.height = h + "px"; th.style.transform = `translateY(${max > 0 ? Math.round((H - h) * y / max) : 0}px)`;
+  };
+  A.adv.ticketFit = nx => {
+    const b = nx.querySelector(".nr-body"); if (!b) return;
+    const over = () => b.scrollHeight > b.clientHeight + 1;
+    nx.classList.remove("c1", "c2", "sc"); for (const c of ["c1", "c2", "sc"]) { if (!over()) break; nx.classList.add(c); }
+    if (nx.classList.contains("sc")) { const bar = nx.querySelector(".nr-bar"); bar.style.top = b.offsetTop + "px"; bar.style.height = b.clientHeight + "px"; }
+    if (!b._tk) { b._tk = 1; b.addEventListener("scroll", () => ticketMore(nx), { passive: true }); nx.querySelector(".nr-more").onclick = () => b.scrollBy({ top: Math.round(b.clientHeight * 0.7) }); }
+    ticketMore(nx);
   };
   /* v0.3.1: sobornar es caro y el crupier sube la tarifa. Base: 3 + 2 por nivel del truco (+1 si es de mapa), el doble en el jefe, y sube con el acto
      y la ascension como todo lo demas. Cada soborno pagado en la expedicion encarece los siguientes un 50 % del precio base (barajar no lo reinicia).
@@ -1446,6 +1466,7 @@ window.AIQ = window.AIQ || {};
   function renderShop(chest) {
     reportCasino();
     legOn = 0; swapIx = null; shopChest = !!chest; A.peek.close(true);  // mesa nueva: si la legendaria se estaba luciendo en la anterior, esa secuencia ya no sigue
+    const tkOld = document.querySelector("#dlg .nr-body"), tkY = tkOld ? tkOld.scrollTop : 0;   // el boleto, por donde iba (sobornar el quinto reto no devuelve la lista arriba)
     const slots = maxPerks(), info = actInfo(run.act), rc = rerollCost(), r = roundNo(), cf = chalFor(r);
     const cards = run.stock.map((s, i) => cardHtml(s, i, chest)).join("") || `<p class="tb-empty">${A.T("No quedan cartas: ¡sigue adelante!", "No cards left: move on!")}</p>`;
     /* la mochila no avisa de que una reliquia ya no sirve: saber cuando venderla tambien es cosa del jugador */
@@ -1458,11 +1479,6 @@ window.AIQ = window.AIQ || {};
     /* antes del jefe, el crupier te reescribe el boton (funciona igual) */
     const doom = !chest && !!cf.boss, DOOM = A.pick6("Ir al matadero|To the slaughter|À l'abattoir|Pro matadouro|Zur Schlachtbank|Al macello||去送死|도살장으로|処刑台へ|На убой|Na rzeź");
     const nd = defAt(r), TN = TOPIC_NAMES[nd.topic], topic = A.tx(TN[Math.min(nd.tier, TN.length - 1)]);
-    /* letra de las cartas segun lo llena que va la mesa (retos de la proxima ronda, Ojo en el cielo, avisos): se decide aqui, sin medir nada
-       (con container queries cada maquetacion del Campamento costaba el doble y la primera apertura perdia un fotograma) */
-    const full = (cf.list.length + cf.paid.length >= 3 ? 1 : 0) + (has("spy") ? Math.min(2, LAST - r) : 0) + (note ? 1 : 0) - (chest ? 1 : 0);   // el cofre no lleva suministros: le sobra sitio
-    const dense = Math.max(0, Math.min(2, full + (full > 0 && /^(ru|pl)$/.test(A.lang) ? 1 : 0)));   // ruso y polaco, los textos mas largos de las cartas
-    /* v0.3.23: con la mesa llena (tight) la bandeja y los huecos se aprietan para que todo quepa a tamano real en 1280x800 (css/campamento.css) */
     const chip = chest ? ic("chest") : A.blind(cf.boss ? "boss" : run.round === 0 ? "small" : "big", cf.boss ? BOSS_IC : run.round === 0 ? "s_pin" : "s_compass");
     const goB = chest ? A.T("Continuar sin elegir", "Continue without picking") : doom ? DOOM : A.T("Siguiente ronda", "Next round");
     const goI = chest ? `${A.pick6(TAKE)} ${CN()}+${gain(chestSkip())}` : cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + (run.round + 1);   // v0.3.48: el tema y el nombre del jefe ya estan en el boleto, justo encima
@@ -1471,7 +1487,7 @@ window.AIQ = window.AIQ || {};
        La descripcion de las cartas va siempre entera (usuario): si no cabe, la mesa entera baja de escala (A.fitK), nunca se corta */
     const ascI = run.asc ? A.adv.ascInfo(run.asc) : null;
     const ascChip = ascI ? `<span class="tb-asc" ${A.ttAttr(A.T("Ascensión", "Ascension") + " " + run.asc + " · " + ascI.n, ascI.d + (ascI.k ? " " + ascI.k : ""))}>${ic(ASC_CHIP[run.asc])}<em>${run.asc}</em></span>` : "";
-    C().dialog(`<div class="table mesa gx-camp d${dense}${chest ? " chest" : ""}${run.stock.length > 3 ? " many" : ""}${full >= 2 && !chest ? " tight" : ""}">
+    C().dialog(`<div class="table mesa gx-camp${chest ? " chest" : ""}">
       <header class="tb-head"><div class="tb-title"><span class="gx-eyb tag">${A.tx(info.n)} · ${actSub(info)}</span><span class="tb-trow"><h2 class="gx-t-m">${chest ? A.T("Cofre del jefe", "Boss chest") : A.T("Campamento", "Camp")}</h2>${ascChip}</span></div>
         ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins">${CN()}<b>${run.coins}</b></div></div></header>
       <section class="tb-shop gx-pnl">${note ? `<p class="tb-note">${note}</p>` : ""}<section class="offers" style="--n:${Math.max(1, run.stock.length)}">${cards}${chest ? "" : `<div class="tb-actions"><button class="tb-deck" id="rerollBtn" type="button"><span class="tb-dk">${ic("dice")}</span><span>${A.T("Cambiar cartas", "New cards")}</span><em>${rc ? CN() + rc : A.T("gratis", "free")}</em></button></div>`}</section></section>
@@ -1482,6 +1498,7 @@ window.AIQ = window.AIQ || {};
         <div class="tray-col tr-prov"><h4 class="gx-eyb">${A.T("Provisiones", "Provisions")} <b>${run.lives}/${run.maxLives}</b></h4><div class="tray-row hearts">${hearts()}</div></div></footer>
       ${nextHtml()}
       <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
+    if (tkY > 0) { const tk = document.querySelector("#dlg .tb-next"); A.adv.ticketFit(tk); tk.querySelector(".nr-body").scrollTo({ top: tkY, behavior: "instant" }); }
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
     A.casa.acto(run.act); musica(false);                               // en el Campamento, la cancion del acto que viene (si sonaba la del jefe, se va)
     Gold.mount($("dlg"));                                                // el brillo de oro de las legendarias (mesa y mochila)
