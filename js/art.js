@@ -45,8 +45,9 @@ window.AIQ = window.AIQ || {};
      siempre salen enteras y repartidas por igual, tambien en las esquinas (las antiguas, un fondo de lunares a 20 px, se cortaban en los bordes).
      Capas: casquillo de tinta y cristal apagado (fijos) y tres tandas encendidas, cada una en su propio svg: solo cambia su opacidad, asi el
      compositor las enciende sin repintar nada. v0.3.52 (la casa): persecucion de tres pasos con un solo reloj para todas las bombillas del juego
-     (A.casa.MQ_P); --mq-s las pone en fase con el reloj del documento al nacer. Tamano, margen y densidad por CSS (--mqi, --mqb, --mqr) */
+     (A.casa.MQ_P); --mq-s las pone en fase con el reloj del documento al nacer. Tamano, margen y densidad por CSS (--mqi, --mqb, --mqr).
+     v0.3.70: irradian. Cada tanda lleva cuatro bandas de luz (h1-h4, antes dos) y el marco deja su resplandor (.mq-aura) sobre la pieza y alrededor */
   A.bulbs = () => { const c = A.casa || {}, P = c.MQ_P || 1140, now = performance.now(), s = -Math.round((((now - (c.MQ_O || 0)) % P) + P) % P), r = k => `<rect class="${k}" pathLength="144"/>`;
-    return `<span class="mqw" aria-hidden="true" style="--mq-p:${P.toFixed(2)}ms;--mq-s:${s}ms;--mq-j:${-Math.round(now % 1000)}ms"><svg class="mqb mq-base">${r("mqb-sk")}${r("mqb-off")}</svg>${[1, 2, 3].map(k => `<svg class="mqb mq-lit l${k}">${r("mqb-on mqb-h2")}${r("mqb-on mqb-h1")}${r("mqb-on")}${r("mqb-on mqb-c")}</svg>`).join("")}</span>`; };
+    return `<span class="mqw" aria-hidden="true" style="--mq-p:${P.toFixed(2)}ms;--mq-s:${s}ms;--mq-j:${-Math.round(now % 1000)}ms"><svg class="mqb mq-base">${r("mqb-sk")}${r("mqb-off")}</svg>${[1, 2, 3].map(k => `<svg class="mqb mq-lit l${k}">${r("mqb-on mqb-h4")}${r("mqb-on mqb-h3")}${r("mqb-on mqb-h2")}${r("mqb-on mqb-h1")}${r("mqb-on")}${r("mqb-on mqb-c")}</svg>`).join("")}<i class="mq-aura"></i></span>`; };
   A.art = () => "";
 })(window.AIQ);

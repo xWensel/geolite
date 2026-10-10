@@ -1,0 +1,22 @@
+/* Geolite - LA ESCENA (js/escena.js): la luz que se ve en el aire, entre la penumbra de la sala (js/casa.js) y las piezas.
+   Son capas quietas, por detras de todo lo que se lee y del crupier; solo se anima su opacidad al encenderse. Sin filtros ni modos de mezcla.
+   Con "Luces de la sala" apagadas no hay escena; con "suaves", a un 60 %. */
+@keyframes esc-in { to { opacity: 1; } }
+/* el chasquido de una lampara que arranca: cinco pasos y se queda encendida */
+@keyframes esc-clac { 0% { opacity: 0; } 12% { opacity: .9; } 22% { opacity: .15; } 38% { opacity: 1; } 50% { opacity: .5; } 62%, 100% { opacity: 1; } }
+
+/* ===================================================================================================== LA PORTADA, CON FOCOS DE SALA (v0.3.70)
+   .hh-aire vive en #layer justo encima de la penumbra y por debajo de todo lo demas: dos focos de techo que caen en diagonal sobre las cartas de
+   los lados (nacen fuera de cuadro, arriba), el resplandor del cartel (su marquesina es la luz de la carta del centro) y el de la carta de la
+   Aventura. La primera vez se encienden con su chasquido; al volver a la portada ya estan encendidos */
+.hh-aire { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+html:not(.sala-on) .hh-aire { display: none; }
+html.sala-soft .hh-aire { opacity: .6; }
+.hh-aire > i { position: absolute; opacity: 0; }
+.hh-aire .hz { transform-origin: 50% 0; --li: .2; --lc: 255, 232, 190;
+  background: conic-gradient(from calc(180deg - var(--a)) at 50% var(--oy, 0px), transparent 0deg, rgba(var(--lc), calc(var(--li) * .5)) calc(var(--a) * .5), rgba(var(--lc), var(--li)) var(--a), rgba(var(--lc), calc(var(--li) * .5)) calc(var(--a) * 1.5), transparent calc(var(--a) * 2));
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .9) 0, rgba(0, 0, 0, .65) 50%, rgba(0, 0, 0, .25) 82%, transparent 100%); mask-image: linear-gradient(180deg, rgba(0, 0, 0, .9) 0, rgba(0, 0, 0, .65) 50%, rgba(0, 0, 0, .25) 82%, transparent 100%); }
+.hh-aire .gl { border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--lc), var(--li)), rgba(var(--lc), calc(var(--li) * .4)) 50%, rgba(var(--lc), 0) 100%); }
+.hh-aire > i { animation: esc-clac .5s steps(1, end) var(--d, .3s) forwards; }
+.hh-aire.ya > i { animation: esc-in .3s ease forwards; }
+html.reduce-motion .hh-aire > i, html.soft-flash .hh-aire > i { animation: esc-in .3s ease forwards; }   /* Movimiento suave o minimo: se encienden sin parpadeo */

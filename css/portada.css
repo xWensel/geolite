@@ -145,7 +145,7 @@ html body #dlg > .hh-ver { font-size: 12px; }
 .hh-cont .gx-k { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .hh-cont kbd.k-kb { font-family: var(--mono); font-size: 16px; line-height: 1; padding: 3px 5px 2px; box-shadow: inset 0 0 0 2px currentColor; opacity: .75; background: none; color: inherit; }
 .hh-cont .gl { margin: -6px 0; }
-.hh-resume > .mqw > .mqb { --mqi: -7px; --mqb: 6px; --mqr: -2px; z-index: 2; }
+.hh-resume > .mqw { --mqi: -7px; --mqb: 6px; --mqr: -2px; } .hh-resume > .mqw > .mqb { z-index: 2; }
 
 /* la letra, en la escala comun (solo en escritorio y Deck: el movil conserva sus tamanos) */
 @media (min-width: 900px) and (min-height: 520px) {

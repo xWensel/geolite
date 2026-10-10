@@ -132,7 +132,7 @@ html.reduce-motion .tk-rows > div.beat::after { animation: none; opacity: 0; }
 /* las bombillas del marcador (js/marcador.js, M.luces): por fuera del marco y por detras de la etiqueta de la racha */
 #ledger > .mc-mq { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .3s ease; }
 #ledger > .mc-mq.on { opacity: 1; }
-#ledger > .mc-mq > .mqw > .mqb { --mqi: -9px; --mqb: 6px; --mqr: 14px; }
+#ledger > .mc-mq > .mqw { --mqi: -9px; --mqb: 6px; --mqr: 14px; }
 .mc-mq.rev .mqb.l1 { --mq-k: 2; } .mc-mq.rev .mqb.l3 { --mq-k: 0; }
 .mc-mq.all .mqb.mq-lit { animation: none; opacity: 1; }
 .tk-rows .tk-srow.off dd s { opacity: .55; margin-right: 6px; }

@@ -978,14 +978,14 @@ html.sala-on .vignette { display: none; }                                  /* la
 
 /* bombillas de la casa en las piezas clave (A.bulbs, js/art.js): el cartel de la ronda, el boton principal del veredicto y del Campamento y la Barra */
 .gx-vd-head { position: relative; align-self: center; }
-.gx-vd-head > .mqw > .mqb { --mqi: -18px; --mqb: 7px; --mqr: -10px; left: -16px; width: calc(100% + 26px); }   /* a la derecha no pasa del medianil: no roza el ticket */
-.gx-vd.lose .gx-vd-head .mq-lit { display: none; }                         /* ronda fallida: el cartel se queda apagado */
+.gx-vd-head > .mqw { --mqi: -18px; --mqb: 7px; --mqr: -10px; } .gx-vd-head > .mqw > * { left: -16px; width: calc(100% + 26px); }   /* a la derecha no pasa del medianil: no roza el ticket */
+.gx-vd.lose .gx-vd-head .mq-lit, .gx-vd.lose .gx-vd-head .mq-aura { display: none; }                         /* ronda fallida: el cartel se queda apagado */
 .gx-mq { position: relative; display: inline-flex; }
-.gx-mq > .mqw > .mqb { --mqi: -8px; --mqb: 6px; --mqr: -3px; }
-.gx-camp > .go2-wrap > .mqw > .mqb { --mqi: -7px; --mqb: 6px; --mqr: -2px; z-index: 2; }
-.gx-camp > .go2-wrap:has(.go2.skip) .mq-lit { display: none; }
+.gx-mq > .mqw { --mqi: -8px; --mqb: 6px; --mqr: -3px; }
+.gx-camp > .go2-wrap > .mqw { --mqi: -7px; --mqb: 6px; --mqr: -2px; } .gx-camp > .go2-wrap > .mqw > .mqb { z-index: 2; }
+.gx-camp > .go2-wrap:has(.go2.skip) .mq-lit, .gx-camp > .go2-wrap:has(.go2.skip) .mq-aura { display: none; }
 .gx-camp .tb-sup { position: relative; }
-.gx-camp .tb-sup > .mqw > .mqb { --mqi: -6px; --mqb: 5px; --mqr: -1px; z-index: 2; }
+.gx-camp .tb-sup > .mqw { --mqi: -6px; --mqb: 5px; --mqr: -1px; } .gx-camp .tb-sup > .mqw > .mqb { z-index: 2; }
 @media (max-width: 899px), (max-height: 519px) { .gx-camp .tb-sup > .mqw, .gx-camp > .go2-wrap > .mqw { display: none; } }
 
 /* la escena del jefe: sus bombillas laten en rojo al compas de la sala. Van DETRAS del crupier (estan en la ilustracion): lo que el tapa se ve
@@ -994,6 +994,7 @@ html.sala-on .vignette { display: none; }                                  /* la
 #intro .intro-in.is-boss .mqb .mqb-on.mqb-c { stroke: #ffe2d8; }
 #intro .intro-in.is-boss .mqb .mqb-on.mqb-h1 { stroke: rgba(255, 74, 62, .6); stroke-width: calc(var(--mqb) * 2.6); }
 #intro .intro-in.is-boss .mqb .mqb-on.mqb-h2 { stroke: rgba(255, 52, 40, .3); stroke-width: calc(var(--mqb) * 6); }
+#intro .intro-in.is-boss .mqb .mqb-on.mqb-h3, #intro .intro-in.is-boss .mqb .mqb-on.mqb-h4, #intro .intro-in.is-boss .mq-aura { display: none; }   /* sus dos bandas rojas de siempre, sin las doradas nuevas */
 #intro .intro-in.is-boss .mqb.mq-lit { animation: mq-latido 1s steps(1, end) infinite; animation-delay: var(--mq-j, 0ms); }
 @keyframes mq-latido { 0% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 36% { opacity: 0; } 100% { opacity: 0; } }
 html.reduce-motion #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; }

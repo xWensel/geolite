@@ -72,6 +72,7 @@ window.AIQ = window.AIQ || {};
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
+    if (A.escena) A.escena.portada();                                 // v0.3.70: los focos de sala y el resplandor del cartel (js/escena.js)
     if (A.mesas && A.mesas.check) A.mesas.check();                    // v0.3.62: si has ganado una mesa del mapa, la casa la estrena (js/mesas.js)
   }
 

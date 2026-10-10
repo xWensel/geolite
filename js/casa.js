@@ -30,14 +30,19 @@ window.AIQ = window.AIQ || {};
   const MQ_P = 1140;                                                    // el reloj de la casa para las bombillas: tres pasos de 380 ms
 
   /* ================================================================ la luz: el calculo (el mismo codigo corre en el Worker o, si no hay, aqui) */
-  /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], keep [cx, cy, rx, ry] }
+  /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], keep [cx, cy, rx, ry],
+          cones [[ax, ay, bx, by, r0, r1, k]] (v0.3.70: el cono de un foco o de una lampara colgada, de su boca a lo que alumbra) }
      Las lamparas (pools) son lo unico que da forma a la penumbra: una caida suave y redonda, justificada por la lampara. Nada mas: la capa va
      por detras de todas las piezas, asi que no hay recortes ni recuadros de luz con forma de nada (los hubo hasta la v0.3.57 y se veian) */
   function paint(p) {
     const B = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], W = p.w, H = p.h, c = p.c, amb = p.amb, N = p.bands, SEAM = 0.12;
-    const pools = p.pools, keep = p.keep, out = new Uint8ClampedArray(W * H * 4), r = p.rgb[0], g = p.rgb[1], b = p.rgb[2];
+    const pools = p.pools, keep = p.keep, cones = p.cones || [], out = new Uint8ClampedArray(W * H * 4), r = p.rgb[0], g = p.rgb[1], b = p.rgb[2];
     const at = (x, y) => {
       let pool = 0;
+      /* un cono: de la boca [ax, ay] (medio ancho r0) a lo que alumbra [bx, by] (medio ancho r1); pierde fuerza con la distancia y muere un poco mas alla */
+      for (let k = 0; k < cones.length; k++) { const q = cones[k], vx = q[2] - q[0], vy = q[3] - q[1], t = ((x - q[0]) * vx + (y - q[1]) * vy) / (vx * vx + vy * vy);
+        if (t > 0 && t < 1.3) { const qx = q[0] + vx * t, qy = q[1] + vy * t, d2 = (x - qx) * (x - qx) + (y - qy) * (y - qy), rr = q[4] + (q[5] - q[4]) * t;
+          if (d2 < rr * rr) { let f = (1 - d2 / (rr * rr)) * q[6] * (1 - 0.3 * (t > 1 ? 1 : t)); if (t > 1) f *= 1 - (t - 1) / 0.3; if (f > pool) pool = f; } } }
       for (let k = 0; k < pools.length; k++) { const q = pools[k], dx = (x - q[0]) / q[2], dy = (y - q[1]) / q[3], d2 = dx * dx + dy * dy; if (d2 < 1) { const f = (1 - d2) * q[4]; if (f > pool) pool = f; } }
       let L = amb + (1 - amb) * (pool > 1 ? 1 : pool);
       if (keep) { const dx = (x - keep[0]) / keep[2], dy = (y - keep[1]) / keep[3], d = Math.sqrt(dx * dx + dy * dy); if (d < 1) { let t = d < 0.78 ? 1 : 1 - (d - 0.78) / 0.22; t = t * t * (3 - 2 * t); L += (1 - L) * t; } }
@@ -87,6 +92,8 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (lay && !lay.classList.contains("hidden") && dlg) {
       if (lay.querySelector(":scope > :not(#dlg) .gx-stage") || dlg.querySelector(".gx-camp, .gx-stage")) return { key: "stage", off: 1 };   // tapete propio: su lampara ya va pintada en el fieltro
       if (dlg.classList.contains("home")) {                                                                          // portada: la lampara sobre las tres cartas y otra sobre el cartel
+        const E = A.escena && A.escena.luzPortada && A.escena.luzPortada();
+        if (E) { E.pools.forEach(add); return { key: "home", pools: P, cones: E.cones }; }                             // v0.3.70: con sus focos de sala (js/escena.js): un cono por foco
         add(pool(union(all(".hh-cards > *", dlg)), 1.5, 1.7, 1.3)); add(pool(vis(dlg.querySelector(".hh-logo")), 1.5, 2.1, 1.15));
         return { key: "home", pools: P };
       }
@@ -135,8 +142,8 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     root.classList.toggle("mute", !!R.off);
     if (R.off) { if (map) map.calm = 0; sig = "off"; seq++; root.classList.remove("boss"); hora(); return; }
     const N = NOCHE[act] || NOCHE[0], boss = !!R.boss;
-    const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, keep: R.keep || null };
-    const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), p.keep]);
+    const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, keep: R.keep || null, cones: R.cones || null };
+    const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), p.keep, (R.cones || []).map(q => q.map(v => Math.round(v / 6)))]);
     if (map) map.calm = R.calm ? 1 : 0;                                 // en partida el remolino del oceano baja la voz (js/map.js)
     hora();
     if (s === sig) return; sig = s;
@@ -292,6 +299,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (root) root.classList.toggle("hidden", mode === "off");
     if (map) { map.vigK = mode === "off" ? 1 : 0.55; if (mode === "off") map.calm = 0; map.dirty = true; }
     sig = ""; if (mode !== "off") mira();
+    if (A.escena && A.escena.portada) A.escena.portada();                 // los focos de la portada se van o vuelven con el ajuste
   }
   function init(m, how) {
     map = m || null;
