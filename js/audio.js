@@ -372,7 +372,7 @@ window.AIQ = window.AIQ || {};
     reveal: go((t, tier) => {
       if (tier === 4) {
         [72, 76, 79, 84].forEach((m, i) => bell(m + 12, t + i * 0.055, { vol: 0.085, dur: 1.4 })); thump(t, { vol: 0.28, f0: 90, f1: 38, dur: 0.4 });
-        noise(t, 0.6, { hp: 3000, vol: 0.04, sweepTo: 12000, type: "highpass" }); A.music.duck(0.35, 1600);
+        A.music.duck(0.35, 1600);
       } else if (tier === 3) { [72, 76, 79].forEach((m, i) => bell(m, t + i * 0.07, { vol: 0.09, dur: 1.1 })); A.music.duck(0.4, 1300); }
       else if (tier === 2) { [76, 79].forEach((m, i) => bell(m, t + i * 0.08, { vol: 0.08, dur: 0.9 })); }
       else if (tier === 1) { pluck(67, t, { vol: 0.12, dur: 0.5, bright: 3 }); pluck(64, t + 0.11, { vol: 0.1, dur: 0.6, bright: 3 }); }
@@ -756,21 +756,25 @@ window.AIQ = window.AIQ || {};
       set(f, q) { const w = TAU * f / fs, al = Math.sin(w) / (2 * q), a0 = 1 + al; b0 = al / a0; a1 = -2 * Math.cos(w) / a0; a2 = (1 - al) / a0; },
       zero() { x1 = x2 = y1 = y2 = 0; },
       run(x) { const y = b0 * (x - x2) - a1 * y1 - a2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y; return y; } }; };
-    /* los aplausos: tres tandas distintas de 900 palmadas (una sala entera, no cuatro manos). Cada palmada es ruido corto por un paso de banda (la resonancia de unas manos
-       ahuecadas), con su golpe y su caida; arrancan casi a la vez, aguantan y se van apagando como se apaga una sala. Cada tanda sale normalizada:
-       su tramo fuerte queda a 0,2 de valor eficaz, y el nivel final lo pone el juego */
-    const FA = 22050, AD = 2.6, AN = Math.round((AD + 0.4) * FA), claps = [];
+    /* los aplausos (v0.3.68): una sala de unas 30 personas, cada una con SU ritmo. Antes eran 900 palmadas al azar en 2,6 s (350 por segundo): una
+       cortina de ruido, "mas ruido que aplauso" (usuario). Ahora cada persona aplaude de 2,4 a 4 veces por segundo, con su cadencia, su distancia
+       (casi todas lejos, alguna cerca y fuerte), su sitio en el estereo y su momento de empezar y de parar; cada palmada es un chasquido seco y
+       corto (resonancia de manos ahuecadas, ~4 ms) que se oye suelto. Tres tandas; cada una sale con su tramo fuerte a 0,2 de valor eficaz y el
+       nivel final lo pone el juego */
+    const FA = 22050, AD = 3.0, AN = Math.round((AD + 0.5) * FA), claps = [];
     for (let v = 0; v < 3; v++) {
-      const l = new Float32Array(AN), r = new Float32Array(AN), bq = biq(FA);
-      for (let i = 0; i < 900; i++) {
-        const u = rnd(), t0 = AD * Math.pow(u, 0.85), amp = Math.min(1, 0.25 + u * 9) * (1 - u * u * u) * (0.45 + 0.55 * rnd());
-        const a = (rnd() * 1.5 - 0.75 + 1) * Math.PI / 4, pl = Math.cos(a) * SQ2, pr = Math.sin(a) * SQ2, s0 = Math.round(t0 * FA), at = 0.0015 * FA, tau = (0.004 + rnd() * 0.004) * FA, ns = Math.round(at + tau * 6);
-        bq.set(1000 + rnd() * 1700, 1.1 + rnd() * 0.6); bq.zero();
-        for (let k = 0; k < ns && s0 + k < AN; k++) { const e = k < at ? k / at : Math.exp(-(k - at) / tau), y = bq.run(rnd() * 2 - 1) * e * amp; l[s0 + k] += y * pl; r[s0 + k] += y * pr; }
+      const l = new Float32Array(AN), r = new Float32Array(AN), bq = biq(FA), bq2 = biq(FA), NP = 26 + Math.floor(rnd() * 10);
+      for (let p = 0; p < NP; p++) {
+        const dist = 0.12 + 0.88 * Math.pow(rnd(), 3), start = Math.pow(rnd(), 1.6) * 0.7, stop = AD * (0.5 + 0.5 * rnd()), per = 1 / (2.4 + rnd() * 1.6);
+        const a = (rnd() * 1.6 - 0.8 + 1) * Math.PI / 4, pl = Math.cos(a) * SQ2, pr = Math.sin(a) * SQ2, f1 = 1100 + rnd() * 1200, f2 = 2600 + rnd() * 1800, q = 1.8 + rnd() * 1.4;
+        for (let t0 = start + rnd() * per; t0 < stop; t0 += per * (0.86 + rnd() * 0.28)) {
+          const fall = t0 > stop - 0.6 ? Math.max(0, (stop - t0) / 0.6) : 1, amp = dist * fall * (0.6 + 0.8 * rnd()), s0 = Math.round(t0 * FA), at = 0.0006 * FA, tau = (0.0028 + rnd() * 0.0035) * FA, ns = Math.round(at + tau * 6);
+          bq.set(f1 * (0.9 + rnd() * 0.2), q); bq.zero(); bq2.set(f2 * (0.9 + rnd() * 0.2), q + 0.8); bq2.zero();
+          for (let k = 0; k < ns && s0 + k < AN; k++) { const e = k < at ? k / at : Math.exp(-(k - at) / tau), x = rnd() * 2 - 1, y = (bq.run(x) + 0.55 * bq2.run(x)) * e * amp; l[s0 + k] += y * pl; r[s0 + k] += y * pr; }
+        }
       }
-      let sum = 0, cnt = 0, pk = 0; for (let n = Math.round(0.3 * FA); n < Math.round(1.5 * FA); n++) { sum += l[n] * l[n] + r[n] * r[n]; cnt += 2; }
-      for (let n = 0; n < AN; n++) pk = Math.max(pk, Math.abs(l[n]), Math.abs(r[n]));
-      const g = Math.min(0.2 / Math.sqrt(sum / cnt + 1e-12), 0.95 / (pk + 1e-9)); for (let n = 0; n < AN; n++) { l[n] *= g; r[n] *= g; }
+      let sum = 0, cnt = 0; for (let n = Math.round(0.3 * FA); n < Math.round(1.8 * FA); n++) { sum += l[n] * l[n] + r[n] * r[n]; cnt += 2; }
+      const g = 0.2 / Math.sqrt(sum / cnt + 1e-12); for (let n = 0; n < AN; n++) { l[n] = Math.tanh(l[n] * g) * 0.95; r[n] = Math.tanh(r[n] * g) * 0.95; }
       claps.push([l, r]);
     }
     return { fa: FA, claps };
@@ -815,7 +819,7 @@ window.AIQ = window.AIQ || {};
     if (!amb) { if (lvl > 0 && ctx.state === "running") ambBuild(); if (!amb) return; }
     const t = ctx.currentTime, tc = ambPlace === "jefe" ? 0.12 : 0.6; amb.P = P;
     amb.ev.g.gain.setTargetAtTime(lvl, t, tc); amb.ev.lp.frequency.setTargetAtTime(P.lp, t, tc);
-    amb.re.g.gain.setTargetAtTime(ambWanted() ? 0.11 * A.audio.vol.amb : 0, t, 0.1);   // los aplausos: por debajo de la fanfarria
+    amb.re.g.gain.setTargetAtTime(ambWanted() ? 0.045 * A.audio.vol.amb : 0, t, 0.1);   // los aplausos: de fondo, flojos, sin tapar la fanfarria (v0.3.68, usuario)
     if (lvl > 0 && !ambTimer) { const now = ctx.currentTime; amb.n = { chips: now + 1 + Math.random() * 2, glass: now + 3 + Math.random() * 6, ice: now + 2 + Math.random() * 5, deck: now + 20 + Math.random() * 30 }; ambTimer = setInterval(ambTick, 500); }
     else if (lvl <= 0 && ambTimer) { clearInterval(ambTimer); ambTimer = 0; }
   }
