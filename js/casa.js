@@ -22,22 +22,28 @@ window.AIQ = window.AIQ || {};
   const MQ_P = 1140;                                                    // el reloj de las bombillas: tres pasos de 380 ms
 
   /* ================================================================ la luz: el calculo (el mismo codigo corre en el Worker o, si no hay, aqui) */
-  /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], floors [[x0, y0, x1, y1, luz, borde]], keep [cx, cy, rx, ry] } */
+  /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], floors [[x0, y0, x1, y1, luzMinima]], keep [cx, cy, rx, ry] }
+     Las lamparas (pools) son lo unico que da forma a la penumbra: una caida suave y redonda, justificada por la lampara. Cada pieza (floor) recibe
+     UNA sola luz, la que cae en su centro (o su minimo para poder leerla), plana y recortada a su borde: ni halo alrededor ni el borde de una
+     banda cruzandola. Asi no aparece ninguna sombra con forma de algo que no esta en pantalla */
   function paint(p) {
     const B = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], W = p.w, H = p.h, c = p.c, amb = p.amb, N = p.bands, SEAM = 0.12;
     const pools = p.pools, floors = p.floors, keep = p.keep, out = new Uint8ClampedArray(W * H * 4), r = p.rgb[0], g = p.rgb[1], b = p.rgb[2];
+    const at = (x, y) => {
+      let pool = 0;
+      for (let k = 0; k < pools.length; k++) { const q = pools[k], dx = (x - q[0]) / q[2], dy = (y - q[1]) / q[3], d2 = dx * dx + dy * dy; if (d2 < 1) { const f = (1 - d2) * q[4]; if (f > pool) pool = f; } }
+      let L = amb + (1 - amb) * (pool > 1 ? 1 : pool);
+      if (keep) { const dx = (x - keep[0]) / keep[2], dy = (y - keep[1]) / keep[3], d = Math.sqrt(dx * dx + dy * dy); if (d < 1) { let t = d < 0.78 ? 1 : 1 - (d - 0.78) / 0.22; t = t * t * (3 - 2 * t); L += (1 - L) * t; } }
+      return L;
+    };
+    const FL = floors.map(f => Math.max(f[4], at((f[0] + f[2]) / 2, (f[1] + f[3]) / 2)));
     for (let j = 0; j < H; j++) {
       const y = (j + 0.5) * c;
       for (let i = 0; i < W; i++) {
         const x = (i + 0.5) * c;
-        let pool = 0;
-        for (let k = 0; k < pools.length; k++) { const q = pools[k], dx = (x - q[0]) / q[2], dy = (y - q[1]) / q[3], d2 = dx * dx + dy * dy; if (d2 < 1) { const f = (1 - d2) * q[4]; if (f > pool) pool = f; } }
-        let L = amb + (1 - amb) * (pool > 1 ? 1 : pool);
-        for (let k = 0; k < floors.length; k++) {
-          const f = floors[k], ox = Math.max(f[0] - x, 0, x - f[2]), oy = Math.max(f[1] - y, 0, y - f[3]);
-          if (ox < f[5] && oy < f[5]) { const o = Math.sqrt(ox * ox + oy * oy); if (o < f[5]) { let t = 1 - o / f[5]; t = t * t * (3 - 2 * t); const v = L + (f[4] - L) * t; if (v > L) L = v; } }
-        }
-        if (keep) { const dx = (x - keep[0]) / keep[2], dy = (y - keep[1]) / keep[3], d = Math.sqrt(dx * dx + dy * dy); if (d < 1) { let t = d < 0.78 ? 1 : 1 - (d - 0.78) / 0.22; t = t * t * (3 - 2 * t); L += (1 - L) * t; } }
+        let L = -1;
+        for (let k = 0; k < floors.length; k++) { const f = floors[k]; if (x >= f[0] && x <= f[2] && y >= f[1] && y <= f[3] && FL[k] > L) L = FL[k]; }
+        if (L < 0) L = at(x, y);
         let t = (L - amb) / (1 - amb); t = t < 0 ? 0 : t > 1 ? 1 : t;
         const xv = t * N; let s = Math.floor(xv); const fr = xv - s;
         if (fr > 1 - SEAM && B[(i & 3) + ((j & 3) << 2)] / 16 < (fr - (1 - SEAM)) / SEAM) s++;   // la costura de trama, solo en el borde de cada banda
@@ -62,62 +68,57 @@ onmessage = e => { const p = e.data, out = paint(p);
   const union = rs => rs.length ? rs.reduce((u, r) => ({ left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) }), { left: 1e9, top: 1e9, right: -1e9, bottom: -1e9 }) : null;
   /* una lampara centrada en una pieza: sx/sy agrandan su radio respecto a la pieza; k > 1 deja meseta de luz plena en el centro */
   const pool = (r, sx, sy, k = 1.25) => r ? [(r.left + r.right) / 2, (r.top + r.bottom) / 2, Math.max(60, (r.right - r.left) / 2 * sx), Math.max(60, (r.bottom - r.top) / 2 * sy), k] : null;
-  /* el suelo de luz de una pieza que se lee: nunca baja de `lv` dentro de ella, y se funde con la sala en `soft` px */
-  const floor = (r, lv, soft) => r ? [r.left - 6, r.top - 6, r.right + 6, r.bottom + 6, lv, soft] : null;
+  /* la luz de una pieza SOLIDA (carta, ticket, boton, placa): plana y recortada a su borde (2 px de margen por la celda); `lv` es su minimo para
+     poder leerla. Nunca se le da a un contenedor invisible ni a un texto suelto: su caja dibujaria un recuadro de luz que no corresponde a nada */
+  const floor = (r, lv) => r ? [r.left - 2, r.top - 2, r.right + 2, r.bottom + 2, lv] : null;
   /* las piezas de una pantalla de gala: las de su reticula de 12 columnas o, si no la usa (la Clasificacion), sus bloques y lo que llevan dentro */
   const stageKids = st => { const k = all(".gx-grid > *", st); return k.length ? k : all(":scope > *, :scope > * > *", st); };
   function rule() {
-    const W = innerWidth, H = innerHeight, S = Math.min(W, H) * 0.11, s = S * 0.3, lay = $("layer"), dlg = $("dlg"), intro = $("intro");
+    const W = innerWidth, H = innerHeight, lay = $("layer"), dlg = $("dlg"), intro = $("intro");
     const P = [], F = [], add = (arr, x) => { if (x) arr.push(x); };
-    /* lo que se lee (papel, botones, titulos) va a luz plena con un borde corto: sobre el papel nunca cae el borde de una banda.
-       Los contenedores de fieltro llevan un suelo mas bajo y borde largo: sobre ellos si se ve la caida de la lampara */
-    const fl = (rs, lv, soft = S) => rs.forEach(r => add(F, floor(r, lv, soft)));
-    if (intro && !intro.classList.contains("hidden") && !intro.classList.contains("out")) {                          // intro de ronda o de jefe
-      const kids = all(".intro-in > *", intro); add(P, pool(union(kids), 1.3, 1.5)); fl(kids, 1, s);
-      return { key: "intro", pools: P, floors: F, root: intro };
+    const fl = (rs, lv) => rs.forEach(r => add(F, floor(r, lv)));
+    /* las marquesinas de bombillas dan luz: el hueco que ocupan nunca queda en sombra */
+    const bulbs = root => fl(all(".mqb.mq-base", root), 1);
+    /* un tablero a pantalla completa (pantallas de gala, cuadros): una lampara ancha con mucha meseta; todo lo que hay se lee a luz plena y
+       la penumbra solo asoma en los margenes */
+    const board = kids => add(P, pool(union(kids), 1.32, 1.5, 3.2));
+    if (document.body.classList.contains("cx-on")) return { key: "codex", off: 1 };                                 // la Enciclopedia es un aparato con su propia pantalla: la luz de la sala no entra
+    if (intro && !intro.classList.contains("hidden") && !intro.classList.contains("out")) {                          // intro de ronda o de jefe: una lampara sobre el cartel entero
+      add(P, pool(union(all(".intro-in > *", intro)), 1.4, 1.7, 1.9)); bulbs(intro);
+      return { key: "intro", pools: P, floors: F };
     }
     const top = lay && !lay.classList.contains("hidden") ? [...lay.querySelectorAll(":scope > :not(#dlg) .gx-stage")].pop() : null;
-    if (top) {                                                                                                      // la Clasificacion: va en #layer, encima de la portada
-      const kids = stageKids(top); add(P, pool(union(kids), 1.18, 1.32, 1.35)); fl(kids, 1, s);
-      return { key: "stage", pools: P, floors: F, root: top.parentElement || top };
-    }
+    if (top) { board(stageKids(top)); bulbs(top); return { key: "stage", pools: P, floors: F }; }                    // la Clasificacion: va en #layer, encima de la portada
     if (lay && !lay.classList.contains("hidden") && dlg) {
-      if (dlg.classList.contains("home")) {                                                                          // portada: la lampara sobre las tres cartas
-        const cards = all(".hh-cards > *", dlg), u = union(cards);
-        add(P, pool(u, 1.45, 1.6)); add(P, pool(vis(dlg.querySelector(".hh-logo")), 1.45, 2, 1.1));
-        fl(cards, 1, s); fl(all(".hh-logo, .hh-tag, .hh-resume, .hh-bottom > *", dlg), 1, s); fl(all(".hh-top > *, #hud > *, #dockSh, #railSh", dlg.ownerDocument), 0.95, s);
-        return { key: "home", pools: P, floors: F, root: dlg };
+      if (dlg.classList.contains("home")) {                                                                          // portada: la lampara sobre las tres cartas y otra sobre el cartel
+        const cards = all(".hh-cards > *", dlg);
+        add(P, pool(union(cards), 1.5, 1.7, 1.3)); add(P, pool(vis(dlg.querySelector(".hh-logo")), 1.5, 2.1, 1.15));
+        fl(cards, 1); fl(all(".plq, .hh-resume .startbtn", dlg), 1); fl(all(".hh-top .menu-gear, .menu-gear", dlg), 0.8); fl(all("#leftCol > *"), 1);
+        return { key: "home", pools: P, floors: F };
       }
       const vd = dlg.querySelector(".gx-vd");
-      if (vd) {                                                                                                     // ronda superada o fallida: el ticket bajo su lampara
+      if (vd) {                                                                                                     // ronda superada o fallida: el ticket bajo su lampara y otra sobre el cartel
         const tk = vis(vd.querySelector(".gx-vd-ticket")), hd = vis(vd.querySelector(".gx-vd-head"));
-        add(P, pool(tk, 1.55, 1.2)); add(P, pool(hd, 1.35, 1.5, 1.05));
-        fl([tk, hd].filter(Boolean), 1, s); fl(all(".gx-vd-side > *", vd), 0.96, s); fl(all(".gx-vd-acts .gx-btn, .gx-vd-acts .gx-mq", vd), 1, s);
-        return { key: "vd", pools: P, floors: F, root: vd };
+        add(P, pool(tk, 1.7, 1.3, 1.4)); add(P, pool(hd, 1.5, 1.7, 1.5)); add(P, pool(vis(vd.querySelector(".gx-vd-side")), 1.5, 1.4, 1.5));
+        fl([tk].filter(Boolean), 1); fl(all(".gx-vd-iq, .gx-vd-acts .gx-btn", vd), 1); bulbs(vd);
+        return { key: "vd", pools: P, floors: F };
       }
       const camp = dlg.querySelector(".gx-camp");
-      if (camp) {                                                                                                   // el Campamento: la mesa de cartas y el boleto
-        add(P, pool(vis(camp.querySelector(".tb-shop")), 1.22, 1.5)); add(P, pool(vis(camp.querySelector(".tb-next")), 1.3, 1.18, 1.2));
-        fl(all(".tb-shop", camp), 0.72); fl(all(".tb-sup, .tb-tray", camp), 0.86);
-        fl(all(".offer, .tb-deck, .sup, .tb-next, .go2-wrap, :scope > .tb-head > *", camp), 1, s);
-        return { key: "camp", pools: P, floors: F, root: camp };
+      if (camp) {                                                                                                   // el Campamento: una lampara sobre la mesa (cartas, Barra, mochila) y otra sobre el boleto
+        add(P, pool(union(all(":scope > .tb-head, :scope > .tb-shop, :scope > .tb-sup, :scope > .tb-tray", camp)), 1.22, 1.32, 1.7));
+        add(P, pool(union(all(":scope > .tb-next, :scope > .go2-wrap", camp)), 1.4, 1.25, 1.7));
+        fl(all(".offer, .tb-deck, .tb-next, .go2-wrap, .sup, .tb-right > *", camp), 1); fl(all(":scope > .tb-tray", camp), 0.9); bulbs(camp);
+        return { key: "camp", pools: P, floors: F };
       }
       const stage = dlg.querySelector(".gx-stage");
-      if (stage) {                                                                                                  // pantallas de gala (Aventura, Clasico, Reto, Perfil...)
-        const kids = stageKids(stage); add(P, pool(union(kids), 1.18, 1.32, 1.35));
-        fl(kids, 1, s);                                                                                             // son tableros para leer: todo a luz plena, la penumbra en los margenes
-        return { key: "stage", pools: P, floors: F, root: dlg };
-      }
-      if (!dlg.classList.contains("side")) {                                                                        // cualquier otro cuadro centrado
-        const kids = all(":scope > *", dlg); add(P, pool(union(kids), 1.4, 1.5)); fl(kids, 1, s);
-        return { key: "box", pools: P, floors: F, root: dlg };
-      }
+      if (stage) { board(stageKids(stage)); bulbs(stage); return { key: "stage", pools: P, floors: F }; }           // pantallas de gala (Aventura, Clasico, Reto, Perfil...)
+      if (!dlg.classList.contains("side")) { board(all(":scope > *", dlg)); return { key: "box", pools: P, floors: F }; }   // cualquier otro cuadro centrado
     }
-    /* partida: la lampara sobre la mesa. El centro del mapa queda intacto; las piezas del HUD, con su luz */
+    /* partida: la lampara sobre la mesa. El centro del mapa queda intacto; las piezas solidas del HUD (placa, marcador, nota, avisos) van a luz plena */
     add(P, [W / 2, H / 2, W * 0.8, H * 0.86, 1.2]);
-    fl(all("#leftCol > *, #hud > *, #ledgerSh, #noteSh, #toolBar, .tool-bar, #railSh, #dockSh"), 1, s);
-    if (dlg && dlg.classList.contains("side") && lay && !lay.classList.contains("hidden")) fl([vis(dlg)].filter(Boolean), 1, s);
-    return { key: "play", pools: P, floors: F, keep: [W / 2, H * 0.53, W * 0.46, H * 0.44], calm: 1, root: $("ledgerSh") };
+    fl(all("#leftCol > *, #ledgerSh, #noteSh"), 1); fl(all("#toolBar .tb-tool, #toolBar > *, #railSh, #dockSh"), 0.86);
+    if (dlg && dlg.classList.contains("side") && lay && !lay.classList.contains("hidden")) fl(all(":scope > .sheet", dlg), 1);
+    return { key: "play", pools: P, floors: F, keep: [W / 2, H * 0.53, W * 0.46, H * 0.44], calm: 1 };
   }
 
   /* ================================================================ la luz: dibujo, fundido y cuando recalcular */
@@ -142,6 +143,8 @@ onmessage = e => { const p = e.data, out = paint(p);
     if (!root || mode === "off") return;
     const W = innerWidth, H = innerHeight; if (!W || !H) return;
     const R = rule(), L = LUX[mode], k = Math.min(W / 1280, H / 720), c = Math.max(2, Math.round(2 * k));
+    root.classList.toggle("mute", !!R.off);
+    if (R.off) { if (map) map.calm = 0; sig = "off"; seq++; return; }
     const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: L.amb, dark: L.dark, bands: 6, rgb: [2, 9, 8], pools: R.pools, floors: R.floors, keep: R.keep || null };
     const s = JSON.stringify([mode, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), R.floors.map(q => q.map(v => Math.round(v / 6))), p.keep]);
     if (map) map.calm = R.calm ? 1 : 0;                                 // en partida el remolino del oceano baja la voz (js/map.js)
@@ -162,6 +165,7 @@ onmessage = e => { const p = e.data, out = paint(p);
   let lastKind = "";
   function kind() {
     const lay = $("layer"), dlg = $("dlg"), intro = $("intro");
+    if (document.body.classList.contains("cx-on")) return "codex";
     if (intro && !intro.classList.contains("hidden") && !intro.classList.contains("out")) return "intro";
     const top = lay && !lay.classList.contains("hidden") ? [...lay.querySelectorAll(":scope > :not(#dlg) .gx-stage")].pop() : null;
     if (top) return "stage " + top.className;
@@ -176,7 +180,7 @@ onmessage = e => { const p = e.data, out = paint(p);
   }
   function mira(changed) {
     if (!root || mode === "off") return;
-    if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind) neutral(); lastKind = k; } }
+    if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind) neutral(); lastKind = k; root.classList.toggle("mute", k === "codex"); } }
     clearTimeout(tm); clearTimeout(tm2);
     tm = setTimeout(() => idle(look), 650);                            // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
     tm2 = setTimeout(() => idle(look), 1600);
@@ -225,6 +229,7 @@ onmessage = e => { const p = e.data, out = paint(p);
     const mo = new MutationObserver(() => mira(true));
     [["layer", { attributes: true, attributeFilter: ["class"], childList: true }], ["dlg", { attributes: true, attributeFilter: ["class"], childList: true }], ["intro", { attributes: true, attributeFilter: ["class"] }],
       ["leftCol", { childList: true }], ["ledgerSh", { childList: true }]].forEach(([id, o]) => { const el = $(id); if (el) mo.observe(el, o); });
+    mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });                                      // cx-on: se abre o se cierra la Enciclopedia
     addEventListener("resize", () => { sig = ""; mira(); });
     set(how || "full");
   }
