@@ -124,6 +124,17 @@ html body .tk2 .tk-km { margin-top: 6px; }
 .tk-pin.ok b { color: #1d6b42; } .tk-pin.bad b { color: var(--red); } .tk-pin.sea b { color: #2d6f8a; }
 /* Clasico: la racha solo cuenta (no multiplica) */
 .tk-rows .tk-srow dt, .tk-rows .tk-srow dd { color: var(--red); }
+/* v0.3.54, la cuenta por golpes: el sumando que cuenta ahora recibe una pasada de rotulador (solo transform y opacidad) */
+.tk-rows > div[data-b] { position: relative; isolation: isolate; }
+.tk-rows > div.beat::after { content: ""; position: absolute; inset: -3px -6px; z-index: -1; pointer-events: none; background: rgba(248, 180, 73, .52); transform-origin: 0 50%; animation: tk-beat .46s ease-out both; }
+@keyframes tk-beat { 0% { transform: scaleX(0); opacity: 1; } 22% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+html.reduce-motion .tk-rows > div.beat::after { animation: none; opacity: 0; }
+/* las bombillas del marcador (js/marcador.js, M.luces): por fuera del marco y por detras de la etiqueta de la racha */
+#ledger > .mc-mq { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .3s ease; }
+#ledger > .mc-mq.on { opacity: 1; }
+#ledger > .mc-mq > .mqw > .mqb { --mqi: -9px; --mqb: 6px; --mqr: 14px; }
+.mc-mq.rev .mqb.l1 { --mq-k: 2; } .mc-mq.rev .mqb.l3 { --mq-k: 0; }
+.mc-mq.all .mqb.mq-lit { animation: none; opacity: 1; }
 .tk-rows .tk-srow.off dd s { opacity: .55; margin-right: 6px; }
 
 /* la ecuacion: PUNTOS x RACHA, siempre a la vista en la Aventura y el Reto. La caja roja cuenta la racha: apagada (x1), encendida con llamas

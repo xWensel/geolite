@@ -913,10 +913,23 @@ html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
    La luz de la sala: una capa fija por encima de las pantallas y el HUD y por debajo de avisos, pausa, Ajustes, crupier y mesas. Es una imagen
    pequena (una celda por cada 2-4 px) escalada sin suavizar: bandas de pixel. Cambia con un fundido cuando cambia la pantalla; nada por fotograma */
 #sala { position: absolute; inset: 0; z-index: 7; pointer-events: none; overflow: hidden; }
+#sala.bajo { z-index: auto; }                                               /* en partida: sobre el mapa y por debajo del HUD */
 #sala.hidden { display: none; }
 #sala { transition: opacity .25s ease; } #sala.mute { opacity: 0; }                /* la Enciclopedia: un aparato con su propia pantalla; la luz de la sala no entra */
-#sala canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; transition: opacity .55s ease; will-change: opacity; }
-#sala canvas.on { opacity: 1; }
+#sala canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; }
+#sala canvas.d { transition: opacity .55s ease; will-change: opacity; }
+#sala canvas.d.on { opacity: 1; }
+/* v0.3.54 (la sala responde): la luz que sube (el mismo mapa, en calido: solo enciende la penumbra), el velo de la lampara que baja y el haz del barrido.
+   Los tres se animan desde js/casa.js solo con opacidad y transform */
+#sala canvas.g { will-change: opacity; }
+#sala .veil { position: absolute; inset: 0; background: #020908; opacity: 0; will-change: opacity; }
+#sala .beam { position: absolute; top: -10%; left: 0; width: 46vw; height: 120%; opacity: 0; will-change: transform, opacity;
+  background: linear-gradient(90deg, transparent, rgba(255, 230, 172, .13) 20%, rgba(255, 240, 200, .38) 50%, rgba(255, 230, 172, .13) 80%, transparent); }
+/* llega el jefe: la luz roja de la penumbra late como un corazon (dos golpes por segundo y silencio) */
+#sala.boss canvas.g { animation: sala-latido 1s steps(1, end) infinite; animation-delay: var(--lt, 0ms); }
+@keyframes sala-latido { 0% { opacity: .42; } 14% { opacity: 0; } 24% { opacity: .3; } 36% { opacity: 0; } 100% { opacity: 0; } }
+html.reduce-motion #sala.boss canvas.g, html.soft-flash #sala.boss canvas.g { animation: none; opacity: .08; }
+@media (prefers-reduced-motion: reduce) { #sala.boss canvas.g { animation: none; opacity: .08; } }
 #sala::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .3s ease; background: radial-gradient(ellipse 75% 70% at 50% 47%, transparent 58%, rgba(2, 9, 8, .42) 100%); }
 #sala.neutral::before { opacity: 1; }                                       /* entre una pantalla y otra: penumbra neutra mientras llega la luz nueva */
 #sala.neutral canvas { transition-duration: .28s; }
@@ -934,3 +947,14 @@ html.sala-on .vignette { display: none; }                                  /* la
 .gx-camp .tb-sup { position: relative; }
 .gx-camp .tb-sup > .mqw > .mqb { --mqi: -6px; --mqb: 5px; --mqr: -1px; z-index: 2; }
 @media (max-width: 899px), (max-height: 519px) { .gx-camp .tb-sup > .mqw, .gx-camp > .go2-wrap > .mqw { display: none; } }
+
+/* la escena del jefe: sus bombillas laten en rojo al compas de la sala. Van DETRAS del crupier (estan en la ilustracion): lo que el tapa se ve
+   como un halo ancho a su alrededor, nunca encima de el */
+#intro .intro-in.is-boss .mqb .mqb-on { stroke: #ff5a4e; }
+#intro .intro-in.is-boss .mqb .mqb-on.mqb-c { stroke: #ffe2d8; }
+#intro .intro-in.is-boss .mqb .mqb-on.mqb-h1 { stroke: rgba(255, 74, 62, .6); stroke-width: calc(var(--mqb) * 2.6); }
+#intro .intro-in.is-boss .mqb .mqb-on.mqb-h2 { stroke: rgba(255, 52, 40, .3); stroke-width: calc(var(--mqb) * 6); }
+#intro .intro-in.is-boss .mqb.mq-lit { animation: mq-latido 1s steps(1, end) infinite; animation-delay: var(--mq-j, 0ms); }
+@keyframes mq-latido { 0% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 36% { opacity: 0; } 100% { opacity: 0; } }
+html.reduce-motion #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; } }

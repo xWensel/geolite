@@ -147,6 +147,7 @@ window.AIQ = window.AIQ || {};
   /* ---------------------------------------------------------------- el cobro: los puntos del ticket suben al marcador */
   function clearFx() {
     document.querySelectorAll(".mc-chip, .mc-plus, .mc-stamp").forEach(e => e.remove());   // (el ticket que cae, .mc-drop, se va solo)
+    M.luces(false);
     const l = $("scLoot"); if (l) l.classList.remove("mc-hold");
   }
   /* inversa de la curva de la barra (cubic-bezier .2,.8,.2,1): en que momento de su recorrido pasa por la fraccion f */
@@ -177,9 +178,24 @@ window.AIQ = window.AIQ || {};
 
   /* datos (desde reveal en game.js): { from, to, total, advance, runTotal, delay, ms, gauge, lootOn }
      delay/ms: cuando empieza y cuanto dura el rodar del TOTAL del ticket (las cifras del marcador van al mismo compas); gauge: lo que tarda la barra */
+  /* v0.3.54: las bombillas del marcador. Apagadas mientras piensas; se encienden mientras cobra (la persecucion de la casa, cada vez en un
+     sentido) y lo celebran si cruza la meta. Van por fuera del marco y por detras de la etiqueta de la racha */
+  let mqOff = 0;
+  M.luces = (on, ms = 0) => {
+    const led = $("ledger"); if (!led || document.documentElement.classList.contains("reduce-motion")) return;
+    let mq = led.querySelector(":scope > .mc-mq");
+    clearTimeout(mqOff);
+    if (!on) { if (mq) mq.classList.remove("on", "all"); return; }
+    if (!mq) { mq = document.createElement("span"); mq.className = "mc-mq"; mq.setAttribute("aria-hidden", "true"); led.appendChild(mq); }
+    if (!mq.classList.contains("on")) { mq.innerHTML = A.bulbs(); mq.classList.toggle("rev", Math.random() < 0.5); A.restyle(mq); mq.classList.add("on"); }
+    if (ms) mqOff = setTimeout(() => M.luces(false), ms);
+  };
+  /* todas encendidas a la vez un instante (la meta, cada jackpot) */
+  M.destello = (ms = 170) => { const mq = $("ledger") && $("ledger").querySelector(":scope > .mc-mq.on"); if (!mq) return; mq.classList.add("all"); setTimeout(() => mq.classList.remove("all"), ms); };
   M.cashIn = o => {
     const { from, to, total, advance, runTotal = 0, delay = 700, ms = 1100, gauge = 450, lootOn = false } = o;
     if (!(to > from)) return;
+    if (!still()) later(() => M.luces(true, ms + 900), delay);
     const led = $("ledger"), num = $("scLevel"), bar = $("scBar"), mark = $("scMark"), tot = $("scTotal"), loot = $("scLoot"), moving = !still();
     /* el TOTAL de la partida sube cuando llega el dinero, no antes */
     if (tot) { const fin = tot.textContent; tot.textContent = A.fmt(runTotal + from); later(() => { tot.textContent = fin; if (moving) tot.animate([{ transform: "translateY(-3px)", color: "#2f7bf5" }, { transform: "none" }], { duration: 380, easing: "ease-out" }); }, delay + ms); }
@@ -213,6 +229,7 @@ window.AIQ = window.AIQ || {};
         if (led) { const st = document.createElement("b"); st.className = "mc-stamp"; st.textContent = A.pick6("¡META!|TARGET HIT!|OBJECTIF !|META!|ZIEL!|TRAGUARDO!||达标！|목표 달성!|目標達成！|ЦЕЛЬ ВЗЯТА!|CEL!"); led.appendChild(st); }
         if (loot) loot.classList.remove("mc-hold");
         if (A.sfx.goal) A.sfx.goal(); buzz([40, 50, 40, 50, 110]);   // la firma del juego (sol-do-re) y tres pulsos, el ultimo largo
+        if (moving) { M.luces(true, 2400); M.destello(190); if (A.casa) A.casa.luz(0.46, 760); }   // la meta: el marcador entero se enciende y la lampara sube
       } else {
         const b = loot && loot.querySelector("b");
         if (b && moving) b.animate([{ transform: "scale(1)" }, { transform: "scale(1.5)", color: "#b3322a", offset: 0.35 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.3, 1.6, .5, 1)" });

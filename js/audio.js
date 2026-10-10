@@ -611,6 +611,29 @@ window.AIQ = window.AIQ || {};
       bell(91, t + 0.2, { vol: 0.07, dur: 1.2, rev: 0.6 }); bell(98, t + 0.26, { vol: 0.04, dur: 1, rev: 0.6 });
       noise(t + 0.16, 0.5, { hp: 4500, vol: 0.028, sweepTo: 12000, type: "highpass" }); A.music.duck(0.5, 1000);
     }),
+    /* v0.3.54 (la sala responde, js/casa.js). golpe: cada sumando de la cuenta da el suyo, una ficha que cae un peldano mas agudo que la anterior
+       (k = 0, 1, 2...); impacto: el golpe grave de la diana, tras su instante de silencio; barrido: el haz de luz que cruza la sala con el premio gordo;
+       latido y zumbido: el corazon y el fondo grave de la sala mientras llega el jefe (el zumbido se apaga solo a los 10 s o al cerrarlo) */
+    golpe: go((t, k = 0) => {
+      const r = Math.random, m = scaleNote(8 + 2 * k, 60) + (r() - 0.5) * 0.08;
+      noise(t, 0.016, { type: "bandpass", lp: 3700 + 400 * r(), q: 2, vol: 0.055 }); noise(t + 0.02 + 0.006 * r(), 0.01, { type: "bandpass", lp: 4600, q: 2, vol: 0.028 });
+      thump(t, { vol: 0.1, f0: 240, f1: 110, dur: 0.06 });
+      pluck(m, t + 0.004, { vol: 0.07 * (0.9 + 0.2 * r()), dur: 0.2, bright: 3, rev: 0.12 }); bell(m + 12, t + 0.01, { vol: 0.035, dur: 0.28, rev: 0.25 });
+    }),
+    impacto: go(t => { thump(t, { vol: 0.34, f0: 70, f1: 30, dur: 0.45 }); noise(t, 0.09, { lp: 1400, vol: 0.1 }); }),
+    barrido: go(t => { noise(t, 0.7, { type: "bandpass", lp: 900, sweepTo: 5200, q: 1.1, vol: 0.05 }); [84, 88, 91, 96].forEach((m, i) => bell(m, t + 0.1 + i * 0.09, { vol: 0.05, dur: 0.9, rev: 0.6 })); }),
+    latido: go(t => { thump(t, { vol: 0.3, f0: 72, f1: 38, dur: 0.16 }); thump(t + 0.24, { vol: 0.2, f0: 64, f1: 36, dur: 0.14 }); }),
+    zumbido: (() => {
+      let g = null, os = [];
+      return on => {
+        if (!on) { if (g && ctx) { const t = ctx.currentTime, oo = os; g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(0.0001, t, 0.2); oo.forEach(o => { try { o.stop(t + 1.2); } catch (e) { /* ya parado */ } }); } g = null; os = []; return; }
+        if (g || !A.audio.sfxOn || document.hidden || !init()) return;
+        const t = ctx.currentTime + 0.01, lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 170;
+        g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.07, t + 1.2); g.gain.setTargetAtTime(0.0001, t + 9, 1.4);
+        os = [41.2, 41.7, 61.8].map(f => { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + 16); return o; });
+        g.connect(lp).connect(sfxBus);
+      };
+    })(),
     lootStep: go((t, k = 1) => {
       const n = scaleNote(5 + Math.min(4, Math.max(1, k)), 60) + 12;
       bell(n, t, { vol: 0.08, dur: 0.4, rev: 0.3 }); bell(n + 7, t + 0.05, { vol: 0.06, dur: 0.6, rev: 0.35 }); noise(t, 0.012, { hp: 6000, vol: 0.05 });

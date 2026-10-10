@@ -456,7 +456,7 @@ window.AIQ = window.AIQ || {};
     try { localStorage.removeItem(key); } catch (e) { /* sin almacenamiento */ }
   };
   A.adv.save = () => persist();
-  A.adv.leave = () => { if (run) { snapSpent(); persist(); A.dealer.noteLeave(); } clearTimers(); A.chal.end(); A.dealer.enable(false); run = null; A.adv.hideBars(); };
+  A.adv.leave = () => { if (run) { snapSpent(); persist(); A.dealer.noteLeave(); } clearTimers(); A.chal.end(); A.dealer.enable(false); run = null; A.adv.hideBars(); A.casa.acto(0); };
   A.adv.summary = (daily = false) => { const r = (run && !!run.board === daily && run) || loadSlot(daily); return r ? { act: r.act + 1, round: r.round + 1, coins: r.coins, score: r.score, lives: r.lives, board: r.board || null, dailyTry: r.dailyTry || 0, inf: !!r.inf, asc: r.asc || 0 } : null; };
   A.adv.active = () => !!run;
   A.adv.isDaily = () => !!(run && run.board);
@@ -555,6 +555,7 @@ window.AIQ = window.AIQ || {};
   }
   function startRound(keep) {
     run.phase = "round"; if (A.coverMap) A.coverMap("camp", false);   // sales del Campamento: el mapa vuelve a dibujarse al instante
+    A.casa.acto(run.act);                                              // la noche avanza con los actos (js/casa.js)
     if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; run.calmOn = false; refillTools(); }
     const Lv = roundLevel(keep), S = C().S;
     S.run = run; S.camp = { id: "adv", mode: "adventure", title: { es: "Aventura", en: "Adventure" }, home: { lat: 20, lon: 10, zoom: 1 }, levels: [Lv] };
@@ -1188,6 +1189,7 @@ window.AIQ = window.AIQ || {};
   }
   /* ronda 12 es la ultima: desde aqui solo se puede cobrar o pasar al modo infinito (nunca mas rondas numeradas) */
   function showWinChoice() {
+    A.casa.acto("fin");                                                // tres actos completados: se encienden las luces de sala
     C().verdict({
       kind: "win", level: 12, tag: A.T("Tres actos completados", "Three acts completed"), title: A.T("¡Terra Incognita conquistada!", "Terra Incognita conquered!"),
       text: A.pick6("Has completado los tres actos. Puedes cobrar tu gloria ahora o entrar en el modo infinito: preguntas sin parar de todo tipo, cada vez con menos tiempo, hasta que se te acaben las provisiones.|You've completed all three acts. Cash out your glory now, or enter infinite mode: nonstop questions of every kind, with less time on each one, until you run out of provisions.|Tu as terminé les trois actes. Encaisse ta gloire maintenant, ou entre dans le mode infini : des questions de tout genre sans arrêt, avec moins de temps à chaque question, jusqu'à épuiser tes provisions.|Você completou os três atos. Recolha sua glória agora ou entre no modo infinito: perguntas de todo tipo sem parar, com menos tempo a cada pergunta, até acabarem suas provisões.|Du hast alle drei Akte geschafft. Kassiere jetzt deinen Ruhm oder starte den Endlosmodus: Fragen aller Art ohne Pause, mit jeder Frage weniger Zeit, bis dein Proviant aufgebraucht ist.|Hai completato i tre atti. Incassa la gloria ora oppure entra nella modalità infinita: domande di ogni tipo senza sosta, con meno tempo a ogni domanda, finché non finiscono le provviste.|Completaste los tres actos. Puedes cobrar tu gloria ahora o entrar al modo infinito: preguntas sin parar de todo tipo, cada vez con menos tiempo, hasta que se te acaben las provisiones.|你已完成全部三幕。现在兑现荣耀，或进入无尽模式：各类问题接连不断，每题时间越来越少，直到补给耗尽。|세 막을 모두 완료했습니다. 지금 영광을 챙기거나 무한 모드에 들어가세요: 식량이 떨어질 때까지 온갖 문제가 끝없이 나오고, 문제마다 시간이 점점 줄어듭니다.|3つの幕をすべて完了した。今すぐ栄光を現金化するか、エンドレスモードへ：食料が尽きるまで、あらゆる問題がノンストップで、1問ごとに時間が短くなる。|Все три акта пройдены. Забери свою славу сейчас или войди в бесконечный режим: вопросы всех видов без остановки, с каждым вопросом времени меньше, пока не кончатся запасы.|Wszystkie trzy akty za tobą. Zgarnij chwałę teraz albo wejdź w tryb nieskończony: pytania wszelkiego rodzaju bez przerwy, z coraz krótszym czasem, aż skończą ci się zapasy."),
@@ -1478,6 +1480,7 @@ window.AIQ = window.AIQ || {};
       ${nextHtml()}
       <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
+    A.casa.acto(run.act);
     Gold.mount($("dlg"));                                                // el brillo de oro de las legendarias (mesa y mochila)
     document.querySelectorAll(".offer").forEach((el, i) => { const btn = el.querySelector(".buy"); if (btn) btn.onclick = () => buy(el, chest); if (!chest) el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && A.dealer.campHover) A.dealer.campHover(i); }); });
     /* la mochila: pasar el raton abre la carta grande (con su boton de vender); un clic la deja fija. Con una carta de la mesa esperando
@@ -2485,6 +2488,7 @@ window.AIQ = window.AIQ || {};
   }
   function endRun(win) {
     if (A.coverMap) A.coverMap("camp", false);
+    A.casa.acto("fin");                                                // se acabo la expedicion: luces de sala
     if (run.practice) return endPractice(win);
     const P = A.profile.get(), bonus = run.cleared * 1000 + (run.won ? 2500 : 0), final = finalOf(run), wasRanked = run.ranked, board = run.board, daily = !!(wasRanked && board);
     /* el Reto diario tiene sus propias tablas (Hoy y Ayer): no cuenta para el record ni para la tabla "Aventura" (solo expediciones del modo Aventura) */

@@ -834,11 +834,14 @@
     const cxr = guess ? A.codexUnlock(o, km) : { added: [], level: 0 };
     /* Enciclopedia: 1, 2 o 3 jackpots segun el nivel, en cuanto el total termina de rodar. Con cada uno tiembla la pantalla (mas cuanto
        mas cerca) y vibra el movil, y las casillas del ticket se encienden al mismo ritmo. Si ya has pasado a la siguiente pregunta, no empiezan */
-    const JP_AT = 1850, JP_MS = Math.round(A.audio.jpGap * 1000), jpTok = S.jpTok = (S.jpTok || 0) + 1, jpAt = i => JP_AT + i * JP_MS + "ms";
+    /* v0.3.54, la pausa de impacto: en la diana, 90 ms de silencio (la musica se agacha) y luego el golpe. El compas entero del revelado
+       (sonido, bandera, cuenta, racha y jackpots) se retrasa esos 90 ms; nada se congela en pantalla */
+    const HS = tier === 4 && guess ? 90 : 0;
+    const JP_AT = 1850 + HS, JP_MS = Math.round(A.audio.jpGap * 1000), jpTok = S.jpTok = (S.jpTok || 0) + 1, jpAt = i => JP_AT + i * JP_MS + "ms";
     const still = () => S.jpTok === jpTok && S.phase === "reveal";          // sigue en pantalla este ticket (si ya has pasado, sus sonidos no pisan la pregunta siguiente)
     /* v0.2.15: acierto = la misma regla que la racha (<= 300 km, el anillo exterior). Te llevas la bandera: en el mapa se iza en el sitio
        (FLAG_AT, con su corneta) y en el ticket va junto al nombre; si fallas, el mastil se queda vacio. T_SLAM: golpe de la caja de la racha */
-    const hit = !!guess && (adv ? adv.hit : km <= lim[0]), fl = flagsOf(o), up = hit && fl.length > 0, FLAG_AT = 650, T_SLAM = 1300;
+    const hit = !!guess && (adv ? adv.hit : km <= lim[0]), fl = flagsOf(o), up = hit && fl.length > 0, FLAG_AT = 650 + HS, T_SLAM = 1300 + HS;
     const label = o.clue ? A.tx(o.answer) : A.tx(o.name);
     /* tu chincheta, por el camino corto: si cruza el antimeridiano (Fiyi y Samoa) se dibuja en la copia del mundo junto al objetivo */
     const refLon = ans ? ans[0] : labelAt ? labelAt[0] : null, gLon = guess ? (refLon == null ? guess.lon : guess.lon + 360 * Math.round((refLon - guess.lon) / 360)) : null;
@@ -852,7 +855,12 @@
     const fC = isC ? world.byName[o.key] : null;
     const fpts = (isC ? span.slice(0, 2).map(p => [p[0], p[1], fC && fC.ct]) : [[ans[0], ans[1]]]).concat(span.slice(isC ? 2 : 1).map(p => [p[0], p[1]]), guess ? [[gLon, guess.lat, map.pickCt]] : []);
 
-    setTimeout(() => { if (still()) A.sfx.reveal(tier); }, 480);
+    if (HS) setTimeout(() => { if (still()) A.music.duck(0.12, 260); }, 480 - 30);
+    setTimeout(() => {
+      if (!still()) return; A.sfx.reveal(tier);
+      if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); }          // la diana pega: golpe grave, un temblor y la lampara que sube
+      else if (tier === 0 || tier === 5) A.casa.baja(tier === 0 && prevStreak >= 2 ? 1 : 0.7);    // fallo: la lampara baja un momento
+    }, 480 + HS);
     if (up) setTimeout(() => { if (still() && A.sfx.flag) A.sfx.flag(fl.length); }, FLAG_AT);
     if (cxr.level) setTimeout(() => {
       if (!still()) return;
@@ -865,7 +873,7 @@
     const broke = eq === "broken" || (!S.run && prevStreak >= 2 && !S.streak);
     setTimeout(() => {
       if (!still()) { if (S.phase === "asking") setStreak(); return; }
-      if (eq === "on" || (!S.run && S.streak >= 2)) { A.sfx.streak(S.streak); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
+      if (eq === "on" || (!S.run && S.streak >= 2)) { A.sfx.streak(S.streak); if (eq === "on") A.casa.luz(0.4, 520); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
       else if (broke) { if (A.sfx.streakBreak) A.sfx.streakBreak(); if (eq) shards(); }
       setStreak();
     }, T_SLAM);
@@ -902,8 +910,8 @@
       ${pinTxt ? `<div class="tk-pin ${pinCls}">${pinTxt}</div>` : ""}
       <div class="tk-perf"></div>
       <dl class="tk-rows">
-        <div style="--i:0"><dt>${A.t("res.dist")}</dt><i></i><dd>+${A.fmt(sc.dist)}</dd></div>
-        <div style="--i:1"><dt>${A.t("res.speed")}</dt><i></i><dd>+${A.fmt(sc.time)}</dd></div>
+        <div style="--i:0" data-b="d"><dt>${A.t("res.dist")}</dt><i></i><dd>+${A.fmt(sc.dist)}</dd></div>
+        <div style="--i:1" data-b="t"><dt>${A.t("res.speed")}</dt><i></i><dd>+${A.fmt(sc.time)}</dd></div>
         ${srow}
       </dl>
       ${adv && adv.lines.length ? `<div class="tk-perks">${adv.lines.map(l => `<div><span>${A.icon(l[0])}</span><i>${l[1]}</i><b>${l[2]}</b></div>`).join("")}</div>` : ""}
@@ -918,21 +926,34 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     $("plate").classList.remove("hurry");
     /* el cobro: los puntos del ticket suben al marcador al compas de su TOTAL (700 + 1100 ms); la barra llega en 450 ms y, si cruza la meta
        o un escalon de botin, lo celebra (js/marcador.js) */
-    const cash = { from: S.levelScore - total, to: S.levelScore, total, delay: 700, ms: 1100, gauge: 450 };
+    const cash = { from: S.levelScore - total, to: S.levelScore, total, delay: 700 + HS, ms: 1100, gauge: 450 };
     /* v0.2.15: el ticket se monta en el fotograma siguiente. La puntuacion, las marcas y los sonidos van en esta tarea y el ticket (maquetarlo es lo mas
        caro) en la otra: asi ninguna se come un fotograma entero (con la CPU a x4 el revelado era una sola tarea de ~50 ms) */
     requestAnimationFrame(() => {
       if (!still()) return;
       dialog(tkHtml, "side");
-      if (showKm) { const kmEl = $("kmNum"); odoNow(kmEl, 0); requestAnimationFrame(() => odoSet(kmEl, Math.round(S.units === "mi" ? km / 1.609344 : km), { ms: 1100, delay: 560 })); }
+      if (showKm) { const kmEl = $("kmNum"); odoNow(kmEl, 0); requestAnimationFrame(() => odoSet(kmEl, Math.round(S.units === "mi" ? km / 1.609344 : km), { ms: 1100, delay: 560 + HS })); }
       /* el total: con racha, primero cuenta los PUNTOS y, con el golpe de la caja roja, sube por el multiplicador (como en Balatro); sin ella, de una vez.
          Las cifras del marcador van aparte, al mismo compas de siempre (700 + 1100 ms) */
-      const totEl = $("totNum"), eqC = $("eqChips"); odoNow(totEl, 0);
-      if (eqC) { odoNow(eqC, 0); requestAnimationFrame(() => odoSet(eqC, chips, { ms: 560, delay: 700 })); }
+      const totEl = $("totNum"), eqC = $("eqChips"); odoNow(totEl, 0); if (eqC) odoNow(eqC, 0);
+      /* v0.3.54, la cuenta por golpes: cada sumando (distancia, velocidad) da el suyo, uno tras otro y un peldano mas agudo; su fila se marca,
+         PUNTOS salta a la suma y da un respingo. Despues, como siempre: el golpe de la racha y el TOTAL. El ritmo entre golpes se sortea un poco
+         (aleatorio dentro del orden) y nunca llega al golpe de la racha */
+      const sheet = totEl.closest(".sheet"), beats = [["d", Math.min(sc.dist, chips)], ["t", chips]].filter((b, i, a) => b[1] > (i ? a[i - 1][1] : 0));
+      const gap = beats.length > 1 ? Math.min(170 + Math.round(Math.random() * 40), Math.floor(430 / (beats.length - 1))) : 0, T0 = 700 + HS, lastAt = T0 + gap * Math.max(0, beats.length - 1);
+      const jump = el => { if (el && !S.reduce) el.animate([{ transform: "scale(1.3)" }, { transform: "none" }], { duration: 190, easing: "ease-out" }); };
+      beats.forEach(([key, val], i) => setTimeout(() => {
+        if (!still() || !totEl.isConnected) return;
+        const row = sheet && sheet.querySelector(`.tk-rows [data-b="${key}"]`); if (row) row.classList.add("beat");
+        if (eqC) { odoSet(eqC, val, { ms: 130 }); jump(eqC); }
+        if (eq === "on") odoSet(totEl, val, { ms: 130 }); else if (i === beats.length - 1) odoSet(totEl, total, { ms: 420, tick: total > 0 }); else { odoSet(totEl, val, { ms: 130 }); jump(totEl); }
+        A.sfx.golpe(i);
+      }, T0 + i * gap));
+      if (!beats.length) requestAnimationFrame(() => odoSet(totEl, total, { ms: 1100, delay: T0, tick: total > 0 }));
       if (eq === "on") {
-        requestAnimationFrame(() => odoSet(totEl, chips, { ms: 560, delay: 700, tick: chips > 0 }));
-        setTimeout(() => { if (still() && totEl.isConnected) odoSet(totEl, total, { ms: 470, delay: 30, tick: true }); }, T_SLAM);
-      } else requestAnimationFrame(() => odoSet(totEl, total, { ms: 1100, delay: 700, tick: total > 0 }));
+        if (beats.length) setTimeout(() => { if (still() && totEl.isConnected) A.sfx.countEnd(); }, lastAt + 200);
+        setTimeout(() => { if (still() && totEl.isConnected) { odoSet(totEl, total, { ms: 470, delay: 30, tick: true }); jump(totEl); } }, T_SLAM);
+      }
       $("nextBtn").onclick = () => { last ? finishLevel() : (S.qi++, nextQuestion()); };
       updateHud(cash);
       A.marcador.cashIn({ ...cash, advance: L.advance, runTotal: S.runTotal, lootOn: !!(S.run && S.camp.mode === "adventure" && !(A.adv.isInfinite && A.adv.isInfinite())) });
