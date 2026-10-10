@@ -103,6 +103,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
       if (vd) {                                                                                                     // ronda superada o fallida: el ticket bajo su lampara y otra sobre el cartel
         add(pool(vis(vd.querySelector(".gx-vd-ticket")), 1.7, 1.3, 1.4)); add(pool(vis(vd.querySelector(".gx-vd-head")), 1.5, 1.7, 1.5)); add(pool(vis(vd.querySelector(".gx-vd-side")), 1.5, 1.4, 1.5));
         crupier(vd);
+        { const E = A.escena && A.escena.luzCaja && A.escena.luzCaja(); if (E) return { key: "vd", pools: P, cones: E.cones }; }   // v0.3.76: el cono de la lampara de la caja (js/escena.js)
         return { key: "vd", pools: P };
       }
       if (!dlg.classList.contains("side")) { add(pool(union(all(":scope > *", dlg)), 1.32, 1.5, 3.2)); return { key: "box", pools: P }; }   // cualquier otro cuadro centrado: una lampara ancha
@@ -195,6 +196,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     /* en que pantalla estas: lo usan la luz y el sonido (con las Luces de la sala apagadas, el sonido sigue sabiendo donde estas) */
     if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind && mode !== "off") neutral(); lastKind = k; root.classList.toggle("mute", TAPETE(k)); llegaElJefe(k === "intro jefe"); lugar(k); } }
     coloca(lastKind);                                                   // tambien si la pantalla se ha vuelto a pintar entera y se ha llevado la capa por delante
+    if (A.escena && A.escena.caja) A.escena.caja(lastKind === "vd");      // v0.3.76: la lampara de la caja cuelga mientras dura el veredicto
     clearTimeout(tm); clearTimeout(tm2);
     if (mode === "off") { tm = setTimeout(hora, 650); return; }       // sin luces de sala, las bombillas siguen en hora
     tm = setTimeout(() => idle(look), performance.now() < prisa ? 140 : 650);   // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas

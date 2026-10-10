@@ -83,3 +83,20 @@ html.reduce-motion .esc-luces > i, html.soft-flash .esc-luces > i { animation: e
 #intro .intro-art { transform: none; }
 .intro-hueco { display: block; width: 100%; aspect-ratio: 16 / 10; }
 #intro .intro-dealer { left: 0; right: 0; bottom: -30%; transform: none; display: grid; justify-items: center; }
+
+/* ===================================================================================================== LA LAMPARA DE LA CAJA (v0.3.76)
+   El veredicto: la lampara verde de billar colgada sobre el ticket (js/escena.js). Vive en #layer, por encima de la penumbra y por debajo de
+   todas las piezas: el papel no cambia de color; se ve la lampara, su resplandor y el charco de luz que deja alrededor del ticket.
+   Ronda fallida (.baja): la lampara se queda a media luz y sin resplandor, como el cartel, que apaga sus bombillas */
+.esc-caja { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+html:not(.sala-on) .esc-caja { display: none; }
+.esc-caja > i { position: absolute; }
+.esc-caja .esc-lamp { --d: .12s; }
+.esc-caja .cj-luz { opacity: 0; border-radius: 50%; animation: esc-clac .5s steps(1, end) .12s forwards; }
+.esc-caja .cj-halo { background: radial-gradient(closest-side, rgba(255, 222, 164, .5), rgba(255, 222, 164, .18) 45%, rgba(255, 222, 164, 0)); }
+.esc-caja .cj-charco { background: radial-gradient(closest-side, rgba(255, 222, 164, .3), rgba(255, 222, 164, .1) 55%, rgba(255, 222, 164, 0)); }
+html.sala-soft .esc-caja .cj-halo, html.sala-soft .esc-caja .cj-charco { filter: opacity(.6); }
+html.reduce-motion .esc-caja .cj-luz, html.soft-flash .esc-caja .cj-luz { animation: esc-in .3s ease .12s forwards; }   /* Movimiento suave o minimo: sin parpadeo */
+.esc-caja.ya .cj-luz { animation: none; opacity: 1; } .esc-caja.ya .esc-lamp { animation: none; }                      /* recolocada: ya estaba encendida */
+.esc-caja.baja .cj-halo { display: none; } .esc-caja.baja .cj-charco { animation: none; opacity: .25; } .esc-caja.baja .esc-lamp { animation: none; filter: brightness(.42) saturate(.55); }
+#layer.hidden > .esc-caja { display: none; }

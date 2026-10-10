@@ -3,6 +3,7 @@
  *
  *  - La portada tiene focos de sala: dos focos de techo caen en diagonal sobre las cartas de los lados, el cartel enciende la sala y su oro
  *    baja hasta la carta de la Aventura, que tiene su propio resplandor.
+ *  - v0.3.76: el veredicto, bajo la lampara de la caja: la verde de billar colgada sobre el ticket.
  *  - v0.3.72: la intro de cada ronda es un escenario. Telon de terciopelo del color del acto (esmeralda, azul de medianoche, violeta; granate
  *    cuando llega el jefe), galon y suelo, y la lampara del tema colgada sobre la ficha y sobre el crupier, con su haz en el aire. Se encienden
  *    una detras de otra. El jefe lleva un foco de teatro sobre su ficha y la lampara del tema, en rojo, sobre el crupier.
@@ -122,6 +123,37 @@ window.AIQ = window.AIQ || {};
   }
   addEventListener("resize", () => { const d = $("dlg"); if (d && d.classList.contains("home")) portada(); });
 
-  A.escena = { portada, luzPortada: () => { const d = $("dlg"); return hs && d && d.classList.contains("home") && luces() ? hs : null; },
+  /* ================================================================ la lampara de la caja (v0.3.76): el veredicto */
+  /* Sobre el ticket del veredicto, que es el papel de la caja, cuelga la lampara verde de billar (siempre la misma: las de cada tema no caben).
+     Si sobre el ticket hay sitio cuelga de su cable; si no, asoma desde fuera de la pantalla y pierde la varilla, el casquillo y, como mucho,
+     media pantalla. Va en #layer, detras de todas las piezas; su cono se recorta en la penumbra (luzCaja, js/casa.js). Ronda fallida: a media
+     luz y sin resplandor. La pone y la quita js/casa.js, que sabe cuando hay veredicto. Con las Luces de la sala apagadas no hay lampara */
+  let cj = null, cjT = 0;
+  function quitaCaja() { clearTimeout(cjT); cjT = 0; const lay = $("layer"); if (lay) lay.querySelectorAll(":scope > .esc-caja").forEach(e => e.remove()); cj = null; }
+  function ponCaja() {
+    const lay = $("layer"), dlg = $("dlg"), vd = dlg && dlg.querySelector(".gx-vd"), papel = vd && vd.querySelector(".gx-vd-ticket");
+    if (!papel || !luces()) return quitaCaja();
+    if (vd.classList.contains("gx-out")) return;                         // el veredicto se esta yendo: la lampara se queda como esta hasta que se vaya con el (nada de volver a medir a mitad de la salida)
+    const r = papel.getBoundingClientRect(), p = px(), M = L.billar; if (r.width < 40 || r.top < 18 * p) return quitaCaja();   // sin sitio ni para media pantalla: mejor sin lampara
+    const cx = Math.round((r.left + r.right) / 2 / p) * p, top = Math.max(Math.round((r.top - 3 * p - M.h * p) / p) * p, Math.ceil((r.top - 2 * p - M.h * p) / p) * p, -24 * p);
+    const baja = vd.classList.contains("lose"), key = [cx, top, Math.round(r.top), Math.round(r.width), Math.round(r.height), baja, p].join(), old = lay.querySelector(":scope > .esc-caja");
+    if (cj && cj.key === key && old) return;
+    const my = top + M.b[0] * p, rm = M.b[1] * p, host = document.createElement("div");
+    host.className = "esc-caja" + (baja ? " baja" : "") + (old ? " ya" : ""); host.style.setProperty("--p", p + "px"); host.setAttribute("aria-hidden", "true");
+    const add = (cls, css) => { const e = document.createElement("i"); e.className = cls; Object.assign(e.style, css); host.appendChild(e); };
+    if (top > 0) add("esc-cable", { left: cx - p + "px", top: "0px", height: top + "px" });
+    add("cj-luz cj-charco", { left: cx - r.width * 0.72 + "px", top: r.top - r.height * 0.16 + "px", width: r.width * 1.44 + "px", height: r.height * 0.8 + "px" });
+    add("cj-luz cj-halo", { left: cx - rm * 2.3 + "px", top: my - rm * 1.5 + "px", width: rm * 4.6 + "px", height: rm * 3.4 + "px" });
+    add("esc-lamp", { left: cx - 32 * p + "px", top: top + "px", width: 64 * p + "px", height: 48 * p + "px", backgroundImage: "url(assets/esc/lamp_billar.png)" });
+    if (old) old.remove(); lay.insertBefore(host, dlg);
+    cj = { key, cones: [[cx, my, cx, r.top + r.height * 0.42, rm * 1.1, r.width * 0.66, baja ? 0.7 : 1.3]] };
+    if (A.casa && A.casa.mira) A.casa.mira();                            // la penumbra se abre bajo la lampara
+  }
+  /* on: hay veredicto en pantalla. Se mide cuando ya ha entrado (sus piezas llegan con transform) y otra vez al final, por si algo crecio */
+  function laCaja(on) {
+    if (!on) return quitaCaja();
+    if (cjT) return; cjT = setTimeout(() => { ponCaja(); cjT = setTimeout(() => { cjT = 0; ponCaja(); }, 950); }, cj ? 80 : 720);                // el ticket termina de imprimirse a los 650 ms
+  }
+  A.escena = { caja: laCaja, luzCaja: () => (cj && $("layer") && $("layer").querySelector(":scope > .esc-caja") && luces() ? cj : null), portada, luzPortada: () => { const d = $("dlg"); return hs && d && d.classList.contains("home") && luces() ? hs : null; },
     monta, desmonta, luz: () => (st && st.luz && st.tel.isConnected && luces() ? st.luz : null) };
 })(window.AIQ);

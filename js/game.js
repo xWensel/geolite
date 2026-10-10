@@ -997,7 +997,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const idc = iq != null ? `<div class="gx-vd-iq gx-paper">${tier != null ? A.icon("iq_" + tier) : `<img class="ic" src="assets/icons/logo_mark.png" alt="">`}<span class="gx-eyb">${A.t("iq.label")}</span><b class="odo" id="iqNum"></b><em>${tierName}</em></div>` : "";
     const order = buttons.filter(b => !b.primary).concat(buttons.filter(b => b.primary));
     const btn = b => { const h = `<button class="gx-btn${b.primary ? " pri" : b.ghost ? " gho sm" : ""}" id="${b.id}" ${b.primary ? "data-primary" : ""}><span>${b.label}</span>${b.primary ? A.gala.keyHint("Enter", "a") : ""}</button>`;
-      return b.primary ? `<span class="gx-mq">${h}${A.bulbs()}</span>` : h; };                   // v0.3.52: el boton principal con las bombillas de la casa
+      return h; };                                                                               // v0.3.76: el boton principal ya no lleva bombillas alrededor (peticion del autor)
     dialog(`<div class="vd gx-vd gx-layer gx-in${kind === "" ? " lose" : ""}${two && !(A.dealer && A.dealer.on) ? " wide" : ""}">
       <div class="gx-vd-head gx-from-left"><span class="gx-eyb">${tag || A.t("v.level", { n: pad2(level) })}</span><h2 class="gx-t-xl">${title}</h2><p class="gx-lead">${text}</p>${bar}${A.bulbs()}</div>
       <div class="gx-vd-mid gx-sh">${ticket}</div>

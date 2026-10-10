@@ -899,13 +899,14 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .nr-more b { font-weight: 400; } .gx-camp .nr-more b:empty { display: none; }
 @keyframes nr-more { 50% { transform: translateY(2px); } }
 
-/* estoy listo: abajo a la derecha, con la ficha de la ronda que viene. Su luz late detras (solo opacidad) */
+/* estoy listo: abajo a la derecha, con la ficha de la ronda que viene. v0.3.76: sin luces alrededor (ni bombillas ni la luz que latia detras) */
 .gx-camp > .go2-wrap { position: relative; isolation: isolate; display: flex; min-width: 0; }
-/* la sombra dura y la luz, detras del boton y sin filtro (un drop-shadow sobre la luz que late se repintaria en cada fotograma) */
+/* la sombra dura, detras del boton */
 .gx-camp > .go2-wrap::after { content: ""; position: absolute; inset: 4px 0 -4px; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); background: rgba(2, 6, 4, .78); }
-.gx-camp > .go2-wrap::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; box-shadow: 0 0 24px 4px rgba(248, 180, 73, .6); opacity: 0; will-change: opacity; animation: go2-glow 2.4s ease-in-out infinite; }
-.gx-camp > .go2-wrap:has(.go2.doom)::before { box-shadow: 0 0 24px 4px rgba(254, 95, 85, .6); } .gx-camp > .go2-wrap:has(.go2.skip)::before { animation: none; }
-@keyframes go2-glow { 50% { opacity: 1; } }
+/* v0.3.76: una capa vacia e invisible que cubre el boton y 10 px mas. No pinta nada: esta para el compositor. Las bombillas que rodeaban el boton
+   hacian ese papel sin saberlo: al quitarlas, la entrada del Campamento pasaba de perder 5-7 fotogramas a 9-10; con esta capa pierde 4-5
+   (medido en tres tandas con la base al lado). Si algun dia deja de ayudar, se quita y no se nota nada */
+.gx-camp > .go2-wrap::before { content: ""; position: absolute; inset: -10px; z-index: 2; pointer-events: none; opacity: .001; will-change: opacity; }
 .gx-camp .go2 { flex: 1 1 auto; justify-content: flex-start; gap: 12px; min-width: 0; max-width: none; min-height: 0; margin: 0; padding: 8px 18px 10px 12px; white-space: normal; }
 .gx-camp .go2-chip { flex: none; display: grid; place-items: center; width: 56px; height: 56px; }
 .gx-camp .go2-chip > .ic, .gx-camp .go2-chip .ic.blindchip { width: 56px; height: 56px; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .4)); }
@@ -923,13 +924,11 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .dealer.camp.seat .dl-bubble { transform-origin: calc(100% - var(--hf) / 2) 100%;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - var(--hf) / 2 + 10px) calc(100% - 12px), calc(100% - var(--hf) / 2) 100%, calc(100% - var(--hf) / 2 - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
 
-/* reducir movimiento: sin cartas que botan ni se reparten, bombillas quietas, sin luz que late ni ficha que gira */
+/* reducir movimiento: sin cartas que botan ni se reparten, bombillas quietas y sin ficha que gira */
 html.reduce-motion .gx-camp .offer.pc { animation: none; }
-html.reduce-motion .gx-camp > .go2-wrap::before, html.reduce-motion .gx-camp .go2-chip .bc-base,
+html.reduce-motion .gx-camp .go2-chip .bc-base,
 html.reduce-motion .gx-camp .tr-relic.swap-pick .tr-face, html.reduce-motion .gx-camp .sup.fresh .sp-on, html.reduce-motion .gx-camp .sup.spinning .sp-ic .ic, html.reduce-motion .gx-camp .nr-more i { animation: none; }
 html.reduce-motion .gx-camp .nr-body { scroll-behavior: auto; }
-html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
-html.reduce-motion .gx-camp .offer.pc, html.reduce-motion .gx-camp > .go2-wrap::before { animation: none; }
 
 /* movil y ventanas muy pequenas (aqui la pantalla se desplaza): todo en una columna */
 @media (max-width: 899px), (max-height: 519px) {
@@ -976,17 +975,17 @@ html.reduce-motion #sala.boss canvas.g { animation: none; opacity: .08; }
 html.sala-soft #sala::before { background: radial-gradient(ellipse 75% 70% at 50% 47%, transparent 58%, rgba(2, 9, 8, .22) 100%); }
 html.sala-on .vignette { display: none; }                                  /* la vineta de siempre vuelve con las luces apagadas */
 
-/* bombillas de la casa en las piezas clave (A.bulbs, js/art.js): el cartel de la ronda, el boton principal del veredicto y del Campamento y la Barra */
+/* bombillas de la casa en las piezas clave (A.bulbs, js/art.js): el cartel de la ronda y la Barra. v0.3.76: los botones principales del veredicto
+   y del Campamento ya no las llevan */
 .gx-vd-head { position: relative; align-self: center; }
 .gx-vd-head > .mqw { --mqi: -18px; --mqb: 7px; --mqr: -10px; } .gx-vd-head > .mqw > * { left: -16px; width: calc(100% + 26px); }   /* a la derecha no pasa del medianil: no roza el ticket */
 .gx-vd.lose .gx-vd-head .mq-lit, .gx-vd.lose .gx-vd-head .mq-all, .gx-vd.lose .gx-vd-head .mq-aura { display: none; }                         /* ronda fallida: el cartel se queda apagado */
+/* .gx-mq: un boton con su marco de bombillas. El veredicto ya no lo usa (v0.3.76); lo sigue usando el Duelo de fichas (js/duelo.js) */
 .gx-mq { position: relative; display: inline-flex; }
 .gx-mq > .mqw { --mqi: -8px; --mqb: 6px; --mqr: -3px; }
-.gx-camp > .go2-wrap > .mqw { --mqi: -7px; --mqb: 6px; --mqr: -2px; } .gx-camp > .go2-wrap > .mqw > .mqb { z-index: 2; }
-.gx-camp > .go2-wrap:has(.go2.skip) .mq-lit, .gx-camp > .go2-wrap:has(.go2.skip) .mq-all, .gx-camp > .go2-wrap:has(.go2.skip) .mq-aura { display: none; }
 .gx-camp .tb-sup { position: relative; }
 .gx-camp .tb-sup > .mqw { --mqi: -6px; --mqb: 5px; --mqr: -1px; } .gx-camp .tb-sup > .mqw > .mqb { z-index: 2; }
-@media (max-width: 899px), (max-height: 519px) { .gx-camp .tb-sup > .mqw, .gx-camp > .go2-wrap > .mqw { display: none; } }
+@media (max-width: 899px), (max-height: 519px) { .gx-camp .tb-sup > .mqw { display: none; } }
 
 /* (v0.3.72: la escena del jefe y sus bombillas rojas se fueron con las ilustraciones de la intro; ahora late la sala y su lampara es roja: css/escena.css) */
 

@@ -1498,7 +1498,7 @@ window.AIQ = window.AIQ || {};
         <div class="tray-col tr-tools"><h4 class="gx-eyb">${A.T("Herramientas", "Tools")}</h4><div class="tray-row">${tools}</div></div>
         <div class="tray-col tr-prov"><h4 class="gx-eyb">${A.T("Provisiones", "Provisions")} <b>${run.lives}/${run.maxLives}</b></h4><div class="tray-row hearts">${hearts()}</div></div></footer>
       ${nextHtml()}
-      <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
+      <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button></div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
     if (tkY > 0) { const tk = document.querySelector("#dlg .tb-next"); A.adv.ticketFit(tk); tk.querySelector(".nr-body").scrollTo({ top: tkY, behavior: "instant" }); }
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
     A.casa.acto(run.act); musica(false);                               // en el Campamento, la cancion del acto que viene (si sonaba la del jefe, se va)
