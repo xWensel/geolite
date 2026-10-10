@@ -1,0 +1,114 @@
+/* Geolite - DUELO DE FICHAS (prototipo local, js/duelo.js). Sobrio y con las piezas del juego: el marcador de papel y su ticket (css/marcador.css),
+   el aviso de la columna izquierda y, en las pantallas, el Naipe de gala (css/gala.css). Medidas pares y sombras duras; nada difuminado. */
+
+/* ---------------------------------------------------------------- marcador: las dos pilas dentro del marcador de siempre (#ledger).
+   Va ya al ancho del ticket, asi que al desplegarse el revelado no cambia de tamano */
+body.duelo-on #ledgerSh { width: var(--mc-w); }
+body.duelo-on #ledger > :not(#duBoard):not(.mc-mq) { display: none; }
+.du-board { display: grid; gap: 8px; }
+.du-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 16px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); }
+.du-mult { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1; letter-spacing: 0; color: #fff; background: var(--red); padding: 0 8px 2px; box-shadow: 0 0 0 2px var(--ink), 0 4px 0 0 var(--ink); }   /* entre las dos pilas: es lo que esta en juego */
+.du-mult.pop { animation: du-pop .5s steps(4, end); }
+@keyframes du-pop { 0% { transform: scale(1.7); } 100% { transform: none; } }
+.du-stacks { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.du-st { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; justify-items: start; min-width: 0; }
+.du-st.rv { justify-items: end; text-align: right; }
+.du-who { font-family: var(--mono); font-size: 16px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.du-n { display: flex; align-items: center; gap: 6px; }
+.du-n .odo { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 900; font-size: 38px; letter-spacing: -.02em; height: 1em; color: var(--ink); }
+.du-chip { width: 28px; height: 28px; flex: none; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .4)); }
+/* la lucecita: pensando (parpadea), fijada (laton) y, en el revelado, lo que gana o pierde */
+.du-lamp { display: inline-flex; align-items: center; gap: 8px; min-height: 20px; font-style: normal; font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--ink-2); white-space: nowrap; }
+.du-st.rv .du-lamp { flex-direction: row-reverse; }
+.du-lamp::before { content: ""; flex: none; width: 10px; height: 10px; background: var(--paper-3); box-shadow: 0 0 0 2px var(--ink); }
+.du-lamp[data-s=""]::before, .du-lamp:not([data-s])::before { display: none; }
+.du-lamp[data-s="think"]::before { animation: du-blink 1s steps(2, end) infinite; }
+@keyframes du-blink { 50% { background: var(--ink-2); } }
+.du-lamp[data-s="lock"] { color: var(--ink); } .du-lamp[data-s="lock"]::before { background: var(--brass); }
+.du-lamp[data-s="win"] { color: #1d6b42; } .du-lamp[data-s="win"]::before { background: var(--green); }
+.du-lamp[data-s="lose"] { color: var(--red-deep); } .du-lamp[data-s="lose"]::before { background: var(--red); }
+/* el reparto de las fichas de la mesa: azul las tuyas, rojo las del rival, con la marca del centro */
+.du-bal { position: relative; height: 12px; background: var(--red); box-shadow: inset 0 0 0 2px var(--ink); }
+.du-bal i { position: absolute; inset: 0 auto 0 0; width: 50%; background: var(--teal); box-shadow: inset 0 0 0 2px var(--ink); transition: width .9s cubic-bezier(.2, .8, .2, 1); }
+.du-bal::after { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); }
+html.reduce-motion .du-bal i { transition: none; } html.reduce-motion .du-mult.pop, html.reduce-motion .du-lamp::before { animation: none; }
+
+/* ---------------------------------------------------------------- aviso bajo la placa: el rival ya ha fijado / tu respuesta esta fijada */
+.du-flash { width: 100%; display: grid; gap: 2px; padding: 8px 14px 9px; color: var(--ink); background: var(--brass); box-shadow: inset 0 0 0 3px var(--ink), 0 6px 0 -2px rgba(0, 0, 0, .35); pointer-events: none; animation: du-in .28s steps(4, end) both; }
+.du-flash.me { background: var(--paper); }
+.du-flash b { font-family: var(--mono); font-weight: 700; font-size: 16px; letter-spacing: .05em; text-transform: uppercase; }
+.du-flash span { font-family: var(--sans); font-size: 22px; line-height: 1; }
+@keyframes du-in { from { transform: translateX(-110%); } }
+html.reduce-motion .du-flash { animation: none; }
+
+/* ---------------------------------------------------------------- ticket del revelado (sale del marcador, como el de siempre) */
+.du-tk .tk-title { color: var(--ink); } .du-tk.du-w .tk-title { color: #1d6b42; } .du-tk.du-l .tk-title { color: var(--red); }
+.du-vs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 12px; }
+.du-col { display: grid; justify-items: center; gap: 2px; min-width: 0; }
+.du-col > span, .du-x { font-family: var(--mono); font-size: 16px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); font-style: normal; }
+.du-col .odo { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 900; font-size: 46px; letter-spacing: -.02em; height: 1em; color: var(--ink); }
+.du-col > i { font-style: normal; font-family: var(--sans); font-size: 18px; line-height: 1.1; color: var(--ink-2); white-space: nowrap; }
+.du-tk.du-w .tk-total .odo { color: #1d6b42; } .du-tk.du-l .tk-total .odo { color: var(--red-deep); }
+.du-tk .btn-ink { position: relative; overflow: hidden; }
+.du-auto { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255, 255, 255, .8); transform-origin: 0 50%; animation: du-drain var(--du-s, 8s) linear both; pointer-events: none; }
+@keyframes du-drain { to { transform: scaleX(0); } }
+:is(#ledgerSh, .mc-ghost).mc-c1 .du-vs { margin-top: 8px; } :is(#ledgerSh, .mc-ghost).mc-c1 .du-col .odo { font-size: 38px; }
+:is(#ledgerSh, .mc-ghost).mc-c2 .du-vs { margin-top: 6px; } :is(#ledgerSh, .mc-ghost).mc-c2 .du-col .odo { font-size: 32px; }
+/* las fichas que pasan de una pila a la otra */
+.du-fly { position: absolute; z-index: 60; width: 24px; height: 24px; pointer-events: none; }
+.du-fly .ic { display: block; width: 24px; height: 24px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .4)); }
+
+/* ---------------------------------------------------------------- final: titular y pilas | ticket con el resumen ronda a ronda (sobre el veredicto del Naipe de gala) */
+#dlg.verdict > .du-end .gx-vd-mid { grid-column: 5 / 13; }
+.du-fin { display: grid; gap: 8px; margin-top: 8px; max-width: 380px; }
+.du-fin .ic.sm { width: 24px; height: 24px; vertical-align: -5px; margin-right: 8px; image-rendering: pixelated; }
+.du-fin .gx-lead-row.big { font-size: 26px; } .du-fin .gx-lead-row.big b { font-size: 40px; line-height: 1; } .du-fin .odo { height: 1em; }
+.du-tab { display: grid; gap: 4px; }
+.du-row { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) 58px 58px 72px 72px; column-gap: 10px; align-items: baseline; font-size: 20px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.du-row > * { text-align: right; white-space: nowrap; font-weight: 400; }
+.du-row .n, .du-row .p { text-align: left; } .du-row .p { overflow: hidden; text-overflow: ellipsis; }
+.du-row .x, .du-row .s, .du-row .n { color: var(--gx-ink-2); }
+.du-row.w b { color: #1d6b42; } .du-row.l b { color: #c0392b; }
+.du-row.hd { padding-bottom: 4px; margin-bottom: 2px; border-bottom: 2px solid var(--gx-line); font-family: var(--mono); font-size: 16px; letter-spacing: .02em; text-transform: uppercase; color: var(--gx-ink-2); }
+.du-row.hd b { color: var(--gx-ink-2); }
+
+/* ---------------------------------------------------------------- elegir mesa: las tres mesas sobre el fieltro (1-7) y la ficha de papel de la elegida (8-12) */
+.du-screen { z-index: 1; }
+.du-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
+.du-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 24px; min-width: 0; }
+.du-head #hubBack .ic { width: 22px; height: 22px; }
+.du-head .gx-eyb { justify-self: end; text-align: right; }
+.du-left { grid-column: 1 / 8; grid-row: 2; min-width: 0; min-height: 0; }
+.du-right { grid-column: 8 / 13; grid-row: 2; min-width: 0; min-height: 0; }
+.du-mesas { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 16px; }
+.du-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-content: center; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
+.du-mesa { position: relative; display: grid; justify-items: center; align-content: center; gap: 12px; min-height: 304px; margin: 0; padding: 24px 12px; border: 0; cursor: pointer; text-align: center;
+  font-family: var(--sans); color: var(--gx-ink); clip-path: var(--gx-notch); background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); transition: transform .12s steps(2, end), filter .12s; }
+.du-mesa:hover, .du-mesa.pad-hov { transform: translateY(-4px); filter: brightness(1.05); }
+.du-mesa.sel { transform: translateY(-8px); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 6px var(--gx-gold), inset 0 0 0 8px var(--gx-o); }
+.du-mesa:focus { outline: none; }
+.du-mesa:focus-visible::after, html[data-input="pad"] .du-mesa:focus::after { content: ""; position: absolute; inset: 10px; box-shadow: inset 0 0 0 2px var(--gx-ink); animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.du-mesa b { font-weight: 400; font-size: 34px; line-height: 1; }
+.du-mesa i { font-style: normal; font-size: 20px; line-height: 1.1; color: var(--gx-ink-2); }
+.du-mic .ic { display: block; width: 96px; height: 96px; image-rendering: pixelated; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .4)); }
+.du-ficha { height: 100%; display: grid; grid-template-rows: auto auto auto auto auto auto minmax(0, 1fr); gap: 12px; align-content: start; }
+.du-ft { display: flex; align-items: center; gap: 12px; }
+.du-ft .gx-t-m { color: var(--gx-ink); text-shadow: none; }
+.du-fic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; }
+.du-rules { display: grid; gap: 6px; }
+.du-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.du-step { display: flex; align-items: center; gap: 10px; }
+.du-step b { min-width: 2ch; font-weight: 400; font-size: 30px; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+.du-step b.sd { font-family: var(--mono); font-size: 16px; letter-spacing: .08em; }
+.du-step .gx-btn { min-width: 48px; padding-left: 14px; padding-right: 14px; }
+.du-go { align-self: end; justify-content: flex-end; }
+@media (max-width: 899px), (max-height: 519px) {
+  .du-screen { overflow-y: auto; }
+  .du-grid { position: static; padding: 14px 16px 20px; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 12px; }
+  .du-left, .du-right { grid-column: 1; grid-row: auto; } .du-mesa { min-height: 150px; } .du-ficha { height: auto; }
+  #dlg.verdict > .du-end .gx-vd-mid { grid-column: 1; } .du-row { grid-template-columns: 26px 40px minmax(0, 1fr) 50px 50px 64px; font-size: 18px; } .du-row .s { display: none; }
+}
+
+/* ---------------------------------------------------------------- entrada oculta (solo con atlasiq.duelo = "1"): junto al cuaderno de las notas del parche */
+.du-entry { position: absolute; left: 14px; bottom: 64px; z-index: 3; filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78)); }
+.du-entry .ic { width: 28px; height: 28px; image-rendering: pixelated; }

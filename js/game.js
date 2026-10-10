@@ -135,6 +135,7 @@
   function levelTitle(L) { return A.tx(L.name) + (L.diff ? " · " + A.t("diff." + L.diff) : ""); }
   /* cash (solo al revelar): las cifras ruedan al compas del TOTAL del ticket y la barra arranca a la vez (el resto del cobro, en js/marcador.js) */
   function updateHud(cash) {
+    if (S.duel) return A.duelo.hud();                                      // Duelo de fichas (prototipo, js/duelo.js): su marcador son las dos pilas
     const L = lv(), inf = S.run && A.adv.isInfinite && A.adv.isInfinite();
     $("lvlText").textContent = S.run ? A.adv.hudTitle() : A.t("lvl", { n: S.level + 1, m: S.camp.levels.length, name: levelTitle(L) });
     if (S.run) A.adv.refresh();
@@ -495,6 +496,7 @@
 
   /* ------------------------------------------------------------ menu principal */
   function showTitle(screen) {
+    if (S.duel) A.duelo.leave();                                           // Duelo de fichas: recoge su marcador
     document.body.classList.add("title-on"); S.phase = "title"; S.camp = null; S.run = null; S.tool = null; S.ranked = null; A.adv.hideBars(); map.setStyle(A.mesas.style()); map.setPick(false); map.clearMarks(); map.setHome({ lat: 0, lon: 0, zoom: 1 });
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("veil").classList.add("hidden"); $("intro").classList.add("hidden");
     chrome(false); $("factText").textContent = ""; A.music.mode(0); A.music.moment("home"); map.startDrift(); openSettings(false);
@@ -795,6 +797,7 @@
   }
 
   function reveal(guess, left) {
+    if (S.duel) return A.duelo.answer(guess, left);                        // Duelo de fichas: tu respuesta se fija y el revelado espera al rival (js/duelo.js)
     S.phase = "reveal"; map.setPick(false); S.tense = false; A.music.mode(1); if (S.run) A.chal.reveal();
     const o = q(), L = lv(), af = A.waters && A.waters.of(o), isC = o.t === "c" || !!af, prevStreak = S.streak || 0;      // af: masa de agua (mar, oceano, lago): se acierta dentro, como un pais, y se dibuja su territorio
     let km = null, ans = null, span = [], labelAt = null;
@@ -1075,14 +1078,16 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   }
   function veilMenu(onResume) {
     const adv = !!S.run || A.adv.active(), prac = adv && A.adv.isPractice(), daily = adv && A.adv.isDaily() && !prac, v = $("veil"), run = adv ? A.adv.run : null;
+    const du = S.duel ? A.duelo.pause() : null;                            // Duelo de fichas: su nombre, su nota y sus dos pilas
     /* intento del Reto diario: se guarda en su propia ranura y vuelve a su pantalla; no se "empieza otra", se termina aqui (cuenta lo que lleva) */
     const newLbl = daily ? A.pick6("Terminar el intento aquí|End the attempt here|Terminer l'essai ici|Encerrar a tentativa aqui|Versuch hier beenden|Chiudi qui il tentativo||在此结束本次尝试|여기서 시도 끝내기|ここで挑戦を終える|Закончить попытку здесь|Zakończ podejście tutaj") : A.T("Empezar una partida nueva", "Start a new run");
-    const note = prac ? A.pick6("La práctica no se guarda: si sales, se acaba. Puedes repetirla cuando quieras desde el Reto diario.|Practice isn't saved: if you leave, it ends. You can replay it any time from the Daily challenge.|L'entraînement n'est pas enregistré : si tu pars, il s'arrête. Tu peux le rejouer quand tu veux depuis le Défi quotidien.|O treino não é salvo: se você sair, ele acaba. Pode repeti-lo quando quiser no Desafio diário.|Das Training wird nicht gespeichert: Wenn du gehst, ist es vorbei. Du kannst es jederzeit über die Tagesherausforderung wiederholen.|L'allenamento non si salva: se esci, finisce. Puoi rifarlo quando vuoi dalla Sfida giornaliera.||练习不会保存：退出即结束。你可以随时在每日挑战中再来一次。|연습은 저장되지 않아요. 나가면 끝나요. 일일 도전에서 언제든 다시 할 수 있어요.|練習は保存されない。出ると終わる。デイリーチャレンジからいつでもやり直せる。|Тренировка не сохраняется: выйдешь — она закончится. Повторить можно в любой момент из Испытания дня.|Trening się nie zapisuje: jeśli wyjdziesz, się kończy. Możesz go powtórzyć kiedy chcesz z Wyzwania dnia.")
+    const note = du ? du.note : prac ? A.pick6("La práctica no se guarda: si sales, se acaba. Puedes repetirla cuando quieras desde el Reto diario.|Practice isn't saved: if you leave, it ends. You can replay it any time from the Daily challenge.|L'entraînement n'est pas enregistré : si tu pars, il s'arrête. Tu peux le rejouer quand tu veux depuis le Défi quotidien.|O treino não é salvo: se você sair, ele acaba. Pode repeti-lo quando quiser no Desafio diário.|Das Training wird nicht gespeichert: Wenn du gehst, ist es vorbei. Du kannst es jederzeit über die Tagesherausforderung wiederholen.|L'allenamento non si salva: se esci, finisce. Puoi rifarlo quando vuoi dalla Sfida giornaliera.||练习不会保存：退出即结束。你可以随时在每日挑战中再来一次。|연습은 저장되지 않아요. 나가면 끝나요. 일일 도전에서 언제든 다시 할 수 있어요.|練習は保存されない。出ると終わる。デイリーチャレンジからいつでもやり直せる。|Тренировка не сохраняется: выйдешь — она закончится. Повторить можно в любой момент из Испытания дня.|Trening się nie zapisuje: jeśli wyjdziesz, się kończy. Możesz go powtórzyć kiedy chcesz z Wyzwania dnia.")
       : daily ? A.pick6("Tu intento se guarda solo. Puedes salir y continuarlo desde el Reto diario.|Your attempt saves itself. You can leave and pick it up again from the Daily challenge.|Ton essai s'enregistre tout seul. Tu peux partir et le reprendre depuis le Défi quotidien.|Sua tentativa é salva automaticamente. Você pode sair e continuá-la no Desafio diário.|Dein Versuch wird automatisch gespeichert. Du kannst gehen und ihn in der Tagesherausforderung fortsetzen.|Il tuo tentativo si salva da solo. Puoi uscire e riprenderlo dalla Sfida giornaliera.||你的尝试会自动保存。可以离开，稍后在每日挑战中继续。|시도는 자동으로 저장돼요. 나갔다가 일일 도전에서 이어서 할 수 있어요.|挑戦は自動で保存されます。抜けても、デイリーチャレンジから続きができます。|Попытка сохраняется сама. Можно выйти и продолжить её в Испытании дня.|Podejście zapisuje się samo. Możesz wyjść i dokończyć je w Wyzwaniu dnia.")
       : adv ? A.T("Tu expedición se guarda sola. Puedes salir y continuarla desde Aventura.", "Your expedition saves itself. You can leave and pick it up again from Adventure.") : A.t("pause.p");
-    const mode = prac ? A.pick6("Práctica|Practice|Entraînement|Treino|Training|Allenamento||练习|연습|練習|Тренировка|Trening") : daily ? A.T("Reto diario", "Daily challenge") : adv ? A.T("Aventura", "Adventure") : A.t("mode.classic");
+    const mode = du ? du.mode : prac ? A.pick6("Práctica|Practice|Entraînement|Treino|Training|Allenamento||练习|연습|練習|Тренировка|Trening") : daily ? A.T("Reto diario", "Daily challenge") : adv ? A.T("Aventura", "Adventure") : A.t("mode.classic");
     const inRound = (S.phase === "asking" || S.phase === "reveal") && S.camp, L = inRound ? lv() : null;
     const rows = [];
+    if (du) rows.push(du.rows); else
     if (L) rows.push(`<div class="gx-lead-row"><span>${A.t("score.level")}</span><s></s><b>${A.fmt(S.levelScore)}${L.advance > 1 ? ` <small>/ ${A.fmt(L.advance)}</small>` : ""}</b></div>`
       + (L.advance > 1 ? `<div class="gx-bar"><i style="width:${Math.min(100, (100 * S.levelScore) / L.advance)}%"></i></div>` : ""));
     if (run && !prac) rows.push(`<div class="gx-lead-row"><span>${A.pick6("Doblones|Doubloons|Doublons|Dobrões|Dublonen|Dobloni||金币|도블론|ダブロン|Дублоны|Dublony")}</span><s></s><b>${A.fmt(run.coins || 0)}</b></div>`);
@@ -1256,7 +1261,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (S.intro) playStudio(showGate); else showGate();
   }
 
-  A.core = { S, map, world, dialog, closeDialog, verdict, prog, save, toggleFs, openSettings, openLangPop, runMenu, refreshPrompt: () => { setPrompt(); }, updateHud, newRun, prepareRun, startLevel: startLevel_, showHub: showTitle, odoSet, jpShake, syncSettings };   // jpShake: el temblor de los jackpots (tambien la legendaria del cofre, js/adventure.js)
+  A.core = { S, map, world, dialog, closeDialog, verdict, prog, save, toggleFs, openSettings, openLangPop, runMenu, refreshPrompt: () => { setPrompt(); }, updateHud, newRun, prepareRun, startLevel: startLevel_, showHub: showTitle, odoSet, jpShake, syncSettings, nextQuestion, chrome, factLine, revealObs };   // jpShake: el temblor de los jackpots (tambien la legendaria del cofre, js/adventure.js)
 
   applyLang(); syncSettings();
   const start = () => {
