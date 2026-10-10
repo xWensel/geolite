@@ -111,6 +111,7 @@
 .table.mesa.lg-seq .offer.pc { animation-play-state: paused; }
 .table.mesa.lg-seq .tb-note, .table.mesa.lg-seq .go2 { opacity: 0; transition: opacity .3s; }   /* ya has elegido: fuera "Elige UNA..." y "Continuar sin elegir" */
 .table.mesa .offer.pc.lg-hero { z-index: 20; }
+.table.mesa.lg-seq .offer.pc.lg-hero, .table.mesa.lg-seq .offer.pc.lg-hero:hover { z-index: 20; }   /* el puntero sigue sobre la carta recien elegida: su :hover de la tienda (gala.css, z-index 4) no puede bajarla por detras de la sala oscura (z-index 8) */
 .lg-dim { position: absolute; inset: 0; z-index: 8; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at var(--lx, 50%) var(--ly, 46%), rgba(48, 30, 6, .5), rgba(4, 7, 5, .9) 72%); }
 .lg-fx { position: absolute; inset: 0; z-index: 21; pointer-events: none; overflow: hidden; }   /* los doblones saltan por delante de la carta (si no, la carta tapaba casi todos) */
 .lg-coin { position: absolute; width: 36px; height: 36px; margin: -18px 0 0 -18px; background: url("../assets/icons/coin.webp") center / contain no-repeat; }
