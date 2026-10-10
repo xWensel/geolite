@@ -37,7 +37,7 @@ const endOf = (R, b) => { const s = +R["s:" + b] || 0; if (!s) return 0; const e
 
 function view(R, code, role, now, n, k) {
   const other = role === "h" ? "g" : "h", ago = r => Math.max(0, now - (+R[r + "s"] || 0));
-  const seat = r => (R[r] ? { n: R[r + "n"] || "", on: ago(r) < 9000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
+  const seat = r => (R[r] ? { n: R[r + "n"] || "", on: ago(r) < 10000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
   const o = { ok: true, now, code, role, st: R.st || "lobby", n: +R.n || 0, t: R.t || "media", h: seat("h"), g: seat("g") };
   if (o.st === "play") o.seed = R.seed;
   if (n != null && n === o.n) { const q = R["q:" + n]; if (q) { o.quit = q[0] === role ? "me" : "his"; if (q[1] === "!") o.gone = true; } }
@@ -109,8 +109,8 @@ module.exports = async (req, res) => {
     }
     /* se acabo la ronda (plazo y margen): quien no haya respondido se queda sin respuesta */
     if (live && R["s:" + bk] && now > endOf(R, bk) + GRACE) for (const r of ["h", "g"]) if (R["a:" + bk + ":" + r] == null) cmds.push(["HSETNX", key(code), "a:" + bk + ":" + r, "0"]);
-    if (a !== "bye" && now - (+R[role + "s"] || 0) > 2500) cmds.push(["HSET", key(code), role + "s", now]);   // sigo aqui (el otro me ve conectado)
-    if (cmds.length) R = await write(code, cmds);
+    if (cmds.length) R = await write(code, a === "bye" ? cmds : [...cmds, ["HSET", key(code), role + "s", now]]);
+    else if (now - (+R[role + "s"] || 0) > 4000) { await run([["HSET", key(code), role + "s", now], ["EXPIRE", key(code), TTL]]); R[role + "s"] = String(now); }   // sigo aqui (el otro me ve conectado); sin releer la sala
     if (!R.h) return send({ ok: false, why: "none" });
     send(view(R, code, role, now, n, k));
   } catch (e) { res.status(502).json({ ok: false, why: "kv" }); }
