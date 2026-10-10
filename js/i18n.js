@@ -115,6 +115,7 @@ window.AIQ = window.AIQ || {};
     "vol.master": ["General", "Master", "Général", "Geral", "Gesamt", "Generale", "General", "总音量", "전체", "マスター", "Общая", "Ogólna"],
     "vol.music": ["Música", "Music", "Musique", "Música", "Musik", "Musica", "Música", "音乐", "음악", "音楽", "Музыка", "Muzyka"],
     "vol.sfx": ["Efectos", "Effects", "Effets", "Efeitos", "Effekte", "Effetti", "Efectos", "音效", "효과음", "効果音", "Эффекты", "Efekty"],
+    "vol.amb": ["Ambiente", "Ambience", "Ambiance", "Ambiente", "Atmosphäre", "Ambiente", "Ambiente", "环境音", "환경음", "環境音", "Окружение", "Otoczenie"],
     "gfx.auto": ["Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "Auto", "自动", "자동", "オート", "Авто", "Auto"],
     "gfx.high": ["Alto", "High", "Élevé", "Alto", "Hoch", "Alta", "Alto", "高", "높음", "高", "Высокая", "Wysoka"],
     "gfx.saver": ["Ahorro", "Saver", "Économie", "Economia", "Sparen", "Risparmio", "Ahorro", "省电", "절약", "省電力", "Экономия", "Oszczędna"],

@@ -20,7 +20,7 @@
       A.lang = d.lang && A.STR[d.lang] ? d.lang : A.detectLang();
       S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = ({ video: "screen", pad: "ctl" })[d.setTab] || (["general", "screen", "sound", "ctl", "a11y", "data"].includes(d.setTab) ? d.setTab : "general");   // v0.3.2: Imagen pasa a Pantalla y Mando a Controles S.skin = "casino";
       A.audio.sfxOn = d.sfx !== false; A.audio.musicOn = d.music !== false;
-      if (d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
+      if (d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx", "amb"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
       S.prog = d.prog && typeof d.prog === "object" && !Array.isArray(d.prog) ? d.prog : {}; S.mode = d.mode || "classic"; S.campId = d.campId || null; S.quality = d.quality || "auto";
       S.panSens = d.panSens || 100; S.zoomSens = d.zoomSens || 100; S.units = d.units === "mi" ? "mi" : "km";
       S.contrast = !!d.contrast; S.colorblind = ["protan", "deutan", "tritan"].includes(d.colorblind) ? d.colorblind : "off"; S.qSize = ["l", "xl"].includes(d.qSize) ? d.qSize : "n";
@@ -300,7 +300,7 @@
   }
   function toggleSwitch(k) {
     if (k === "music") { A.audio.setMusic(!A.audio.musicOn); if (A.audio.musicOn) A.audio.unlock(); else if (A.jukebox) A.jukebox.hide(); A.sfx.flip(A.audio.musicOn); }
-    else { const willOn = !A.audio.sfxOn; if (!willOn) A.sfx.flip(false); A.audio.sfxOn = willOn; if (willOn) A.sfx.flip(true); }
+    else { const willOn = !A.audio.sfxOn; if (!willOn) A.sfx.flip(false); A.audio.sfxOn = willOn; if (willOn) A.sfx.flip(true); A.amb.refresh(); }   // sin efectos tampoco hay ambiente
     save(); syncSettings();
   }
   /* ---- idioma: cuadricula en ajustes, popover en el menu y chips en la entrada ---- */
@@ -1020,7 +1020,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     p.best = Math.max(p.best, shown); p.bestIq = Math.max(p.bestIq, iq); save();
     if (pass && S.level === S.camp.levels.length - 1) return endScreen(true, iq);
     if (pass) {
-      A.sfx.stamp(); setTimeout(A.sfx.win, 380);
+      A.sfx.stamp(); setTimeout(A.sfx.win, 380); setTimeout(() => A.amb.applause(0.8), 900);   // nivel superado: la sala aplaude
       verdict({
         kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
         stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1),
@@ -1036,7 +1036,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }
-    if (win) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
+    if (win) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); setTimeout(() => A.amb.applause(1), 900); setTimeout(() => A.amb.applause(0.8), 2300); }
     const btns = [];
     if (!win) btns.push({ id: "retryBtn", cls: "btn-ink", label: A.t("btn.retry"), arrow: true, primary: true, onclick: () => { S.runMax = S.runMax0 || 0; startLevel_(S.level); } });   // el intento fallido deja de contar en el maximo: el IQ y la medalla miden la pasada buena (S.clean sigue en false: Sin red exige no fallar ninguno)
     btns.push({ id: "newBtn", cls: win ? "btn-ink" : "btn-line", label: A.t("btn.newGame"), primary: win, onclick: () => { S.startLevel = 0; showTitle(); } });

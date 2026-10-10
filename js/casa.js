@@ -204,7 +204,13 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
   }
 
   /* v0.3.55: el sitio en el que estas tambien se oye. En el Campamento la musica llega amortiguada, como desde la sala (js/audio.js) */
-  function lugar(k) { if (A.music && A.music.room) A.music.room(k === "camp"); }
+  function lugar(k) {
+    if (A.music && A.music.room) A.music.room(k === "camp");
+    /* v0.3.56: y la sala suena distinto en cada sitio (A.amb, js/audio.js): el salon, la sala que baja la voz mientras piensas, la caja,
+       la barra del Campamento y el silencio mientras el jefe esta en la mesa. La Enciclopedia es un aparato: queda fuera de la sala */
+    const jefe = k === "intro jefe" || ((k === "play" || k === "intro") && A.music && A.music.where === "boss");
+    if (A.amb) A.amb.place(k === "codex" ? "fuera" : jefe ? "jefe" : k === "camp" ? "barra" : k === "vd" ? "caja" : k === "play" || k === "intro" ? "calma" : "salon");
+  }
 
   /* ================================================================ las bombillas: un solo reloj */
   /* A.bulbs nace ya en fase (--mq-s, sacado del reloj del documento). Si se pinto oculta y empezo tarde, aqui se pone en hora para siempre:
@@ -264,7 +270,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(n);
     const top = Math.max(n, o.fuerza | 0), g = gapMs(), LZ = [0.3, 0.46, 0.74];
     /* con cada golpe la lampara sube un punto mas; tras el tercero, el barrido de luz */
-    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); if (A.marcador && A.marcador.destello) A.marcador.destello(130); if (k === 3) setTimeout(barrido, 60); };
+    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); if (A.marcador && A.marcador.destello) A.marcador.destello(130); if (k === 3) { setTimeout(barrido, 60); if (A.amb) setTimeout(() => A.amb.applause(1), 320); } };   // el premio gordo: barrido de luz y aplausos
     for (let k = 1; k <= n; k++) { if (k === 1) golpe(1); else setTimeout(() => golpe(k), (k - 1) * g); }
   }
   /* perdida: la apuesta que se va. Sonido de perder (o el que traiga quien llama), un temblor seco y la lampara que baja */
