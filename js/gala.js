@@ -34,13 +34,13 @@ window.AIQ = window.AIQ || {};
     };
   }
   /* precalentamiento (v0.3.35): la primera vez que la GPU pinta estas superficies y su entrada compila sus shaders (~80 ms, un tiron en la
-     primera pausa de una instalacion nueva; luego quedan en la cache del disco). Se pinta una muestra animada, casi invisible, una vez,
+     primera pausa de una instalacion nueva; luego quedan en la cache del disco). Se pinta una muestra animada, una vez, a opacidad .004 (1/255: la GPU la dibuja, el ojo no; a .02 se veian fantasmas de las pantallas del juego sobre la puerta),
      cuando la pantalla esta quieta (la puerta de entrada) */
   let warmed = false;
   function warm() {
     if (warmed || reduced()) return; warmed = true;
     const w = document.createElement("div"); w.setAttribute("aria-hidden", "true"); w.inert = true;
-    w.style.cssText = "position:fixed;inset:0;opacity:.02;pointer-events:none;z-index:2147483000";
+    w.style.cssText = "position:fixed;inset:0;opacity:.004;pointer-events:none;z-index:2147483000";
     const abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnÑñOoPpQqRrSsTtUuVvWwXxYyZz ÁáÉéÍíÓóÚúÜü¿?¡!·/.,:%+-0123456789";   // los glifos tambien se rasterizan la primera vez, a cada tamano
     w.innerHTML = `<div class="gx-pause gx-layer gx-in"><div class="gx-veil"></div><div class="gx-spot"></div><div class="gx-stage"><div class="gx-grid"><div class="gx-sh gx-railw gx-from-left"><section class="gx-pnl gx-rail">
       <div class="gx-head"><span class="gx-eyb">${abc}</span><h2 class="gx-t-l">${abc}</h2><p class="gx-lead">${abc}</p></div><div class="gx-paper"><div class="gx-lead-row"><span>${abc}</span><s></s><b>0 <small>/ 1</small></b></div><div class="gx-bar"><i style="width:40%"></i></div></div>
@@ -58,7 +58,7 @@ window.AIQ = window.AIQ || {};
     const sh = document.getElementById("setSh");
     if (sh && sh.classList.contains("hidden")) setTimeout(() => {
       if (!sh.classList.contains("hidden")) return;
-      sh.style.opacity = ".02"; sh.style.pointerEvents = "none"; sh.classList.remove("hidden");
+      sh.style.opacity = ".004"; sh.style.pointerEvents = "none"; sh.classList.remove("hidden");
       setTimeout(() => { sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); }, 900);
     }, 800);
   }
