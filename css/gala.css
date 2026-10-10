@@ -988,16 +988,7 @@ html.sala-on .vignette { display: none; }                                  /* la
 .gx-camp .tb-sup > .mqw { --mqi: -6px; --mqb: 5px; --mqr: -1px; } .gx-camp .tb-sup > .mqw > .mqb { z-index: 2; }
 @media (max-width: 899px), (max-height: 519px) { .gx-camp .tb-sup > .mqw, .gx-camp > .go2-wrap > .mqw { display: none; } }
 
-/* la escena del jefe: sus bombillas laten en rojo al compas de la sala. Van DETRAS del crupier (estan en la ilustracion): lo que el tapa se ve
-   como un halo ancho a su alrededor, nunca encima de el */
-#intro .intro-in.is-boss .mqb .mqb-on { stroke: #ff5a4e; }
-#intro .intro-in.is-boss .mqb .mqb-on.mqb-c { stroke: #ffe2d8; }
-#intro .intro-in.is-boss .mqb .mqb-on.mqb-h1 { stroke: rgba(255, 74, 62, .6); stroke-width: calc(var(--mqb) * 2.6); }
-#intro .intro-in.is-boss .mqb .mqb-on.mqb-h2 { stroke: rgba(255, 52, 40, .3); stroke-width: calc(var(--mqb) * 6); }
-#intro .intro-in.is-boss .mqb .mqb-on.mqb-h3, #intro .intro-in.is-boss .mqb .mqb-on.mqb-h4, #intro .intro-in.is-boss .mq-aura { display: none; }   /* sus dos bandas rojas de siempre, sin las doradas nuevas */
-#intro .intro-in.is-boss .mqb.mq-lit { animation: mq-latido 1s steps(1, end) infinite; animation-delay: var(--mq-j, 0ms); }
-@keyframes mq-latido { 0% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 36% { opacity: 0; } 100% { opacity: 0; } }
-html.reduce-motion #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; }
+/* (v0.3.72: la escena del jefe y sus bombillas rojas se fueron con las ilustraciones de la intro; ahora late la sala y su lampara es roja: css/escena.css) */
 
 /* ---------------------------------------------------------------- BOTONES DE ESQUINA (v0.3.67): el engranaje de los menus, Apagar y Notas del parche.
    Eran cuadrados oscuros redondeados; ahora son el boton de fieltro con anillo de laton del sistema (como .gx-btn.gho), con su esquina de pixel.

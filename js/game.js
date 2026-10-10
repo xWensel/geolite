@@ -648,6 +648,7 @@
     /* la intro no se cierra sola mientras el crupier habla: espera a su ultima frase y a su segundo de mas, aunque vaya con retraso
        (antes un tope de 11 s le cortaba a media frase). Un clic o una tecla la saltan igual. */
     if (S.run && A.adv.introReady) { const need = A.adv.introReady(L, () => { talking = false; if (timeUp) end(); }) || 0; talking = need > 0; ms = Math.max(ms, 1200 + need); }
+    if (A.escena) A.escena.monta({ act: (S.run && A.adv.run && A.adv.run.act) || 0 });   // v0.3.72: el escenario de la ronda, con el crupier ya en su sitio (su lampara se cuelga sobre el)
     const end = () => { if (done || tok !== S.introTok) return; done = true; el.onclick = null; if (S.run && A.adv.introEnd) A.adv.introEnd(); el.classList.add("out"); setTimeout(() => { if (tok !== S.introTok) return; el.classList.add("hidden"); cb(); }, 430); };
     S.skipIntro = end; el.onclick = end; setTimeout(() => { timeUp = true; if (!talking) end(); }, ms); setTimeout(end, ms + 15000);   // red de seguridad: nunca se queda colgada
   }

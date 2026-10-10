@@ -625,11 +625,11 @@ window.AIQ = window.AIQ || {};
   A.adv.duelHud = () => { const d = run && run.duel && !run.inf ? run.duel : null; if (!d) return null; const bank = d.s.slice(0, d.n || 0).reduce((a, b) => a + b, 0); return { bank, pct: Math.min(100, 100 * bank / Math.max(1, d.T)) }; };
   A.adv.introHtml = Lv => {
     if (run.inf) {
-      return `<div class="intro-in adv"><div class="intro-left"><div class="intro-num blind">${A.blind("small", "s_compass")}</div><div class="intro-body">
+      return `<div class="intro-in adv" data-topic="mixed"><div class="intro-left"><div class="intro-num blind">${A.blind("small", "s_compass")}</div><div class="intro-body">
         <span class="tag">${A.tx(actInfo(run.act).n)} · ${A.T("Modo infinito", "Infinite mode")}</span><h2>${A.tx(Lv.topicName)}</h2>
         <p class="intro-sub">${A.T("De todo tipo: mapas, países, monumentos, historia… Cada pregunta, menos tiempo.", "Every kind of question: maps, countries, landmarks, history… Less time on every question.")}</p>
         <p class="adv-goal">${A.fmt1(Lv.seconds)} s</p></div></div>
-        <div class="intro-art">${A.pic("topic_mixed")}<div class="intro-dealer" id="introDealer"></div></div></div>`;
+        <div class="intro-art"><i class="intro-hueco"></i><div class="intro-dealer" id="introDealer"></div></div></div>`;
     }
     const info = actInfo(run.act), def = rdef(), list = run.chal || [];
     /* territorio nuevo: una ronda mas alla de tu mejor ronda de siempre (desde la 2.a expedicion, una vez por expedicion): sello "Nuevo" y el crupier lo dice */
@@ -637,13 +637,13 @@ window.AIQ = window.AIQ || {};
     const NEW = A.pick6("Nuevo|New|Nouveau|Novo|Neu|Nuovo||新领域|새 영역|未踏|Впервые|Nowe");
     const chips = list.map(c => { if (c.hid && !c.up) return `<div class="adv-debuff k-rule"><span>${ic(BOSS_IC)}</span><div><b>${A.tx(A.chal.tl("ui_faceDown"))}</b><i>${A.tx(A.chal.tl(run.chalKey === "collector" ? "ui_faceDownColl" : "ui_faceDownWheel"))}</i></div></div>`; const d = A.CHAL[c.id]; return `<div class="adv-debuff k-${d.kind}"><span>${ic(d.ico)}</span><div><b>${A.tx(d.n)}${c.isNew ? ` <span class="ch-new">${A.tx(A.chal.NEW_TAG)}</span>` : ""} <i class="ch-lv">${"●".repeat(c.lv || 1)}</i></b><i>${A.tx(d.d)}</i>${c.id === "wind" && run.wind ? `<em>${A.T("Viento hacia", "Wind toward")} ${dirName(run.wind.brg)} · ${A.fmtDist(run.wind.km)}</em>` : ""}</div></div>`; }).join("");
     const kind = Lv.boss ? "boss" : run.round === 0 ? "small" : "big", inner = Lv.boss ? BOSS_IC : run.round === 0 ? "s_pin" : "s_compass";
-    return `<div class="intro-in adv${Lv.boss ? " is-boss" : ""}"><div class="intro-left"><div class="intro-num blind">${A.blind(kind, inner)}</div><div class="intro-body">
+    return `<div class="intro-in adv${Lv.boss ? " is-boss" : ""}" data-topic="${def.topic}"><div class="intro-left"><div class="intro-num blind">${A.blind(kind, inner)}</div><div class="intro-body">
       <span class="tag">${A.tx(info.n)} · ${actSub(info)}</span><h2>${A.tx(Lv.topicName)}</h2>
       ${Lv.boss && run.chalName ? `<p class="boss-combo">${A.tx(run.chalName)}</p>` : ""}${Lv.boss && run.chalDesc && run.chalDesc.es ? `<p class="boss-d">${A.tx(run.chalDesc)}</p>` : ""}
       <p class="intro-sub">${Lv.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + (run.round + 1)} · ${A.tx(info.f)}${run._virgin ? ` <b class="intro-new">${NEW}</b>` : ""}</p>
       <p class="adv-goal">${A.T("Objetivo", "Target")} ${!run.inf && baseTarget() > Lv.advance ? `<s class="of-was">${A.fmt(baseTarget())}</s> ` : ""}<b>${A.fmt(Lv.advance)}</b> · ${run.qn} ${A.T("lugares", "places")}${run.qn > 5 ? " · " + A.tx(BEST5) : ""} · ${Lv.seconds} s</p>
       ${list.length ? `<h4 class="adv-chal-h">${A.T("El crupier toca la mesa", "The dealer touches the table")}</h4>` : ""}${chips}</div></div>
-      <div class="intro-art">${A.pic("topic_" + def.topic)}<div class="intro-dealer" id="introDealer"></div></div></div>`;
+      <div class="intro-art"><i class="intro-hueco"></i><div class="intro-dealer" id="introDealer"></div></div></div>`;   // v0.3.72: sin ilustracion; el crupier, solo bajo la lampara del tema (js/escena.js)
   };
   /* el crupier habla en la intro: lo que toca segun el momento de la expedicion (primera, revancha, reanudada, reintento, nuevo acto, jefe...)
      + una frase por reto (y protesta si ya llevas el perk que lo anula). El guion vive en js/dealer.js (D.introSeq). */

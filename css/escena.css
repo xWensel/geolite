@@ -20,3 +20,66 @@ html.sala-soft .hh-aire { opacity: .6; }
 .hh-aire > i { animation: esc-clac .5s steps(1, end) var(--d, .3s) forwards; }
 .hh-aire.ya > i { animation: esc-in .3s ease forwards; }
 html.reduce-motion .hh-aire > i, html.soft-flash .hh-aire > i { animation: esc-in .3s ease forwards; }   /* Movimiento suave o minimo: se encienden sin parpadeo */
+
+/* ===================================================================================================== EL ESCENARIO DE LA INTRO (v0.3.72)
+   Tres capas pegadas al fondo de #intro, por debajo del cartel y del crupier:
+     .esc-telon   el telon de terciopelo, su galon y el suelo (debajo de la penumbra de la sala: solo se ve bien donde le da una lampara)
+     #sala        la penumbra (js/casa.js), con el cono de cada lampara recortado
+     .esc-aire    lo que flota delante del telon: el haz de cada lampara, su resplandor y la lampara misma
+   --p: px de pantalla por pixel de arte (entero; lo pone js/escena.js) */
+.esc-telon, .esc-aire { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+html:not(.sala-on) .esc-telon, html:not(.sala-on) .esc-aire { display: none; }
+.esc-telon { --p: 3px; --fh: calc(34 * var(--p)); opacity: 0; animation: esc-in .4s ease .22s forwards; background-color: #0b0705; }
+/* el pano: pliegues de terciopelo. Cada pliegue sube del fondo (t4) al lomo (t0) y vuelve, a bandas duras de pocos tonos y poco contraste (es tela,
+   no metal); tres pliegues de ancho distinto para que no se lea como un patron. Arriba lo oscurece la barra; abajo, la sombra del dobladillo */
+.esc-telon > .pano { position: absolute; left: 0; right: 0; top: 0; bottom: var(--fh);
+  background-image:
+    linear-gradient(180deg, rgba(0, 0, 0, .3) 0, rgba(0, 0, 0, 0) 14%, rgba(0, 0, 0, 0) 82%, rgba(0, 0, 0, .34) 100%),
+    repeating-linear-gradient(90deg,
+      var(--t4) 0 calc(3 * var(--p)), var(--t3) 0 calc(8 * var(--p)), var(--t2) 0 calc(17 * var(--p)), var(--t1) 0 calc(27 * var(--p)), var(--t0) 0 calc(31 * var(--p)), var(--t1) 0 calc(37 * var(--p)), var(--t2) 0 calc(44 * var(--p)), var(--t3) 0 calc(49 * var(--p)),
+      var(--t4) 0 calc(52 * var(--p)), var(--t3) 0 calc(55 * var(--p)), var(--t2) 0 calc(61 * var(--p)), var(--t1) 0 calc(68 * var(--p)), var(--t0) 0 calc(70 * var(--p)), var(--t1) 0 calc(74 * var(--p)), var(--t2) 0 calc(79 * var(--p)), var(--t3) 0 calc(83 * var(--p)),
+      var(--t4) 0 calc(86 * var(--p)), var(--t3) 0 calc(91 * var(--p)), var(--t2) 0 calc(101 * var(--p)), var(--t1) 0 calc(114 * var(--p)), var(--t0) 0 calc(119 * var(--p)), var(--t1) 0 calc(127 * var(--p)), var(--t2) 0 calc(136 * var(--p)), var(--t3) 0 calc(143 * var(--p)), var(--t4) 0 calc(146 * var(--p))); }
+/* el dobladillo: un galon de oro con fleco, pegado al suelo */
+.esc-telon > .pano::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(7 * var(--p));
+  background:
+    linear-gradient(180deg, #1d0a3d 0 var(--p), #f8cf5a 0 calc(2 * var(--p)), #e09a1c 0 calc(3 * var(--p)), #1d0a3d 0 calc(4 * var(--p)), transparent 0),
+    repeating-linear-gradient(90deg, #e09a1c 0 var(--p), #b8642e 0 calc(2 * var(--p)), #5a2414 0 calc(3 * var(--p))); }
+/* el suelo del escenario: tablas oscuras, mas claras junto al telon (donde cae la luz) y el canto al frente */
+.esc-telon > .suelo { position: absolute; left: 0; right: 0; bottom: 0; height: var(--fh);
+  background:
+    linear-gradient(180deg, #1d0a3d 0 var(--p), #7a4a26 0 calc(2 * var(--p)), #5c351c 0 calc(9 * var(--p)), #3c2114 0 calc(10 * var(--p)), #50301a 0 calc(19 * var(--p)), #33190f 0 calc(20 * var(--p)), #452716 0 calc(30 * var(--p)), #1d0a3d 0 calc(31 * var(--p)), #2a140c 0); }
+#intro.out .esc-telon, #intro.out .esc-aire { animation: esc-out .22s ease forwards; }
+@keyframes esc-out { from { opacity: 1; } to { opacity: 0; } }
+/* t0 = lomo del pliegue (lo que mas luz coge) ... t4 = fondo del pliegue */
+.esc-telon.t-a1 { --t0: #288058; --t1: #1f6c4a; --t2: #185a3e; --t3: #124732; --t4: #0c3626; }       /* acto I: esmeralda */
+.esc-telon.t-a2 { --t0: #3f50b4; --t1: #323f98; --t2: #28327e; --t3: #1e2664; --t4: #151a4a; }       /* acto II: azul de medianoche */
+.esc-telon.t-a3 { --t0: #7c4cb4; --t1: #663c98; --t2: #52307e; --t3: #402464; --t4: #2e184a; }       /* acto III: violeta */
+.esc-telon.t-jefe { --t0: #b23036; --t1: #96262c; --t2: #7c1e24; --t3: #62161c; --t4: #480f14; }     /* el jefe: granate */
+/* la barra de laton de la que cuelgan las lamparas, arriba del todo */
+.esc-telon::before { content: ""; position: absolute; z-index: 1; left: 0; right: 0; top: 0; height: calc(4 * var(--p));
+  background: linear-gradient(180deg, #5a2414 0 calc(1 * var(--p)), #f8cf5a 0 calc(2 * var(--p)), #e09a1c 0 calc(3 * var(--p)), #1d0a3d 0); }
+
+/* la lampara: sprite a pixel entero, con su cable hasta la barra. Apagada hasta que le toca */
+.esc-lamp { position: absolute; image-rendering: pixelated; background: center / 100% 100% no-repeat; animation: esc-lamp-on .5s steps(1, end) var(--d, .5s) both; }
+@keyframes esc-lamp-on { 0% { filter: brightness(.42) saturate(.6); } 12% { filter: none; } 22% { filter: brightness(.5) saturate(.7); } 38% { filter: none; } 50% { filter: brightness(.75); } 62%, 100% { filter: none; } }
+.esc-cable { position: absolute; width: calc(2 * var(--p)); background: linear-gradient(90deg, #f8cf5a 50%, #e09a1c 50%); box-shadow: calc(-1 * var(--p)) 0 0 #1d0a3d, var(--p) 0 0 #1d0a3d; }
+/* las luces: el haz (un cono en el aire, mas denso cerca de la lampara; suave: es aire, no un objeto), el resplandor de la boca y el charco
+   sobre lo que alumbra. Se encienden una lampara detras de otra, con su chasquido */
+.esc-luces { position: absolute; inset: 0; } html.sala-soft .esc-luces { opacity: .6; }
+.esc-luces > i { position: absolute; opacity: 0; animation: esc-clac .5s steps(1, end) var(--d, .5s) forwards; }
+.esc-haz { background: conic-gradient(from calc(180deg - var(--a)) at 50% var(--oy, 0px), transparent 0deg, rgba(var(--lc), calc(var(--li) * .5)) calc(var(--a) * .5), rgba(var(--lc), var(--li)) var(--a), rgba(var(--lc), calc(var(--li) * .5)) calc(var(--a) * 1.5), transparent calc(var(--a) * 2));
+  -webkit-mask-image: linear-gradient(180deg, #000 0, rgba(0, 0, 0, .6) 40%, rgba(0, 0, 0, .22) 78%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, rgba(0, 0, 0, .6) 40%, rgba(0, 0, 0, .22) 78%, transparent 100%); }
+.esc-halo { border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--lc), .5), rgba(var(--lc), .18) 45%, rgba(var(--lc), 0) 100%); }
+.esc-charco { border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--lc), .2), rgba(var(--lc), .07) 55%, rgba(var(--lc), 0) 100%); }
+html.reduce-motion .esc-luces > i, html.soft-flash .esc-luces > i { animation: esc-in .3s ease var(--d, .5s) forwards; } html.reduce-motion .esc-lamp, html.soft-flash .esc-lamp { animation: none; }   /* Movimiento suave o minimo: sin parpadeo */
+.esc-aire.ya .esc-luces > i { animation: none; opacity: 1; } .esc-aire.ya .esc-lamp { animation: none; }   /* recolocadas (cambio de tamano de la ventana): ya estaban encendidas */
+@media (max-width: 899px), (max-height: 519px) { .esc-aire { display: none; } }
+/* el jefe en el escenario: la sala sigue latiendo en rojo, pero sin tapar el telon ni los focos */
+#intro .esc-telon ~ #sala.boss canvas.g { animation-name: sala-latido-esc; }
+@keyframes sala-latido-esc { 0% { opacity: .2; } 14% { opacity: 0; } 24% { opacity: .13; } 36% { opacity: 0; } 100% { opacity: 0; } }
+
+/* la intro, sin ilustracion: el crupier solo, centrado en su columna, bajo la lampara del tema. El hueco conserva la proporcion del cartel que
+   habia para que el retrato no se mueva cuando el bocadillo crece hacia arriba; se centra sin transform porque su caja es la que se mide */
+#intro .intro-art { transform: none; }
+.intro-hueco { display: block; width: 100%; aspect-ratio: 16 / 10; }
+#intro .intro-dealer { left: 0; right: 0; bottom: -30%; transform: none; display: grid; justify-items: center; }

@@ -86,6 +86,8 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     /* donde este el crupier (intro, veredicto), una lampara detras de el: se ve como halo, nunca le pasa por encima */
     const crupier = root => add(pool(vis(root.querySelector(".dealer")), 1.3, 1.25, 2.2));
     if (intro && !intro.classList.contains("hidden") && !intro.classList.contains("out")) {                          // intro de ronda o de jefe: una lampara sobre el cartel entero
+      const E = A.escena && A.escena.luz && A.escena.luz();
+      if (E) { E.pools.forEach(add); crupier(intro); return { key: "intro", pools: P, cones: E.cones, esc: 1, boss: !!intro.querySelector(".intro-in.is-boss") }; }   // v0.3.72: el escenario (js/escena.js): un cono por lampara
       add(pool(union(all(".intro-in > *", intro)), 1.4, 1.7, 1.9)); crupier(intro);
       return { key: "intro", pools: P, boss: !!intro.querySelector(".intro-in.is-boss") };
     }
@@ -143,7 +145,8 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (R.off) { if (map) map.calm = 0; sig = "off"; seq++; root.classList.remove("boss"); hora(); return; }
     const N = NOCHE[act] || NOCHE[0], boss = !!R.boss;
     const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, keep: R.keep || null, cones: R.cones || null };
-    const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), p.keep, (R.cones || []).map(q => q.map(v => Math.round(v / 6)))]);
+    if (R.esc) { p.amb = boss ? 0.12 : 0.16; p.dark = L.dark * 0.92; p.bands = 9; p.rgb = boss ? [18, 2, 5] : [3, 6, 8]; }   // el escenario: a oscuras salvo donde da una lampara; la sombra, casi negra (el color lo pone el telon)
+    const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.esc ? 1 : 0, R.pools.map(q => q.map(v => Math.round(v / 6))), p.keep, (R.cones || []).map(q => q.map(v => Math.round(v / 6)))]);
     if (map) map.calm = R.calm ? 1 : 0;                                 // en partida el remolino del oceano baja la voz (js/map.js)
     hora();
     if (s === sig) return; sig = s;
@@ -183,16 +186,18 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const app = $("app"), h = TAPETE(k) ? (root.isConnected ? null : app) : k.startsWith("intro") ? $("intro") : k === "play" ? app : $("layer");
     if (!h) return;
     if (h === app) { if (root.parentNode !== app) { const ref = app.querySelector(":scope > .vignette"); app.insertBefore(root, ref ? ref.nextSibling : app.firstChild); } }
-    else if (h.firstChild !== root) h.insertBefore(root, h.firstChild);
+    else { const tel = h.querySelector(":scope > .esc-telon"), ref = tel ? tel.nextSibling : h.firstChild; if (ref !== root) h.insertBefore(root, ref); }   // el telon de la intro (js/escena.js), por debajo de la luz
   }
-  function mira(changed) {
+  let prisa = 0;                                                        // v0.3.72: el escenario de la intro pide su luz pronto: tiene que estar cuando se encienden las lamparas
+  function mira(changed, pronto) {
     if (!root) return;
+    if (pronto) prisa = performance.now() + 500;
     /* en que pantalla estas: lo usan la luz y el sonido (con las Luces de la sala apagadas, el sonido sigue sabiendo donde estas) */
     if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind && mode !== "off") neutral(); lastKind = k; root.classList.toggle("mute", TAPETE(k)); llegaElJefe(k === "intro jefe"); lugar(k); } }
     coloca(lastKind);                                                   // tambien si la pantalla se ha vuelto a pintar entera y se ha llevado la capa por delante
     clearTimeout(tm); clearTimeout(tm2);
     if (mode === "off") { tm = setTimeout(hora, 650); return; }       // sin luces de sala, las bombillas siguen en hora
-    tm = setTimeout(() => idle(look), 650);                            // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
+    tm = setTimeout(() => idle(look), performance.now() < prisa ? 140 : 650);   // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
     tm2 = setTimeout(() => idle(look), 1600);
   }
 

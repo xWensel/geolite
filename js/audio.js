@@ -697,6 +697,9 @@ window.AIQ = window.AIQ || {};
     }),
     impacto: go(t => { thump(t, { vol: 0.34, f0: 70, f1: 30, dur: 0.45 }); noise(t, 0.09, { lp: 1400, vol: 0.1 }); }),
     barrido: go(t => { noise(t, 0.7, { type: "bandpass", lp: 900, sweepTo: 5200, q: 1.1, vol: 0.05 }); [84, 88, 91, 96].forEach((m, i) => bell(m, t + 0.1 + i * 0.09, { vol: 0.05, dur: 0.9, rev: 0.6 })); }),
+    /* v0.3.72: una lampara del escenario que se enciende: el chasquido seco del interruptor y, muy bajito, el cristal que canta (re y sol: la
+       firma de la casa). La segunda, un pelo mas aguda; nunca dos iguales */
+    lampara: go((t, i = 0) => { const r = Math.random; noise(t, 0.014, { hp: 3400 + 500 * i + 400 * r(), vol: 0.05 }); thump(t, { vol: 0.06, f0: 290 - 30 * i + 20 * r(), f1: 120, dur: 0.06 }); bell(i ? 91 : 86, t + 0.018, { vol: 0.016 + 0.005 * r(), dur: 0.7, rev: 0.35 }); }),
     latido: go(t => { thump(t, { vol: 0.3, f0: 72, f1: 38, dur: 0.16 }); thump(t + 0.24, { vol: 0.2, f0: 64, f1: 36, dur: 0.14 }); }),
     zumbido: (() => {
       let g = null, os = [];
