@@ -581,21 +581,36 @@ window.AIQ = window.AIQ || {};
       else el.classList.add("ch-mirror");
     }
     if (has("upside") && !fx.unmirrorText) el.classList.add("ch-upside");
-    if (riddle) { el.classList.add("ch-riddle"); if (text.length > 190) el.classList.add("ch-long"); fitRiddle(el); }
+    if (riddle) { el.classList.add("ch-riddle"); fitRiddle(el); }
     if (has("scroll") && !fx.noMarquee) { el.innerHTML = `<span class="ch-marq">${el.innerHTML}</span>`; el.classList.add("ch-scroll"); }
     const restore = (b, g) => { b.classList.remove("gap", "dot", "faint", "rune"); b.classList.add("fix"); b.textContent = g; };
     const hid = [...hidden, ...dots];
     if (hid.length && fx.missingRate > 0) hid.forEach((k, j) => later(() => { const b = el.querySelector(`.lt[data-n="${k}"]`); if (b) { restore(b, b.dataset.g); say("chip", 1 + j * 0.2); } }, 900 + (j * 1000) / fx.missingRate));
     const unfix = new Set([...(fx.unswapMs ? fixed : []), ...(fx.decodeMs ? runes : [])]);   // la Chuleta devuelve las cambiadas o mezcladas, no las runas (eso no lo dice su carta)
     if (unfix.size) later(() => { el.querySelectorAll(".lt").forEach(b => { const i = +b.dataset.n; if (unfix.has(i) && b.textContent !== orig[i] && !b.classList.contains("gap")) restore(b, orig[i]); }); say("chip", 2); }, Math.min(fx.unswapMs || 1e9, fx.decodeMs || 1e9));
-    if (riddle && fx.riddleMs) later(() => { el.classList.remove("ch-riddle"); el.textContent = A.tx(obj); el.classList.add("fixed"); say("chip", 2); }, fx.riddleMs);
+    if (riddle && fx.riddleMs) later(() => { el.classList.remove("ch-riddle"); ridWide(el, 0); el.textContent = A.tx(obj); el.classList.add("fixed"); say("chip", 2); }, fx.riddleMs);
     const mem = get("memory");
     if (mem) later(() => { el.classList.add(fx.keepName ? "ch-dim" : "ch-fade"); }, par(mem).ms);
   }
-  /* adivinanza: la pista se encoge hasta caber en la placa (antes una nota larga se salia por debajo del crupier), tambien a lo ancho */
+  /* adivinanza: la pista va SIEMPRE a un mismo tamano de letra legible (css/challenges.css) y nunca se encoge. Si es larga, lo que crece es la placa
+     a lo ancho, lo justo para que la pista no pase del 22 % del alto de la ventana (tope: el ancho de la placa del Clasico). Sale solo del texto y de la
+     ventana: da igual cuantas veces se pinte la pregunta. (Antes la letra bajaba de px en px desde el tamano del nombre, con una pasada por cada pintado:
+     segun la ventana acababa en 22-26 px con una placa de media pantalla o en 10 px que no se leian) */
+  const ridSh = el => (el && el.closest ? el.closest(".plate-sh") : null);
+  const ridWide = (el, w) => { const sh = ridSh(el); if (sh) sh.style.width = w ? w + "px" : ""; };
+  function fitRiddle(el, again) {
+    if (!el.classList.contains("ch-riddle")) return;
+    const sh = ridSh(el); if (!sh) return; sh.style.width = "";
+    const base = sh.offsetWidth;
+    if (!base) { if (!again) requestAnimationFrame(() => fitRiddle(el, true)); return; }                 // la placa aun no esta a la vista: se mide en el siguiente fotograma
+    const cs = getComputedStyle(el), padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const max = Math.max(base, Math.min(760, innerWidth * 0.56)), lim = Math.max(96, innerHeight * 0.22) - padY, rest = base - (el.clientWidth - padX);   // rest: lo que no es renglon (margenes de la placa y de la pista)
+    let w = base, h = el.offsetHeight - padY;
+    for (let n = 0; n < 5 && h > lim && w < max; n++) { w = Math.min(max, Math.ceil(rest + (w - rest) * Math.max(1.06, (h / lim) * 1.02))); sh.style.width = w + "px"; h = el.offsetHeight - padY; }
+  }
+  addEventListener("resize", () => { const el = $("askName"); if (el && el.classList.contains("ch-riddle")) fitRiddle(el); });
   const HZ = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff]/, HZ_CLOSE = /[、。，．！？：；）」』】〕〉》”’ー・…％ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ]/, HZ_OPEN = /[（「『【〔〈《“‘]/;
-  const fitRiddle = el => requestAnimationFrame(() => { if (!el.classList.contains("ch-riddle")) return; let f = parseFloat(getComputedStyle(el).fontSize) || 16, n = 0; const max = Math.max(96, innerHeight * 0.22); while ((el.scrollHeight > max || el.scrollWidth > el.clientWidth + 2) && f > 11 && n++ < 18) { f -= 1; el.style.fontSize = f + "px"; } });
-  function clearText() { for (const id of ["askName", "askSub"]) { const el = $(id); if (el) el.style.fontSize = ""; if (el) el.classList.remove("ch-shaky", "ch-mirror", "ch-upside", "ch-fade", "ch-dim", "ch-dance", "ch-crazy", "ch-riddle", "ch-long", "ch-scroll", "ch-nocountry", "fixed", "ch-board", "ch-pass", "ch-covered", "sf-pop"); } S.fb = S.fz = S.fw = S.fp = null; boardStop(); }
+  function clearText() { ridWide($("askName"), 0); for (const id of ["askName", "askSub"]) { const el = $(id); if (el) el.style.fontSize = ""; if (el) el.classList.remove("ch-shaky", "ch-mirror", "ch-upside", "ch-fade", "ch-dim", "ch-dance", "ch-crazy", "ch-riddle", "ch-scroll", "ch-nocountry", "fixed", "ch-board", "ch-pass", "ch-covered", "sf-pop"); } S.fb = S.fz = S.fw = S.fp = null; boardStop(); }
 
   /* ------------------------------------------------------------------ mapa: deformaciones */
   /* la colocacion de continentes (19-76 ms de calculo) sale igual en todas las preguntas de la ronda (misma semilla, mismo reto): se calcula una vez
@@ -1175,7 +1190,7 @@ window.AIQ = window.AIQ || {};
       if (map && map.clearDistort) { map.clearDistort(ms); if (map.setDecoys) map.setDecoys([]); }
       $("app").classList.remove("ch-negative");
       if (S.ov) { S.ov.classList.remove("on"); for (const c of ["blur", "myopia", "myopia2", "dark", "halo", "spot", "night"]) layer(c).classList.remove("on"); layer("flick").style.opacity = 0; layer("flash").style.opacity = 0; }
-      for (const id of ["askName", "askSub"]) { const el = $(id); if (el) { el.classList.remove("ch-fade", "ch-dim", "ch-riddle", "ch-nocountry"); el.querySelectorAll(".gap,.dot,.rune,.faint").forEach(b => { b.classList.remove("gap", "dot", "rune", "faint"); b.textContent = b.dataset.g || b.textContent; }); } }
+      for (const id of ["askName", "askSub"]) { const el = $(id); if (el) { el.classList.remove("ch-fade", "ch-dim", "ch-nocountry"); el.querySelectorAll(".gap,.dot,.rune,.faint").forEach(b => { b.classList.remove("gap", "dot", "rune", "faint"); b.textContent = b.dataset.g || b.textContent; }); } }
       const o = A.core && A.core.S.qs[A.core.S.qi], sb = $("askSub"); if (o && sb && o.sub && !o.clue && sb.textContent.includes("▮")) A.renderBlanks(sb, A.tx(o.sub));       // al responder, el pais vuelve
     },
     suspend() { S.suspended = true; this.reveal(500); const o = A.core && A.core.S.qs[A.core.S.qi]; if (o) decorate(o); if (A.pointer && A.pointer.mods) A.pointer.mods(); },

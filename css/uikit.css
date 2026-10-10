@@ -121,7 +121,6 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 .blk, .lt.blk { display: inline-block; width: .4em; height: .78em; margin: 0 .17em; vertical-align: -.04em; border-bottom: .14em solid currentColor; -webkit-text-fill-color: transparent; overflow: hidden; }
 .wg { display: inline-block; width: .55em; }
 .wd { display: inline-block; white-space: nowrap; }
-#askName.ch-long, #askSub.ch-long { font-size: .42em; }
 #askSub .blk { opacity: .85; }
 
 /* movil en horizontal (poca altura): HUD compacto para que el mapa mande */

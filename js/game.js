@@ -334,7 +334,7 @@
      se siguen leyendo en muchos sitios: salen de aqui */
   function applyMotion() {
     S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
-    document.documentElement.classList.toggle("reduce-motion", S.reduce); document.documentElement.classList.toggle("soft-flash", S.softFlash); map.fxOn = S.motion === "full";
+    document.documentElement.classList.toggle("reduce-motion", S.reduce); document.documentElement.classList.toggle("soft-flash", S.softFlash); map.fxOn = S.motion !== "min"; map.blurOn = S.motion === "full";   // Suave: sin desenfoque, pero el remolino del fondo sigue vivo (solo se para en Minimo)
   }
   function applySens() { A.mapSens.pan = S.panSens / 100; A.mapSens.zoom = S.zoomSens / 100; }
   /* Vibracion = no: html.no-shake quita en CSS todos los temblores de pantalla (rachas, rabieta y golpes del crupier; ver uikit.css),

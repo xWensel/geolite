@@ -144,7 +144,6 @@ html.no-shake #app.vivo-quake, html.reduce-motion #app.vivo-quake { animation: n
 #askName.ch-scroll , #askSub.ch-scroll, .split-alt .sa-n.ch-scroll { overflow: hidden; white-space: nowrap; }
 #askName .ch-marq , #askSub .ch-marq, .split-alt .sa-n .ch-marq { display: inline-block; padding-left: 100%; animation: ch-marq 3.4s linear infinite; }
 @keyframes ch-marq { to { transform: translateX(-100%); } }
-#askName.ch-riddle , #askSub.ch-riddle, .split-alt .sa-n.ch-riddle { font-size: .5em; line-height: 1.18; text-align: left; letter-spacing: 0; font-weight: 600; white-space: normal; }
 #askName.fixed , #askSub.fixed, .split-alt .sa-n.fixed { animation: lt-fix .5s cubic-bezier(.2, 1.6, .4, 1); }
 .ch-myopia { -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask: radial-gradient(circle at var(--px, 50%) var(--py, 50%), #000 0, #000 var(--mr, 120px), transparent calc(var(--mr, 120px) + 50px)); mask: radial-gradient(circle at var(--px, 50%) var(--py, 50%), #000 0, #000 var(--mr, 120px), transparent calc(var(--mr, 120px) + 50px)); }
 .ch-spot { background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), rgba(2, 6, 4, .98) 0, rgba(2, 6, 4, .98) var(--sr, 80px), rgba(2, 6, 4, 0) calc(var(--sr, 80px) + 28px)); }
@@ -295,7 +294,10 @@ html.no-shake #app.vivo-quake, html.reduce-motion #app.vivo-quake { animation: n
 #askName.ch-scroll::after, #askSub.ch-scroll::after, .split-alt .sa-n.ch-scroll::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 48%, #140d07 64%) 0 0 / 3px 3px; }
 #askName .ch-marq, #askSub .ch-marq, .split-alt .sa-n .ch-marq { color: #ffb347; -webkit-text-fill-color: #ffb347; text-shadow: 0 0 .16em rgba(255, 170, 60, .95), 0 0 .5em rgba(255, 120, 20, .5); }
 /* adivinanza: tarjeta de pista legible; sin pais: tachon de rotulador negro */
-#askName.ch-riddle, #askSub.ch-riddle, .split-alt .sa-n.ch-riddle { font-size: .56em; line-height: 1.22; text-align: left; letter-spacing: .005em; font-weight: 600; white-space: normal; padding: .3em .55em .35em .7em; border-left: 3px solid #f8b449; border-radius: 0 6px 6px 0; background: linear-gradient(90deg, rgba(248, 180, 73, .16), rgba(248, 180, 73, 0)); }
+/* Adivinanza: la pista va siempre a UN tamano legible (18 px con la ventana a 1280 de ancho, 24 px desde 1850; por el Tamano del texto de Accesibilidad)
+   y no se encoge: si es larga, crece la placa a lo ancho (js/challenges.js, fitRiddle). html body delante: gana a las reglas del nombre de la placa */
+html body #askName.ch-riddle { font-size: calc(clamp(18px, calc(1.3 * var(--vw)), 24px) * var(--ask-scale, 1)); }
+#askName.ch-riddle, #askSub.ch-riddle, .split-alt .sa-n.ch-riddle { line-height: 1.22; text-align: left; letter-spacing: .005em; font-weight: 600; white-space: normal; padding: .3em .55em .35em .7em; border-left: 3px solid #f8b449; border-radius: 0 6px 6px 0; background: linear-gradient(90deg, rgba(248, 180, 73, .16), rgba(248, 180, 73, 0)); }
 #askSub.ch-nocountry, .split-alt .sa-n.ch-nocountry { opacity: 1; letter-spacing: 0; }
 .ch-redact { display: inline-block; padding: 0 .25em; border-radius: 2px; color: transparent; -webkit-text-fill-color: transparent; background: #1c211d; transform: rotate(-.8deg); box-shadow: inset 0 -2px 0 rgba(255, 255, 255, .06), 0 1px 0 rgba(0, 0, 0, .2); }
 

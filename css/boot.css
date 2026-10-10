@@ -113,6 +113,6 @@
   clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
 .menu-tools { display: flex; gap: 8px; }
 .menu-gear.txt { width: auto; padding: 0 12px; font-family: var(--mono); font-weight: 500; font-size: 15.5px; letter-spacing: .05em; }
-html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }   /* una sola vuelta: las infinitas a .01ms parpadeaban; los retos que son animacion se rescatan en challenges.css */
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; }   /* una sola vuelta: las infinitas a .01ms parpadeaban; los retos que son animacion se rescatan en challenges.css. Las transiciones a 0 s y no a .01ms: con .01ms TODO cambio de estilo (letra, ancho...) tardaba un fotograma en aplicarse y lo que se mide nada mas escribir (la pista de la Adivinanza, A.squeeze) leia el valor viejo */
 @media (max-width: 480px) { .st-logo { width: calc(88 * var(--vw)); } }
 

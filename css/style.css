@@ -382,7 +382,7 @@ body.vd-on #hud, body.vd-on .dock-sh, body.vd-on .rail-sh, body.vd-on .note-sh {
 @media (max-width: 480px) {
   #dock button, #rail button { width: 38px; height: 38px; } #dock svg:not(.ic), #rail svg:not(.ic) { width: 20px; height: 20px; } #dock .ic, #rail .ic { width: 24px; height: 24px; }
 }
-@media (prefers-reduced-motion: reduce) { *:not(.rou, .rou *), *:not(.rou, .rou *)::before, *:not(.rou, .rou *)::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }   /* una sola vuelta: las animaciones infinitas a .01ms parpadeaban en cada fotograma (placa con prisa, pips, medalla) */
+@media (prefers-reduced-motion: reduce) { *:not(.rou, .rou *), *:not(.rou, .rou *)::before, *:not(.rou, .rou *)::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; } }   /* una sola vuelta: las animaciones infinitas a .01ms parpadeaban en cada fotograma (placa con prisa, pips, medalla). Transiciones a 0 s: ver css/boot.css */
 
 /* ---- ajustes sin scroll en escritorio (1280x720 en adelante, 12 idiomas): tarjetas compactas, idiomas 6x2, General en 3 columnas e Imagen en 2 ---- */
 @media (min-width: 901px) {

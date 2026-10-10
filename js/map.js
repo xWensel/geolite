@@ -616,7 +616,7 @@ void main(){
       this.marks = this._emptyMarks(); this.probes = []; this.pickEnabled = false; this.mouse = null;
       this.quality = "auto"; this.rs = 1; this.frameEma = 0; this.baseDt = 1e9; this.lastT = 0; this.calm = 0;
       this.rsCap = 1; this.cdpr = 1; this.idleMs = 40; this.lite = false; this.slow = 0; this.rafEma = 0; this._rawT = 0; this._win = []; this._degAt = 0; this._capInit = false; this._capQ = ""; this._lastDraw = 0;
-      this.fxOn = true; this.zv = 0; this.lastLz = null; this.pv = [0, 0]; this.zc = null; this.lastView = { cx: 0, cy: 0, s: 0 };
+      this.fxOn = true; this.blurOn = true; this.zv = 0; this.lastLz = null; this.pv = [0, 0]; this.zc = null; this.lastView = { cx: 0, cy: 0, s: 0 };
       this.dirty = this.fxDirty = true; this.pointers = new Map(); this.samples = [];
       this.dist = { spec: null, k: 0, kk: 0, kl: 0, ko: 0, from: 0, to: 0, lfrom: 0, lto: 0, ofrom: 0, oto: 0, t0: 0, ms: 0, ct: 6 }; this.lens = null; this.hideReticle = false;
       this.sk = A.MAPSTYLES.casino || A.MAPSTYLES.expedicion; this.ms = this._prepStyle(this.sk);
@@ -1490,7 +1490,7 @@ void main(){
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, scene.tex); gl.uniform1i(P.post.u.u_scene, 0);
       const zc = this.zc || [W / 2, H / 2];
       this._u(P.post, "u_res", this.cv.width, this.cv.height); this._u(P.post, "u_zc", zc[0] * dpr, (H - zc[1]) * dpr);
-      const fxk = this.fxOn === false ? 0 : 1;
+      const fxk = this.blurOn === false ? 0 : 1;
       this._u(P.post, "u_zv", this.zv * fxk); this._u(P.post, "u_pv", this.pv[0] * dpr * 0.06 * fxk, -this.pv[1] * dpr * 0.06 * fxk);
       this._u(P.post, "u_crt", st.crt ? 1 : 0); this._u(P.post, "u_lite", this.lite ? 1 : 0); this._u(P.post, "u_dpr", dpr);
       this._u(P.post, "u_vig", st.vignette * (this.vigK == null ? 1 : this.vigK)); this._u(P.post, "u_grain", st.postGrain); this._u(P.post, "u_tint", ...st.tint); this._u(P.post, "u_time", now / 1000);   // vigK: con la luz de la sala (js/casa.js) la vineta del mapa pesa la mitad
