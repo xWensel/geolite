@@ -1814,12 +1814,13 @@ window.AIQ = window.AIQ || {};
     const block = e => { e.preventDefault(); e.stopPropagation(); };                                // mientras gira, ni el teclado llega al Campamento de detras
     addEventListener("keydown", block, true);
     let closed = false, revealed = false, t0 = 0, last = S0, lastT = 0, lastTick = 0, cur = -1, fast = false, evI = 0;
-    const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, {}) : null;                               // v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js)
+    const hk = {}, ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, hk) : null;                       // v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js); hk.close = salir ya con el resultado (v0.3.69)
     const cleanup = () => { if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); rouOpen = false; tableOn(false); };
     const close = () => {
       if (closed) return; closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out");
       setTimeout(() => { ov.remove(); rouOpen = false; tableOn(false); done(); }, reduced ? 0 : 280);
     };
+    hk.close = close;
     const bail = e => { try { console.error("ruleta", e); } catch (x) { /* nada */ } if (closed) return; closed = true; cleanup(); ov.remove(); done(); };   // pase lo que pase, el Campamento nunca se queda bloqueado
     const hit = px => { if (!reduced) band.animate([{ transform: "translateY(0)" }, { transform: `translateY(${px}px)` }, { transform: `translateY(${-px * 0.375}px)` }, { transform: "translateY(0)" }], { duration: 300, easing: "ease-out" }); };   // el golpe del tope
     const tense = on => { ov.classList.toggle("crawl", on); ov.classList.toggle("spin", !on); };   // tension: latido y bombillas lentas
@@ -1830,7 +1831,7 @@ window.AIQ = window.AIQ || {};
       kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
     };
     const reveal = () => {
-      if (revealed) return; revealed = true; if (ctl) ctl.outcome(); place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
+      if (revealed) return; revealed = true; if (ctl) ctl.outcome(); else if (A.casCtl) A.casCtl.armEnd(ov, close); place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
       if (cur >= 0 && kids[cur]) kids[cur].classList.remove("cur"); kids[SF].classList.add("hit");
       A.sfx.rouStop(); if (A.haptic) A.haptic([zero ? 60 : 30]);
       hit(K.hit || 8);
@@ -1951,7 +1952,8 @@ window.AIQ = window.AIQ || {};
     const sh = { ov, reduced, closed: false, revealed: false, hooks: {} };
     /* v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js). sh.waiting(true) = el juego espera al jugador (sin botones y a x1); sh.outcome() = llega el resultado (a x1, sin botones); sh.hooks.skip = salto propio del juego */
     const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, sh.hooks) : null;
-    sh.waiting = on => { if (ctl) ctl.waiting(on); }; sh.outcome = () => { if (ctl) ctl.outcome(); };
+    sh.hooks.close = () => sh.close();                                                                // v0.3.69: con el resultado ya se puede salir (casino-ctl.js armEnd); sin dock (reducir movimiento) tambien
+    sh.waiting = on => { if (ctl) ctl.waiting(on); }; sh.outcome = () => { if (ctl) ctl.outcome(); else if (A.casCtl) A.casCtl.armEnd(ov, sh.hooks.close); };
     sh.close = () => { if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.classList.add("out"); setTimeout(() => { ov.remove(); rouOpen = false; tableOn(false); done(); }, reduced ? 0 : 280); };
     sh.bail = e => { try { console.error("casino", e); } catch (x) { /* nada */ } if (sh.closed) return; sh.closed = true; if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); ov.remove(); rouOpen = false; tableOn(false); done(); };
     sh.hold = ms => { sh.outcome(); setTimeout(() => { ov.addEventListener("click", sh.close); ov.classList.add("skippable"); }, 600); setTimeout(sh.close, ms); };   // sh.hold llega siempre al final: por si algun juego no avisa del resultado

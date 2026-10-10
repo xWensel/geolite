@@ -464,11 +464,11 @@ window.AIQ = window.AIQ || {};
       setBtn(); if (!reduced) setTimeout(() => { if (alive() && ST.phase !== "done") { ov.classList.add("skippable"); ov.addEventListener("click", sh.close, { once: true }); } }, 2600);   // despues de cobrar, tocar la pantalla se salta el resto del vuelo
     }
     function ceiling() {                                                                           // el techo x100: si no habias cobrado, se cobra solo a x100; el globo sale al espacio
-      sh.outcome(); F.t = tOf(CAP); F.m = CAP; if (!F.cashed) cash(CAP, "ceiling"); ST.phase = "burst"; pushHist(CAP);
+      sh.outcome(); rec.done = true; cx.persist(); F.t = tOf(CAP); F.m = CAP; if (!F.cashed) cash(CAP, "ceiling"); ST.phase = "burst"; pushHist(CAP);
       BC.mode = "abduct"; BC.vy = -30; BC.t = 0; BC.duck = 0; sfx.engine.stop(); wash("rgba(180,220,255,.7)"); kick(8, 500); sfx.cash(3); finishSoon();
     }
     function burst() {
-      sh.outcome(); F.t = F.tB; F.m = F.X; ST.phase = "burst"; const g = F.cashed; sfx.engine.stop(); BURST[F.kind].contact(g); pushHist(F.X);
+      sh.outcome(); rec.done = true; cx.persist(); F.t = F.tB; F.m = F.X; ST.phase = "burst"; const g = F.cashed; sfx.engine.stop(); BURST[F.kind].contact(g); pushHist(F.X);
       if (!g) { showPlate("lose", tr(U.pLose), fmtX(F.X), "−" + F.stake); react(F.X <= 1000 ? "gbBurst100" : F.X >= 10000 ? "gbBurstHigh" : "gbBurst"); }
       else { const dt = F.t - F.cashT; setTimeout(() => { if (!alive()) return; if (dt < .6) react("gbCloseCall"); else if (F.X >= 3 * F.cashM && F.X >= 5000) react("gbRegret"); else if (F.X <= 1.25 * F.cashM) react("gbRelief"); }, 1300); }
       setBtn(); finishSoon();

@@ -14,6 +14,7 @@ window.AIQ = window.AIQ || {};
   const FF = 14, TXT = {
     skip: A.L6("Saltar|Skip|Passer|Pular|Überspringen|Salta||跳过|건너뛰기|スキップ|Пропустить|Pomiń"),
     skipTip: A.L6("Saltar al resultado|Skip to the result|Passer au résultat|Pular para o resultado|Zum Ergebnis springen|Salta al risultato||跳到结果|결과로 건너뛰기|結果へスキップ|Перейти к результату|Przejdź do wyniku"),
+    go: A.L6("Continuar|Continue|Continuer|Continuar|Weiter|Continua||继续|계속|続ける|Продолжить|Dalej"),
     ffTip: A.L6("Mantén pulsado: ×2 de velocidad|Hold: double speed|Maintiens : vitesse ×2|Segure: velocidade ×2|Gedrückt halten: doppeltes Tempo|Tieni premuto: velocità ×2|Mantén presionado: ×2 de velocidad|按住：2 倍速|길게 누르면 2배속|長押しで2倍速|Удерживай: скорость ×2|Przytrzymaj: prędkość ×2"),
   };
 
@@ -63,12 +64,28 @@ window.AIQ = window.AIQ || {};
     if (!rateOn) { rateOn = true; N.raf(rateTick); }
   }
 
+  /* ------------------------------------------------------------------ salir en cuanto llega el resultado (v0.3.69)
+     Quien ya ha visto el juego mil veces no espera al crupier: desde el instante del resultado (y un respiro de 350 ms para no cerrar de un manotazo)
+     vale tocar/hacer clic en cualquier parte, Intro, Espacio, Esc, o el boton Continuar. Un clic solo cuenta si su pulsacion empezo DESPUES del resultado
+     (rascando con el boton hundido, soltarlo no cierra) y una tecla solo si no es repeticion de la que ya estaba pulsada. */
+  function armEnd(ov, close) {
+    if (!ov || ov._endArmed || typeof close !== "function") return; ov._endArmed = true;
+    let on = false, fresh = false; const t = N.st(() => { on = true; }, 350);
+    const dn = () => { if (on) fresh = true; }, ck = e => { if (on && fresh && (!e || e.button === 0 || e.button == null)) { fresh = false; go(); } };
+    const kd = e => { if (!on || e.repeat) return; if (e.key === "Enter" || e.key === " " || e.key === "Escape") { e.preventDefault(); go(); } };
+    const stop = () => { N.ct(t); ov.removeEventListener("pointerdown", dn, true); ov.removeEventListener("click", ck); removeEventListener("keydown", kd, true); };
+    const go = () => { stop(); close(); };
+    ov.addEventListener("pointerdown", dn, true); ov.addEventListener("click", ck); addEventListener("keydown", kd, true);
+    const wd2 = N.si(() => { if (!ov.isConnected) { N.ci(wd2); stop(); } }, 400);
+  }
+
   /* ------------------------------------------------------------------ el dibujo de los iconos: pixel art, un rect por fila */
   const TRI = [1, 2, 3, 4, 5, 4, 3, 2, 1];
   const rows = (cols) => TRI.map((w, i) => { let d = ""; cols.forEach(([x0, kind]) => { if (kind === "t") d += `M${x0} ${i}h${w}v1h-${w}z`; else d += `M${x0} ${i}h${kind}v1h-${kind}z`; }); return d; }).join("");
   const ICON = {
     ff: { w: 11, d: rows([[0, "t"], [6, "t"]]) },                                              // dos flechas
     skip: { w: 8, d: rows([[0, "t"], [6, 2]]) },                                             // flecha + barra
+    go: { w: 5, d: rows([[0, "t"]]) },                                                       // flecha sola: seguir
   };
   const svg = k => `<svg class="cc-ic" viewBox="0 0 ${ICON[k].w} 10" shape-rendering="crispEdges" aria-hidden="true"><path class="sh" transform="translate(0 1)" d="${ICON[k].d}"/><path class="fg" d="${ICON[k].d}"/></svg>`;
 
@@ -78,7 +95,8 @@ window.AIQ = window.AIQ || {};
     const tx = o => A.tx(o);
     const dock = document.createElement("div"); dock.className = "cc-dock"; dock.dataset.st = "play";
     dock.innerHTML = `<button class="cc-btn cc-ff" type="button" title="${tx(TXT.ffTip)}" aria-label="${tx(TXT.ffTip)}">${svg("ff")}<b>×2</b></button>`
-      + `<button class="cc-btn cc-skip" type="button" title="${tx(TXT.skipTip)}" aria-label="${tx(TXT.skipTip)}">${svg("skip")}<span>${tx(TXT.skip)}</span></button>`;
+      + `<button class="cc-btn cc-skip" type="button" title="${tx(TXT.skipTip)}" aria-label="${tx(TXT.skipTip)}">${svg("skip")}<span>${tx(TXT.skip)}</span></button>`
+      + `<button class="cc-btn cc-go" type="button" aria-label="${tx(TXT.go)}">${svg("go")}<span>${tx(TXT.go)}</span></button>`;
     ov.appendChild(dock); dock.addEventListener("animationend", e => { if (e.target === dock) dock.classList.add("shown"); });
     const ffB = dock.querySelector(".cc-ff"), skB = dock.querySelector(".cc-skip");
     const S = { ov, hooks: hooks || {}, st: "play", held: false, latch: false, ff: false, saved: null, dead: false };
@@ -111,6 +129,9 @@ window.AIQ = window.AIQ || {};
       try { if (S.hooks.skip) S.hooks.skip(); } catch (e) { try { console.error(e); } catch (x) { /* nada */ } }
       update();
     };
+    const goB = dock.querySelector(".cc-go");
+    goB.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); });
+    goB.addEventListener("click", e => { e.stopPropagation(); try { if (S.hooks.close) S.hooks.close(); } catch (x) { /* nada */ } });
     skB.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); });
     skB.addEventListener("click", e => { e.stopPropagation(); skip(); });
     dock.addEventListener("click", e => e.stopPropagation());                                  // nada de esto cierra la capa (tocar la pantalla la cierra al acabar)
@@ -127,11 +148,11 @@ window.AIQ = window.AIQ || {};
     const wd = N.si(() => { if (!ov.isConnected) destroy(); }, 250);                           // si otra pantalla se lleva la capa, no se queda el sonido callado ni el reloj acelerado
     const api = {
       waiting(on) { if (S.dead || S.st === "done") return; S.st = on ? "wait" : "play"; if (on) S.latch = false; update(); },   // el juego espera una accion del jugador: sin botones y a x1
-      outcome() { if (S.dead || S.st === "done") return; S.st = "done"; S.ff = S.held = S.latch = false; update(); },             // llega el resultado: se ve entero y a x1
+      outcome() { if (S.dead || S.st === "done") return; S.st = "done"; S.ff = S.held = S.latch = false; update(); armEnd(ov, () => S.hooks.close && S.hooks.close()); },   // llega el resultado: se ve entero y a x1, y se puede salir ya
       destroy, get fast() { return speed; },
     };
     return api;
   }
 
-  A.casCtl = { attach, install, FF, get speed() { return speed; } };
+  A.casCtl = { attach, install, armEnd, FF, get speed() { return speed; } };
 })(window.AIQ);

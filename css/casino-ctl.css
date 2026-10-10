@@ -3,7 +3,12 @@
 .cc-dock { --s: 4; --r: 3; --u: 3; --rp: calc(var(--r) * 1px); position: absolute; right: calc(var(--s) * 7px); bottom: calc(var(--s) * 6px); z-index: 100002; display: flex; align-items: flex-end; gap: calc(var(--s) * 3px);
   font-family: var(--mono); pointer-events: auto; animation: cc-in .4s steps(5) .7s both; transition: opacity .2s steps(3), transform .2s steps(3); }
 .cc-dock.shown { animation: none; }                                                     /* la entrada con retraso solo la primera vez; luego aparece y se esconde con el fundido */
-.cc-dock[data-st="wait"], .cc-dock[data-st="done"] { opacity: 0; transform: translateY(calc(var(--s) * 4px)); pointer-events: none; animation: none; }
+.cc-dock[data-st="wait"] { opacity: 0; transform: translateY(calc(var(--s) * 4px)); pointer-events: none; animation: none; }
+.cc-go { display: none; }                                                                /* llega el resultado: queda SOLO "Continuar" (v0.3.69), a mano desde el primer instante */
+.cc-dock[data-st="done"] { animation: none; transition-delay: .25s; }
+.cc-dock[data-st="done"] .cc-ff, .cc-dock[data-st="done"] .cc-skip { display: none; }
+.cc-dock[data-st="done"] .cc-go { display: inline-flex; }
+.cc-go .cc-ic { width: calc(var(--u) * 5px); }
 @keyframes cc-in { from { opacity: 0; transform: translateY(calc(var(--s) * 4px)); } to { opacity: 1; transform: none; } }
 .cc-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: calc(var(--s) * 2.5px); height: calc(var(--s) * 13px); min-width: calc(var(--s) * 20px); padding: 0 calc(var(--s) * 4px) 0 calc(var(--s) * 3.5px);
   border: 0; border-radius: calc(var(--s) * 2px); background: #0a140f; color: #ffd98a; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;

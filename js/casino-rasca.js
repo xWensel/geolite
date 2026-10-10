@@ -322,14 +322,14 @@ window.AIQ = window.AIQ || {};
     function tensionOff() { if (!card) return; card.tense = false; heartOff(); dealerBox.classList.remove("sweat", "g-peek"); QA(".ra-hls .hl.pair").forEach(h => h.classList.remove("pair")); }
     let finishRes = null; const finished = new Promise(res => { finishRes = res; });
     function win() {
-      const c = card, tier = TIERS.find(t => t.id === out.cls); sh.outcome(); tensionOff(); c.paid = true; purse = run.coins; hud();
+      const c = card, tier = TIERS.find(t => t.id === out.cls); sh.outcome(); rec.done = true; cx.persist(); tensionOff(); c.paid = true; purse = run.coins; hud();
       out.cells.forEach(i => { hlsEl.children[i].classList.add("win"); symsEl.children[i].classList.add("win"); }); later(() => c.rev.forEach((r, i) => { if (r && !out.cells.includes(i)) symsEl.children[i].classList.add("dim"); }), 700);
       const row = Q(`.ra-row[data-tier="${tier.id}"]`); row && row.classList.add("hit");
       showPlate(tier.level >= 3 ? "big" : "", tr(U.win), "×" + tier.m, "+" + o.pay); hint(null); reward(tier.level, tier); say(tier.sit, 4);
       later(() => { if (!c.finished) swallow(autoReveal(false)); }, reduced ? 600 : 1500);
     }
     function finish() {
-      const c = card; if (c.finished) return; c.finished = true; sh.outcome(); tensionOff();
+      const c = card; if (c.finished) return; c.finished = true; sh.outcome(); rec.done = true; cx.persist(); tensionOff();
       if (!c.paid) {
         if (out.cls === "casi") { sfx.casi(); showPlate("casi", tr(U.casi), "", "−" + o.stake); say("rcCasi", 4); shake(4, 300); }
         else { A.sfx.lose(); showPlate("lose", tr(U.lose), "", "−" + o.stake); say("rcNada", 4); }
