@@ -12,7 +12,7 @@ window.AIQ = window.AIQ || {};
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const TITLE = () => P6("Clasificación|Leaderboard|Classement|Placar|Rangliste|Classifica|Clasificación|排行榜|리더보드|ランキング|Рейтинг|Ranking");   // corto: cabe en la fila de la portada
   const L_TODAY = () => P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś"), L_YDAY = () => P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj");
-  const MODES = () => [["adv", "dealer_mini", A.T("Aventura", "Adventure")], ["daily", "dice", A.T("Reto diario", "Daily challenge")]];
+  const MODES = () => [["adv", "dealer_mini", A.T("Aventura", "Adventure")], ["daily", "dice", A.T("Reto diario", "Daily challenge")]].filter(m => m[0] !== "daily" || A.dailyOn !== false);   // el Reto diario, retirado por ahora (js/hub.js)
   const PERS = m => (m === "adv" ? [["all", P6("Histórico|All time|Historique|Histórico|Gesamt|Di sempre||历史|역대|歴代|За всё время|Wszech czasów")], ["today", L_TODAY()], ["yday", L_YDAY()]] : [["today", L_TODAY()], ["yday", L_YDAY()]]);
   /* Aventura: la de siempre y la mejor expedicion de hoy / ayer; Reto diario: la puntuacion global (suma de los 3 intentos) de hoy / ayer */
   const boardOf = (m, p) => (m === "daily" ? (p === "yday" ? A.rank.daily.yesterday() : A.rank.daily.board()) : p === "today" ? A.rank.day.board() : p === "yday" ? A.rank.day.yesterday() : "adv-all");
@@ -48,7 +48,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ el podio */
   /* v0.3.39 (Naipe de gala): los dos selectores del sistema, en la cabecera: el modo y su periodo */
-  const tabsHtml = () => `<div class="gx-seg pd-modes" role="tablist">${MODES().map(([id, ic, l]) => `<button type="button" role="tab" class="pd-mode${id === mode ? " on" : ""}" data-m="${id}" aria-selected="${id === mode}"><span class="pd-mi">${A.icon(ic)}</span><span>${l}</span></button>`).join("")}</div>
+  const tabsHtml = () => `<div class="gx-seg pd-modes${MODES().length > 1 ? "" : " hidden"}" role="tablist">${MODES().map(([id, ic, l]) => `<button type="button" role="tab" class="pd-mode${id === mode ? " on" : ""}" data-m="${id}" aria-selected="${id === mode}"><span class="pd-mi">${A.icon(ic)}</span><span>${l}</span></button>`).join("")}</div>
     <div class="gx-seg pd-tabs" role="tablist">${PERS(mode).map(([id, l]) => `<button type="button" role="tab" class="${id === per ? "on" : ""}" data-p="${id}" aria-selected="${id === per}">${l}</button>`).join("")}</div>`;
   function wireTabs() {
     const p = $("podio"); if (!p) return;

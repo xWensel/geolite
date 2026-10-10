@@ -5,6 +5,10 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const T = A.T, $ = id => document.getElementById(id), C = () => A.core;
+  /* EL RETO DIARIO ESTA RETIRADO POR AHORA (2026-10-10, decision del autor): su carta de la portada es la del Duelo de fichas (js/duelo.js) y su pestaña
+     de la Clasificacion no sale (js/podio.js). Su codigo sigue entero (pantalla, intentos, tablas y logros): para devolverlo, DAILY = true */
+  const DAILY = false; A.dailyOn = DAILY;
+  if (!DAILY && A.dealer && A.dealer.lines && A.dealer.lines.firstGuide) A.dealer.lines.firstGuide[1] = "El Clásico es para relajarse. El Duelo, para ver quién paga. La Aventura… para sufrir conmigo.|Classic is for relaxing. The Duel is for finding out who pays. Adventure… is for suffering with me.";   // la orientacion del crupier nombraba el Reto diario (los otros diez idiomas caen al ingles mientras sea prototipo)
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const BOOK = () => A.icon("m_codex");
   /* solo el engranaje en la esquina: idioma, pantalla completa y el resto viven en Ajustes */
@@ -43,6 +47,7 @@ window.AIQ = window.AIQ || {};
     const dMeta = dLive ? A.pick6("Intento {k}/3|Attempt {k}/3|Essai {k}/3|Tentativa {k}/3|Versuch {k}/3|Tentativo {k}/3||尝试 {k}/3|시도 {k}/3|挑戦 {k}/3|Попытка {k}/3|Podejście {k}/3").replace("{k}", dsv.dailyTry || 1)
       : dst.done ? `${A.fmt(dst.total)} · ${dst.done}/3`
       : A.pick6("Nuevo reto|New today|Nouveau défi|Novo desafio|Neu heute|Nuova sfida||新挑战|새 도전|新チャレンジ|Новый день|Nowe dziś");
+    const du = A.duelo ? A.duelo.stats() : { d: 0, w: 0 }, duMeta = du.d ? T(`${du.w} de ${du.d} ganados`, `${du.w} of ${du.d} won`) : T("Contra la banca", "Vs the house");   // carta del Duelo de fichas (mientras el Reto diario este retirado)
     /* cada modo es una carta (sin indices de baraja: el marco y la ilustracion bastan); la descripcion solo sale al pasar el raton (ficha data-tt) */
     const BULBS = A.bulbs();                                          // bombillas de marquesina de la Aventura (js/art.js)
     const mc = (id, rank, suit, art, title, desc, meta, badge) => `<button class="mcard${id === "adventure" ? " hero" : ""}" data-mode="${id}" data-suit="${suit === "s_pin" || suit === "s_compass" ? "red" : "blk"}" ${A.ttAttr(title, desc)} aria-description="${esc(desc)}">
@@ -53,7 +58,8 @@ window.AIQ = window.AIQ || {};
       <div class="hh-cards">
         ${mc("classic", "K", "s_palm", "card_classic", T("Clásico", "Classic"), T("Regiones del mundo, banderas, pistas, sucesos y personajes, contra el reloj.", "Regions of the world, flags, clues, events and famous people, against the clock."), T("Directo al grano", "No frills"))}
         ${mc("adventure", "A", "s_peak", "card_adv", T("Aventura", "Adventure"), T("Roguelike: el crupier cambia las reglas. Mapa a oscuras, del revés, letras que tiemblan… y reliquias para vencerlo.", "Roguelike: the dealer changes the rules. Dark maps, upside-down worlds, shaky letters… and relics to beat him."), saved ? T("▶ Guardada", "▶ Saved") : adv.bestScore ? T("Récord ", "Best ") + A.fmt(adv.bestScore) : T("Nueva", "New"), T("Modo principal", "Main mode"))}
-        ${mc("daily", "Q", "s_compass", "card_compete", T("Reto diario", "Daily challenge"), A.pick6("Una expedición al azar, la misma para todos. 3 intentos que suman.|A random expedition, the same for everyone. 3 attempts, one combined score.|Une expédition au hasard, la même pour tous. 3 essais cumulés.|Expedição aleatória, igual para todos. 3 tentativas que somam.|Zufällige Expedition, für alle gleich. 3 Versuche, eine Summe.|Spedizione a caso, uguale per tutti. 3 tentativi che si sommano.||随机远征，人人相同。3 次尝试，分数累加。|모두에게 똑같은 무작위 원정. 시도 3번의 점수를 합산.|全員共通のランダム遠征。3回の挑戦を合計。|Случайная экспедиция, одна на всех. 3 попытки, очки складываются.|Losowa wyprawa, ta sama dla wszystkich. 3 podejścia, wyniki się sumują."), dMeta)}
+        ${DAILY ? mc("daily", "Q", "s_compass", "card_compete", T("Reto diario", "Daily challenge"), A.pick6("Una expedición al azar, la misma para todos. 3 intentos que suman.|A random expedition, the same for everyone. 3 attempts, one combined score.|Une expédition au hasard, la même pour tous. 3 essais cumulés.|Expedição aleatória, igual para todos. 3 tentativas que somam.|Zufällige Expedition, für alle gleich. 3 Versuche, eine Summe.|Spedizione a caso, uguale per tutti. 3 tentativi che si sommano.||随机远征，人人相同。3 次尝试，分数累加。|모두에게 똑같은 무작위 원정. 시도 3번의 점수를 합산.|全員共通のランダム遠征。3回の挑戦を合計。|Случайная экспедиция, одна на всех. 3 попытки, очки складываются.|Losowa wyprawa, ta sama dla wszystkich. 3 podejścia, wyniki się sumują."), dMeta)
+          : mc("duelo", "Q", "s_compass", "card_compete", T("Duelo de fichas", "Chip duel"), T("Uno contra uno: la misma pregunta para los dos y quien puntúa menos paga la diferencia. De momento, contra la banca.", "One on one: the same question for both, and whoever scores less pays the difference. For now, against the house."), duMeta)}
       </div>
       <div class="hh-bottom">
         ${saved && sm ? `<div class="hh-resume"><button type="button" class="hh-cont" id="homeCont" data-primary><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${CONT_RUN()}</b><i>${runLine(sm)}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div>` : ""}
@@ -523,7 +529,7 @@ window.AIQ = window.AIQ || {};
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open() }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
   }
   /* el Reto diario de hoy tal cual, sin cerrar nada (precalentamiento de la puerta): sin ids, es una copia */

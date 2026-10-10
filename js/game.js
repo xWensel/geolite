@@ -473,7 +473,7 @@
   /* sonido suave al pasar por controles. Los 7 botones del menu principal (3 modos, Enciclopedia, Clasificacion, Perfil, Ajustes) tienen el suyo,
      solo con raton: en movil el toque ya suena al pulsar y no se montan dos sonidos */
   const MENU6 = ".hh .mcard, .hh .plq, .hh .menu-gear, #dlg > .menu-patch";                                   // .plq: las placas del pie (Enciclopedia, Clasificacion, Perfil)
-  const menuK = el => (el.classList.contains("mcard") ? ["classic", "adventure", "daily"].indexOf(el.dataset.mode) : ({ codexBtn: 3, profBtn: 4, rankBtn: 6, patchBtn: 3 })[el.id] ?? 5);
+  const menuK = el => (el.classList.contains("mcard") ? ({ classic: 0, adventure: 1, daily: 2, duelo: 2 })[el.dataset.mode] : ({ codexBtn: 3, profBtn: 4, rankBtn: 6, patchBtn: 3 })[el.id] ?? 5);
   let lastHover = null, ptr = "mouse";
   document.addEventListener("pointerover", e => (ptr = e.pointerType), true);
   document.addEventListener("mouseover", e => {
@@ -1261,7 +1261,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (S.intro) playStudio(showGate); else showGate();
   }
 
-  A.core = { S, map, world, dialog, closeDialog, verdict, prog, save, toggleFs, openSettings, openLangPop, runMenu, refreshPrompt: () => { setPrompt(); }, updateHud, newRun, prepareRun, startLevel: startLevel_, showHub: showTitle, odoSet, jpShake, syncSettings, nextQuestion, chrome, factLine, revealObs };   // jpShake: el temblor de los jackpots (tambien la legendaria del cofre, js/adventure.js)
+  A.core = { S, map, world, dialog, closeDialog, verdict, prog, save, toggleFs, openSettings, openLangPop, runMenu, refreshPrompt: () => { setPrompt(); }, updateHud, newRun, prepareRun, startLevel: startLevel_, showHub: showTitle, odoSet, jpShake, syncSettings, nextQuestion, chrome, factLine, revealObs, flagsOf, flagImg };   // jpShake: el temblor de los jackpots (tambien la legendaria del cofre, js/adventure.js)
 
   applyLang(); syncSettings();
   const start = () => {
