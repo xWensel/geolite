@@ -54,7 +54,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .mqb .mqb-on.mqb-h2 { stroke: rgba(255, 168, 40, .2); stroke-width: calc(var(--mqb) * 3); }
 .mqb.l2 .mqb-on { stroke-dashoffset: -2; } .mqb.l3 .mqb-on { stroke-dashoffset: -4; }
 .mqb .mqb-c { stroke: #fff6cf; stroke-width: calc(var(--mqb) * .45); filter: none; }    /* filamento blanco en el centro */
-.mqb.mq-lit { animation: mq-ch 1140ms steps(1, end) infinite; animation-delay: calc(var(--mq-s, 0ms) - var(--mq-k, 0) * 380ms); }
+.mqb.mq-lit { animation: mq-ch var(--mq-p, 1140ms) steps(1, end) infinite; animation-delay: calc(var(--mq-s, 0ms) - var(--mq-k, 0) * var(--mq-p, 1140ms) / 3); }   /* --mq-p: lo que dura la vuelta (tres pasos); lo pone js/casa.js: el reloj de la casa o el compas de la cancion */
 .mqb.l2 { --mq-k: 1; } .mqb.l3 { --mq-k: 2; }
 @keyframes mq-ch { 0% { opacity: 0; } 33.333% { opacity: 1; } 100% { opacity: 1; } }
 html.reduce-motion .mqb.mq-lit { animation: none; } html.reduce-motion .mqb.l1 { opacity: 0; }   /* reducir movimiento: quietas, dos de cada tres encendidas */

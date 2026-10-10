@@ -14,6 +14,7 @@
  *    avanza por actos (color y fuerza de la penumbra: A.casa.acto) y, cuando llega el jefe, la penumbra se cierra, enrojece y late.
  *    Todo son capas con animacion de opacidad o de transform: lo hace el compositor, sin repintar.
  *  - Las bombillas de la casa (A.bulbs, js/art.js) laten con un solo reloj (A.casa.MQ_P); aqui se vuelven a poner en fase tras cada pantalla.
+ *  - v0.3.57 (Fase 3c): ese reloj es el compas de la cancion que suena: un paso por pulso. Sin musica, el reloj de la casa de siempre.
  *
  * Capas (#app): mapa < [#sala en partida] < HUD (z 5-6) < #layer (4) < #intro (6) < [#sala en las demas pantallas, z 7] < #tip (30) < avisos (40) < pausa (60) < Ajustes (62) < crupier y mesas.
  */
@@ -22,7 +23,7 @@ window.AIQ = window.AIQ || {};
   "use strict";
   const $ = id => document.getElementById(id);
   const core = () => A.core || {};
-  const MQ_P = 1140;                                                    // el reloj de las bombillas: tres pasos de 380 ms
+  const MQ_P = 1140;                                                    // el reloj de la casa para las bombillas: tres pasos de 380 ms
 
   /* ================================================================ la luz: el calculo (el mismo codigo corre en el Worker o, si no hay, aqui) */
   /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], floors [[x0, y0, x1, y1, luzMinima]], keep [cx, cy, rx, ry] }
@@ -163,7 +164,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, floors: R.floors, keep: R.keep || null };
     const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), R.floors.map(q => q.map(v => Math.round(v / 6))), p.keep]);
     if (map) map.calm = R.calm ? 1 : 0;                                 // en partida el remolino del oceano baja la voz (js/map.js)
-    syncBulbs();
+    hora();
     if (s === sig) return; sig = s;
     const id = p.id = ++seq, w = worker();
     if (w) { w._c[id] = { c, boss }; w.postMessage(p); }
@@ -197,8 +198,8 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (!root) return;
     /* en que pantalla estas: lo usan la luz y el sonido (con las Luces de la sala apagadas, el sonido sigue sabiendo donde estas) */
     if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind && mode !== "off") neutral(); lastKind = k; root.classList.toggle("mute", k === "codex"); root.classList.toggle("bajo", k === "play"); llegaElJefe(k === "intro jefe"); lugar(k); } }
-    if (mode === "off") return;
     clearTimeout(tm); clearTimeout(tm2);
+    if (mode === "off") { tm = setTimeout(hora, 650); return; }       // sin luces de sala, las bombillas siguen en hora
     tm = setTimeout(() => idle(look), 650);                            // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
     tm2 = setTimeout(() => idle(look), 1600);
   }
@@ -212,13 +213,34 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (A.amb) A.amb.place(k === "codex" ? "fuera" : jefe ? "jefe" : k === "camp" ? "barra" : k === "vd" ? "caja" : k === "play" || k === "intro" ? "calma" : "salon");
   }
 
-  /* ================================================================ las bombillas: un solo reloj */
-  /* A.bulbs nace ya en fase (--mq-s, sacado del reloj del documento). Si se pinto oculta y empezo tarde, aqui se pone en hora para siempre:
-     retraso base 0 y startTime 0 (el origen del reloj del documento), asi todas comparten el mismo paso */
-  function syncBulbs() {
-    const ws = [...document.querySelectorAll(".mqw")].filter(w => w.style.getPropertyValue("--mq-s") !== "0ms"); if (!ws.length) return;
-    ws.forEach(w => { w.style.setProperty("--mq-s", "0ms"); w.style.setProperty("--mq-j", "0ms"); });
-    ws.forEach(w => w.querySelectorAll(".mq-lit").forEach(el => el.getAnimations && el.getAnimations().forEach(a => { a.startTime = 0; })));
+  /* ================================================================ las bombillas: un solo reloj, y al compas (v0.3.57) */
+  /* Todas las bombillas comparten reloj: cuanto dura la vuelta de tres pasos (mqP) y cuando empezo (mqO, en el reloj del documento).
+     Con musica, el paso es un pulso de la cancion que suena (A.music.beat: tempo y primer pulso medidos de cada pista, sin analizar nada
+     mientras suena) y cae justo en el pulso. Sin musica, el reloj de la casa: tres pasos de 380 ms.
+     Siguen siendo animaciones CSS de opacidad (las mueve el compositor): aqui solo se les dice la duracion (--mq-p) y la hora de inicio
+     (startTime) al cambiar de cancion o de pantalla, o si el reproductor se ha ido mas de 35 ms. Por fotograma no se hace nada. */
+  const MQ_TOL = 35;
+  let mqP = MQ_P, mqO = 0;
+  /* A.bulbs nace ya en fase (--mq-p y --mq-s). Si se pinto oculta y empezo tarde, o el reloj ha cambiado, aqui se pone en hora:
+     retraso base 0 y startTime = mqO, asi todas dan el mismo paso a la vez */
+  function hora() {
+    const p = mqP.toFixed(2) + "ms";
+    document.querySelectorAll(".mqw").forEach(w => {
+      if (w.style.getPropertyValue("--mq-p") !== p) w.style.setProperty("--mq-p", p);
+      if (w.style.getPropertyValue("--mq-s") !== "0ms") { w.style.setProperty("--mq-s", "0ms"); w.style.setProperty("--mq-j", "0ms"); }
+    });
+    document.querySelectorAll(".mqb.mq-lit").forEach(el => el.getAnimations && el.getAnimations().forEach(a => {
+      const t = a.animationName === "mq-ch" ? mqO : a.animationName === "mq-latido" ? 0 : null;   // el latido del jefe va con el reloj del documento, como su sonido
+      if (t !== null && (a.startTime === null || Math.abs(a.startTime - t) > 1)) a.startTime = t;
+    }));
+  }
+  function compas() {
+    const b = A.music && A.music.beat ? A.music.beat() : null, now = performance.now();
+    const P = b ? 3 * b.ms : MQ_P, paso = P / 3, T0 = b ? now - b.at : 0;                       // T0: cuando cayo (o caera) el primer pulso
+    let e = (((T0 - mqO) % paso) + paso) % paso; e = Math.min(e, paso - e);
+    if (Math.abs(P - mqP) < 0.01 && e < MQ_TOL) return;                                         // mismo tempo y en hora: no se toca nada
+    mqP = P; mqO = T0 + Math.floor((now - T0) / P) * P - P;                                     // una vuelta entera hacia atras: siempre en el pasado
+    hora();
   }
 
   /* ================================================================ la sala responde (v0.3.54) */
@@ -300,8 +322,11 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
       ["leftCol", { childList: true }], ["ledgerSh", { childList: true }]].forEach(([id, o]) => { const el = $(id); if (el) mo.observe(el, o); });
     mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });                                      // cx-on: se abre o se cierra la Enciclopedia
     addEventListener("resize", () => { sig = ""; mira(); });
+    /* el compas: al empezar, parar o saltar una cancion (A.music.onBeat) y, cada dos segundos, por si el reproductor se ha ido o se ha quitado la musica */
+    if (A.music) A.music.onBeat = compas;
+    setInterval(compas, 2000); document.addEventListener("visibilitychange", () => { if (!document.hidden) compas(); });
     set(how || "full");
   }
 
-  A.casa = { init, set, mira, premio, perdida, impacto, luz, baja, barrido, acto, vario, MQ_P, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
+  A.casa = { init, set, mira, premio, perdida, impacto, luz, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
 })(window.AIQ);

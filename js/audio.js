@@ -195,14 +195,17 @@ window.AIQ = window.AIQ || {};
        al irse, vuelve la cancion del acto por donde iba) y la victoria.
      - LUFS: el volumen medido de cada pista (ffmpeg ebur128). Entre la mas fuerte y la mas floja habia 8,7 dB; TRIM las lleva todas a -34 LUFS
        (correccion limitada a -4 / +5,5 dB) con una ganancia por pista.
-     - BPM y BEAT0 (tempo y primer pulso en ms, medidos: todas van a tempo exacto de principio a fin): el compas de la que suena, A.music.beat(). */
+     - BPM y BEAT0 (tempo y primer pulso en ms, medidos: todas van a tempo exacto de principio a fin): el compas de la que suena, A.music.beat().
+       Las 21 arrancan en el pulso: el primer ataque cae a los 59-62 ms del archivo y la rejilla aguanta hasta el final. Ojo si entra una pista
+       nueva: el ataque mas fuerte de una cancion puede ser el contratiempo (mambo, house, cha-cha); el pulso se mide con la energia en el
+       tiempo y con los graves, no con el ataque de toda la banda. */
   const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
   GROUPS.classic = GROUPS.home.concat(GROUPS.a1); GROUPS.inf = GROUPS.a2.concat(GROUPS.a3);
   const NOW = { boss: 1, win: 1 };                                      // momentos que no esperan a que acabe la cancion
   const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4];
   const TRIM = LUFS.map(l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20));
   const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92];
-  const BEAT0 = [477, 20, 26, 22, 23, 26, 25, 26, 283, 26, 441, 22, 299, 277, 26, 268, 20, 25, 257, 23, 399];
+  const BEAT0 = 60;
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
   let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
   const decks = [], recent = [];                                        // dos platos: mientras uno entra, el otro sale
@@ -291,8 +294,8 @@ window.AIQ = window.AIQ || {};
     /* el compas de la cancion que suena: { ms: lo que dura un pulso, at: cuantos ms hace que cayo el primero } o null si no suena nada. Sale del tempo
        medido de cada pista y del reloj del reproductor: no hace falta analizar la musica mientras suena */
     beat() {
-      const d = di >= 0 ? decks[di] : null; if (!d || cur < 0 || d.el.paused || d.el.readyState < 2 || !A.audio.musicOn) return null;
-      return { ms: 60000 / BPM[cur], at: d.el.currentTime * 1000 - BEAT0[cur] - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
+      const d = di >= 0 ? decks[di] : null; if (!d || cur < 0 || d.el.paused || d.el.readyState < 2 || !A.audio.musicOn || !(A.audio.vol.music * A.audio.vol.master > 0)) return null;   // con la musica a cero no hay compas que seguir
+      return { ms: 60000 / BPM[cur], at: d.el.currentTime * 1000 - BEAT0 - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
     },
   };
   A.audio.setSkin = () => {};   // las 21 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
