@@ -25,21 +25,26 @@
 .hh-bottom { justify-self: center; width: max-content; max-width: 100%; display: grid; justify-items: stretch; gap: clamp(10px, calc(1.8 * var(--vh)), 18px); }
 .hh-deck { display: grid; grid-template-columns: minmax(var(--cw), 1fr) minmax(var(--hw), max-content) minmax(var(--cw), 1fr); gap: var(--cg); align-items: stretch; }
 .hh-bottom .hh-resume { flex: none; box-sizing: border-box; width: auto; max-width: none; margin: 0; }   /* en una sola fila, del ancho de las placas */
-.hh-bottom:has(.hh-resume .startbtn):has(.plq-rib.on) { row-gap: clamp(24px, calc(3.2 * var(--vh)), 32px); }   /* la cinta de tu puesto no toca el banner */
+.hh-bottom:has(.hh-cont) { row-gap: 22px; }                                                        /* las bombillas de Continuar no tocan las placas */
+.hh-bottom:has(.hh-cont):has(.plq-rib.on) { row-gap: 40px; }   /* la cinta de tu puesto no toca el banner */
 
-.plq { --c1: #4ee3c1; --c2: #1fb3a3; --c3: #16787f; --c4: #164a5c; --glow: rgba(78, 227, 193, .5); --tilt: 0deg; --d: .3s;
-  position: relative; display: flex; align-items: center; justify-content: center; gap: 11px; min-width: 0; min-height: 66px; box-sizing: border-box; padding: 8px 14px 11px;
-  border: 0; border-radius: 14px; cursor: pointer; text-align: left; color: #fff; background: var(--c2);
-  box-shadow: 0 0 0 3px #16241c, inset 0 4px 0 var(--c1), inset 0 -6px 0 var(--c3), 0 8px 0 3px #16241c, 0 16px 26px rgba(0, 0, 0, .45);
-  transition: transform .3s var(--spring), box-shadow .25s; animation: plq-in .62s var(--spring) var(--d) backwards, plq-bob 5s ease-in-out calc(var(--d) + .8s) infinite; }
-/* costura de ficha de casino: una linea discontinua por dentro del borde */
-.plq::before { content: ""; position: absolute; inset: 7px 7px 10px; border-radius: 8px; border: 2px dashed rgba(255, 255, 255, .32); pointer-events: none; }
+/* v0.3.67: placas en el sistema. Conservan su color (el del marco de la carta de encima), pero se construyen como los demas botones:
+   esquina de pixel, luz arriba y labio abajo, contorno de tinta y sombra dura; sin costura ni resplandor. La placa no se recorta entera
+   (la cinta de "tu puesto" sobresale): la cara va en ::before y la sombra en ::after, que se mueven con ella (solo transform) */
+.plq { --c1: #4ee3c1; --c2: #1fb3a3; --c3: #16787f; --c4: #164a5c; --tilt: 0deg; --d: .3s;
+  position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; gap: 11px; min-width: 0; min-height: 66px; box-sizing: border-box; padding: 8px 14px 12px;
+  border: 0; border-radius: 0; cursor: pointer; text-align: left; color: #fff; background: none;
+  transition: transform .3s var(--spring); animation: plq-in .62s var(--spring) var(--d) backwards, plq-bob 5s ease-in-out calc(var(--d) + .8s) infinite; }
+.plq::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o);
+  background: linear-gradient(var(--c1) 0 4px, var(--c2) 4px calc(100% - 6px), var(--c3) calc(100% - 6px)); }
+.plq::after { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; clip-path: var(--gx-notch); background: rgba(2, 6, 4, .78); transform: translateY(6px); transition: transform .3s var(--spring); }
 .plq-codex { --tilt: -2deg; --d: .38s; }
-.plq-rank { --c1: #ffd95a; --c2: #f5a623; --c3: #c46a1b; --c4: #7f3a1a; --glow: rgba(255, 208, 107, .6); --d: .3s; }
-.plq-prof { --c1: #b36cff; --c2: #8440e0; --c3: #5a2ab0; --c4: #351a70; --glow: rgba(199, 139, 240, .55); --tilt: 2deg; --d: .38s; }
-.plq:hover { transform: translateY(-7px) rotate(var(--tilt)) scale(1.05); z-index: 2; box-shadow: 0 0 0 3px #16241c, inset 0 4px 0 var(--c1), inset 0 -6px 0 var(--c3), 0 13px 0 3px #16241c, 0 0 40px 4px var(--glow); }
-.plq:active { transform: translateY(5px) scale(.98); box-shadow: 0 0 0 3px #16241c, inset 0 4px 0 var(--c1), inset 0 -4px 0 var(--c3), 0 3px 0 3px #16241c, 0 6px 12px rgba(0, 0, 0, .4); transition-duration: .08s; }
-.plq:focus-visible { outline: 3px solid #fff; outline-offset: 5px; }
+.plq-rank { --c1: #ffd95a; --c2: #f5a623; --c3: #c46a1b; --c4: #7f3a1a; --d: .3s; }
+.plq-prof { --c1: #b36cff; --c2: #8440e0; --c3: #5a2ab0; --c4: #351a70; --tilt: 2deg; --d: .38s; }
+.plq:hover { transform: translateY(-7px) rotate(var(--tilt)) scale(1.05); z-index: 2; } .plq:hover::before { filter: brightness(1.08); } .plq:hover::after { transform: translateY(11px); }
+.plq:active { transform: translateY(4px) scale(.98); transition-duration: .08s; } .plq:active::after { transform: translateY(2px); }
+.plq:focus { outline: none; }
+.plq:focus-visible::before, html[data-input="pad"] .plq:focus::before { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fff; }
 @keyframes plq-in { from { opacity: 0; transform: translateY(70px) scale(.8); } }
 @keyframes plq-bob { 50% { translate: 0 -3px; } }                                    /* respiracion muy suave (translate: no pisa el transform del raton) */
 .plq-rank { animation-name: plq-in, plq-bob-c; } @keyframes plq-bob-c { 0%, 100% { translate: 0 -3px; } 50% { translate: 0 0; } }   /* el centro respira al reves: espejo */
@@ -48,22 +53,22 @@
 .plq-ic .ic { width: 42px; height: 42px; filter: drop-shadow(0 3px 0 rgba(22, 36, 28, .6)); transition: transform .3s var(--spring); }
 .plq:hover .plq-ic .ic { transform: rotate(calc(var(--tilt) * -3)) scale(1.12); }
 .plq-t { position: relative; z-index: 1; display: grid; justify-items: start; gap: 5px; min-width: 0; }
-.plq-t > b { max-width: 100%; font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 900; font-size: 26px; line-height: .9; color: #fff; text-shadow: 0 3px 0 var(--c4), 0 0 1px var(--c4); white-space: nowrap; overflow: hidden; }
+.plq-t > b { max-width: 100%; font-family: var(--sans); font-weight: 400; font-size: 26px; line-height: .9; color: #fff; text-shadow: 0 3px 0 var(--c4), 0 0 1px var(--c4); white-space: nowrap; overflow: hidden; }
 .plq-t > b.sq-wrap { white-space: normal; text-wrap: balance; }
 .plq-tag { position: relative; max-width: 100%; box-sizing: border-box; display: flex; overflow: hidden; font-style: normal; background: #16241c; padding: 3px 8px 6px; }
-.plq-tag > span { display: flex; align-items: center; gap: 5px; min-width: 0; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; line-height: 1; text-transform: uppercase; color: #f6efdc; white-space: nowrap; overflow: hidden; }
+.plq-tag > span { display: flex; align-items: center; gap: 5px; min-width: 0; font-family: var(--mono); font-size: 16px; letter-spacing: .05em; line-height: 1; text-transform: uppercase; color: #f6efdc; white-space: nowrap; overflow: hidden; }
 .plq-tag > span.sq-wrap { white-space: normal; }
-.plq-tag .ic { flex: none; width: 15px; height: 15px; margin: 0; filter: none; }
+.plq-tag .ic { flex: none; width: 16px; height: 16px; margin: 0; filter: none; }
 .plq-tag.bar::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: max(3px, var(--p)); background: var(--c1); }   /* progreso, del color de la placa */
-html body .plq-tag > span { font-size: 14px; }
+html body .plq-tag > span { font-size: 16px; }                                    /* v0.3.67: el minimo de Deck (salian a 14) */
 /* Clasificacion: sin etiqueta (no es solo de la Aventura); el titulo, mas grande, ocupa su sitio */
 .plq-rank .plq-tag { display: none; }
-.plq-rank .plq-t > b { font-size: 32px; }
+.plq-rank .plq-t > b { font-size: 26px; }
 @media (max-width: 700px) and (orientation: portrait) { .plq-rank .plq-t > b { font-size: clamp(16px, calc(4.8 * var(--vw)), 22px); } }
 @media (max-height: 520px) and (orientation: landscape) { .plq-rank .plq-t > b { font-size: 23px; } }
 
 /* tu puesto mundial: cinta de neon centrada arriba, como "Modo principal" en la carta de la Aventura */
-.plq-rib { position: absolute; z-index: 3; top: -23px; left: 50%; display: none; align-items: center; gap: 5px; font-family: var(--mono); font-style: normal; font-size: 14px; letter-spacing: .05em; line-height: 1; color: #fff; background: var(--red);
+.plq-rib { position: absolute; z-index: 3; top: -25px; left: 50%; display: none; align-items: center; gap: 5px; font-family: var(--mono); font-style: normal; font-size: 16px; letter-spacing: .05em; line-height: 1; color: #fff; background: var(--red);
   padding: 5px 10px 4px; box-shadow: 0 4px 0 rgba(0, 0, 0, .45), 0 0 0 2px #16241c; white-space: nowrap; text-shadow: 0 0 6px #fff, 0 0 14px var(--red), 0 0 26px var(--red); transform: translateX(-50%) rotate(-2deg); pointer-events: none;
   animation: rib-in .5s var(--spring) both, neon-flicker 3.2s linear .5s infinite; }
 .plq-rib.on { display: inline-flex; } .plq-rib .ic { width: 16px; height: 16px; margin: 0; filter: none; }
@@ -89,7 +94,7 @@ html body #dlg > .hh-ver { font-size: 12px; }
   .hh .mqb rect { stroke-dasharray: 0 4; } .hh .mqb .mqb-on { stroke-dasharray: 0 12; } .hh .mqb.l2 .mqb-on { stroke-dashoffset: -4; } .hh .mqb.l3 .mqb-on { stroke-dashoffset: -8; }
   .hh .mc-name { font-size: clamp(13px, calc(4.1 * var(--vw)), 17px); }   /* "Приключение" cabe entera en un movil de 375 px */ .hh .mc-stat { font-size: 11px; letter-spacing: .02em; padding: 4px 6px 3px; } .hh .mc-ribbon { font-size: 11px; padding: 4px 8px 3px; }
   .hh-deck { gap: 8px; }
-  .hh-resume .startbtn { gap: 10px; padding: 6px 14px 6px 8px; } .hh-resume .sb-ic .ic { width: 38px; height: 38px; }
+  .hh-resume .hh-cont { gap: 10px; padding: 6px 14px 8px 8px; } .hh-resume .sb-ic .ic { width: 38px; height: 38px; }
   .plq { flex-direction: column; gap: 6px; min-height: 0; padding: 10px 6px 14px; text-align: center; }
   .plq::before { inset: 5px 5px 8px; }
   .plq-ic .ic { width: 36px; height: 36px; }
@@ -107,4 +112,43 @@ html body #dlg > .hh-ver { font-size: 12px; }
   .hh-bottom .hh-resume { min-width: 0; }
   html body .plq-tag > span { font-size: 11px; } .plq-tag { padding: 3px 6px 5px; }
   .hh { padding-bottom: 22px; }
+}
+
+/* ==== v0.3.67: LA PORTADA EN EL SISTEMA (Naipe de gala). La composicion en espejo, el logo, los dibujos y el movimiento son los de siempre;
+   cambia como estan hechas las piezas: esquina de pixel en vez de redonda, sombra dura sin resplandores, "Continuar expedicion" = la placa de
+   laton del boton principal con sus bombillas y la tecla, y la letra en la escala comun.
+   Las cartas, como las placas, no se recortan enteras (la cinta "Modo principal" sobresale): cara en ::before, sombra en ::after. ==== */
+.hh .mcard, .hh .mcard:hover { border-radius: 0; background: none; box-shadow: none; isolation: isolate; --mqr: calc(var(--mqi) + 2px);
+  --px2: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px); }
+.hh .mcard::before { content: ""; position: absolute; inset: -3px; z-index: -1; pointer-events: none; clip-path: var(--px2); background: #f6efdc; box-shadow: inset 0 0 0 3px #16241c, inset 0 0 0 8px var(--rc), inset 0 0 0 10px #16241c; }
+.hh .mcard::after { content: ""; position: absolute; inset: -3px; z-index: -2; pointer-events: none; clip-path: var(--px2); background: rgba(0, 0, 0, .45); transform: translateY(18px); transition: transform .3s var(--spring); }
+.hh .mcard:hover::before, .hh .mcard:focus-visible::before { box-shadow: inset 0 0 0 3px #16241c, inset 0 0 0 8px #ffd06b, inset 0 0 0 10px #16241c; }
+.hh .mcard:hover::after { transform: translateY(26px); }
+.hh .mcard:focus { outline: none; }
+.hh .mcard:focus-visible::before, html[data-input="pad"] .hh .mcard:focus::before { box-shadow: inset 0 0 0 3px #16241c, inset 0 0 0 8px #ffd06b, inset 0 0 0 10px #16241c, inset 0 0 0 12px #fff; }
+.hh .mc-win { border-radius: 0; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 3px #16241c; } .hh .mc-win .pic { inset: 3px; }
+
+/* "Continuar expedicion": la placa de laton con tornillos del boton principal, del ancho exacto de las tres placas, con las bombillas de la casa
+   (A.bulbs, al mismo paso que las de la carta de la Aventura) y la tecla a la derecha. La sombra va en ::after del contenedor: sin filtros
+   alrededor de la ficha que gira */
+.hh-resume { position: relative; isolation: isolate; }
+.hh-resume::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); background: rgba(2, 6, 4, .78); transform: translateY(5px); }
+.hh-cont { box-sizing: border-box; display: flex; align-items: center; gap: 14px; width: 100%; min-width: 0; min-height: 62px; margin: 0; padding: 6px 20px 10px 14px; border: 0; cursor: pointer; text-align: left;
+  font-family: var(--sans); color: var(--gx-ink); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o); transition: transform .12s steps(2, end), filter .12s;
+  background: radial-gradient(circle at 10px 10px, #fff4c8 0 1px, #6b4410 1.5px 2.5px, transparent 3px), radial-gradient(circle at calc(100% - 10px) 10px, #fff4c8 0 1px, #6b4410 1.5px 2.5px, transparent 3px),
+    linear-gradient(var(--gx-gold-hi) 0 4px, var(--gx-gold) 4px calc(100% - 6px), var(--gx-gold-lo) calc(100% - 6px)); }
+.hh-cont:hover, .hh-cont.pad-hov { transform: translateY(-2px); filter: brightness(1.06); } .hh-cont:active { transform: translateY(2px); filter: brightness(.96); }
+.hh-cont:focus { outline: none; }
+.hh-cont:focus-visible::after, html[data-input="pad"] .hh-cont:focus::after { content: ""; position: absolute; inset: 5px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.hh-cont .sb-ic .ic { width: 44px; height: 44px; }
+.hh-cont .sb-t { gap: 2px; } .hh-cont .sb-t b { font-family: var(--sans); font-weight: 400; font-size: 26px; line-height: 1; } .hh-cont .sb-t i { font-size: 16px; opacity: .8; }
+.hh-cont .gx-k { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.hh-cont kbd.k-kb { font-family: var(--mono); font-size: 16px; line-height: 1; padding: 3px 5px 2px; box-shadow: inset 0 0 0 2px currentColor; opacity: .75; background: none; color: inherit; }
+.hh-cont .gl { margin: -6px 0; }
+.hh-resume > .mqw > .mqb { --mqi: -7px; --mqb: 6px; --mqr: -2px; z-index: 2; }
+
+/* la letra, en la escala comun (solo en escritorio y Deck: el movil conserva sus tamanos) */
+@media (min-width: 900px) and (min-height: 520px) {
+  .hh .hh-tag { font-size: 24px; }
+  .hh .mcard .mc-name { font-size: 30px; }
 }

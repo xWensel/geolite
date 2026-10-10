@@ -998,6 +998,24 @@ html.sala-on .vignette { display: none; }                                  /* la
 @keyframes mq-latido { 0% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 36% { opacity: 0; } 100% { opacity: 0; } }
 html.reduce-motion #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; }
 
+/* ---------------------------------------------------------------- BOTONES DE ESQUINA (v0.3.67): el engranaje de los menus, Apagar y Notas del parche.
+   Eran cuadrados oscuros redondeados; ahora son el boton de fieltro con anillo de laton del sistema (como .gx-btn.gho), con su esquina de pixel.
+   La sombra dura la pone su contenedor (.menu-tools); el de las Notas va suelto en la portada y no la lleva */
+html[data-skin] body .menu-gear { width: 44px; height: 44px; border: 0; border-radius: 0; clip-path: var(--gx-notch); color: var(--gx-txt);
+  background: linear-gradient(#2f6a4f 0 4px, #1a4533 4px calc(100% - 6px), #0b2118 calc(100% - 6px)); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55);
+  transition: transform .12s steps(2, end), filter .12s; }
+html[data-skin] body .menu-gear:hover, html[data-skin] body .menu-gear.pad-hov, html[data-skin] body .menu-gear:focus-visible { transform: translateY(-2px); filter: brightness(1.12); color: var(--gx-txt); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); outline: none; }
+html[data-skin] body .menu-gear:active { transform: translateY(2px); filter: brightness(.96); }
+html[data-skin] body .menu-gear:focus-visible, html[data-input="pad"] body .menu-gear:focus { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fff; }
+html[data-skin] body .menu-gear .ic { width: 28px; height: 28px; transition: transform .3s var(--spring); }
+html[data-skin] body .menu-gear:not(.menu-quit):not(.menu-patch):hover .ic { transform: rotate(60deg); }                       /* el engranaje sigue girando al pasar */
+html[data-skin] body .menu-gear.menu-quit:hover, html[data-skin] body .menu-gear.menu-quit:focus-visible { color: var(--gx-red-hi); }
+html[data-skin] body .menu-gear.menu-patch { background: linear-gradient(#2f6a4f 0 4px, #1a4533 4px calc(100% - 6px), #0b2118 calc(100% - 6px)); }
+html[data-skin] body .menu-gear.menu-patch .ic { width: 30px; height: 30px; }
+.menu-tools { filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78)); }
+@media (max-width: 899px) { html[data-skin] body .menu-gear { width: 40px; height: 40px; } }
+@media (max-height: 520px) and (orientation: landscape) { html[data-skin] body .menu-gear { width: 36px; height: 36px; } html[data-skin] body .menu-gear .ic { width: 24px; height: 24px; } }
+
 /* ---------------------------------------------------------------- MESAS DEL MAPA (v0.3.62): la pagina "Mesas" del libro del Perfil (js/hub.js, mesasPage)
    y el estreno de una mesa recien ganada (js/mesas.js). El catalogo y lo que es tuyo: js/skins.js (A.mesas).
    La pagina: seis tarjetas en dos columnas, cada una con la captura de su mesa, lo que es (o como se gana, si aun no es tuya) y su estado.

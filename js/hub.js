@@ -28,10 +28,11 @@ window.AIQ = window.AIQ || {};
   /* nombres de las cartas: como mucho dos lineas. Una palabra muy larga en una carta estrecha (el aleman "Tagesherausforderung") llegaba a tres;
      se reduce la letra poco a poco (hasta un 25 %) hasta que quepa en dos. Se mide en px propios de la carta: ni el zoom ni el giro cambian la cuenta */
   const lineCount = el => { const cs = getComputedStyle(el), lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize); return Math.round(el.offsetHeight / lh); };   // alto sin transformaciones (las cartas entran girando)
+  /* el nombre de cada carta, en dos lineas como mucho y sin salirse a lo ancho (una palabra larga que no parte: "Приключение" pisaba las bombillas) */
   const fitNames = () => document.querySelectorAll(".hh .mc-name").forEach(el => {
-    el.style.fontSize = ""; if (lineCount(el) <= 2) return;
+    el.style.fontSize = ""; const bad = () => lineCount(el) > 2 || el.scrollWidth > el.clientWidth + 1; if (!bad()) return;
     const fs = parseFloat(getComputedStyle(el).fontSize);
-    for (let k = 0.94; k >= 0.74 && lineCount(el) > 2; k -= 0.04) el.style.fontSize = (fs * k).toFixed(1) + "px";
+    for (let k = 0.94; k >= 0.6 && bad(); k -= 0.04) el.style.fontSize = Math.max(18, fs * k).toFixed(1) + "px";
   });
   addEventListener("resize", () => { if (document.querySelector(".hh")) fitNames(); });
   function home() {
@@ -55,7 +56,7 @@ window.AIQ = window.AIQ || {};
         ${mc("daily", "Q", "s_compass", "card_compete", T("Reto diario", "Daily challenge"), A.pick6("Una expedición al azar, la misma para todos. 3 intentos que suman.|A random expedition, the same for everyone. 3 attempts, one combined score.|Une expédition au hasard, la même pour tous. 3 essais cumulés.|Expedição aleatória, igual para todos. 3 tentativas que somam.|Zufällige Expedition, für alle gleich. 3 Versuche, eine Summe.|Spedizione a caso, uguale per tutti. 3 tentativi che si sommano.||随机远征，人人相同。3 次尝试，分数累加。|모두에게 똑같은 무작위 원정. 시도 3번의 점수를 합산.|全員共通のランダム遠征。3回の挑戦を合計。|Случайная экспедиция, одна на всех. 3 попытки, очки складываются.|Losowa wyprawa, ta sama dla wszystkich. 3 podejścia, wyniki się sumują."), dMeta)}
       </div>
       <div class="hh-bottom">
-        ${saved && sm ? `<div class="hh-resume">${startBtn("homeCont", CONT_RUN(), runLine(sm), true)}</div>` : ""}
+        ${saved && sm ? `<div class="hh-resume"><button type="button" class="hh-cont" id="homeCont" data-primary><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${CONT_RUN()}</b><i>${runLine(sm)}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div>` : ""}
         <div class="hh-deck">
           ${plaque("plq-codex", "codexBtn", "m_codex", A.t("codex.title"), `${A.fmt(cx.u)} / ${A.fmt(cx.t)}`, (100 * cx.u) / Math.max(1, cx.t), A.ttAttr(A.t("codex.title"), A.tip6("Fichas de lugares, historia y datos clave: se descubren acertando cerca.|Cards for places, history and key facts: found by pinning close.|Cartes de lieux, d'histoire et de faits clés : on les découvre en visant juste.|Cartas de lugares, história e dados-chave: descobertas ao acertar perto.|Karten zu Orten, Geschichte und Kernfakten: entdeckt durch genaue Treffer.|Schede di luoghi, storia e dati chiave: si scoprono colpendo vicino.||地点、历史与关键信息的卡片：准确标出即可发现。|장소, 역사, 핵심 정보 카드: 가깝게 맞히면 발견됩니다.|場所・歴史・重要な事実のカード：近くに当てると見つかる。|Карточки мест, истории и ключевых фактов: открываются точными попаданиями.|Karty miejsc, historii i kluczowych faktów: odkrywasz je celnymi trafieniami.")))}
           ${A.podio.button()}
@@ -76,7 +77,6 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ marco comun de las sub-pantallas (a pantalla completa, sobre el mapa) */
   const scr = (title, inner, cls = "", foot = "") => `<div class="scr ${cls}"><header class="scr-head"><button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button><h2>${title}</h2>${tools()}</header><div class="scr-body">${inner}</div>${foot}</div>`;   // foot: barra fija bajo la lista que se desplaza (Clasico)
-  const startBtn = (id, big, small, primary, cls = "") => `<button class="startbtn${cls ? " " + cls : ""}" id="${id}" ${primary ? "data-primary" : ""}><span class="sb-ic">${A.icon("chip_r")}</span><span class="sb-t"><b>${big}</b><i>${small}</i></span><span class="sb-ar">${A.icon("u_next", "sm")}</span></button>`;
 
   /* ------------------------------------------------------------------ Clasico: campanas */
   /* portada de cada campana: minicarta pixel art (un protagonista sobre el foco de su color), assets/gen/camp_<id>.webp */
