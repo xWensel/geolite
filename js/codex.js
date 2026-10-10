@@ -1191,10 +1191,15 @@ window.AIQ = window.AIQ || {};
     return it;
   }
   /* el aviso espera (hasta 1,4 s) a que las fotos de las primeras tarjetas esten cargadas: se ve la foto, no el icono de relleno */
-  function toast(ids) {
+  /* v0.3.79: la esquina es de uno cada vez. Si el crupier esta comentando la respuesta, el monton espera a que acabe su frase y su segundo de mas
+     (A.dealer.yieldCorner: no se le corta) y sale cuando se aparta. Y si entre tanto ya hay otra pregunta en pantalla, no sale: las tarjetas
+     estan ganadas igual y el mapa queda libre con el reloj corriendo (q0: la pregunta en la que se ganaron) */
+  function toast(ids, q0) {
     if (!ids.length) return;
-    const items = ids.map(toastItem);
-    Promise.race([Promise.all(items.slice(0, 2).map(x => x._ready)), new Promise(r => setTimeout(r, 1400))]).then(() => toastShow(ids, items));
+    const items = ids.map(toastItem), S = A.core && A.core.S;
+    const stale = () => !!S && q0 != null && (S.qi !== q0[0] || S.qs !== q0[1] || S.phase !== "reveal");
+    const go = () => { if (!stale()) toastShow(ids, items); };
+    Promise.race([Promise.all(items.slice(0, 2).map(x => x._ready)), new Promise(r => setTimeout(r, 1400))]).then(() => { if (stale()) return; if (A.dealer && A.dealer.yieldCorner) A.dealer.yieldCorner(go); else go(); });
   }
   function toastShow(ids, items) {
     let el = $("cxToast"); if (!el) { el = document.createElement("button"); el.id = "cxToast"; el.type = "button"; el.className = "cx-toast hidden"; (document.getElementById("leftCol") || $("app")).appendChild(el); }
@@ -1211,7 +1216,8 @@ window.AIQ = window.AIQ || {};
     const rest = items.map(() => { let r; do r = rnd(-6, 6); while (Math.abs(r - lastR) < 2.5); lastR = r; return `translate(${rnd(-12, 12).toFixed(1)}px, ${rnd(-8, 6).toFixed(1)}px) rotate(${r.toFixed(2)}deg)`; });
     items.forEach((it, j) => { it.style.transform = rest[j]; it.style.zIndex = j + 1; it.style.setProperty("--ko", `${rnd(25, 75) | 0}% ${rnd(25, 70) | 0}%`); });
     /* de donde cae: izquierda, arriba, derecha o abajo, girando a su aire */
-    const from = () => { const side = Math.random() * 4 | 0, sp = rnd(-28, 28).toFixed(1);
+    const inCol = !!el.parentNode && el.parentNode.id === "leftCol";         // v0.3.79: en la columna de la partida no entran desde abajo (asomaban cortadas por el borde y sobre los botones mientras subian)
+    const from = () => { const side = Math.random() * (inCol ? 3 : 4) | 0, sp = rnd(-28, 28).toFixed(1);
       return side === 0 ? `translate(-125%, ${rnd(-60, 40) | 0}px) rotate(${-Math.abs(sp)}deg)` : side === 1 ? `translate(${rnd(-50, 50) | 0}px, -115%) rotate(${sp}deg)`
         : side === 2 ? `translate(120%, ${rnd(-60, 40) | 0}px) rotate(${Math.abs(sp)}deg)` : `translate(${rnd(-40, 40) | 0}px, 70%) rotate(${sp}deg) scale(1.08)`; };
     let i = 0;
@@ -1231,24 +1237,41 @@ window.AIQ = window.AIQ || {};
     el.onpointerleave = () => { clearTimeout(reelT); reelT = setTimeout(next, 700); };
     el.onclick = () => { clearTimeout(reelT); if (A.core && A.core.S && A.core.S.phase === "asking") { leave(); return; } el.classList.add("hidden"); open(ids[i]); };   // con el reloj corriendo solo se aparta
     el.classList.remove("hidden", "in", "out"); A.restyle(el); el.classList.add("in");
-    /* ancho de la polaroid segun el alto libre bajo la placa: se mide al abrir (no por fotograma) y se encoge hasta que no tape los botones de abajo */
-    el.classList.remove("slim"); el.style.removeProperty("--pw");
-    if (el.parentNode && el.parentNode.id === "leftCol" && !document.body.classList.contains("tk-on")) {
-      const col = el.parentNode.clientWidth, limit = window.innerHeight - 72, reel = el.firstElementChild;
-      let pw = Math.round(col * .9); el.classList.toggle("slim", window.innerHeight < 720);
-      for (let k = 0; k < 4; k++) {
-        el.style.setProperty("--pw", pw + "px");
-        const over = reel.getBoundingClientRect().bottom + 14 - limit; if (over <= 0) break;
-        pw = Math.max(200, Math.round(pw - over / (el.classList.contains("slim") ? .62 : .75) - 4)); if (pw === 200) { el.style.setProperty("--pw", "200px"); break; }
-      }
+    /* v0.3.79: el monton, SIEMPRE entero (lo pidio el usuario: puede encoger un poco, nunca cortarse por abajo). Se mide una vez, al abrir. Su hueco
+       va desde donde empieza hasta los botones de abajo, que no tapa (o hasta la nota de campo o el borde, lo que tenga debajo). Por orden: la foto
+       4:3 a todo el ancho; si no cabe, apaisada (16:10, dato a 2 lineas); si aun asi no cabe, el monton SUBE sobre la barra del acto lo que haga
+       falta (nunca sobre la pregunta ni sobre un aviso de logro), que durante unos segundos importa menos que ver la foto grande; y solo al final
+       se estrecha. Los paneles van escalados (css/partida.css): los rectangulos son pixeles de pantalla y --pw, de diseno. Cuenta lo que baja, sube
+       o se va de lado la esquina de una tarjeta al girar (gira sobre el 85 % de su alto). Una vez medido se CLAVA (posicion absoluta en la
+       columna): si luego llega un aviso de logro y empuja la barra, el monton no baja con ella */
+    el.classList.remove("slim"); for (const k of ["--pw", "margin-top", "position", "left", "top"]) el.style.removeProperty(k);
+    if (el.parentNode && el.parentNode.id === "leftCol" && (!A.marcador || A.marcador.docked())) {
+      const col = el.parentNode, z = el.currentCSSZoom || 1, reel = el.firstElementChild, cr = col.getBoundingClientRect(), colW = col.clientWidth;
+      const rect = id => { const e = $(id); return e && e.getClientRects().length ? e.getBoundingClientRect() : null; }, dr = rect("dock"), nr = rect("note");
+      let floor = dr && dr.left < cr.right && dr.top > cr.top ? dr.top - 8 * z : window.innerHeight - 20 * z;
+      if (nr && nr.left < cr.right - 4 && nr.top > cr.top) floor = Math.min(floor, nr.top - 8 * z);   // ventanas de menos de 1200 px: con el ticket abierto la nota va bajo esta columna
+      const maxW = Math.round(colW * .9), MINW = 220, tilt = w => 0.052 * w + 6;
+      let last = null; const over = w => { el.style.setProperty("--pw", w + "px"); last = reel.getBoundingClientRect(); return (last.bottom - floor) / z + tilt(w); };   // > 0: lo que se sale (px de diseno). Cada medida recalcula el monton entero: las justas
+      const e0 = el.getBoundingClientRect(), r0 = reel.getBoundingClientRect(), free = (floor - r0.top) / z;   // (sin coste: A.restyle acaba de maquetar)
+      const pr = rect("plate"), ar = rect("achToast"), achB = ar && ar.bottom < r0.top + 2 ? ar.bottom + 2 * z : 0;
+      const can = w => Math.max(0, (r0.top - Math.max((pr ? pr.bottom : cr.top) + (8 + tilt(w)) * z, achB)) / z);   // lo que puede subir sin pisar la pregunta (ni con la esquina que sube al girar) ni el aviso de logro (que va por encima: ahi la esquina no importa)
+      let w = maxW, o;
+      if (free < .75 * (maxW - 20) + 100 + tilt(maxW)) { el.classList.add("slim"); o = over(w); }   // la 4:3 no cabe ni con el texto mas corto: apaisada sin probar
+      else { last = r0; o = (r0.bottom - floor) / z + tilt(w); if (o > 0) { el.classList.add("slim"); o = over(w); } }
+      for (let k = 0; o - can(w) > 0.5 && w > MINW && k < 6; k++) { w = Math.max(MINW, Math.floor(w - (o - can(w)) / (.625 + 0.052) - 2)); o = over(w); }
+      const lift = Math.max(0, Math.min(o, can(w)));
+      const side = cr.left / z + (colW - w) / 2, swing = 0.089 * last.height / z + 24, dx = Math.max(0, Math.ceil(swing - side + 4));   // que la esquina de arriba (y la medalla) no asome fuera de la pantalla
+      el.style.setProperty("--pw", w + "px"); el.style.position = "absolute"; el.style.top = Math.round((e0.top - cr.top) / z - lift) + "px"; el.style.left = Math.round((colW - w) / 2 + dx) + "px";
     }
     show(0); reelT = setTimeout(next, hold(0));
   }
-  listeners.push(added => { setTimeout(() => toast(added), 1700); });   // sin sonido propio: lo celebran los jackpots del ticket (A.sfx.jackpot)
+  listeners.push(added => { const S = A.core && A.core.S, q0 = S && S.phase === "reveal" ? [S.qi, S.qs] : null; setTimeout(() => toast(added, q0), 1700); });   // sin sonido propio: lo celebran los jackpots del ticket (A.sfx.jackpot)
 
   A.codex = {
     init(w, m) { world = w; map = m; load(); build(); },
     open, close, isOpen, stats, entry: id => E[id], has: id => !!E[id],
+    /* ¿esta el monton en la esquina? (el crupier no habla encima: js/dealer.js) */
+    toastOn() { const el = $("cxToast"), S = A.core && A.core.S; return !!el && !el.classList.contains("hidden") && !el.classList.contains("out") && el.classList.contains("pile") && el.getClientRects().length > 0 && !!S && S.phase === "reveal"; },
     toastAside() { const el = $("cxToast"); if (el && el._leave && !el.classList.contains("hidden") && !el.classList.contains("out")) el._leave(); },   // empieza otra pregunta: el monton se aparta y deja el mapa libre
     unlocked: () => order.filter(isUnlocked), total: () => order.length,
     isUnlocked: id => !!store.unlocked[id],

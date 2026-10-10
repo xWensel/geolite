@@ -1,0 +1,206 @@
+/* Geolite - LOS PANELES DE LA PARTIDA en Naipe de gala (v0.3.79). La pregunta, el marcador con su ticket, la barra del acto, la nota de campo, el zoom
+   y los botones de abajo eran lo ultimo que seguia con el dibujo de antes. Lo aprobo el usuario en la Mesa de diseno (version 20, direccion A):
+   - PAPEL lo que el crupier te da a leer (la pregunta, el ticket, la nota); FIELTRO CON LATON lo que es de la mesa (el marcador, la barra del acto,
+     el zoom y los botones de abajo); LATON lo que se pulsa para seguir («Siguiente»). El ticket sale de la ranura del marcador, algo mas estrecho.
+   - Van a la escala del juego (--k, la de los menus, el Campamento y el crupier) y en su margen (40 / 32), asi que «Tamano de la interfaz» tambien
+     manda aqui. Antes iban a tamano fijo: a 1080p la pregunta quedaba a dos tercios de todo lo demas.
+   - Quietos (sin balanceo ni giro: la letra de pixel queda nitida), letra en sus minimos en cualquier pantalla (16 Silkscreen / 18 Jersey a escala 1),
+     sin la banda del ticket que repetia la pregunta y sin el corazon de adorno del marcador.
+   Solo en escritorio (el ticket pegado al marcador: mas de 900 px de ancho y de 520 de alto; en Electron, siempre). La hoja de la ventana estrecha
+   y el Duelo de fichas (body.duelo-on, que coloca sus piezas respecto a los botones de siempre) no cambian. */
+
+:root { --hx: 40px; --hy: 32px; }
+@media (max-width: 1199px), (max-height: 699px) { :root { --hx: 16px; --hy: 14px; } }   /* ventanas pequenas (siempre a escala 1): el margen de antes, que el mapa manda */
+
+@media (min-width: 901px) and (min-height: 521px) {
+  /* ================================================================ 1 · escala y sitio
+     `zoom` escala tambien left/top/right/bottom y el ancho del propio panel; --vw y --vh se dividen entre k para que lo de dentro mida como a 1280 */
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol { left: var(--hx); top: var(--hy); width: min(389px, calc(42 * var(--vw))); gap: 8px; zoom: var(--k); --vw: calc(1vw / var(--k)); --vh: calc(1vh / var(--k)); }
+  html[data-skin="casino"] body:not(.duelo-on) #hud { left: var(--hx); right: var(--hx); top: var(--hy); zoom: var(--k); --vw: calc(1vw / var(--k)); --vh: calc(1vh / var(--k)); }
+  html[data-skin="casino"] body:not(.duelo-on) .rail-sh { right: var(--hx); zoom: var(--k); }
+  html[data-skin="casino"] body:not(.duelo-on) .dock-sh { left: var(--hx); bottom: var(--hy); zoom: var(--k); }
+  html[data-skin="casino"] body:not(.duelo-on) .note-sh { zoom: var(--k); --vw: calc(1vw / var(--k)); --vh: calc(1vh / var(--k)); transform: translateX(-50%); }
+  html[data-skin="casino"] body:not(.duelo-on) #toolBar.tool-bar { zoom: var(--k); bottom: calc(var(--note-top, 88px) / var(--k) + 12px); }   /* --note-top llega en pixeles de pantalla */
+  html[data-skin="casino"] body:not(.duelo-on) :is(.plate-sh, .ledger-sh, .rail-sh, .dock-sh, .note-sh) { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(.plate-sh, .ledger-sh) { animation: none; }
+
+  /* ================================================================ 2 · la pregunta: un naipe de papel con su filete */
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol #plate { padding: 16px 20px 18px; border-radius: 0; clip-path: var(--gx-notch); color: var(--gx-ink); background: var(--gx-card);
+    box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol #plate::before { inset: 8px 8px 10px; z-index: 0; border-radius: 0; background: none; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-print); pointer-events: none; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol #plate > * { position: relative; z-index: 1; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol #plate > .trap-mark { position: absolute; z-index: 3; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol #plate.trap { box-shadow: inset 0 0 0 2px #5e1238, inset 0 0 0 4px #d8283f, inset 0 -4px 0 2px var(--gx-paper-lo); }   /* la pregunta trampa: el canto, en rojo */
+  html[data-skin="casino"] body:not(.duelo-on) #plate.trap #askKind { visibility: hidden; }   /* el sello TRAMPA va en su sitio (antes la tapaba a medias) */
+  html[data-skin="casino"] body:not(.duelo-on) #plate .trap-stamp { right: 18px; top: 12px; font-size: 16px; line-height: 1; padding: 5px 8px 4px; border-radius: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate .plate-top { font-size: 16px; letter-spacing: .08em; color: var(--gx-ink-2); }
+  html[data-skin="casino"] body:not(.duelo-on) #plate .tag { font-size: 16px; letter-spacing: .04em; line-height: 1; padding: 5px 8px 4px; border-radius: 0; background: var(--gx-ink); color: var(--gx-paper); }
+  html[data-skin="casino"] body:not(.duelo-on) #plate #askName { font-size: calc(40px * var(--ask-scale, 1)); line-height: .95; margin-top: 6px; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate.clue #askName { font-size: calc(26px * var(--ask-scale, 1)); line-height: 1.05; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate #askName.ch-riddle { font-size: calc(20px * var(--ask-scale, 1)); }
+  html[data-skin="casino"] body:not(.duelo-on) #plate #askSub { font-size: calc(22px * var(--ask-scale, 1)); font-weight: 400; color: #1f7a4d; margin-top: 4px; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate .clock { margin-top: 8px; gap: 10px; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate .ruler { height: 6px; border: 0; background: rgba(22, 36, 28, .18); }
+  html[data-skin="casino"] body:not(.duelo-on) #plate .ruler i { bottom: 0; height: 6px; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate #timeTxt { width: 56px; font-size: 18px; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate #pips { gap: 4px; margin-top: 10px; }
+  html[data-skin="casino"] body:not(.duelo-on) #plate #pips i { height: 6px; max-width: none; border-radius: 0; }
+
+  /* ================================================================ 3 · la barra del acto: una tira de fieltro con filo de laton; los retos, etiquetas rectas
+     (el fondo va en ::before con su esquina de pixel: asi la barra no recorta lo que asoma de sus etiquetas, como el sello del amuleto) */
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .adv-bar { min-width: 224px; padding: 10px 14px 12px; gap: 8px; background: none; box-shadow: none; isolation: isolate; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .adv-bar::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); image-rendering: pixelated;
+    background: url(../assets/dados/felt.png) 0 0 / 32px 32px, linear-gradient(var(--gx-felt-1), var(--gx-felt-3)); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .7); }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-top { gap: 12px; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-act { font-size: 16px; letter-spacing: .08em; opacity: 1; color: var(--gx-acc); }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins { font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; gap: 4px; color: var(--gx-gold); }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins b { font-weight: 400; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins .ic, html[data-skin="casino"] body:not(.duelo-on) #advBar .hp .ic { width: 24px; height: 24px; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-perk { width: 32px; height: 32px; background: rgba(4, 12, 8, .45); box-shadow: inset 0 0 0 2px var(--gx-o); }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-wind, html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-noise { font-size: 16px; letter-spacing: .06em; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-rise { border-radius: 0; background: #0b1d15; box-shadow: inset 0 0 0 2px var(--gx-o); padding: 5px 7px; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-rise i, html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-noise span { border-radius: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ch-chip { border-radius: 0; padding: 5px 10px 5px 6px; background: #0b1d15; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ch-chip > b, html[data-skin="casino"] body:not(.duelo-on) #advBar .ch-chip .ch-lv { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ch-chip .ic { width: 24px; height: 24px; }
+
+  /* el monton de tarjetas nuevas de la Enciclopedia (js/codex.js ajusta su tamano para que salga entero): solo la letra, en sus minimos; el dato,
+     en letra de texto (se lee mejor y cabe mas en dos lineas) */
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .cx-toast.pile .cx-tt em, html[data-skin="casino"] body:not(.duelo-on) #leftCol .cx-toast.pile .cx-tt s { font-size: 16px; line-height: 1.15; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .cx-toast.pile .cx-tt b { font-weight: 400; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .cx-toast.pile .cx-tt i { font-family: var(--sans); font-size: 18px; line-height: 1.12; letter-spacing: 0; text-transform: none; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .cx-toast .cx-cnt { bottom: -10px; font-size: 16px; line-height: 1; padding: 5px 8px 4px; }   /* un poco mas abajo: no tapa el final del dato */
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .ach-toast .ach-t em { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) #leftCol .ach-toast { z-index: 9; }   /* un aviso de logro que llegue con el monton ya puesto sale por encima de el (js/codex.js clava el monton en su sitio) */
+  html[data-skin="casino"] body:not(.duelo-on) #toolBar .tool kbd { font-size: 16px; line-height: 1; padding: 2px 5px 1px; }
+
+  /* ================================================================ 4 · el marcador: un cartel de la mesa. Fieltro con marco de laton (en ::before, con su
+     esquina de pixel, para no recortar las bombillas del cobro ni la etiqueta de la racha, que van por fuera) */
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh #ledger { z-index: 1; min-width: 304px; padding: 14px 20px 14px; border-radius: 0; background: none; color: var(--gx-txt); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh #ledger::before { inset: 0; z-index: -1; border-radius: 0; clip-path: var(--gx-notch); image-rendering: pixelated; transition: none;
+    background: url(../assets/dados/felt.png) 0 0 / 32px 32px, radial-gradient(130% 90% at 50% 0%, var(--gx-felt-1) 0%, var(--gx-felt-2) 55%, var(--gx-felt-3) 100%);
+    box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 6px var(--gx-rim), inset 0 0 0 8px var(--gx-o), inset 0 40px 56px -40px rgba(255, 214, 140, .14); }
+  /* (era el corazon de adorno de la esquina, que no es una vida: ahora, el brillo y la sombra del laton) */
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh #ledger::after { content: ""; position: absolute; inset: 2px; right: 2px; top: 2px; width: auto; height: auto; z-index: -1; opacity: 1; pointer-events: none;
+    background: linear-gradient(var(--gx-o), var(--gx-o)) 0 0 / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 100% 0 / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 0 100% / 2px 2px no-repeat, linear-gradient(var(--gx-o), var(--gx-o)) 100% 100% / 2px 2px no-repeat,
+      linear-gradient(var(--gx-rim-hi), var(--gx-rim-hi)) 2px 0 / calc(100% - 4px) 2px no-repeat, linear-gradient(var(--gx-rim-lo), var(--gx-rim-lo)) 2px 100% / calc(100% - 4px) 2px no-repeat; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-label { font-size: 16px; letter-spacing: .08em; line-height: 1.1; color: var(--gx-acc); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-num { font-size: 44px; margin: 3px 0 6px; color: var(--gx-ttl); text-shadow: 0 3px 0 #050b08; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .gauge { height: 10px; border: 0; margin-bottom: 8px; background: #0b1d15; box-shadow: inset 0 0 0 2px var(--gx-o); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .gauge i { bottom: 0; height: 10px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .35), inset 0 0 0 2px var(--gx-o); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .gauge em { top: -4px; bottom: -4px; background: var(--gx-red); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .gauge em::before { border-top-color: var(--gx-red); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-row { font-size: 16px; line-height: 1.1; color: var(--gx-txt-2); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-row b { color: var(--gx-txt); font-weight: 400; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-loot { font-size: 16px; margin-top: 6px; color: var(--gx-txt-2); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-loot b { color: var(--gx-gold); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .lg-loot b .ic { width: 20px; height: 20px; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .mc-plus { color: #8cc4ff; text-shadow: 0 2px 0 #050b08; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger .mc-stamp { border-radius: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledger > .mc-mq > .mqw { --mqi: -9px; --mqb: 6px; --mqr: 2px; }
+  /* la etiqueta de la racha: recta y a caballo del marco */
+  html[data-skin="casino"] body:not(.duelo-on) #ledger #streakChip { right: 14px; top: -8px; transform: none; font-size: 16px; line-height: 1; padding: 5px 8px 4px; color: #fff; background: var(--gx-red); box-shadow: inset 0 0 0 2px var(--gx-o), 0 3px 0 rgba(2, 6, 4, .7); }
+
+  /* ================================================================ 5 · el ticket: papel de gala que sale de la ranura del marcador (10 px mas estrecho por
+     cada lado). Tambien la copia que se arranca y cae (.mc-drop). Medidas pensadas para que el ticket de siempre quepa entero a 720 de alto */
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh .mc-slot { padding: 0 10px; margin-top: -4px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .mc-in { border: 0; border-radius: 0; background: var(--gx-card);
+    box-shadow: inset 2px 0 0 var(--gx-o), inset -2px 0 0 var(--gx-o), inset 0 -2px 0 var(--gx-o), inset 0 -6px 0 var(--gx-paper-lo); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh .mc-in, .mc-ghost) > .ticket { width: calc((var(--mc-w) - 20px) / var(--mc-z, 1)); padding: 0 20px 16px; color: var(--gx-ink); }
+  html[data-skin="casino"] body:not(.duelo-on) .mc-drop { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-band { display: none; }   /* repetia «N.º 01 / 05 · Capital», que sigue a la vista en la pregunta */
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-head { margin-top: 22px; }   /* hueco para la fila de bombillas del cobro, que va justo por fuera del marcador (antes caia sobre la banda) */
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-title { font-size: 30px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-place > span { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-place b { font-size: 24px; font-weight: 400; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-place em { font-size: 18px; font-weight: 400; color: #1f7a4d; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-answer { font-size: 20px; font-weight: 400; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-answer span { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-km { font-size: 52px; margin-top: 4px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-km > span:last-child { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-from { font-size: 20px; line-height: 1.1; margin-top: 2px; min-height: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-pin { font-size: 18px; line-height: 1.1; margin-top: 2px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-perf { margin: 10px -20px 10px; border-top: 2px dashed rgba(22, 36, 28, .4); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-rows { gap: 4px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-rows dt { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-rows dd { font-size: 18px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-perks { margin-top: 6px; gap: 3px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-perks > div { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-eq { margin: 20px 0 4px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-eq :is(.c, .m) { min-height: 56px; padding: 5px 8px 6px; border-radius: 0; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px rgba(0, 0, 0, .22), 0 4px 0 rgba(2, 6, 4, .45); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-eq :is(.c, .m) > span { font-size: 16px; line-height: 1; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-eq .m > span em.lg { font-size: 16px; line-height: 1; letter-spacing: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-eq .m small { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-eq b { font-size: 28px; font-weight: 400; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-total { margin: 8px 0 8px; padding-top: 6px; border-top: 2px solid var(--gx-ink); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-total > span:first-child { font-size: 16px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-total .odo { font-size: 40px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-coins { font-size: 18px; margin: -2px 0 8px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-cx { margin-bottom: 10px; border-radius: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-cx > span, html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .tk-cx > b { font-size: 16px; }
+  /* «Siguiente»: la placa de laton del boton principal de todo el juego, con sus tornillos y su tecla. Sin luces alrededor */
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .btn-ink { min-height: 52px; padding: 4px 18px 6px; justify-content: space-between; gap: 10px; font-family: var(--sans); font-weight: 400; font-size: 26px; line-height: 1; letter-spacing: 0; text-transform: none;
+    color: var(--gx-ink); border-radius: 0; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o); filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78)); transition: transform .12s steps(2, end), filter .12s;
+    background: radial-gradient(circle at 10px 10px, #fff4c8 0 1px, #6b4410 1.5px 2.5px, transparent 3px), radial-gradient(circle at calc(100% - 10px) 10px, #fff4c8 0 1px, #6b4410 1.5px 2.5px, transparent 3px),
+      linear-gradient(var(--gx-gold-hi) 0 4px, var(--gx-gold) 4px calc(100% - 6px), var(--gx-gold-lo) calc(100% - 6px)); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh .btn-ink:hover, html[data-skin="casino"] body:not(.duelo-on) #ledgerSh .btn-ink.pad-hov { transform: translateY(-2px); filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78)) brightness(1.06); box-shadow: inset 0 0 0 2px var(--gx-o); }
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh .btn-ink:active { transform: translateY(2px); filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78)) brightness(.96); box-shadow: inset 0 0 0 2px var(--gx-o); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .btn-ink .ar { display: none; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .btn-ink kbd { margin-left: auto; font-family: var(--mono); font-size: 16px; line-height: 1; padding: 3px 5px 2px; box-shadow: inset 0 0 0 2px currentColor; opacity: .75; background: none; color: inherit; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .btn-ink kbd .ic { width: 20px; height: 20px; filter: brightness(0); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-drop) .btn-ink .gl { margin: -6px 0 -6px auto; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh .btn-ink:focus { outline: none; }
+  html[data-skin="casino"] body:not(.duelo-on) #ledgerSh .btn-ink:focus-visible::after, html[data-skin="casino"][data-input="pad"] body:not(.duelo-on) #ledgerSh .btn-ink:focus::after { content: ""; position: absolute; inset: 5px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+
+  /* falta alto (ronda con muchas reliquias, botin en el marcador, 16:9 con la interfaz en Grande...): primero se aprieta y luego se encoge (--mc-z) */
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-head { margin-top: 20px; }   /* (el hueco de las bombillas no se aprieta) */
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-title { font-size: 26px; margin-top: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-place b { font-size: 22px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-km { font-size: 44px; margin-top: 2px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-from { font-size: 18px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-perf { margin-top: 6px; margin-bottom: 6px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-rows { gap: 2px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-eq { margin-top: 14px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-eq :is(.c, .m) { min-height: 50px; padding-top: 4px; padding-bottom: 5px; gap: 2px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-eq b { font-size: 25px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-total { margin: 5px 0 5px; padding-top: 4px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-total .odo { font-size: 34px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .tk-cx { margin-bottom: 8px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c1 .btn-ink { min-height: 48px; padding-top: 3px; padding-bottom: 5px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-head { margin-top: 18px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-title { font-size: 22px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-km { font-size: 38px; margin-top: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-perf { margin-top: 3px; margin-bottom: 3px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-eq { margin-top: 12px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-eq :is(.c, .m) { min-height: 46px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-eq b { font-size: 23px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-total { margin: 3px 0 4px; padding-top: 3px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-total .odo { font-size: 30px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .tk-cx { margin-bottom: 6px; padding-top: 4px; padding-bottom: 3px; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#ledgerSh, .mc-ghost).mc-c2 .btn-ink { min-height: 44px; font-size: 24px; }
+
+  /* ================================================================ 6 · la nota de campo: una tira de papel, recta */
+  html[data-skin="casino"] body:not(.duelo-on) #noteSh #note { padding: 12px 22px 14px; border-radius: 0; clip-path: var(--gx-notch); color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); }
+  html[data-skin="casino"] body:not(.duelo-on) #noteSh #note::before { inset: 8px 8px 10px; z-index: 0; border-radius: 0; background: none; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-print); pointer-events: none; }
+  html[data-skin="casino"] body:not(.duelo-on) #noteSh #note > * { position: relative; z-index: 1; }
+  html[data-skin="casino"] body:not(.duelo-on) #note #lvlText { font-size: 16px; letter-spacing: .08em; line-height: 1.25; color: var(--gx-ink-2); }
+  html[data-skin="casino"] body:not(.duelo-on) #note #factText { font-size: 20px; line-height: 1.15; margin-top: 4px; }
+
+  /* ================================================================ 7 · el zoom y los botones de abajo: fieltro con filo de laton, botones de 44 */
+  html[data-skin="casino"] body:not(.duelo-on) :is(#rail, #dock) { padding: 6px; gap: 4px; border-radius: 0; clip-path: var(--gx-notch); image-rendering: pixelated;
+    background: url(../assets/dados/felt.png) 0 0 / 32px 32px, linear-gradient(var(--gx-felt-1), var(--gx-felt-3)); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .7); }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#rail, #dock)::before { display: none; }
+  html[data-skin="casino"] body:not(.duelo-on) :is(#rail, #dock) button { width: 44px; height: 44px; border-radius: 0; }
+  html[data-skin="casino"] body:not(.duelo-on) #rail .zscale { height: 64px; }
+  html[data-skin="casino"] body:not(.duelo-on) #rail .zscale i { box-shadow: none; }
+}
+
+/* ================================================================ 8 · con sitio de sobra (16:9 y 16:10 a cualquier escala): la nota, en la reticula.
+   Mientras piensas va centrada abajo, entre los botones y su hueco simetrico; con el ticket abierto, entre la columna de la pregunta y el ticket */
+@media (min-width: 1200px) and (min-height: 700px) {
+  html[data-skin="casino"] body:not(.duelo-on) .note-sh { bottom: var(--hy); width: min(592px, calc(100 * var(--vw) - 2 * var(--hx) - 336px)); }
+  html[data-skin="casino"] body.mc-on:not(.duelo-on) .note-sh { left: calc(var(--hx) + 389px + 16px); right: calc(var(--hx) + var(--mc-w) + 16px); width: auto; max-width: 592px; margin: 0 auto; transform: none; }
+}
+/* de 901 a 1100 px con el ticket abierto la nota va a la izquierda (css/marcador.css): aqui solo pierde el giro */
+@media (min-width: 901px) and (max-width: 1100px) and (min-height: 521px) { html[data-skin="casino"] body.mc-on:not(.duelo-on) .note-sh { transform: none; } }
+html.reduce-motion #ledgerSh .btn-ink { transition: none; }

@@ -1664,7 +1664,8 @@ window.AIQ = window.AIQ || {};
     const L = R.left + 16, cap = x => (sheet && sheet.left > x ? sheet.left - 12 - x : Infinity);
     const mob = innerWidth <= 720, maxS = Math.max(0, Math.min(mob ? 170 : 384, cap(L)));
     const nav = setP && document.querySelector("#settings .set-nav");
-    const top = [box("plate"), box("advBar"), box("cxToast"), nav ? nav.getBoundingClientRect() : null].filter(r => hits(r, L, L + maxS + 360)).reduce((m, r) => Math.max(m, r.bottom), R.top) + 10;   // v0.32: tampoco pisa el aviso de tarjeta nueva
+    const pile = $("cxToast") && $("cxToast").classList.contains("pile");    // v0.3.79: el monton de tarjetas y el no conviven (yieldCorner): si se recoloca durante el relevo, no lo cuenta como techo (se quedaba sin cara)
+    const top = [box("plate"), box("advBar"), pile ? null : box("cxToast"), nav ? nav.getBoundingClientRect() : null].filter(r => hits(r, L, L + maxS + 360)).reduce((m, r) => Math.max(m, r.bottom), R.top) + 10;   // v0.32: tampoco pisa el aviso de tarjeta nueva
     const lows = [box("dock"), box("note"), box("toolBar")]; if (sheet) lows.push(sheet);
     let floor = R.bottom - 8; for (const r of lows) if (hits(r, L, L + maxS)) floor = Math.min(floor, r.top - 8);
     const sn = A.crupier.snap(Math.min(maxS, floor - top), mob ? 0 : Math.floor(3 * (devicePixelRatio || 1) + 0.25));   // v0.32: x3 si cabe, si no x2 o x1 (pixel entero)
@@ -1706,6 +1707,7 @@ window.AIQ = window.AIQ || {};
     if (!o.live && !o.force && A.vivoQuiet && A.vivoQuiet()) return;      // el autor habla por el: sus frases automaticas callan mientras el esta en la mesa y 90 s despues
     if (!o.force && (held || napping || napWant || (!D.on && !D.onHome))) return;
     if (o.valid && !o.valid()) return;                                // la frase ya no toca (p. ej. la reaccion a una pregunta que ya paso)
+    if (cornerTaken(o)) { if (!(pend && pend[1].live && !o.live)) pend = [line, o]; waitCorner(); return; }   // v0.3.79: el monton de tarjetas tiene la esquina (o la ha pedido): espera a que se vaya
     if (el) ensure();
     const left = D.busy && el ? (typing ? Infinity : doneAt + LINGER - Date.now()) : 0;   // tambien las escenas (force) esperan a que acabe la frase en curso
     if (left > 0) { if (pend && pend[1].live && !o.live) return; if (!pend && left !== Infinity) later(flush, left); pend = [line, o]; return; }   // lo que te dice en directo no lo pisa una frase suya
@@ -1732,6 +1734,7 @@ window.AIQ = window.AIQ || {};
       if (!el.isConnected) { rehome(); fitCorner(); }                        // otra pantalla sustituyo la suya: termina la frase en la esquina (antes se callaba a media frase)
       if (i >= chars.length) {
         typing = false; doneAt = Date.now(); el.classList.add("done"); spr.talk(false); later(() => spr.release(), LINGER);   // un gesto sostenido dura su frase y su segundo de mas
+        if (cornerTaken(o) && !leaving) { if (!pend && o.done && released !== me) later(o.done, LINGER); grantCorner(); later(giveCorner, LINGER); return; }   // el monton de tarjetas espera la esquina: sale ya, y el se aparta tras su segundo de mas (lo pendiente espera al monton)
         if (pend) { later(flush, LINGER); return; }
         if (leaving) { later(finishLeave, LINGER); return; }                  // se iba: acaba, su segundo de mas, y se va (sin encadenar nada detras)
         if (o.hold !== 0) later(() => D.hide(), (o.hold || 1800 + text.length * 22) + LINGER);
@@ -1742,7 +1745,7 @@ window.AIQ = window.AIQ || {};
     typing = true; tick(); D.busy = true;
   };
   /* se va: lo que estuviera diciendo o fuera a decir se corta con el (antes seguia escribiendo oculto, con su voz, y el resto de la intro asomaba luego en la esquina) */
-  D.hide = () => { if (!el) return; clear(); el.classList.remove("in", "done", "laugh", "angry", "shock", "sly", "boss", "doze", "nap", "nap1", "nap2"); bubble.classList.remove("on"); D.busy = false; dozing = false; spr.talk(false); spr.release(); spr.shown(false); };
+  D.hide = () => { if (!el) return; clear(); el.classList.remove("in", "done", "laugh", "angry", "shock", "sly", "boss", "doze", "nap", "nap1", "nap2"); bubble.classList.remove("on"); D.busy = false; dozing = false; spr.talk(false); spr.release(); spr.shown(false); if (cornerAsk) grantCorner(); };   // se va: si el monton de tarjetas esperaba la esquina, ya es suya
   D.enable = on => {
     D.on = !!on; clearTimeout(runT);
     if (on && D.onHome) D.homeTease(false);                           // entrar en partida (p. ej. Continuar desde el inicio) apaga las apariciones del menu
@@ -1758,6 +1761,26 @@ window.AIQ = window.AIQ || {};
     D.host = host || null; if (host) host.appendChild(el); else $("app").appendChild(el);
     el.classList.toggle("big", !!host); el.classList.remove("camp", "screen"); if (host) el.classList.remove("inline", "home", ...HOME_CORNERS);   // lo del Campamento o del Perfil no le sigue
     fitCorner();                                                      // v0.3.35: en un hueco ajeno se quita la altura y el tamano que le dio la esquina (en la pausa flotaba 76 px); de vuelta, los recalcula
+  };
+  /* v0.3.79: LA ESQUINA ES DE UNO CADA VEZ. El monton de tarjetas nuevas (js/codex.js) sale en la columna de la izquierda, justo donde el comenta la
+     respuesta, y con los paneles a la escala del juego ya no caben los dos: antes el quedaba encima de las tarjetas. Ahora el monton pide la esquina
+     (yieldCorner). Si el crupier esta callado, es suya al momento. Si esta a media frase NO se le corta: la termina; en ese instante sale el monton
+     y el se queda su segundo de mas (el relevo: las tarjetas caen y el se aparta) y se va, sin el rato de lectura de despues. Lo que tuviera
+     pendiente de decir espera a que el monton se vaya (solo la ultima frase, como siempre, y solo si aun viene a cuento: o.valid). Una frase muy
+     larga no retiene al monton mas de max ms. Las escenas forzadas, lo que escribe el autor en directo y las frases de otras pantallas ni
+     esperan ni se acortan */
+  let cornerAsk = null, cornerT = 0, cornerW = 0;
+  const pileOn = () => !!(A.codex && A.codex.toastOn && A.codex.toastOn());
+  const cornerTaken = o => !o.force && !o.live && !o.pos && !o.camp && !o.screen && !o.table && !D.host && D.on && !D.onHome && (!!cornerAsk || pileOn());
+  const grantCorner = () => { const f = cornerAsk; cornerAsk = null; clearTimeout(cornerT); if (f) f(); };
+  function waitCorner() { if (cornerW) return; cornerW = setInterval(() => { if (pend && (cornerAsk || pileOn())) return; clearInterval(cornerW); cornerW = 0; if (pend && !D.busy) flush(); }, 160); }
+  function giveCorner() { const p = pend; D.hide(); pend = p; if (pend) waitCorner(); }
+  D.yieldCorner = (cb, max = 4500) => {
+    const here = !!el && !D.host && D.on && D.busy && !["lvpos", "camp", "screen", "inline", "big", "home"].some(c => el.classList.contains(c));
+    if (!here) return cb();
+    if (typing) { if (cornerAsk) { const f = cornerAsk; cornerAsk = () => { f(); cb(); }; } else { cornerAsk = cb; clearTimeout(cornerT); cornerT = setTimeout(grantCorner, max); } return; }   // a media frase: el monton sale cuando la termine (o a los max ms)
+    const left = doneAt + LINGER - Date.now(); cb();                  // ya la termino: el monton sale ya...
+    if (left <= 0) giveCorner(); else if (!leaving) later(giveCorner, left);   // ...y el se aparta al acabar su segundo de mas (si ya lo tuvo, ahora mismo)
   };
   /* se retira SIN cortarle: si esta a media frase la acaba donde este (con su segundo de mas) y luego se va; nada de lo que esperaba turno le sigue */
   let leaving = false, leaveT = 0, lineN = 0, released = 0;

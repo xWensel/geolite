@@ -974,6 +974,7 @@ window.AIQ = window.AIQ || {};
     let el = $("advBar"); if (el) return;
     el = document.createElement("div"); el.id = "advBar"; el.className = "adv-bar hidden"; ($("leftCol") || $("app")).appendChild(el);
     const tb = document.createElement("div"); tb.id = "toolBar"; tb.className = "tool-bar hidden"; $("app").appendChild(tb);
+    if (A._noteTop && A.marcador && A.marcador.docked()) tb.style.setProperty("--note-top", A._noteTop);   // v0.3.79: lo que ocupa la nota de campo (js/game.js ya no lo escribe en la raiz)
   }
   function hearts() { let h = ""; for (let i = 0; i < run.maxLives; i++) h += `<i class="hp ${i < run.lives ? "on" : ""}">${ic(i < run.lives ? "heart" : "heart_empty")}</i>`; return h; }
   /* botin en vivo en el marcador: en cuanto superas el objetivo, cuanto cobrarias ya y a cuantos puntos esta el siguiente doblon */
@@ -1096,7 +1097,9 @@ window.AIQ = window.AIQ || {};
     tb.querySelectorAll(".tool").forEach(b => (b.onclick = () => A.adv.useTool(b.dataset.tool)));
     fitToolNames(tb);
     if (A.pointer) A.pointer.set({ tool: C().S.tool });
+    { const sig = tb.classList.contains("hidden") ? "" : ids.join(); if (sig !== toolSig) { toolSig = sig; if (A.dealer && A.dealer.refit) requestAnimationFrame(A.dealer.refit); } }   // v0.3.79: la mano acaba de salir o de cambiar: si el crupier ya hablaba, sube su bocadillo
   }
+  let toolSig = "";
   A.adv.refresh = renderBars;
   A.adv.hideBars = () => { const a = $("advBar"), b = $("toolBar"), l = $("scLoot"); if (a) a.classList.add("hidden"); if (b) b.classList.add("hidden"); if (l) l.classList.add("hidden"); };
   A.adv.hudTitle = () => { const Lv = C().S.camp.levels[0]; return run && run.inf ? `${A.tx(Lv.name)} · ${A.tx(Lv.topicName)} · ${A.fmt1(Lv.seconds)} s` : `${A.tx(Lv.name)} · ${A.tx(Lv.topicName)} · ${A.T("Objetivo", "Target")} ${A.fmt(Lv.advance)}`; };

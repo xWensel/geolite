@@ -607,8 +607,13 @@
        (el marcador cambia de tamano en cada fotograma mientras se despliega el ticket: escribirlas siempre costaba fotogramas) */
     const set = (k, v) => { if (last[k] !== v) { last[k] = v; de.style.setProperty(k, v); } };
     const upd = () => {
-      const r = $("note").getBoundingClientRect(); set("--note-top", (r.height ? Math.round(innerHeight - r.top) : 16) + "px");
-      if (A.marcador.docked()) return;
+      const r = $("note").getBoundingClientRect(), nt = (r.height ? Math.round(innerHeight - r.top) : 16) + "px", tb = $("toolBar");
+      /* v0.3.79: en escritorio --note-top solo la usa la mano de herramientas (css/uikit.css y css/partida.css), asi que se escribe en ella y no en la raiz:
+         con los paneles en gala la nota cambia de sitio en el mismo fotograma en que sale el ticket, y recalcular ahi toda la pagina se notaba.
+         A._noteTop: para la mano que aun no existe (js/adventure.js la crea al empezar la primera Aventura) */
+      A._noteTop = nt;
+      if (A.marcador.docked()) { if (tb && tb.style.getPropertyValue("--note-top") !== nt) tb.style.setProperty("--note-top", nt); return; }
+      if (tb) tb.style.removeProperty("--note-top"); set("--note-top", nt);
       const p = $("plate").getBoundingClientRect(), lw = $("ledgerSh").getBoundingClientRect().width;
       set("--plate-bottom", (p.height ? Math.round(p.bottom) : 16) + "px"); if (lw) set("--ledger-w", Math.round(lw) + "px");   // la placa deja sitio al marcador
       A.marcador.fitSheet();

@@ -18,6 +18,9 @@ window.AIQ = window.AIQ || {};
   let slot = null, isOpen = false, gen = 0, widthT = 0;
   const later = (fn, ms) => { const g = gen; setTimeout(() => { if (g === gen) fn(); }, ms); };
   const shell = () => $("ledgerSh");
+  /* v0.3.79: los paneles de la partida van a la escala del juego (css/partida.css, zoom). getBoundingClientRect da pixeles de pantalla;
+     offsetHeight, scrollHeight y lo que se escribe en style, pixeles de diseno. zOf: cuantos de pantalla hace uno de diseno */
+  const zOf = el => (el && el.currentCSSZoom) || 1;
   function paper() {
     if (!slot) { slot = document.createElement("div"); slot.id = "tkSlot"; slot.className = "mc-slot"; slot.innerHTML = '<div class="mc-in"></div>'; shell().appendChild(slot); }
     return slot.firstElementChild;
@@ -27,13 +30,13 @@ window.AIQ = window.AIQ || {};
 
   /* ancho animado: el marcador pasa de su ancho natural al del ticket y vuelve. Con "auto" no hay transicion: se fija en px mientras dura */
   function widthTo(open) {
-    const sh = shell(); clearTimeout(widthT);
+    const sh = shell(), z = zOf(sh); clearTimeout(widthT);
     const from = sh.getBoundingClientRect().width;
     sh.style.width = ""; sh.classList.toggle("mc-open", open);
     const to = sh.getBoundingClientRect().width;
     if (still() || Math.abs(to - from) < 1) return;
-    sh.style.transition = "none"; sh.style.width = from + "px"; A.restyle(sh); sh.style.transition = "";
-    sh.style.width = to + "px";
+    sh.style.transition = "none"; sh.style.width = from / z + "px"; A.restyle(sh); sh.style.transition = "";   // v0.3.79: el marcador va escalado; su ancho se fija en pixeles de diseno
+    sh.style.width = to / z + "px";
     widthT = setTimeout(() => { sh.style.width = ""; }, 460);
   }
 
@@ -65,7 +68,8 @@ window.AIQ = window.AIQ || {};
       c.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
       c.className = ["mc-in", "mc-ghost", ...[...sh.classList].filter(k => /^mc-c\d$/.test(k))].join(" ");
       g.className = "mc-drop"; g.appendChild(c);                  // la sombra va en el envoltorio: la mascara dentada la cortaria
-      Object.assign(g.style, { left: r.left - ar.left + "px", top: r.top - ar.top + "px", width: r.width + "px", height: r.height + "px" });
+      const z = zOf(p);
+      Object.assign(g.style, { left: (r.left - ar.left) / z + "px", top: (r.top - ar.top) / z + "px", width: r.width / z + "px", height: r.height / z + "px", zoom: z === 1 ? "" : z });   // suelta en #app, a la misma escala que el marcador
       app.appendChild(g);
       const s = Math.random() < 0.5 ? -1 : 1, dx = s * (10 + Math.random() * 16), rot = s * (4 + Math.random() * 3);
       /* tiron seco (se arranca) y luego cae con gravedad, girando un poco hacia un lado */
@@ -85,25 +89,33 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- que quepa entero: nada de desplazarse ni de pisar la nota de campo */
   const mcW = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--mc-w")) || 352;
-  function limit(sh) {
-    let lim = innerHeight - 12;
-    const n = $("noteSh"), right = sh.getBoundingClientRect().right, left = right - mcW();
+  function limit(sh, gap = 12) {
+    const z = zOf(sh); let lim = innerHeight - gap * z;
+    const n = $("noteSh"), right = sh.getBoundingClientRect().right, left = right - mcW() * z;
     if (n && !n.classList.contains("hidden")) { const r = n.getBoundingClientRect(); if (r.height && r.left < right && r.right > left + 1) lim = Math.min(lim, r.top - 10); }   // solo si de verdad comparten columna (a 1440 px quedan a 4 px)
     return lim;
   }
   function fit() {
     if (!isOpen || !M.docked()) return;
     const sh = shell(), p = paper(), led = $("ledger"); if (!p.firstElementChild) return;
-    sh.classList.remove("mc-c1", "mc-c2"); p.style.removeProperty("--mc-z");
-    const lim = limit(sh), top = sh.getBoundingClientRect().top;
+    /* v0.3.79: el marcador va escalado (zOf) y a 16:9 lo normal ya es ir apretado un nivel, asi que este ajuste se cuida: (1) si el ticket, la ventana y
+       el hueco son los de la ultima vez, no toca nada (lo llaman tres veces por ticket: al abrir, en el fotograma siguiente y cuando la nota de
+       campo cambia de tamano); (2) empieza por el nivel en que acabo la ultima vez, que casi siempre es el bueno: una sola medida en vez de dos o
+       tres, cada una con su recalculo de estilos del ticket entero */
+    const z = zOf(sh), lim = limit(sh), top = sh.getBoundingClientRect().top;
     const hold = () => { const l = $("scLoot"); return l && l.classList.contains("mc-hold") ? l.scrollHeight + 5 : 0; };   // botin que aparecera al llegar a la meta
-    const need = () => top + led.offsetHeight + hold() + p.scrollHeight + 3;
-    if (need() <= lim) return;
-    sh.classList.add("mc-c1"); if (need() <= lim) return;
-    sh.classList.add("mc-c2"); if (need() <= lim) return;
-    const room = lim - top - led.offsetHeight - hold() - 3, k = Math.max(0.55, Math.min(1, room / Math.max(1, p.scrollHeight)));
-    p.style.setProperty("--mc-z", k.toFixed(3));
+    const need = () => top + (led.offsetHeight + hold() + p.scrollHeight + 3) * z;
+    const lvNow = () => (sh.classList.contains("mc-c2") ? 2 : sh.classList.contains("mc-c1") ? 1 : 0), set = n => { sh.classList.toggle("mc-c1", n >= 1); sh.classList.toggle("mc-c2", n >= 2); };
+    const sig = () => [gen, innerWidth, innerHeight, Math.round(lim), Math.round(top), Math.round(need()), lvNow(), p.style.getPropertyValue("--mc-z")].join();
+    if (fitSig && sig() === fitSig) return;
+    if (p.style.getPropertyValue("--mc-z")) p.style.removeProperty("--mc-z");
+    let n = Math.min(2, fitLv); if (lvNow() !== n) set(n);
+    if (need() <= lim) { while (n > 0) { const h1 = need(); if (lim - h1 < GAIN[n] * z) break; set(n - 1); const h0 = need(); GAIN[n] = Math.max(GAIN[n], (h0 - h1) / z); if (h0 <= lim) n--; else { set(n); break; } } }   // cabe: solo prueba a aflojar si sobra lo que ocupa un nivel (y apunta lo que ocupa de verdad, para no volver a probar en balde)
+    else { while (n < 2 && need() > lim) set(++n);
+      if (need() > lim) { const room = (lim - top) / z - led.offsetHeight - hold() - 3, k = Math.max(0.55, Math.min(1, room / Math.max(1, p.scrollHeight))); p.style.setProperty("--mc-z", k.toFixed(3)); } }
+    fitLv = n; fitSig = sig();
   }
+  let fitSig = "", fitLv = 0; const GAIN = [0, 44, 36];   // lo que gana cada nivel de apretar (px de diseno; empieza por lo bajo y se corrige al medirlo)
   M.fit = fit;
   /* v0.2.15: la hoja del ticket (ventana estrecha o baja: #dlg.side, sin marcador al lado). Cabe entera sin desplazarse (antes se recortaba por
      dentro y dejaba fuera el total y el boton): primero se aprieta (sc1, sc2) y, si aun no cabe, se encoge. sheetRect: su sitio sin la animacion de
@@ -129,7 +141,7 @@ window.AIQ = window.AIQ || {};
   M.finalRect = () => {
     const sh = shell(); if (!sh) return null; const r = sh.getBoundingClientRect();
     if (!isOpen || !M.docked()) return r;
-    const h = $("ledger").offsetHeight + paper().scrollHeight + 3, w = mcW();
+    const z = zOf(sh), h = ($("ledger").offsetHeight + paper().scrollHeight + 3) * z, w = mcW() * z;
     return { left: r.right - w, right: r.right, top: r.top, bottom: r.top + h, width: w, height: h };
   };
   /* la ventana pasa de escritorio a movil con el ticket abierto: se lleva a la hoja inferior de siempre (y al reves solo se reajusta) */
@@ -163,7 +175,8 @@ window.AIQ = window.AIQ || {};
       const ar = app.getBoundingClientRect(), a = f.getBoundingClientRect(), b = g.getBoundingClientRect(); if (!a.width || !b.width) return;
       const x0 = a.left + a.width * (0.2 + Math.random() * 0.75) - ar.left, y0 = a.top + a.height * 0.5 - ar.top;
       const x1 = b.left + b.width * (0.25 + Math.random() * 0.55) - ar.left, y1 = b.top + b.height * 0.55 - ar.top;
-      const c = document.createElement("i"); c.className = "mc-chip" + (k % 4 === 3 ? " g" : "");
+      const c = document.createElement("i"), z = zOf(g); c.className = "mc-chip" + (k % 4 === 3 ? " g" : "");
+      if (z !== 1) { const s = Math.round(10 * z); c.style.width = c.style.height = s + "px"; c.style.margin = `${-s / 2}px 0 0 ${-s / 2}px`; }
       c.style.left = Math.round(x0) + "px"; c.style.top = Math.round(y0) + "px"; app.appendChild(c);
       const dx = x1 - x0, dy = y1 - y0, bow = (Math.random() - 0.5) * 80;
       const an = c.animate([
