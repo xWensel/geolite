@@ -252,6 +252,15 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const a = Math.min(1, cuanto * k * vario());
     glowCv.animate([{ opacity: 0 }, { opacity: a, offset: 0.1 }, { opacity: a, offset: 0.26 }, { opacity: 0 }], { duration: ms, easing: "ease-out" });
   }
+  /* v0.3.74, el destello: en cada golpe de premio, todas las bombillas que hay en pantalla suben a la vez y vuelven a su ola. Cada marco lleva
+     una capa con todas sus bombillas encendidas (.mq-all, js/art.js) que normalmente no se ve: aqui solo se anima su opacidad (lo hace el
+     compositor) y la ola sigue por debajo, sin pararse ni desfasarse. k: 1-3, la fuerza del golpe (con el reposo al 55 %, 1 = todas a tope).
+     No depende de las Luces de la sala (las bombillas son piezas); con Movimiento minimo estan quietas y no hay destello; con "suave", la mitad */
+  function destello(k = 3, host) {
+    if (quieto()) return;
+    const a = [0.67, 0.84, 1][Math.max(1, Math.min(3, k | 0)) - 1] * (document.documentElement.classList.contains("soft-flash") ? 0.5 : 1), ms = 460 + 80 * k;
+    (host || document).querySelectorAll(".mqb.mq-all").forEach(el => el.animate([{ opacity: a }, { opacity: a, offset: 0.2 }, { opacity: 0 }], { duration: ms, easing: "ease-out" }));
+  }
   /* la lampara baja: la sala pierde un punto de luz y vuelve (un fallo, una apuesta perdida) */
   function baja(cuanto = 1) {
     const k = fuerza(); if (!k || !veil) return;
@@ -289,7 +298,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(n);
     const top = Math.max(n, o.fuerza | 0), g = gapMs(), LZ = [0.3, 0.46, 0.74];
     /* con cada golpe la lampara sube un punto mas; tras el tercero, el barrido de luz */
-    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); if (A.marcador && A.marcador.destello) A.marcador.destello(130); if (k === 3) { setTimeout(barrido, 60); if (A.amb) setTimeout(() => A.amb.applause(1), 320); } };   // el premio gordo: barrido de luz y aplausos
+    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); destello(k); if (k === 3) { setTimeout(barrido, 60); if (A.amb) setTimeout(() => A.amb.applause(1), 320); } };   // el premio gordo: barrido de luz y aplausos
     for (let k = 1; k <= n; k++) { if (k === 1) golpe(1); else setTimeout(() => golpe(k), (k - 1) * g); }
   }
   /* perdida: la apuesta que se va. Sonido de perder (o el que traiga quien llama), un temblor seco y la lampara que baja */
@@ -324,5 +333,5 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     set(how || "full");
   }
 
-  A.casa = { init, set, mira, premio, perdida, impacto, luz, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
+  A.casa = { init, set, mira, premio, perdida, impacto, luz, destello, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
 })(window.AIQ);

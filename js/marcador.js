@@ -191,7 +191,9 @@ window.AIQ = window.AIQ || {};
     if (ms) mqOff = setTimeout(() => M.luces(false), ms);
   };
   /* todas encendidas a la vez un instante (la meta, cada jackpot) */
-  M.destello = (ms = 170) => { const mq = $("ledger") && $("ledger").querySelector(":scope > .mc-mq.on"); if (!mq) return; mq.classList.add("all"); setTimeout(() => mq.classList.remove("all"), ms); };
+  M.destello = (ms = 170) => { const mq = $("ledger") && $("ledger").querySelector(":scope > .mc-mq.on"); if (!mq) return;
+    if (A.casa && A.casa.destello) return A.casa.destello(3, mq);       // v0.3.74: el destello de la casa, que suma sobre la ola sin pararla
+    mq.classList.add("all"); setTimeout(() => mq.classList.remove("all"), ms); };
   M.cashIn = o => {
     const { from, to, total, advance, runTotal = 0, delay = 700, ms = 1100, gauge = 450, lootOn = false } = o;
     if (!(to > from)) return;

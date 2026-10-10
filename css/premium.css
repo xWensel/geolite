@@ -48,21 +48,24 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 /* v0.3.52 (la casa): tres tandas encendidas, una por svg, que se turnan con un solo reloj (1140 ms = tres pasos de 380): en cada paso se apaga
    una y lucen las otras dos, y el hueco corre por el marco. Solo cambia la opacidad del svg: el compositor lo hace sin repintar */
 .mqw { display: contents; }
-.mqb .mqb-on { stroke: #ffd060; stroke-dasharray: 0 6; }
+.mqb .mqb-on, .mqb .mqb-a { stroke: #ffd060; } .mqb .mqb-on { stroke-dasharray: 0 6; }   /* .mqb-a: las de la capa del destello (todas, no una de cada tres) */
 /* v0.3.70: la bombilla irradia. Filamento blanco, cristal calido y cuatro bandas de luz que llegan a cinco veces su tamano: la primera casi blanca
    (sobre crema se lee como un velo de luz), las demas cada vez mas ambar. Son trazos anchos y translucidos del mismo svg, a bandas de pixel
    (es un objeto); sin filtros: nada que repintar */
-.mqb .mqb-on.mqb-h1 { stroke: rgba(255, 244, 196, .6); stroke-width: calc(var(--mqb) * 1.6); }
-.mqb .mqb-on.mqb-h2 { stroke: rgba(255, 216, 130, .34); stroke-width: calc(var(--mqb) * 2.5); }
-.mqb .mqb-on.mqb-h3 { stroke: rgba(255, 188, 84, .2); stroke-width: calc(var(--mqb) * 3.8); }
-.mqb .mqb-on.mqb-h4 { stroke: rgba(255, 162, 50, .11); stroke-width: calc(var(--mqb) * 5.6); }
+.mqb .mqb-on.mqb-h1, .mqb .mqb-a.mqb-h1 { stroke: rgba(255, 244, 196, .6); stroke-width: calc(var(--mqb) * 1.6); }
+.mqb .mqb-on.mqb-h2, .mqb .mqb-a.mqb-h2 { stroke: rgba(255, 216, 130, .34); stroke-width: calc(var(--mqb) * 2.5); }
+.mqb .mqb-on.mqb-h3, .mqb .mqb-a.mqb-h3 { stroke: rgba(255, 188, 84, .2); stroke-width: calc(var(--mqb) * 3.8); }
+.mqb .mqb-on.mqb-h4, .mqb .mqb-a.mqb-h4 { stroke: rgba(255, 162, 50, .11); stroke-width: calc(var(--mqb) * 5.6); }
 .mqb.l2 .mqb-on { stroke-dashoffset: -2; } .mqb.l3 .mqb-on { stroke-dashoffset: -4; }
 .mqb .mqb-c { stroke: #fffdf0; stroke-width: calc(var(--mqb) * .56); filter: none; }    /* filamento blanco en el centro */
-/* la persecucion no corta: cada tanda sube en un 7 % de la vuelta, justo en el pulso, y se enfria en un 10 %; apagada conserva un rescoldo.
-   --mq-p: lo que dura la vuelta (tres pasos); lo pone js/casa.js: el reloj de la casa o el compas de la cancion */
+.mqb.mq-all { opacity: 0; }                                                            /* v0.3.74: el destello de los premios; solo se ve mientras A.casa.destello la anima */
+/* v0.3.74, la ola: ninguna bombilla se apaga. Todas lucen a un nivel de reposo (55 %) y, en cada pulso, una tanda da un golpe de luz que se
+   enfria despacio hasta el reposo (en 1,7 pulsos); el golpe corre por el marco. Lo que se mueve es luz, no un hueco (hasta la v0.3.73 eran
+   dos tandas encendidas y una apagada). El golpe sube en la decima de pulso anterior y cae justo en el pulso (0 % de la vuelta).
+   --mq-p: lo que dura la vuelta (tres pulsos); lo pone js/casa.js: el reloj de la casa o el compas de la cancion */
 .mqb.mq-lit { animation: mq-ch var(--mq-p, 1140ms) linear infinite; animation-delay: calc(var(--mq-s, 0ms) - var(--mq-k, 0) * var(--mq-p, 1140ms) / 3); }
 .mqb.l2 { --mq-k: 1; } .mqb.l3 { --mq-k: 2; }
-@keyframes mq-ch { 0% { opacity: .08; } 26.5% { opacity: .08; } 33.333% { opacity: 1; } 90.5% { opacity: 1; } 100% { opacity: .08; } }
+@keyframes mq-ch { 0% { opacity: 1; } 4.533% { opacity: 1; } 17% { opacity: .752; } 35.133% { opacity: .604; } 56.667% { opacity: .55; } 96.667% { opacity: .55; } 100% { opacity: 1; } }
 /* el resplandor del marco entero: fuera, sobre lo que tiene alrededor; dentro, sobre la propia pieza. Una sombra quieta (el aire, suave) */
 .mq-aura { position: absolute; z-index: 0; left: var(--mqi); top: var(--mqi); width: calc(100% - 2 * var(--mqi)); height: calc(100% - 2 * var(--mqi)); pointer-events: none;
   border-radius: calc(var(--mqr, 18px) - var(--mqi)); --ag: calc(var(--mqb) + max(0px, var(--mqi)));
@@ -70,7 +73,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
     inset 0 0 calc(var(--mqb) * 3) calc(var(--mqb) * .4) rgba(255, 230, 160, .26); }
 html:not(.sala-on) .mq-aura { display: none; }                                         /* con las Luces de la sala apagadas, sin resplandor */
 html.sala-soft .mq-aura { opacity: .6; }
-html.reduce-motion .mqb.mq-lit { animation: none; } html.reduce-motion .mqb.l1 { opacity: 0; }   /* reducir movimiento: quietas, dos de cada tres encendidas */
+html.reduce-motion .mqb.mq-lit { animation: none; }                                     /* Movimiento minimo: quietas y todas encendidas (hasta la v0.3.73, dos de cada tres) */
 /* v0.3.19: las mismas bombillas en las ilustraciones (A.pic: escena de la ronda, carta del Reto diario) y en tu escalon del podio. Cada sitio ajusta
    margen (--mqi), tamano (--mqb), radio del marco (--mqr) y densidad: con pathLength 144, "0 2" son 72 bombillas, "0 3" 48 y "0 4" 36 (las encendidas, la mitad) */
 .mqb rect { rx: calc(var(--mqr, 18px) - var(--mqi)); }
@@ -181,7 +184,7 @@ html[data-skin] .row-btn.danger { color: #ffb4a8; box-shadow: inset 0 0 0 2px rg
 html[data-skin] .row-btn.danger.armed { background: #fe5f55; color: #16241c; }
 
 /* el crupier apaga las luces de su carta si te quedas mirando el Clasico (js/dealer.js, watchCards): en dos tandas; se encienden al pasar por ella */
-.mcard.hero.sulk .mqb.l1, .mcard.hero.sulk2 .mqb.l2, .mcard.hero.sulk2 .mqb.l3 { display: none; }
+.mcard.hero.sulk .mqb.l1, .mcard.hero.sulk2 .mqb.l2, .mcard.hero.sulk2 .mqb.l3, .mcard.hero.sulk2 .mqb.mq-all { display: none; }
 /* territorio nuevo: sello "Nuevo" junto al numero de ronda de la intro (js/adventure.js, introHtml) */
 .intro-new { display: inline-block; margin-left: 10px; padding: 1px 8px 0; border: 2px solid #e2483d; color: #e2483d; font-family: var(--serif); font-weight: 400; font-size: .95em; text-transform: uppercase; letter-spacing: .06em; transform: rotate(-6deg); vertical-align: 2px; }
 /* v0.19: Campamento. Sello "Sin fondos" sobre la carta que no puedes pagar; el trile (cartas boca abajo mientras se barajan) */

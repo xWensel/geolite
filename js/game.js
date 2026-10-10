@@ -861,7 +861,7 @@
     if (HS) setTimeout(() => { if (still()) A.music.duck(0.12, 260); }, 480 - 30);
     setTimeout(() => {
       if (!still()) return; A.sfx.reveal(tier);
-      if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); }          // la diana pega: golpe grave, un temblor y la lampara que sube
+      if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); A.casa.destello(2); }          // la diana pega: golpe grave, un temblor y la lampara que sube
       else if (tier === 0 || tier === 5) A.casa.baja(tier === 0 && prevStreak >= 2 ? 1 : 0.7);    // fallo: la lampara baja un momento
     }, 480 + HS);
     if (up) setTimeout(() => { if (still() && A.sfx.flag) A.sfx.flag(fl.length); }, FLAG_AT);
