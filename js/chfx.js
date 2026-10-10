@@ -6,6 +6,9 @@
  *   - capas DOM con backdrop-filter donde hay que emborronar lo de debajo de verdad (gotas en el cristal, huellas, esquirlas)
  *   - retos de CUARTA PARED: ventanas de error falsas y bateria baja (estos dos viven fuera del mapa, sobre la pantalla entera)
  * Solo trabaja mientras hay algo activo. Si no hay WebGL2, js/challenges.js vuelve a sus capas CSS de siempre.
+ * Hay DOS motores iguales (make): el de los retos, pegado al mapa (#chOv, por debajo del marcador y de los menus), y el de la mesa del autor
+ * (EN DIRECTO, js/vivo.js), que nace la primera vez que la mesa lanza algo y pinta en #vivoFx, por encima de TODO el juego: en la partida, en
+ * el Campamento, en los menus, en los juegos del casino o en los creditos. Solo queda por delante el crupier cuando habla en directo.
  *
  *   A.chfx.attach(ov)            A.chfx.ok()                 A.chfx.set(list, par, fx)     A.chfx.clear()
  *   A.chfx.cut(len, dim, done)   corte de luz                A.chfx.strike()               rayo con destello
@@ -13,7 +16,9 @@
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  const X = A.chfx = {};
+const SH = { rain: false };                                              // la lluvia de la mesa esta puesta: el motor de los retos no le apaga el sonido
+const make = top => {
+  const X = {};
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), rnd = Math.random, TAU = Math.PI * 2;
   let qr = null;                                                       // azar con semilla de la pregunta (solo en el Reto diario, ver X.set); en la Aventura, Math.random
   const R = tag => (qr ? qr[tag] || (qr[tag] = A.rng(qr.key + ":" + tag)) : rnd);
@@ -30,8 +35,11 @@ window.AIQ = window.AIQ || {};
   let ov = null, glCv = null, gl = null, prog = null, cv = null, g2 = null, raf = 0, W = 0, H = 0, K = 1, D2 = 1, last = 0, glTried = false, psc = null, linked = false, shs = [], lostAt = 0;
   const U = {}, t0 = performance.now(), timers = [], DM = { r: 0 };   // DM: el ultimo radio del foco (un jefe lo cierra de pregunta en pregunta)
   const E = { dark: null, spot: null, smoke: null, rain: null, lens: null, seal: null, film: null, crack: null, prints: null, batt: null, wins: null, cut: { v: 0, tv: 0, e: 0, b: 0, bt: 0, soft: false }, flash: 0, fseq: null, bolts: [], puffs: [], trail: [], sparks: [], shades: [], wipes: [], teth: null, wind: null, night: null };
-  const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
-  const ptr = () => (A.chal && A.chal.state && A.chal.state.px) || { x: W / 2, y: H / 2 };
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); if (!top) timers.push(t); return t; };
+  /* el puntero: el de los retos lo lleva el mapa (reticulo, con su viento y su retraso); el de la mesa es el raton de verdad, este donde este */
+  const TP = { x: innerWidth / 2, y: innerHeight / 2 };
+  if (top) addEventListener("pointermove", e => { TP.x = e.clientX; TP.y = e.clientY; }, { passive: true, capture: true });
+  const ptr = top ? () => TP : () => (A.chal && A.chal.state && A.chal.state.px) || { x: W / 2, y: H / 2 };
 
   /* ------------------------------------------------------------------ WebGL: un unico pase a pantalla completa */
   const VS = `#version 300 es
@@ -135,7 +143,7 @@ void main(){
     return (linked = true);
   }
   /* se deja compilando en un rato libre nada mas arrancar: cuando llegue el primer reto ya esta listo */
-  { const idle = (fn, ms) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: ms }) : setTimeout(fn, ms));
+  if (!top) { const idle = (fn, ms) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: ms }) : setTimeout(fn, ms));
     addEventListener("load", () => idle(() => { initGL(); idle(ready, 6000); }, 5000), { once: true }); }
 
   /* ------------------------------------------------------------------ lienzos y capas */
@@ -259,8 +267,9 @@ void main(){
     const low = game().quality === "low";                                           // en calidad baja, menos gotas con backdrop-filter
     for (let i = 0, m = Math.round((low ? 4 : 10) + dens * (low ? 12 : 34)); i < m; i++) r.drops.push(glassDrop(box, true));   // tanda 7: mas gotas
     part("chx-wet").classList.add("on");
-    say("rain", dens);
+    rainSnd(dens);
   }
+  const rainSnd = d => say("rain", d || (!top && SH.rain ? 0.55 : 0));     // un solo sonido de lluvia para los dos motores: el de los retos no calla la de la mesa
   function streak(init) { const z = rnd(), end = H * (0.06 + rnd() * 0.98); return { x: rnd() * (W + 260) - 200, y: init ? rnd() * end : -20 - rnd() * 180, end, z, v: 650 + z * 1150, l: 9 + z * 30 + (z > 0.93 ? 34 : 0) }; }
   function glassDrop(box, init) {
     const el = document.createElement("i"); el.className = "chx-drop"; const s = 6 + rnd() ** 2.2 * 34;
@@ -431,7 +440,7 @@ void main(){
   function drawCrack(g, c, now) {
     g.save(); g.globalAlpha = clamp(c.k, 0, 1);
     for (const h of c.hits) {
-      if (!h.img || !h.at) continue; const x = h.fx * W, y = h.fy * H, q = Math.min(1, (now - h.at) / 120);
+      if (!h.img || !h.at) continue; const x = h.fx * W, y = h.fy * H, q = clamp((now - h.at) / 120, 0, 1);   // el fotograma puede traer una hora algo anterior a la del golpe: nunca un radio negativo
       if (q < 1) { g.save(); g.beginPath(); g.arc(x, y, h.S * 0.5 * (0.15 + 0.85 * q), 0, TAU); g.clip(); }
       g.drawImage(h.img, x - h.S / 2, y - h.S / 2, h.S, h.S);
       if (q < 1) { g.restore(); g.fillStyle = `rgba(255,255,255,${(0.5 * (1 - q)).toFixed(3)})`; g.beginPath(); g.arc(x, y, 40 + q * 60, 0, TAU); g.fill(); }
@@ -731,7 +740,7 @@ void main(){
   function nightOn() {
     const n = E.night = keep(E.night && E.night.on ? E.night : null, { lights: [], rs: [], g: 0 });
     if (!reduce()) for (let i = 0; i < 90; i++) n.rs.push(streak(true));
-    say("rain", 0.3);
+    rainSnd(0.3);
   }
 
   /* ------------------------------------------------------------------ API: configura la pregunta y la limpia al responder */
@@ -742,7 +751,7 @@ void main(){
     const dk = gl_ && get("dark"); if (dk) { const p = par(dk), boss = !!(A.chal.state && A.chal.state.bk), r0 = dk.slam ? Math.max(W, H, 800) : E.dark && E.dark.k > 0.01 ? E.dark.r : boss && DM.r > 0 ? DM.r : p.r; E.dark = keep(E.dark, { tr: p.r, a: p.a, warm: !!fx.halo, fast: dk.slam ? 0.16 : 0.55 }); E.dark.r = r0; if (boss) DM.r = p.r; } else off("dark");   // tanda 16: el foco se cierra en directo hasta su radio (o salta de golpe, si lo enciende la siesta)
     const bs = gl_ && get("blindspot"); if (bs) E.spot = keep(E.spot, { r: par(bs).r }); else off("spot");
     const cl = gl_ && get("clouds"); if (cl) { if (!E.smoke || !E.smoke.on) sweepReset(); E.smoke = keep(E.smoke, { cover: par(cl).cover, hole: fx.cloudClear || 0, seed: E.smoke && E.smoke.on ? E.smoke.seed : R("clouds")() }); } else off("smoke");   // Reto diario: los claros de las nubes en el mismo sitio para todos
-    const rn = get("rain"); if (rn) { if (!(E.rain && E.rain.on)) rainOn(par(rn).dens); } else if (E.rain && !E.rain.live) { E.rain.on = 0; part("chx-wet").classList.remove("on"); say("rain", 0); }
+    const rn = get("rain"); if (rn) { if (!(E.rain && E.rain.on)) rainOn(par(rn).dens); } else if (E.rain) { E.rain.on = 0; part("chx-wet").classList.remove("on"); rainSnd(0); }
     if (get("blur") && fx.lensR > 0) E.lens = keep(E.lens, { r: fx.lensR }); else off("lens");
     if ((get("wrongborders") && fx.trueR > 0) || (get("noborders") && fx.peekR > 0)) E.seal = keep(E.seal, { r: 110 }); else off("seal");
     if (get("negative") && !fx.noNegative) E.film = keep(E.film, {}); else off("film");
@@ -753,32 +762,32 @@ void main(){
     const bt = get("battery"); if (bt && !(E.batt && E.batt.on)) battOn(par(bt).dim, bt);
     if (gl_ && get("stormnight")) nightOn(); else off("night");
   };
-  /* EN DIRECTO (js/vivo.js): la mesa del autor maneja los efectos de los retos sobre la partida, en cualquier pantalla con mapa:
+  /* EN DIRECTO (js/vivo.js): la mesa del autor maneja los efectos sobre la partida, en CUALQUIER pantalla y por encima de todo (motor `top`, #vivoFx):
      - rayo: uno por pulsacion;
-     - interruptores (se quedan hasta apagarlos): lluvia, tormenta (lluvia + rayos sueltos), apagon y terremoto;
+     - interruptores (se quedan hasta apagarlos): lluvia, tormenta (lluvia + rayos sueltos), apagon, terremoto y humo (js/humo.js);
      - contadores de 0 a 5 (uno a uno, poner y quitar): cristal roto, huellas y ventanas de error.
-     Lo del directo no lo borran las preguntas ni los retos (X.clear / X.set lo respetan); solo la mesa, o que la mesa deje de mirar (X.liveReset).
+     No los borran las preguntas ni los retos (esos van en el otro motor); solo la mesa, o que la mesa deje de mirar (X.liveReset).
      Mismos sonidos y mismos ajustes de Destellos suaves, Movimiento y Temblor que los retos */
-  const LV = { lluvia: false, tormenta: false, apagon: false, terremoto: false };
+  const LV = { lluvia: false, tormenta: false, apagon: false, terremoto: false, humo: false };
   let stormT = 0, quakeT = 0;
-  const shards = () => (E.crack && E.crack.on && E.crack.live ? E.crack.hits.length : 0);
-  const prints = () => (E.prints && E.prints.on && E.prints.live ? E.prints.list.length : 0);
+  const shards = () => (E.crack && E.crack.on ? E.crack.hits.length : 0);
+  const prints = () => (E.prints && E.prints.on ? E.prints.list.length : 0);
   const wins = () => (ov ? part("chx-wins").querySelectorAll(".chx-win:not(.bye)").length : 0);
   const spot = (list, minD) => { let fx = 0.5, fy = 0.5; for (let t = 0; t < 40; t++) { fx = 0.18 + rnd() * 0.64; fy = 0.26 + rnd() * 0.52; if (list.every(q => Math.hypot((q.fx - fx) * W, (q.fy - fy) * H) > minD)) break; } return [fx, fy]; };
   function crackAdd() {
     if (!(E.crack && E.crack.on)) { E.crack = { on: 1, k: 1, hits: [] }; part("chx-shards").innerHTML = ""; }
-    const c = E.crack; c.live = 1; c.k = 1;
+    const c = E.crack; c.k = 1;
     const [fx, fy] = spot(c.hits, Math.min(W, H) * 0.3), h = { fx, fy, R: 0.21 + rnd() * 0.08, glass: 1, seed: rnd(), at: 0, img: null };
     c.hits.push(h); land(h);
   }
   function crackDel() {
     const c = E.crack; if (!c || !c.on) return; const h = c.hits.pop(); if (h && h.sh) h.sh.remove();
-    if (!c.hits.length) { c.on = 0; c.live = 0; part("chx-shards").classList.remove("on"); } kick();
+    if (!c.hits.length) { c.on = 0; part("chx-shards").classList.remove("on"); } kick();
   }
   function printAdd() {
     const box = part("chx-prints");
     if (!(E.prints && E.prints.on)) { E.prints = { on: 1, k: 1, list: [] }; box.innerHTML = ""; }
-    const p = E.prints; p.live = 1; p.k = 1; box.classList.add("on");
+    const p = E.prints; p.k = 1; box.classList.add("on");
     const [fx, fy] = spot(p.list, 150), w = 120 + rnd() * 55, el = document.createElement("i"), sm = document.createElement("i"), blur = 5;
     el.className = "chx-print"; sm.className = "chx-print smear"; box.append(sm, el);
     const pr = { fx, fy, w, h: w * 1.32, rot: (rnd() - 0.5) * 1.3, seed: rnd(), el, sm, blur, dir: rnd() * TAU, len: w * (0.9 + rnd() * 0.9) };
@@ -787,26 +796,26 @@ void main(){
   }
   function printDel() {
     const p = E.prints; if (!p || !p.on) return; const pr = p.list.pop(); if (pr) { pr.el.remove(); pr.sm.remove(); }
-    if (!p.list.length) { p.on = 0; p.live = 0; part("chx-prints").classList.remove("on"); } kick();
+    if (!p.list.length) { p.on = 0; part("chx-prints").classList.remove("on"); } kick();
   }
   function winAdd() {
     const box = part("chx-wins"), n = wins(); box.classList.add("on");
-    if (!E.wins) E.wins = { n: 0 }; E.wins.live = 1; E.wins.n = n + 1;
+    if (!E.wins) E.wins = { n: 0 }; E.wins.n = n + 1;
     openWin(box, n, Math.max(n + 1, 2), WT.msgs[Math.floor(rnd() * WT.msgs.length)], 0);
   }
   function winDel() {
     const box = part("chx-wins"), ws = [...box.querySelectorAll(".chx-win:not(.bye)")], w = ws[ws.length - 1];
     if (w) { w.classList.add("bye"); say("flip", false); setTimeout(() => w.remove(), 140); }
-    if (ws.length <= 1 && E.wins) E.wins.live = 0;
   }
   function rainSet(on) {
-    if (on) { if (!(E.rain && E.rain.on)) rainOn(0.55); E.rain.live = 1; return; }
-    if (E.rain && E.rain.live) { E.rain.live = 0; if (!(A.chal && A.chal.has && A.chal.state && A.chal.state.on && A.chal.has("rain"))) { E.rain.on = 0; part("chx-wet").classList.remove("on"); part("chx-drops").classList.remove("on"); say("rain", 0); } }
+    SH.rain = on;
+    if (on) { if (!(E.rain && E.rain.on)) rainOn(0.55); return; }
+    if (E.rain && E.rain.on) { E.rain.on = 0; part("chx-wet").classList.remove("on"); part("chx-drops").classList.remove("on"); if (!(A.chal && A.chal.has && A.chal.state && A.chal.state.on && (A.chal.has("rain") || A.chal.has("stormnight")))) say("rain", 0); }   // la lluvia de un reto sigue sonando
   }
   function storm() { clearTimeout(stormT); if (!LV.tormenta) return; X.strike({ near: 0.35, shade: rnd() < 0.4 ? 900 : 0 }); if (rnd() < 0.3) setTimeout(() => LV.tormenta && X.strike({ near: 0.2 }), 260 + rnd() * 260); stormT = setTimeout(storm, 2600 + rnd() * 4200); }
+  /* el terremoto sacude la pantalla entera (<html>: el juego, lo que haya abierto encima y los efectos de la mesa) */
   function quake() {
-    clearTimeout(quakeT); const app = document.getElementById("app"); if (!app) return;
-    app.classList.toggle("vivo-quake", LV.terremoto);
+    clearTimeout(quakeT); document.documentElement.classList.toggle("vivo-quake", LV.terremoto);
     if (LV.terremoto) { if (A.haptic) A.haptic([70, 50, 90]); quakeT = setTimeout(quake, 1300 + rnd() * 900); }   // el mando retumba a rachas mientras dura
   }
   const SET = {
@@ -814,16 +823,24 @@ void main(){
     tormenta: v => { LV.tormenta = v; rainSet(v || LV.lluvia); if (v) { say("thunder"); stormT = setTimeout(storm, 600); } else clearTimeout(stormT); },
     apagon: v => {
       LV.apagon = v; const sf = E.cut.soft = soft();
-      if (v) { E.cut.hold = 1; say("buzz", 0); if (!sf) sparkBurst(); later(() => { if (!LV.apagon) return; E.cut.tv = 0.92; if (!sf) { E.cut.v = 0.92; E.cut.bt = performance.now() + 70; } say("powerdown"); kick(); }, sf ? 0 : 120); }
-      else { E.cut.hold = 0; E.cut.tv = 0; if (!sf) { E.cut.v = 0; E.flash = Math.max(E.flash, 0.16); } say("restore"); kick(); }
+      if (v) { say("buzz", 0); if (!sf) sparkBurst(); later(() => { if (!LV.apagon) return; E.cut.tv = 0.92; if (!sf) { E.cut.v = 0.92; E.cut.bt = performance.now() + 70; } say("powerdown"); kick(); }, sf ? 0 : 120); }
+      else { E.cut.tv = 0; if (!sf) { E.cut.v = 0; E.flash = Math.max(E.flash, 0.16); } say("restore"); kick(); }
     },
     terremoto: v => { LV.terremoto = v; quake(); if (v && A.sfx && A.sfx.thunder) A.sfx.thunder(); },
+    /* el humo del crupier es un fluido (js/humo.js); si esta GPU no puede con el, queda el humo de puro de los retos (el del shader de arriba, que tambien se barre) */
+    humo: v => { LV.humo = v; if (v) { if (!(A.humo && A.humo.on(ov, ptr))) { sweepReset(); E.smoke = keep(E.smoke, { cover: 0.4, hole: 0, seed: rnd() }); } } else { if (A.humo) A.humo.off(); if (E.smoke) E.smoke.on = 0; } kick(); },
   };
   const COUNT = { cristal: [shards, crackAdd, crackDel], huellas: [prints, printAdd, printDel], ventana: [wins, winAdd, winDel] };
-  /* kind + v: "rayo" (sin v), un interruptor con true/false o un contador con el numero que debe quedar (0-5). Devuelve false si no hay mapa */
+  /* la capa de la mesa: lo ultimo de <body>, por encima de todo (css/challenges.css, #vivoFx) */
+  function liveHost() {
+    let h = document.getElementById("vivoFx");
+    if (!h) { h = document.createElement("div"); h.id = "vivoFx"; h.setAttribute("aria-hidden", "true"); }
+    if (h.parentNode !== document.body) document.body.appendChild(h);
+    X.attach(h);
+  }
+  /* kind + v: "rayo" (sin v), un interruptor con true/false o un contador con el numero que debe quedar (0-5) */
   X.live = (kind, v) => {
-    if ((!ov || !ov.isConnected) && A.chal && A.chal.overlay) A.chal.overlay();
-    if (!ov) return false; size(); kick();
+    liveHost(); size(); kick();
     if (kind === "rayo") { X.strike({ near: 0.6, shade: 900 }); return true; }
     if (SET[kind]) { if (!!v !== LV[kind]) SET[kind](!!v); return true; }
     const C = COUNT[kind]; if (!C) return false;
@@ -832,25 +849,33 @@ void main(){
     return true;
   };
   /* lo que hay puesto, para que la mesa lo pinte en sus fichas */
-  X.liveState = () => ({ lluvia: LV.lluvia, tormenta: LV.tormenta, apagon: LV.apagon, terremoto: LV.terremoto, cristal: shards(), huellas: prints(), ventana: wins() });
+  X.liveState = () => ({ lluvia: LV.lluvia, tormenta: LV.tormenta, apagon: LV.apagon, terremoto: LV.terremoto, humo: LV.humo, cristal: shards(), huellas: prints(), ventana: wins() });
   /* la mesa ha dejado de mirar: todo fuera */
   X.liveReset = () => { for (const k in LV) if (LV[k]) X.live(k, false); for (const k in COUNT) if (COUNT[k][0]()) X.live(k, 0); };
   X.reset = () => { DM.r = 0; };
   X.clear = () => {
     timers.forEach(clearTimeout); timers.length = 0; qr = null;   // cada pregunta empieza su azar desde su semilla
     for (const n of ["dark", "spot", "smoke", "lens", "seal", "film", "night"]) if (E[n]) E[n].on = 0;
-    if (E.rain && !E.rain.live) { E.rain.on = 0; say("rain", 0); }
-    if (E.night) { E.night.on = 0; say("rain", 0); }
-    const lr = E.rain && E.rain.live, lc = E.crack && E.crack.live, lp = E.prints && E.prints.live, lw = E.wins && E.wins.live;   // lo del directo (la mesa del autor) se queda hasta que la mesa lo quite
-    if (ov) { if (!lr) { part("chx-wet").classList.remove("on"); part("chx-drops").classList.remove("on"); } if (!lc) part("chx-shards").classList.remove("on"); if (!lp) part("chx-prints").classList.remove("on"); if (!lw) { const wb = part("chx-wins"); wb.querySelectorAll(".chx-win").forEach(w => w.classList.add("bye")); setTimeout(() => { if (!E.wins) wb.innerHTML = ""; }, 160); } }
-    if (!lw) E.wins = null;
-    if (E.crack && !lc) E.crack.on = 0;
-    if (E.prints && !lp) E.prints.on = 0;
+    if (E.rain) { E.rain.on = 0; rainSnd(0); }
+    if (E.night) { E.night.on = 0; rainSnd(0); }
+    if (ov) { part("chx-wet").classList.remove("on"); part("chx-drops").classList.remove("on"); part("chx-shards").classList.remove("on"); part("chx-prints").classList.remove("on"); const wb = part("chx-wins"); wb.querySelectorAll(".chx-win").forEach(w => w.classList.add("bye")); setTimeout(() => { if (!E.wins) wb.innerHTML = ""; }, 160); }
+    E.wins = null;
+    if (E.crack) E.crack.on = 0;
+    if (E.prints) E.prints.on = 0;
     { const dd = document.getElementById("chxDead"); if (dd) dd.classList.remove("on"); }
     E.sparks.length = 0; E.shades.length = 0; E.wipes.length = 0; E.teth = null; if (E.wind) E.wind.off = true;
     if (E.batt && E.batt.on) { E.batt.on = 0; E.batt.hud.classList.add("charge"); E.batt.hud.classList.remove("toast", "crit"); if (E.batt.k > 0.05) say("charge"); }
-    if (!E.cut.hold) E.cut.v = E.cut.tv = 0; E.fseq = null; E.bolts.length = 0;
+    E.cut.v = E.cut.tv = 0; E.fseq = null; E.bolts.length = 0;
     const app = document.getElementById("app"); if (app) app.classList.remove("chx-punch");
     kick();
   };
+  return X;
+};
+/* el motor de los retos (sobre el mapa) y, cuando la mesa del autor lanza algo, el suyo (por encima de todo) */
+const X = A.chfx = make(false), OFF = { lluvia: false, tormenta: false, apagon: false, terremoto: false, humo: false, cristal: 0, huellas: 0, ventana: 0 };
+let T = null;
+X.live = (kind, v) => (T || (T = make(true))).live(kind, v);
+X.liveState = () => (T ? T.liveState() : OFF);
+X.liveReset = () => { if (T) T.liveReset(); };
+X.liveOn = () => { if (!T) return false; const L = T.liveState(); return Object.keys(L).some(k => L[k]); };   // la mesa tiene algo puesto: el crupier habla por delante (js/dealer.js)
 })(window.AIQ);

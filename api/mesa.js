@@ -4,14 +4,14 @@
      POST { op: "watch", sid }            ->  la estas mirando (45 s): esa partida pregunta cada 2 s
      POST { op: "unwatch", sid }
      POST { op: "say", sid, t, e, g, s, p }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
-     POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto (v true/false), cristal/huellas/ventana (v 0-5)
+     POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto/humo (v true/false), cristal/huellas/ventana (v 0-5)
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
                                           ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas */
 const crypto = require("crypto");
 const kv = require("./_kv");
 const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
-const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "cristal", "huellas", "ventana"];
+const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "humo", "cristal", "huellas", "ventana"];
 const KEY = process.env.MESA_KEY || "";
 const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // estilos del bocadillo (css/challenges.css, .dl-bubble.st-*)
 const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier en la pantalla del jugador: esquinas o centro grande

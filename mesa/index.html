@@ -266,7 +266,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
         <div class="tvtip">Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</div>
       </div>
       <div class="print"><h1>La mesa del crupier</h1><p>La casa siempre gana · en directo desde Geolite</p><i class="line"></i></div>
-      <div class="rack"><span class="lbl">Fichas · se quedan puestas hasta que las quites</span><div class="tray" id="tray"></div><span class="trayHint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></div>
+      <div class="rack"><span class="lbl">Fichas · caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</span><div class="tray" id="tray"></div><span class="trayHint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></div>
       <div class="seats" id="list"></div>
     </div></div></div>
 
@@ -351,15 +351,15 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   const lang = () => (selSt && selSt.l) || "es";
   const same = l => l === "es" || l === "es-419";
 
-  /* ------------------------------------------------ fichas: los efectos de los retos del juego (js/chfx.js) */
+  /* ------------------------------------------------ fichas: los efectos de los retos del juego y el humo, por encima de toda su pantalla (js/chfx.js, js/humo.js) */
   /* rayo: uno por clic · interruptores: se quedan hasta quitarlos · contadores: x1 a x5, uno a uno */
-  const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
+  const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["humo", "Humo", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
   const KIND_ = Object.fromEntries(CHIPS.map(c => [c[0], c[2]])), NAME_ = Object.fromEntries(CHIPS.map(c => [c[0], c[1]]));
   $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
-  /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores) y la mesa lo adelanta al pulsar */
+  /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores + el humo, que las partidas de antes de la 0.3.65 no mandan) y la mesa lo adelanta al pulsar */
   const fxs = {}, fxAt = {};
-  const parseFx = f => !f || f.length !== 7 ? null : { lluvia: f[0] === "1", tormenta: f[1] === "1", apagon: f[2] === "1", terremoto: f[3] === "1", cristal: +f[4], huellas: +f[5], ventana: +f[6] };
-  const fxOf = sid => fxs[sid] || (fxs[sid] = { lluvia: false, tormenta: false, apagon: false, terremoto: false, cristal: 0, huellas: 0, ventana: 0 });
+  const parseFx = f => !f || f.length < 7 ? null : { lluvia: f[0] === "1", tormenta: f[1] === "1", apagon: f[2] === "1", terremoto: f[3] === "1", cristal: +f[4], huellas: +f[5], ventana: +f[6], humo: f[7] === "1" };
+  const fxOf = sid => fxs[sid] || (fxs[sid] = { lluvia: false, tormenta: false, apagon: false, terremoto: false, humo: false, cristal: 0, huellas: 0, ventana: 0 });
   function paintChips() {
     const F = sel ? fxOf(sel) : null;
     document.querySelectorAll(".chip").forEach(c => {

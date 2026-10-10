@@ -139,8 +139,8 @@ html.reduce-motion #askName.ch-crazy .lt[data-cz], html.reduce-motion #askSub.ch
 #app.ch-quaking { animation: ch-quake .65s linear; }
 @keyframes ch-quake { 10% { transform: translate(-7px, 4px); } 22% { transform: translate(6px, -5px); } 34% { transform: translate(-5px, -3px); } 46% { transform: translate(4px, 4px); } 60% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, -1px); } 100% { transform: none; } }
 html.no-shake #app.ch-quaking { animation: none; }
-#app.vivo-quake { animation: ch-quake .65s linear infinite; }   /* js/chfx.js: el terremoto del directo, hasta que la mesa lo apague */
-html.no-shake #app.vivo-quake, html.reduce-motion #app.vivo-quake { animation: none; }
+html.vivo-quake { animation: ch-quake .65s linear infinite; }   /* js/chfx.js: el terremoto de la mesa del autor sacude la pantalla entera (como la rabieta del crupier), hasta que la mesa lo apague */
+html.no-shake.vivo-quake, html.reduce-motion.vivo-quake { animation: none; }
 #askName.ch-scroll , #askSub.ch-scroll, .split-alt .sa-n.ch-scroll { overflow: hidden; white-space: nowrap; }
 #askName .ch-marq , #askSub .ch-marq, .split-alt .sa-n .ch-marq { display: inline-block; padding-left: 100%; animation: ch-marq 3.4s linear infinite; }
 @keyframes ch-marq { to { transform: translateX(-100%); } }
@@ -511,12 +511,21 @@ html.reduce-motion #ssFx, html.reduce-motion #albumFx, html.reduce-motion #wheel
 @keyframes chAmuSlam { 0% { opacity: 0; transform: scale(2.6) rotate(-24deg); } 50% { opacity: 1; transform: scale(.82) rotate(8deg); } 72% { transform: scale(1.14) rotate(-3deg); } 100% { opacity: 1; transform: none; } }
 html.reduce-motion .ch-chip .ch-amu.slam { animation: none; }
 
+/* LOS EFECTOS DE LA MESA (js/chfx.js, el motor de la mesa; el humo, js/humo.js): una capa propia, colgada de <body>, por encima de TODO el juego (partida,
+   Campamento, menus, casino, Ajustes, creditos). Por delante solo quedan el crupier cuando habla en directo (.dealer.lvpos), el cursor del mando, el piloto y la mano */
+#vivoFx { position: fixed; inset: 0; z-index: 2147482500; pointer-events: none; overflow: hidden; }
+#vivoFx > * { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity .55s ease; }
+#vivoFx > .on { opacity: 1; }
+#vivoFx > .chx-gl, #vivoFx > .chx-2d { transition: none; }
+#vivoFx > .chx-wins { opacity: 1; }
+#vivoFx > .hm-cv { transition: opacity .8s ease; }
+
 /* LA CAMARA DEL CRUPIER (js/vivo.js): el piloto de arriba mientras la mesa del autor ve la ventana del juego, y su mano (25x37 de su sprite, escala entera) */
-#vivoEye { position: fixed; left: 50%; top: 10px; z-index: 100030; display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 2px; background: rgba(10, 14, 12, .88); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .65), 0 4px 0 rgba(0, 0, 0, .4); font-family: var(--mono); font-size: 16px; line-height: 1; color: #ff8a93; text-transform: uppercase; white-space: nowrap; pointer-events: none; transform: translate(-50%, -70px); transition: transform .45s cubic-bezier(.2, 1.4, .4, 1); }
+#vivoEye { position: fixed; left: 50%; top: 10px; z-index: 2147483100; display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 2px; background: rgba(10, 14, 12, .88); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .65), 0 4px 0 rgba(0, 0, 0, .4); font-family: var(--mono); font-size: 16px; line-height: 1; color: #ff8a93; text-transform: uppercase; white-space: nowrap; pointer-events: none; transform: translate(-50%, -70px); transition: transform .45s cubic-bezier(.2, 1.4, .4, 1); }
 #vivoEye.on { transform: translate(-50%, 0); }
 #vivoEye img { width: 36px; height: 36px; image-rendering: pixelated; }
 #vivoEye i { width: 8px; height: 8px; background: #e8283a; box-shadow: 0 0 0 2px rgba(232, 40, 58, .22); animation: dlLive 1.2s steps(1) infinite; }
-#vivoGlove { position: fixed; left: 0; top: 0; z-index: 100040; pointer-events: none; opacity: 0; transition: opacity .2s, transform .1s linear; }
+#vivoGlove { position: fixed; left: 0; top: 0; z-index: 2147483200; pointer-events: none; opacity: 0; transition: opacity .2s, transform .1s linear; }
 #vivoGlove.on { opacity: 1; }
 #vivoGlove img { display: block; width: var(--gw); height: var(--gh); margin-left: calc(-1 * var(--gx)); image-rendering: pixelated; filter: drop-shadow(0 5px 0 rgba(0, 0, 0, .35)); transform-origin: 20% 0; }
 .vg-ring { position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 255, 255, .9), 0 0 0 6px rgba(22, 36, 28, .35); opacity: 0; transform: translate(-50%, -50%); }
