@@ -14,7 +14,7 @@ window.AIQ = window.AIQ || {};
   "use strict";
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const reduced = () => document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => document.documentElement.classList.contains("reduce-motion");
   const TX = {
     eyb: "Mesa nueva|New table|Nouvelle table|Mesa nova|Neuer Tisch|Nuovo tavolo||新牌桌|새 테이블|新しいテーブル|Новый стол|Nowy stół",
     casa: "La casa te abre una mesa nueva.|The house opens a new table for you.|La maison t'ouvre une nouvelle table.|A casa abre uma mesa nova para você.|Das Haus öffnet dir einen neuen Tisch.|La casa ti apre un nuovo tavolo.||赌场为你开了一张新牌桌。|하우스가 새 테이블을 열어 줍니다.|ハウスがあなたに新しいテーブルを開きます。|Казино открывает для тебя новый стол.|Kasyno otwiera dla ciebie nowy stół.",

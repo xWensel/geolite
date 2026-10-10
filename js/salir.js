@@ -46,7 +46,7 @@ window.AIQ = window.AIQ || {};
   };
   const clock = () => { const d = new Date(); try { const L = (A.LANGS || []).find(l => l.code === A.lang); return d.toLocaleTimeString(L ? L.loc : undefined, { hour: "2-digit", minute: "2-digit" }); } catch (e) { return d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); } };
   const who = () => { const P = A.profile && A.profile.get(); return (P && P.name) || ""; };
-  const reduced = () => { const S = C() && C().S; return !!(S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches; };
+  const reduced = () => { const S = C() && C().S; return !!(S && S.reduce); };
   const shakeOk = () => { const S = C() && C().S; return !(S && S.shake === false) && !reduced(); };
 
   /* las trastadas salen de una bolsa (guardada: tampoco se repiten entre sesiones) hasta agotarlas todas */

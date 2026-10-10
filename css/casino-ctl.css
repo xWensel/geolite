@@ -22,4 +22,4 @@
 @keyframes cc-nudge { 50% { transform: translateX(calc(var(--u) * 1px)); } }
 .cc-skip.on { pointer-events: none; } .cc-skip.on .cc-ic { animation: cc-nudge .16s steps(2) infinite; }
 .cc-dock.is-ff .cc-ff { opacity: .45; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .cc-dock, .cc-ff.on .cc-ic, .cc-skip.on .cc-ic { animation: none; } }
+html.reduce-motion .cc-dock, html.reduce-motion .cc-ff.on .cc-ic, html.reduce-motion .cc-skip.on .cc-ic { animation: none; }

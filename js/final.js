@@ -12,7 +12,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const $ = id => document.getElementById(id), P6 = s => A.pick6(s), esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => document.documentElement.classList.contains("reduce-motion");
   const TRACK = 5;                                                     // 06-vals-real.mp3 (1:45): el rodillo cae en su ultima frase
   const ROLL_S = 80;                                                   // segundos de rodillo a velocidad normal
 

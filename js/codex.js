@@ -606,7 +606,7 @@ window.AIQ = window.AIQ || {};
     if (E[id] && !U(id)) {
       ui.lockN++;
       if (ui.lockN >= 3) setTimeout(() => { const k = document.querySelector("#codex .cx-big .cx-bk .ic.q"), S2 = A.core && A.core.S;
-        if (k && !((S2 && S2.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches)) k.animate([{ transform: "none" }, { transform: "rotate(-12deg)" }, { transform: "rotate(10deg)" }, { transform: "rotate(-6deg)" }, { transform: "none" }], { duration: 420 });
+        if (k && !(S2 && S2.reduce)) k.animate([{ transform: "none" }, { transform: "rotate(-12deg)" }, { transform: "rotate(10deg)" }, { transform: "rotate(-6deg)" }, { transform: "none" }], { duration: 420 });
         if (A.dealer && A.dealer.codexLock) A.dealer.codexLock(ui.lockN); }, 150);
     }
     go({ k: "detail", id }, false, src);
@@ -1088,7 +1088,7 @@ window.AIQ = window.AIQ || {};
   /* v0.3.50 (usuario): el aparato se enciende al abrirlo (la linea de fosforo y la pantalla que se abre) y se apaga al cerrarlo (se cierra en una
      linea y se va en un punto). Solo transform y opacidad sobre capas propias (css/codex.css, .cx-pw); con "reducir movimiento", sin efecto */
   let pwT = 0, shutT = 0;
-  const pwStill = () => { const S2 = A.core && A.core.S; return !!(S2 && S2.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches; };
+  const pwStill = () => { const S2 = A.core && A.core.S; return !!(S2 && S2.reduce); };
   function power(on) {
     const r = $("codex"); if (!r) return; clearTimeout(pwT); r.classList.remove("pw-on", "pw-off"); if (pwStill()) return;
     A.restyle(r); r.classList.add(on ? "pw-on" : "pw-off");
@@ -1113,7 +1113,7 @@ window.AIQ = window.AIQ || {};
      descubrir de la lista (su bandera y su nombre); y en el Resumen, uno grande del mapa del juego, resaltado con su nombre */
   function tease() {
     const g = $("cxMain"); if (!g) return false; const gr = g.getBoundingClientRect();
-    const S2 = A.core && A.core.S, reduced = (S2 && S2.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const S2 = A.core && A.core.S, reduced = (S2 && S2.reduce);
     const seen = el => { const r = el.getBoundingClientRect(); return r.top >= gr.top && r.bottom <= gr.bottom; };
     const flip = (b, then) => { if (reduced) return then(); b.animate([{ transform: "rotateY(0)" }, { transform: "rotateY(90deg)" }], { duration: 160, easing: "ease-in" }).onfinish = () => { then(); b.animate([{ transform: "rotateY(-90deg)" }, { transform: "rotateY(0)" }], { duration: 180, easing: "ease-out" }); }; };
     const b = [...g.querySelectorAll(".cx-card.locked")].find(seen);
@@ -1201,7 +1201,7 @@ window.AIQ = window.AIQ || {};
     clearTimeout(toastT); clearTimeout(reelT);
     const n = ids.length, FIRST = 1300, END = 7000, step = Math.max(240, Math.min(900, 3800 / Math.max(1, n - 1)));
     const hold = k => n === 1 ? END : k === 0 ? FIRST : k < n - 1 ? step : Math.max(1600, END - FIRST - (n - 2) * step);
-    const calm = document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const calm = document.documentElement.classList.contains("reduce-motion");
     el.classList.add("pile");
     el.innerHTML = `<span class="cx-reel"></span>${n > 1 ? `<span class="cx-cnt"></span>` : ""}`;
     const cnt = el.querySelector(".cx-cnt"), rnd = (a, b) => a + Math.random() * (b - a);

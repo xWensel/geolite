@@ -27,7 +27,7 @@ window.AIQ = window.AIQ || {};
   }
   const exprId = id => { const d = D(); return d.expr[id] ? id : d.alias.expr[id] || "sly"; };
   const gestId = id => { const d = D(); return d.gest[id] ? id : d.alias.gest[id] || null; };
-  const reduced = () => document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => document.documentElement.classList.contains("reduce-motion");
 
   /* lienzos de trabajo de 128x128 en CPU (se leen filas para el corte del busto, el glitch y la silueta), compartidos */
   let work, wctx, hw, hctx;

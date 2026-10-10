@@ -63,7 +63,7 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 26px), transparent); }
 .pt-scroll::-webkit-scrollbar { display: none; }
 html.reduce-motion .pt-scroll { scroll-behavior: auto; }
-@media (prefers-reduced-motion: reduce) { .pt-scroll { scroll-behavior: auto; } .menu-patch .pt-dot { animation: none; } .pt-lb, .pt-lb img { transition: none; } }
+html.reduce-motion .menu-patch .pt-dot { animation: none; } html.reduce-motion .pt-lb, html.reduce-motion .pt-lb img { transition: none; }
 /* barra de laton: carril de papel con contorno y asa de laton (se mueve con transform, sin maquetar) */
 .pt-bar { position: absolute; z-index: 3; right: 20px; top: 26px; bottom: 26px; width: 10px; background: rgba(22, 36, 28, .1); box-shadow: inset 0 0 0 2px rgba(22, 36, 28, .3); cursor: pointer; touch-action: none; transition: opacity .2s; }
 .pt-bar.off { opacity: 0; pointer-events: none; }

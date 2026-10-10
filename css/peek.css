@@ -60,4 +60,3 @@
 .table.mesa .tr-tool:hover .tr-face { transform: translateY(-4px); }
 .ab-perk { cursor: pointer; } .ab-perk.pk-on { box-shadow: 0 0 0 2px #ffd95a, 0 0 0 4px rgba(255, 217, 90, .3); }
 html.reduce-motion .pk-felt .ic, html.reduce-motion .pk-gold, html.reduce-motion .pk-card.r2::after { animation: none; }
-@media (prefers-reduced-motion: reduce) { .pk-felt .ic, .pk-gold, .pk-card.r2::after { animation: none; } }

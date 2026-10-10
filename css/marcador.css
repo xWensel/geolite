@@ -88,7 +88,7 @@ html[data-skin="casino"] #ledgerSh.mc-live .ledger::before { border-radius: 11px
 
 html.reduce-motion #ledgerSh, html.reduce-motion #ledgerSh .mc-slot, html.reduce-motion #scLoot { transition: none; }
 html.reduce-motion #ledgerSh .mc-in > .ticket, html.reduce-motion .mc-stamp { animation: none; }
-@media (prefers-reduced-motion: reduce) { .mc-chip, .mc-plus, .mc-drop { display: none; } }
+html.reduce-motion .mc-chip, html.reduce-motion .mc-plus, html.reduce-motion .mc-drop { display: none; }
 
 /* ==========================================================================
    v0.2.15 - el ticket nuevo (reveal en js/game.js). Se lee de arriba abajo como una mano de Balatro:
@@ -202,7 +202,7 @@ html.reduce-motion .tk-rows > div.beat::after { animation: none; opacity: 0; }
 
 html.reduce-motion .tk-flag img.c, html.reduce-motion .tk-eq .m, html.reduce-motion .tk-eq .fire { animation-duration: 1ms; }
 html.reduce-motion .tk-eq .fire b { animation: none; }
-@media (prefers-reduced-motion: reduce) { .tk-eq .fire b { animation: none; } .tk-shard { display: none; } }
+html.reduce-motion .tk-shard { display: none; }
 
 /* la hoja del ticket (ventana estrecha o baja, #dlg.side): la ecuacion un poco mas baja; la bandera y la linea de tu chincheta se quitan si falta sitio
    (sc1, sc2: js/marcador.js) o en movil (<= 600 px), y entonces la cabecera se centra */

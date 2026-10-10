@@ -76,7 +76,6 @@
   .adv-bar { top: 118px; max-width: 200px; } .tool-bar { bottom: 96px; flex-wrap: wrap; justify-content: center; width: calc(calc(100 * var(--vw)) - 16px); } .tool { min-width: 112px; }
   .mode-card { grid-template-columns: 46px 1fr auto; }
 }
-@media (prefers-reduced-motion: reduce) { .ping, .coin-fly { display: none; } }
 html.reduce-motion .ping, html.reduce-motion .coin-fly { display: none; }
 @media (max-width: 900px) { .adv-bar { top: 262px; max-width: 176px; padding: 7px 9px 8px; } .ab-perk { width: 24px; height: 24px; font-size: 16px; } }
 
@@ -179,7 +178,6 @@ html[data-skin="casino"] .ach b { font-size: 19px; } html[data-skin="casino"] .t
 @keyframes ach-drop { 0% { transform: translateX(-50%) rotate(0); } 22% { transform: translateX(-50%) rotate(-8deg); } 100% { transform: translate(-50%, 110vh) rotate(-26deg); } }
 html.reduce-motion .ach-fake.drop { animation: ach-fade .5s forwards; } html.reduce-motion .ach-fake.fooled .ach-stamp { animation: none; opacity: 1; transform: translateY(-50%) rotate(-12deg); }
 @keyframes ach-fade { to { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .ach-fake.drop { animation: ach-fade .5s forwards; } .ach-fake.fooled .ach-stamp { animation: none; opacity: 1; transform: translateY(-50%) rotate(-12deg); } }
 
 /* ---- tanda 2, lucirse: tu reliquia salta en la barra cuando actua (fl0 aviso; fl1/fl2 premio con marco de oro a pasos de pixel) y suelta su
    etiqueta ("+3 s", "+1"...); en el veredicto, las lineas que pone una reliquia llevan su icono. Animaciones a saltos (steps), nada suave */

@@ -124,5 +124,5 @@
 .qx-sign.up { animation: none; transition: transform .9s cubic-bezier(.6, 0, .8, .3); transform: translateX(-50%) translateY(-120%); }
 .qx.cb .qx-in { padding-top: calc(9vh / var(--k, 1) + 150px); }
 
-@media (prefers-reduced-motion: reduce) { .fin-dust u, .fin .qx-beam u { animation: none; } .qx-sign.swing { animation: none; } }
+html.reduce-motion .fin-dust u, html.reduce-motion .fin .qx-beam u { animation: none; } html.reduce-motion .qx-sign.swing { animation: none; }
 @media (max-width: 720px) { .fin-n { font-size: calc(40px * var(--dll, 1)); } .fin-thanks .fin-n { font-size: calc(54px * var(--dll, 1)); } .fin-row, .fin-tk-r, .fin-s { font-size: calc(22px * var(--dll, 1)); } }

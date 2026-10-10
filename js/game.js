@@ -341,7 +341,7 @@
      jpShake no arranca y el movil no vibra. Los retos que tiemblan (Terremoto, letras...) son el propio reto y siguen */
   function applyShake() { document.documentElement.classList.toggle("no-shake", !S.shake); }   // v0.3.2: solo el temblor de pantalla; la vibracion del mando va aparte (Controles > Mando > Sensacion)
   /* Destellos suaves (v0.52): html.soft-flash; js/chfx.js (A.softFlash) suma "reducir movimiento" del juego o del sistema, que tambien los suaviza */
-  function flashForced() { return !!S.reduce || matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  function flashForced() { return !!S.reduce; }
   /* daltonismo (filtro SVG, ver index.html #cbDefs) + alto contraste: se combinan en un solo filter CSS */
   function applyVisualFX() {
     const cb = S.colorblind !== "off" ? `url(#cbFix_${S.colorblind})` : "";
@@ -680,7 +680,7 @@
   ];
   let jpAnim = null, jpAng = Math.random() * Math.PI * 2;
   function jpShake(n) {
-    if (!S.shake || S.reduce || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!S.shake || S.reduce) return;
     const P = SHAKE[n - 1], rnd = (a, b) => a + Math.random() * (b - a);
     jpAng += rnd(1.1, 5.2);
     const k = P.k + (Math.random() < 0.5 ? 0 : 1), turn = Math.random() < 0.5 ? -1 : 1, oval = rnd(0.25, 0.55), frames = [{ transform: "none", offset: 0, easing: P.ease }];
@@ -779,7 +779,7 @@
   }
   /* racha rota: la caja roja suelta unas esquirlas de pixel al agrietarse */
   function shards() {
-    if (S.reduce || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (S.reduce) return;
     const m = document.querySelector(".tk-eq .m"), app = $("app"); if (!m || !app) return;
     const r = m.getBoundingClientRect(), ar = app.getBoundingClientRect(); if (!r.width) return;
     for (let i = 0; i < 7; i++) {

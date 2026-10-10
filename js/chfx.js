@@ -18,7 +18,7 @@ window.AIQ = window.AIQ || {};
   let qr = null;                                                       // azar con semilla de la pregunta (solo en el Reto diario, ver X.set); en la Aventura, Math.random
   const R = tag => (qr ? qr[tag] || (qr[tag] = A.rng(qr.key + ":" + tag)) : rnd);
   const say = (k, ...a) => { try { A.sfx[k] && A.sfx[k](...a); } catch (e) { /* audio no listo */ } };
-  const reduce = () => document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;   // el ajuste del juego o el del sistema, como el resto del juego
+  const reduce = () => document.documentElement.classList.contains("reduce-motion");   // el ajuste del juego (Movimiento: Minimo), como el resto del juego
   /* Destellos suaves (Ajustes > Accesibilidad > Movimiento Suave o Minimo (v0.3.2), apagado por defecto; "reducir movimiento" del juego o del sistema tambien lo activa): cada Rayo es un solo
      fundido y los cortes de luz se apagan y se encienden sin chisporrotear. Sin el, todo sigue igual de intenso */
   const soft = A.softFlash = () => document.documentElement.classList.contains("soft-flash") || reduce();

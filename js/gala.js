@@ -5,7 +5,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const OUT_MS = 180;
-  const reduced = () => document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => document.documentElement.classList.contains("reduce-motion");
   const focusables = root => [...root.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex='-1'])")].filter(el => el.offsetParent !== null || el === document.activeElement);
 
   /* abre una capa ya montada: anima la entrada, coloca el foco y atrapa Tab. Devuelve un objeto para cerrarla */

@@ -8,8 +8,7 @@
   const A = window.AIQ = window.AIQ || {};
   const regs = [];
   let box = null, cur = null, pinned = false, tOpen = 0, tClose = 0, anim = null;
-  const RM = matchMedia("(prefers-reduced-motion: reduce)");
-  const still = () => RM.matches || document.documentElement.classList.contains("reduce-motion");
+  const still = () => document.documentElement.classList.contains("reduce-motion");
   const SPRING = "cubic-bezier(.3, 1.45, .55, 1)";
   const find = t => { if (!t || !t.closest) return null; for (const r of regs) { const el = t.closest(r.sel); if (el) return { el, r }; } return null; };
   const inBox = t => !!(box && t && box.contains(t));

@@ -1025,7 +1025,7 @@ window.AIQ = window.AIQ || {};
   const amuOf = c => { const f = (A.CHAL[c.id] || {}).fam; return f ? perkList().find(p => p.amulet === f) : null; };
   A.adv.amuSlam = id => {
     run.amuSlam = roundNo() + ":" + (run.attempt || 0);
-    document.querySelectorAll(`#advBar .ch-amu[data-amu="${id}"]`).forEach((el, i) => { el.classList.remove("wait", "slam"); A.restyle(el); el.classList.add("slam"); setTimeout(() => A.sfx.sealPop(), 60 + i * 120); const ch = el.closest(".ch-chip"); if (ch && !matchMedia("(prefers-reduced-motion: reduce)").matches) ch.animate([{ transform: "none" }, { transform: "translateX(-4px) rotate(-2deg)" }, { transform: "translateX(3px) rotate(1deg)" }, { transform: "none" }], { duration: 300, delay: 220, easing: "steps(6, end)" }); });   // la ficha encaja el golpe
+    document.querySelectorAll(`#advBar .ch-amu[data-amu="${id}"]`).forEach((el, i) => { el.classList.remove("wait", "slam"); A.restyle(el); el.classList.add("slam"); setTimeout(() => A.sfx.sealPop(), 60 + i * 120); const ch = el.closest(".ch-chip"); if (ch && !document.documentElement.classList.contains("reduce-motion")) ch.animate([{ transform: "none" }, { transform: "translateX(-4px) rotate(-2deg)" }, { transform: "translateX(3px) rotate(1deg)" }, { transform: "none" }], { duration: 300, delay: 220, easing: "steps(6, end)" }); });   // la ficha encaja el golpe
   };
   /* premio en el veredicto (la barra esta oculta): suena una moneda por linea de reliquia al aparecer y tiembla una vez (1); lv 2 = premio medio */
   function relicPay(ids, lv = 1) {
@@ -1175,7 +1175,7 @@ window.AIQ = window.AIQ || {};
   const SAVED_SUP = "¡El Seguro de ronda te cubre: no pierdes provisión! |Round insurance covers you: no provision lost! |L'Assurance de manche te couvre : aucune provision perdue ! |O Seguro de rodada te cobre: nenhuma provisão perdida! |Die Rundenversicherung springt ein: kein Proviant verloren! |L'Assicurazione del round ti copre: nessuna provvista persa! ||回合保险为你兜底：补给不减！ |라운드 보험이 지켜 줬습니다: 식량 손실 없음! |ラウンド保険でカバー：食料は失われなかった！ |Страховка раунда покрыла провал: ни один запас не потерян! |Ubezpieczenie rundy cię kryje: żaden zapas nie przepada! ";
   /* el primer clic en "Abrir el cofre" no lo abre: el cofre (la medalla) tiembla y el crupier confiesa que lo esta sujetando; el segundo ya lo abre */
   function stuckChest() {
-    const m = document.querySelector(".gx-vd-medal"), b = $("nlBtn"), S = C().S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const m = document.querySelector(".gx-vd-medal"), b = $("nlBtn"), S = C().S, reduced = (S && S.reduce);
     A.sfx.deny();
     if (!reduced) [m, b].forEach(e => e && e.animate([{ transform: "none" }, { transform: "translateX(-6px) rotate(-4deg)" }, { transform: "translateX(5px) rotate(3deg)" }, { transform: "translateX(-3px) rotate(-2deg)" }, { transform: "none" }], { duration: 420, easing: "ease-out" }));
     if (A.dealer.chestStuck) A.dealer.chestStuck();
@@ -1314,11 +1314,10 @@ window.AIQ = window.AIQ || {};
      en la secuencia del cofre) */
   const GLINT = `<span class="lg-halo"></span><span class="lg-clip"><canvas></canvas></span>`;
   const ASC_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_boss"];   // la ficha de cada Ascension (como en js/hub.js)
-  const RMQ = matchMedia("(prefers-reduced-motion: reduce)");           // una sola consulta: leer .matches no cuesta nada
   const Gold = (() => {
     const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], WH = [255, 255, 255], G0 = [255, 246, 200], G1 = [255, 217, 90], PER = 3.6, DUR = 0.9;
     const live = new Set(); let raf = 0, tm = 0, last = 0;
-    const still = () => { const S = C().S; return !!(S && S.reduce) || RMQ.matches; };
+    const still = () => { const S = C().S; return !!(S && S.reduce); };
     const wake = () => { clearTimeout(tm); tm = 0; if (!raf) raf = requestAnimationFrame(frame); };
     const ro = window.ResizeObserver ? new ResizeObserver(es => { es.forEach(e => e.target._gold && e.target._gold.note(e)); wake(); }) : null;
     /* se ve o no (display:none de un padre o fuera de la pantalla): lo dice el navegador al cambiar, sin medir nada */
@@ -1426,7 +1425,7 @@ window.AIQ = window.AIQ || {};
       wire: (card, close) => { const b = card.querySelector(".pk-act:not(.off)"); if (!b) return;
         b.onclick = e => { e.stopPropagation(); if (card.classList.contains("pk-go")) return; card.classList.add("pk-go");
           const go = mode === "swap" ? () => { close(true); if (run && C().S.phase === "shop" && swapIx != null) swapFor(swapIx, id, shopChest); } : () => { close(true); if (run && C().S.phase === "shop" && run.perks.includes(id)) sell(id, shopChest); };
-          if (matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduce-motion")) go(); else { card.classList.add("pk-sold"); setTimeout(go, 230); } }; } };
+          if (document.documentElement.classList.contains("reduce-motion")) go(); else { card.classList.add("pk-sold"); setTimeout(go, 230); } }; } };
   }
   A.peek.on(".table.mesa .tr-relic .tr-face", el => peekRelic(el.parentNode.dataset.relic, true));
   A.peek.on("#advBar .ab-perk", el => peekRelic(el.dataset.id, false));
@@ -2314,7 +2313,7 @@ window.AIQ = window.AIQ || {};
   /* el trile: las cartas se dan la vuelta y se barajan como cubiletes antes de las nuevas (solo animacion: las cartas y precios son los que tocan) */
   function shellCards(done) {
     const tb = document.querySelector("#dlg .table"), cards = [...document.querySelectorAll("#dlg .offers .offer")], S = C().S;
-    const reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = (S && S.reduce);
     const fin = () => { if (tb) tb.classList.remove("shelling"); if (C().S.phase === "shop" && run && run.phase === "shop") done(); };
     if (!tb || cards.length < 2 || reduced) return fin();
     tb.classList.add("shelling");
@@ -2392,7 +2391,7 @@ window.AIQ = window.AIQ || {};
       setTimeout(() => { if (legOn !== tok) return; legOn = 0; if (run === r0 && tb.isConnected) openShop(false); }, 140);
     };
     try {                                                                // si algo falla a mitad, la tienda llega igual (la mesa no se queda inerte)
-      const id = r0.perks[r0.perks.length - 1], S = C().S, rm = !!(S && S.reduce) || RMQ.matches;
+      const id = r0.perks[r0.perks.length - 1], S = C().S, rm = !!(S && S.reduce);
       if (!tb || !A.RELICS[id]) return end();
       const offers = tb.querySelector(".offers"), others = [...offers.querySelectorAll(".offer")].filter(o => o !== el), g = Gold.of(el);
       const slot = tb.querySelectorAll(".tr-relics .tray-row > *")[bagN() - 1], icoSrc = (el.querySelector(".of-ico img") || {}).src || "";

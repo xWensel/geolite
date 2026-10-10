@@ -14,7 +14,7 @@
 .gc-burst i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; background: #fff3cf; box-shadow: 0 0 0 1px #16241c; animation: gcb .5s ease-out forwards; }
 .gc-burst i.g { background: #f8b449; }
 @keyframes gcb { to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .gc-burst { display: none; } .tt { transition: none; } }
+html.reduce-motion .gc-burst { display: none; } html.reduce-motion .tt { transition: none; }
 .kt { display: inline-flex; }
 
 /* ---------------------------------------------------------------- ajustes: pestanas y filas */
@@ -35,7 +35,7 @@
 .np-tri { width: 0; height: 0; border: 6px solid transparent; border-width: 6px 0 6px 9px; border-left-color: #ffd87a; } .np-tri.l { border-width: 6px 9px 6px 0; border-left-color: transparent; border-right-color: #ffd87a; }
 .np-b:hover:not(:disabled) .np-tri.r { border-left-color: #16241c; } .np-b:hover:not(:disabled) .np-tri.l { border-right-color: #16241c; }
 .np-set { width: 100%; margin: 10px 0 4px; justify-content: space-between; } .np-set .np-t { flex: 1; min-width: 0; } .np-set.off { opacity: .45; }
-@media (prefers-reduced-motion: reduce) { #np { transition: opacity .2s; transform: translate(0, 0); } }
+html.reduce-motion #np { transition: opacity .2s; transform: translate(0, 0); }
 
 /* ==================================================================== revision v0.12: maquetacion y pulido */
 /* ticket: puntos x racha (antes salia sin estilo: "Fichas819 × Mult · Racha 21.2") */

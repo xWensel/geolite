@@ -58,7 +58,6 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .mqb.l2 { --mq-k: 1; } .mqb.l3 { --mq-k: 2; }
 @keyframes mq-ch { 0% { opacity: 0; } 33.333% { opacity: 1; } 100% { opacity: 1; } }
 html.reduce-motion .mqb.mq-lit { animation: none; } html.reduce-motion .mqb.l1 { opacity: 0; }   /* reducir movimiento: quietas, dos de cada tres encendidas */
-@media (prefers-reduced-motion: reduce) { .mqb.mq-lit { animation: none; } .mqb.l1 { opacity: 0; } }
 /* v0.3.19: las mismas bombillas en las ilustraciones (A.pic: escena de la ronda, carta del Reto diario) y en tu escalon del podio. Cada sitio ajusta
    margen (--mqi), tamano (--mqb), radio del marco (--mqr) y densidad: con pathLength 144, "0 2" son 72 bombillas, "0 3" 48 y "0 4" 36 (las encendidas, la mitad) */
 .mqb rect { rx: calc(var(--mqr, 18px) - var(--mqi)); }

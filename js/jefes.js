@@ -18,7 +18,7 @@ window.AIQ = window.AIQ || {};
   const CS = () => A.chal.state, game = () => (A.core && A.core.S) || {}, mapOf = () => A.core && A.core.map;
   const tl = k => A.tx(A.chal.tl(k));
   const say = (k, ...a) => { try { A.sfx[k] && A.sfx[k](...a); } catch (e) { /* audio no listo */ } };
-  const reduce = () => document.documentElement.classList.contains("reduce-motion") || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const reduce = () => document.documentElement.classList.contains("reduce-motion");
   const phaseOk = () => { const g = game(); return g.phase === "asking" && !g.paused; };
   const elapsed = () => { const g = game(); return g.t0 ? (performance.now() - g.t0 - (g.pausedAcc || 0)) / 1000 : 0; };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

@@ -10,7 +10,7 @@ window.AIQ = window.AIQ || {};
 (function (A) {
   const $ = id => document.getElementById(id);
   const M = A.marcador = {};
-  const still = () => document.documentElement.classList.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const still = () => document.documentElement.classList.contains("reduce-motion");
   const buzz = p => { if (A.haptic) A.haptic(p); };
   /* escritorio: el ticket va pegado al marcador. Movil, tablet y movil en horizontal (<= 520 px de alto): hoja inferior (#dlg) */
   M.docked = () => innerWidth > 900 && innerHeight > 520;

@@ -230,7 +230,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
 
   /* ================================================================ la sala responde (v0.3.54) */
   /* cuanto: Movimiento completo = 1; "Destellos suaves" = 0,5; "Minimo" (o el sistema pide menos movimiento) = nada */
-  const quieto = () => { const h = document.documentElement.classList; return h.contains("reduce-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches; };
+  const quieto = () => { const h = document.documentElement.classList; return h.contains("reduce-motion"); };
   const fuerza = () => (mode === "off" || !root || quieto() ? 0 : (mode === "soft" ? 0.6 : 1) * (document.documentElement.classList.contains("soft-flash") ? 0.5 : 1));
   /* aleatorio dentro del orden: el mismo golpe, nunca con la misma fuerza exacta */
   const vario = (a = 0.86, b = 1.14) => a + Math.random() * (b - a);

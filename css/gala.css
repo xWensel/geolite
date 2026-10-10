@@ -106,7 +106,6 @@
 @keyframes gx-pop { from { visibility: hidden; } }
 .gx-layer.gx-in .gx-spot, .gx-layer .gx-spot.on { opacity: 1; }
 html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duration: 0s !important; animation-delay: 0s !important; }
-@media (prefers-reduced-motion: reduce) { .gx-layer *, .gx-layer { animation-duration: 0s !important; animation-delay: 0s !important; } }
 
 /* ---------------------------------------------------------------- PAUSA (Carril): el estado de la partida y el menu a la izquierda, el crupier bajo su foco a la derecha.
    El velo es opaco a proposito: con el mapa a la vista se podria pausar para buscar el sitio sin reloj */
@@ -894,7 +893,7 @@ html.reduce-motion .gx-camp .offer.pc { animation: none; }
 html.reduce-motion .gx-camp > .go2-wrap::before, html.reduce-motion .gx-camp .go2-chip .bc-base,
 html.reduce-motion .gx-camp .tr-relic.swap-pick .tr-face, html.reduce-motion .gx-camp .sup.fresh .sp-on, html.reduce-motion .gx-camp .sup.spinning .sp-ic .ic { animation: none; }
 html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
-@media (prefers-reduced-motion: reduce) { .gx-camp .offer.pc, .gx-camp > .go2-wrap::before { animation: none; } }
+html.reduce-motion .gx-camp .offer.pc, html.reduce-motion .gx-camp > .go2-wrap::before { animation: none; }
 
 /* movil y ventanas muy pequenas (aqui la pantalla se desplaza): todo en una columna */
 @media (max-width: 899px), (max-height: 519px) {
@@ -933,7 +932,7 @@ html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
 #sala.boss canvas.g { animation: sala-latido 1s steps(1, end) infinite; animation-delay: var(--lt, 0ms); }
 @keyframes sala-latido { 0% { opacity: .42; } 14% { opacity: 0; } 24% { opacity: .3; } 36% { opacity: 0; } 100% { opacity: 0; } }
 html.reduce-motion #sala.boss canvas.g, html.soft-flash #sala.boss canvas.g { animation: none; opacity: .08; }
-@media (prefers-reduced-motion: reduce) { #sala.boss canvas.g { animation: none; opacity: .08; } }
+html.reduce-motion #sala.boss canvas.g { animation: none; opacity: .08; }
 #sala::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .3s ease; background: radial-gradient(ellipse 75% 70% at 50% 47%, transparent 58%, rgba(2, 9, 8, .42) 100%); }
 #sala.neutral::before { opacity: 1; }                                       /* entre una pantalla y otra: penumbra neutra mientras llega la luz nueva */
 #sala.neutral canvas { transition-duration: .28s; }
@@ -961,7 +960,6 @@ html.sala-on .vignette { display: none; }                                  /* la
 #intro .intro-in.is-boss .mqb.mq-lit { animation: mq-latido 1s steps(1, end) infinite; animation-delay: var(--mq-j, 0ms); }
 @keyframes mq-latido { 0% { opacity: 1; } 14% { opacity: 0; } 24% { opacity: 1; } 36% { opacity: 0; } 100% { opacity: 0; } }
 html.reduce-motion #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; }
-@media (prefers-reduced-motion: reduce) { #intro .intro-in.is-boss .mqb.mq-lit { animation: none; opacity: 1; } }
 
 /* ---------------------------------------------------------------- MESAS DEL MAPA (v0.3.62): la pagina "Mesas" del libro del Perfil (js/hub.js, mesasPage)
    y el estreno de una mesa recien ganada (js/mesas.js). El catalogo y lo que es tuyo: js/skins.js (A.mesas).

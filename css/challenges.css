@@ -334,7 +334,7 @@ html.reduce-motion .ch-chip.ctr-pop, html.reduce-motion #app.chx-punch { animati
 .offer .buy .of-was { margin: 0 5px 0 1px; opacity: .6; font-size: .86em; text-decoration-thickness: 2px; }
 /* cofre del jefe: dejarlo sin abrir tambien paga */
 .go-next .gn-coins { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; font-style: normal; font-family: var(--mono); font-size: .82em; letter-spacing: .04em; color: #ffe7a8; } .go-next .gn-coins .ic { width: 15px; height: 15px; }
-/* reducir movimiento (ajuste del juego: html.reduce-motion en boot.css; del sistema: prefers-reduced-motion en style.css) deja las animaciones en .01ms
+/* reducir movimiento (Movimiento: Minimo; html.reduce-motion en boot.css) deja las animaciones en .01ms
    y una sola vuelta. Los trucos que SON movimiento (letras que tiemblan o bailan, marquesina) siguen a su ritmo y en bucle, porque son el reto (sin esto,
    la marquesina dejaba el nombre fuera de la caja y las letras quietas). Los brillos de adorno (runas, neon y penumbra de la bandera, bateria en rojo)
    se quedan quietos: el truco sigue puesto (el filtro de la bandera va en linea) pero sin parpadeos */
@@ -342,7 +342,6 @@ html.reduce-motion #askName.ch-shaky .lt[data-sh], html.reduce-motion #askSub.ch
 html.reduce-motion #askName.ch-dance .lt[data-dn], html.reduce-motion #askSub.ch-dance .lt[data-dn], html.reduce-motion .split-alt .sa-n.ch-dance .lt[data-dn] { animation-duration: .9s !important; animation-delay: calc(var(--di, 0) * -.11s) !important; animation-iteration-count: infinite !important; }
 html.reduce-motion #askName .ch-marq, html.reduce-motion #askSub .ch-marq, html.reduce-motion .split-alt .sa-n .ch-marq { animation-duration: 3.4s !important; animation-iteration-count: infinite !important; }
 html.reduce-motion #askName .lt.rune, html.reduce-motion #askSub .lt.rune, html.reduce-motion .ask-flag.fx-flaghue, html.reduce-motion .ask-flag.fx-flagdark, html.reduce-motion #chxBat.crit .cb-cell, html.reduce-motion .split-alt .sa-n .lt.rune { animation: none !important; }
-@media (prefers-reduced-motion: reduce) { #askName.ch-shaky .lt[data-sh], #askSub.ch-shaky .lt[data-sh], .split-alt .sa-n.ch-shaky .lt[data-sh] { animation-duration: var(--dur, .1s) !important; animation-delay: var(--del, 0s) !important; animation-iteration-count: infinite !important; } #askName.ch-dance .lt[data-dn], #askSub.ch-dance .lt[data-dn], .split-alt .sa-n.ch-dance .lt[data-dn] { animation-duration: .9s !important; animation-delay: calc(var(--di, 0) * -.11s) !important; animation-iteration-count: infinite !important; } #askName .ch-marq, #askSub .ch-marq, .split-alt .sa-n .ch-marq { animation-duration: 3.4s !important; animation-iteration-count: infinite !important; } #askName .lt.rune, #askSub .lt.rune, .ask-flag.fx-flaghue, .ask-flag.fx-flagdark, #chxBat.crit .cb-cell, .split-alt .sa-n .lt.rune { animation: none !important; } }
 /* Destellos suaves (v0.52, Ajustes > Imagen; tambien con "reducir movimiento"): sin WebGL, el Rayo y el corte de luz de las capas CSS son un fundido
    (con WebGL lo hace js/chfx.js), y el chispazo de "ch-glitch" al empezar una pregunta con reto de mapa se queda en el meneo, sin fogonazos de color */
 #chOv .ch-flash.soft { transition: opacity .5s ease-in !important; } #chOv .ch-flash.soft.up { transition: opacity .17s ease-out !important; }
@@ -510,7 +509,7 @@ html.reduce-motion #ssFx, html.reduce-motion #albumFx, html.reduce-motion #wheel
 .ch-chip .ch-amu.wait { opacity: 0; }
 .ch-chip .ch-amu.slam { animation: chAmuSlam .46s steps(8, end) both; }
 @keyframes chAmuSlam { 0% { opacity: 0; transform: scale(2.6) rotate(-24deg); } 50% { opacity: 1; transform: scale(.82) rotate(8deg); } 72% { transform: scale(1.14) rotate(-3deg); } 100% { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .ch-chip .ch-amu.slam { animation: none; } }
+html.reduce-motion .ch-chip .ch-amu.slam { animation: none; }
 
 /* LA CAMARA DEL CRUPIER (js/vivo.js): el piloto de arriba mientras la mesa del autor ve la ventana del juego, y su mano (25x37 de su sprite, escala entera) */
 #vivoEye { position: fixed; left: 50%; top: 10px; z-index: 100030; display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 2px; background: rgba(10, 14, 12, .88); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .65), 0 4px 0 rgba(0, 0, 0, .4); font-family: var(--mono); font-size: 16px; line-height: 1; color: #ff8a93; text-transform: uppercase; white-space: nowrap; pointer-events: none; transform: translate(-50%, -70px); transition: transform .45s cubic-bezier(.2, 1.4, .4, 1); }
@@ -542,7 +541,6 @@ html.reduce-motion #vivoGlove.tap .vg-ring, html.reduce-motion #vivoEye i { anim
 #dealer .dl-bubble.st-gold { font-size: calc(32px * var(--dll, 1)); background: linear-gradient(100deg, #f1d79a 0 40%, #fff6d0 50%, #f1d79a 60% 100%) 0 0 / 250% 100%; animation: dlShine 2.2s linear infinite; padding: 14px 22px 16px; }
 @keyframes dlShine { to { background-position: -150% 0; } }
 @media (max-width: 720px) { #dealer .dl-bubble.st-shout { font-size: calc(28px * var(--dll, 1)); } #dealer .dl-bubble.st-gold { font-size: calc(24px * var(--dll, 1)); } #dealer .dl-bubble.st-whisper { font-size: calc(17px * var(--dll, 1)); } #dealer .dl-bubble.st-tremble { font-size: calc(20px * var(--dll, 1)); } }
-@media (prefers-reduced-motion: reduce) { .dl-bubble[class*="st-"], .dl-bubble[class*="st-"] p { animation: none !important; } }
 html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class*="st-"] p { animation: none !important; }
 
 /* donde sale el crupier cuando habla la mesa (js/dealer.js, o.pos): esquinas o centro grande, por encima de todo */

@@ -328,7 +328,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-ri.kb .cx-art:not(.flag) > img { animation: cx-kb 9s ease-out both; } @keyframes cx-kb { to { transform: scale(1.15); } }   /* el zoom lento de documental */
 .cx-tmed { position: absolute; z-index: 2; left: -10px; top: -11px; width: 44px; height: 44px; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); } .cx-tmed .ic { width: 100%; height: 100%; image-rendering: pixelated; }
 .cx-cnt { position: absolute; z-index: 99; right: 2px; bottom: 0; font-family: var(--mono); font-size: 13px; letter-spacing: .06em; color: var(--paper); background: var(--ink); padding: 5px 8px 4px; pointer-events: none; font-variant-numeric: tabular-nums; }
-html.reduce-motion .cx-ri.kb .cx-art > img { animation: none; } @media (prefers-reduced-motion: reduce) { .cx-ri.kb .cx-art > img { animation: none; } }
+html.reduce-motion .cx-ri.kb .cx-art > img { animation: none; }
 .cx-toast.out { animation: cx-toast-out .34s ease-in both; } @keyframes cx-toast-out { to { transform: translateX(120%); opacity: 0; } }
 .cx-tt { display: grid; gap: 3px; min-width: 0; padding: 0 4px; } .cx-tt em { font-style: normal; font-family: var(--mono); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; color: var(--red-deep); } .cx-tt b { font-family: var(--serif); font-variation-settings: var(--disp); font-weight: 800; font-size: 30px; line-height: .95; } .cx-tt s { text-decoration: none; font-family: var(--mono); font-size: 14px; letter-spacing: .04em; color: var(--muted, #5b6a5f); } .cx-tt i { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-style: normal; font-family: var(--mono); font-size: 14px; line-height: 1.3; color: var(--ink-2); margin-top: 2px; }
 
@@ -366,7 +366,7 @@ html[data-skin="casino"] .cx-toast { border-radius: 14px; }
   .cx-main h2 { font-size: 36px; } .cx-cards { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; }
   .cx-toast { bottom: auto; top: 64px; right: 8px; } .cx-brk { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .cx-d1, .cx-card.fresh { animation: none !important; } .cx-card, .cx-big, .cx-ct, .cx-nv { transition: none; } }
+html.reduce-motion .cx-d1, html.reduce-motion .cx-card.fresh { animation: none !important; } html.reduce-motion .cx-card, html.reduce-motion .cx-big, html.reduce-motion .cx-ct, html.reduce-motion .cx-nv { transition: none; }
 html.reduce-motion .cx-card.fresh, html.reduce-motion .cx-d1 { animation: none !important; }
 /* coreano: el hangul se corta por palabras (con break-word partia "정확도 올리/기"); japones: por frases donde hay sitio */
 html:lang(ko) #codex :is(.cx-nv b, .cx-jump b, .cx-ct-t b, .cx-pn, .cx-rh b, .cx-main h2, .cx-sh b) { word-break: keep-all; overflow-wrap: anywhere; }

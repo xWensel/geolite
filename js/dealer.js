@@ -2130,7 +2130,7 @@ window.AIQ = window.AIQ || {};
     if (A.sfx.chip) A.sfx.chip(Math.min(4, pokeN - 1));
     const idx = { 1: 0, 2: 1, 3: 2, 5: 3 }[pokeN]; if (idx == null || Date.now() - pokeSaid < 3000) return;
     pokeSaid = Date.now();
-    const S = A.core && A.core.S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const S = A.core && A.core.S, reduced = (S && S.reduce);
     const fx = pokeN === 5 && !reduced ? (S && S.shake === false ? "blackout" : "shake") : null;
     D.say(nth("poke", idx), {                                                          // el respingo es inmediato; la frase, a su turno (nunca se le corta)
       mood: ["shock", "laugh", "angry", "angry"][idx], hold: holdFor(nth("poke", idx)), fx, gesture: jolt && !typing ? "hat_pop" : undefined });   // si dice ya su frase, el bote va con ella
@@ -2314,7 +2314,7 @@ window.AIQ = window.AIQ || {};
   };
   function flipCell(f) {
     const b = BOOK[f.k], c = document.querySelector(`#dlg .pf-stat[data-ic="${b[1]}"]`); if (!c) return;   // v0.3.41: la fila de la ficha de socio
-    const S = A.core && A.core.S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const S = A.core && A.core.S, reduced = (S && S.reduce);
     const lab = c.querySelector("span"), val = c.querySelector("b"), was = [lab.textContent, val.textContent];
     const turn = (to, after) => {
       if (reduced) { to(); after && after(); return; }
@@ -2531,7 +2531,7 @@ window.AIQ = window.AIQ || {};
   }
   if (DS.tier == null) { DS.tier = firstVisit ? 0 : Math.max(0, tierNow() - 1); saveStore(); }
   function tierCard(n) {
-    const P = A.profile.get() || {}, S = A.core && A.core.S, reduced = (S && S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const P = A.profile.get() || {}, S = A.core && A.core.S, reduced = (S && S.reduce);
     const no = "N.º|No.|N°|Nº|Nr.|N.||No.|No.|No.|№|Nr", title = "Tarjeta de socio|Member card|Carte de membre|Cartão de sócio|Mitgliedskarte|Tessera socio||会员卡|회원 카드|会員カード|Клубная карта|Karta członkowska";
     const num = String((A.rank && A.rank.hash ? A.rank.hash(P.id + ":socio") : 421) % 10000).padStart(4, "0");
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -2947,7 +2947,7 @@ window.AIQ = window.AIQ || {};
     const p = { bull: 0.8, miss: 0.55, timeout: 0.75, good: 0.2, streak: 0.4, counter: 1, roundWin: 1, roundFail: 1, runWin: 1, runLose: 1 }[kind];
     if (p == null || Math.random() > (soft ? Math.max(p, 0.5) : p)) return;
     if (soft) { D.say(soft.t, { mood: soft.mood, valid: o.valid }); return; }
-    const reduced = (A.core && A.core.S && A.core.S.reduce) || matchMedia("(prefers-reduced-motion: reduce)").matches;   // como los jackpots: sin movimiento, sin rabieta (ni frase que prometa un efecto que no llega)
+    const reduced = (A.core && A.core.S && A.core.S.reduce);   // como los jackpots: sin movimiento, sin rabieta (ni frase que prometa un efecto que no llega)
     if (kind === "roundWin" && !reduced && Math.random() < 0.22) {
       const fx = A.core.S.shake === false ? "blackout" : rand(["shake", "blackout"]), line = pickLine(fx === "shake" ? "tantrumShake" : "tantrumBlackout");   // Vibracion = no: solo el apagon (la frase no promete un temblor que no llega)
       if (line) { D.say(line, { mood: "angry", fx }); return; }                   // el efecto sale con la frase (si espera su turno, espera con ella)
