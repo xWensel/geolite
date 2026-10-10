@@ -1,0 +1,252 @@
+/* Geolite - DUELO DE FICHAS (prototipo local, js/duelo.js). El aspecto es el de la maqueta aprobada el 2026-10-10: el diseno es a escala 1 del juego
+   (1280 x 720) con las piezas del Naipe de gala (css/gala.css: .gx-pnl, .gx-paper, .gx-btn, .gx-eyb, .gx-t-*, .gx-lead-row, .gx-bar) y se escala entero
+   con --dk (la pone js/duelo.js: min(ancho / 1280, alto / 720), sin pasar de la escala de la interfaz). Tu color es el oro y el del rival, el violeta.
+   Reglas de la casa: sombras duras y solo bajo piezas, nada de grano, letra desde 18 px (Jersey) y 16 px (Silkscreen), movimientos solo con
+   transform y opacity y en curva continua (steps() queda para los parpadeos de pixel), y el movimiento reducido es html.reduce-motion. */
+
+/* ---------------------------------------------------------------- base: colores, letra y piezas comunes */
+.du-st { --me: #f8b449; --me-hi: #fff0b8; --me-lo: #b5651b; --rv: #b36cff; --rv-hi: #ecc2ff; --rv-lo: #5a2ab0;
+  font-family: var(--sans); font-size: 22px; line-height: 1.1; color: var(--gx-txt); text-align: left; font-variant-ligatures: none; font-variant-numeric: tabular-nums; }
+.du-st img, .du-st canvas { image-rendering: pixelated; }
+.du-st h2, .du-st h3, .du-st p { margin: 0; font-weight: 400; }
+.du-st .ink { color: var(--gx-ink); text-shadow: none; }
+html body .du-st .tag { font-family: var(--mono); font-weight: 400; font-size: 16px; letter-spacing: .04em; text-transform: uppercase; line-height: 1; padding: 5px 8px 4px; border-radius: 0; background: var(--gx-ink); color: var(--gx-paper); white-space: nowrap; }
+html body .du-st .tag.me { background: var(--me); color: #120c02; } html body .du-st .tag.rv { background: var(--rv); color: #150a2a; } html body .du-st .tag.red { background: var(--gx-red); color: #fff; }
+html body .du-st .tag.line { background: none; color: var(--gx-txt-2); box-shadow: inset 0 0 0 2px currentColor; }
+.du-st .rows { display: grid; gap: 6px; }
+.du-st .gx-lead-row { font-size: 22px; }
+.du-st .pips { display: flex; gap: 4px; align-items: flex-end; }
+.du-st .pips i { width: 12px; height: 8px; background: rgba(243, 237, 220, .2); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.du-st .pips i.me { background: var(--me); } .du-st .pips i.rv { background: var(--rv); } .du-st .pips i.eq { background: var(--gx-txt-2); }
+.du-st .pips i.now { background: #fff; animation: du-blink 1s steps(2, end) infinite; }
+@keyframes du-blink { 50% { opacity: .35; } }
+.du-st .brass { display: inline-flex; align-items: center; justify-content: center; color: var(--gx-ink); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o);
+  background: radial-gradient(circle at 8px 8px, #fff4c8 0 1px, #6b4410 1.5px 2.5px, transparent 3px), radial-gradient(circle at calc(100% - 8px) 8px, #fff4c8 0 1px, #6b4410 1.5px 2.5px, transparent 3px), linear-gradient(var(--gx-gold-hi) 0 4px, var(--gx-gold) 4px calc(100% - 6px), var(--gx-gold-lo) calc(100% - 6px)); }
+/* pila de fichas vista de canto (veredicto) */
+.du-st .pile { width: 56px; height: var(--h, 70px); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o);
+  background: repeating-linear-gradient(to top, rgba(10, 20, 15, .85) 0 1px, transparent 1px 7px), repeating-linear-gradient(to top, transparent 0 5px, rgba(255, 255, 255, .28) 5px 6px, transparent 6px 7px), repeating-linear-gradient(90deg, var(--c) 0 10px, #fff4dc 10px 18px, var(--c) 18px 28px); }
+.du-st .pile.me { --c: var(--me); } .du-st .pile.rv { --c: var(--rv); } .du-st .pile.zero { height: 0; box-shadow: none; }
+/* entradas */
+.du-st .pop { animation: du-pop .2s steps(2, end) both; animation-delay: var(--d, 0s); }
+.du-st .rise { animation: du-rise .42s cubic-bezier(.2, 1.1, .4, 1) both; animation-delay: var(--d, 0s); }
+.du-st .drop { animation: du-drop .5s cubic-bezier(.2, 1.1, .4, 1) both; animation-delay: var(--d, 0s); }
+.du-st .fromL { animation: du-fl .46s cubic-bezier(.2, 1.1, .4, 1) both; animation-delay: var(--d, 0s); }
+.du-st .fromR { animation: du-fr .46s cubic-bezier(.2, 1.1, .4, 1) both; animation-delay: var(--d, 0s); }
+@keyframes du-pop { from { visibility: hidden; } }
+@keyframes du-rise { from { opacity: 0; transform: translateY(18px); } }
+@keyframes du-drop { 0% { opacity: 0; transform: translateY(-120%) rotate(4deg); } 62% { opacity: 1; transform: translateY(4%) rotate(-1.5deg); } 82% { transform: translateY(-1%) rotate(.6deg); } 100% { transform: none; } }
+@keyframes du-fl { from { opacity: 0; transform: translateX(-64px) rotate(-3deg); } }
+@keyframes du-fr { from { opacity: 0; transform: translateX(64px) rotate(3deg); } }
+html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-motion .du-st *::after, html.reduce-motion .du-fly { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; }
+
+/* ---------------------------------------------------------------- pantallas de gala del duelo: tapete a toda la ventana, foco detras de todo y el lienzo de 1280 x 720 centrado */
+.du-wrap { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
+.du-spot { position: absolute; top: 0; left: 22%; width: 56%; height: 100%; pointer-events: none; background: radial-gradient(ellipse 55% 100% at 50% 0%, rgba(255, 226, 160, .2), rgba(255, 226, 160, .07) 55%, transparent 80%); }
+.du-stage { position: relative; flex: none; width: 1280px; height: 720px; zoom: var(--dk, 1); }
+.du-st .g12 { position: absolute; left: 40px; right: 40px; top: 32px; bottom: 32px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; row-gap: 16px; }
+.du-st .hd { grid-column: 1 / 13; display: flex; align-items: center; gap: 20px; min-width: 0; }
+.du-st .hd .gx-eyb { margin-left: auto; } .du-st .hd .gx-btn .ic { width: 22px; height: 22px; }
+/* el crupier de las frases, sentado en un hueco de estas pantallas: retrato a escala entera y bocadillo de 22 px, sin cola */
+.du-st .seatw { position: relative; }
+.du-st .seatw .dealer.big { position: absolute; left: 0; bottom: 0; flex-direction: row; align-items: center; gap: 14px; z-index: 5; }
+.du-st .seatw .dealer.big .dl-face { width: 128px; height: 128px; order: 0; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .4)); }
+.du-st .seatw .dealer.big .dl-bubble { order: 1; margin: 0; width: max-content; max-width: 470px; padding: 10px 14px 12px; font-size: calc(22px * var(--dll, 1)); line-height: 1.12; clip-path: none; background: #fff; color: #14110f; box-shadow: 0 0 0 2px #14110f, 0 6px 0 2px rgba(2, 6, 4, .55); transform-origin: 0 50%; }
+
+/* ---------------------------------------------------------------- 1 · LA SALA */
+.du-st .lob { grid-template-rows: 64px minmax(0, 1fr) 132px; }
+.du-st .socio { grid-column: 1 / 5; grid-row: 2; min-height: 0; }
+.du-st .socio .gx-paper { height: 100%; display: grid; grid-template-rows: auto auto auto auto 1fr; gap: 12px; padding: 20px 22px 22px; }
+.du-st .socio .who { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: center; }
+.du-st .socio .who .ic { width: 96px; height: 96px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
+.du-st .socio .who b { display: block; font-weight: 400; font-size: 40px; line-height: .95; overflow-wrap: anywhere; } .du-st .socio .who span { font-size: 22px; color: var(--gx-ink-2); }
+.du-st .puertas { grid-column: 5 / 13; grid-row: 2; min-height: 0; }
+.du-st .puertas .gx-pnl { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 12px; padding: 20px 22px 18px; }
+.du-st .doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; min-height: 0; }
+.du-st .doorw { padding: 4px; clip-path: var(--gx-notch); min-height: 0; display: grid; }
+.du-st .doorw.eleg { background: linear-gradient(var(--gx-rim-hi) 0 2px, var(--gx-rim) 2px calc(100% - 2px), var(--gx-rim-lo) calc(100% - 2px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.du-st .doorw.off { filter: grayscale(.9) brightness(.7); }
+/* las puertas abiertas se eligen: la elegida lleva el marco de laton y la otra queda un punto mas apagada */
+.du-st .doorw.on { cursor: pointer; } .du-st .doorw.on:not(.eleg) { filter: brightness(.8); } .du-st .doorw.on:not(.eleg):hover, .du-st .doorw.on.pad-hov:not(.eleg) { filter: none; }
+.du-st .doorw:focus { outline: none; } .du-st .doorw:focus-visible, html[data-input="pad"] .du-st .doorw:focus { background: #fff; }
+.du-st .door { display: grid; grid-template-rows: minmax(40px, 96px) auto 1fr auto; gap: 6px; padding: 10px 12px 12px; min-height: 0; }   /* la ilustracion cede alto si el titulo o la descripcion ocupan mas lineas (otros idiomas) */
+.du-st .door .ill { position: relative; min-height: 0; overflow: hidden; box-shadow: inset 0 0 0 2px var(--gx-o); image-rendering: pixelated; background-position: 50% 40%; background-size: 204px 256px; background-repeat: no-repeat; background-color: #2a1a52; }
+.du-st .door .ill.amigo { background: repeating-radial-gradient(circle at 50% 60%, #1c6e73 0 20px, #185f66 20px 40px); }
+.du-st .door .ill.amigo .ic { position: absolute; top: calc(50% - 34px); left: calc(50% - 58px); width: 64px; height: 64px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .4)); } .du-st .door .ill.amigo .ic + .ic { left: calc(50% - 6px); top: calc(50% - 26px); }
+.du-st .door h3 { font-size: 28px; line-height: 1; } .du-st .door p { font-size: 18px; line-height: 1.12; color: var(--gx-ink-2); }
+.du-st .door .tag { justify-self: start; } html body .du-st .door .tag.line { color: var(--gx-ink-2); }
+/* «Retar a un amigo»: el codigo de su sala (abrir la tuya es el boton principal) */
+.du-st .amg { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; min-height: 56px; font-size: 20px; line-height: 1.1; color: var(--gx-txt-2); }
+.du-st .amg .bad { color: var(--me-hi); }
+.du-st .amg input { width: 172px; height: 52px; box-sizing: border-box; margin: 0; padding: 2px 0 0 .12em; border: 0; border-radius: 0; outline: none; text-align: center; font-family: var(--sans); font-size: 36px; line-height: 1; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gx-ink); caret-color: var(--gx-ink); background: var(--gx-card); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 6px 0 rgba(22, 36, 28, .12); }
+.du-st .amg input:focus { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--me); }
+.du-st .amg input::placeholder { color: rgba(22, 36, 28, .3); }
+/* la mesa: las tres del prototipo y cuanto sabe la banca */
+.du-st .mesas { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+.du-st .mss { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.du-st .ms { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; align-items: center; min-height: 56px; margin: 0; padding: 6px 10px; border: 0; cursor: pointer; text-align: left; font-family: var(--sans); font-size: 18px; line-height: 1; color: var(--gx-txt-2); background: none; box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .16); }
+.du-st .ms .ic { width: 32px; height: 32px; } .du-st .ms b { display: block; font-weight: 400; font-size: 22px; color: var(--gx-ttl); white-space: nowrap; } .du-st .ms i { display: none; }
+.du-st .ms:hover, .du-st .ms.pad-hov { background: rgba(255, 207, 102, .06); }
+.du-st .ms.on { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim); background: rgba(255, 207, 102, .1); }
+.du-st .ms:focus { outline: none; } .du-st .ms:focus-visible, html[data-input="pad"] .du-st .ms:focus { box-shadow: inset 0 0 0 2px #fff; }
+.du-st .lvl { display: flex; align-items: center; gap: 10px; font-size: 20px; color: var(--gx-txt-2); white-space: nowrap; }
+.du-st .lvl b { min-width: 2ch; font-weight: 400; font-size: 30px; line-height: 1; text-align: center; color: var(--gx-ttl); }
+.du-st .lvl .gx-btn { min-width: 44px; padding-left: 12px; padding-right: 12px; }
+.du-st .regl { display: flex; gap: 22px; align-items: center; font-size: 20px; color: var(--gx-txt-2); }
+.du-st .regl span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; } .du-st .regl .ic { width: 32px; height: 32px; } .du-st .regl b { font-weight: 400; color: var(--gx-ttl); }
+.du-st .ft { grid-column: 1 / 13; grid-row: 3; position: relative; }
+.du-st .ft .seatw { position: absolute; left: 0; bottom: -4px; width: 128px; height: 128px; }
+.du-st .ft .gx-acts { position: absolute; right: 0; bottom: 0; align-items: center; gap: 28px; }
+
+/* ---------------------------------------------------------------- 2 · CARA A CARA */
+.du-st .vs { grid-template-rows: auto minmax(0, 1fr) auto 70px; }
+.du-st .vs .top { grid-column: 1 / 13; text-align: center; display: grid; gap: 4px; justify-items: center; }
+.du-st .vs .cardw { grid-row: 2; align-self: center; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
+.du-st .vs .cardw.l { grid-column: 2 / 6; rotate: -2deg; } .du-st .vs .cardw.r { grid-column: 8 / 12; rotate: 2deg; }
+.du-st .vs .pc { display: grid; gap: 10px; justify-items: center; text-align: center; padding: 22px; }
+.du-st .vs .pc > .ic { width: 128px; height: 128px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
+.du-st .vs .pc h3 { font-size: 40px; line-height: .95; overflow-wrap: anywhere; } .du-st .vs .pc .rows { width: 100%; text-align: left; }
+.du-st .vs .mid { grid-column: 6 / 8; grid-row: 2; align-self: center; display: grid; justify-items: center; gap: 8px; text-align: center; }
+.du-st .vs .mid .seatw { position: static; width: 128px; height: 128px; }
+.du-st .vs .mid b { font-weight: 400; font-size: 60px; line-height: .9; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08; }
+/* aqui el retrato va en el centro y su frase abajo, en la fila de la escalera hacia abajo (sin tapar los naipes) */
+.du-st .vs .mid .dealer.big { position: static; display: block; }
+.du-st .vs .mid .dealer.big .dl-bubble { position: absolute; left: 50%; bottom: 6px; translate: -50% 0; max-width: 760px; text-align: center; transform-origin: 50% 100%; }
+.du-st .lad { grid-column: 2 / 12; grid-row: 3; display: grid; grid-template-columns: repeat(var(--n, 12), minmax(0, 1fr)); gap: 6px; align-items: end; }
+.du-st .lad div { display: grid; justify-items: center; gap: 4px; font-size: 20px; color: var(--gx-txt-2); }
+.du-st .lad div i { display: block; width: 100%; height: var(--h); background: linear-gradient(var(--gx-rim-hi) 0 2px, var(--gx-rim) 2px calc(100% - 2px), var(--gx-rim-lo) calc(100% - 2px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.du-st .cnt { position: absolute; right: 40px; bottom: 32px; font-family: var(--mono); font-size: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--gx-acc); }
+.du-wrap:has(.vs) { cursor: pointer; }
+
+/* ---------------------------------------------------------------- 3 · LA PARTIDA
+   Dentro del duelo no salen el marcador de siempre, la nota de campo, las muescas de la placa ni el aviso de tarjeta nueva (la Enciclopedia se ensena en el veredicto) */
+body.duelo-on #ledgerSh, body.duelo-on #noteSh, body.duelo-on #pips, body.duelo-on #cxToast { display: none !important; }
+/* la placa de la pregunta, en su sitio de siempre pero en papel de gala (solo aqui: la de la Aventura y la del Clasico no cambian) */
+body.duelo-on #leftCol { left: 40px; top: 32px; width: 389px; gap: 8px; zoom: var(--dk, 1); }
+html[data-skin="casino"] body.duelo-on #leftCol .plate-sh { animation: none; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
+html[data-skin="casino"] body.duelo-on #plate { padding: 16px 20px 18px; border-radius: 0; clip-path: var(--gx-notch); color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); animation: none; }
+html[data-skin="casino"] body.duelo-on #plate::before { inset: 8px 8px 10px; z-index: 0; border-radius: 0; background: none; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-print); pointer-events: none; }
+body.duelo-on #plate > * { position: relative; z-index: 1; }
+body.duelo-on .plate-top { font-size: 16px; letter-spacing: .08em; color: var(--gx-ink-2); }
+html body.duelo-on #plate .tag { font-size: 16px; letter-spacing: .04em; line-height: 1; padding: 5px 8px 4px; border-radius: 0; background: var(--gx-ink); color: var(--gx-paper); }
+html[data-skin="casino"] body.duelo-on #askName { font-size: calc(40px * var(--ask-scale, 1)); line-height: .95; margin-top: 6px; }
+html[data-skin="casino"] body.duelo-on #plate.clue #askName { font-size: calc(26px * var(--ask-scale, 1)); line-height: 1.05; }
+html[data-skin="casino"] body.duelo-on #askSub { font-size: calc(22px * var(--ask-scale, 1)); font-weight: 400; color: #1f7a4d; margin-top: 4px; }
+body.duelo-on .clock { margin-top: 8px; gap: 10px; }
+body.duelo-on .ruler { height: 6px; border: 0; background: rgba(22, 36, 28, .18); }
+body.duelo-on .ruler i { bottom: 0; height: 6px; }
+body.duelo-on #timeTxt { width: 52px; font-size: 18px; }
+/* el rival ya ha fijado y tu no: el reloj, en rojo */
+body.duelo-lock #plate .ruler i { background: var(--gx-red); } body.duelo-lock #timeTxt { color: var(--gx-red-lo); }
+
+body.duelo-on .rail-sh { top: 58%; }                                             /* el carril de zoom, un poco mas abajo: el marcador crece una fila en el revelado */
+/* el marcador en espejo: tu a la izquierda (oro), el rival a la derecha (violeta) y en medio el peldano y lo que paga la ronda */
+.du-hud { position: absolute; z-index: 7; left: 445px; right: 40px; top: 32px; zoom: var(--dk, 1); filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); pointer-events: none; }
+.du-hud .gx-pnl { padding: 14px 20px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0 18px; align-items: center; pointer-events: auto; }
+.du-hud .pl { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; min-width: 0; }
+.du-hud .pl.rv { grid-template-columns: minmax(0, 1fr) 64px; text-align: right; }
+.du-hud .pl .av { width: 64px; height: 64px; }
+.du-hud .pl .du-nm { display: flex; gap: 8px; align-items: center; min-width: 0; font-size: 22px; color: var(--gx-txt); white-space: nowrap; } .du-hud .pl.rv .du-nm { justify-content: flex-end; }
+.du-hud .pl .nmt { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.du-hud .num { display: flex; margin-top: 4px; font-size: 44px; line-height: 1; height: 1em; color: var(--me-hi); filter: drop-shadow(0 3px 0 #050b08); } .du-hud .pl.rv .num { color: var(--rv-hi); justify-content: flex-end; }
+.du-hud .mid { display: grid; justify-items: center; gap: 6px; }
+.du-hud .mid .brass { min-width: 108px; height: 44px; font-size: 36px; line-height: 1; padding: 0 14px 2px; }
+.du-hud .bal { position: relative; grid-column: 1 / 4; height: 10px; margin-top: 10px; }
+.du-hud .bal span { position: absolute; inset: 0; overflow: hidden; background: var(--rv); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.du-hud .bal i { position: absolute; inset: 0; background: var(--me); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 4px 0 var(--me-hi); transform: translateX(-50%); transition: transform .7s cubic-bezier(.2, .8, .2, 1); }
+.du-hud .bal::after { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 0 1px var(--gx-o); }
+/* la cuenta: una fila mas dentro del marcador, solo en el revelado */
+.du-hud .cuenta { grid-column: 1 / 4; display: none; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 18px; align-items: center; padding-top: 12px; }
+.du-hud.rev .cuenta { display: grid; animation: du-rise .22s ease-out both; }
+.du-hud .cuenta .mx, .du-hud .cuenta .lft, .du-hud .cuenta .rgt { display: flex; gap: 10px; align-items: center; } .du-hud .cuenta .rgt { justify-content: flex-end; }
+.du-st .box { flex: none; display: grid; justify-items: center; gap: 2px; padding: 6px 12px 8px; min-width: 96px; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o); color: #fff; background: linear-gradient(var(--h) 0 4px, var(--m) 4px calc(100% - 6px), var(--l) calc(100% - 6px)); --h: #7fc0ff; --m: #2a78e4; --l: #1f4bb0; }
+.du-st .box small { white-space: nowrap; font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; line-height: 1; } .du-st .box b { font-weight: 400; font-size: 32px; line-height: .9; }
+.du-st .box.me { --h: var(--me-hi); --m: var(--me); --l: var(--me-lo); color: #120c02; } .du-st .box.rv { --h: var(--rv-hi); --m: var(--rv); --l: var(--rv-lo); color: #150a2a; }
+.du-st .box.red { --h: var(--gx-red-hi); --m: var(--gx-red); --l: var(--gx-red-lo); } .du-st .box.dk { --h: #4a5a50; --m: #26332b; --l: #101a14; }
+.du-st .op { font-size: 32px; line-height: 1; color: var(--gx-ttl); text-shadow: 0 3px 0 #050b08; }
+.du-st .box.w, .du-st .op.w { visibility: hidden; }
+.du-st .box:not(.w), .du-st .op:not(.w) { animation: du-pop .2s steps(2, end) both; }
+
+/* el crupier, en su esquina de la mesa: sin bocadillo, solo caras (js/crupier.js lo pinta a escala entera). Si aun acababa una frase, la termina aqui */
+.du-seat { position: absolute; z-index: 5; left: 40px; bottom: calc(80px / var(--dk, 1)); width: 224px; height: 224px; zoom: var(--dk, 1); pointer-events: none; }   /* 80 px reales: justo encima de los botones del juego, que no se escalan */
+.du-seat .own { position: absolute; inset: 0; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .4)); }
+.du-seat .own .cr-cv { position: absolute; left: 50%; top: auto; bottom: 0; transform: translateX(-50%); }
+.du-seat .dealer.big { position: absolute; left: 0; bottom: 0; flex-direction: row; align-items: flex-end; gap: 8px; }
+.du-seat .dealer:not(.in) { display: none; }
+.du-seat .dealer.big .dl-face { width: 224px; height: 224px; order: 0; }
+.du-seat .dealer.big .dl-bubble { order: 1; margin: 0 0 96px; width: max-content; max-width: 420px; clip-path: none; padding-bottom: 13px; }
+.du-tools { position: absolute; z-index: 6; left: calc(172px / var(--dk, 1)); bottom: calc(16px / var(--dk, 1)); zoom: var(--dk, 1); }
+.du-tools #duQuit { display: inline-grid; white-space: nowrap; } .du-tools #duQuit > span { grid-area: 1 / 1; }          /* «Rendirse» y «¿Seguro?» en el mismo hueco: el boton no cambia de ancho */
+.du-tools #duQuit .b, .du-tools #duQuit.armed .a { visibility: hidden; } .du-tools #duQuit.armed .b { visibility: visible; }
+
+/* las fichas sobre el mapa (tu respuesta en oro y la del rival en violeta), con su etiqueta y su linea de puntos al lugar */
+.du-pins { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+.du-pins svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.du-pins line { stroke-width: calc(3px * var(--dk, 1)); stroke-dasharray: 2 7; stroke-linecap: square; visibility: hidden; }
+.du-pins line.me { stroke: var(--me); } .du-pins line.rv { stroke: var(--rv); }
+.du-pins.ln line { visibility: visible; }
+.du-pins .pn { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
+.du-pins .pn .in { position: absolute; left: 0; top: 0; }
+.du-pins .pn .in.drop { animation: du-chip .28s cubic-bezier(.3, 1.3, .5, 1) both; }
+@keyframes du-chip { from { opacity: 0; transform: translateY(-26px); } }
+.du-pins .pn canvas { position: absolute; left: 0; top: 0; translate: -50% -50%; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .5)); }
+html body .du-pins .pn .tag { position: absolute; top: 0; font-size: calc(16px * var(--dk, 1)); padding: .2em .4em .14em; box-shadow: 0 0 0 2px var(--gx-o); translate: 0 -50%; }
+.du-pins .pn.l .tag { right: calc(18px * var(--dk, 1)); } .du-pins .pn.r .tag { left: calc(18px * var(--dk, 1)); }
+.du-pins .pn.up .tag { translate: 0 -150%; } .du-pins .pn.dn .tag { translate: 0 50%; }
+.du-fly { position: absolute; left: 0; top: 0; z-index: 20; pointer-events: none; image-rendering: pixelated; will-change: transform; }
+
+/* la tira de papel de abajo: la bandera, el nombre y el dato; al final, la cuenta atras */
+.du-fact { position: absolute; z-index: 6; left: 50%; bottom: 32px; width: 592px; margin-left: -296px; zoom: var(--dk, 1); filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); pointer-events: none; }
+.du-fact .gx-paper { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 16px 12px; font-size: 20px; line-height: 1.1; animation: du-rise .42s cubic-bezier(.2, 1.1, .4, 1) both; }
+.du-fact .gx-paper.nf { grid-template-columns: minmax(0, 1fr) auto; }
+.du-fact .fg { display: block; width: 48px; height: auto; }
+.du-fact b { display: block; font-weight: 400; font-size: 24px; } .du-fact span { display: block; }
+.du-fact .tag { align-self: center; }
+
+/* ---------------------------------------------------------------- 5 · EL VEREDICTO */
+.du-st .du-fin { grid-template-rows: minmax(0, 1fr) auto; }
+.du-st .du-fin .tit { grid-column: 1 / 5; grid-row: 1; display: grid; gap: 14px; align-content: start; padding-top: 8px; }
+.du-st .du-fin .tit .gx-t-xl { font-size: 72px; }
+.du-st .liga { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); margin-top: 6px; }
+.du-st .liga .gx-pnl { padding: 16px 18px 18px; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 6px 14px; align-items: center; }
+.du-st .liga .ic { width: 64px; height: 64px; grid-row: span 2; } .du-st .liga b { font-weight: 400; font-size: 28px; color: var(--gx-ttl); }
+.du-st .liga .gx-bar { background: #0b2118; overflow: hidden; } .du-st .liga .gx-bar i { inset: 0; width: 100%; transform-origin: 0 50%; transform: scaleX(var(--s1)); animation: du-liga .9s cubic-bezier(.2, .8, .2, 1) 1.2s backwards; }
+@keyframes du-liga { from { transform: scaleX(var(--s0)); } }
+.du-st .liga p { grid-column: 1 / 3; font-size: 20px; color: var(--gx-txt-2); }
+.du-st .pol { display: grid; gap: 10px; margin-top: 6px; } .du-st .pol .rw { display: flex; flex-wrap: wrap; gap: 10px 12px; }
+.du-st .pol figure { margin: 0; width: 118px; padding: 6px 6px 4px; background: #fbf7ea; box-shadow: 0 0 0 2px var(--gx-o), 0 5px 0 2px rgba(2, 6, 4, .6); color: var(--gx-ink); font-size: 18px; line-height: 1; text-align: center; display: grid; gap: 4px; }
+.du-st .pol figure:nth-child(3n + 1) { rotate: -3deg; } .du-st .pol figure:nth-child(3n + 2) { rotate: 2deg; translate: 0 4px; } .du-st .pol figure:nth-child(3n) { rotate: -1deg; }
+.du-st .pol img, .du-st .pol .ph { display: block; width: 106px; height: 80px; object-fit: cover; image-rendering: auto; box-shadow: 0 0 0 1px rgba(22, 36, 28, .3); background: #d9cfb4; }
+.du-st .pol figcaption { overflow-wrap: anywhere; padding-bottom: 2px; }
+.du-st .du-fin .tk { grid-column: 5 / 9; grid-row: 1; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); align-self: start; }
+.du-st .du-fin .tk .gx-paper { padding: 18px 20px 20px; display: grid; gap: 5px; }
+.du-st .du-fin .tk .ln { display: grid; grid-template-columns: 24px minmax(0, 1fr) 44px 64px; gap: 8px; font-size: 20px; line-height: 1.05; align-items: baseline; }
+.du-st .du-fin .tk .ln i { font-style: normal; color: var(--gx-ink-2); } .du-st .du-fin .tk .ln b { font-weight: 400; text-align: right; } .du-st .du-fin .tk .ln .up { color: #1f7a4d; } .du-st .du-fin .tk .ln .dn { color: var(--gx-red-lo); }
+.du-st .du-fin .tk .ln span { min-width: 0; overflow-wrap: anywhere; }
+.du-st .du-fin .mesa { grid-column: 9 / 13; grid-row: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: end; justify-items: center; align-self: start; padding-top: 8px; height: 330px; }
+.du-st .du-fin .mesa .col { display: grid; justify-items: center; gap: 6px; align-content: end; height: 100%; min-width: 0; }
+.du-st .du-fin .mesa .col b { font-weight: 400; font-size: 44px; line-height: .9; } .du-st .du-fin .mesa .col b.me { color: var(--me-hi); } .du-st .du-fin .mesa .col b.rv { color: var(--rv-hi); }
+.du-st .du-fin .mesa .col span { font-size: 22px; max-width: 100%; text-align: center; overflow-wrap: anywhere; }
+.du-st .du-fin .mesa .dais { grid-column: 1 / 3; width: 100%; height: 14px; background: linear-gradient(var(--gx-rim-hi) 0 2px, var(--gx-rim) 2px calc(100% - 4px), var(--gx-rim-lo) calc(100% - 4px)); box-shadow: inset 0 0 0 2px var(--gx-o), 0 6px 0 rgba(2, 6, 4, .7); }
+.du-st .du-fin > .seatw { position: absolute; right: 0; bottom: 88px; width: 128px; height: 128px; }
+.du-st .du-fin > .seatw .dealer.big { left: auto; right: 0; flex-direction: row-reverse; } .du-st .du-fin > .seatw .dealer.big .dl-bubble { max-width: 330px; transform-origin: 100% 50%; }
+.du-st .du-fin > .gx-acts { grid-column: 1 / 13; grid-row: 2; justify-content: flex-end; align-items: center; gap: 12px 24px; }
+
+/* ---------------------------------------------------------------- 6 · LA SALA PRIVADA (un amigo, con un codigo): los dos asientos y, en medio, la mesa */
+.du-st .pv { grid-template-rows: 64px minmax(0, 1fr) 132px; }
+.du-st .pv .tbl { grid-column: 1 / 13; grid-row: 2; min-height: 0; }
+.du-st .pv .tbl .gx-pnl { height: 100%; padding: 24px 26px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; align-items: center; }
+.du-st .pv .asi { grid-column: span 3; min-width: 0; } .du-st .pv .asi.occ { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
+.du-st .pv .asi .gx-paper, .du-st .pv .libre { display: grid; gap: 8px; justify-items: center; align-content: center; text-align: center; padding: 20px 16px; min-height: 282px; }
+.du-st .pv .asi .ic { width: 96px; height: 96px; } .du-st .pv .asi h3 { font-size: 32px; line-height: .95; max-width: 100%; overflow-wrap: anywhere; }
+.du-st .pv .asi .sub { font-size: 20px; line-height: 1.1; color: var(--gx-ink-2); }
+.du-st .pv .libre { box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .35); background: repeating-linear-gradient(45deg, rgba(243, 237, 220, .04) 0 8px, transparent 8px 16px); color: var(--gx-txt-2); font-size: 22px; }
+.du-st .pv .libre .cod { padding-left: .1em; font-weight: 400; font-size: 60px; line-height: .9; letter-spacing: .1em; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08; user-select: text; -webkit-user-select: text; }
+.du-st .pv .libre small { font-size: 18px; line-height: 1.12; }
+.du-st .pv .opc { grid-column: span 6; display: grid; gap: 14px; padding: 0 12px; min-width: 0; }
+.du-st .pv .ms { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 4px; padding: 10px 6px; min-height: 0; text-align: center; }
+.du-st .pv .ms .ic { width: 48px; height: 48px; } .du-st .pv .ms i { display: block; font-style: normal; font-size: 18px; }
+.du-st .pv .ms.ro { cursor: default; } .du-st .pv .ms.ro:not(.on) { opacity: .5; background: none; }        /* el invitado ve la mesa, no la elige */
+.du-st .pv .regl { flex-wrap: wrap; gap: 8px 22px; }
+.du-st .pv .est { min-height: 44px; font-size: 22px; line-height: 1.1; color: var(--gx-ttl); }
+.du-st .gx-mq:has(.gx-btn.dis) { filter: grayscale(1) brightness(.6); } .du-st .gx-btn.dis { cursor: default; }   /* «Repartir» apagado: tambien sus bombillas */

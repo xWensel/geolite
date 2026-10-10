@@ -1,7 +1,7 @@
 # Geolite - reglas del proyecto
 
 ## Que es Geolite
-Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa lo mas cerca posible del lugar que te piden. Modos: Aventura (roguelike de 12 rondas en 3 actos, Ascensiones 0-5, modo infinito, Campamento con tienda y casino de 8 juegos, Don Crupier), Clasico (12 campanas de 10 niveles), Reto diario y Enciclopedia (5.025 tarjetas). 12 idiomas, 100 logros en Steamworks, web/PWA, Electron en Windows, Linux y Steam Deck. La definicion completa del producto es `README.md`: describe SIEMPRE lo que Geolite es hoy, en presente, sin historia ni origenes. Los datos del jugador usan claves `atlasiq.*` y el codigo el espacio `window.AIQ` (nombres internos estables).
+Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa lo mas cerca posible del lugar que te piden. Modos: Aventura (roguelike de 12 rondas en 3 actos, Ascensiones 0-5, modo infinito, Campamento con tienda y casino de 8 juegos, Don Crupier), Clasico (12 campanas de 10 niveles), Duelo de fichas (prototipo de 1 vs 1: con un amigo por codigo de sala o contra la banca; ocupa en la portada la carta del Reto diario, retirado por ahora: `DAILY` en `js/hub.js`) y Enciclopedia (5.025 tarjetas). 12 idiomas, 100 logros en Steamworks, web/PWA, Electron en Windows, Linux y Steam Deck. La definicion completa del producto es `README.md`: describe SIEMPRE lo que Geolite es hoy, en presente, sin historia ni origenes. Los datos del jugador usan claves `atlasiq.*` y el codigo el espacio `window.AIQ` (nombres internos estables).
 
 ## Autoria y creditos (no se cambia sin que el autor lo pida)
 - Diseno, codigo, arte y banda sonora: Cousins Studios (el arte, con el matiz de la linea siguiente).

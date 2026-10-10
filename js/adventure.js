@@ -510,6 +510,7 @@ window.AIQ = window.AIQ || {};
   A.adv._bandIdx = cid => { const pos = roundNo(), B = bandsOf(slotOf(pos), pos), q = allQ()[cid]; return q && B.pct(q) != null ? B.cls(q) : 0; };   // para las pruebas: 0 facil, 1 media, 2 dificil (relativas a la ventana de esta Ascension y ronda)
   A.adv._diff = cid => { const q = allQ()[cid]; return q ? diffOf(q, ROUND_THEME[slotOf(roundNo())]) : 50; };   // la dificultad 0-100 de una pregunta (A.QDIFF), para el bot
   A.adv._allQ = allQ;                                                // para las pruebas: cid -> pregunta
+  A.adv.kf = kf;                                                     // factor por tipo de lugar (el Duelo de fichas puntua con el mismo, js/duelo.js)
   A.adv.diffAt = diffAt;                                             // D(Ascension, ronda) de 0 a 1
   function pickQuestions(n, keep, chal) {
     const all = allQ();
