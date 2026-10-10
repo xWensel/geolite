@@ -489,7 +489,7 @@ window.AIQ = window.AIQ || {};
 
   function screen(id) {
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
-    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); }
+    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
     ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
   }
@@ -499,5 +499,5 @@ window.AIQ = window.AIQ || {};
   const classicHtml = () => { const S = C().S, camps = A.CAMPAIGNS.filter(x => x.mode === "classic"), id = camps.some(x => x.id === S.campId) ? S.campId : camps[0].id; return clHtml("classic", id, Math.min(S.startLevel || 0, C().prog(id).unlocked - 1)).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
   /* la Aventura tal cual (precalentamiento de la puerta), sin tocar la baraja ni la Ascension elegidas: sin ids, es una copia */
   const adventureHtml = () => { const sv = A.adv.hasSave(); return avHtml(sv && A.adv.summary(), sv).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
-  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, dailyHtml, classicHtml, adventureHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
+  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, dailyHtml, classicHtml, adventureHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
 })(window.AIQ);

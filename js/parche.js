@@ -36,6 +36,7 @@ window.AIQ = window.AIQ || {};
     hist: "Historial|History|Historique|Histórico|Verlauf|Cronologia||历史|기록|履歴|История|Historia",
     allv: "Todas las versiones|All versions|Toutes les versions|Todas as versões|Alle Versionen|Tutte le versioni||所有版本|모든 버전|すべてのバージョン|Все версии|Wszystkie wersje",
     foot: "Cada entrada lleva la versión del juego en la que llegó. Las capturas son del juego real.|Each entry shows the game version it arrived in. Screenshots are from the real game.|Chaque entrée indique la version du jeu où elle est arrivée. Les captures viennent du vrai jeu.|Cada entrada indica a versão do jogo em que chegou. As capturas são do jogo real.|Jeder Eintrag nennt die Spielversion, in der er erschien. Die Screenshots stammen aus dem echten Spiel.|Ogni voce indica la versione del gioco in cui è arrivata. Le schermate sono del gioco vero.||每条记录都标有它加入的游戏版本。截图均来自真实游戏。|각 항목에는 추가된 게임 버전이 적혀 있습니다. 스크린샷은 실제 게임 화면입니다.|各項目には追加されたゲームのバージョンを記載。スクリーンショットは実際のゲームのものです。|У каждой записи указана версия игры, в которой она появилась. Скриншоты — из настоящей игры.|Każdy wpis podaje wersję gry, w której się pojawił. Zrzuty ekranu pochodzą z prawdziwej gry.",
+    count: "{n} parches · último v{v}|{n} patches · latest v{v}|{n} patchs · dernier v{v}|{n} patches · mais recente v{v}|{n} Patches · neuester v{v}|{n} patch · ultima v{v}||共 {n} 个补丁 · 最新 v{v}|패치 {n}개 · 최신 v{v}|パッチ {n} 件 · 最新 v{v}|Патчей: {n} · последний v{v}|Patche: {n} · najnowszy v{v}",
     only: "Estas notas solo están en español e inglés.|These notes are only in Spanish and English.|Ces notes sont uniquement en espagnol et en anglais.|Estas notas só existem em espanhol e inglês.|Diese Notizen gibt es nur auf Spanisch und Englisch.|Queste note sono solo in spagnolo e inglese.||这些说明仅提供西班牙语和英语版本。|이 노트는 스페인어와 영어로만 제공됩니다.|このノートはスペイン語と英語のみです。|Эти заметки есть только на испанском и английском.|Te notatki są tylko po hiszpańsku i angielsku.",
     /* etiquetas de las entradas */
     new_: "Nuevo|New|Nouveau|Novo|Neu|Nuovo||新增|신규|新規|Новое|Nowe",
@@ -72,13 +73,17 @@ window.AIQ = window.AIQ || {};
   const LOC = () => ({ pt: "pt-BR", zh: "zh-CN" }[A.lang] || A.lang || "es");
   const day = s => { try { return new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "long", year: "numeric" }).format(new Date(s + "T12:00:00")); } catch (e) { return s; } };
   const gamesTxt = p => p.games ? t("games").replace("{a}", p.games[0]).replace("{b}", p.games[1]) : "";
-  const verTxt = v => /^0\.2\./.test(v) ? "v" + v : t("bld") + " " + v;  /* 0.2.N = version-parche; 0.50-0.79 = compilacion antigua */
+  const verTxt = v => (+String(v).split(".")[1] < 50 ? "v" + v : t("bld") + " " + v);  /* 0.2.N y 0.3.N = version del juego (v); 0.50-0.79 = compilacion antigua (antes las 0.3.N salian como "comp.") */
+  const dayShort = s => { try { return new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "long" }).format(new Date(s + "T12:00:00")); } catch (e) { return s; } };
+  /* el aviso "solo en espanol e ingles", solo si ESTE parche no esta en tu idioma (desde la 0.3.4 todos van en los 12) */
+  const noLang = p => { const l = A.lang === "es-419" ? "es" : A.lang; if (l === "es" || l === "en") return false; const o = p.name; return !(o && typeof o === "object" && !Array.isArray(o) && o[A.lang]); };
+  let pidNow = "";                                                       // el parche que se esta pintando: sus entradas no repiten su propia version
 
   const shots = imgs => !imgs || !imgs.length ? "" : `<div class="pt-shots">${imgs.map(m => {
     const cap = tx(m.cap || ""), src = "assets/parche/" + m.src + ".webp";
     return `<figure class="pt-shot s-${m.size || "wide"}"><button type="button" class="pt-zoom" data-src="${src}" style="--ar:${m.w} / ${m.h}" aria-label="${esc(cap)} · ${esc(t("zoom"))}"><img src="${src}" width="${m.w}" height="${m.h}" alt="${esc(cap)}" loading="lazy" decoding="async" draggable="false"></button>${cap ? `<figcaption>${esc(cap)}</figcaption>` : ""}</figure>`;
   }).join("")}</div>`;
-  const entry = e => `<article class="pt-en t-${e.tag}"><header><h3>${esc(tx(e.name))}</h3><span class="pt-tag">${esc(tagName(e.tag))}</span>${e.ver ? `<span class="pt-ver">${esc(verTxt(e.ver))}</span>` : ""}</header>
+  const entry = e => `<article class="pt-en t-${e.tag}"><header><h3>${esc(tx(e.name))}</h3><span class="pt-tag">${esc(tagName(e.tag))}</span>${e.ver && e.ver !== pidNow ? `<span class="pt-ver">${esc(verTxt(e.ver))}</span>` : ""}</header>
     <ul>${e.items.map(i => `<li>${rich(i)}</li>`).join("")}</ul>${shots(e.imgs)}</article>`;
   const chapter = c => `<section class="pt-ch" id="ptc-${esc(c.id)}" data-ch="${esc(c.id)}"><header class="pt-chh"><span class="pt-ck">${esc(tx(c.kicker))}</span><h2>${esc(tx(c.title))}</h2></header>
     ${c.intro ? `<p class="pt-lead">${rich(c.intro)}</p>` : ""}
@@ -86,12 +91,11 @@ window.AIQ = window.AIQ || {};
     ${(c.entries || []).map(entry).join("")}</section>`;
   const timeline = p => !p.timeline || !p.timeline.length ? "" : `<section class="pt-ch" id="ptc-versiones" data-ch="versiones"><header class="pt-chh"><span class="pt-ck">${esc(t("hist"))}</span><h2>${esc(t("allv"))}</h2></header>
     <ol class="pt-tl">${p.timeline.map(r => `<li><b>${esc(verTxt(r[0]))}</b><span>${esc(tx(r[1]))}</span></li>`).join("")}</ol></section>`;
-  const hero = p => `<header class="pt-hero"><span class="pt-hico">${A.icon("m_patch")}</span><div class="pt-ht">
-    <span class="pt-k">${esc(t("patch"))} v${esc(p.id)} · Geolite</span><h1>${esc(tx(p.name))}</h1>
-    <div class="pt-meta"><span>${esc(day(p.date))}</span>${p.games ? `<span>${esc(gamesTxt(p))}</span>` : ""}</div>
-    <p class="pt-sum">${rich(p.summary)}</p>${["es", "en", "es-419"].includes(A.lang) ? "" : `<p class="pt-lang">${esc(t("only"))}</p>`}</div></header>`;
+  /* v0.3.51 (mesa de diseno, Notas del parche A): el parche impreso en papel, como un boletin; nombre en grande, fecha, resumen */
+  const hero = p => `<header class="pt-hero"><span class="gx-eyb pt-k">${esc(t("patch"))} v${esc(p.id)} · ${esc(day(p.date))}${p.games ? " · " + esc(gamesTxt(p)) : ""}</span><h1>${esc(tx(p.name))}</h1>
+    <p class="pt-sum">${rich(p.summary)}</p>${noLang(p) ? `<p class="pt-lang">${esc(t("only"))}</p>` : ""}</header>`;
   /* el parche se pinta por trozos (cabecera y primer capitulo ya; el resto, uno por fotograma, por debajo de la vista): maquetar de golpe las ~100 entradas costaba un fotograma largo con CPU lenta */
-  const parts = p => [hero(p) + (p.chapters[0] ? chapter(p.chapters[0]) : ""), ...p.chapters.slice(1).map(chapter), timeline(p) + `<p class="pt-foot">${esc(t("foot"))}</p>`];
+  const parts = p => (pidNow = p.id, [hero(p) + (p.chapters[0] ? chapter(p.chapters[0]) : ""), ...p.chapters.slice(1).map(chapter), timeline(p) + `<p class="pt-foot">${esc(t("foot"))}</p>`]);
   const tocOf = p => [...p.chapters.map(c => [c.id, tx(c.kicker)]), ...(p.timeline && p.timeline.length ? [["versiones", t("allv")]] : [])];
 
   /* ------------------------------------------------------------------ la pantalla */
@@ -101,16 +105,27 @@ window.AIQ = window.AIQ || {};
   function open(id) {
     const ps = list(); if (!ps.length) return A.hub.screen("home");
     const c = C();
+    /* la primera vez que se abren, solo el ultimo es "nuevo" (antes los 51); despues, los que salgan desde tu ultima visita */
+    { const m = seenMap(); if (!Object.keys(m).length) { ps.slice(1).forEach(p => (m[p.id] = 1)); A.profile.save(); } }
     fresh = new Set(ps.filter(isNew).map(p => p.id));                            // los puntos "nuevo" de esta visita (al salir ya estan leidos)
     cur = (find(id || cur || (ps.find(isNew) || ps[0]).id) || ps[0]).id;
-    const items = ps.map((p, i) => `<button type="button" class="pt-item" data-id="${esc(p.id)}"><span class="pt-ic">${A.icon("m_patch")}</span>
-      <span class="pt-it"><b>v${esc(p.id)}</b><i>${esc(tx(p.name))}</i><em>${esc(day(p.date))}</em></span>${fresh.has(p.id) ? `<u class="pt-new">${esc(t("new"))}</u>` : i === 0 ? `<u class="pt-last">${esc(t("latest"))}</u>` : ""}</button>`).join("");
-    c.dialog(A.hub.frame(t("title"), `<div class="pt" data-nosq>
-      <nav class="pt-rail" aria-label="${esc(t("patches"))}"><h3 class="pt-rh">${esc(t("patches"))}</h3><div class="pt-items">${items}</div>
-        <h3 class="pt-rh">${esc(t("inpatch"))}</h3><ol class="pt-toc"></ol></nav>
-      <section class="pt-main"><div class="pt-scroll" tabindex="0" role="region"><div class="pt-in"></div></div>
-        <div class="pt-bar" aria-hidden="true"><i></i></div><button type="button" class="pt-top off" aria-label="${esc(t("top"))}">${A.icon("u_next")}</button></section></div>`, "s-patch scrolls"), "tablewrap");
+    /* v0.3.51 (mesa de diseno, Notas del parche A): 12 columnas. A la izquierda (1-4), el fieltro con todos los parches en filas finas agrupadas por dia
+       (version y nombre; un punto rojo en los que no has leido; el abierto, en laton). A la derecha (5-12), el parche impreso en papel, como un boletin */
+    let dd = "", items = "";
+    ps.forEach(p => { if (p.date !== dd) { dd = p.date; items += `<span class="gx-eyb pt-day">${esc(dayShort(p.date))}</span>`; }
+      items += `<button type="button" class="pt-item" data-id="${esc(p.id)}"><b>v${esc(p.id)}</b><span>${esc(tx(p.name))}</span>${fresh.has(p.id) ? `<i class="pt-nw" ${A.ttAttr(t("new"))}></i>` : ""}</button>`; });
+    c.dialog(`<div class="gx-veil"></div><section class="pt-screen gx-stage" aria-labelledby="ptH">
+      <div class="gx-grid pt-grid pt" data-nosq>
+        <header class="pt-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${esc(t("close"))}</span>${A.gala.keyHint("Esc", "b")}</button>
+          <h2 class="gx-t-l pt-h" id="ptH"><span class="pt-hic">${A.icon("m_patch")}</span>${esc(t("title"))}</h2>
+          <span class="pt-cnt">${esc(t("count").replace("{n}", A.fmt(ps.length)).replace("{v}", ps[0].id))}</span>${A.hub.tools()}</header>
+        <div class="gx-sh pt-left"><nav class="gx-pnl pt-rail" aria-label="${esc(t("patches"))}"><div class="pt-items">${items}</div>
+          <div class="pt-tocw"><h3 class="gx-eyb pt-rh">${esc(t("inpatch"))}</h3><ol class="pt-toc"></ol></div></nav></div>
+        <div class="gx-sh pt-right"><section class="gx-paper pt-main"><div class="pt-scroll" tabindex="0" role="region"><div class="pt-in"></div></div>
+          <div class="pt-bar" aria-hidden="true"><i></i></div><button type="button" class="pt-top off" aria-label="${esc(t("top"))}">${A.icon("u_next")}</button></section></div>
+      </div></section>`, "tablewrap");
     A.hub.wireTools(); $("hubBack").onclick = () => A.hub.screen("home");
+    if (A.coverMap) A.coverMap("patch", true, () => !!document.querySelector("#dlg .pt-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
     const root = document.querySelector("#dlg .pt"); if (!root) return;
     ui = { root, scroll: root.querySelector(".pt-scroll"), inner: root.querySelector(".pt-in"), toc: root.querySelector(".pt-toc"), bar: root.querySelector(".pt-bar"), thumb: root.querySelector(".pt-bar i"), top: root.querySelector(".pt-top"),
       M: { sh: 0, ch: 0, tr: 0, th: 40 }, ro: null, io: null, act: "", lock: 0, raf: 0 };
@@ -124,7 +139,10 @@ window.AIQ = window.AIQ || {};
     const p = find(id), u = ui; if (!p || !u || !u.root.isConnected) return;
     cur = p.id; markSeen(p.id);
     u.root.querySelectorAll(".pt-item").forEach(b => { const on = b.dataset.id === p.id; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
-    u.toc.innerHTML = tocOf(p).map(([cid, name], i) => `<li><button type="button" data-ch="${esc(cid)}"><span class="pt-n">${i + 1}</span><span class="pt-t">${esc(name)}</span></button></li>`).join("");
+    const toc = tocOf(p);
+    u.toc.innerHTML = toc.map(([cid, name], i) => `<li><button type="button" data-ch="${esc(cid)}"><span class="pt-n">${i + 1}</span><span class="pt-t">${esc(name)}</span></button></li>`).join("");
+    u.root.querySelector(".pt-tocw").hidden = toc.length < 2;                       // "En este parche" solo si hay mas de un capitulo
+    { const on = u.root.querySelector(".pt-item.on"); if (on) on.scrollIntoView({ block: "nearest" }); }   // a la vista aunque el indice de abajo encoja la lista
     u.scroll.setAttribute("aria-label", t("title") + " v" + p.id + " · " + tx(p.name));
     const ps = parts(p); u.inner.innerHTML = ps[0]; u.pending = ps.slice(1); u.gen = (u.gen || 0) + 1;
     u.scroll.scrollTo({ top: 0, behavior: "instant" });
@@ -202,6 +220,12 @@ window.AIQ = window.AIQ || {};
     /* sonido flojito al pasar por lo pulsable de la pantalla (el resto de botones ya lo hace game.js) */
     let last = null;
     u.root.addEventListener("mouseover", e => { const el = e.target.closest(".pt-item, .pt-toc button, .pt-zoom, .pt-top"); if (el && el !== last) A.sfx.hover(); last = el; });
+    /* las filas de la lista: cada parche en su sitio y con flechas arriba y abajo cuando el foco esta en la lista */
+    u.root.querySelector(".pt-items").addEventListener("keydown", e => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return; const b = e.target.closest(".pt-item"); if (!b) return;
+      const all = [...u.root.querySelectorAll(".pt-item")], k = all.indexOf(b) + (e.key === "ArrowDown" ? 1 : -1); if (k < 0 || k >= all.length) return;
+      e.preventDefault(); e.stopPropagation(); all[k].focus(); all[k].scrollIntoView({ block: "nearest" }); select(all[k].dataset.id);
+    });
   }
 
   /* ------------------------------------------------------------------ visor de capturas */
@@ -234,6 +258,7 @@ window.AIQ = window.AIQ || {};
   addEventListener("keydown", e => {
     const u = ui; if (!u || !u.root.isConnected || $("ptLb") || (A.core && A.core.S.settingsOpen) || (A.creditos && A.creditos.on) || e.ctrlKey || e.metaKey || e.altKey || (e.target && e.target.tagName === "INPUT")) return;
     const ae = document.activeElement, onBtn = ae && ae.tagName === "BUTTON", s = u.scroll, M = u.M;
+    if ((e.key === "ArrowDown" || e.key === "ArrowUp") && ae && ae.classList && ae.classList.contains("pt-item")) return;   // en la lista, las flechas cambian de parche
     let dy = null, abs = null;
     if (e.key === "ArrowDown") dy = 90; else if (e.key === "ArrowUp") dy = -90;
     else if (e.key === "PageDown" || (e.key === " " && !onBtn && !e.shiftKey)) dy = M.ch * 0.88; else if (e.key === "PageUp" || (e.key === " " && !onBtn && e.shiftKey)) dy = -M.ch * 0.88;

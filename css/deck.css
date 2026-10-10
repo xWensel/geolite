@@ -6,15 +6,6 @@ html[data-dev="deck"] .dlf-r span { font-size: 16px; }   /* «Visitas» ajustes-
 html[data-dev="deck"] .lg-label, html[data-dev="deck"] .lg-row { font-size: 16px; }   /* «Puntos del nivel» partida,revelado */
 html[data-dev="deck"] .np-t em { font-size: 16px; }   /* «1/21» ajustes-sound */
 html[data-dev="deck"] .plate-top { font-size: 16px; }   /* «Nº 01 / 10» partida,revelado */
-html[data-dev="deck"] .pt-ck { font-size: 16px; }   /* «Mando» hub-patch */
-html[data-dev="deck"] .pt-it em { font-size: 16px; }   /* «4 de octubre de 2026» hub-patch */
-html[data-dev="deck"] .pt-k { font-size: 16px; }   /* «Parche v0.2.31 · Geolite» hub-patch */
-html[data-dev="deck"] .pt-meta span { font-size: 16px; }   /* «4 de octubre de 2026» hub-patch */
-html[data-dev="deck"] .pt-n { font-size: 16px; }   /* «1» hub-patch */
-html[data-dev="deck"] .pt-new, html[data-dev="deck"] .pt-last { font-size: 16px; }   /* «Nuevo» hub-patch */
-html[data-dev="deck"] .pt-rh { font-size: 16px; }   /* «Parches» hub-patch */
-html[data-dev="deck"] .pt-tag { font-size: 16px; }   /* «Nuevo» hub-patch */
-html[data-dev="deck"] .pt-ver { font-size: 16px; }   /* «v0.2.31» hub-patch */
 html[data-dev="deck"] .rd.plan .rd-h b { font-size: 16px; }   /* «Acto I» hub-adventure */
 html[data-dev="deck"] .rd.plan .rd-n em { font-size: 16px; }   /* «1» hub-adventure */
 html[data-dev="deck"] .rd.plan .rd-n.inf em { font-size: 16px; }   /* «Infinito» hub-adventure */
@@ -43,7 +34,7 @@ html[data-dev="deck"] .seg button { letter-spacing: 0; line-height: 1.05; }
 
 /* v0.2.33: textos en Jersey / Pixelify (mayusculas del 55 % de su tamano): a 16 px se quedaban en 8,8 px; en la Deck van a 18 */
 html[data-dev="deck"] .rd.plan .rd-n.inf em, html[data-dev="deck"] .tk-pin,
-html[data-dev="deck"] #settings .set-keys em, html[data-dev="deck"] .osk-legend, html[data-dev="deck"] .pt-lang { font-size: 18px; }
+html[data-dev="deck"] #settings .set-keys em, html[data-dev="deck"] .osk-legend { font-size: 18px; }
 
 /* v0.2.34: retos de cuarta pared sin imitar al sistema (en una consola, un aviso falso se confundiria con uno real) */
 /* No responde: paneles de la mesa en vez de ventanas de Windows */
