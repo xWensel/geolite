@@ -1121,7 +1121,7 @@ window.AIQ = window.AIQ || {};
       if (has("bank")) { const b = gain(sumFlag("bank")); run.hucha = (run.hucha || 0) + b; lines.push([A.tx(A.RELICS.hoard.n) + " · " + A.tx(H_IN).replace("{n}", run.hucha), "+" + b, "hoard"]); }   // tanda 9: la Hucha guarda, no paga
       if (boss && run.act === 1 && has("bossHeal") && run.lives < run.maxLives) { run.lives++; lines.push([A.tx(A.RELICS.heartperk.n), A.tx(H_HEART), "heartperk"]); setTimeout(() => A.sfx.jackpot(1), 1100); }   // Corazon: el jefe del acto II te devuelve una provision
       const bet = (run.bets || {})[roundNo()], rb = casOf(roundNo()), first = !run.attempt;   // tanda 11: las apuestas se cobran aqui
-      if (rb && rb.id === "red" && rb.win && rb.att === (run.attempt || 0) && !rb.paid) { const extra = Math.ceil(x.coins * 0.5); x.coins += extra; rb.paid = 1; lines.push([A.tx(BETS.red.n) + " · +50 %", "+" + extra, null, "bet"]); }
+      if (rb && rb.id === "red" && rb.win && rb.att === (run.attempt || 0) && !rb.paid) { const pct = 0.5 * (rb.mult || 1), extra = Math.ceil(x.coins * pct); x.coins += extra; rb.paid = 1; lines.push([A.tx(BETS.red.n) + " · +" + Math.round(pct * 100) + " %", "+" + extra, null, "bet"]); }
       const got = gain(x.coins); if (got !== x.coins) lines.push([A.T("Doblones ×2", "Doubloons ×2"), "+" + (got - x.coins), (perkList().find(p => p.coinX) || {}).id]);
       run.coins += got; run.stats.coinsEarned += got;
       if (bet && bet.id === "double" && !bet.done) { bet.done = 1; if (first) { const win = Math.min(bet.stake, 40); run.coins += bet.stake + win; run.stats.coinsEarned += win; lines.push([A.tx(BETS.double.n) + " ×2", "+" + (bet.stake + win), null, "bet"]); setTimeout(() => { A.casa.premio(3); A.dealer.say(A.dealer.line("betWin"), { mood: "angry", hold: 2400 }); }, 1100); } }   // doblas lo apostado (+40 como mucho)
@@ -1579,7 +1579,8 @@ window.AIQ = window.AIQ || {};
   }
   const offerPay = c => { const d = A.CHAL[c.id]; return Math.max(1, Math.round(0.6 * (3 + 2 * (c.lv || 3) + (d.kind === "map" ? 1 : 0)) * ascFx(run.asc).price * inflation())); };   // el 60 % del soborno base, sin la escalada
   const betsOpen = () => true;   // la Barra de tres casillas (suministro, casino, apuesta) sale en TODOS los Campamentos, desde el primero
-  const redCost = () => price(2);
+  const redCost = (i = 0) => price([2, 5, 10][i % 3]);   // las mismas fichas que Moneda y Trile (COIN_STAKES, mas abajo)
+  let redStake = 0;
   /* n retos sellados para la ronda r: de familias que no estan, sin chocar con la ronda (texto en banderas, la placa, Memoria de pez...) */
   function pickSealed(r, n, tag, baseList) {
     const D = A.CHAL, base = baseList || chalFor(r).list, fs = new Set(base.map(c => D[c.id].fam)), flag = defAt(r).topic === "flag", topic = defAt(r).topic, txt = base.some(c => D[c.id].kind === "text");
@@ -1622,7 +1623,7 @@ window.AIQ = window.AIQ || {};
     if (k === "red") {
       const att = run.attempt || 0;
       if (b && b.att === att) { const gn = b.out === "green"; return `<div class="sup bet cas bt-red done ${b.win ? "win" : "lose"}${gn ? " zero" : ""}" data-bet="red">${head}<em class="bt-res"><b>${A.tx(gn ? BT2.zero : b.out === "red" ? BT.red : BT.black)}${b.n != null ? " · " + b.n : ""}</b>${A.tx(gn ? BT2.house : b.win ? BT.won : BT.lost)}${b.retos && b.retos.length ? " · " + A.tx(BT2.extra) : ""}</em></div>`; }
-      return `<div class="sup bet cas bt-red" data-bet="red">${head}<span class="bt-pick"><button class="bt-c bt-cr" type="button" data-pick="red">${A.tx(BT.red)}</button><button class="bt-c bt-cb" type="button" data-pick="black">${A.tx(BT.black)}</button>${r < LAST ? `<button class="bt-c bt-cg" type="button" data-pick="green" ${A.ttAttr(A.tx(BT2.green), A.tx(BT2.tip))}>${A.tx(BT2.green)}</button>` : ""}<em class="sp-p">${CN()}${redCost()}</em></span></div>`;
+      return `<div class="sup bet cas bt-red" data-bet="red">${head}<span class="bt-pick"><button class="bt-c bt-cr" type="button" data-pick="red">${A.tx(BT.red)}</button><button class="bt-c bt-cb" type="button" data-pick="black">${A.tx(BT.black)}</button>${r < LAST ? `<button class="bt-c bt-cg" type="button" data-pick="green" ${A.ttAttr(A.tx(BT2.green), A.tx(BT2.tip))}>${A.tx(BT2.green)}</button>` : ""}<em class="sp-p bt-stake" role="button" tabindex="0">${CN()}${redCost(redStake)}</em></span></div>`;
     }
     if (b && b.id === k) return `<div class="sup bet on bt-${k}" data-bet="${k}" role="button" tabindex="0">${head}<em class="sp-on">${A.tx(BT.on)}${k === "double" ? " · " + CN() + b.stake : ""}</em></div>`;
     if (!sideOk(k, r)) return "";
@@ -1688,12 +1689,14 @@ window.AIQ = window.AIQ || {};
       return;
     }
     if (k === "red") {
+      const pill = el.querySelector(".bt-stake");
+      if (pill) pill.onclick = e => { e.stopPropagation(); redStake = (redStake + 1) % 3; pill.innerHTML = CN() + redCost(redStake); A.sfx.tick(1); };   // el precio se cambia con un clic en la ficha; el premio de acertar crece con ella
       el.querySelectorAll("[data-pick]").forEach(btn => (btn.onclick = e => {
-        e.stopPropagation(); if (rouOpen) return; const c = redCost(); if (run.coins < c) { A.sfx.deny(); shake(el); return; }
+        e.stopPropagation(); if (rouOpen) return; const c = redCost(redStake); if (run.coins < c) { A.sfx.deny(); shake(el); return; }
         const att = run.attempt || 0, n = Math.floor(A.rng(`${run.seed}:rojo:${r}:${att}`)() * 37), out = colorOf(n), pick = btn.dataset.pick;   // la rueda europea: 18 rojos, 18 negros y el cero
         run.coins -= c; run.reds = run.reds || {}; const win = pick === out;
         const extra = !win && chalFor(r).list.length < 5 ? pickSealed(r, 1, "rojoextra") : [];   // fallar: la cuota ya esta perdida y la ronda trae un reto mas (sellado, nivel 3; con 5 retos ya no cabe)
-        run.reds[r] = { id: "red", pick, out, n, win, att }; if (extra.length) run.reds[r].retos = extra;
+        run.reds[r] = { id: "red", pick, out, n, win, att, mult: [2, 5, 10][redStake % 3] / 2 };   // mult: 1 / 2,5 / 5 veces el +50 % de siempre if (extra.length) run.reds[r].retos = extra;
         const skip = win && out === "green" ? greenSkip() : null;   // el salto ya esta hecho y guardado antes de girar: recargar a medias no lo deshace (la ruleta solo lo ensena)
         persist();
         A.sfx.rouBet(pick === "green" ? 2 : pick === "red" ? 0 : 1); if (A.haptic) A.haptic([10]);   // la ficha cae al instante: el clic nunca se queda mudo
