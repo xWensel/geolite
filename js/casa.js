@@ -4,7 +4,8 @@
  *  - La luz de la sala (#sala): una lampara sobre lo que importa en cada pantalla y penumbra media alrededor, a bandas de pixel con una
  *    costura de trama solo en el borde de cada banda (nada de grano). Es una imagen fija: se calcula en un hilo aparte (Worker) SOLO cuando
  *    cambia lo que hay en pantalla y entra con un fundido. En cada fotograma no cuesta nada: es una capa compuesta mas, como la vineta de siempre.
- *  - Lo que hay que leer siempre tiene luz: cada pieza (placa, ticket, cartas, botones) lleva su suelo de luz; la penumbra solo se come lo que sobra.
+ *  - La penumbra va SIEMPRE pegada al fondo, por detras de todas las piezas (v0.3.58): cae sobre el mapa o sobre el velo de la pantalla y nunca
+ *    sobre una carta, un boton, una pestana o el crupier. Ninguna pieza necesita "su" luz: estan delante y se ven enteras.
  *  - En partida, la lampara sobre la mesa: el centro del mapa no cambia nunca (la tierra no cambia de color) y la sala se calma (el remolino
  *    del oceano baja la voz). La sombra solo toca los bordes.
  *  - Ajustes > Pantalla > Luces de la sala: completas, suaves o apagadas (vuelve la vineta de siempre).
@@ -16,7 +17,10 @@
  *  - Las bombillas de la casa (A.bulbs, js/art.js) laten con un solo reloj (A.casa.MQ_P); aqui se vuelven a poner en fase tras cada pantalla.
  *  - v0.3.57 (Fase 3c): ese reloj es el compas de la cancion que suena: un paso por pulso. Sin musica, el reloj de la casa de siempre.
  *
- * Capas (#app): mapa < [#sala en partida] < HUD (z 5-6) < #layer (4) < #intro (6) < [#sala en las demas pantallas, z 7] < #tip (30) < avisos (40) < pausa (60) < Ajustes (62) < crupier y mesas.
+ * Donde vive #sala (v0.3.58): en partida, en #app justo encima del mapa y por debajo del HUD; en la portada, el veredicto y los cuadros, dentro de
+ * #layer (encima de su velo, debajo de todo lo demas); en la intro de ronda o de jefe, dentro de #intro (encima del telon, debajo del cartel y del
+ * crupier). Las pantallas con tapete propio (Campamento, Aventura, Clasico, Reto, Perfil, Notas, Clasificacion) ya traen su lampara pintada en el
+ * fieltro: ahi la luz de la sala no entra.
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -26,13 +30,12 @@ window.AIQ = window.AIQ || {};
   const MQ_P = 1140;                                                    // el reloj de la casa para las bombillas: tres pasos de 380 ms
 
   /* ================================================================ la luz: el calculo (el mismo codigo corre en el Worker o, si no hay, aqui) */
-  /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], floors [[x0, y0, x1, y1, luzMinima]], keep [cx, cy, rx, ry] }
-     Las lamparas (pools) son lo unico que da forma a la penumbra: una caida suave y redonda, justificada por la lampara. Cada pieza (floor) recibe
-     UNA sola luz, la que cae en su centro (o su minimo para poder leerla), plana y recortada a su borde: ni halo alrededor ni el borde de una
-     banda cruzandola. Asi no aparece ninguna sombra con forma de algo que no esta en pantalla */
+  /* p: { w, h, c (px por celda), amb (luz minima), bands, dark (fuerza de la sombra), rgb, pools [[cx, cy, rx, ry, k]], keep [cx, cy, rx, ry] }
+     Las lamparas (pools) son lo unico que da forma a la penumbra: una caida suave y redonda, justificada por la lampara. Nada mas: la capa va
+     por detras de todas las piezas, asi que no hay recortes ni recuadros de luz con forma de nada (los hubo hasta la v0.3.57 y se veian) */
   function paint(p) {
     const B = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], W = p.w, H = p.h, c = p.c, amb = p.amb, N = p.bands, SEAM = 0.12;
-    const pools = p.pools, floors = p.floors, keep = p.keep, out = new Uint8ClampedArray(W * H * 4), r = p.rgb[0], g = p.rgb[1], b = p.rgb[2];
+    const pools = p.pools, keep = p.keep, out = new Uint8ClampedArray(W * H * 4), r = p.rgb[0], g = p.rgb[1], b = p.rgb[2];
     const at = (x, y) => {
       let pool = 0;
       for (let k = 0; k < pools.length; k++) { const q = pools[k], dx = (x - q[0]) / q[2], dy = (y - q[1]) / q[3], d2 = dx * dx + dy * dy; if (d2 < 1) { const f = (1 - d2) * q[4]; if (f > pool) pool = f; } }
@@ -40,14 +43,11 @@ window.AIQ = window.AIQ || {};
       if (keep) { const dx = (x - keep[0]) / keep[2], dy = (y - keep[1]) / keep[3], d = Math.sqrt(dx * dx + dy * dy); if (d < 1) { let t = d < 0.78 ? 1 : 1 - (d - 0.78) / 0.22; t = t * t * (3 - 2 * t); L += (1 - L) * t; } }
       return L;
     };
-    const FL = floors.map(f => Math.max(f[4], at((f[0] + f[2]) / 2, (f[1] + f[3]) / 2)));
     for (let j = 0; j < H; j++) {
       const y = (j + 0.5) * c;
       for (let i = 0; i < W; i++) {
         const x = (i + 0.5) * c;
-        let L = -1;
-        for (let k = 0; k < floors.length; k++) { const f = floors[k]; if (x >= f[0] && x <= f[2] && y >= f[1] && y <= f[3] && FL[k] > L) L = FL[k]; }
-        if (L < 0) L = at(x, y);
+        let L = at(x, y);
         let t = (L - amb) / (1 - amb); t = t < 0 ? 0 : t > 1 ? 1 : t;
         const xv = t * N; let s = Math.floor(xv); const fr = xv - s;
         if (fr > 1 - SEAM && B[(i & 3) + ((j & 3) << 2)] / 16 < (fr - (1 - SEAM)) / SEAM) s++;   // la costura de trama, solo en el borde de cada banda
@@ -74,59 +74,33 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
   const union = rs => rs.length ? rs.reduce((u, r) => ({ left: Math.min(u.left, r.left), top: Math.min(u.top, r.top), right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) }), { left: 1e9, top: 1e9, right: -1e9, bottom: -1e9 }) : null;
   /* una lampara centrada en una pieza: sx/sy agrandan su radio respecto a la pieza; k > 1 deja meseta de luz plena en el centro */
   const pool = (r, sx, sy, k = 1.25) => r ? [(r.left + r.right) / 2, (r.top + r.bottom) / 2, Math.max(60, (r.right - r.left) / 2 * sx), Math.max(60, (r.bottom - r.top) / 2 * sy), k] : null;
-  /* la luz de una pieza SOLIDA (carta, ticket, boton, placa): plana y recortada a su borde (2 px de margen por la celda); `lv` es su minimo para
-     poder leerla. Nunca se le da a un contenedor invisible ni a un texto suelto: su caja dibujaria un recuadro de luz que no corresponde a nada */
-  const floor = (r, lv) => r ? [r.left - 2, r.top - 2, r.right + 2, r.bottom + 2, lv] : null;
-  /* las piezas de una pantalla de gala: las de su reticula de 12 columnas o, si no la usa (la Clasificacion), sus bloques y lo que llevan dentro */
-  const stageKids = st => { const k = all(".gx-grid > *", st); return k.length ? k : all(":scope > *, :scope > * > *", st); };
   function rule() {
     const W = innerWidth, H = innerHeight, lay = $("layer"), dlg = $("dlg"), intro = $("intro");
-    const P = [], F = [], add = (arr, x) => { if (x) arr.push(x); };
-    const fl = (rs, lv) => rs.forEach(r => add(F, floor(r, lv)));
-    /* las marquesinas de bombillas dan luz: el hueco que ocupan nunca queda en sombra */
-    const bulbs = root => fl(all(".mqb.mq-base", root), 1);
-    /* un tablero a pantalla completa (pantallas de gala, cuadros): una lampara ancha con mucha meseta; todo lo que hay se lee a luz plena y
-       la penumbra solo asoma en los margenes */
-    const board = kids => add(P, pool(union(kids), 1.32, 1.5, 3.2));
+    const P = [], add = x => { if (x) P.push(x); };
     if (document.body.classList.contains("cx-on")) return { key: "codex", off: 1 };                                 // la Enciclopedia es un aparato con su propia pantalla: la luz de la sala no entra
-    /* el crupier va delante de todo: donde este (intro, veredicto), una lampara propia. Ninguna sombra ni luz le pasa por encima */
-    const crupier = root => add(P, pool(vis(root.querySelector(".dealer")), 1.3, 1.25, 2.2));
+    /* donde este el crupier (intro, veredicto), una lampara detras de el: se ve como halo, nunca le pasa por encima */
+    const crupier = root => add(pool(vis(root.querySelector(".dealer")), 1.3, 1.25, 2.2));
     if (intro && !intro.classList.contains("hidden") && !intro.classList.contains("out")) {                          // intro de ronda o de jefe: una lampara sobre el cartel entero
-      add(P, pool(union(all(".intro-in > *", intro)), 1.4, 1.7, 1.9)); crupier(intro); bulbs(intro);
-      return { key: "intro", pools: P, floors: F, boss: !!intro.querySelector(".intro-in.is-boss") };
+      add(pool(union(all(".intro-in > *", intro)), 1.4, 1.7, 1.9)); crupier(intro);
+      return { key: "intro", pools: P, boss: !!intro.querySelector(".intro-in.is-boss") };
     }
-    const top = lay && !lay.classList.contains("hidden") ? [...lay.querySelectorAll(":scope > :not(#dlg) .gx-stage")].pop() : null;
-    if (top) { board(stageKids(top)); bulbs(top); return { key: "stage", pools: P, floors: F }; }                    // la Clasificacion: va en #layer, encima de la portada
     if (lay && !lay.classList.contains("hidden") && dlg) {
+      if (lay.querySelector(":scope > :not(#dlg) .gx-stage") || dlg.querySelector(".gx-camp, .gx-stage")) return { key: "stage", off: 1 };   // tapete propio: su lampara ya va pintada en el fieltro
       if (dlg.classList.contains("home")) {                                                                          // portada: la lampara sobre las tres cartas y otra sobre el cartel
-        const cards = all(".hh-cards > *", dlg);
-        add(P, pool(union(cards), 1.5, 1.7, 1.3)); add(P, pool(vis(dlg.querySelector(".hh-logo")), 1.5, 2.1, 1.15));
-        fl(cards, 1); fl(all(".plq, .hh-resume .startbtn", dlg), 1); fl(all(".hh-top .menu-gear, .menu-gear", dlg), 0.8); fl(all("#leftCol > *"), 1);
-        return { key: "home", pools: P, floors: F };
+        add(pool(union(all(".hh-cards > *", dlg)), 1.5, 1.7, 1.3)); add(pool(vis(dlg.querySelector(".hh-logo")), 1.5, 2.1, 1.15));
+        return { key: "home", pools: P };
       }
       const vd = dlg.querySelector(".gx-vd");
       if (vd) {                                                                                                     // ronda superada o fallida: el ticket bajo su lampara y otra sobre el cartel
-        const tk = vis(vd.querySelector(".gx-vd-ticket")), hd = vis(vd.querySelector(".gx-vd-head"));
-        add(P, pool(tk, 1.7, 1.3, 1.4)); add(P, pool(hd, 1.5, 1.7, 1.5)); add(P, pool(vis(vd.querySelector(".gx-vd-side")), 1.5, 1.4, 1.5));
-        fl([tk].filter(Boolean), 1); fl(all(".gx-vd-iq, .gx-vd-acts .gx-btn", vd), 1); crupier(vd); bulbs(vd);
-        return { key: "vd", pools: P, floors: F };
+        add(pool(vis(vd.querySelector(".gx-vd-ticket")), 1.7, 1.3, 1.4)); add(pool(vis(vd.querySelector(".gx-vd-head")), 1.5, 1.7, 1.5)); add(pool(vis(vd.querySelector(".gx-vd-side")), 1.5, 1.4, 1.5));
+        crupier(vd);
+        return { key: "vd", pools: P };
       }
-      const camp = dlg.querySelector(".gx-camp");
-      if (camp) {                                                                                                   // el Campamento: una lampara sobre la mesa (cartas, Barra, mochila) y otra sobre el boleto
-        add(P, pool(union(all(":scope > .tb-head, :scope > .tb-shop, :scope > .tb-sup, :scope > .tb-tray", camp)), 1.22, 1.32, 1.7));
-        add(P, pool(union(all(":scope > .tb-next, :scope > .go2-wrap", camp)), 1.4, 1.25, 1.7));
-        fl(all(".offer, .tb-deck, .tb-next, .go2-wrap, .sup, .tb-right > *", camp), 1); fl(all(":scope > .tb-tray", camp), 0.9); bulbs(camp);
-        return { key: "camp", pools: P, floors: F };
-      }
-      const stage = dlg.querySelector(".gx-stage");
-      if (stage) { board(stageKids(stage)); bulbs(stage); return { key: "stage", pools: P, floors: F }; }           // pantallas de gala (Aventura, Clasico, Reto, Perfil...)
-      if (!dlg.classList.contains("side")) { board(all(":scope > *", dlg)); return { key: "box", pools: P, floors: F }; }   // cualquier otro cuadro centrado
+      if (!dlg.classList.contains("side")) { add(pool(union(all(":scope > *", dlg)), 1.32, 1.5, 3.2)); return { key: "box", pools: P }; }   // cualquier otro cuadro centrado: una lampara ancha
     }
-    /* partida: la lampara sobre la mesa. La penumbra cae SOLO sobre el mapa: en partida la luz de la sala va por debajo del HUD (#sala.bajo), asi que
-       la placa, el marcador y su ticket, las tarjetas y las herramientas quedan encima, siempre a plena luz y sin recortes que calcular.
-       El centro del mapa queda intacto */
-    add(P, [W / 2, H / 2, W * 0.8, H * 0.86, 1.2]);
-    return { key: "play", pools: P, floors: F, keep: [W / 2, H * 0.53, W * 0.46, H * 0.44], calm: 1 };
+    /* partida: la lampara sobre la mesa. La penumbra cae sobre el mapa, por debajo del HUD; el centro del mapa queda intacto */
+    add([W / 2, H / 2, W * 0.8, H * 0.86, 1.2]);
+    return { key: "play", pools: P, keep: [W / 2, H * 0.53, W * 0.46, H * 0.44], calm: 1 };
   }
 
   /* ================================================================ la luz: dibujo, fundido y cuando recalcular */
@@ -159,10 +133,10 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const W = innerWidth, H = innerHeight; if (!W || !H) return;
     const R = rule(), L = LUX[mode], k = Math.min(W / 1280, H / 720), c = Math.max(2, Math.round(2 * k));
     root.classList.toggle("mute", !!R.off);
-    if (R.off) { if (map) map.calm = 0; sig = "off"; seq++; root.classList.remove("boss"); return; }
+    if (R.off) { if (map) map.calm = 0; sig = "off"; seq++; root.classList.remove("boss"); hora(); return; }
     const N = NOCHE[act] || NOCHE[0], boss = !!R.boss;
-    const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, floors: R.floors, keep: R.keep || null };
-    const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), R.floors.map(q => q.map(v => Math.round(v / 6))), p.keep]);
+    const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, keep: R.keep || null };
+    const s = JSON.stringify([mode, act, boss, p.w, p.h, R.key, R.pools.map(q => q.map(v => Math.round(v / 6))), p.keep]);
     if (map) map.calm = R.calm ? 1 : 0;                                 // en partida el remolino del oceano baja la voz (js/map.js)
     hora();
     if (s === sig) return; sig = s;
@@ -194,10 +168,21 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     }
     return "play";
   }
+  /* donde vive la luz en cada pantalla: siempre pegada a su fondo y por detras de todo lo que se ve en ella (css/gala.css, LA SALA).
+     Las pantallas con tapete propio no la usan: se queda donde este, apagada */
+  const TAPETE = k => k === "codex" || k === "camp" || k.startsWith("stage");
+  function coloca(k) {
+    if (!root) return;
+    const app = $("app"), h = TAPETE(k) ? (root.isConnected ? null : app) : k.startsWith("intro") ? $("intro") : k === "play" ? app : $("layer");
+    if (!h) return;
+    if (h === app) { if (root.parentNode !== app) { const ref = app.querySelector(":scope > .vignette"); app.insertBefore(root, ref ? ref.nextSibling : app.firstChild); } }
+    else if (h.firstChild !== root) h.insertBefore(root, h.firstChild);
+  }
   function mira(changed) {
     if (!root) return;
     /* en que pantalla estas: lo usan la luz y el sonido (con las Luces de la sala apagadas, el sonido sigue sabiendo donde estas) */
-    if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind && mode !== "off") neutral(); lastKind = k; root.classList.toggle("mute", k === "codex"); root.classList.toggle("bajo", k === "play"); llegaElJefe(k === "intro jefe"); lugar(k); } }
+    if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind && mode !== "off") neutral(); lastKind = k; root.classList.toggle("mute", TAPETE(k)); llegaElJefe(k === "intro jefe"); lugar(k); } }
+    coloca(lastKind);                                                   // tambien si la pantalla se ha vuelto a pintar entera y se ha llevado la capa por delante
     clearTimeout(tm); clearTimeout(tm2);
     if (mode === "off") { tm = setTimeout(hora, 650); return; }       // sin luces de sala, las bombillas siguen en hora
     tm = setTimeout(() => idle(look), 650);                            // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
@@ -313,12 +298,10 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     root = document.createElement("div"); root.id = "sala"; root.setAttribute("aria-hidden", "true");
     root.innerHTML = '<canvas class="d"></canvas><canvas class="d"></canvas><canvas class="g"></canvas><i class="veil"></i><i class="beam"></i>';
     cvs = [...root.querySelectorAll("canvas.d")]; glowCv = root.querySelector("canvas.g"); veil = root.querySelector(".veil"); beam = root.querySelector(".beam");
-    /* va justo encima del mapa (tras la vineta): en partida se queda ahi, por debajo del HUD; en las demas pantallas sube con z-index por encima de ellas */
-    const app = $("app"), ref = app.querySelector(":scope > .vignette"); if (ref) app.insertBefore(root, ref.nextSibling); else app.insertBefore(root, app.firstChild);
-    root.classList.add("bajo"); lastKind = kind(); root.classList.toggle("bajo", lastKind === "play"); lugar(lastKind);
+    lastKind = kind(); root.classList.toggle("mute", TAPETE(lastKind)); coloca(lastKind); lugar(lastKind);
     /* que mirar: cambios de pantalla (#layer, #dlg, #intro), las piezas que entran y salen en partida (#leftCol, el ticket del marcador) y el tamano */
     const mo = new MutationObserver(() => mira(true));
-    [["layer", { attributes: true, attributeFilter: ["class"], childList: true }], ["dlg", { attributes: true, attributeFilter: ["class"], childList: true }], ["intro", { attributes: true, attributeFilter: ["class"] }],
+    [["layer", { attributes: true, attributeFilter: ["class"], childList: true }], ["dlg", { attributes: true, attributeFilter: ["class"], childList: true }], ["intro", { attributes: true, attributeFilter: ["class"], childList: true }],
       ["leftCol", { childList: true }], ["ledgerSh", { childList: true }]].forEach(([id, o]) => { const el = $(id); if (el) mo.observe(el, o); });
     mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });                                      // cx-on: se abre o se cierra la Enciclopedia
     addEventListener("resize", () => { sig = ""; mira(); });

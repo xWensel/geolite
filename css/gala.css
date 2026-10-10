@@ -910,10 +910,14 @@ html.reduce-motion .gx-camp > .go2-wrap::before { opacity: .6; }
 }
 
 /* ===================================================================================================== LA SALA (v0.3.52, js/casa.js)
-   La luz de la sala: una capa fija por encima de las pantallas y el HUD y por debajo de avisos, pausa, Ajustes, crupier y mesas. Es una imagen
-   pequena (una celda por cada 2-4 px) escalada sin suavizar: bandas de pixel. Cambia con un fundido cuando cambia la pantalla; nada por fotograma */
-#sala { position: absolute; inset: 0; z-index: 7; pointer-events: none; overflow: hidden; }
-#sala.bajo { z-index: auto; }                                               /* en partida: sobre el mapa y por debajo del HUD */
+   La luz de la sala: una imagen pequena (una celda por cada 2-4 px) escalada sin suavizar: bandas de pixel. Cambia con un fundido cuando cambia
+   la pantalla; nada por fotograma.
+   v0.3.58: va SIEMPRE pegada al fondo de la pantalla y por detras de todas sus piezas (js/casa.js la cuelga de #app en partida, de #layer en la
+   portada, el veredicto y los cuadros, y de #intro en la intro): z-index -1 dentro de su contenedor = encima de su fondo y debajo de todo lo demas.
+   Nunca tapa una carta, un boton, una pestana ni al crupier, y no hacen falta recortes de luz alrededor de nada */
+#sala { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+#app > #sala { z-index: auto; }                                             /* en partida: sobre el mapa (va tras la vineta) y por debajo del HUD */
+#intro::before { z-index: -1; }                                             /* el telon de la intro, por debajo de la luz; el cartel y el crupier, por encima */
 #sala.hidden { display: none; }
 #sala { transition: opacity .25s ease; } #sala.mute { opacity: 0; }                /* la Enciclopedia: un aparato con su propia pantalla; la luz de la sala no entra */
 #sala canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; }
