@@ -278,7 +278,16 @@ function startServer() {
       if (!filePath.startsWith(ROOT + path.sep) || path.relative(ROOT, filePath).split(path.sep).some(p => p.startsWith("."))) { res.writeHead(403); res.end(); return; }
       fs.readFile(filePath, (err, data) => {
         if (err) { res.writeHead(404); res.end("Not found"); return; }
-        res.writeHead(200, { "Content-Type": MIME[path.extname(filePath)] || "application/octet-stream", "Cache-Control": "no-cache" });   // siempre la ultima version de los archivos
+        const head = { "Content-Type": MIME[path.extname(filePath)] || "application/octet-stream", "Cache-Control": "no-cache", "Accept-Ranges": "bytes" };   // siempre la ultima version de los archivos
+        /* v0.3.55: peticiones por rangos (Range). Sin ellas el reproductor no puede saltar dentro de una cancion: tras el tema del jefe,
+           la cancion del acto volvia a empezar en vez de seguir por donde iba */
+        const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+        if (m && (m[1] || m[2])) {
+          const n = data.length, a = m[1] ? +m[1] : Math.max(0, n - +m[2]), b = m[1] && m[2] ? Math.min(+m[2], n - 1) : n - 1;
+          if (a > b || a >= n) { res.writeHead(416, { "Content-Range": "bytes */" + n }); res.end(); return; }
+          res.writeHead(206, { ...head, "Content-Range": `bytes ${a}-${b}/${n}`, "Content-Length": b - a + 1 }); res.end(data.subarray(a, b + 1)); return;
+        }
+        res.writeHead(200, head);
         res.end(data);
       });
     });

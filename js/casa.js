@@ -194,12 +194,17 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     return "play";
   }
   function mira(changed) {
-    if (!root || mode === "off") return;
-    if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind) neutral(); lastKind = k; root.classList.toggle("mute", k === "codex"); root.classList.toggle("bajo", k === "play"); llegaElJefe(k === "intro jefe"); } }
+    if (!root) return;
+    /* en que pantalla estas: lo usan la luz y el sonido (con las Luces de la sala apagadas, el sonido sigue sabiendo donde estas) */
+    if (changed === true) { const k = kind(); if (k !== lastKind) { if (lastKind && mode !== "off") neutral(); lastKind = k; root.classList.toggle("mute", k === "codex"); root.classList.toggle("bajo", k === "play"); llegaElJefe(k === "intro jefe"); lugar(k); } }
+    if (mode === "off") return;
     clearTimeout(tm); clearTimeout(tm2);
     tm = setTimeout(() => idle(look), 650);                            // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
     tm2 = setTimeout(() => idle(look), 1600);
   }
+
+  /* v0.3.55: el sitio en el que estas tambien se oye. En el Campamento la musica llega amortiguada, como desde la sala (js/audio.js) */
+  function lugar(k) { if (A.music && A.music.room) A.music.room(k === "camp"); }
 
   /* ================================================================ las bombillas: un solo reloj */
   /* A.bulbs nace ya en fase (--mq-s, sacado del reloj del documento). Si se pinto oculta y empezo tarde, aqui se pone en hora para siempre:
@@ -282,7 +287,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     cvs = [...root.querySelectorAll("canvas.d")]; glowCv = root.querySelector("canvas.g"); veil = root.querySelector(".veil"); beam = root.querySelector(".beam");
     /* va justo encima del mapa (tras la vineta): en partida se queda ahi, por debajo del HUD; en las demas pantallas sube con z-index por encima de ellas */
     const app = $("app"), ref = app.querySelector(":scope > .vignette"); if (ref) app.insertBefore(root, ref.nextSibling); else app.insertBefore(root, app.firstChild);
-    root.classList.add("bajo"); lastKind = kind(); root.classList.toggle("bajo", lastKind === "play");
+    root.classList.add("bajo"); lastKind = kind(); root.classList.toggle("bajo", lastKind === "play"); lugar(lastKind);
     /* que mirar: cambios de pantalla (#layer, #dlg, #intro), las piezas que entran y salen en partida (#leftCol, el ticket del marcador) y el tamano */
     const mo = new MutationObserver(() => mira(true));
     [["layer", { attributes: true, attributeFilter: ["class"], childList: true }], ["dlg", { attributes: true, attributeFilter: ["class"], childList: true }], ["intro", { attributes: true, attributeFilter: ["class"] }],

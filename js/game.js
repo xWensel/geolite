@@ -497,7 +497,7 @@
   function showTitle(screen) {
     document.body.classList.add("title-on"); S.phase = "title"; S.camp = null; S.run = null; S.tool = null; S.ranked = null; A.adv.hideBars(); map.setStyle(A.MAPSTYLES[S.skin] || A.MAPSTYLES.casino); map.setPick(false); map.clearMarks(); map.setHome({ lat: 0, lon: 0, zoom: 1 });
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("veil").classList.add("hidden"); $("intro").classList.add("hidden");
-    chrome(false); $("factText").textContent = ""; A.music.mode(0); map.startDrift(); openSettings(false);
+    chrome(false); $("factText").textContent = ""; A.music.mode(0); A.music.moment("home"); map.startDrift(); openSettings(false);
     renderMenu(screen);
   }
   function renderMenu(screen) { A.hub.screen(screen || S.hub || "home"); }
@@ -628,6 +628,7 @@
   }
   function startLevel_(idx) {
     if (!S.run && A.dealer && A.dealer.noteClassic) A.dealer.noteClassic();     // juegas al Clasico: al volver a la portada, el crupier lo comenta
+    if (!S.run) A.music.moment("classic");                                       // la musica del Clasico: las de la portada y las del acto I (js/audio.js)
     document.body.classList.remove("title-on"); S.level = idx; S.qs = lv().questions(); S.qi = 0; S.levelScore = 0; S.log = []; S.streak = 0; S.hits = 0; S.phase = "intro"; S.runMax0 = S.runMax;   // maximo acumulado al empezar el nivel (Reintentar vuelve a el)
     closeDialog(); $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden");
     chrome(true); $("factText").textContent = ""; odoNow($("scLevel"), 0); updateHud();

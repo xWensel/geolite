@@ -5,6 +5,7 @@
  *  - Firma: motivo de tres notas ascendentes (sol-do-re) que suena al empezar, al superar niveles y en la victoria.
  *  - Escala pentatonica de Do mayor: cualquier nota que suene "encaja", asi nada choca.
  *  - La intensidad de "tension" (ultimos segundos) abre el filtro de la musica; no cambia de pista.
+ *  - Cada cancion tiene su momento (portada, actos, jefe, victoria) y su correccion de volumen: ver GROUPS mas abajo (v0.3.55).
  *  - Los sonidos del resultado cambian segun lo cerca que estes: diana, muy bien, bien, fallo, tiempo agotado.
  */
 window.AIQ = window.AIQ || {};
@@ -37,11 +38,11 @@ window.AIQ = window.AIQ || {};
     const rvOut = ctx.createGain(); rvOut.gain.value = 0.42;
     revIn = ctx.createGain(); revIn.connect(rv); rv.connect(rvOut).connect(master);
     /* pestana oculta: se suspende el audio y se pausa la cancion (si no, seguiria avanzando en silencio y encadenando pistas sin que nadie las oiga) */
-    let hidPlay = false;
+    let hidPlay = [];
     document.addEventListener("visibilitychange", () => {
       if (!ctx) return;
-      if (document.hidden) { hidPlay = !!(mediaEl && !mediaEl.paused); if (hidPlay) mediaEl.pause(); ctx.suspend(); }
-      else { ctx.resume(); if (hidPlay && mediaEl && A.audio.musicOn) mediaEl.play().catch(() => {}); hidPlay = false; }
+      if (document.hidden) { hidPlay = decks.filter(d => d && !d.el.paused); hidPlay.forEach(d => d.el.pause()); ctx.suspend(); }
+      else { ctx.resume(); if (A.audio.musicOn) hidPlay.forEach(d => d.el.play().catch(() => {})); hidPlay = []; }
     });
     return true;
   }
@@ -184,46 +185,114 @@ window.AIQ = window.AIQ || {};
     "assets/music/16-house-del-crupier.mp3", "assets/music/17-tecno-del-bote.mp3", "assets/music/18-merengue-del-premio.mp3",
     "assets/music/19-cha-cha-del-casino.mp3", "assets/music/20-ranchera-de-la-suerte.mp3", "assets/music/21-corrido-del-apostador.mp3",
   ];
-  let cur = -1, mediaEl = null, mediaSrc = null, mode = 0;
-  const recent = [];
+  /* v0.3.55 (el sonido de la casa, 3a): cada cancion tiene su momento y su volumen. Los archivos no se tocan: todo se decide aqui.
+     - GROUPS: el reparto. La portada y los menus, las mas tranquilas (la 1.a, "Apuesta segura", es SIEMPRE la del arranque); cada acto de la
+       Aventura, con mas empuje que el anterior; el jefe y la victoria, su tema; los creditos, el vals (js/final.js). Clasico = portada + acto I;
+       modo infinito = actos II y III.
+     - Dentro de un momento, al acabar una cancion entra otra del grupo (sin repetir las ultimas) con un fundido. Al cambiar de momento la que suena
+       TERMINA y la siguiente ya sale del grupo nuevo: ninguna cancion se corta a medias. Las excepciones son el jefe (su tema entra con su llegada y,
+       al irse, vuelve la cancion del acto por donde iba) y la victoria.
+     - LUFS: el volumen medido de cada pista (ffmpeg ebur128). Entre la mas fuerte y la mas floja habia 8,7 dB; TRIM las lleva todas a -34 LUFS
+       (correccion limitada a -4 / +5,5 dB) con una ganancia por pista.
+     - BPM y BEAT0 (tempo y primer pulso en ms, medidos: todas van a tempo exacto de principio a fin): el compas de la que suena, A.music.beat(). */
+  const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
+  GROUPS.classic = GROUPS.home.concat(GROUPS.a1); GROUPS.inf = GROUPS.a2.concat(GROUPS.a3);
+  const NOW = { boss: 1, win: 1 };                                      // momentos que no esperan a que acabe la cancion
+  const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4];
+  const TRIM = LUFS.map(l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20));
+  const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92];
+  const BEAT0 = [477, 20, 26, 22, 23, 26, 25, 26, 283, 26, 441, 22, 299, 277, 26, 268, 20, 25, 257, 23, 399];
+  const XF = 1.4;                                                       // segundos de fundido entre dos canciones
+  let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
+  const decks = [], recent = [];                                        // dos platos: mientras uno entra, el otro sale
 
-  function ensureMedia() {
-    if (mediaEl) return;
-    mediaEl = new Audio(); mediaEl.crossOrigin = "anonymous"; mediaEl.preload = "auto"; mediaEl.loop = false;   // si algun dia sale de otro dominio: sin CORS, WebAudio la silenciaria
-    mediaSrc = ctx.createMediaElementSource(mediaEl); mediaSrc.connect(musBus);
-    mediaEl.addEventListener("ended", () => useTrack(autoIdx(), true));
+  function deck(k) {
+    if (decks[k]) return decks[k];
+    const el = new Audio(); el.crossOrigin = "anonymous"; el.preload = "auto"; el.loop = false;   // si algun dia sale de otro dominio: sin CORS, WebAudio la silenciaria
+    const trim = ctx.createGain(), fade = ctx.createGain(); fade.gain.value = 0;
+    ctx.createMediaElementSource(el).connect(trim).connect(fade).connect(musBus);
+    const d = (decks[k] = { el, trim, fade, idx: -1, leaving: false, tm: 0 });
+    /* la cancion se acaba: la siguiente entra fundida un poco antes del final (o, si no se pudo, al terminar) */
+    el.addEventListener("timeupdate", () => { if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.25) change(pick(), "fade"); });
+    el.addEventListener("ended", () => { if (decks[di] === d && !d.leaving) change(pick(), "soft"); });
+    ["playing", "pause", "seeked", "waiting"].forEach(ev => el.addEventListener(ev, () => { if (decks[di] === d && A.music.onBeat) A.music.onBeat(); }));
+    return d;
   }
-  const autoIdx = () => { const opts = FILES.map((_, i) => i).filter(i => !recent.includes(i)); return opts[Math.floor(Math.random() * opts.length)]; };
-  const nextIdx = () => (cur + 1) % FILES.length;
-  const prevIdx = () => (cur - 1 + FILES.length) % FILES.length;
-  function transition(t) {
-    noise(t, 1.1, { hp: 2500, vol: 0.035, sweepTo: 9000, type: "highpass", bus: musBus }); thump(t, { vol: 0.2, f0: 90, f1: 40, dur: 0.3, bus: musBus }); bell(84, t, { vol: 0.05, dur: 1.4, bus: musBus, rev: 0.6 });
+  const group = () => GROUPS[moment] || GROUPS.home;
+  /* otra del grupo: nunca la que suena ni las ultimas (cuantas, segun lo grande que sea el grupo) */
+  function pick(g = group()) {
+    const last = recent.slice(-Math.max(1, Math.min(4, g.length - 2)));
+    let o = g.filter(i => !last.includes(i)); if (!o.length) o = g.filter(i => i !== cur); if (!o.length) o = g;
+    return o[Math.floor(Math.random() * o.length)];
   }
-  function useTrack(i, announce) {
-    ensureMedia(); cur = i; recent.push(i); if (recent.length > 4) recent.shift();
-    mediaEl.src = A.media(FILES[i]); mediaEl.currentTime = 0; mediaEl.play().catch(() => {});
-    if (announce) { transition(ctx.currentTime); if (A.music.onChange) A.music.onChange(i); }
+  /* suena la pista i. how: "fade" (fundido de XF s), "soft" (entra en un cuarto de segundo) o "cut" (de golpe). at: segundo desde el que sigue */
+  function useTrack(i, how = "soft", at = 0) {
+    const t = ctx.currentTime, old = di >= 0 ? decks[di] : null, k = di === 0 ? 1 : 0, d = deck(k), f = how === "fade" ? XF : how === "soft" ? 0.25 : 0.03;
+    clearTimeout(d.tm); d.leaving = false; d.idx = i; cur = i; recent.push(i); if (recent.length > 6) recent.shift();
+    d.el.src = A.media(FILES[i]); try { d.el.currentTime = at; } catch (e) { /* aun sin datos: empieza desde el principio */ }
+    d.trim.gain.value = TRIM[i]; d.el.play().catch(() => {});
+    d.fade.gain.cancelScheduledValues(t); d.fade.gain.setValueAtTime(0.0001, t); d.fade.gain.linearRampToValueAtTime(1, t + f);
+    if (old) {
+      old.leaving = true; old.fade.gain.cancelScheduledValues(t); old.fade.gain.setValueAtTime(old.fade.gain.value, t); old.fade.gain.linearRampToValueAtTime(0.0001, t + f);
+      old.tm = setTimeout(() => { if (decks[di] !== old) old.el.pause(); }, f * 1000 + 150);
+    }
+    di = k;
+  }
+  /* cambio de cancion con su aviso (js/jukebox.js) */
+  function change(i, how, at) { useTrack(i, how, at); if (A.music.onChange) A.music.onChange(i); }
+  const musLevel = () => MUS_BASE * A.audio.vol.music * (bar && !muf ? 0.7 : 1);
+  /* el timbre de la musica segun donde estes: amortiguada del todo (pausa, tu nombre, salir), "desde la barra" (Campamento) o abierta en los ultimos segundos */
+  function tone() {
+    if (!ctx) return; const t = ctx.currentTime;
+    musFilter.frequency.setTargetAtTime(muf ? 320 : bar ? 1250 : mode === 2 ? 12500 : 8600, t, muf ? 0.08 : 0.15);
+    musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel(), t, 0.15);
   }
   A.music = {
     start() {
       if (!A.audio.musicOn || !init()) return;
-      if (cur < 0) useTrack(0, false); else { ensureMedia(); mediaEl.play().catch(() => {}); }
+      if (cur < 0) useTrack(0, "cut"); else decks[di].el.play().catch(() => {});   // la primera es siempre la del arranque
     },
-    next() { if (cur < 0) return; useTrack(nextIdx(), true); },
-    prev() { if (cur < 0) return; useTrack(prevIdx(), true); },
+    /* las flechas del reproductor: la anterior y la siguiente DENTRO del grupo del momento */
+    next() { A.music.step(1); },
+    prev() { A.music.step(-1); },
+    step(d) { const g = group(); if (cur < 0 || g.length < 2) return; const k = g.indexOf(cur); change(g[k < 0 ? 0 : (k + d + g.length) % g.length], "soft"); },
     index() { return cur; },
     count() { return FILES.length; },
     title(i = cur) { const n = NAMES[i]; if (!n) return ""; const k = A.LANGS.findIndex(l => l.code === A.lang); return n[k] || n[1]; },
-    go(i, quiet) { if (FILES[i] != null && A.audio.musicOn && init()) useTrack(i, !quiet); },   // salta a una cancion (quiet: sin el golpe de cambio; los creditos finales ponen el vals)
+    go(i, quiet) { if (FILES[i] == null || !A.audio.musicOn || !init()) return; if (quiet) useTrack(i, "soft"); else change(i, "soft"); },   // salta a una cancion (quiet: sin aviso; los creditos finales ponen el vals)
     now() { return A.music.title(); },
-    stop() { if (mediaEl) mediaEl.pause(); },
-    mode(m) { mode = m; if (ctx) musFilter.frequency.setTargetAtTime(m === 2 ? 12500 : 8600, ctx.currentTime, 0.15); },
+    stop() { decks.forEach(d => d && d.el.pause()); },
+    mode(m) { mode = m; tone(); },
     duck(level = 0.3, ms = 1400) {
       if (!ctx || cur < 0) return;
-      const base = MUS_BASE * A.audio.vol.music, t = ctx.currentTime; musBus.gain.cancelScheduledValues(t);
+      const base = musLevel(), t = ctx.currentTime; musBus.gain.cancelScheduledValues(t);
       musBus.gain.setTargetAtTime(base * level, t, 0.05); musBus.gain.setTargetAtTime(base, t + ms / 1000, 0.4);
     },
-    muffle(on) { if (ctx) musFilter.frequency.setTargetAtTime(on ? 320 : 8600, ctx.currentTime, 0.08); },
+    muffle(on) { muf = !!on; tone(); },
+    /* el Campamento: la misma cancion, como si llegara desde la sala */
+    room(on) { if (bar === !!on) return; bar = !!on; tone(); },
+    /* el momento del juego: "home", "classic", "a1" | "a2" | "a3", "inf", "boss", "win". o.delay: ms hasta que entra el tema del jefe (tras el golpe de su llegada) */
+    moment(key, o = {}) {
+      if (!GROUPS[key] || key === moment) return; const was = moment; moment = key; clearTimeout(momT);
+      if (cur < 0 || !ctx || !A.audio.musicOn) { resume = null; return; }
+      if (key === "boss") {
+        resume = { idx: cur, at: decks[di].el.currentTime };
+        momT = setTimeout(() => { if (moment === "boss" && cur !== GROUPS.boss[0]) change(GROUPS.boss[0], "cut"); }, o.delay || 0);
+        return;
+      }
+      if (was === "boss" || NOW[key]) {
+        const g = GROUPS[key], back = was === "boss" && resume && g.includes(resume.idx) && cur !== resume.idx ? resume : null, i = back ? back.idx : g.includes(cur) ? cur : pick(g);
+        resume = null; if (i !== cur) change(i, "fade", back ? back.at : 0);
+      }
+      /* de un momento a otro (portada -> acto, acto -> acto): la que suena termina y la siguiente ya sale del grupo nuevo */
+    },
+    get where() { return moment; },
+    /* el compas de la cancion que suena: { ms: lo que dura un pulso, at: cuantos ms hace que cayo el primero } o null si no suena nada. Sale del tempo
+       medido de cada pista y del reloj del reproductor: no hace falta analizar la musica mientras suena */
+    beat() {
+      const d = di >= 0 ? decks[di] : null; if (!d || cur < 0 || d.el.paused || d.el.readyState < 2 || !A.audio.musicOn) return null;
+      return { ms: 60000 / BPM[cur], at: d.el.currentTime * 1000 - BEAT0[cur] - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
+    },
   };
   A.audio.setSkin = () => {};   // las 21 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
   A.audio.state = () => (ctx ? ctx.state : 'none');
@@ -233,7 +302,7 @@ window.AIQ = window.AIQ || {};
     if (!ctx) return;
     const t = ctx.currentTime;
     if (kind === "master") { if (!ducked) master.gain.setTargetAtTime(v, t, 0.03); }
-    else if (kind === "music") { musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(MUS_BASE * v, t, 0.03); }
+    else if (kind === "music") { musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel(), t, 0.03); }
     else sfxBus.gain.setTargetAtTime(v, t, 0.03);
   };
   /* Ajustes > Sonido > Sonar en segundo plano (v0.3.2): baja el volumen general a 0 mientras el juego no esta delante y lo devuelve al volver */

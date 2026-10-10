@@ -565,7 +565,10 @@ window.AIQ = window.AIQ || {};
     persist(); A.ach.emit("adv", { kind: "round", act: run.act }); C().startLevel(0);
     if (keep) { S.qi = run.qi; S.levelScore = run.roundScore; S.streak = run.streak || 0; S.hits = run.rGood; C().updateHud && C().updateHud(); }
     if (Lv.boss) setTimeout(() => A.sfx.boss(), 200);
+    musica(Lv.boss, 760);                                              // el tema del jefe entra tras los tres golpes de su llegada
   }
+  /* v0.3.55: la musica del momento (js/audio.js). El grupo del acto; el tema del jefe mientras dura su ronda; en el modo infinito, actos II y III */
+  function musica(boss, delay) { if (run) A.music.moment(boss ? "boss" : run.inf ? "inf" : "a" + (Math.min(2, run.act) + 1), { delay }); }
   /* ---------------- modo infinito: tras la ronda 12, ya no hay mas rondas numeradas ni campamento ---------------- */
   function infPool() {                                                 // todo el banco de lugares, de todos los temas, sin repetir
     const P = pools(), seen = new Set(), out = [];
@@ -1125,6 +1128,7 @@ window.AIQ = window.AIQ || {};
       if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => A.casa.premio(3), 1100); } }   // +2 provisiones para el modo infinito
       A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); if (!run.practice) A.profile.get().adv.boss++; }
       A.sfx.stamp(); setTimeout(A.sfx.clear, 300);
+      if (boss) A.music.moment(run.act + 1 === 3 && !run.won ? "win" : run.inf ? "inf" : "a" + Math.min(3, run.act + 2));   // jefe derrotado: su tema se va; entra la cancion del acto que viene (o la de la victoria)
       const actDone = boss, winAct = actDone ? run.act + 1 : 0;
       if (actDone) { const flawless = run.livesLostAct === 0; A.ach.emit("adv", { kind: "act", act: winAct, flawless, asc: run.asc, daily: !!run.board }); run.livesLostAct = 0; if (!run.practice) A.profile.get().adv.bestAct = Math.max(A.profile.get().adv.bestAct || 0, winAct); }
       if (!run.practice) A.profile.get().adv.bestRound = Math.max(A.profile.get().adv.bestRound, roundNo() + 1);   // la practica no cuenta para records
@@ -1182,7 +1186,7 @@ window.AIQ = window.AIQ || {};
     else { run.round++; run.attempt = 0; openShop(false); }
   }
   function winScreen() {
-    run.won = true; run.act++; run.round = 0; run.attempt = 0; run.phase = "win"; persist(); A.sfx.victory();
+    run.won = true; run.act++; run.round = 0; run.attempt = 0; run.phase = "win"; persist(); A.sfx.victory(); A.music.moment("win");   // tres actos completados: la cancion de la victoria
     const PA = run.practice ? {} : A.profile.get().adv; PA.wins = (PA.wins || 0) + 1; PA.deckWins = PA.deckWins || {}; PA.deckWins[run.deck] = (PA.deckWins[run.deck] || 0) + 1; A.profile.save();
     A.ach.emit("adv", { kind: "win", deck: run.deck });
     showWinChoice();
@@ -1480,7 +1484,7 @@ window.AIQ = window.AIQ || {};
       ${nextHtml()}
       <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button>${A.bulbs()}</div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
-    A.casa.acto(run.act);
+    A.casa.acto(run.act); musica(false);                               // en el Campamento, la cancion del acto que viene (si sonaba la del jefe, se va)
     Gold.mount($("dlg"));                                                // el brillo de oro de las legendarias (mesa y mochila)
     document.querySelectorAll(".offer").forEach((el, i) => { const btn = el.querySelector(".buy"); if (btn) btn.onclick = () => buy(el, chest); if (!chest) el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && A.dealer.campHover) A.dealer.campHover(i); }); });
     /* la mochila: pasar el raton abre la carta grande (con su boton de vender); un clic la deja fija. Con una carta de la mesa esperando
@@ -2489,6 +2493,7 @@ window.AIQ = window.AIQ || {};
   function endRun(win) {
     if (A.coverMap) A.coverMap("camp", false);
     A.casa.acto("fin");                                                // se acabo la expedicion: luces de sala
+    A.music.moment(win ? "win" : "home");                              // cobrada: la cancion de la victoria; perdida: vuelven las de la portada
     if (run.practice) return endPractice(win);
     const P = A.profile.get(), bonus = run.cleared * 1000 + (run.won ? 2500 : 0), final = finalOf(run), wasRanked = run.ranked, board = run.board, daily = !!(wasRanked && board);
     /* el Reto diario tiene sus propias tablas (Hoy y Ayer): no cuenta para el record ni para la tabla "Aventura" (solo expediciones del modo Aventura) */
