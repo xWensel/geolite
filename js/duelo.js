@@ -1,6 +1,6 @@
 /*
- * Geolite - DUELO DE FICHAS (prototipo local del modo 1 vs 1). Sin red, sin Steam y sin servidor: se juega contra la banca (un rival simulado)
- * para juzgar si el formato divierte y para comprobar unas cifras que salieron de una simulacion con un jugador inventado.
+ * Geolite - DUELO DE FICHAS (prototipo del modo 1 vs 1). Dos formas de jugar: contra la banca (un rival simulado, sin red) y contra un amigo en
+ * una SALA PRIVADA con codigo (el transporte es js/duelo-red.js y el servidor api/duelo.js; invitar por Steam llegara despues).
  * Aspecto: la maqueta aprobada el 2026-10-10 (sala, cara a cara, marcador en espejo, revelado con la cuenta dentro del marcador y veredicto).
  *  - Los dos reciben la misma pregunta a la vez. Puntos de la ronda = solo precision: round(1000 * e^(-km / (1500 * kf))), con el factor kf por tipo
  *    de lugar de la Aventura (A.adv.kf). Sin racha, sin perks y sin puntos de rapidez.
@@ -11,8 +11,11 @@
  *    (A.rng de js/rank.js): con la misma semilla sale el mismo duelo (mismas preguntas y mismas respuestas del rival).
  * TODAS las cifras estan en CFG, aqui debajo. Guarda solo tus duelos contra la banca (localStorage "atlasiq.duelo.banca") y las tarjetas de la
  * Enciclopedia que ganes (en silencio: se ensenan juntas en el veredicto). Ni logros de partida, ni perfil, ni clasificacion.
+ * Entre jugadores (seccion «ENTRE JUGADORES», al final): los dos juegos sacan las mismas preguntas de la misma semilla y hacen las mismas cuentas;
+ * por la red solo viajan «listo», «he fijado aqui» y «me rindo». El reloj es el del servidor, no hay pausa y los amistosos no cuentan para tus
+ * duelos contra la banca.
  * Entrada: la tercera carta de la portada (la que era del Reto diario, retirado por ahora: js/hub.js), que abre la sala (A.duelo.open()).
- * Enganches fuera de este fichero: js/game.js (S.duel en updateHud, showTitle, reveal y la pausa; piezas publicadas en A.core) y A.adv.kf en js/adventure.js.
+ * Enganches fuera de este fichero: js/game.js (S.duel en updateHud, showTitle, reveal y la pausa, que entre jugadores no existe; piezas publicadas en A.core) y A.adv.kf en js/adventure.js.
  * Textos solo en es/en mientras sea prototipo: antes de publicarlo hay que pasarlos a los 12 idiomas.
  */
 window.AIQ = window.AIQ || {};
@@ -117,7 +120,7 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ el duelo: estado, ronda y pago (lo usan igual la partida y la simulacion) */
   function mkState(o = {}) {
     const table = CFG.tables.find(t => t.id === o.table) || CFG.tables[1], seed = String(o.seed || newSeed());
-    return { seed, table, level: o.level == null ? table.center : +o.level, auto: o.auto || null, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":rival"), ra: A.rng(seed + ":auto"),
+    return { seed, table, level: o.level == null ? table.center : +o.level, auto: o.auto || null, net: o.net || null, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":rival"), ra: A.rng(seed + ":auto"),
       me: CFG.stack, rv: CFG.stack, shown: { me: CFG.stack, rv: CFG.stack }, k: 0, used: new Set(), lastCont: null, log: [], cur: null, over: null, phase: "", secs: 0 };
   }
   function nextRound(st) {
@@ -137,7 +140,7 @@ window.AIQ = window.AIQ || {};
   }
   const summary = st => ({ seed: st.seed, table: st.table.id, level: st.level, win: !!(st.over && st.over.win), ko: !!(st.over && st.over.ko), rounds: st.k, me: st.me, rv: st.rv,
     secs: Math.round(st.secs * 10) / 10, wall: st.t0 ? Math.round((performance.now() - st.t0) / 100) / 10 : null,
-    log: st.log.map(r => ({ k: r.k, mult: r.mult, id: r.id, d: r.d, me: r.me.pts, meKm: r.me.km == null ? null : Math.round(r.me.km), rv: r.rv.pts, rvKm: Math.round(r.rv.km), tier: r.tier, pay: r.pay, stMe: r.stMe })) });
+    log: st.log.map(r => ({ k: r.k, mult: r.mult, id: r.id, d: r.d, me: r.me.pts, meKm: r.me.km == null ? null : Math.round(r.me.km), rv: r.rv.pts, rvKm: r.rv.km == null ? null : Math.round(r.rv.km), tier: r.tier, pay: r.pay, stMe: r.stMe })) });
 
   const D = A.duelo = { CFG, multOf, secsOf, targetOf, pool, botPlay, kmOf, ptsOf, last: null };
   /* cientos de duelos entre dos rivales simulados con el banco, la puntuacion y las reglas del juego (sin interfaz ni esperas): rondas, KO y duracion.
@@ -172,6 +175,8 @@ window.AIQ = window.AIQ || {};
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const ME_CHIP = "chip_o", RV_CHIP = "chip_p", ME_FICHA = "blank_gold", RV_FICHA = "chip_p";   // colores fijos: tu, oro; el rival, violeta
   const myName = () => { const n = A.profile && A.profile.get().name; return n ? esc(n) : ""; };
+  const foeRaw = () => (st && st.net ? st.net.his || RIVAL() : BANK()), foe = () => esc(foeRaw());   // el de enfrente: la banca o, en la sala privada, tu amigo
+  const cut = (s, n) => { const a = [...String(s)]; return a.length > n ? a.slice(0, n - 1).join("") + "…" : String(s); };
   const range = t => `${targetOf(t.center, 1)} ${T("a", "to")} ${targetOf(t.center, CFG.ladder.steps + 1)}`;
   const row = (a, b) => `<div class="gx-lead-row"><span>${a}</span><s></s><b>${b}</b></div>`;
   const tableOf = id => CFG.tables.find(t => t.id === id) || CFG.tables[1];
@@ -202,6 +207,19 @@ window.AIQ = window.AIQ || {};
     lose: [["Alguien tenía que pagar. Hoy has sido tú. Mañana, ya veremos.", "Someone had to pay. Today it was you. Tomorrow, we'll see."],
       ["La casa gana. No es nada personal: es la costumbre.", "The house wins. Nothing personal: it's a habit."]],
     quit: [["¿Te vas a medias? Las fichas se quedan. Tú vuelve cuando quieras.", "Leaving halfway? The chips stay. You come back whenever you like."]],
+    vs2: [["Mismas preguntas, mismo reloj. Lo único distinto es lo que sabéis.", "Same questions, same clock. The only difference is what each of you knows."],
+      ["Yo solo reparto. Las fichas os las quitáis entre vosotros.", "I only deal. You two take the chips off each other."],
+      ["Doce peldaños. Arriba se cobra caro. Subid con cuidado.", "Twelve rungs. It gets pricey at the top. Climb carefully."]],
+    win2: [["Te llevas sus fichas. Yo solo las repartí. Esta vez.", "You walk off with their chips. I only dealt them. This time."],
+      ["Bien jugado. Hoy no pago yo, y eso siempre me alegra la noche.", "Well played. I'm not the one paying tonight, and that always makes my evening."]],
+    lose2: [["Alguien tenía que pagar. Hoy has sido tú. Mañana, ya veremos.", "Someone had to pay. Today it was you. Tomorrow, we'll see."],
+      ["Se lleva tus fichas. Pídele la revancha: yo barajo encantado.", "They're taking your chips. Ask for a rematch: I'll gladly shuffle."]],
+    left2: [["Se ha levantado de la mesa. Las fichas se quedan contigo.", "They got up from the table. The chips stay with you."]],
+    quit2: [["Se ha rendido. Las fichas no discuten: son tuyas.", "They gave up. Chips don't argue: they're yours."]],
+    lost2: [["Te perdí de vista demasiado rato. Y la mesa no espera.", "I lost sight of you for too long. And the table doesn't wait."]],
+    r_open: [["Sala abierta. Pásale el código a tu amigo; yo voy barajando.", "Room's open. Send your friend the code; I'll start shuffling."]],
+    r_both: [["Ya estáis los dos. Cuando quieras, reparto.", "You're both here. I'll deal whenever you like."]],
+    r_guest: [["Bienvenido a la mesa. Aquí reparte el anfitrión; yo solo miro. Y cobro.", "Welcome to the table. The host deals here; I just watch. And collect."]],
     how: [["Una pregunta, dos respuestas: la tuya y la mía. Puntúa más quien clava más cerca.", "One question, two answers: yours and mine. Whoever pins closer scores more."],
       ["Quien puntúa menos paga la diferencia, multiplicada por el peldaño. Arriba se paga hasta ×5,5.", "Whoever scores less pays the difference, times the rung. At the top it pays up to ×5.5."],
       ["Sin fichas, pierdes. Y cuando uno fija, al otro le quedan cinco segundos. Sin prisa. Bueno, con un poco.", "Out of chips, you lose. And once one of us locks in, the other gets five seconds. No rush. Well, a little."]],
@@ -211,7 +229,7 @@ window.AIQ = window.AIQ || {};
   const DL = () => A.dealer || {};
   const seat = host => { if (DL().dock) DL().dock(host); };
   const unseat = () => { if (DL().dock) { DL().dock(null); DL().release(); } };       // si esta a media frase, la acaba en su esquina y se va
-  const speak = (text, o = {}) => { if (DL().say) DL().say(text, { force: true, mood: o.mood || "sly", face: o.face, gesture: o.gesture, done: o.done }); else if (o.done) o.done(); };
+  const speak = (text, o = {}) => { if (DL().say) DL().say(text, { force: true, mood: o.mood || "sly", face: o.face, gesture: o.gesture, done: o.done, valid: o.valid }); else if (o.done) o.done(); };
   const face = (e, g) => { if (!st || !st.spr) return; st.spr.set(e); if (g) st.spr.play(g); };
 
   /* pantalla de gala del duelo: tapete a toda la ventana y el lienzo de 1280 x 720 centrado y escalado */
@@ -225,42 +243,56 @@ window.AIQ = window.AIQ || {};
     cv.style.width = cv.style.height = (N * s) / dpr + "px"; return cv;
   }
 
-  /* ================================================================== 1 · LA SALA: tu ficha de socio y las tres puertas (solo «Contra el crupier» funciona) */
-  const sel = { table: "media", level: null };
+  /* ================================================================== 1 · LA SALA: tu ficha de socio y las tres puertas («Retar a un amigo» y «Contra el crupier»; la liga, mas adelante) */
+  const sel = { table: "media", level: null, door: "crupier", msg: "" };
+  const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."],
+    ver: ["Tu amigo y tú tenéis versiones distintas del juego.", "You and your friend are on different versions of the game."], closed: ["La sala se ha cerrado.", "The room was closed."],
+    short: ["El código tiene 5 letras o números.", "The code has 5 letters or digits."], net: ["No se ha podido conectar con la sala. Inténtalo otra vez.", "Couldn't reach the room. Try again."] };
+  const whyTxt = w => { const a = WHY[w] || WHY.net; return T(a[0], a[1]); };
+  const salaMsg = (t, bad) => { const e = $("duAmgTx"); if (!e) return; e.textContent = t || T("¿Tu amigo ya tiene sala? Escribe su código.", "Does your friend already have a room? Type their code."); e.classList.toggle("bad", !!bad); };
   const lvOf = () => (sel.level == null ? tableOf(sel.table).center : sel.level);
   let greeted = false;
   D.open = () => {
     const c = C(), S = c.S; if (S.booting || S.phase !== "title") return;
     pool(); fitDk(); S.hub = "duelo";                                     // S.hub: Esc vuelve a la portada (js/game.js)
     const s = stats(), nm = myName();
-    const door = (i, ill, t, d, tag, cls, on) => `<div class="doorw ${on ? "on" : "off"} rise" style="--d:${(0.1 + i * 0.08).toFixed(2)}s"><div class="gx-paper door">${ill}<h3 class="ink">${t}</h3><p>${d}</p><span class="tag ${cls}">${tag}</span></div></div>`;
+    const door = (i, id, ill, t, d, tag, cls, on) => `<div class="doorw ${on ? "on" : "off"} rise" style="--d:${(0.1 + i * 0.08).toFixed(2)}s"${on ? ` data-door="${id}" role="button" tabindex="0"` : ""}><div class="gx-paper door">${ill}<h3 class="ink">${t}</h3><p>${d}</p><span class="tag ${cls}">${tag}</span></div></div>`;
     const ms = t => `<button type="button" class="ms${t.id === sel.table ? " on" : ""}" data-t="${t.id}" aria-pressed="${t.id === sel.table}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${T("dificultad", "difficulty")} ${range(t)}</i></span></button>`;
-    c.dialog(stage("lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l" id="duH">${NAME()}</h2><span class="gx-eyb">${T("Prototipo · contra la banca", "Prototype · against the house")}</span></div>
+    c.dialog(stage("lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l" id="duH">${NAME()}</h2><span class="gx-eyb">${T("Prototipo", "Prototype")}</span></div>
       <div class="socio gx-sh fromL"><div class="gx-paper"><span class="gx-eyb">${T("Tu ficha", "Your chip")}</span>
         <div class="who">${A.icon(ME_CHIP)}<div><b>${nm || T("Jugador", "Player")}</b><span>${T("Sin liga todavía", "No league yet")}</span></div></div>
-        <p class="gx-note">${T("Las ligas y los duelos entre jugadores llegarán más adelante. De momento, práctica contra la banca.", "Leagues and player duels come later. For now, practice against the house.")}</p>
+        <p class="gx-note">${T("Las ligas llegarán más adelante. De momento: amistosos con un amigo y práctica contra la banca.", "Leagues come later. For now: friendlies with a friend and practice against the house.")}</p>
         <div class="gx-hr"></div>
         <div class="rows">${row(T("Duelos", "Duels"), s.d)}${row(T("Victorias", "Wins"), s.w)}${row(T("Racha", "Streak"), s.s ? inRow(s.s) : "—")}<div class="gx-lead-row"><span>${T("Tu mesa", "Your table")}</span><s></s><b id="duTm"></b></div></div>
       </div></div>
       <div class="puertas gx-sh"><div class="gx-pnl"><span class="gx-eyb">${T("Elige duelo", "Pick a duel")}</span>
-        <div class="doors">
-          ${door(0, `<div class="ill" style="background-image:url(assets/gen/card_compete.webp)"></div>`, T("Duelo de liga", "League duel"), T("Un rival de tu liga, o su partida grabada si no hay nadie.", "A rival from your league, or their recorded game if no one's around."), T("Pronto", "Soon"), "line", false)}
-          ${door(1, `<div class="ill amigo">${A.icon("chip_b")}${A.icon("chip_g")}</div>`, T("Retar a un amigo", "Challenge a friend"), T("Invítale por Steam y elegid mesa.", "Invite them on Steam and pick a table."), T("Pronto", "Soon"), "line", false)}
-          ${door(2, `<div class="ill" style="background-image:url(assets/gen/card_adv.webp);background-color:#5a1420"></div>`, T("Contra el crupier", "Against the dealer"), T("Práctica contra la banca. Tú eliges cuánto sabe.", "Practice against the house. You choose how much it knows."), T("Práctica", "Practice"), "", true)}
+        <div class="doors" id="duDoors">
+          ${door(0, "liga", `<div class="ill" style="background-image:url(assets/gen/card_compete.webp)"></div>`, T("Duelo de liga", "League duel"), T("Un rival de tu liga, o su partida grabada si no hay nadie.", "A rival from your league, or their recorded game if no one's around."), T("Pronto", "Soon"), "line", false)}
+          ${door(1, "amigo", `<div class="ill amigo">${A.icon("chip_o")}${A.icon("chip_p")}</div>`, T("Retar a un amigo", "Challenge a friend"), T("Abre una sala y pásale el código. O entra en la suya.", "Open a room and send them the code. Or join theirs."), T("Con código", "With a code"), "", true)}
+          ${door(2, "crupier", `<div class="ill" style="background-image:url(assets/gen/card_adv.webp);background-color:#5a1420"></div>`, T("Contra el crupier", "Against the dealer"), T("Práctica contra la banca. Tú eliges cuánto sabe.", "Practice against the house. You choose how much it knows."), T("Práctica", "Practice"), "", true)}
         </div>
-        <div class="mesas"><div class="mss" id="duMesas">${CFG.tables.map(ms).join("")}</div>
+        <div class="amg hidden" id="duRowA"><span id="duAmgTx" role="status"></span><input id="duCode" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="duJoin">${T("Entrar", "Join")}</button></span></div>
+        <div class="mesas" id="duRowB"><div class="mss" id="duMesas">${CFG.tables.map(ms).join("")}</div>
           <div class="lvl"><span>${T("La banca sabe", "The house knows")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvDn" aria-label="-">−</button></span><b id="duLv"></b><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvUp" aria-label="+">+</button></span></div></div>
         <div class="regl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
       </div></div>
       <div class="ft"><div class="seatw" id="duSalaSeat"></div><div class="gx-acts"><button type="button" class="gx-btn gho" id="duHow">${T("Cómo se juega", "How to play")}</button>${primary("duGo", T("Sentarse a la mesa", "Take a seat"))}</div></div>`), "tablewrap");
-    const paint = () => { const t = tableOf(sel.table); $("duLv").textContent = lvOf(); $("duTm").textContent = `${T("dificultad", "difficulty")} ${range(t)}`; };
-    paint();
+    const paint = () => { const t = tableOf(sel.table), am = sel.door === "amigo"; $("duLv").textContent = lvOf(); $("duTm").textContent = `${T("dificultad", "difficulty")} ${range(t)}`;
+      document.querySelectorAll("#duDoors .doorw.on").forEach(x => { const on = x.dataset.door === sel.door; x.classList.toggle("eleg", on); x.setAttribute("aria-pressed", on); });
+      $("duRowA").classList.toggle("hidden", !am); $("duRowB").classList.toggle("hidden", am);
+      $("duGo").querySelector("span").textContent = am ? T("Abrir una sala", "Open a room") : T("Sentarse a la mesa", "Take a seat"); };
+    paint(); salaMsg(sel.msg, !!sel.msg); sel.msg = "";
     $("hubBack").onclick = () => { A.sfx.ui(); unseat(); A.hub.screen("home"); };
+    $("duDoors").onclick = e => { const b = e.target.closest(".doorw.on"); if (!b || b.dataset.door === sel.door) return; sel.door = b.dataset.door; A.sfx.card(); paint(); };
+    { const ci = $("duCode");                                              // el codigo de tu amigo: solo sus letras y cifras; Intro = Entrar
+      ci.oninput = () => { const v = ci.value.toUpperCase().replace(/[^A-HJKMNP-Z2-9]/g, "").slice(0, 5); if (v !== ci.value) ci.value = v; salaMsg(""); };
+      ci.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); roomJoin(ci.value); } };   // tambien el «Listo» del teclado en pantalla (js/teclado.js)
+      $("duJoin").onclick = () => roomJoin(ci.value); }
     $("duMesas").onclick = e => { const b = e.target.closest(".ms"); if (!b || b.dataset.t === sel.table) return; sel.table = b.dataset.t; sel.level = null; A.sfx.card();
       document.querySelectorAll("#duMesas .ms").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); }); paint(); };
     const step = d => () => { sel.level = clamp(lvOf() + d, 4, 96); A.sfx.ui(); paint(); };
     $("duLvDn").onclick = step(-4); $("duLvUp").onclick = step(4);
-    $("duGo").onclick = () => { A.sfx.depart(); D.start({ table: sel.table, level: lvOf() }); };
+    $("duGo").onclick = () => { if (sel.door === "amigo") return roomNew(); A.sfx.depart(); D.start({ table: sel.table, level: lvOf() }); };
     let k = 0; const how = () => { if (k > 2 || !$("duSalaSeat")) return; speak(line("how", k++), { done: how }); };
     $("duHow").onclick = () => { A.sfx.ui(); if (k > 0 && k < 3) return; k = 0; how(); };   // el crupier lo explica en tres frases
     seat($("duSalaSeat")); if (!greeted) { greeted = true; speak(line("sala", s.d ? 1 : 0)); }
@@ -282,20 +314,21 @@ window.AIQ = window.AIQ || {};
 
   /* ================================================================== 2 · CARA A CARA: los dos naipes, las fichas en juego y la escalera de lo que paga cada ronda */
   function vs(cb) {
-    const c = C(), S = c.S, tb = st.table, s = stats(), sT = st, nm = myName(); S.phase = "intro";
+    const c = C(), S = c.S, tb = st.table, s = stats(), sT = st, nm = myName(), nt = st.net; S.phase = "intro";
+    const room = w => row(T("Fichas", "Chips"), A.fmt(CFG.stack)) + row(T("Victorias en la sala", "Wins in this room"), w);
     const card = (side, chip, name, tag, cls, rws) => `<div class="cardw ${side} ${side === "l" ? "fromL" : "fromR"}" style="--d:.15s"><div class="gx-paper pc">${A.icon(chip)}<h3 class="ink">${name}</h3><span class="tag ${cls}">${tag}</span><div class="rows">${rws}</div></div></div>`;
     const lad = Array.from({ length: CFG.rounds }, (_, i) => `<div class="pop" style="--d:${(0.6 + i * 0.05).toFixed(2)}s"><i style="--h:${8 + Math.round(multOf(i + 1) * 6)}px"></i><span>×${fmtM(multOf(i + 1))}</span></div>`).join("");
     c.dialog(stage("vs", `<div class="top"><span class="gx-eyb">${A.tx(tb.n)} · ${T("dificultad", "difficulty")} ${range(tb)}</span></div>
-      ${card("l", ME_CHIP, nm || T("Jugador", "Player"), ME(), "me", row(T("Duelos", "Duels"), s.d) + row(T("Victorias", "Wins"), s.w) + row(T("Racha", "Streak"), s.s || "—"))}
+      ${card("l", ME_CHIP, nm || T("Jugador", "Player"), ME(), "me", nt ? room(N.score.me) : row(T("Duelos", "Duels"), s.d) + row(T("Victorias", "Wins"), s.w) + row(T("Racha", "Streak"), s.s || "—"))}
       <div class="mid"><div class="seatw" id="duVsSeat"></div><b class="rise" style="--d:.35s">${A.fmt(2 * CFG.stack)}</b><span class="gx-note rise" style="--d:.4s">${T("fichas en juego", "chips at stake")}</span></div>
-      ${card("r", RV_CHIP, BANK(), RIVAL(), "rv", row(T("Nivel", "Level"), st.level) + row(T("Duelos contigo", "Duels with you"), s.d) + row(T("Victorias", "Wins"), s.d - s.w))}
+      ${card("r", RV_CHIP, foe(), RIVAL(), "rv", nt ? room(N.score.rv) : row(T("Nivel", "Level"), st.level) + row(T("Duelos contigo", "Duels with you"), s.d) + row(T("Victorias", "Wins"), s.d - s.w))}
       <div class="lad" style="--n:${CFG.rounds}">${lad}</div>`, `<span class="cnt" id="duCnt"></span>`), "tablewrap");
     A.sfx.intro(); c.map.animateTo(c.map.home(), 1100);
     /* dura lo justo y se puede saltar (clic, Intro o A). Nunca se cierra sola con el crupier a media frase: espera a que acabe, con su segundo de mas */
     let done = false, talking = !!DL().say, timeUp = false, left = Math.ceil(CFG.introSecs);
-    const end = () => { if (done || st !== sT) return; done = true; clearInterval(iv); cb(); };
-    const cnt = $("duCnt"), iv = setInterval(() => { if (st !== sT || done) return clearInterval(iv); left--; cnt.textContent = left > 0 && left <= 3 ? T(`Empieza en ${left}`, `Starts in ${left}`) : ""; if (left <= 0) { timeUp = true; if (!talking) end(); } }, 1000);
-    seat($("duVsSeat")); speak(line("vs"), { done: () => { talking = false; if (timeUp) end(); } });
+    const end = () => { if (done || st !== sT || st.phase === "end") return; done = true; clearInterval(iv); cb(); };   // (phase "end": el otro se fue durante el cara a cara y ya esta el veredicto)
+    const cnt = $("duCnt"), iv = setInterval(() => { if (st !== sT || done || st.phase === "end") return clearInterval(iv); left--; cnt.textContent = left > 0 && left <= 3 ? T(`Empieza en ${left}`, `Starts in ${left}`) : ""; if (left <= 0) { timeUp = true; if (!talking) end(); } }, 1000);
+    seat($("duVsSeat")); speak(line(nt ? "vs2" : "vs"), { done: () => { talking = false; if (timeUp) end(); } });
     S.skipIntro = end; document.querySelector("#dlg .du-wrap").onclick = end; later(end, CFG.introSecs * 1000 + 15000);   // red de seguridad
   }
 
@@ -308,7 +341,7 @@ window.AIQ = window.AIQ || {};
     add("duHud", "du-hud du-st", `<div class="gx-pnl">
       <div class="pl me">${A.icon(ME_CHIP, "av")}<div data-src="me"><div class="du-nm"><span class="tag me" id="duTagMe"></span>${nm ? `<span class="nmt">${nm}</span>` : ""}</div><div class="num odo" id="duMe"></div></div></div>
       <div class="mid"><span class="gx-eyb" id="duRd"></span><span class="brass" id="duMult" ${A.ttAttr(T("Lo que paga la ronda", "What the round pays"), T("La diferencia de puntos se paga por este número.", "The point difference is paid times this number."))}></span><div class="pips" id="duPips"></div></div>
-      <div class="pl rv"><div data-src="rv"><div class="du-nm"><span>${T("Banca", "House")}</span><span class="tag line" id="duTagRv"></span></div><div class="num odo" id="duRv"></div></div>${A.icon(RV_CHIP, "av")}</div>
+      <div class="pl rv"><div data-src="rv"><div class="du-nm"><span class="nmt">${st.net ? foe() : T("Banca", "House")}</span><span class="tag line" id="duTagRv"></span></div><div class="num odo" id="duRv"></div></div>${A.icon(RV_CHIP, "av")}</div>
       <div class="bal"><span><i id="duBal"></i></span></div>
       <div class="cuenta" id="duCuenta"></div></div>`);
     add("duSeat", "du-seat", `<div class="own" id="duOwn"></div>`);
@@ -320,8 +353,9 @@ window.AIQ = window.AIQ || {};
     /* rendirse: dos pulsaciones, como todo lo que no tiene vuelta atras */
     { const b = $("duQuit"); let armed = 0;
       b.onclick = () => { if (!st || st.phase === "end") return; if (!armed) { armed = setTimeout(() => { armed = 0; b.classList.remove("armed"); b.textContent = T("Rendirse", "Give up"); }, 4000); b.classList.add("armed"); b.textContent = T("¿Seguro? Pulsa otra vez", "Sure? Press again"); A.sfx.deny(); return; }
-        clearTimeout(armed); A.sfx.deny(); st.over = { win: false, ko: false, quit: true, rounds: st.k }; finish(); }; }
-    st.shown = { me: st.me, rv: st.rv }; D.hud(); ask();
+        clearTimeout(armed); A.sfx.deny(); if (st.net) send({ a: "quit", n: st.net.n }); st.over = { win: false, ko: false, quit: true, rounds: Math.max(1, st.k) }; finish(); }; }
+    st.shown = { me: st.me, rv: st.rv };
+    if (st.net) { st.phase = "wait"; D.hud(); netReady(1, 0); } else { D.hud(); ask(); }   // entre jugadores, la primera pregunta sale cuando los dos estan sentados
   }
   /* lo que pinta el juego en su marcador (js/game.js, updateHud): aqui, el numero de la pregunta en la placa y el marcador del duelo */
   D.hud = () => {
@@ -330,15 +364,18 @@ window.AIQ = window.AIQ || {};
     $("duRd").textContent = rungTxt(k); $("duMult").textContent = "×" + fmtM(multOf(k));
     let h = ""; for (let i = 1; i <= n; i++) { const r = st.log[i - 1], done = r && (i < k || (!ask && st.rolled)); h += `<i class="${done ? (r.pay > 0 ? "me" : r.pay < 0 ? "rv" : "eq") : i === k ? "now" : ""}"></i>`; }
     $("duPips").innerHTML = h;
-    const tm = $("duTagMe"), tr = $("duTagRv"), mine = ask && cur && cur.meAns, his = ask && cur && cur.rvLocked;
-    tm.textContent = mine ? T("Fijada", "Locked in") : ME();
-    tr.className = "tag " + (!ask ? "rv" : his ? "red" : "line"); tr.textContent = !ask ? RIVAL() : his ? T("Ha fijado", "Locked in") : T("Pensando", "Thinking");
+    const tm = $("duTagMe"), tr = $("duTagRv"), mine = ask && cur && cur.meAns, his = ask && cur && cur.rvLocked, nt = st.net, wait = st.phase === "wait", cutoff = nt && N.cut, gone = nt && nt.off;
+    tm.className = "tag " + (cutoff ? "red" : "me"); tm.textContent = cutoff ? T("Sin conexión", "Offline") : mine ? T("Fijada", "Locked in") : ask && cur && cur.passed ? T("Sin respuesta", "No answer") : ME();
+    tr.className = "tag " + (gone ? "red" : wait ? "line" : !ask ? "rv" : his ? "red" : "line");
+    tr.textContent = gone ? T("Sin señal", "No signal") : wait ? T("Esperando", "Waiting") : !ask ? RIVAL() : his ? T("Ha fijado", "Locked in") : T("Pensando", "Thinking");
     document.body.classList.toggle("duelo-lock", !!(his && !mine));          // el reloj de la placa, en rojo
     c.odoSet($("duMe"), sh.me, { instant: true }); c.odoSet($("duRv"), sh.rv, { instant: true }); bal();
   };
   const bal = () => { const sh = st.shown, e = $("duBal"); if (e) e.style.transform = `translateX(${(-100 + (100 * sh.me) / Math.max(1, sh.me + sh.rv)).toFixed(2)}%)`; };
   /* la pausa del juego (js/game.js, veilMenu): nombre del modo, nota y las dos pilas */
-  D.pause = () => ({ mode: `${NAME()} · ${A.tx(st.table.n)}`,
+  D.pause = () => (st.net ? { mode: `${NAME()} · ${T("Amistoso", "Friendly")}`,
+    note: T("Entre jugadores no hay pausa: el reloj sigue corriendo para los dos. Si sales al menú, pierdes el duelo.", "There's no pause between players: the clock keeps running for both. If you exit to the menu, you lose the duel."),
+    rows: row(T("Tus fichas", "Your chips"), A.fmt(st.me)) + row(T(`Fichas de ${foe()}`, `${foe()}'s chips`), A.fmt(st.rv)) } : { mode: `${NAME()} · ${A.tx(st.table.n)}`,
     note: T("Prototipo contra la banca: aquí la pausa detiene el reloj. En un duelo entre jugadores no habrá pausa.", "Prototype against the house: here the pause stops the clock. A duel between players won't have one."),
     rows: row(T("Tus fichas", "Your chips"), A.fmt(st.me)) + row(T("Fichas de la banca", "The house's chips"), A.fmt(st.rv)) + row(T("Nivel de la banca", "The house's level"), st.level) });
 
@@ -384,6 +421,7 @@ window.AIQ = window.AIQ || {};
     pinsSet([]); $("duHud").classList.remove("rev"); $("duCuenta").innerHTML = ""; $("duFact").classList.add("hidden"); face("sly");
     c.nextQuestion();                                                     // placa, reloj, mapa listo para el clic y D.hud()
     cur.t0 = performance.now(); cur.rvAt = Math.min(cur.bot.t, cur.secs - 0.4);
+    if (st.net) { const nt = st.net; cur.t0 = S.t0 = Rd().perfAt(nt.s); cur.rvAt = Infinity; nt.want = st.k; nt.ack = nt.rdy = false; nt.s = 0; netLoop(); }   // entre jugadores, el reloj es el del servidor: empieza para los dos a la vez
     if (st.auto) { cur.auto = botPlay(st.ra, cur.q, cur.d, st.auto.level == null ? st.table.center : st.auto.level); cur.autoAt = Math.min(cur.auto.t, cur.secs - 0.4); }
   }
   /* cuando uno fija, al otro le quedan como mucho lockRush segundos: el reloj de la placa salta a ese tiempo */
@@ -397,6 +435,11 @@ window.AIQ = window.AIQ || {};
   /* tu respuesta (js/game.js, reveal): guess = { lon, lat }, o null si se acabo el tiempo. Se queda fijada (tu ficha, clavada en el mapa) y el revelado espera al rival */
   D.answer = guess => {
     const cur = st && st.cur; if (!cur || st.phase !== "ask") return;
+    if (st.net) {                                                         // entre jugadores: se la manda al servidor y el revelado llega cuando estan las dos (duelView)
+      if (cur.meAns || cur.passed) return;
+      if (guess) { cur.meAns = { lon: guess.lon, lat: guess.lat, t: Math.max(0, elapsed()) }; pinsSet([{ who: "me", lon: guess.lon, lat: guess.lat, ct: C().map.pickCt, drop: true }]); } else cur.passed = true;
+      C().map.setPick(false); D.hud(); return netKick(true);
+    }
     if (!guess) return resolve();
     if (cur.meAns) return;
     cur.meAns = { lon: guess.lon, lat: guess.lat, t: elapsed() };
@@ -417,12 +460,13 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ================================================================== 4 · EL REVELADO: el mapa vuela al lugar, cae la bandera y las dos fichas, y la cuenta se hace dentro del marcador */
-  function resolve() {
+  function resolve(net) {                                                 // net (entre jugadores): { me, rv } = las dos respuestas tal como las guardo el servidor ({ lon, lat, t } o null)
     const c = C(), S = c.S, map = c.map, cur = st.cur, q = cur.q, R = CFG.rev; if (st.phase !== "ask") return;
+    if (net) { if (!net.me && cur.meAns) pinsSet([]); cur.meAns = net.me; }   // una respuesta que llego fuera de plazo no cuenta
     const tEnd = elapsed(); st.secs += tEnd;
     st.phase = "reveal"; S.phase = "reveal"; S.tense = false; map.setPick(false); A.music.mode(1); $("plate").classList.remove("hurry"); st.rolled = false;
     if (!cur.rvLocked) { cur.rvLocked = true; cur.rvT = Math.min(cur.rvAt, tEnd); }
-    const rd = settle(st, cur.meAns, { lon: cur.bot.lon, lat: cur.bot.lat, t: cur.rvT }), me = rd.me, rv = rd.rv, g = cur.meAns, tok = st.k, live = () => st && st.k === tok && st.phase === "reveal";
+    const rd = settle(st, cur.meAns, net ? net.rv : { lon: cur.bot.lon, lat: cur.bot.lat, t: cur.rvT }), me = rd.me, rv = rd.rv, g = cur.meAns, tok = st.k, live = () => st && st.k === tok && st.phase === "reveal";
     const cx = g && !st.auto && A.codexUnlock ? A.codexUnlock(q, me.km) : { added: [], level: 0 }; rd.cards = cx.added;   // la Enciclopedia, en silencio: se ensena en el veredicto
     D.hud();
     /* el objetivo, como en el revelado de siempre: el lugar con su bandera en el mastil, el pais resaltado o la masa de agua */
@@ -430,7 +474,7 @@ window.AIQ = window.AIQ || {};
     if (af) { span = [[af.bbox[0], af.bbox[1]], [af.bbox[2], af.bbox[3]]]; labelAt = [q.lon, q.lat]; }
     else if (isC) { const b = big(fC).bbox; span = [[b[0], b[1]], [b[2], b[3]]]; labelAt = [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; }
     else { ans = [q.lon, q.lat]; span = [ans]; }
-    const tgt = ans || labelAt, near = lon => lon + 360 * Math.round((tgt[0] - lon) / 360), gLon = g ? near(g.lon) : null, rLon = near(rv.lon);   // por el camino corto (antimeridiano)
+    const tgt = ans || labelAt, near = lon => lon + 360 * Math.round((tgt[0] - lon) / 360), gLon = g ? near(g.lon) : null, rLon = rv.lon == null ? null : near(rv.lon);   // por el camino corto (antimeridiano)
     const label = q.clue ? A.tx(q.answer) : A.tx(q.name), kmTxt = s => (s.km > 0 ? A.fmtDist(s.km) : T("dentro", "inside")), fl = c.flagsOf(q);
     const lim = A.codexLimits && q.cid ? A.codexLimits({ id: q.cid[0], cids: q.cid }) : [300, 150, 75];
     map.setMarks({ guess: null, answer: ans, highlight: fC ? q.key : null, area: af || null, label, labelAt, dist: "", pop: null, flags: fl.length ? fl.map(c.flagImg) : null,
@@ -439,28 +483,32 @@ window.AIQ = window.AIQ || {};
     if (g && !st.pins.list.some(x => x.who === "me")) pinAdd({ who: "me", lon: gLon, lat: g.lat, ct: map.pickCt });
     const mine = st.pins.list.find(x => x.who === "me"); if (mine) { mine.lon = gLon; mine.line = me.km > 0; }
     st.pins.tgt = [tgt[0], tgt[1], fC && fC.ct]; st.pins.sig = "";
-    const fpts = (isC ? span.map(p => [p[0], p[1], fC && fC.ct]) : [[ans[0], ans[1]]]).concat(g ? [[gLon, g.lat, map.pickCt]] : [], [[rLon, rv.lat]]);
+    const fpts = (isC ? span.map(p => [p[0], p[1], fC && fC.ct]) : [[ans[0], ans[1]]]).concat(g ? [[gLon, g.lat, map.pickCt]] : [], rLon == null ? [] : [[rLon, rv.lat]]);
     requestAnimationFrame(() => { if (!live()) return; if (map.frameReveal) map.frameReveal(fpts, obstacles(), { l: 110, r: 110, t: 96, b: 44 }, 1100); else map.fitPoints(fpts.map(p => [p[0], p[1]]), undefined, 1100); });
 
     /* la cuenta, a la vista y por golpes: tus puntos, los suyos, DIFERENCIA x RONDA = fichas */
     const win = rd.pay > 0, lose = rd.pay < 0, tier = !g ? 5 : me.km <= 75 ? 4 : me.km <= 150 ? 3 : me.km <= 300 ? 2 : me.km <= 600 ? 1 : 0;
-    const box = (id, cls, small, v) => `<div class="box ${cls} w" id="${id}"><small>${small}</small><b>${v}</b></div>`, off = s => (s.km == null ? T("Sin respuesta", "No answer") : s.km > 0 ? T(`A ${A.fmtDist(s.km)}`, `${A.fmtDist(s.km)} off`) : T("Dentro", "Inside"));
+    const box = (id, cls, small, v) => `<div class="box ${cls} w" id="${id}"><small>${small}</small><b>${v}</b></div>`, off = s => { if (s.km == null) return T("En blanco", "No answer"); if (!(s.km > 0)) return T("Dentro", "Inside"); const d = A.fmtDist(s.km); return d.length > 6 ? d : T(`A ${d}`, `${d} off`); };   // etiquetas cortas: la fila no da para mas
     $("duCuenta").innerHTML = `<div class="lft">${box("duBm", "me", off(me), A.fmt(me.pts))}</div>
-      <div class="mx">${box("duBd", "dk", T("Diferencia", "Difference"), A.fmt(Math.abs(rd.diff)))}<span class="op w" id="duO1">×</span>${box("duBx", "red", T("Ronda", "Round"), "×" + fmtM(rd.mult))}<span class="op w" id="duO2">=</span>${box("duBp", win ? "me" : lose ? "rv" : "dk", win ? T("Para ti", "For you") : lose ? T("Para la banca", "For the house") : T("Nadie paga", "No one pays"), A.fmt(Math.abs(rd.pay)))}</div>
+      <div class="mx">${box("duBd", "dk", T("Diferencia", "Difference"), A.fmt(Math.abs(rd.diff)))}<span class="op w" id="duO1">×</span>${box("duBx", "red", T("Ronda", "Round"), "×" + fmtM(rd.mult))}<span class="op w" id="duO2">=</span>${box("duBp", win ? "me" : lose ? "rv" : "dk", win ? T("Para ti", "For you") : lose ? T("Pagas tú", "You pay") : T("Nadie paga", "No one pays"), A.fmt(Math.abs(rd.pay)))}</div>
       <div class="rgt">${box("duBr", "rv", off(rv), A.fmt(rv.pts))}</div>`;
     const show = (ids, beat) => () => { if (!live()) return; ids.forEach(id => { const e = $(id); if (e) e.classList.remove("w"); }); if (beat != null && A.sfx.golpe) A.sfx.golpe(beat); };
     later(() => { if (live()) A.sfx.reveal(tier); }, 480);
     if (fl.length) later(() => { if (live() && A.sfx.flag) A.sfx.flag(fl.length); }, 650);
     later(() => { if (live() && g) pinTag("me", `${ME()} · ${kmTxt(me)}`); }, R.me);
-    later(() => { if (!live()) return; pinAdd({ who: "rv", lon: rLon, lat: rv.lat, drop: true, line: rv.km > 0 }); pinTag("rv", `${BANK()} · ${kmTxt(rv)}`); if (A.sfx.bankPin) A.sfx.bankPin(); }, R.rv);
+    later(() => { if (!live() || rLon == null) return; pinAdd({ who: "rv", lon: rLon, lat: rv.lat, drop: true, line: rv.km > 0 }); pinTag("rv", `${cut(foeRaw(), 13)} · ${kmTxt(rv)}`); if (A.sfx.bankPin) A.sfx.bankPin(); }, R.rv);
     later(() => { if (live()) $("duPins").classList.add("ln"); }, R.lines);
     later(() => { if (!live()) return; $("duHud").classList.add("rev"); factShow(q, label, fl); }, R.row);
     later(show(["duBm"], 0), R.pm); later(show(["duBr"], 1), R.pr); later(show(["duBd"], 2), R.diff); later(show(["duO1", "duBx"], 3), R.mult);
-    later(() => { show(["duO2", "duBp"])(); if (!live()) return; if (rd.pay) A.sfx.countEnd(); face(lose ? (-rd.pay >= 900 ? "laugh" : "smug") : win ? (rd.pay >= 900 ? "angry" : "suspicious") : "puzzled"); }, R.pay);
+    later(() => { show(["duO2", "duBp"])(); if (!live()) return; if (rd.pay) A.sfx.countEnd();
+      if (st.net) face(!rd.pay ? "puzzled" : Math.abs(rd.pay) >= 900 ? "shock" : win ? "wink" : "smug");   // entre jugadores el crupier no cobra ni paga: solo mira
+      else face(lose ? (-rd.pay >= 900 ? "laugh" : "smug") : win ? (rd.pay >= 900 ? "angry" : "suspicious") : "puzzled"); }, R.pay);
     later(() => { if (live() && rd.pay) fly(win ? "rv" : "me", win ? "me" : "rv"); }, R.fly);
     later(() => { if (!live()) return; st.shown = { me: st.me, rv: st.rv }; st.rolled = true; D.hud(); c.odoSet($("duMe"), st.me, { ms: R.rollMs, tick: !!rd.pay && win }); c.odoSet($("duRv"), st.rv, { ms: R.rollMs, tick: !!rd.pay && lose }); }, R.roll);
     /* avanza sola: los tres ultimos segundos se cuentan en la tira del dato; con el menu o Ajustes delante, espera */
-    const total = st.auto && st.auto.next != null ? st.auto.next : CFG.revealSecs * 1000, go = () => { if (!live()) return; if (veiled()) return later(go, 400); if (st.over) finish(); else ask(); };
+    const total = st.auto && st.auto.next != null ? st.auto.next : CFG.revealSecs * 1000, go = () => { if (!live()) return; if (veiled() && !st.net) return later(go, 400); if (st.over) finish(); else ask(); };
+    /* entre jugadores: «listo para la siguiente» sale ya, y la pregunta empieza para los dos a la hora que diga el servidor (netGo) */
+    if (st.net && !st.over) { netReady(st.k + 1, total); later(() => { const e = $("duNext"); if (live() && e && e.classList.contains("hidden")) { e.textContent = T("Esperando…", "Waiting…"); e.classList.remove("hidden"); } }, total + 700); return; }
     for (let n = 3; n >= 1; n--) if (total - n * 1000 > R.row) later(() => { const e = $("duNext"); if (live() && e) { e.textContent = T(`Sigue en ${n}`, `Next in ${n}`); e.classList.remove("hidden"); } }, total - n * 1000);
     later(go, total);
   }
@@ -488,14 +536,20 @@ window.AIQ = window.AIQ || {};
 
   /* ================================================================== 5 · EL VEREDICTO: titular, la cuenta ronda a ronda, las dos pilas sobre la tarima y las tarjetas nuevas */
   function finish() {
-    const c = C(), S = c.S, map = c.map, o = st.over, tb = st.table, s = st, win = !!o.win; st.phase = "end"; S.phase = "levelEnd"; timers.forEach(clearTimeout); timers = [];
+    const c = C(), S = c.S, map = c.map, o = st.over, tb = st.table, s = st, win = !!o.win, nt = st.net; st.phase = "end"; S.phase = "levelEnd"; timers.forEach(clearTimeout); timers = [];
+    if (nt && veiled() && !S.settingsOpen) c.runMenu();                    // entre jugadores el menu no para nada: si estaba abierto, se cierra para ver el veredicto
     map.clearMarks(); map.setDecoys([]); map.animateTo(map.home(), 900); map.setPick(false); pinsSet([]);
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); document.querySelectorAll(".du-fly").forEach(e => e.remove());
     for (const id of ["duHud", "duSeat", "duTools", "duFact"]) { const e = $(id); if (e) e.classList.add("hidden"); }
-    const sum = (D.last = summary(st)), was = stats(), now = st.auto ? was : statsAdd(win), pct = x => (x.d ? Math.round((100 * x.w) / x.d) : 0);
+    const sum = (D.last = summary(st)), was = stats(), now = st.auto || nt ? was : statsAdd(win), pct = x => (x.d ? Math.round((100 * x.w) / x.d) : 0), fo = foe();
+    if (nt && !nt.counted) { nt.counted = true; N.score[win ? "me" : "rv"]++; }   // el marcador de la sala (los amistosos no cuentan para tus duelos contra la banca)
+    const sc = N.score, share = (w, t) => (t > 0 ? w / t : 0.5);
     A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.fail, 380);
-    const lead = o.quit ? T(`Te has rendido en la ronda ${o.rounds}.`, `You gave up in round ${o.rounds}.`)
-      : o.ko ? (win ? T(`La banca se ha quedado sin fichas en la ronda ${o.rounds}.`, `The house ran out of chips in round ${o.rounds}.`) : T(`Te has quedado sin fichas en la ronda ${o.rounds}.`, `You ran out of chips in round ${o.rounds}.`))
+    const lead = o.lost ? T("Has estado demasiado rato sin conexión.", "You were offline for too long.")
+      : o.left ? (o.cut ? T(`${fo} ha perdido la conexión.`, `${fo} lost their connection.`) : T(`${fo} se ha levantado de la mesa.`, `${fo} left the table.`))
+      : o.quit === "rv" ? T(`${fo} se ha rendido en la ronda ${o.rounds}.`, `${fo} gave up in round ${o.rounds}.`)
+      : o.quit ? T(`Te has rendido en la ronda ${o.rounds}.`, `You gave up in round ${o.rounds}.`)
+      : o.ko ? (win ? T(`${fo} se ha quedado sin fichas en la ronda ${o.rounds}.`, `${fo} ran out of chips in round ${o.rounds}.`) : T(`Te has quedado sin fichas en la ronda ${o.rounds}.`, `You ran out of chips in round ${o.rounds}.`))
       : o.rounds > CFG.rounds ? T(`Empate al tope: se ha decidido en la ronda extra ${o.rounds}.`, `Tied at the cap: settled in extra round ${o.rounds}.`) : T(`Tope de ${CFG.rounds} rondas: gana quien tiene más fichas.`, `${CFG.rounds}-round cap: whoever holds more chips wins.`);
     const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "") + A.fmt(Math.abs(v)), hpx = v => (v > 0 ? 14 + 7 * Math.round((v / (2 * CFG.stack)) * 26) : 0), me = Math.max(0, st.me), rv = Math.max(0, st.rv);
     const rows = st.log.map(r => `<div class="ln"><i>${pad2(r.k)}</i><span>${r.q.kind === "flag" ? T("Bandera de ", "Flag of ") : ""}${esc(r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name))}</span><i>×${fmtM(r.mult)}</i><b class="${r.pay > 0 ? "up" : r.pay < 0 ? "dn" : ""}">${sgn(r.pay)}</b></div>`).join("");
@@ -504,21 +558,185 @@ window.AIQ = window.AIQ || {};
     const pol = places.length ? `<div class="pol"><span class="gx-eyb">${T("Tarjetas nuevas", "New cards")} · ${nCards}</span><div class="rw">${places.slice(0, 6).map((p, i) => `<figure class="drop" style="--d:${(1.3 + i * 0.15).toFixed(2)}s" data-id="${esc(p.id)}"><span class="ph"></span><figcaption>${esc(p.n)}</figcaption></figure>`).join("")}</div></div>` : "";
     const pile = (cls, v) => `<div class="pile ${cls}${v ? "" : " zero"}" style="--h:${hpx(v)}px"></div>`;
     c.dialog(stage("du-fin", `<div class="tit"><span class="gx-eyb">${NAME()} · ${A.tx(tb.n)}</span><h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : T("Derrota", "Defeat")}</h2><p class="gx-lead">${lead}</p>
-        <div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Contra la banca", "Against the house")}</b><div class="gx-bar"><i style="--s0:${pct(was) / 100};--s1:${pct(now) / 100}"></i></div>
-          <p>${tally(now)} ${now.s > 1 ? T(`Racha de ${now.s} seguidas.`, `${now.s} in a row.`) : !win && was.s > 1 ? T("Racha cortada.", "Streak broken.") : ""}</p></div></div>${pol}</div>
+        ${nt ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Marcador de la sala", "Room score")}</b><div class="gx-bar"><i style="--s0:${share(sc.me - (win ? 1 : 0), sc.me + sc.rv - 1)};--s1:${share(sc.me, sc.me + sc.rv)}"></i></div>
+          <p>${myName() || ME()} ${sc.me} · ${fo} ${sc.rv}. ${T("Amistoso: no cuenta para la liga.", "Friendly: doesn't count for the league.")}</p></div></div>`
+        : `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Contra la banca", "Against the house")}</b><div class="gx-bar"><i style="--s0:${pct(was) / 100};--s1:${pct(now) / 100}"></i></div>
+          <p>${tally(now)} ${now.s > 1 ? T(`Racha de ${now.s} seguidas.`, `${now.s} in a row.`) : !win && was.s > 1 ? T("Racha cortada.", "Streak broken.") : ""}</p></div></div>`}${pol}</div>
       <div class="tk drop" style="--d:.15s"><div class="gx-paper"><span class="gx-eyb">${T("La cuenta", "The tally")}</span>${rows}<div class="gx-hr"></div>${row(T("Tu pila", "Your stack"), A.fmt(me))}</div></div>
-      <div class="mesa"><div class="col"><b class="me">${A.fmt(me)}</b><span>${myName() || ME()}</span>${pile("me", me)}</div><div class="col"><b class="rv">${A.fmt(rv)}</b><span>${BANK()}</span>${pile("rv", rv)}</div><div class="dais"></div></div>
+      <div class="mesa"><div class="col"><b class="me">${A.fmt(me)}</b><span>${myName() || ME()}</span>${pile("me", me)}</div><div class="col"><b class="rv">${A.fmt(rv)}</b><span>${fo}</span>${pile("rv", rv)}</div><div class="dais"></div></div>
       <div class="seatw" id="duVdSeat"></div>
-      <div class="gx-acts"><button type="button" class="gx-btn gho" id="duExit"><span>${T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button><button type="button" class="gx-btn" id="duTables"><span>${T("Otra mesa", "Another table")}</span></button>${primary("duRematch", T("Revancha", "Rematch"))}</div>`), "tablewrap");
+      <div class="gx-acts"><button type="button" class="gx-btn gho" id="duExit"><span>${nt ? T("Salir de la sala", "Leave the room") : T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${nt ? primary("duRoom", T("Volver a la sala", "Back to the room")) : `<button type="button" class="gx-btn" id="duTables"><span>${T("Otra mesa", "Another table")}</span></button>${primary("duRematch", T("Revancha", "Rematch"))}`}</div>`), "tablewrap");
     document.querySelectorAll("#dlg .pol figure").forEach(f => { const id = f.dataset.id, k = A.mediaKey(id), im = new Image(); im.alt = ""; im.decoding = "async"; im.onload = () => f.querySelector(".ph").replaceWith(im); im.onerror = () => { if (!im.dataset.b) { im.dataset.b = 1; im.src = A.media(`assets/wiki/card/${k}.webp`); } }; im.src = A.media(`assets/wiki/th/${k}.webp`); });
-    $("duRematch").onclick = () => D.start({ table: tb.id, level: s.level, auto: s.auto });
-    $("duExit").onclick = () => c.showHub("home"); $("duTables").onclick = () => { c.showHub("home"); D.open(); };
-    seat($("duVdSeat")); speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "laugh" });
+    $("duExit").onclick = () => c.showHub("home");
+    if (nt) $("duRoom").onclick = roomBack;
+    else { $("duRematch").onclick = () => D.start({ table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
+    seat($("duVdSeat"));
+    if (nt) speak(line(o.lost ? "lost2" : o.left ? "left2" : o.quit === "rv" ? "quit2" : o.quit ? "quit" : win ? "win2" : "lose2"), win ? { gesture: "hat_tip" } : { face: "sly" });
+    else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "laugh" });
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
     if (st.auto && st.auto.done) st.auto.done(sum);
   }
+  /* ================================================================== ENTRE JUGADORES · LA SALA PRIVADA (un amigo, con un codigo)
+     El servidor (api/duelo.js) solo guarda la sala, el reloj de cada ronda y las dos respuestas. Un unico bucle de sondeo (netLoop) pregunta el
+     estado cada poco y netView lo aplica. Todo se puede repetir sin efecto: si un mensaje se pierde, el siguiente sondeo lo reenvia (netBody).
+     N = la sala en la que estas: code, role ("h" anfitrion / "g" invitado), R (el ultimo estado), n (el ultimo duelo empezado), okAt / cut (la
+     ultima respuesta buena y si llevas mas de 4 s sin ninguna) y score (victorias de cada uno en esta sala). st.net = el duelo en curso: n, his (nombre del rival), want (la ronda
+     que esperas), s (cuando empieza, hora del servidor), rdy / ack (el servidor ya tiene tu «listo» / tu respuesta) y off (el rival no da senal) */
+  const N = { code: "", role: "", R: null, n: 0, tm: 0, okAt: 0, cut: false, fly: 0, q: 0, qa: 0, busy: false, keep: false, sig: "", said: "", gone: 0, had: false, score: { me: 0, rv: 0 } };
+  const Rd = () => A.dueloRed, rawName = () => (A.profile && A.profile.get().name) || "";
+  const hisSeat = v => (v ? (N.role === "h" ? v.g : v.h) : null);
+  const inSala = () => !!document.querySelector("#dlg .du-wrap .lob"), inRoom = () => !!document.querySelector("#dlg .du-wrap .pv");
+  const send = body => Rd().call({ code: N.code, ...body });
+  /* manda y aplica la respuesta (netView). Las respuestas buenas que llegan desordenadas se descartan: manda la mas nueva */
+  const sendV = body => { const q = ++N.q, code = N.code; return send(body).then(x => { if (N.code !== code) return; if (x && x.ok) { if (q < N.qa) return; N.qa = q; } netView(x, code); }); };
+  /* la firma del duelo: version del juego, reglas y banco de preguntas. Solo se sientan juntos dos juegos que vayan a sacar el mismo duelo */
+  const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  let SIG = ""; const sig = () => SIG || (SIG = "d1." + A.VERSION + "." + hash(JSON.stringify([CFG.stack, CFG.scale, CFG.rounds, CFG.mult, CFG.clock, CFG.lockRush, CFG.ladder, CFG.tables.map(t => [t.id, t.center])]) + pool().map(e => e.id + ":" + e.d + ":" + e.cont).join("|")));
+
+  /* ---------------- abrir una sala o entrar en la de tu amigo (desde «Retar a un amigo») */
+  async function roomNew() {
+    if (N.busy) return; N.busy = true; A.sfx.ui(); salaMsg(T("Abriendo la sala…", "Opening the room…"));
+    const v = await Rd().call({ a: "new", name: rawName(), ver: sig(), t: sel.table }); N.busy = false;
+    if (!inSala()) { if (v.ok) Rd().call({ a: "bye", code: v.code }); return; }   // se fue mientras se abria
+    if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
+    roomSet(v);
+  }
+  async function roomJoin(code) {
+    code = String(code || "").toUpperCase(); if (N.busy) return;
+    if (code.length !== 5) { A.sfx.deny(); return salaMsg(whyTxt("short"), true); }
+    N.busy = true; A.sfx.ui(); salaMsg(T("Llamando a la puerta…", "Knocking on the door…"));
+    const v = await Rd().call({ a: "join", code, name: rawName(), ver: sig() }); N.busy = false;
+    if (!inSala()) { if (v.ok) Rd().call({ a: "bye", code }); return; }
+    if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
+    roomSet(v);
+  }
+  function roomSet(v) { Object.assign(N, { code: v.code, role: v.role, R: v, n: v.n, okAt: performance.now(), cut: false, fly: 0, gone: 0, said: "", had: false, score: { me: 0, rv: 0 } }); A.sfx.depart(); roomOpen(); netLoop(); }
+  function netBye() { const code = N.code; clearTimeout(N.tm); N.tm = 0; N.code = ""; N.R = null; N.busy = false; if (code) Rd().call({ a: "bye", code }); }
+  addEventListener("pagehide", () => { if (N.code) Rd().bye({ a: "bye", code: N.code }); });   // al cerrar el juego: el asiento queda libre (o la sala, cerrada)
+
+  /* ---------------- 6 · LA SALA PRIVADA: los dos asientos, la mesa (la elige el anfitrion) y «Repartir» */
+  function roomOpen() {
+    const c = C(), S = c.S; fitDk(); S.hub = "duelo";
+    const tile = t => `<button type="button" class="ms" data-t="${t.id}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${T("dificultad", "difficulty")} ${range(t)}</i></span></button>`;
+    c.dialog(stage("pv", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${T("Salir de la sala", "Leave the room")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${T("Sala privada", "Private room")}</h2><span class="gx-eyb">${T("Amistoso · no cuenta para la liga", "Friendly · doesn't count for the league")}</span></div>
+      <div class="tbl gx-sh"><div class="gx-pnl"><div class="asi" id="duSwH"></div>
+        <div class="opc"><span class="gx-eyb" id="duRoomEyb"></span><div class="mss" id="duMesas">${CFG.tables.map(tile).join("")}</div>
+          <div class="regl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
+          <p class="est" id="duRoomSt" role="status"></p></div>
+        <div class="asi" id="duSwG"></div></div></div>
+      <div class="ft"><div class="seatw" id="duSalaSeat"></div><div class="gx-acts">${primary("duDeal", T("Repartir", "Deal"))}</div></div>`), "tablewrap");
+    $("hubBack").onclick = () => { A.sfx.ui(); netBye(); sel.door = "amigo"; D.open(); };
+    $("duMesas").onclick = e => { const b = e.target.closest(".ms"), v = N.R; if (!b || N.role !== "h" || !v || v.st === "play" || b.dataset.t === v.t) return; A.sfx.card(); v.t = b.dataset.t; N.setT = { t: v.t, at: performance.now() }; roomPaint(); sendV({ a: "set", t: v.t }); };
+    $("duDeal").onclick = () => { const v = N.R, g = v && v.g; if (N.role !== "h" || !g || !g.in || g.out || N.busy) return A.sfx.deny(); N.busy = true; sendV({ a: "deal" }).then(() => { N.busy = false; }); };
+    seat($("duSalaSeat")); N.sig = ""; roomPaint();
+    if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
+  }
+  /* al portapapeles (y, si el navegador no deja, a la manera antigua). Devuelve si se pudo */
+  const copy = t => { const old = () => { try { const a = document.createElement("textarea"); a.value = t; a.style.cssText = "position:fixed;left:0;top:0;opacity:0"; document.body.appendChild(a); a.select(); const ok = document.execCommand("copy"); a.remove(); return !!ok; } catch (e) { return false; } };
+    try { return navigator.clipboard.writeText(t).then(() => true, old); } catch (e) { return Promise.resolve(old()); } };
+  /* pinta la sala con el ultimo estado; solo toca la pagina cuando algo ha cambiado */
+  function roomPaint() {
+    const v = N.R; if (!v || !inRoom()) return;
+    const host = N.role === "h", g = v.g && !v.g.out ? v.g : null, cutoff = N.cut, role = r => (r === "h" ? T("Anfitrión", "Host") : T("Invitado", "Guest"));
+    const say = !g ? (host ? "open" : "") : host ? "both" : "guest"; if (say && say !== N.said) { N.said = say; speak(line("r_" + say), { valid: inRoom }); }   // el crupier comenta cada cosa una vez (si esta hablando, espera su turno)
+    const sg = JSON.stringify([v.code, v.t, v.st, N.role, N.score, cutoff, [v.h, g].map(s => s && [s.n, s.on, s.in])]); if (sg === N.sig) return; N.sig = sg;
+    const card = (s, r) => { const mine = r === N.role, w = mine ? N.score.me : N.score.rv, played = N.score.me + N.score.rv > 0;
+      return `<div class="gx-paper">${A.icon(mine ? ME_CHIP : RV_CHIP)}<h3 class="ink">${esc(s.n) || role(r)}</h3><span class="tag ${mine ? "me" : "rv"}">${role(r)}</span><span class="sub">${mine ? ME() : !s.on ? T("Sin señal", "No signal") : !s.in ? T("Mirando el veredicto", "Reading the verdict") : T("En la mesa", "At the table")}${played ? ` · ${w} ${w === 1 ? T("victoria", "win") : T("victorias", "wins")}` : ""}</span></div>`; };
+    const H = $("duSwH"), G = $("duSwG"), fresh = !!g && !N.had; N.had = !!g;
+    H.innerHTML = card(v.h, "h"); H.className = "asi occ";
+    G.innerHTML = g ? card(g, "g") : `<div class="libre"><span>${T("Asiento libre", "Empty seat")}</span><b class="cod">${v.code}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="duCopy">${T("Copiar el código", "Copy the code")}</button></span><small>${T("Pásaselo a tu amigo: lo escribe en «Retar a un amigo».", "Send it to your friend: they type it under “Challenge a friend”.")}</small></div>`;
+    G.className = "asi" + (g ? " occ" : "") + (fresh ? " fromR" : "");
+    $("duRoomEyb").textContent = `${T("Sala", "Room")} ${v.code} · ${T("la mesa", "the table")}`;
+    document.querySelectorAll("#duMesas .ms").forEach(x => { const on = x.dataset.t === v.t; x.classList.toggle("on", on); x.classList.toggle("ro", !host); x.setAttribute("aria-pressed", on); });
+    const ok = host && g && g.in, b = $("duDeal"); b.classList.toggle("dis", !ok); b.setAttribute("aria-disabled", !ok);
+    $("duRoomSt").textContent = cutoff ? T("Sin conexión. Reintentando…", "No connection. Retrying…")
+      : host ? (!g ? T("Tú eliges la mesa. Cuando se siente tu amigo, repartes.", "You pick the table. Once your friend sits down, you deal.") : !g.in ? T("Tu amigo sigue mirando el veredicto.", "Your friend is still reading the verdict.") : T("Los dos en la mesa. Reparte cuando quieras.", "Both at the table. Deal whenever you like."))
+      : !v.h.in ? T("El anfitrión sigue mirando el veredicto.", "The host is still reading the verdict.") : T("La mesa la elige el anfitrión. Empieza cuando reparta.", "The host picks the table. It starts when they deal.");
+    const cp = $("duCopy"); if (cp) cp.onclick = () => { A.sfx.ui(); copy(v.code).then(ok => { cp.textContent = ok ? T("Copiado", "Copied") : T("Cópialo a mano", "Copy it by hand"); }); };
+  }
+  /* del veredicto a la sala (los dos siguen sentados; reparte otra vez el anfitrion) */
+  function roomBack() {
+    const c = C(); A.sfx.ui();
+    if (!N.code) { c.showHub("home"); sel.door = "amigo"; sel.msg = whyTxt("closed"); return D.open(); }   // la sala ya no existe
+    N.keep = true; c.showHub("home"); N.keep = false;
+    const v = N.R, me = v && (N.role === "h" ? v.h : v.g); if (v) v.st = "lobby"; if (me) me.in = true;
+    roomOpen(); sendV({ a: "back" }); netLoop();
+  }
+
+  /* ---------------- el bucle de sondeo: mas vivo con el reloj corriendo, mas lento en la sala y en el veredicto. Va con temporizador (no con
+     fotogramas): con la ventana minimizada el duelo sigue y el otro no se queda esperando */
+  function netLoop() {
+    clearTimeout(N.tm); N.tm = 0; if (!N.code) return;
+    N.tm = setTimeout(netKick, !st || !st.net ? 1500 : st.phase === "ask" || st.phase === "wait" ? 450 : st.phase === "end" ? 3000 : 800);
+  }
+  /* un latido: manda lo pendiente (o solo pregunta) y deja puesto el siguiente SIN esperar la respuesta: si la red se atasca el duelo no se queda
+     parado (como mucho dos llamadas en el aire; `now`: lo tuyo no espera). Mas de 4 s sin respuesta = sin conexion: se avisa y se sigue intentando */
+  function netKick(now) {
+    clearTimeout(N.tm); N.tm = 0; const code = N.code; if (!code) return;
+    const cut = performance.now() - N.okAt > 4000; if (cut !== N.cut) { N.cut = cut; netPaint(); }
+    const body = N.fly < (now === true ? 4 : 2) && netBody(); if (N.code !== code) return;   // (netBody puede levantarse de la sala)
+    if (body) { N.fly++; sendV(body).then(() => { if (N.code === code) N.fly--; }); }
+    netLoop();
+  }
+  const netPaint = () => { if (st && st.net) D.hud(); else { N.sig = ""; roomPaint(); } };
+  /* que decirle al servidor ahora: lo pendiente (mi «listo», mi respuesta) o, si no hay nada, solo preguntar */
+  function netBody() {
+    if (!st || !st.net) { if (!inRoom()) { if (++N.gone > 1) netBye(); return null; } N.gone = 0; return { a: "poll" }; }   // fuera de la sala por otro camino: se levanta
+    const nt = st.net, cur = st.cur, b = { n: nt.n, k: Math.max(1, nt.want || st.k) };
+    if (st.phase === "end") return { a: "poll", n: nt.n };
+    if (nt.want > st.k) return nt.rdy ? { ...b, a: "poll" } : { ...b, a: "ready", secs: secsOf(nt.want), rush: CFG.lockRush, wait: Math.max(0, Math.round(nt.goAt - performance.now())) };
+    if (st.phase === "ask" && cur && !nt.ack) { if (cur.meAns) return { ...b, a: "lock", lon: cur.meAns.lon, lat: cur.meAns.lat, t: cur.meAns.t }; if (cur.passed) return { ...b, a: "pass" }; }
+    return { ...b, a: "poll" };
+  }
+  function netView(v, code) {
+    if (!N.code || (code && code !== N.code)) return;                     // respuesta de una sala de la que ya te has ido
+    if (!v || !v.ok) {
+      const w = v && v.why;
+      if (w === "none" || w === "out") {                                  // la sala ya no existe: la cerro el anfitrion o caduco
+        clearTimeout(N.tm); N.tm = 0; N.code = ""; N.R = null;
+        if (st && st.net) netOver({ win: true, left: true }); else if (inRoom()) { sel.door = "amigo"; sel.msg = whyTxt("closed"); D.open(); }
+        return;
+      }
+      return;                                                             // sin red o el servidor no contesta: se sigue intentando (netKick avisa a los 4 s)
+    }
+    N.okAt = performance.now(); N.role = v.role; N.R = v; if (N.cut) { N.cut = false; netPaint(); }
+    if (st && st.net) return duelView(v);
+    if (!inRoom()) return;
+    if (N.setT) { if (v.t === N.setT.t || N.role !== "h" || performance.now() - N.setT.at > 4000) N.setT = null; else v.t = N.setT.t; }   // la mesa recien elegida no parpadea si llega una respuesta de antes del cambio
+    if (v.st === "play" && v.n > N.n && v.seed) { N.n = v.n; const o = hisSeat(v); return void D.start({ table: v.t, seed: v.seed, net: { n: v.n, his: (o && o.n) || "", want: 0, s: 0 } }); }   // el anfitrion ha repartido
+    roomPaint();
+  }
+
+  /* ---------------- el duelo, visto desde el servidor */
+  const ansOf = s => { if (!s || s === "0") return null; try { const a = JSON.parse(s); return a && Number.isFinite(a.lon) && Number.isFinite(a.lat) ? { lon: a.lon, lat: a.lat, t: +a.t || 0 } : null; } catch (e) { return null; } };
+  const clockTo = e => { const S = C().S, t0 = Rd().perfAt(e) - S.limit * 1000; if (Math.abs(t0 - S.t0) > 150) S.t0 = t0; };   // el reloj de la placa acaba cuando dice el servidor (y salta a 5 s cuando fija el primero)
+  function netOver(o) { if (!st || st.phase === "end") return; st.over = { ko: false, rounds: Math.max(1, st.k), ...o }; finish(); }
+  /* «listo para la ronda k»: sale ya y se repite hasta que el servidor lo apunte; la pregunta empieza `wait` ms despues de que esten los dos */
+  function netReady(k, wait) { const nt = st.net; nt.want = k; nt.s = 0; nt.rdy = false; nt.goAt = performance.now() + wait; netKick(true); }
+  /* ya hay hora para la ronda que viene: la cuenta atras de la tira del dato y la pregunta, a su hora en los dos juegos */
+  function netGo() {
+    const nt = st.net, k = nt.want, left = Math.max(0, Rd().perfAt(nt.s) - performance.now());
+    for (let n = 3; n >= 1; n--) if (left - n * 1000 > 0) later(() => { const e = $("duNext"); if (e && st.phase === "reveal" && nt.want === k) { e.textContent = T(`Sigue en ${n}`, `Next in ${n}`); e.classList.remove("hidden"); } }, left - n * 1000);
+    later(() => { if (nt.want === k && st.k === k - 1 && (st.phase === "reveal" || st.phase === "wait")) ask(); }, left);
+  }
+  function duelView(v) {
+    const nt = st.net, o = hisSeat(v); if (st.phase === "end" || v.n !== nt.n) return;
+    if (v.quit === "me") return netOver({ win: false, lost: true });      // el otro ha cobrado tu ausencia: demasiado rato sin conexion
+    if (v.quit === "his") return netOver(v.gone ? { win: true, left: true, cut: true } : { win: true, quit: "rv" });
+    if (!o || o.out) return netOver({ win: true, left: true });
+    if (!o.on !== !!nt.off) { nt.off = !o.on; D.hud(); }
+    if (o.ago < 5000) nt.claim = false; else if (o.ago > 20000 && !nt.claim) { nt.claim = true; sendV({ a: "claim", n: nt.n }); }   // 20 s sin dar senal: pierde por abandono
+    const rd = v.rd; if (!rd) { if (v.st !== "play" && !st.over) netOver({ win: true, left: true }); return; }
+    if (nt.want > st.k) { if (rd.k !== nt.want) return; nt.rdy = !!rd.rdy[0]; if (rd.s && !nt.s) { nt.s = rd.s; netGo(); } return; }   // esperando a que empiece la ronda que viene
+    const cur = st.cur; if (rd.k !== st.k || st.phase !== "ask" || !cur) return;
+    if (rd.e) clockTo(rd.e);
+    if (rd.me != null) nt.ack = true;
+    if (rd.his && rd.his.lk && !cur.rvLocked) { cur.rvLocked = true; cur.rvT = elapsed(); A.sfx.knock(); if (!cur.meAns) face("shock"); D.hud(); }   // «Ha fijado»: su etiqueta en rojo y el crupier con cara de susto
+    if (rd.me != null && rd.his && rd.his.a !== undefined) resolve({ me: ansOf(rd.me), rv: ansOf(rd.his.a) });
+  }
+
   /* Esc en el veredicto = Salir, y en la sala = Cerrar (asi el crupier se levanta antes de que cambie la pantalla) */
-  addEventListener("keydown", e => { if (e.key !== "Escape" || C().S.settingsOpen) return; const b = st && st.phase === "end" ? $("duExit") : !st && document.querySelector("#dlg .du-wrap .lob") ? $("hubBack") : null; if (!b) return; e.stopImmediatePropagation(); e.preventDefault(); b.click(); }, true);
+  addEventListener("keydown", e => { if (e.key !== "Escape" || C().S.settingsOpen || (A.teclado && A.teclado.on)) return; const b = st && st.phase === "end" ? $("duExit") : !st && document.querySelector("#dlg .du-wrap .lob, #dlg .du-wrap .pv") ? $("hubBack") : null; if (!b) return; e.stopImmediatePropagation(); e.preventDefault(); b.click(); }, true);
 
   /* salir del duelo (lo llama js/game.js al volver a la portada, y D.start antes de empezar otro) */
   D.leave = again => {
@@ -528,6 +746,7 @@ window.AIQ = window.AIQ || {};
     for (const id of ["duHud", "duSeat", "duTools", "duFact", "duPins"]) { const e = $(id); if (e) e.remove(); }
     document.body.classList.remove("duelo-on", "duelo-lock"); if (A.codex && A.codex.toastAside) A.codex.toastAside();
     if (c) { c.map.setDecoys([]); c.S.duel = null; } st = null;
+    if (N.code && !again && !N.keep) netBye();                              // salir al menu en un duelo entre jugadores = levantarse de la sala
   };
 
 })(window.AIQ);

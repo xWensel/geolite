@@ -1122,6 +1122,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   }
   function togglePause() {
     if (S.phase !== "asking") return;
+    if (S.duel && S.duel.net) return;                                       // Duelo entre jugadores: el reloj es de los dos y no se para (el menu se abre sin pausa: runMenu)
     S.paused = !S.paused; A.sfx.pause(); A.music.muffle(S.paused);
     const note = S.run && A.dealer && A.dealer.notePause;                      // el crupier te espera en la pausa (js/dealer.js): habla antes de acoplarse y, al volver, ya en su esquina
     if (S.paused) { S.pauseAt = performance.now(); map.setPick(false); if (note) A.dealer.notePause(true); veilMenu(togglePause); }
@@ -1131,7 +1132,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   document.addEventListener("visibilitychange", () => { if (document.hidden && S.phase === "asking" && !S.paused) togglePause(); });
   function runMenu() {
     if (S.booting || !(S.run || S.camp || A.adv.active()) || S.phase === "title" || S.phase === "intro") return;
-    if (S.phase === "asking") return togglePause();
+    if (S.phase === "asking" && !(S.duel && S.duel.net)) return togglePause();
     if (!$("veil").classList.contains("hidden")) return closeVeil();
     A.sfx.pause(); veilMenu(closeVeil);
   }
@@ -1151,7 +1152,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   $("zoomIn").onclick = () => map.zoomBy(1.6);
   $("zoomOut").onclick = () => map.zoomBy(1 / 1.6);
   $("zoomHome").onclick = () => map.animateTo(S.camp ? map.home() : { ...map.home(), s: map.minS }, 600);
-  $("pauseBtn").onclick = togglePause;
+  $("pauseBtn").onclick = () => (S.duel && S.duel.net ? runMenu() : togglePause());
   function toggleFs() {
     const host = window.geoliteHost;
     const to = host && host.windowMode ? (host.windowMode() === "full" ? "window" : "full") : document.fullscreenElement ? "window" : "full";
@@ -1186,7 +1187,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     else if (act === "codex") { if (S.phase === "title") (A.codex.isOpen() ? A.codex.close() : A.codex.open()); }
     else if (act === "sfx") toggleSwitch("sfx");
     else if (act === "mus") toggleSwitch("music");
-    else if (act === "pause") togglePause();
+    else if (act === "pause") (S.duel && S.duel.net ? runMenu() : togglePause());
     else if (act === "zin") map.zoomBy(1.6);
     else if (act === "zout") map.zoomBy(1 / 1.6);
     else if (act === "home") $("zoomHome").click();

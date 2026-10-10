@@ -63,14 +63,24 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .puertas .gx-pnl { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 12px; padding: 20px 22px 18px; }
 .du-st .doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; min-height: 0; }
 .du-st .doorw { padding: 4px; clip-path: var(--gx-notch); min-height: 0; display: grid; }
-.du-st .doorw.on { background: linear-gradient(var(--gx-rim-hi) 0 2px, var(--gx-rim) 2px calc(100% - 2px), var(--gx-rim-lo) calc(100% - 2px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.du-st .doorw.eleg { background: linear-gradient(var(--gx-rim-hi) 0 2px, var(--gx-rim) 2px calc(100% - 2px), var(--gx-rim-lo) calc(100% - 2px)); box-shadow: inset 0 0 0 2px var(--gx-o); }
 .du-st .doorw.off { filter: grayscale(.9) brightness(.7); }
+/* las puertas abiertas se eligen: la elegida lleva el marco de laton y la otra queda un punto mas apagada */
+.du-st .doorw.on { cursor: pointer; } .du-st .doorw.on:not(.eleg) { filter: brightness(.8); } .du-st .doorw.on:not(.eleg):hover, .du-st .doorw.on.pad-hov:not(.eleg) { filter: none; }
+.du-st .doorw:focus { outline: none; } .du-st .doorw:focus-visible, html[data-input="pad"] .du-st .doorw:focus { background: #fff; }
 .du-st .door { display: grid; grid-template-rows: auto auto 1fr auto; gap: 6px; padding: 10px 12px 12px; min-height: 0; }
 .du-st .door .ill { position: relative; height: 96px; overflow: hidden; box-shadow: inset 0 0 0 2px var(--gx-o); image-rendering: pixelated; background-position: 50% 40%; background-size: 204px 256px; background-repeat: no-repeat; background-color: #2a1a52; }
 .du-st .door .ill.amigo { background: repeating-radial-gradient(circle at 50% 60%, #1c6e73 0 20px, #185f66 20px 40px); }
 .du-st .door .ill.amigo .ic { position: absolute; top: 14px; left: calc(50% - 58px); width: 64px; height: 64px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .4)); } .du-st .door .ill.amigo .ic + .ic { left: calc(50% - 6px); top: 22px; }
 .du-st .door h3 { font-size: 28px; line-height: 1; } .du-st .door p { font-size: 18px; line-height: 1.12; color: var(--gx-ink-2); }
 .du-st .door .tag { justify-self: start; } html body .du-st .door .tag.line { color: var(--gx-ink-2); }
+/* «Retar a un amigo»: el codigo de su sala (abrir la tuya es el boton principal) */
+.du-st .amg { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; min-height: 56px; font-size: 20px; line-height: 1.1; color: var(--gx-txt-2); }
+.du-st .amg .bad { color: var(--me-hi); }
+.du-st .amg input { width: 172px; height: 52px; box-sizing: border-box; margin: 0; padding: 2px 0 0 .12em; border: 0; border-radius: 0; outline: none; text-align: center; font-family: var(--sans); font-size: 36px; line-height: 1; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gx-ink); caret-color: var(--gx-ink); background: var(--gx-card); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 6px 0 rgba(22, 36, 28, .12); }
+.du-st .amg input:focus { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--me); }
+.du-st .amg input::placeholder { color: rgba(22, 36, 28, .3); }
 /* la mesa: las tres del prototipo y cuanto sabe la banca */
 .du-st .mesas { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
 .du-st .mss { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -149,7 +159,7 @@ body.duelo-on .rail-sh { top: 58%; }                                            
 .du-hud .cuenta { grid-column: 1 / 4; display: none; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 18px; align-items: center; padding-top: 12px; }
 .du-hud.rev .cuenta { display: grid; animation: du-rise .22s ease-out both; }
 .du-hud .cuenta .mx, .du-hud .cuenta .lft, .du-hud .cuenta .rgt { display: flex; gap: 10px; align-items: center; } .du-hud .cuenta .rgt { justify-content: flex-end; }
-.du-st .box { display: grid; justify-items: center; gap: 2px; padding: 6px 12px 8px; min-width: 96px; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o); color: #fff; background: linear-gradient(var(--h) 0 4px, var(--m) 4px calc(100% - 6px), var(--l) calc(100% - 6px)); --h: #7fc0ff; --m: #2a78e4; --l: #1f4bb0; }
+.du-st .box { flex: none; display: grid; justify-items: center; gap: 2px; padding: 6px 12px 8px; min-width: 96px; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o); color: #fff; background: linear-gradient(var(--h) 0 4px, var(--m) 4px calc(100% - 6px), var(--l) calc(100% - 6px)); --h: #7fc0ff; --m: #2a78e4; --l: #1f4bb0; }
 .du-st .box small { white-space: nowrap; font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; line-height: 1; } .du-st .box b { font-weight: 400; font-size: 32px; line-height: .9; }
 .du-st .box.me { --h: var(--me-hi); --m: var(--me); --l: var(--me-lo); color: #120c02; } .du-st .box.rv { --h: var(--rv-hi); --m: var(--rv); --l: var(--rv-lo); color: #150a2a; }
 .du-st .box.red { --h: var(--gx-red-hi); --m: var(--gx-red); --l: var(--gx-red-lo); } .du-st .box.dk { --h: #4a5a50; --m: #26332b; --l: #101a14; }
@@ -220,3 +230,22 @@ html body .du-pins .pn .tag { position: absolute; top: 0; font-size: calc(16px *
 .du-st .du-fin > .seatw { position: absolute; right: 0; bottom: 88px; width: 128px; height: 128px; }
 .du-st .du-fin > .seatw .dealer.big { left: auto; right: 0; flex-direction: row-reverse; } .du-st .du-fin > .seatw .dealer.big .dl-bubble { max-width: 330px; transform-origin: 100% 50%; }
 .du-st .du-fin > .gx-acts { grid-column: 1 / 13; grid-row: 2; justify-content: flex-end; align-items: center; gap: 12px 24px; }
+
+/* ---------------------------------------------------------------- 6 · LA SALA PRIVADA (un amigo, con un codigo): los dos asientos y, en medio, la mesa */
+.du-st .pv { grid-template-rows: 64px minmax(0, 1fr) 132px; }
+.du-st .pv .tbl { grid-column: 1 / 13; grid-row: 2; min-height: 0; }
+.du-st .pv .tbl .gx-pnl { height: 100%; padding: 24px 26px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; align-items: center; }
+.du-st .pv .asi { grid-column: span 3; min-width: 0; } .du-st .pv .asi.occ { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
+.du-st .pv .asi .gx-paper, .du-st .pv .libre { display: grid; gap: 8px; justify-items: center; align-content: center; text-align: center; padding: 20px 16px; min-height: 282px; }
+.du-st .pv .asi .ic { width: 96px; height: 96px; } .du-st .pv .asi h3 { font-size: 32px; line-height: .95; max-width: 100%; overflow-wrap: anywhere; }
+.du-st .pv .asi .sub { font-size: 20px; line-height: 1.1; color: var(--gx-ink-2); }
+.du-st .pv .libre { box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .35); background: repeating-linear-gradient(45deg, rgba(243, 237, 220, .04) 0 8px, transparent 8px 16px); color: var(--gx-txt-2); font-size: 22px; }
+.du-st .pv .libre .cod { padding-left: .1em; font-weight: 400; font-size: 60px; line-height: .9; letter-spacing: .1em; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08; user-select: text; -webkit-user-select: text; }
+.du-st .pv .libre small { font-size: 18px; line-height: 1.12; }
+.du-st .pv .opc { grid-column: span 6; display: grid; gap: 14px; padding: 0 12px; min-width: 0; }
+.du-st .pv .ms { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 4px; padding: 10px 6px; min-height: 0; text-align: center; }
+.du-st .pv .ms .ic { width: 48px; height: 48px; } .du-st .pv .ms i { display: block; font-style: normal; font-size: 18px; }
+.du-st .pv .ms.ro { cursor: default; } .du-st .pv .ms.ro:not(.on) { opacity: .5; background: none; }        /* el invitado ve la mesa, no la elige */
+.du-st .pv .regl { flex-wrap: wrap; gap: 8px 22px; }
+.du-st .pv .est { min-height: 44px; font-size: 22px; line-height: 1.1; color: var(--gx-ttl); }
+.du-st .gx-mq:has(.gx-btn.dis) { filter: grayscale(1) brightness(.6); } .du-st .gx-btn.dis { cursor: default; }   /* «Repartir» apagado: tambien sus bombillas */
