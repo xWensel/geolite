@@ -18,6 +18,7 @@ window.AIQ = window.AIQ || {};
      con la misma cuenta que los vertices de la GPU: ct + 8 * (vuelta + 2). Sin vuelta (t null), el punto se envuelve al lado visible del mundo */
   const frameOf = ct => (ct == null ? [null, null] : ct < 8 ? [ct, null] : [ct % 8, Math.floor(ct / 8) - 2]);
   const TWO_PI = Math.PI * 2;
+  const wrapCx = x => x - TWO_PI * Math.round(x / TWO_PI);                 // el mundo se repite de izquierda a derecha: cualquier x vale modulo una vuelta
   const FLAG_EXT = 18;                                     // v0.2.15: celdas que se alarga el mastil de la bandera del acierto (lo que sube la tela)
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const easeIO = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -300,7 +301,8 @@ void main(){
      anillo ni flecha: el marcador late y dice "¡Dentro del pais!" (antes no se veia nada). Devuelve true si hay que seguir dibujando */
   A.drawProbes = (map, c, now) => {
     const sk = map.sk || {}, ink = sk.ink || "#14232b", brass = sk.brass || "#c8963e", font = `600 13px ${map._fm ? map._fm() : "'DM Mono', monospace"}`;
-    const P = map.probes.map(p => map.lonLatToScreen(p.lon, p.lat, p.ct == null ? 6 : p.ct)), labels = [];
+    const P = map.probes.map(p => { const q = map.lonLatToScreen(p.lon, p.lat, p.ct == null ? 6 : p.ct); q.k = map._lk; return q; }), labels = [];   // q.k: la copia del mundo mas cercana (el anillo y la flecha van en ella)
+    const sx = (x, k) => (x > BX1 || x < BX0 ? x - TWO_PI * Math.round(x / TWO_PI) : x) + k * TWO_PI;
     const taken = (map.avoid || []).concat(P.map(q => [q[0] - 11, q[1] - 11, q[0] + 11, q[1] + 11]));   // map.avoid: el HUD (lo pone la Aventura al sondear)
     let anim = false;
     map.probes.forEach((p, idx) => {
@@ -308,7 +310,7 @@ void main(){
       let R = 0, dir = null;
       c.save(); c.lineJoin = "round";
       if (p.dr) {                                                        // continentes movidos: circulo en el mapa que ves, alrededor del marcador y por el objetivo
-        const W0 = map.sceneOf(p.lon, p.lat, p.ct), r = p.dr * k; c.beginPath();
+        const W0 = map.sceneOf(p.lon, p.lat, p.ct), r = p.dr * k; W0[0] = sx(W0[0], P0.k); c.beginPath();
         for (let i = 0; i <= 96; i++) { const t = (i / 96) * Math.PI * 2, q = map.toScreen(W0[0] + Math.cos(t) * r, W0[1] + Math.sin(t) * r); i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); R = Math.max(R, Math.hypot(q[0] - P0[0], q[1] - P0[1])); }
         c.setLineDash([10, 8]); c.lineDashOffset = -now / 60; c.lineWidth = 5; c.strokeStyle = rgbaOf(ink, 0.75); c.stroke();
         c.lineWidth = 2.2; c.strokeStyle = rgbaOf(brass, 0.95); c.stroke(); c.fillStyle = rgbaOf(brass, 0.07); c.fill();
@@ -316,7 +318,8 @@ void main(){
       } else if (p.km) {
         c.beginPath(); let prev = null, split = false;
         for (let i = 0; i <= 96; i++) {
-          const [lo, la] = destLL(p.lat, p.lon, (i / 96) * 360, p.km * k), q = map.lonLatToScreen(lo, la, p.ct == null ? 6 : p.ct);   // sin marco (mapa sin continentes movidos): sin mover, sin buscar el continente de cada punto en cada fotograma
+          let [lo, la] = destLL(p.lat, p.lon, (i / 96) * 360, p.km * k); lo += 360 * Math.round((p.lon - lo) / 360);   // el anillo no se parte en el antimeridiano
+          const q = map.lonLatToScreen(lo, la, p.ct == null ? 6 : p.ct, P0.k);   // sin marco (mapa sin continentes movidos): sin mover, sin buscar el continente de cada punto en cada fotograma
           if (!prev || Math.abs(q[0] - prev[0]) > map.W * 0.6) { if (prev) split = true; c.moveTo(q[0], q[1]); } else c.lineTo(q[0], q[1]);
           prev = q; R = Math.max(R, Math.hypot(q[0] - P0[0], q[1] - P0[1]));
         }
@@ -326,7 +329,7 @@ void main(){
         anim = true;                                                     // el borde discontinuo se mueve
       }
       if (p.bearing != null) {                                           // rumbo medido en el mapa que ves (p.bearing: grados desde el norte del mapa)
-        const W0 = map.sceneOf(p.lon, p.lat, p.ct == null ? 6 : p.ct), b = p.bearing * D2R, F = map.toScreen(W0[0] + Math.sin(b) * 0.3, W0[1] + Math.cos(b) * 0.3);
+        const W0 = map.sceneOf(p.lon, p.lat, p.ct == null ? 6 : p.ct), b = p.bearing * D2R; W0[0] = sx(W0[0], P0.k); const F = map.toScreen(W0[0] + Math.sin(b) * 0.3, W0[1] + Math.cos(b) * 0.3);
         let dx = F[0] - P0[0], dy = F[1] - P0[1]; const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L; dir = [dx, dy];
         const len = 76 * e, x2 = P0[0] + dx * len, y2 = P0[1] + dy * len, nx = -dy, ny = dx;
         c.setLineDash([]); c.lineCap = "round"; c.lineWidth = 8; c.strokeStyle = rgbaOf(ink, 0.85); c.beginPath(); c.moveTo(P0[0], P0[1]); c.lineTo(x2, y2); c.stroke();
@@ -757,7 +760,7 @@ void main(){
     /* ---------- tamano / camara ---------- */
     _emptyMarks() { return { guess: null, answer: null, highlight: null, area: null, label: null, labelAt: null, dist: "", pop: null, t0: 0 }; }
     setMarks(m) { const hl = m.highlight && this.world.byName[m.highlight]; this.marks = { ...this._emptyMarks(), gct: m.guess ? this.pickCt : null, act: hl ? hl.ct : null, ...m, t0: performance.now() }; this.fxDirty = this.dirty = true; }
-    clearMarks() { this.marks = this._emptyMarks(); this.probes = []; this.panSlack = 0; this.fxDirty = this.dirty = true; }
+    clearMarks() { this.marks = this._emptyMarks(); this.probes = []; this.fxDirty = this.dirty = true; }
     /* paises tenidos por encima de la tierra ({ "Spain": [r, g, b, a] }, 0-1): la Enciclopedia pinta asi lo que llevas descubierto. null = nada */
     setPaint(p) { this.paint = p || null; this.dirty = this.fxDirty = true; }
     /* resalta un pais sin reiniciar las marcas (la chincheta no vuelve a caer): el pais bajo el raton en la Enciclopedia */
@@ -804,8 +807,7 @@ void main(){
     }
     _clamp(v) {
       const hw = this.W / (2 * v.s), hh = this.H / (2 * v.s);
-      const sl = this.panSlack || 0;                                   // v0.2.15: el encuadre del revelado puede asomar mas alla de los 180 grados (Pacifico)
-      v.cx = hw * 2 >= BX1 - BX0 ? 0 : clamp(v.cx, BX0 + hw - sl, BX1 - hw + sl);
+      v.cx = wrapCx(v.cx);                                             // mundo infinito: sin bordes a izquierda y derecha (se normaliza a una vuelta; el dibujo repite las copias)
       v.cy = hh * 2 >= BY1 - BY0 ? (BY0 + BY1) / 2 : clamp(v.cy, BY0 + hh, BY1 - hh);
       return v;
     }
@@ -821,11 +823,13 @@ void main(){
       clearTimeout(this._dT); this.drift = null; this.tv = null; this.inertia = null;
       if (ms <= 0) { this.view = t; this.anim = null; this.dirty = this.fxDirty = true; return; }
       const from = { ...this.view };
+      t.cx += TWO_PI * Math.round((from.cx - t.cx) / TWO_PI);          // el mundo da la vuelta: se va por el camino corto (cruzando el antimeridiano si hace falta)
       const far = Math.min(1, Math.hypot(t.cx - from.cx, t.cy - from.cy) * Math.min(from.s, t.s) / Math.max(this.W, this.H));
       this.anim = { from, to: t, t0: performance.now(), ms, dip: 0.5 * far };
     }
     fitPoints(pts, pad = { l: 60, r: 60, t: 160, b: 120 }, ms = 900) {
       const ps = pts.map(([lo, la]) => project(lo, la));
+      for (const q of ps) q[0] += TWO_PI * Math.round((ps[0][0] - q[0]) / TWO_PI);   // el mundo da la vuelta: por el camino corto
       let x0 = Math.min(...ps.map(p => p[0])), x1 = Math.max(...ps.map(p => p[0]));
       let y0 = Math.min(...ps.map(p => p[1])), y1 = Math.max(...ps.map(p => p[1]));
       const MIN_SPAN = 0.3;
@@ -846,7 +850,8 @@ void main(){
       obs = obs.map(r => [Math.floor(r[0]), Math.floor(r[1]), Math.ceil(r[2]), Math.ceil(r[3]), r[4] || 0]);   // en pixeles enteros, como los bordes candidatos (con decimales un borde de 456,8 invalidaba el hueco que empieza en 457)
       const R = (x, y) => (o.on ? [(o.c * x) / o.sx - o.s * y, (-o.s * x) / o.sx - o.c * y] : [x, -y]);   // escena -> pantalla (sin camara)
       const Ri = (u, v) => (o.on ? [o.sx * (o.c * u - o.s * v), -(o.s * u + o.c * v)] : [u, -v]);
-      const U = pts.map(p => { const q = clr ? project(p[0], p[1]) : this.sceneOf(p[0], p[1], p[2]); return R(q[0], q[1]); });
+      let ux0 = null;                                                    // el mundo da la vuelta: los puntos se encuadran por el camino corto
+      const U = pts.map(p => { const q = clr ? project(p[0], p[1]) : this.sceneOf(p[0], p[1], p[2]), qx = ux0 == null ? (ux0 = q[0]) : q[0] + TWO_PI * Math.round((ux0 - q[0]) / TWO_PI); return R(qx, q[1]); });
       let x0 = Math.min(...U.map(p => p[0])), x1 = Math.max(...U.map(p => p[0])), y0 = Math.min(...U.map(p => p[1])), y1 = Math.max(...U.map(p => p[1]));
       const MIN = 0.3;                                                   // con un pleno no se acerca tanto que pierdas el pais de vista
       if (x1 - x0 < MIN) { const m = (x0 + x1) / 2; x0 = m - MIN / 2; x1 = m + MIN / 2; }
@@ -872,9 +877,6 @@ void main(){
       const s = clamp(bx.s, this.minS, this.maxS), scx = (bx.a + mg.l + bx.b - mg.r) / 2, scy = (bx.c + mg.t + bx.d - mg.b) / 2;
       const [cx, cy] = Ri((x0 + x1) / 2 - (scx - W / 2) / s, (y0 + y1) / 2 - (scy - H / 2) / s);
       this.frameBox = [bx.a, bx.c, bx.b, bx.d];      // (para las pruebas)
-      /* junto al antimeridiano (Nueva Zelanda, Fiyi, Samoa...) el mapa no deja pasar de los 180 grados y el objetivo quedaba pegado al borde, bajo el
-         ticket: mientras dure este revelado se deja asomar hasta 0,8 rad mas alla (alli las islas tienen su copia dibujada). clearMarks lo devuelve a 0 */
-      const hw = W / (2 * s); this.panSlack = hw * 2 >= BX1 - BX0 ? 0 : clamp(Math.abs(cx) - (Math.PI - hw), 0, 0.8);
       this.animateTo({ cx, cy, s }, ms);
     }
     startDrift() {
@@ -899,13 +901,20 @@ void main(){
        contiene o el mas cercano (_ctOf solo con el mapa deformado: en el mar recorre el mundo entero). Tu chincheta y las sondas del Sonar pasan
        el marco con el que se leyo el clic: asi el anillo sale entero (antes cada punto del anillo se movia con su continente y quedaba hecho trizas).
        lon puede venir con una vuelta de mas (+-360, la linea de la chincheta a la respuesta): esa vuelta se respeta */
-    lonLatToScreen(lon, lat, ct) {
-      if (!this.dist.spec || !this._moved()) { const [x, y] = project(lon, lat); return this.toScreen(x, y); }
+    lonLatToScreen(lon, lat, ct, k, ref) {
+      /* el mundo se repite: sin k se devuelve la copia mas cercana al centro de la vista (o a ref, una x de mundo: la chincheta tuya junto a la
+         respuesta, por el camino corto); con k (vueltas enteras) esa copia exacta (anillos y contornos que van de punto en punto). Deja en
+         this._lk la copia elegida y en this._lwx la x de mundo resultante */
       const lo = ((lon + 180) % 360 + 360) % 360 - 180, turn = Math.round((lon - lo) / 360) * TWO_PI;   // redondeada: una longitud ya normalizada dejaba un resto de 1e-15 y el punto no daba la vuelta
-      const [c, t] = frameOf(ct); let [x, y] = this._dispFwd(...project(lo, lat), c == null ? this._ctOf(lo, lat) : c);
-      if (t != null) x += t * TWO_PI;                                   // marco de un clic: la copia del mundo que tocaste (junto al borde se ven las dos)
-      else if (x > BX1 || x < BX0) x -= TWO_PI * Math.round(x / TWO_PI);   // lo que sale por un lado del mundo entra por el otro
-      return this.toScreen(x + turn, y);
+      let x, y;
+      if (!this.dist.spec || !this._moved()) [x, y] = project(lo, lat);
+      else {
+        const [c] = frameOf(ct); [x, y] = this._dispFwd(...project(lo, lat), c == null ? this._ctOf(lo, lat) : c);
+        if (x > BX1 || x < BX0) x -= TWO_PI * Math.round(x / TWO_PI);   // lo que sale por un lado del mundo entra por el otro
+      }
+      if (k === undefined) { const v = this.viewJ || this.view; k = Math.round(((ref === undefined ? v.cx : ref) - x - turn) / TWO_PI); this._lk = k; }
+      this._lwx = x + turn + k * TWO_PI;
+      return this.toScreen(this._lwx, y);
     }
 
     /* ---------- continentes, deformaciones y orientacion (retos) ---------- */
@@ -1016,7 +1025,7 @@ void main(){
     }
     /* coordenadas del mapa (ya sin deformar) -> lon/lat. Deformado, la lectura puede dar la vuelta al mundo o pasarse del polo: se normaliza
        (antes se tiraba el clic); sin deformar, fuera del mundo sigue sin haber nada */
-    _real(x, y) { const [lon, lat] = unproject(x, y); return this.lastCt == null ? [lon, lat] : [((lon + 180) % 360 + 360) % 360 - 180, clamp(lat, -89.5, 89.5)]; }
+    _real(x, y) { const [lon, lat] = unproject(x, y), lo = ((lon + 180) % 360 + 360) % 360 - 180; return this.lastCt == null ? [lo, lat] : [lo, clamp(lat, -89.5, 89.5)]; }   // el mundo da la vuelta: la longitud siempre en -180..180
     /* Mascaras de tierra por continente (rejilla gruesa en coordenadas del mapa): sirven para comprobar SOLAPES REALES entre continentes, no cajas. */
     /* Solo cuenta la copia propia de cada poligono (la que se mueve con su continente) y la rejilla sobra por los lados: Rusia llega a 190° y las
        islas del otro lado del antimeridiano se colocan junto a su continente. Asi las mascaras son lo que de verdad se dibuja al moverlo */
@@ -1165,7 +1174,7 @@ void main(){
       } else d.kk = d.k;
     }
     /* punto de pantalla (px CSS del lienzo) -> lon/lat reales, teniendo en cuenta orientacion y continentes movidos */
-    screenToLonLat(px, py) { let [x, y] = this._toWorld(px, py); [x, y] = this._undisp(x, y); return this._real(x, y); }
+    screenToLonLat(px, py) { let [x, y] = this._toWorld(px, py); [x, y] = this._undisp(wrapCx(x), y); return this._real(x, y); }
     /* lupa de fronteras verdaderas (Sello de aduana / Teodolito): {x,y,r} en px CSS o null */
     setLens(l) {                                                        // la lupa solo obliga a repintar si hay deformacion del mapa y cambia de sitio
       const o = this.lens; if (!o && !l) return;
@@ -1281,12 +1290,12 @@ void main(){
       const rx = px, ry = py;
       const ef = A.pointer && A.pointer.effective && A.pointer.effective(); if (ef) { px = ef[0]; py = ef[1]; }     // el puntero puede tener retos (temblor, retraso, invertido...)
       if (ef) { const card = A.pointer.uiAt && A.pointer.uiAt(); if (card) { card.click(); return; } }          // el reticulo esta encima de una carta de la mano: se pulsa la carta, no se pone chincheta debajo
-      let [x, y] = this._toWorld(px, py); [x, y] = this._undisp(x, y); const [lon, lat] = this._real(x, y);
+      let [x, y] = this._toWorld(px, py); [x, y] = this._undisp(wrapCx(x), y); const [lon, lat] = this._real(x, y);
       if (lon < -180 || lon > 180 || lat > 90 || lat < -90) return;
       this.pickCt = this.lastCt;                                         // marco del clic: la chincheta y el anillo del Sonar se dibujan justo donde has tocado
       if (this.lastCt != null) { const w = this._toWorld(px, py)[0], f = this._dispFwd(x, y, this.lastCt)[0]; this.pickCt = this.lastCt + 8 * (Math.round((w - f) / TWO_PI) + 2); }   // y en la copia del mundo que tocaste: junto al borde (la curva CRT ensena algo mas del mundo) se ven las dos y la chincheta salia en la otra
       /* para el crupier (js/dealer.js): donde estaba tu raton de verdad y donde habrias clicado en el mapa sin girar ni mover continentes */
-      try { const v = this.viewJ || this.view; this.lastTap = { raw: ef ? this.screenToLonLat(rx, ry) : [lon, lat], plain: unproject(v.cx + (px - this.W / 2) / v.s, v.cy - (py - this.H / 2) / v.s), at: performance.now() }; } catch (e) { this.lastTap = null; }
+      try { const v = this.viewJ || this.view; this.lastTap = { raw: ef ? this.screenToLonLat(rx, ry) : [lon, lat], plain: unproject(wrapCx(v.cx + (px - this.W / 2) / v.s), v.cy - (py - this.H / 2) / v.s), at: performance.now() }; } catch (e) { this.lastTap = null; }
       this.onPick(lon, lat);
     }
 
@@ -1324,9 +1333,10 @@ void main(){
       if (this.anim) {
         const a = this.anim, k = Math.min(1, (now - a.t0) / a.ms), e = easeIO(k), dip = 1 - a.dip * Math.sin(Math.PI * e);
         this.view = { cx: a.from.cx + (a.to.cx - a.from.cx) * e, cy: a.from.cy + (a.to.cy - a.from.cy) * e, s: Math.max(this.minS, a.from.s * Math.pow(a.to.s / a.from.s, e) * dip) };
-        if (k >= 1) this.anim = null; this.dirty = this.fxDirty = true;
+        this.view.cx = wrapCx(this.view.cx); if (k >= 1) this.anim = null; this.dirty = this.fxDirty = true;
       } else if (this.tv) {
         const k = 1 - Math.exp(-dt * 13), v = this.view, t = this.tv;
+        t.cx += TWO_PI * Math.round((v.cx - t.cx) / TWO_PI);
         v.cx += (t.cx - v.cx) * k; v.cy += (t.cy - v.cy) * k; v.s *= Math.pow(t.s / v.s, k);
         if (Math.abs(Math.log(t.s / v.s)) < 0.0004 && Math.hypot(t.cx - v.cx, t.cy - v.cy) * v.s < 0.15) { this.view = { ...t }; this.tv = null; }
         this._clamp(this.view); this.dirty = this.fxDirty = true;
@@ -1343,7 +1353,7 @@ void main(){
       const lz = Math.log(this.view.s);
       if (this.lastLz !== null && dt > 0) {
         const zv = (lz - this.lastLz) / dt, k = 1 - Math.exp(-dt * 16); this.zv += (zv - this.zv) * k;
-        const pvx = ((this.view.cx - this.lastView.cx) * this.view.s) / dt, pvy = (-(this.view.cy - this.lastView.cy) * this.view.s) / dt;
+        const pvx = (wrapCx(this.view.cx - this.lastView.cx) * this.view.s) / dt, pvy = (-(this.view.cy - this.lastView.cy) * this.view.s) / dt;
         this.pv[0] += (pvx - this.pv[0]) * k; this.pv[1] += (pvy - this.pv[1]) * k;
       }
       this.lastLz = lz; this.lastView = { ...this.view };
@@ -1383,6 +1393,11 @@ void main(){
       const RS = Math.min(this.rs, mos);
       const sw = Math.max(2, Math.round(W * dpr * RS)), sh = Math.max(2, Math.round(H * dpr * RS));
       const scale = t => v.s * (t / W);                                  // px por unidad en un objetivo de ancho t
+      /* el mundo se repite de izquierda a derecha: la geometria se dibuja desde el centro envuelto y, si la vista asoma por un lado, otra vez desde
+         el centro corrido una vuelta (el mapa solo vale de -180 a 180). Con la curva CRT o el giro asoma un poco mas: se deja margen */
+      const cw = wrapCx(v.cx), hwx = (this._orient().on ? Math.max(W, H) * 0.75 : st.crt ? W * 0.56 : W * 0.5) / v.s, cxs = [cw];
+      if (cw + hwx > BX1 + 1e-3) cxs.push(cw - TWO_PI);
+      if (cw - hwx < BX0 - 1e-3) cxs.push(cw + TWO_PI);
       const silW = Math.max(2, Math.round(W / 3)), silH = Math.max(2, Math.round(H / 3));
       const sil = this._target("sil", silW, silH), bA = this._target("bA", silW, silH), bN = this._target("bN", silW, silH), bW = this._target("bW", silW, silH);
       const scene = this._target("scene", sw, sh, mos < 0.999 ? gl.NEAREST : gl.LINEAR);
@@ -1407,8 +1422,8 @@ void main(){
       const same = this._silKey && this._silTex === bW.tex && this._silKey.length === key.length && this._silKey.every((x, i) => x === key[i]);
       if (!same) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, sil.fbo); gl.viewport(0, 0, silW, silH); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.useProgram(P.sil); this._setDist(P.sil); this._u(P.sil, "u_off", 0, 0); this._u(P.sil, "u_center", v.cx, v.cy); this._u(P.sil, "u_scale", scale(silW)); this._u(P.sil, "u_res", silW, silH);
-      gl.bindVertexArray(this.vaoFill); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0);
+      gl.useProgram(P.sil); this._setDist(P.sil); this._u(P.sil, "u_off", 0, 0); this._u(P.sil, "u_scale", scale(silW)); this._u(P.sil, "u_res", silW, silH);
+      gl.bindVertexArray(this.vaoFill); for (const cc of cxs) { this._u(P.sil, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); }
 
       // 2) desenfoques (estrecho y ancho) en la GPU: ancho constante en pantalla
       gl.bindVertexArray(this.vaoEmpty); gl.useProgram(P.blur);
@@ -1429,7 +1444,7 @@ void main(){
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.ocean.u.u_blurN, 0);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bW.tex); gl.uniform1i(P.ocean.u.u_blurW, 1);
       if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(P.ocean.u.u_swirl, 2); }
-      this._u(P.ocean, "u_center", v.cx, v.cy); this._u(P.ocean, "u_scale", sc); this._u(P.ocean, "u_res", sw, sh); this._u(P.ocean, "u_dpr", dpr * RS); this._setDist(P.ocean);
+      this._u(P.ocean, "u_center", cw, v.cy); this._u(P.ocean, "u_scale", sc); this._u(P.ocean, "u_res", sw, sh); this._u(P.ocean, "u_dpr", dpr * RS); this._setDist(P.ocean);
       this._u(P.ocean, "u_oTop", ...ms.oTop); this._u(P.ocean, "u_oBot", ...ms.oBot); this._u(P.ocean, "u_shallow", ...ms.shallow); this._u(P.ocean, "u_grid", ...ms.grid); this._u(P.ocean, "u_tropic", ...ms.tropic);
       this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(P.ocean, "u_felt", f[0], f[1], f[2], f[3]); }
       this._u(P.ocean, "u_time", this.fxOn === false ? 0 : now / 1000); gl.uniform1i(P.ocean.u.u_style, st.style || 0);
@@ -1440,38 +1455,41 @@ void main(){
       gl.bindVertexArray(this.vaoFill);
       if (st.shadow) {                                               // sombra dura de "pegatina" bajo la tierra
         gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.useProgram(P.solid); this._setDist(P.solid);
-        this._u(P.solid, "u_center", v.cx, v.cy); this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
+        this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
         this._u(P.solid, "u_off", st.shadow.off[0] * dpr * RS, st.shadow.off[1] * dpr * RS); this._u(P.solid, "u_col", ...st.shadow.col);
-        gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); gl.disable(gl.BLEND);
+        for (const cc of cxs) { this._u(P.solid, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); } gl.disable(gl.BLEND);
       }
       gl.useProgram(P.land); this._setDist(P.land); this._u(P.land, "u_off", 0, 0);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.land.u.u_blurN, 0);
       gl.uniform1i(P.land.u.u_style, st.style || 0); this._u(P.land, "u_dpr", dpr * RS);
       { const ef = this._eff(), fl = ef.flat != null ? ef.flat : Math.max(0, 1 - ef.lineA), lu = this._lensU(dpr * RS, H, ef); this._u(P.land, "u_flat", fl); this._u(P.land, "u_flatc", ...ms.pal[0]); this._u(P.land, "u_lens", lu[0], lu[1], lu[2]); }
-      this._u(P.land, "u_center", v.cx, v.cy); this._u(P.land, "u_scale", sc); this._u(P.land, "u_res", sw, sh); this._u(P.land, "u_fx", st.ao, st.grain, 0, 0);
+      this._u(P.land, "u_scale", sc); this._u(P.land, "u_res", sw, sh); this._u(P.land, "u_fx", st.ao, st.grain, 0, 0);
       if (this._palFor !== ms) { this._palFor = ms; this._pal = new Float32Array(24); ms.pal.forEach((c, i) => this._pal.set(c, i * 3)); } gl.uniform3fv(P.land.u.u_pal, this._pal);
-      gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0);
+      for (const cc of cxs) { this._u(P.land, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); }
 
       gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       if (this.paint) {                                                  // tintes por pais (setPaint): encima de la tierra y debajo del resalte y las fronteras
         gl.useProgram(P.solid); this._setDist(P.solid); this._u(P.solid, "u_off", 0, 0);
-        this._u(P.solid, "u_center", v.cx, v.cy); this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
-        for (const f of this.world.features) { const c = this.paint[f.name]; if (c && f.gl && f.gl.n) { this._u(P.solid, "u_col", c[0], c[1], c[2], c[3]); gl.drawElements(gl.TRIANGLES, f.gl.n, gl.UNSIGNED_INT, f.gl.i0 * 4); } }
+        this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
+        for (const cc of cxs) { this._u(P.solid, "u_center", cc, v.cy);
+          for (const f of this.world.features) { const c = this.paint[f.name]; if (c && f.gl && f.gl.n) { this._u(P.solid, "u_col", c[0], c[1], c[2], c[3]); gl.drawElements(gl.TRIANGLES, f.gl.n, gl.UNSIGNED_INT, f.gl.i0 * 4); } } }
       }
       const hl = this.marks.highlight && this.world.byName[this.marks.highlight];
       if (hl) {
         const k = Math.min(1, (now - this.marks.t0) / 500);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.useProgram(P.hatch); this._setDist(P.hatch); this._u(P.hatch, "u_off", 0, 0);
-        this._u(P.hatch, "u_center", v.cx, v.cy); this._u(P.hatch, "u_scale", sc); this._u(P.hatch, "u_res", sw, sh); this._u(P.hatch, "u_col", ...ms.hl); this._u(P.hatch, "u_dpr", dpr * RS); this._u(P.hatch, "u_alpha", k);
-        gl.drawElements(gl.TRIANGLES, hl.gl.n, gl.UNSIGNED_INT, hl.gl.i0 * 4);
+        this._u(P.hatch, "u_scale", sc); this._u(P.hatch, "u_res", sw, sh); this._u(P.hatch, "u_col", ...ms.hl); this._u(P.hatch, "u_dpr", dpr * RS); this._u(P.hatch, "u_alpha", k);
+        for (const cc of cxs) { this._u(P.hatch, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, hl.gl.n, gl.UNSIGNED_INT, hl.gl.i0 * 4); }
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       }
       // fronteras
       gl.useProgram(P.line); gl.bindVertexArray(this.vaoLine); this._setDist(P.line);
       { const e = this._eff(); this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_wt", now / 1400); this._u(P.line, "u_lineA", e.lineA); }
-      this._u(P.line, "u_center", v.cx, v.cy); this._u(P.line, "u_scale", sc); this._u(P.line, "u_res", sw, sh);
+      this._u(P.line, "u_scale", sc); this._u(P.line, "u_res", sw, sh);
       const lw = clamp(st.lineW + Math.log2(v.s / this.minS) * 0.06, st.lineW, st.lineW * 1.7) * dpr * RS;
       const lcov = mos < 0.999 ? clamp((lw - 0.2) / 0.8, 0, 1) : 1;    // pixeles gordos: a tan poca resolucion las fronteras desaparecen como en una foto de verdad (antes se amontonaban y el mapa quedaba en manchas de tinta)
+      for (const cc of cxs) {                                           // una vez por copia del mundo visible
+      this._u(P.line, "u_center", cc, v.cy);
       if (st.lineOff && (st.lineOff[0] || st.lineOff[1])) {           // desregistro (impresion): segunda capa desplazada
         this._u(P.line, "u_width", lw); this._u(P.line, "u_off", st.lineOff[0] * dpr * RS, st.lineOff[1] * dpr * RS); this._u(P.line, "u_col", st.lineOffCol[0], st.lineOffCol[1], st.lineOffCol[2], st.lineOffCol[3] * lcov);
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount);
@@ -1494,6 +1512,7 @@ void main(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+      }
       }
       gl.disable(gl.BLEND);
 
@@ -1520,8 +1539,8 @@ void main(){
       const draw = (step, alpha) => {
         if (alpha < 0.03) return;
         c.fillStyle = `rgba(190,225,230,${0.55 * alpha})`;
-        const lon0 = Math.max(-180, Math.floor(wx0 / D2R / step) * step), lon1 = Math.min(180, Math.ceil(wx1 / D2R / step) * step);
-        for (let lo = lon0; lo <= lon1 + 1e-9; lo += step) if (Math.abs(lo % 30) < 1e-9 || step < 30) c.fillText(fmtCoord(lo, "E", "W").replace(".00", ""), this.toScreen(lo * D2R, wyB)[0] + 4, H - 16);
+        const lon0 = Math.floor(wx0 / D2R / step) * step, lon1 = Math.ceil(wx1 / D2R / step) * step;   // el mundo se repite: las etiquetas siguen mas alla de los 180
+        for (let lo = lon0; lo <= lon1 + 1e-9; lo += step) if (Math.abs(lo % 30) < 1e-9 || step < 30) c.fillText(fmtCoord(((lo + 180) % 360 + 360) % 360 - 180, "E", "W").replace(".00", ""), this.toScreen(lo * D2R, wyB)[0] + 4, H - 16);
         const lat0 = Math.max(-90, Math.floor(latBot / step) * step), lat1 = Math.min(90, Math.ceil(latTop / step) * step);
         for (let la = lat0; la <= lat1 + 1e-9; la += step) if (Math.abs(la % 30) < 1e-9 || step < 30) c.fillText(fmtCoord(la, "N", "S").replace(".00", ""), 8, this.toScreen(wxL, project(0, la)[1])[1] + 3);   // la reticula no se deforma: antes cada latitud se movia con el continente del meridiano 0 y salian desordenadas
       };
@@ -1536,9 +1555,9 @@ void main(){
       if (!A_ || A_.f !== f || A_.key !== key) {
         const path = new Path2D(), edge = new Path2D(), W = this.W, H = this.H;
         for (const sh of [-360, 0, 360]) for (const p of f.polys) {
-          const b = p.bbox, q1 = this.lonLatToScreen(b[0] + sh, b[1]), q2 = this.lonLatToScreen(b[2] + sh, b[3]);
+          const b = p.bbox, q1 = this.lonLatToScreen(b[0] + sh, b[1], undefined, 0), q2 = this.lonLatToScreen(b[2] + sh, b[3], undefined, 0);
           if (Math.max(q1[0], q2[0]) < -W || Math.min(q1[0], q2[0]) > 2 * W || Math.max(q1[1], q2[1]) < -H || Math.min(q1[1], q2[1]) > 2 * H) continue;   // fuera de la vista (con margen)
-          for (const ring of p.rings) { let lo0 = 0; ring.forEach(([lo, la], i) => { const q = this.lonLatToScreen(lo + sh, la); i ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); i && !(Math.abs(lo) >= 179.999 && Math.abs(lo0) >= 179.999) ? edge.lineTo(q[0], q[1]) : edge.moveTo(q[0], q[1]); lo0 = lo; }); path.closePath(); }
+          for (const ring of p.rings) { let lo0 = 0; ring.forEach(([lo, la], i) => { const q = this.lonLatToScreen(lo + sh, la, undefined, 0); i ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); i && !(Math.abs(lo) >= 179.999 && Math.abs(lo0) >= 179.999) ? edge.lineTo(q[0], q[1]) : edge.moveTo(q[0], q[1]); lo0 = lo; }); path.closePath(); }
         }
         A_ = this._areaP = { f, key, path, edge };
       }
@@ -1556,7 +1575,9 @@ void main(){
       if (m.area) this._drawArea(c, m, now);
       const age = now - m.t0;
       if (m.guess || m.answer || m.labelAt) {
-        const G = m.guess && this.lonLatToScreen(m.guess[0], m.guess[1], m.gct), Aa = m.answer && this.lonLatToScreen(m.answer[0], m.answer[1]);
+        const Aa = m.answer && this.lonLatToScreen(m.answer[0], m.answer[1]), wA = this._lwx;
+        this._rk = this._lk;                                              // la copia del mundo del objetivo (los anillos van en la misma)
+        const G = m.guess && this.lonLatToScreen(m.guess[0], m.guess[1], m.gct, undefined, Aa ? wA : undefined);   // tu chincheta, a la copia mas cercana a la respuesta
         const fl = m.flags && m.flags.length ? m.flags : null;           // v0.2.15: acierto con bandera (la chincheta del objetivo pasa a mastil)
         if (Aa && m.rings) this._rings(c, m, Aa, age);                    // anillos de la Enciclopedia, debajo de todo
         const ds = G && Aa ? this._line(c, m, G, Aa, age) : null;
@@ -1607,11 +1628,7 @@ void main(){
     _line(c, m, G, Aa, age) {
       const k = clamp((age - 300) / 500, 0, 1), e = easeIO(k); if (k <= 0) return;
       c.save(); c.setLineDash([1, 9]); c.lineCap = "round"; c.lineWidth = 4; c.strokeStyle = this._rgba(this.sk.ink, 0.9);
-      const segs = [];
-      for (const s of [-360, 0, 360]) {
-        if (Math.abs(m.guess[0] + s - m.answer[0]) <= 180) segs.push([this.lonLatToScreen(m.guess[0] + s, m.guess[1], m.gct), Aa]);
-        if (s !== 0 && Math.abs(m.answer[0] + s - m.guess[0]) <= 180) segs.push([G, this.lonLatToScreen(m.answer[0] + s, m.answer[1])]);
-      }
+      const segs = [[G, Aa]];                                           // las dos chinchetas ya van en la copia mas cercana: el camino corto, cruce o no el antimeridiano
       const trace = () => { c.beginPath(); for (const [a, b] of segs) { c.moveTo(a[0], a[1]); c.lineTo(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e); } c.stroke(); };
       trace(); c.lineWidth = 1.5; c.strokeStyle = this._rgba(this.sk.paper, 0.7); c.lineDashOffset = 5; trace(); c.restore();
       return m.dist && k >= 1 ? segs[0] : null;
@@ -1685,8 +1702,8 @@ void main(){
       const R = m.rings, ans = m.answer, T0 = 520, END = 5600; if (age < T0 || age > END + 900) return;
       if (R.ct === undefined) R.ct = this.dist.spec && this._moved() ? this._ctOf(ans[0], ans[1]) : null;   // una vez: en el mar, _ctOf recorre el mundo entero
       if (!R.ll) R.ll = R.r.map(km => { const out = []; for (let j = 0; j <= 80; j++) { let [lo, la] = destLL(ans[1], ans[0], (j / 80) * 360, km); lo += 360 * Math.round((ans[0] - lo) / 360); out.push(lo, la); } return out; });   // junto al antimeridiano no se parte
-      const v = this.viewJ || this.view, key = this.dist.spec ? null : v.cx + "|" + v.cy + "|" + v.s + "|" + this.W + "|" + this.H;
-      if (!key || R.key !== key) { R.key = key; R.xy = R.ll.map(L => { const o = new Float32Array(L.length); for (let j = 0; j < L.length; j += 2) { const q = this.lonLatToScreen(L[j], L[j + 1], R.ct); o[j] = q[0]; o[j + 1] = q[1]; } return o; }); }
+      const v = this.viewJ || this.view, key = this.dist.spec ? null : v.cx + "|" + v.cy + "|" + v.s + "|" + this.W + "|" + this.H + "|" + this._rk;
+      if (!key || R.key !== key) { R.key = key; R.xy = R.ll.map(L => { const o = new Float32Array(L.length); for (let j = 0; j < L.length; j += 2) { const q = this.lonLatToScreen(L[j], L[j + 1], R.ct, this._rk); o[j] = q[0]; o[j + 1] = q[1]; } return o; }); }
       const grow = easeIO(clamp((age - T0) / 560, 0, 1)), sc = 0.55 + 0.45 * grow, fade = 1 - clamp((age - END) / 900, 0, 1), sk = this.sk, MED = ["#c98a4b", "#dfe6ec", "#f8c64a"];
       c.save(); c.lineJoin = "round";
       for (let i = 0; i < 3; i++) {
@@ -1749,7 +1766,7 @@ void main(){
       c.beginPath(); c.moveTo(x - 22, y); c.lineTo(x - 8, y); c.moveTo(x + 8, y); c.lineTo(x + 22, y); c.moveTo(x, y - 22); c.lineTo(x, y - 8); c.moveTo(x, y + 8); c.lineTo(x, y + 22); c.stroke();
       c.fillStyle = sk.red; c.beginPath(); c.arc(x, y, 2.6, 0, Math.PI * 2); c.fill();
       c.fillStyle = sk.brass; c.beginPath(); c.moveTo(x - 5, 0); c.lineTo(x + 5, 0); c.lineTo(x, 8); c.fill(); c.beginPath(); c.moveTo(0, y - 5); c.lineTo(0, y + 5); c.lineTo(8, y); c.fill();
-      const [wx, wy] = this._toWorld(x, y), [lon, lat] = unproject(wx, wy);
+      const [wx, wy] = this._toWorld(x, y), [lon, lat] = unproject(wrapCx(wx), wy);
       if (Math.abs(lon) <= 180 && Math.abs(lat) <= 90) {
         const txt = fmtCoord(lat, "N", "S") + "  " + fmtCoord(lon, "E", "W");
         this._setFont(c, `500 11px ${this._fm()}`); const w = c.measureText(txt).width + 14;
