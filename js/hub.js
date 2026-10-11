@@ -39,8 +39,9 @@ window.AIQ = window.AIQ || {};
     for (let k = 0.94; k >= 0.6 && bad(); k -= 0.04) el.style.fontSize = Math.max(18, fs * k).toFixed(1) + "px";
   });
   addEventListener("resize", () => { if (document.querySelector(".hh")) fitNames(); });
+  let homeDealt = false;
   function home() {
-    pday = null;                                                      // la practica de otro dia se acaba al volver a la portada
+    pday = null;                                                     // la practica de otro dia se acaba al volver a la portada
     const c = C(), P = A.profile.get(), adv = P.adv, saved = A.adv.hasSave(), sm = saved && A.adv.summary(), cx = A.codexStats();
     /* carta del Reto diario: intento a medias, puntuacion global de hoy o los 3 intentos por estrenar */
     const today = A.rank.daily.board(), dst = A.rank.daily.get(today), dsv = A.adv.summary(true), dLive = dsv && dsv.board === today;
@@ -53,7 +54,8 @@ window.AIQ = window.AIQ || {};
     const BULBS = A.bulbs();                                          // bombillas de marquesina de la Aventura (js/art.js)
     const mc = (id, rank, suit, art, title, desc, meta, badge) => `<button class="mcard${id === "adventure" ? " hero" : ""}" data-mode="${id}" data-suit="${suit === "s_pin" || suit === "s_compass" ? "red" : "blk"}" ${A.ttAttr(title, desc)} aria-description="${esc(desc)}">
       ${id === "adventure" ? BULBS : ""}${badge ? `<span class="mc-ribbon">${badge}</span>` : ""}<span class="mc-win">${A.pic(art)}</span><b class="mc-name">${title}</b><span class="mc-stat sq-fit">${meta}</span></button>`;
-    c.dialog(`<div class="hh">
+    const noDeal = homeDealt; homeDealt = true;                       // las cartas se reparten solo la primera vez que se ve la portada; al volver de Perfil & co. ya estan en la mesa
+    c.dialog(`<div class="hh${noDeal ? " nodeal" : ""}">
       <div class="hh-top">${A.salir ? A.salir.button() : ""}<img class="hh-logo" src="assets/logo.png" alt="Geolite" onerror="this.outerHTML='<h1>Geo<em>lite</em></h1>'">${tools()}</div>
       <p class="hh-tag">${A.t("title.tag")}</p>
       <div class="hh-cards">

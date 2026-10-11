@@ -1245,7 +1245,7 @@ window.AIQ = window.AIQ || {};
     const key = `${roundNo()}:${run.attempt || 0}:${run.shopN}:${chest}`, visit = `${roundNo()}:${run.attempt || 0}:${chest}`, newVisit = run.shopKey !== visit;
     if (newVisit) run.visitBuys = 0;
     if (!run.stock || run.stockKey !== key) { run.stock = offers(chest); run.stockKey = key; run.bought = []; if (run.shopKey !== visit) { run.shopKey = visit; run.rerolls = 0; run.freeUsed = 0; } }
-    persist(); renderShop(chest);
+    persist(); renderShop(chest, true);                                   // entrar al Campamento (o cambiar cartas): se reparten; cualquier otro repintado no
     if (!chest && run.legAch) { const r0 = run; setTimeout(() => { if (run === r0) payLeg(r0); }, 900); }   // el logro de la legendaria del cofre: ya en la tienda, un poco despues de pintarla
     if (newVisit && A.dealer.campArrive) {                                            // el crupier se sienta a la mesa (js/dealer.js)
       const cf = chalFor(roundNo()), costs = (run.stock || []).map(s => (s.k === "life" ? lifePrice() : cardCost(s)));
@@ -1467,7 +1467,9 @@ window.AIQ = window.AIQ || {};
     }
     if (any) persist();
   }
-  function renderShop(chest) {
+  function renderShop(chest, deal) {
+    /* de un repintado a otro (comprar, vender, suministro, apuesta, volver de un juego) la mesa NO se reparte otra vez: sin animacion de entrada ni fundido */
+    const again = !deal && !!document.querySelector("#dlg.tablewrap .table.mesa.gx-camp") && !$("layer").classList.contains("hidden");
     reportCasino();
     legOn = 0; swapIx = null; shopChest = !!chest; A.peek.close(true);  // mesa nueva: si la legendaria se estaba luciendo en la anterior, esa secuencia ya no sigue
     const tkOld = document.querySelector("#dlg .nr-body"), tkY = tkOld ? tkOld.scrollTop : 0;   // el boleto, por donde iba (sobornar el quinto reto no devuelve la lista arriba)
@@ -1491,7 +1493,7 @@ window.AIQ = window.AIQ || {};
        La descripcion de las cartas va siempre entera (usuario): si no cabe, la mesa entera baja de escala (A.fitK), nunca se corta */
     const ascI = run.asc ? A.adv.ascInfo(run.asc) : null;
     const ascChip = ascI ? `<span class="tb-asc" ${A.ttAttr(A.T("Ascensión", "Ascension") + " " + run.asc + " · " + ascI.n, ascI.d + (ascI.k ? " " + ascI.k : ""))}>${ic(ASC_CHIP[run.asc])}<em>${run.asc}</em></span>` : "";
-    C().dialog(`<div class="table mesa gx-camp${chest ? " chest" : ""}">
+    C().dialog(`<div class="table mesa gx-camp${chest ? " chest" : ""}${again ? " again" : ""}">
       <header class="tb-head"><div class="tb-title"><span class="gx-eyb tag">${A.tx(info.n)} · ${actSub(info)}</span><span class="tb-trow"><h2 class="gx-t-m">${chest ? A.T("Cofre del jefe", "Boss chest") : A.T("Campamento", "Camp")}</h2>${ascChip}</span></div>
         ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins">${CN()}<b>${run.coins}</b></div></div></header>
       <section class="tb-shop gx-pnl">${note ? `<p class="tb-note">${note}</p>` : ""}<section class="offers" style="--n:${Math.max(1, run.stock.length)}">${cards}${chest ? "" : `<div class="tb-actions"><button class="tb-deck" id="rerollBtn" type="button"><span class="tb-dk">${ic("dice")}</span><span>${A.T("Cambiar cartas", "New cards")}</span><em>${rc ? CN() + rc : A.T("gratis", "free")}</em></button></div>`}</section></section>
@@ -1530,6 +1532,7 @@ window.AIQ = window.AIQ || {};
       if (chest) { const k = gain(chestSkip()); run.coins += k; run.stats.coinsEarned += k; A.sfx.sell(); }   // dejar el cofre sin abrir tambien se cobra (con la mochila llena, el cofre no es papel mojado)
       persist(); chest ? openShop(false) : startRound();
     };
+    if (again) $("dlg").classList.add("in");                             // dialog() lo apaga y lo enciende 2 fotogramas despues: la mesa parpadeaba
     A.ach.emit("casino", { kind: "hold", coins: run.coins }); A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length });
     if (A.tour) A.tour.maybe("camp");
   }

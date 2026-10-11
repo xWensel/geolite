@@ -25,6 +25,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
   transform: rotate(var(--rot)); transition: transform .35s var(--spring), box-shadow .3s; animation: deal .7s var(--spring) both; }
 .mcard:nth-child(1) { --rot: -4deg; animation-delay: .05s; --rc: #4fb6a0; } .mcard:nth-child(2) { --rot: -1.2deg; animation-delay: .12s; } .mcard:nth-child(3) { --rot: 1.4deg; animation-delay: .19s; --rc: #c78bf0; } .mcard:nth-child(4) { --rot: 4deg; animation-delay: .26s; --rc: #f8b449; }
 .mcard.hero { --rc: #ffd06b; width: clamp(210px, calc(24 * var(--vw)), 360px); transform: rotate(var(--rot)) translateY(-8px) scale(1.04); z-index: 2; }
+.hh.nodeal .mcard { animation: none; }
 @keyframes deal { from { opacity: 0; transform: translateY(160px) rotate(24deg) scale(.7); } }
 .mcard:hover { transform: rotate(0deg) translateY(-24px) scale(1.07); z-index: 5; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px #ffd06b, inset 0 0 0 7px #16241c, 0 26px 0 3px rgba(0, 0, 0, .45), 0 0 60px rgba(255, 208, 107, .55); }
 .mcard.hero:hover { transform: rotate(0deg) translateY(-34px) scale(1.09); }
