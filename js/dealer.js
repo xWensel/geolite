@@ -1724,9 +1724,11 @@ window.AIQ = window.AIQ || {};
     bubble.className = bubble.className.replace(/\s*\bst-\w+/g, ""); if (o.sty) bubble.classList.add("st-" + o.sty);   // estilo del bocadillo que elige la mesa (gritando, susurro...)
     bubble.classList.toggle("live", !!o.live); if (o.live) bubble.querySelector(".dl-live span").textContent = A.pick6(LIVE_TAG);   // js/vivo.js: el crupier de verdad (el autor) te habla en directo
     if (o.lang) { bubble.lang = o.lang; bubble.style.setProperty("--dll", /^(zh|ja|ko|ru)/.test(o.lang) ? ".889" : "1"); } else if (bubble.lang) { bubble.removeAttribute("lang"); bubble.style.removeProperty("--dll"); }
+    /* un espacio de ancho cero SIEMPRE detras de lo que falta: sin el, al escribir la ultima letra `text-wrap: pretty` repartia las lineas distinto y la frase saltaba de renglon al acabar */
+    const ZW = "\u200b";
     /* la frase entera ya maquetada desde el principio, con lo que falta por escribir invisible: el globo nace con su tamano final y ninguna palabra
        salta de linea a media escritura (y `text-wrap: pretty` reparte las lineas sin dejar una palabra sola) */
-    sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest"; rest.textContent = text; txt.replaceChildren(sofar, rest);
+    sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest"; rest.textContent = text + ZW; txt.replaceChildren(sofar, rest);
     fitCorner(); spr.fit(); spr.shown(true); spr.talk(true);
     if (mood === "laugh") A.sfx.laugh && A.sfx.laugh();
     let i = 0, at = 0; const chars = [...text], step = mood === "laugh" ? 44 : 34;
@@ -1740,7 +1742,7 @@ window.AIQ = window.AIQ || {};
         if (o.hold !== 0) later(() => D.hide(), (o.hold || 1800 + text.length * 22) + LINGER);
         if (o.done && released !== me) later(o.done, LINGER); return;
       }
-      sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at); if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
+      sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
     };
     typing = true; tick(); D.busy = true;
   };
