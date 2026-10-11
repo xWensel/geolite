@@ -44,6 +44,35 @@ window.AIQ = window.AIQ || {};
     return false;
   }
 
+
+  /* punto bien DENTRO de un poligono (el mas alejado de su borde, en una malla): la bandera del revelado cae en tierra, no en el mar
+     (el centro de la caja de Vietnam, Chile o Italia queda fuera del pais). Si el centro de la caja ya esta dentro y holgado, se queda. */
+  function innerPoint(poly) {
+    if (poly.inner) return poly.inner;
+    const b = poly.bbox, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, kx = Math.max(0.2, Math.cos(cy * D2R));
+    const edge = (lo, la) => {                                    // distancia plana (en grados escalados) al borde mas cercano, todos los anillos
+      let m = Infinity;
+      for (const r of poly.rings) for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const ax = (r[j][0] - lo) * kx, ay = r[j][1] - la, dx = (r[i][0] - r[j][0]) * kx, dy = r[i][1] - r[j][1], l2 = dx * dx + dy * dy;
+        const t = l2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0, ex = ax + t * dx, ey = ay + t * dy, d = ex * ex + ey * ey;
+        if (d < m) m = d;
+      }
+      return Math.sqrt(m);
+    };
+    let best = null, bd = -1;
+    const scan = (x0, y0, x1, y1, n) => {
+      for (let i = 0; i <= n; i++) for (let j = 0; j <= n; j++) {
+        const lo = x0 + (x1 - x0) * i / n, la = y0 + (y1 - y0) * j / n;
+        if (!inPoly(lo, la, poly)) continue;
+        const d = edge(lo, la); if (d > bd) { bd = d; best = [lo, la]; }
+      }
+    };
+    scan(b[0], b[1], b[2], b[3], 20);
+    if (best) { const w = (b[2] - b[0]) / 20, h = (b[3] - b[1]) / 20; scan(best[0] - w, best[1] - h, best[0] + w, best[1] + h, 8); }
+    const mid = inPoly(cx, cy, poly) ? edge(cx, cy) : -1;
+    return (poly.inner = best && bd > mid * 1.05 ? best : [cx, cy]);   // sin hueco interior (Antartida, rarezas): el centro de siempre
+  }
+
   /* ---------- distancia (km) de un punto al borde de un pais ---------- */
   function segDistKm(lon, lat, a, b) {
     const midLat = (a[1] + b[1]) / 2;
@@ -152,5 +181,5 @@ window.AIQ = window.AIQ || {};
     return { features, byName, all };
   }
 
-  A.geo = { D2R, R_KM, project, unproject, haversine, inFeature, distToFeature, buildWorld };
+  A.geo = { D2R, R_KM, project, unproject, haversine, inFeature, distToFeature, innerPoint, buildWorld };
 })(window.AIQ);

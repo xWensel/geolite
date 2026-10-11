@@ -812,7 +812,7 @@
     } else if (isC) {
       const f = world.byName[o.key];
       const big = f.polys.reduce((a, b) => ((b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) > (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) ? b : a));
-      span = [[big.bbox[0], big.bbox[1]], [big.bbox[2], big.bbox[3]]]; labelAt = [(big.bbox[0] + big.bbox[2]) / 2, (big.bbox[1] + big.bbox[3]) / 2];
+      span = [[big.bbox[0], big.bbox[1]], [big.bbox[2], big.bbox[3]]]; labelAt = A.geo.innerPoint(big).slice();   // dentro del territorio (el centro de la caja de Vietnam cae al mar)
       if (guess) km = A.geo.distToFeature(guess.lon, guess.lat, f);
     } else {
       ans = [o.lon, o.lat]; span = [ans];
