@@ -48,7 +48,7 @@ window.AIQ = window.AIQ || {};
         <h2 class="nm-sr" id="nmQ"></h2>
         <div class="nm-stage" id="nmStage"><i class="nm-beam">${motes}</i><i class="nm-pool"></i></div>
         <form class="nm-card" id="nmCard" autocomplete="off" novalidate>
-          ${A.bulbs()}
+          <i class="nm-bulbs" id="nmBulbs" aria-hidden="true"></i>
           <header class="nm-top"><span class="nm-ic">${A.icon("chip_r")}</span><b id="nmTitle"></b><em id="nmNo"></em></header>
           <div class="nm-field" id="nmField"><input id="nmIn" type="text" maxlength="${MAX}" spellcheck="false" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-describedby="nmHint"><i class="nm-shine"></i><b class="nm-stamp" id="nmStamp"></b></div>
           <div class="nm-meter" aria-hidden="true"><span class="nm-dots" id="nmDots">${"<i></i>".repeat(MAX)}</span><output id="nmN"></output></div>
@@ -63,9 +63,26 @@ window.AIQ = window.AIQ || {};
     inp.addEventListener("compositionend", () => typed(false));
     $("nmCard").addEventListener("submit", e => { e.preventDefault(); confirm(); });
     $("nmSkip").onclick = skip; $("nmNext").onclick = early;
+    if (window.ResizeObserver) new ResizeObserver(marquee).observe($("nmCard")); else marquee();
     /* fuera de la tarjeta: mientras pregunta, vuelve a la casilla; cuando ya ha contestado, cierra antes */
     root.addEventListener("pointerdown", e => { if (!st) return; if (st.phase === "done") { e.preventDefault(); early(); } else if (!e.target.closest(".nm-card")) { e.preventDefault(); focusIn(); } });
     return root;
+  }
+  /* la marquesina: un anillo de bombillas con las cuatro esquinas fijas y el resto repartido a partes iguales (nunca se solapan ni quedan cortadas);
+     el total es siempre par, asi que pares e impares alternan sin saltos alrededor de toda la tarjeta */
+  let lastBox = "";
+  function marquee() {
+    const card = $("nmCard"), ring = $("nmBulbs"); if (!card || !ring) return;
+    const w = card.offsetWidth, h = card.offsetHeight; if (!w || !h || w + "x" + h === lastBox) return;
+    lastBox = w + "x" + h;
+    const inset = parseFloat(getComputedStyle(ring).getPropertyValue("--bi")) || 14, pitch = 22;
+    const x0 = inset, y0 = inset, x1 = w - inset, y1 = h - inset, bw = x1 - x0, bh = y1 - y0;
+    const nw = Math.max(2, Math.round(bw / pitch)), nh = Math.max(2, Math.round(bh / pitch)), pts = [];
+    for (let i = 0; i < nw; i++) pts.push([x0 + bw * i / nw, y0]);        // arriba, de izquierda a derecha
+    for (let i = 0; i < nh; i++) pts.push([x1, y0 + bh * i / nh]);        // derecha, hacia abajo
+    for (let i = 0; i < nw; i++) pts.push([x1 - bw * i / nw, y1]);        // abajo, de derecha a izquierda
+    for (let i = 0; i < nh; i++) pts.push([x0, y1 - bh * i / nh]);        // izquierda, hacia arriba
+    ring.innerHTML = pts.map(p => `<i style="left:${p[0].toFixed(1)}px;top:${p[1].toFixed(1)}px"></i>`).join("");
   }
   const focusIn = () => { const i = $("nmIn"); if (i && st && st.phase === "ask") try { i.focus({ preventScroll: true }); } catch (e) { i.focus(); } };
   /* ya contestado: un clic o Intro cierran antes de tiempo, pero no en el primer segundo (un doble clic no se come su respuesta) */
