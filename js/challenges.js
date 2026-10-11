@@ -139,7 +139,7 @@ window.AIQ = window.AIQ || {};
   };
   const MISSING_CJK = [[["missing", 1]], [["missing", 2]], [["missing", 3]]];                    // en chino, japones y coreano no hay vocales: la mitad y dos tercios
   const lvOf = c => clamp(c.lv || 1, 1, 3);
-  const expand = list => list.flatMap(c => { const e = c.id === "missing" && NOLATIN() ? MISSING_CJK : EXPAND[c.id]; return e ? e[lvOf(c) - 1].map(([id, lv]) => ({ id, lv, of: c.id })) : [c]; });
+  const expand = list => list.flatMap(c => { const e = c.id === "missing" && NOLATIN() ? MISSING_CJK : EXPAND[c.id]; return e ? e[lvOf(c) - 1].map(([id, lv]) => ({ id, lv, of: c.id, mesa: c.mesa })) : [c]; });
   /* partidas guardadas y combinaciones de jefe con ids de antes: el reto que los absorbe (con su forma si la combinacion vive de ella) */
   const FORCE = { pangea: 2, deal: 3, mirrorx: 2, negative: 3, flaginvert: 3 };
   const canon = c => (D[c.id] && D[c.id].sub ? { ...c, id: D[c.id].sub, lv: FORCE[c.id] || c.lv } : c);
@@ -369,7 +369,10 @@ window.AIQ = window.AIQ || {};
     default: return {};
   } };
   const par = c => { const p = par0(c); if (c.m) for (const k in c.m) if (typeof p[k] === "number") p[k] *= c.m[k]; return p; };   // m: ratio sobre el nominal (jefes: valor exacto, con los amuletos multiplicando encima)
-  const cur = () => S.qlist || S.bl || S.list;                                  // los retos de ESTA pregunta (la ronda, con el suplente de Babel si toca)
+  /* RETOS DE LA MESA (js/adventure.js, A.adv.mesaCh): los que cambian COMO SE VE la pantalla se pintan en la capa global de la mesa (js/chfx.js,
+     X.mesaSet: por encima de todo y sobre todo el juego, tambien fuera de la partida). Aqui, en la ronda, se omiten para no pintarlos dos veces */
+  const GLOB = new Set(["blur", "myopia", "blindspot", "mosaic", "dark", "flicker", "lightning", "clouds", "rain", "stormnight", "crack", "smudge", "hang", "battery", "quake", "flagblur", "flaggray", "flaginvert", "flaghue", "flagdark"]);
+  const cur = () => { const l = S.qlist || S.bl || S.list; return S.mg ? l.filter(c => !(c.mesa && GLOB.has(c.id))) : l; };   // los retos de ESTA pregunta (la ronda, con el suplente de Babel si toca)
   const has = id => cur().some(c => c.id === id);
   const get = id => cur().find(c => c.id === id);
   const kindOn = k => cur().filter(c => D[c.id].kind === k);
@@ -1143,7 +1146,7 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ API */
   Object.assign(A.chal, {
     begin(list, fx, ctx = {}) {
-      this.end(); S.pub = list.map(canon); S.list = expand(S.pub); S.qlist = null; S.qsub = null; S.fx = fx || A.chal.fx([]); S.halve = ctx.halve || 1; S.seed = ctx.seed || "s"; S.round = ctx.round || 0; S.on = true; S.suspended = false; S.q = 0; S.fpSet = null; S.bk = ctx.boss || null; S.asc = ctx.asc || 0; S.topic = ctx.topic || null; S.cjk = !!ctx.cjk; S.bl = null; if (A.chfx && A.chfx.reset) A.chfx.reset(); if (A.jefes) A.jefes.begin();   // tanda 6: S.pub, los retos de la ronda; S.list, sus efectos
+      this.end(); S.pub = list.map(canon); S.list = expand(S.pub); S.mg = S.list.some(c => c.mesa && GLOB.has(c.id)); S.qlist = null; S.qsub = null; S.fx = fx || A.chal.fx([]); S.halve = ctx.halve || 1; S.seed = ctx.seed || "s"; S.round = ctx.round || 0; S.on = true; S.suspended = false; S.q = 0; S.fpSet = null; S.bk = ctx.boss || null; S.asc = ctx.asc || 0; S.topic = ctx.topic || null; S.cjk = !!ctx.cjk; S.bl = null; if (A.chfx && A.chfx.reset) A.chfx.reset(); if (A.jefes) A.jefes.begin();   // tanda 6: S.pub, los retos de la ronda; S.list, sus efectos
       S.map = A.core && A.core.map; if (S.map) ensureOverlay(S.map);
       /* retos que mueven continentes: su colocacion se deja calculada mientras se presenta la ronda (con el mapa ya quieto), no al empezar la pregunta */
       const LAYIDS = ["pangea", "spread", "tilt", "deal", "giants"], Ls = S.bk && BX[S.bk] ? [0, 1, 2, 3, 4].map(qi => [qi, bossQ(qi)]).filter(([, l]) => l.some(c => LAYIDS.includes(c.id))) : null;   // un jefe: la colocacion de CADA pregunta se deja calculada en la intro
@@ -1200,7 +1203,7 @@ window.AIQ = window.AIQ || {};
     live(list) {
       if (!S.on) return;
       const was = mapSig(cur());
-      S.pub = list.map(canon); S.list = expand(S.pub); S.qlist = null; S.qsub = null; S.fpSet = null;
+      S.pub = list.map(canon); S.list = expand(S.pub); S.mg = S.list.some(c => c.mesa && GLOB.has(c.id)); S.qlist = null; S.qsub = null; S.fpSet = null;
       const cs = A.core && A.core.S, o = cs && cs.qs && cs.qs[cs.qi];
       if (o && cs.phase === "asking" && !S.suspended) this.question(o, S.q, { calm: S.calm, keepMap: mapSig(cur()) === was });   // si lo que mueve el mapa no cambia, no se vuelve a repartir
     },
@@ -1214,6 +1217,7 @@ window.AIQ = window.AIQ || {};
     },
     /* Dividir (tanda 12b): el lugar alternativo bajo la placa, con los mismos retos de texto (ninguna de las dos se lee limpia) */
     decoAlt: (el, o) => { if (!S.on || S.suspended || !cur().some(c => D[c.id].kind === "text")) { el.textContent = A.tx(o.name); return; } deco(el, o, o.name, null, true); },
+    GLOB, parN: c => { const k = S.fx; S.fx = neutralFx(); try { return par(c); } finally { S.fx = k; } },   // parN: los parametros de la mesa, sin amuletos
     decorate, par, get, bossQ, inject, T16, tl: k => L6(T16[k]), hasBX: k => !!BX[k], fxNow: () => S.fx, suspended: () => S.suspended, cjkTail: CJK_TAIL, babelAlt,   // babelAlt y decoys: tambien para las pruebas
     decoys: (o, n) => decoyList(S.map || (A.core && A.core.map), o, n),
     /* nota del pie (Libro de la casa, Nota del crupier): con la Adivinanza en la placa, la nota sale tapada igual (si no, la resolvia al instante) */

@@ -285,7 +285,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       </div>
       <div class="print"><h1>La mesa del crupier</h1><p>La casa siempre gana · en directo desde Geolite</p><i class="line"></i></div>
       <div class="rack"><span class="lbl">Fichas · caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</span><div class="tray" id="tray"></div><span class="trayHint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></div>
-      <div class="rack retos"><span class="lbl">Retos del juego · los mismos de la Aventura: se montan en su pregunta y se quedan hasta que los quites</span><div class="rtabs" id="rtabs"></div><div class="rgrid" id="rgrid"></div><span class="trayHint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo<button class="rclear" id="rclear" type="button" disabled>Quitar todos</button></span></div>
+      <div class="rack retos"><span class="lbl">Retos del juego · los mismos de la Aventura. Lo visual (desenfoque, miopía, píxeles, batería, apagón…) cae sobre TODA su pantalla; el resto, en su pregunta</span><div class="rtabs" id="rtabs"></div><div class="rgrid" id="rgrid"></div><span class="trayHint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo<button class="rclear" id="rclear" type="button" disabled>Quitar todos</button></span></div>
       <div class="seats" id="list"></div>
     </div></div></div>
 
@@ -454,7 +454,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     tabs.innerHTML = RK.map(([k, n]) => { const c = RETOS.filter(r => r[2] === k && C[r[0]]).length; return `<button class="rtab${k === rtab ? " on" : ""}" type="button" data-k="${k}">${n}${c ? `<i>×${c}</i>` : ""}</button>`; }).join("");
     tabs.querySelectorAll(".rtab").forEach(b => b.onclick = () => { rtab = b.dataset.k; paintRetos(); });
     grid.innerHTML = RETOS.filter(r => r[2] === rtab).map(([id, n, k, ico, d, lv]) => {
-      const v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nSolo se nota en preguntas de bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
+      const v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nAfecta a TODA la pantalla, no solo a la bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
       return `<button class="rc${v ? " lit" : ""}" type="button" data-id="${id}" title="${esc(tip)}"${sel ? "" : " disabled"}><img src="../assets/icons/${ico}.webp" alt=""><span>${esc(n)}</span><b>${pips(v)}</b></button>`;
     }).join("");
     grid.querySelectorAll(".rc").forEach(c => {
@@ -474,7 +474,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     try {
       const j = await call("POST", { op: "ch", sid: sel, ch: id, v: n });
       if (!(j.ok && j.live)) toast("Esa partida ya se ha cerrado.");
-      else toast(n ? `${r[1]}: nivel ${n}${r[2] === "flag" ? " (solo en banderas)" : RNOTE[id] ? " (" + RNOTE[id] + ")" : ""}` : `${r[1]}: quitado.`, 1800);
+      else toast(n ? `${r[1]}: nivel ${n}${RNOTE[id] ? " (" + RNOTE[id] + ")" : ""}` : `${r[1]}: quitado.`, 1800);
     } catch (e) { toast("Sin conexión: el reto no ha salido."); }
   }
   async function retoClear() {

@@ -58,13 +58,13 @@ body.ptr-on #map { cursor: none; }
 .cr-cv { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); image-rendering: pixelated; pointer-events: none; }
 .cr-cv.mini { transform: none; }
 .dl-bubble { position: relative; max-width: min(440px, calc(52 * var(--vw))); margin-bottom: 44px; padding: 11px 18px 13px 16px; background: #fdf5fd; color: #16241c; font-family: var(--sans); font-weight: 400; font-size: calc(27px * var(--dll, 1)); line-height: 1.12; box-shadow: inset 0 0 0 3px #16241c, 0 6px 0 rgba(0, 0, 0, .4); opacity: 0; transform: scale(.85); transform-origin: 0 100%; transition: opacity .2s, transform .3s cubic-bezier(.2, 1.6, .4, 1); clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); }
-.dl-bubble.on { opacity: 1; transform: none; } .dl-bubble p { margin: 0; min-height: 1.12em; text-wrap: pretty; } .dl-rest { visibility: hidden; }
+.dl-bubble.on { opacity: 1; transform: none; } .dl-bubble p { margin: 0; min-height: 1.12em; text-wrap: pretty; transition: height .2s cubic-bezier(.2, .9, .3, 1); }   /* crece renglon a renglon al escribir (js/dealer.js) */ .dl-rest { visibility: hidden; }
 /* EN DIRECTO (js/vivo.js): el autor escribe por el crupier. Piloto de estudio de television: cuadrado rojo de pixel que parpadea a golpes y la etiqueta en Silkscreen a 16 px (su rejilla) */
 .dl-live { display: none; align-items: center; gap: 7px; margin: 1px 0 6px; font-family: var(--mono); font-weight: 400; font-size: 16px; line-height: 1; letter-spacing: .02em; color: #c4152a; text-transform: uppercase; white-space: nowrap; }
 .dl-bubble.live .dl-live { display: flex; } .dl-bubble.live p { text-wrap: balance; }   /* lo escrito a mano no tiene el reparto cuidado de sus frases: lineas parejas, nada de una palabra sola abajo */
 .dl-live i { width: 8px; height: 8px; flex: none; background: #e8283a; box-shadow: 0 0 0 2px rgba(232, 40, 58, .22); animation: dlLive 1.2s steps(1) infinite; }
 @keyframes dlLive { 0%, 64% { opacity: 1; } 65%, 100% { opacity: .18; } }
-html.reduce-motion .dl-live i { animation: none; }
+html.reduce-motion .dl-live i { animation: none; } html.reduce-motion .dl-bubble p { transition: none; }
 /* el crupier habla con la letra de lectura del juego (Jersey 15, la de los titulos y nombres), no con la de etiquetas (Silkscreen, todo mayusculas):
    27 px = 1 pixel de la fuente por pixel de pantalla (su rejilla es de 27 px), nitida. El chino/japones/coreano (Fusion Pixel, rejilla de 12 px) va a 24 px
    (x2 exacto) y el cirilico (Pixelify, mas alta que Jersey) tambien, para que no abulte mas que el resto. --dll escala todas las variantes del globo */
@@ -519,6 +519,15 @@ html.reduce-motion .ch-chip .ch-amu.slam { animation: none; }
 #vivoFx > .chx-gl, #vivoFx > .chx-2d { transition: none; }
 #vivoFx > .chx-wins { opacity: 1; }
 #vivoFx > .hm-cv { transition: opacity .8s ease; }
+/* los retos de la mesa que cambian COMO SE VE todo el juego (js/chfx.js, X.mesaSet): capas con backdrop-filter al fondo de #vivoFx, sobre cualquier pantalla */
+#vivoFx > .mx-blur { -webkit-backdrop-filter: blur(var(--mxb, 0px)); backdrop-filter: blur(var(--mxb, 0px)); }
+#vivoFx > .mx-myo { --mxb: 6px; -webkit-backdrop-filter: blur(var(--mxb)); backdrop-filter: blur(var(--mxb));
+  -webkit-mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), transparent calc(var(--mr, 150px) - 14px), #000 calc(var(--mr, 150px) + 46px));
+  mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), transparent calc(var(--mr, 150px) - 14px), #000 calc(var(--mr, 150px) + 46px)); }
+#vivoFx > .mx-tone { -webkit-backdrop-filter: var(--mxf, grayscale(0)); backdrop-filter: var(--mxf, grayscale(0)); }
+#vivoFx > .mx-tone.hue { animation: mx-hue 3.4s ease-in-out infinite alternate; }
+@keyframes mx-hue { from { -webkit-backdrop-filter: var(--mxf, grayscale(0)) hue-rotate(0deg); backdrop-filter: var(--mxf, grayscale(0)) hue-rotate(0deg); } to { -webkit-backdrop-filter: var(--mxf, grayscale(0)) hue-rotate(var(--hd, 90deg)); backdrop-filter: var(--mxf, grayscale(0)) hue-rotate(var(--hd, 90deg)); } }
+html.reduce-motion #vivoFx > .mx-tone.hue { animation: none; }
 
 /* LA CAMARA DEL CRUPIER (js/vivo.js): el piloto de arriba mientras la mesa del autor ve la ventana del juego, y su mano (25x37 de su sprite, escala entera) */
 #vivoEye { position: fixed; left: 50%; top: 10px; z-index: 2147483100; display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 2px; background: rgba(10, 14, 12, .88); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .65), 0 4px 0 rgba(0, 0, 0, .4); font-family: var(--mono); font-size: 16px; line-height: 1; color: #ff8a93; text-transform: uppercase; white-space: nowrap; pointer-events: none; transform: translate(-50%, -70px); transition: transform .45s cubic-bezier(.2, 1.4, .4, 1); }

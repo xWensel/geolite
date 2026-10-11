@@ -322,6 +322,9 @@ window.AIQ = window.AIQ || {};
     run.boss = rules;
     if (!rules.includes("wind")) run.wind = null; else if (!run.wind) run.wind = { brg: Math.floor(Math.random() * 360), km: 160 + 40 * run.act };
   };
+  /* lo que cambia COMO SE VE la pantalla (desenfoque, miopia, pixeles, bateria, apagon, lluvia, cristal...) se pinta en la capa global de la mesa
+     (js/chfx.js, X.mesaSet): por encima de todo y en cualquier pantalla, con o sin ronda en marcha */
+  const mesaGlobal = () => { if (A.chfx && A.chfx.mesaSet && A.chal.GLOB) A.chfx.mesaSet(A.chal.expand(mesaItems()).filter(c => A.chal.GLOB.has(c.id)), A.chal.parN); };
   A.adv.mesaState = () => mesa.map(c => c.id + ":" + c.lv).join(",");
   A.adv.mesaOn = () => mesa.length > 0;
   A.adv.mesaCh = (id, lv) => {
@@ -330,6 +333,7 @@ window.AIQ = window.AIQ || {};
       const d = A.CHAL[id]; if (!d || d.sub || d.boss) return;
       mesa = mesa.filter(c => c.id !== id); lv = clamp(lv | 0, 0, 3); if (lv) mesa.push({ id, lv });
     }
+    mesaGlobal();
     if (!run || run.phase !== "round") return;                         // en el Campamento o en los menus: lo toma la ronda que empiece
     run.chal = withMesa(run.chalBase || (run.chal || []).filter(c => !c.mesa)); mesaRules();
     const Lv = C().S.camp && C().S.camp.levels && C().S.camp.levels[0], st = run.chal.find(c => c.id === "storm");   // Contrarreloj: el reloj de lo que queda de la pregunta y de las siguientes

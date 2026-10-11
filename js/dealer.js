@@ -1730,19 +1730,35 @@ window.AIQ = window.AIQ || {};
        salta de linea a media escritura (y `text-wrap: pretty` reparte las lineas sin dejar una palabra sola) */
     sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest"; rest.textContent = text + ZW; txt.replaceChildren(sofar, rest);
     fitCorner(); spr.fit(); spr.shown(true); spr.talk(true);
+    /* el globo crece renglon a renglon al escribir (la frase ya esta maquetada y oculta, asi que ninguna palabra salta): se mide una sola vez
+       a que renglon cae cada letra y luego solo se sube la altura del parrafo cuando empieza uno nuevo (sin leer el layout por letra) */
+    txt.style.height = ""; let lineOf = null, lineH = 0, nLines = 1, shown = -1;
+    try {
+      const tn = rest.firstChild, hp = txt.offsetHeight, pr = txt.getBoundingClientRect(), k = hp && pr.height ? pr.height / hp : 0;
+      if (tn && k) {
+        const rg = document.createRange(), tops = [], lo = []; let a0 = 0;
+        for (const ch of text) { rg.setStart(tn, a0); rg.setEnd(tn, a0 + ch.length); const r = rg.getClientRects()[0]; lo.push(r && r.height ? Math.round((r.top - pr.top) / k) : null); a0 += ch.length; }
+        lo.forEach(t => { if (t != null && !tops.some(u => Math.abs(u - t) < 3)) tops.push(t); }); tops.sort((x, y) => x - y);
+        let cur = 0; lineOf = lo.map(t => (t == null ? cur : (cur = tops.findIndex(u => Math.abs(u - t) < 3))));
+        nLines = tops.length || 1; lineH = hp / nLines;
+        if (nLines < 2) lineOf = null;                                       // una sola linea: nada que crecer
+      }
+    } catch (e) { lineOf = null; }
+    const grow = i => { if (!lineOf) return; const l = lineOf[i] || 0; if (l <= shown) return; shown = l; txt.style.height = lineH * (l + 1) + "px"; };
+    grow(0);
     if (mood === "laugh") A.sfx.laugh && A.sfx.laugh();
     let i = 0, at = 0; const chars = [...text], step = mood === "laugh" ? 44 : 34;
     const tick = () => {
       if (!el.isConnected) { rehome(); fitCorner(); }                        // otra pantalla sustituyo la suya: termina la frase en la esquina (antes se callaba a media frase)
       if (i >= chars.length) {
-        typing = false; doneAt = Date.now(); el.classList.add("done"); spr.talk(false); later(() => spr.release(), LINGER);   // un gesto sostenido dura su frase y su segundo de mas
+        typing = false; doneAt = Date.now(); txt.style.height = ""; el.classList.add("done"); spr.talk(false); later(() => spr.release(), LINGER);   // un gesto sostenido dura su frase y su segundo de mas
         if (cornerTaken(o) && !leaving) { if (!pend && o.done && released !== me) later(o.done, LINGER); grantCorner(); later(giveCorner, LINGER); return; }   // el monton de tarjetas espera la esquina: sale ya, y el se aparta tras su segundo de mas (lo pendiente espera al monton)
         if (pend) { later(flush, LINGER); return; }
         if (leaving) { later(finishLeave, LINGER); return; }                  // se iba: acaba, su segundo de mas, y se va (sin encadenar nada detras)
         if (o.hold !== 0) later(() => D.hide(), (o.hold || 1800 + text.length * 22) + LINGER);
         if (o.done && released !== me) later(o.done, LINGER); return;
       }
-      sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
+      grow(i); sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
     };
     typing = true; tick(); D.busy = true;
   };
