@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   let b; try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch (e) { return res.status(400).json({ ok: false, reason: "json" }); }
   if (!b || typeof b !== "object") b = {};                             // "null", un numero...: se rechaza abajo como invalido (antes b.board reventaba)
   const board = String(b.board || ""), id = String(b.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 24), daily = /^daily-/.test(board), dayB = /^(day|advd)-/.test(board);
-  const name = [...String(b.name || "").normalize("NFC").replace(/[^\p{L}\p{N} _.'\-]/gu, "").replace(/\s+/g, " ").trim()].slice(0, 20).join("").trim() || "Anonymous";   // el mismo filtro que A.profile.clean (hasta 20)
+  const name = [...String(b.name || "").normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1").trim()].slice(0, 16).join("").trim() || "Anonymous";   // el mismo filtro que A.profile.clean (hasta 16)
   const tries = daily ? (Array.isArray(b.tries) ? b.tries : [b.score]).slice(0, 3).map(v => Math.floor(+v)) : [];
   const score = daily ? 0 : Math.floor(+b.score);
   if (!kv.BOARD.test(board) || !id) return res.status(400).json({ ok: false, reason: "invalid" });

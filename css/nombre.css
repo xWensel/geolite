@@ -80,9 +80,9 @@
 .nm.signed .nm-stamp { animation: nm-stamp .34s cubic-bezier(.3, 1.5, .5, 1) .04s forwards; }
 @keyframes nm-stamp { to { opacity: 1; transform: var(--st) scale(1); } }
 
-/* 20 bombillas: una por caracter (rojas al llegar al tope) */
+/* 16 bombillas: una por caracter (rojas al llegar al tope) */
 .nm-meter { display: flex; align-items: center; gap: 12px; margin: 0 2px; }
-.nm-dots { flex: 1; display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 5px; }
+.nm-dots { flex: 1; display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 5px; }
 .nm-dots i { justify-self: center; width: 100%; max-width: 12px; aspect-ratio: 1; border-radius: 50%; background: #0b1d15; box-shadow: inset 0 0 0 1.5px rgba(255, 217, 138, .26); transition: background .12s, box-shadow .12s, transform .15s; }
 .nm-dots i.on { background: radial-gradient(circle at 35% 30%, #fffbe8, #ffd98a 45%, #f8b449); box-shadow: 0 0 7px rgba(255, 200, 90, .9); }
 .nm-dots i.pop { animation: nm-dot .22s ease-out; } @keyframes nm-dot { 40% { transform: scale(1.45); } }

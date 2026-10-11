@@ -31,8 +31,10 @@ window.AIQ = window.AIQ || {};
   }
 
   /* nombre con el que rankeas (v0.37): letras de cualquier alfabeto, cifras, espacio y _ . - ' (lo mismo que acepta api/submit.js), hasta 20 */
-  const NAME_MAX = 20;
-  const clean = n => [...String(n || "").normalize("NFC").replace(/[^\p{L}\p{N} _.'\-]/gu, "").replace(/\s+/g, " ").trimStart()].slice(0, NAME_MAX).join("");
+  const NAME_MAX = 16;
+  /* solo letras de los alfabetos del juego (latino, cirilico, griego, han, kana, hangul), cifras, espacio y _ . ' - ; fuera los rellenos
+     invisibles (hangul U+115F/1160/3164/FFA0), emojis y simbolos; no empieza por signo ni repite signos (el mismo filtro en api/submit.js y api/duelo.js) */
+  const clean = n => [...String(n || "").normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1")].slice(0, NAME_MAX).join("");
   A.profile = {
     get: () => P, save, NAME_MAX, clean,
     /* guarda el nombre y lo apunta en P.nameLog (los que ya has usado: el crupier "ya te conoce" si vuelves a uno) */

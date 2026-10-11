@@ -25,7 +25,7 @@ const TTL = 3600, START_IN = 1200, GRACE = 1500, GONE = 15000;
 const AB = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const CODE = /^[A-HJKMNP-Z2-9]{5}$/, PID = /^[a-z0-9]{10,24}$/, TABLE = /^[a-z]{2,12}$/, VER = /^[\w.\-/]{1,48}$/, ROUND = /^(s|c|u|x|r|a|q):/;
 const rnd = n => { const b = crypto.randomBytes(n); let s = ""; for (let i = 0; i < n; i++) s += AB[b[i] % AB.length]; return s; };
-const clean = v => [...String(v == null ? "" : v).normalize("NFC").replace(/[^\p{L}\p{N} _.'\-]/gu, "").replace(/\s+/g, " ").trim()].slice(0, 20).join("").trim();   // el mismo filtro que la clasificacion (api/submit.js)
+const clean = v => [...String(v == null ? "" : v).normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1").trim()].slice(0, 16).join("").trim();   // el mismo filtro que la clasificacion (api/submit.js)
 const int = (v, a, b) => { v = Math.floor(+v); return Number.isFinite(v) && v >= a && v <= b ? v : null; };
 const key = c => "duelo:" + c;
 const obj = a => { const o = {}; if (Array.isArray(a)) for (let i = 0; i + 1 < a.length; i += 2) o[a[i]] = String(a[i + 1]); else if (a && typeof a === "object") for (const k in a) o[k] = String(a[k]); return o; };

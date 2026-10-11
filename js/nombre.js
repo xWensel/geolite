@@ -1,6 +1,6 @@
 /*
  * Geolite - TU NOMBRE (v0.37). Al acabar tu primera partida sin nombre (Clasico, Aventura o Reto diario), la sala se apaga, el crupier se asoma
- * bajo un foco y te pregunta "¿Como quieres que te llame?": su tarjeta de socio, con hueco para 20 caracteres. Ese es tu nombre en la
+ * bajo un foco y te pregunta "¿Como quieres que te llame?": su tarjeta de socio, con hueco para 16 caracteres. Ese es tu nombre en la
  * clasificacion (A.rank.rename lo lleva a las tablas) y el crupier lo usa, muy de vez en cuando, para llamarte (js/dealer.js, "tu nombre").
  * Despues solo se cambia en Ajustes > General (el Reto diario no tiene casilla de nombre). Si prefieres no darlo, pregunta como mucho una vez por sesion:
  * vuelve a preguntar al acabar una partida en otra sesion, y tras 3 "Ahora no" ya no pregunta mas.
@@ -10,7 +10,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const $ = id => document.getElementById(id), C = () => A.core, P = () => A.profile.get();
-  const MAX = A.profile.NAME_MAX || 20, clean = v => A.profile.clean(v), t6 = s => A.pick6(s);
+  const MAX = A.profile.NAME_MAX || 16, clean = v => A.profile.clean(v), t6 = s => A.pick6(s);
   const dev = /skipboot/.test(location.search) && !/[?&]name\b/.test(location.search);       // las pruebas automaticas no lo activan (como el tutorial)
 
   /* textos: es | en | fr | pt | de | it | es-419 | zh | ko | ja | ru | pl */
@@ -26,7 +26,7 @@ window.AIQ = window.AIQ || {};
     next: "Continuar|Continue|Continuer|Continuar|Weiter|Continua||继续|계속|続ける|Продолжить|Dalej",
     anon: "Anónimo|Anonymous|Anonyme|Anônimo|Anonym|Anonimo||匿名|익명|匿名|Аноним|Anonim",
     setH: "Tu nombre|Your name|Ton nom|Seu nome|Dein Name|Il tuo nome||你的名字|이름|名前|Твоё имя|Twoje imię",
-    setD: "El crupier te llama así y es tu nombre en la clasificación. Hasta 20 caracteres.|The dealer calls you this, and it's your leaderboard name. Up to 20 characters.|Le croupier t'appelle ainsi, et c'est ton nom au classement. 20 caractères max.|O crupiê te chama assim, e é o seu nome no placar. Até 20 caracteres.|So nennt dich der Croupier, und so heißt du in der Rangliste. Bis zu 20 Zeichen.|Il croupier ti chiama così ed è il tuo nome in classifica. Fino a 20 caratteri.||荷官这样称呼你，这也是你在排行榜上的名字。最多 20 个字符。|딜러가 부르는 이름이자 리더보드 이름이야. 최대 20자.|ディーラーが呼ぶ名前で、ランキングの名前にもなる。最大20文字。|Так тебя зовёт крупье, и это твоё имя в таблице. До 20 символов.|Tak nazywa cię krupier i tak widnieje twoje imię w rankingu. Do 20 znaków.",
+    setD: "El crupier te llama así y es tu nombre en la clasificación. Hasta 16 caracteres.|The dealer calls you this, and it's your leaderboard name. Up to 16 characters.|Le croupier t'appelle ainsi, et c'est ton nom au classement. 16 caractères max.|O crupiê te chama assim, e é o seu nome no placar. Até 16 caracteres.|So nennt dich der Croupier, und so heißt du in der Rangliste. Bis zu 16 Zeichen.|Il croupier ti chiama così ed è il tuo nome in classifica. Fino a 16 caratteri.||荷官这样称呼你，这也是你在排行榜上的名字。最多 16 个字符。|딜러가 부르는 이름이자 리더보드 이름이야. 최대 16자.|ディーラーが呼ぶ名前で、ランキングの名前にもなる。最大16文字。|Так тебя зовёт крупье, и это твоё имя в таблице. До 16 символов.|Tak nazywa cię krupier i tak widnieje twoje imię w rankingu. Do 16 znaków.",
     saved: "Guardado|Saved|Enregistré|Salvo|Gespeichert|Salvato||已保存|저장됨|保存しました|Сохранено|Zapisano",
   };
   /* numero de socio: sale de tu id, siempre el mismo */
@@ -71,7 +71,7 @@ window.AIQ = window.AIQ || {};
   /* ya contestado: un clic o Intro cierran antes de tiempo, pero no en el primer segundo (un doble clic no se come su respuesta) */
   const early = () => { if (st && st.phase === "done" && Date.now() - st.doneAt > 900) close(); };
 
-  /* las bombillas de la tarjeta cuentan los caracteres (rojas al llegar a 20) */
+  /* las bombillas de la tarjeta cuentan los caracteres (rojas al llegar a 16) */
   function meter(n) {
     const dots = $("nmDots"); if (!dots) return;
     [...dots.children].forEach((d, i) => d.classList.toggle("on", i < n));
@@ -149,7 +149,7 @@ window.AIQ = window.AIQ || {};
     if (st.phase !== "ask" && st.phase !== "in") { if (!e.repeat && (e.key === "Enter" || e.key === "Escape" || e.key === " ")) { e.preventDefault(); early(); } return; }
     if (e.key === "Escape") { e.preventDefault(); skip(); return; }
     const inp = $("nmIn"), t = e.target;
-    if (t === inp) {                                                          // ya hay 20: la tecla no entra y se nota
+    if (t === inp) {                                                          // ya hay 16: la tecla no entra y se nota
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing && len(inp.value) >= MAX && inp.selectionStart === inp.selectionEnd) nope();
       return;
     }
