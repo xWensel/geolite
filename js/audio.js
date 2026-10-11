@@ -530,24 +530,6 @@ window.AIQ = window.AIQ || {};
       thump(t + 0.2, { vol: 0.1, f0: 90, f1: 45, dur: 0.12 });
     }),
     chip: go((t, k = 0) => { bell(84 + Math.round(k * 7), t, { vol: 0.05, dur: 0.25, rev: 0.2 }); noise(t, 0.01, { hp: 5000, vol: 0.04 }); }),
-    /* zoom sensorial: silbido de aire continuo cuyo tono y volumen siguen la velocidad del zoom */
-    zoomVel: (() => {
-      let src = null, gain = null, filt = null;
-      return (zv, pan) => {
-        if (!ctx) return;
-        if (!A.audio.sfxOn) { if (gain) gain.gain.setTargetAtTime(0, ctx.currentTime, 0.06); return; }   // efectos apagados (tecla M) a media rueda: el silbido no se queda sonando
-        if (!src) {
-          const n = ctx.sampleRate * 2, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
-          for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-          src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
-          filt = ctx.createBiquadFilter(); filt.type = "bandpass"; filt.Q.value = 0.9; filt.frequency.value = 500;
-          gain = ctx.createGain(); gain.gain.value = 0; src.connect(filt).connect(gain).connect(sfxBus); src.start();
-        }
-        const a = Math.min(1, Math.abs(zv) / 3.2 + Math.min(0.35, pan / 2600)), t = ctx.currentTime;
-        gain.gain.setTargetAtTime(a * 0.045, t, 0.06);
-        filt.frequency.setTargetAtTime(380 + a * 2400 + (zv > 0 ? 500 : 0), t, 0.07);
-      };
-    })(),
     /* feedback de sliders: el tono sube con el valor (0..1) */
     blip: go((t, v) => pluck(scaleNote(Math.round(v * 9), 67), t, { vol: 0.09, dur: 0.16, bright: 3, rev: 0.15 })),
     /* interruptores: clic seco de palanca */

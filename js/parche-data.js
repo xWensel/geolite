@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.82",
+      name: L("Sin siseo", "No hiss", "Sans sifflement", "Sem chiado", "Ohne Zischen", "Senza sibilo", "", "没有嘶嘶声", "쉬익 소리 없음", "シューという音なし", "Без шипения", "Bez syczenia"),
+      date: "2026-10-11",
+      summary: L("Fuera el «pshhh» de fondo: el mapa en movimiento ya no hace sonar un silbido de aire.", "The background “pshhh” is gone: a moving map no longer makes an air whistle sound.", "Fini le « pshhh » de fond : la carte en mouvement ne fait plus siffler l'air.", "Acabou o «pshhh» de fundo: o mapa em movimento já não faz soar um assobio de ar.", "Das «Pshhh» im Hintergrund ist weg: Eine bewegte Karte erzeugt kein Luftpfeifen mehr.", "Via il «pshhh» di fondo: la mappa in movimento non fa più suonare un sibilo d'aria.", "", "背景里的“嘶嘶”声没有了：地图移动时不再发出风声。", "배경의 ‘쉬익’ 소리가 사라졌습니다. 지도가 움직여도 더 이상 바람 소리가 나지 않아요.", "背景の「シュー」という音を消しました。マップが動いても風の音は鳴りません。", "Фоновое «пшш» исчезло: движущаяся карта больше не свистит воздухом.", "Tło «pssst» zniknęło: poruszająca się mapa nie wydaje już świstu powietrza."),
+      chapters: [
+        { id: "sonido", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Sin siseo", "No hiss", "Sans sifflement", "Sem chiado", "Ohne Zischen", "Senza sibilo", "", "没有嘶嘶声", "쉬익 소리 없음", "シューという音なし", "Без шипения", "Bez syczenia"),
+          entries: [
+            E(L("Sin siseo", "No hiss", "Sans sifflement", "Sem chiado", "Ohne Zischen", "Senza sibilo", "", "没有嘶嘶声", "쉬익 소리 없음", "シューという音なし", "Без шипения", "Bez syczenia"), "fix", "0.3.82", [
+              L("El silbido de aire que seguía al mapa cuando se movía o se acercaba (al volver a casa tras un duelo, por ejemplo) era un ruido de fondo molesto. Se ha quitado: ahora el mapa se mueve en silencio.", "The air whistle that followed the map as it moved or zoomed (when returning home after a duel, for instance) was an annoying background noise. It's gone: the map now moves in silence.", "Le sifflement d'air qui suivait la carte quand elle bougeait ou zoomait (en rentrant après un duel, par exemple) était un bruit de fond gênant. Il a disparu : la carte bouge désormais en silence.", "O assobio de ar que seguia o mapa quando ele se movia ou aproximava (ao voltar para casa depois de um duelo, por exemplo) era um ruído de fundo incômodo. Foi removido: agora o mapa se move em silêncio.", "Das Luftpfeifen, das der Karte beim Bewegen oder Zoomen folgte (etwa bei der Rückkehr nach einem Duell), war ein lästiges Hintergrundgeräusch. Es ist weg: Die Karte bewegt sich jetzt lautlos.", "Il sibilo d'aria che seguiva la mappa quando si muoveva o zoomava (per esempio tornando a casa dopo un duello) era un fastidioso rumore di fondo. È stato tolto: ora la mappa si muove in silenzio.", "", "地图移动或缩放时（比如决斗结束回到主页时）跟随的风声是一种恼人的背景噪音。现已去掉：地图现在静音移动。", "지도가 움직이거나 확대될 때(예: 결투를 마치고 돌아갈 때) 따라오던 바람 소리는 거슬리는 배경 소음이었습니다. 없앴습니다. 이제 지도는 조용히 움직입니다.", "マップが動いたりズームしたりするとき（たとえば決闘のあとホームに戻るとき）に付いてくる風の音は、耳障りな背景ノイズでした。取り除きました。マップは静かに動きます。", "Свист воздуха, сопровождавший движение и приближение карты (например, при возврате домой после дуэли), был неприятным фоновым шумом. Его убрали: теперь карта движется тихо.", "Świst powietrza towarzyszący ruchowi i przybliżaniu mapy (na przykład przy powrocie do domu po pojedynku) był irytującym szumem w tle. Usunięto go: mapa porusza się teraz bezgłośnie."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.81",
       name: L("Flechas y Mayús", "Arrows and Shift", "Flèches et Maj", "Setas e Shift", "Pfeile und Umschalt", "Frecce e Maiusc", "", "方向键和 Shift", "화살표와 Shift", "矢印キーと Shift", "Стрелки и Shift", "Strzałki i Shift"),
       date: "2026-10-11",

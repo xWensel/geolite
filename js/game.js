@@ -482,9 +482,7 @@
     lastHover = el;
   });
 
-  /* ------------------------------------------------------------ movimiento de camara -> sonido */
-  let zsT = 0;
-  map.onMotion = (zv, pan) => { const now = performance.now(); if (now - zsT < 33) return; zsT = now; A.sfx.zoomVel(zv, pan); };
+  /* el mapa en movimiento no suena: el silbido de aire que seguia al zoom era un "pshhh" de fondo (fuera) */
 
   /* ------------------------------------------------------------ carril de zoom */
   let zT = 0;
