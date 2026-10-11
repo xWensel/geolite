@@ -136,6 +136,47 @@ window.AIQ = window.AIQ || {};
     if (m.t === "tap") { gEl.classList.remove("tap"); void gEl.offsetWidth; gEl.classList.add("tap"); const im = gEl.firstChild; [[66, 1], [167, 0], [242, 1], [343, 0]].forEach(([t, on]) => setTimeout(() => { im.src = `assets/icons/vivo_hand${on ? "_tap" : ""}.webp`; }, t)); if (A.sfx && A.sfx.knock) { A.sfx.knock(); setTimeout(() => A.sfx.knock(), 170); } }
     clearTimeout(gHide); gHide = setTimeout(() => glove(null), m.t === "tap" ? 3500 : 5000);
   }
+  /* CONTROLES INVERTIDOS FUERA DE LA PREGUNTA (reto "cmirror" puesto desde la mesa, js/adventure.js): en la pregunta ya lo hace el puntero del mapa
+     (js/pointer.js); en menus, Campamento, casino o la revelacion no hay mapa que invierta nada, asi que aqui el raton real se esconde, se dibuja
+     uno espejado y los clics van a donde esta el falso (pointer*, mouse*, click, contextmenu). Nivel 1: izquierda-derecha; 2: arriba-abajo; 3: los dos.
+     El hover de CSS no puede seguir al falso (no es el raton de verdad); los controles de arrastrar (deslizadores) no funcionan mientras dura. */
+  const INV = { lv: 0, x: innerWidth / 2, y: innerHeight / 2, el: null, shown: false, poll: 0 };
+  const invRound = () => !!(A.chal && A.chal.state && A.chal.state.on && A.core && A.core.S && A.core.S.phase === "asking");   // preguntando: manda el puntero del mapa
+  const invOn = () => INV.lv > 0 && !invRound();
+  const invPos = (x, y) => [INV.lv !== 2 ? innerWidth - x : x, INV.lv >= 2 ? innerHeight - y : y];
+  function invCursor() {
+    if (INV.el) return INV.el;
+    const rows = ["X...........", "XX..........", "XOX.........", "XOOX........", "XOOOX.......", "XOOOOX......", "XOOOOOX.....", "XOOOOOOX....", "XOOOOOOOX...", "XOOOOXXXXX..", "XOXXOX......", "XX.XOOX.....", "X..XOOX.....", "....XOOX....", "....XOOX....", ".....XX....."];
+    const c = document.createElement("canvas"); c.width = 12; c.height = 16; const g = c.getContext("2d");
+    rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== ".") { g.fillStyle = ch === "X" ? "#0b1410" : "#fff8e6"; g.fillRect(x, y, 1, 1); } }));
+    const el = INV.el = document.createElement("div"); el.id = "vivoCur"; el.setAttribute("aria-hidden", "true");
+    el.style.backgroundImage = `url(${c.toDataURL()})`; document.body.appendChild(el);
+    return el;
+  }
+  function invSync() {                                                // muestra o esconde el raton falso segun si toca (no en la pregunta)
+    const on = invOn(), el = invCursor();
+    if (on !== INV.shown) { INV.shown = on; document.documentElement.classList.toggle("vivo-inv", on); el.classList.toggle("on", on); }
+    if (on) { const [x, y] = invPos(INV.x, INV.y); el.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`; }
+  }
+  const invFire = (type, e, x, y, el) => {
+    const P = /^pointer/.test(type), o = { bubbles: true, cancelable: true, composed: true, view: window, clientX: x, clientY: y, screenX: e.screenX, screenY: e.screenY, button: e.button, buttons: e.buttons, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, metaKey: e.metaKey, detail: e.detail };
+    if (P) { o.pointerId = e.pointerId; o.pointerType = e.pointerType; o.isPrimary = true; }
+    el.dispatchEvent(new (P ? PointerEvent : MouseEvent)(type, o));
+  };
+  ["pointermove", "mousemove", "pointerdown", "pointerup", "mousedown", "mouseup", "click", "dblclick", "contextmenu", "auxclick"].forEach(type => addEventListener(type, e => {
+    if (!e.isTrusted || !INV.lv) return;
+    if (/move$/.test(type) && /^pointer/.test(type)) { INV.x = e.clientX; INV.y = e.clientY; invSync(); }
+    if (!invOn()) return;
+    e.stopImmediatePropagation(); if (e.cancelable) e.preventDefault();
+    const [x, y] = invPos(INV.x = e.clientX, INV.y = e.clientY), el = document.elementFromPoint(x, y); if (!el) return;
+    invFire(type, e, x, y, el);
+    if (type === "mousedown") { const f = el.closest("input,textarea,select,button,a[href],[tabindex]"); if (f && f.focus) f.focus({ preventScroll: true }); }
+  }, true));
+  function invert(lv) {
+    INV.lv = lv > 0 ? Math.min(3, lv | 0) : 0; clearInterval(INV.poll);
+    if (INV.lv) INV.poll = setInterval(invSync, 400); else { INV.shown = true; }
+    invSync();
+  }
   function hand(data) { let m; try { m = JSON.parse(data); } catch (e) { return; } if (!m || !pc) return; if (m.t === "hide") glove(null); else if (m.t === "tap" || m.t === "move") glove(m); }
 
   const bye = () => { if (!URL_) return; try { navigator.sendBeacon(URL_, JSON.stringify({ sid, bye: 1 })); } catch (e) { /* da igual: caduca en 75 s */ } };
@@ -165,7 +206,7 @@ window.AIQ = window.AIQ || {};
     const sw = c.querySelector(".sw"); sw.setAttribute("aria-checked", on()); sw.setAttribute("aria-label", A.pick6(TXT.t));
     c.classList.toggle("hidden", !URL_);
   }
-  A.vivo = { sync, state, sid: () => sid };
+  A.vivo = { sync, state, invert, sid: () => sid };
   const boot = () => { card(); sched(4000); };                               // los textos se rehacen con Ajustes (js/game.js, syncSettings)
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", boot); else boot();
 })(window.AIQ);

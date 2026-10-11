@@ -324,7 +324,10 @@ window.AIQ = window.AIQ || {};
   };
   /* lo que cambia COMO SE VE la pantalla (desenfoque, miopia, pixeles, bateria, apagon, lluvia, cristal...) se pinta en la capa global de la mesa
      (js/chfx.js, X.mesaSet): por encima de todo y en cualquier pantalla, con o sin ronda en marcha */
-  const mesaGlobal = () => { if (A.chfx && A.chfx.mesaSet && A.chal.GLOB) A.chfx.mesaSet(A.chal.expand(mesaItems()).filter(c => A.chal.GLOB.has(c.id)), A.chal.parN); };
+  const mesaGlobal = () => {
+    if (A.chfx && A.chfx.mesaSet && A.chal.GLOB) A.chfx.mesaSet(A.chal.expand(mesaItems()).filter(c => A.chal.GLOB.has(c.id)), A.chal.parN);
+    if (A.vivo && A.vivo.invert) { const cm = mesa.find(c => c.id === "cmirror"); A.vivo.invert(cm ? cm.lv : 0); }   // controles invertidos fuera de la pregunta: un raton falso (js/vivo.js)
+  };
   A.adv.mesaState = () => mesa.map(c => c.id + ":" + c.lv).join(",");
   A.adv.mesaOn = () => mesa.length > 0;
   A.adv.mesaCh = (id, lv) => {
