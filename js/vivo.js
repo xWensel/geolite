@@ -37,13 +37,14 @@ window.AIQ = window.AIQ || {};
     if (q && (S.phase === "asking" || S.phase === "reveal")) { o.q = es(q.clue ? q.answer : q.name); o.k = q.clue ? "clue" : q.kind || ""; }
     o.sk = S.streak || 0;
     if (A.chfx && A.chfx.liveState) { const L = A.chfx.liveState(); o.fx = [L.lluvia, L.tormenta, L.apagon, L.terremoto].map(b => (b ? 1 : 0)).join("") + L.cristal + L.huellas + L.ventana + (L.humo ? 1 : 0); }   // lo que la mesa tiene puesto (sus fichas): 4 interruptores, 3 contadores y el humo
+    if (A.adv && A.adv.mesaState) o.ch = A.adv.mesaState();                        // los retos del juego que la mesa tiene puestos ("shaky:2,flip:1")
     return o;
   }
 
   let fast = false, last = "", sentAt = 0, timer = 0, dead = 0, fails = 0;
   /* lo que la mesa tenga puesto se va con ella: si deja de mirar, si el jugador apaga el directo o si se cae la conexion (ahora tapa toda la pantalla:
      nada puede quedarse pegado) */
-  const fxOff = () => { if (A.chfx && A.chfx.liveOn && A.chfx.liveOn()) A.chfx.liveReset(); };
+  const fxOff = () => { if (A.chfx && A.chfx.liveOn && A.chfx.liveOn()) A.chfx.liveReset(); if (A.adv && A.adv.mesaOn && A.adv.mesaOn()) A.adv.mesaCh("*", 0); };
   const sched = ms => { clearTimeout(timer); timer = setTimeout(beat, ms); };
   async function beat() {
     if (!URL_ || !on()) return sched(30000);
@@ -55,7 +56,7 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { const was = fast; fast = !!j.w; fails = 0; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (!fast) fxOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
+      if (j && j.ok) { const was = fast; fast = !!j.w; fails = 0; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (!fast) fxOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "ch" ? chal(m.ch, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
     } catch (e) { fast = false; if (++fails >= 2) fxOff(); }                  // dos latidos seguidos sin respuesta: sin conexion, fuera los efectos
     sched(fast ? 2000 : fails === 1 ? 5000 : document.hidden ? 60000 : 25000);
   }
@@ -74,7 +75,9 @@ window.AIQ = window.AIQ || {};
   }
   /* las fichas de la mesa: los efectos de los retos, el terremoto y el humo, por encima de todo el juego y en cualquier pantalla (js/chfx.js, el motor de
      la mesa), con los ajustes de siempre (temblor, destellos, movimiento) */
-  function fx(k, v) { if (A.chfx && A.chfx.live) A.chfx.live(k, v); }   // rayo, interruptores (v true/false) y contadores (v = cuantos deben quedar)
+  function fx(k, v) { if (A.chfx && A.chfx.live) A.chfx.live(k, v); }
+  /* los retos de la Aventura, a mano: A.adv.mesaCh (js/adventure.js) los monta en la pregunta en marcha y se quedan hasta quitarlos; "*" = todos */
+  function chal(id, v) { if (A.adv && A.adv.mesaCh) A.adv.mesaCh(String(id || ""), +v || 0); }   // rayo, interruptores (v true/false) y contadores (v = cuantos deben quedar)
   /* LA CAMARA DEL CRUPIER (solo escritorio): la mesa pide ver la partida y el juego le manda el video de SU ventana (captura de pestana de
      Electron: nada del escritorio ni de otras ventanas) de punto a punto (WebRTC; api/vivo.js y api/mesa.js solo cruzan la oferta y la respuesta).
      Mientras dura, arriba sale el piloto "TE ESTA MIRANDO" con el crupier. Por el mismo canal llega el guante: la mesa senala y da toquecitos en tu pantalla */

@@ -312,6 +312,33 @@ window.AIQ = window.AIQ || {};
     if (pl.some(p => p.spy)) list = list.map(c => (c.hid ? { ...c, up: true } : c));   // tanda 16: con el Ojo en el cielo, las fichas boca abajo del jefe se ven
     return { list, combo: plan.combo, boss, paid, nulled };
   };
+  /* LA MESA DEL CRUPIER (js/vivo.js): retos que el autor pone o quita desde /mesa en cualquier momento. Se quedan entre preguntas y rondas
+     hasta que los quite (o deje de mirar); ganan a un reto de la ronda con el mismo id; no cuentan para historiales ni logros (c.mesa) */
+  let mesa = [];                                                     // [{ id, lv }]
+  const mesaItems = () => mesa.map(c => ({ ...A.chal.canon(c), mesa: 1 }));
+  const withMesa = list => { if (!mesa.length) return list; const ids = mesa.map(c => A.chal.canon(c).id); return list.filter(c => !(ids.includes(c.id) && c.bx == null && c.wh == null)).concat(mesaItems()); };
+  const mesaRules = () => {                                          // las reglas de la casa (viento, reloj, silencio) salen de la lista de la ronda
+    const rules = run.chal.map(c => (c.id === "storm" ? "clock" : c.id)).filter(id => ["wind", "clock", "silence"].includes(id));
+    run.boss = rules;
+    if (!rules.includes("wind")) run.wind = null; else if (!run.wind) run.wind = { brg: Math.floor(Math.random() * 360), km: 160 + 40 * run.act };
+  };
+  A.adv.mesaState = () => mesa.map(c => c.id + ":" + c.lv).join(",");
+  A.adv.mesaOn = () => mesa.length > 0;
+  A.adv.mesaCh = (id, lv) => {
+    if (id === "*") mesa = [];
+    else {
+      const d = A.CHAL[id]; if (!d || d.sub || d.boss) return;
+      mesa = mesa.filter(c => c.id !== id); lv = clamp(lv | 0, 0, 3); if (lv) mesa.push({ id, lv });
+    }
+    if (!run || run.phase !== "round") return;                         // en el Campamento o en los menus: lo toma la ronda que empiece
+    run.chal = withMesa(run.chalBase || (run.chal || []).filter(c => !c.mesa)); mesaRules();
+    const Lv = C().S.camp && C().S.camp.levels && C().S.camp.levels[0], st = run.chal.find(c => c.id === "storm");   // Contrarreloj: el reloj de lo que queda de la pregunta y de las siguientes
+    if (Lv && run.secBase) {
+      const sec = Math.max(6, Math.round(run.secBase * (st ? [0.75, 0.65, 0.55][clamp((st.lv || 1) - 1, 0, 2)] : 1)));
+      if (sec !== Lv.seconds) { const S = C().S, k = sec / Lv.seconds; Lv.seconds = sec; if (S.phase === "asking") { const el = (performance.now() - S.t0 - S.pausedAcc) / 1000; S.limit = el + Math.max(1.5, (S.limit - el) * k); } }
+    }
+    A.chal.live(run.chal); renderBars();
+  };
 
   /* ---------------- tienda relevante: lo que sirve cada reliquia en ESTA expedicion ----------------
      Los retos salen de la semilla (A.chal.plan), asi que el Campamento sabe que trucos quedan por venir (con barajados y sobornos ya aplicados).
@@ -532,9 +559,10 @@ window.AIQ = window.AIQ || {};
     if (run.sup && run.sup.cafe) ctx.seconds += 4;                                       // suministro: Cafe doble
     { const cr = casOf(r); if (cr && cr.secs && cr.att === (run.attempt || 0)) ctx.seconds += cr.secs; }   // Ruleta de premios: Reloj corto
     ctx.seconds = Math.max(6, ctx.seconds);
-    run.chal = cf.list; run.chalName = cf.combo ? cf.combo.n : null; run.chalHalve = halve; run.chalKey = cf.boss && cf.combo ? cf.combo.k : null; run.chalDesc = cf.boss && cf.combo ? cf.combo.d : null;
+    run.chalBase = cf.list; run.chal = cf.list = withMesa(cf.list); run.chalName = cf.combo ? cf.combo.n : null; run.chalHalve = halve; run.chalKey = cf.boss && cf.combo ? cf.combo.k : null; run.chalDesc = cf.boss && cf.combo ? cf.combo.d : null;
     run.duel = !run.inf && run.chalKey === "duel" ? mkDuel(roundTarget()) : null;   // tanda 16: Duelo con la banca
     const rules = cf.list.map(c => (c.id === "storm" ? "clock" : c.id)).filter(id => ["wind", "clock", "silence"].includes(id)), st = cf.list.find(c => c.id === "storm");
+    run.secBase = ctx.seconds;                                       // los segundos sin Contrarreloj (la mesa la pone y la quita en mitad de la ronda)
     if (st) ctx.seconds = Math.max(6, Math.round(ctx.seconds * [0.75, 0.65, 0.55][clamp((st.lv || 1) - 1, 0, 2)]));   // Contrarreloj (tanda 6): 0,75 / 0,65 / 0,55 del tiempo
     run.boss = rules; run.wind = null;
     if (rules.includes("wind")) { const wr = A.rng(`${run.seed}:wind:${r}:${run.attempt}`); run.wind = { brg: Math.round(wr() * 360), km: Math.round((160 + 40 * run.act) * halve) }; }
@@ -589,12 +617,12 @@ window.AIQ = window.AIQ || {};
     };
   }
   function startInfinite(keep) {
-    run.inf = true; run.phase = "round"; run.topic = "mixed"; run.tier = 2; run.chal = []; run.chalName = null; run.chalHalve = 1; run.boss = []; run.wind = null;
+    run.inf = true; run.phase = "round"; run.topic = "mixed"; run.tier = 2; run.chalBase = []; run.chal = withMesa([]); run.secBase = 0; run.chalName = null; run.chalHalve = 1; run.boss = []; run.wind = null; mesaRules();
     if (!keep) { run.infN = 0; run.infOver = false; run.infSeconds = 12; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; refillTools(); }
     const Lv = infiniteLevel(), S = C().S;
     S.run = run; S.camp = { id: "adv", mode: "adventure", title: { es: "Aventura", en: "Adventure" }, home: { lat: 20, lon: 10, zoom: 1 }, levels: [Lv] };
     S.runTotal = run.score; S.runMax = 0; C().map.setHome(S.camp.home); C().map.setStyle(mapStyleFor());
-    A.dealer.enable(true); A.chal.begin([], A.chal.fx(perkList()), { seed: run.seed, round: roundNo(), halve: 1 });
+    A.dealer.enable(true); A.chal.begin(run.chal, A.chal.fx(perkList()), { seed: run.seed, round: roundNo(), halve: 1 });
     persist(); A.ach.emit("adv", { kind: "round", act: run.act }); C().startLevel(0);
     if (keep) { S.qi = run.qi; S.levelScore = run.roundScore; S.streak = run.streak || 0; S.hits = run.rGood; C().updateHud && C().updateHud(); }
   }
@@ -724,7 +752,7 @@ window.AIQ = window.AIQ || {};
     const kind = res.km == null ? "timeout" : res.dist >= 960 ? "bull" : res.dist < 400 ? "miss" : res.streak >= 3 ? "streak" : res.dist >= 750 ? "good" : null;
     const qAt = C().S.qi, still = () => { const S2 = C().S; return !!run && S2.qi === qAt && S2.phase === "reveal"; };   // pasaste a la siguiente: ya no la comenta
     /* lo que el crupier sabe de esta respuesta: el lugar, tu mano de verdad y si es "ese sitio otra vez" (js/dealer.js) */
-    const oq = C().S.qs[qAt], info = { valid: still, km: res.km, dist: res.dist, hand: res.hand || null, chal: (run.chal || []).map(c => c.id), rk: run.act + ":" + run.round + ":" + (run.attempt || 0),
+    const oq = C().S.qs[qAt], info = { valid: still, km: res.km, dist: res.dist, hand: res.hand || null, chal: (run.chal || []).filter(c => !c.mesa).map(c => c.id), rk: run.act + ":" + run.round + ":" + (run.attempt || 0),
       place: oq ? A.tx(oq.clue ? oq.answer : oq.name) : "", key: oq ? (oq.cid ? oq.cid[0] : oq.key || (oq.name && (oq.name.en || oq.name.es))) : "",
       dwell: A.dealer.trackEnd ? A.dealer.trackEnd() : 0, streakEnd: prevStreak >= 5 && !run.streak ? prevStreak : 0,
       goal: !run.inf && !!goalLv && prevScore < goalLv.advance && run.roundScore >= goalLv.advance && run.qi < run.qn };
@@ -1110,7 +1138,7 @@ window.AIQ = window.AIQ || {};
   A.adv.roundEnd = function () {
     if (run.inf) { run.score += C().S.levelScore; run.sup = {}; persist(); A.adv.hideBars(); return endRun(true); }   // modo infinito: sin provisiones, se cobra directamente
     const S = C().S, Lv = S.camp.levels[0], pass = S.levelScore >= Lv.advance, boss = isBoss();
-    if (A.dealer.noteTricks) A.dealer.noteTricks((run.chal || []).map(c => c.id), pass);   // el historial de cada truco (lo cuenta el crupier en la intro)
+    if (A.dealer.noteTricks) A.dealer.noteTricks((run.chal || []).filter(c => !c.mesa).map(c => c.id), pass);   // el historial de cada truco (lo cuenta el crupier en la intro)
     if (A.dealer.noteRound) A.dealer.noteRound(pass);                                     // el marcador historico: tu contra la banca
     S.phase = "levelEnd"; A.adv.hideBars(); clearTimers(); clearTimeout(reactT); A.chal.end(); C().map.setStyle(mapStyleFor());
     if (pass) {
@@ -1504,6 +1532,7 @@ window.AIQ = window.AIQ || {};
         <div class="tray-col tr-prov"><h4 class="gx-eyb">${A.T("Provisiones", "Provisions")} <b>${run.lives}/${run.maxLives}</b></h4><div class="tray-row hearts">${hearts()}</div></div></footer>
       ${nextHtml()}
       <div class="go2-wrap"><button class="gx-btn pri go2${doom ? " doom" : ""}${chest ? " skip" : ""}" id="goRound" type="button" data-primary><span class="go2-chip">${chip}</span><span class="go2-t"><b>${goB}</b><i>${goI}</i></span>${A.gala.keyHint("Enter", "a")}</button></div></div>`, "tablewrap");   // go2-wrap: su luz late detras (el boton recorta su sombra)
+    if (again) $("dlg").classList.add("in");                             // dialog() lo apaga y lo enciende 2 fotogramas despues: la mesa parpadeaba
     if (tkY > 0) { const tk = document.querySelector("#dlg .tb-next"); A.adv.ticketFit(tk); tk.querySelector(".nr-body").scrollTo({ top: tkY, behavior: "instant" }); }
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
     A.casa.acto(run.act); musica(false);                               // en el Campamento, la cancion del acto que viene (si sonaba la del jefe, se va)
@@ -1532,7 +1561,6 @@ window.AIQ = window.AIQ || {};
       if (chest) { const k = gain(chestSkip()); run.coins += k; run.stats.coinsEarned += k; A.sfx.sell(); }   // dejar el cofre sin abrir tambien se cobra (con la mochila llena, el cofre no es papel mojado)
       persist(); chest ? openShop(false) : startRound();
     };
-    if (again) $("dlg").classList.add("in");                             // dialog() lo apaga y lo enciende 2 fotogramas despues: la mesa parpadeaba
     A.ach.emit("casino", { kind: "hold", coins: run.coins }); A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length });
     if (A.tour) A.tour.maybe("camp");
   }

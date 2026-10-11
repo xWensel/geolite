@@ -641,6 +641,8 @@ window.AIQ = window.AIQ || {};
     RPTS = { key, pts }; pts.key = key; return pts;
   };
   const layoutMemo = (map, key, fn) => { let L = LAYM.get(key); if (!L) { L = fn(); LAYM.set(key, L); if (LAYM.size > 8) LAYM.delete(LAYM.keys().next().value); } return { ...L, shift: L.shift.map(p => p.slice()), scale: L.scale.slice() }; };
+  const MAPSIG = ["pangea", "spread", "deal", "tilt", "giants", "wrongborders", "noborders", "flip", "mirrorx", "spin", "mosaic", "quake", "drift"];   // lo que lee mapSpec
+  const mapSig = l => l.filter(c => MAPSIG.includes(c.id)).map(c => c.id + ":" + (c.lv || 1)).sort().join();
   function mapSpec(map, o, L0, qi) {
     const L = L0 || cur(), get = id => L.find(c => c.id === id), has = id => L.some(c => c.id === id), qks = S.bk && BX[S.bk] && qi != null ? ":" + qi : "";   // tanda 16: los efectos de ESTA pregunta (y su colocacion, aparte en cada una)
     const spec = { shift: [0, 1, 2, 3, 4, 5, 6].map(() => [0, 0]), rot: [0, 0, 0, 0, 0, 0, 0], wob: 0, lineA: 1, orient: null, ct: 6 }; let any = false;
@@ -1160,10 +1162,10 @@ window.AIQ = window.AIQ || {};
       const map = S.map = (A.core && A.core.map) || S.map; if (!map || !S.on) return; S.q = qi; S.suspended = false; clearTimers(); ensureOverlay(map); S.bl = S.bk ? bossQ(qi) : null;
       decorate(o); trapMark(o);
       S.calm = opt.calm || null; if (S.calm) S.qlist = cur().filter(c => !S.calm.includes(D[c.id].fam));   // tanda 9: Sangre fria apaga en esta pregunta los retos de puntero y pantalla
-      const spec = map.setDistort ? mapSpec(map, o, null, qi) : null, app = $("app");
-      if (spec) { map.setDistort(spec, spec.ms || 900); say("chal"); } else if (map.clearDistort) map.clearDistort(300);
+      const keep = !!opt.keepMap, spec = !keep && map.setDistort ? mapSpec(map, o, null, qi) : null, app = $("app");   // keepMap (la mesa, A.chal.live): el mapa ya esta colocado como toca y no se vuelve a repartir
+      if (keep) { /* se queda como esta */ } else if (spec) { map.setDistort(spec, spec.ms || 900); say("chal"); } else if (map.clearDistort) map.clearDistort(300);
       if (spec && spec.deal && A.core && A.core.S) A.core.S.limit += spec.ms / 1000;   // mientras se reparten las cartas no se puede responder: ese tiempo se devuelve
-      if (cur().some(c => D[c.id].kind === "map")) { app.classList.remove("ch-glitch"); A.restyle(app); app.classList.add("ch-glitch"); later(() => app.classList.remove("ch-glitch"), 600); }
+      if (!keep && cur().some(c => D[c.id].kind === "map")) { app.classList.remove("ch-glitch"); A.restyle(app); app.classList.add("ch-glitch"); later(() => app.classList.remove("ch-glitch"), 600); }
       app.classList.toggle("ch-negative", has("negative") && !S.fx.noNegative);
       ensureOverlay(map).classList.add("on");
       const bl = get("blur"), dk = get("dark"), cl = get("clouds"), rn = get("rain"), my = get("myopia"), bs = get("blindspot"), dc = get("decoys");
@@ -1193,6 +1195,15 @@ window.AIQ = window.AIQ || {};
       const o = A.core && A.core.S.qs[A.core.S.qi], sb = $("askSub"); if (o && sb && o.sub && !o.clue && sb.textContent.includes("▮")) A.renderBlanks(sb, A.tx(o.sub));       // al responder, el pais vuelve
     },
     suspend() { S.suspended = true; this.reveal(500); const o = A.core && A.core.S.qs[A.core.S.qi]; if (o) decorate(o); if (A.pointer && A.pointer.mods) A.pointer.mods(); },
+    /* la mesa del crupier (js/adventure.js, A.adv.mesaCh) pone o quita retos en mitad de la ronda: se rehace la lista y, si hay una pregunta
+       en marcha (y no la has apagado con el Interruptor), se vuelve a montar con ellos. Sin pregunta, lo recoge la siguiente. */
+    live(list) {
+      if (!S.on) return;
+      const was = mapSig(cur());
+      S.pub = list.map(canon); S.list = expand(S.pub); S.qlist = null; S.qsub = null; S.fpSet = null;
+      const cs = A.core && A.core.S, o = cs && cs.qs && cs.qs[cs.qi];
+      if (o && cs.phase === "asking" && !S.suspended) this.question(o, S.q, { calm: S.calm, keepMap: mapSig(cur()) === was });   // si lo que mueve el mapa no cambia, no se vuelve a repartir
+    },
     upright() { const map = S.map; if (map && map.setOrient) map.setOrient(false, 900); },
     end() {
       clearTimers(); { const ap = $("app"); if (ap) ap.classList.remove("ch-glitch", "ch-quaking"); } clearTimeout(S.preT); fxStop(); zzClear(); trapClear(); S.bk = null; S.bl = null; if (A.jefes) A.jefes.end(); S.nt = null; if (A.chfx) A.chfx.clear(); boardStop(); S.on = false; S.list = []; S.pub = []; S.qlist = null; S.qsub = null; const map = S.map || (A.core && A.core.map);

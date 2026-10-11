@@ -162,6 +162,24 @@ img, canvas { image-rendering: pixelated; }
 @keyframes deny { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .trayHint { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: rgba(241, 215, 154, .45); }
 .trayHint em { font-style: normal; color: var(--brass-lt); }
+/* los retos de la Aventura: pestanas por tipo y una placa por reto con su nivel en puntos */
+.rack.retos { gap: 10px; }
+.rtabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.rtab { font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 7px 10px; color: var(--brass-lt); background: rgba(0, 0, 0, .35); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .35); }
+.rtab:hover { background: rgba(241, 215, 154, .12); } .rtab.on { color: var(--ink); background: var(--brass-lt); box-shadow: 0 2px 0 rgba(0, 0, 0, .5); }
+.rtab i { font-style: normal; margin-left: 5px; opacity: .8; }
+.rgrid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(100%, 980px); padding: 10px; background: linear-gradient(180deg, var(--wood-dk), #1e0e06); box-shadow: inset 0 3px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px rgba(241, 215, 154, .25), 0 3px 0 rgba(255, 255, 255, .06); }
+.rc { position: relative; width: 112px; min-height: 96px; padding: 8px 6px 6px; display: grid; justify-items: center; align-content: start; gap: 4px; text-align: center; background: rgba(0, 0, 0, .3); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .25); transition: transform .12s, background .15s; }
+.rc img { width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .55)); }
+.rc span { font-family: var(--mono); font-size: 8px; line-height: 1.25; text-transform: uppercase; color: var(--brass-lt); }
+.rc b { font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: .12em; color: rgba(241, 215, 154, .3); }
+.rc:hover:not(:disabled) { transform: translateY(-3px); background: rgba(241, 215, 154, .1); }
+.rc:disabled { filter: grayscale(.85) brightness(.55); }
+.rc.lit { background: rgba(241, 215, 154, .16); box-shadow: inset 0 0 0 2px var(--brass-lt), 0 0 14px rgba(241, 215, 154, .35); }
+.rc.lit b { color: #ff8a93; }
+.rc.deny { animation: deny .3s steps(2); }
+.rclear { font-family: var(--mono); font-size: 8px; text-transform: uppercase; margin-left: 8px; padding: 5px 8px; color: var(--brass-lt); background: rgba(0, 0, 0, .45); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .5); }
+.rclear:hover:not(:disabled) { background: rgba(255, 80, 80, .25); } .rclear:disabled { opacity: .4; }
 .flyer { position: fixed; z-index: 50; width: 64px; height: 64px; pointer-events: none; image-rendering: pixelated; }
 
 /* los asientos: cajas de apuesta impresas en el tapete, en arco */
@@ -267,6 +285,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       </div>
       <div class="print"><h1>La mesa del crupier</h1><p>La casa siempre gana · en directo desde Geolite</p><i class="line"></i></div>
       <div class="rack"><span class="lbl">Fichas · caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</span><div class="tray" id="tray"></div><span class="trayHint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></div>
+      <div class="rack retos"><span class="lbl">Retos del juego · los mismos de la Aventura: se montan en su pregunta y se quedan hasta que los quites</span><div class="rtabs" id="rtabs"></div><div class="rgrid" id="rgrid"></div><span class="trayHint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo<button class="rclear" id="rclear" type="button" disabled>Quitar todos</button></span></div>
       <div class="seats" id="list"></div>
     </div></div></div>
 
@@ -367,6 +386,100 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       c.classList.toggle("lit", lit); c.classList.toggle("on", k === "on" && !!v);
       c.querySelector("b").textContent = k === "on" ? "ON" : k === "n" && v ? "×" + v : "";
     });
+    paintRetos();
+  }
+
+  /* ------------------------------------------------ retos de la Aventura (A.CHAL, js/challenges.js): id, nombre, tipo, icono, que hace y lo que hace cada nivel.
+     Los absorbidos (Pangea, Barajados, Espejo del mapa...) son niveles de otro: Big bang 2 = Pangea, Big bang 3 = Barajados, Mundo del revés 2 = Espejo */
+  const RETOS = [
+    ["shaky","Letras temblorosas","text","ch_shaky","El nombre baila y tiembla: cuesta leerlo.","Bailan y tiemblan|Más fuerte|Se dispersan y vuelven"],
+    ["missing","Tinta borrada","text","ch_missing","Se borran letras del nombre; a más nivel, todas las vocales.","Falta 1/3 de las letras|Sin vocales|Sin vocales ni 1/3 de consonantes"],
+    ["mirror","Nombre girado","text","ch_mirror","El nombre sale en espejo, boca abajo o cada palabra a su manera.","En espejo|Boca abajo|Cada palabra a su manera"],
+    ["memory","Memoria de pez","text","ch_memory","El nombre se desvanece: recuérdalo.",""],
+    ["runes","Runas","text","ch_runes","Letras sustituidas por símbolos parecidos.",""],
+    ["anagram","Letras revueltas","text","ch_anagram","Las letras del nombre cambian de sitio.","2 parejas cambiadas|Interior barajado|Todo salvo la 1.ª"],
+    ["riddle","Adivinanza","text","ch_riddle","En vez del nombre, una pista con el nombre tapado.",""],
+    ["babel","Torre de Babel","text","ch_babel","El nombre aparece en otro idioma.",""],
+    ["nocountry","Sin país","text","t_country","El país del lugar desaparece: solo te queda el nombre.",""],
+    ["fakepass","Pasaporte falso","text","ch_fakepass","El país de debajo a veces miente: es un vecino.",""],
+    ["ticker","Panel de salidas","text","ch_ticker","Las letras del nombre giran como en un aeropuerto hasta que se fijan.",""],
+    ["ctrlz","Ctrl+Z","wall","ch_ctrlz","El crupier deshace tu zoom: el mapa vuelve a la vista inicial.",""],
+    ["stormnight","Noche de tormenta","map","ch_stormnight","El mapa está a oscuras: solo lo ves entero cuando cae un rayo.",""],
+    ["trap","Pregunta trampa","rule","ch_trap","Una pregunta fácil se cambia por otra más dura, con el sello TRAMPA.",""],
+    ["giants","Gigantes y enanos","map","ch_giants","Unos continentes se agigantan y otros se encogen: hay que hacer zoom.",""],
+    ["blur","Mapa borroso","map","ch_blur","El mapa está desenfocado.",""],
+    ["dark","Apagón","map","ch_dark","El casino se queda a oscuras: solo ves cerca del puntero.",""],
+    ["flicker","Luces parpadeantes","map","ch_flicker","Las luces se van cuando menos te lo esperas.",""],
+    ["wrongborders","Fronteras falsas","map","ch_wrongborders","Las fronteras dibujadas mienten.",""],
+    ["noborders","Mapa mudo","map","ch_noborders","Sin fronteras ni colores de país; a tope, en negativo.","Sin fronteras|Y de un solo color|Y en negativo"],
+    ["spread","Big bang","map","ch_spread","Los continentes se separan, se juntan en uno o se barajan.","Se separan|Pangea|Barajados"],
+    ["tilt","Continentes torcidos","map","ch_tilt","Cada continente está girado.",""],
+    ["flip","Mundo del revés","map","ch_flip","El mapa se da la vuelta: el sur arriba, en espejo o las dos cosas.","Sur arriba|Espejo este-oeste|Las dos cosas"],
+    ["spin","Ruleta","map","ch_spin","El mapa gira despacio.",""],
+    ["clouds","Humo de sala","map","ch_clouds","El humo tapa el mapa: apártalo con el ratón.",""],
+    ["rain","Lluvia","map","ch_rain","La lluvia empaña el mapa: agita el ratón para limpiarla.",""],
+    ["myopia","Miopía","map","ch_myopia","Todo se ve nítido menos donde apuntas.","Nítido en 120 px|En 150 px|En 190 px y punto negro"],
+    ["mosaic","Píxeles gordos","map","ch_mosaic","El mapa se ve a muy baja resolución.",""],
+    ["quake","Terremoto","map","ch_quake","El mapa se desliza solo y tiembla.","Se desliza|Sacudidas|Sacudidas y deriva"],
+    ["decoys","Chinchetas trampa","map","ch_decoys","Llueven chinchetas falsas por todo el mapa.",""],
+    ["lightning","Rayos","map","ch_lightning","Rayos que ciegan y dejan una sombra donde caen.",""],
+    ["tremble","Pulso","ptr","ch_tremble","Tu puntero tiembla y da vueltas, y el clic también.","Gira|Salta|Salta y gira"],
+    ["ghost","Cursor fantasma","ptr","ch_ghost","El puntero desaparece y parpadea como un neón.","Desaparece 1 s de 5|Neón|Neón, desapariciones y doble visión"],
+    ["lag","Cursor con retraso","ptr","ch_lag","El puntero va con retraso.",""],
+    ["cmirror","Controles invertidos","ptr","ch_cmirror","El puntero se mueve al revés.",""],
+    ["wind","Vendaval","rule","wind","El viento desvía tu pin.",""],
+    ["storm","Contrarreloj","rule","storm","Tienes menos tiempo en cada pregunta.",""],
+    ["silence","Silencio","rule","silence","Tus herramientas no funcionan.",""],
+    ["crack","Cristal roto","wall","ch_crack","El crupier golpea y pringa tu pantalla: mueve o acerca el mapa para ver bajo las grietas.","Un golpe y huellas|Dos golpes|Tres golpes"],
+    ["hang","No responde","wall","ch_hang","Ventanas de error falsas tapan el mapa: ciérralas para seguir.",""],
+    ["battery","Batería baja","wall","ch_battery","Tu pantalla se queda sin batería mientras piensas.",""],
+    ["flaghue","Luces de neón","flag","ch_flaghue","Las luces del casino cambian los colores de la bandera.",""],
+    ["flagblur","Bandera borrosa","flag","ch_blur","La bandera está desenfocada.",""],
+    ["flagdark","Bandera a oscuras","flag","ch_dark","La bandera casi no se distingue en la penumbra.",""],
+    ["flaggray","Bandera desteñida","flag","ch_flaggray","La bandera pierde sus colores; a tope, en negativo.","Casi gris|Gris|Negativo en gris"],
+    ["flagback","Bandera de espaldas","flag","ch_flagback","La bandera se ve por detrás; un sello dice cómo está girada.",""],
+    ["flagpuzzle","Bandera a trozos","flag","ch_flagpuzzle","La bandera está troceada y desordenada. Cada 3 s, un trozo vuelve a su sitio.",""],
+    ["flagwind","Bandera al viento","flag","ch_flagwind","La bandera ondea con el viento y los pliegues la esconden a ratos.",""]
+  ];
+  const RK = [["map", "Mapa"], ["text", "Nombre"], ["ptr", "Puntero"], ["wall", "Pantalla"], ["rule", "Reglas"], ["flag", "Banderas"]];
+  const RNOTE = { trap: "cambia las preguntas al repartirlas: se nota desde la ronda siguiente" };
+  const RMAP = Object.fromEntries(RETOS.map(r => [r[0], r]));
+  let rtab = "map";
+  const chs = {}, chAt = {};                                                   // sid -> { reto: nivel } (lo cuenta el juego; la mesa lo adelanta al pulsar)
+  const parseCh = s => { const o = {}; String(s || "").split(",").forEach(p => { const [i, v] = p.split(":"); if (RMAP[i] && +v > 0) o[i] = +v; }); return o; };
+  const chOf = sid => chs[sid] || (chs[sid] = {});
+  const pips = n => "●".repeat(n) + "○".repeat(3 - n);
+  function paintRetos() {
+    const C = sel ? chOf(sel) : {}, tabs = $("rtabs"), grid = $("rgrid"); if (!tabs || !grid) return;
+    tabs.innerHTML = RK.map(([k, n]) => { const c = RETOS.filter(r => r[2] === k && C[r[0]]).length; return `<button class="rtab${k === rtab ? " on" : ""}" type="button" data-k="${k}">${n}${c ? `<i>×${c}</i>` : ""}</button>`; }).join("");
+    tabs.querySelectorAll(".rtab").forEach(b => b.onclick = () => { rtab = b.dataset.k; paintRetos(); });
+    grid.innerHTML = RETOS.filter(r => r[2] === rtab).map(([id, n, k, ico, d, lv]) => {
+      const v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nSolo se nota en preguntas de bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
+      return `<button class="rc${v ? " lit" : ""}" type="button" data-id="${id}" title="${esc(tip)}"${sel ? "" : " disabled"}><img src="../assets/icons/${ico}.webp" alt=""><span>${esc(n)}</span><b>${pips(v)}</b></button>`;
+    }).join("");
+    grid.querySelectorAll(".rc").forEach(c => {
+      c.onclick = () => { if (c._long) { c._long = false; return; } retoHit(c, +1); };
+      c.oncontextmenu = e => { e.preventDefault(); retoHit(c, -1); };
+      let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; retoHit(c, -1); }, 480); }, { passive: true });
+      c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
+    });
+    $("rclear").disabled = !sel || !Object.keys(C).length;
+  }
+  /* un reto: d = +1 (sube un nivel, hasta 3) o -1 (lo baja; el 0 lo quita) */
+  async function retoHit(c, d) {
+    if (!sel) return; const id = c.dataset.id, r = RMAP[id], C = chOf(sel), n = (C[id] || 0) + d;
+    if (n < 0 || n > 3) return deny(c);
+    if (n) C[id] = n; else delete C[id];
+    chAt[sel] = Date.now(); paintRetos(); clink(); spr.play(d > 0 ? "magic_pass" : "snap");
+    try {
+      const j = await call("POST", { op: "ch", sid: sel, ch: id, v: n });
+      if (!(j.ok && j.live)) toast("Esa partida ya se ha cerrado.");
+      else toast(n ? `${r[1]}: nivel ${n}${r[2] === "flag" ? " (solo en banderas)" : RNOTE[id] ? " (" + RNOTE[id] + ")" : ""}` : `${r[1]}: quitado.`, 1800);
+    } catch (e) { toast("Sin conexión: el reto no ha salido."); }
+  }
+  async function retoClear() {
+    if (!sel) return; chs[sel] = {}; chAt[sel] = Date.now(); paintRetos(); clink();
+    try { await call("POST", { op: "ch", sid: sel, ch: "*", v: 0 }); toast("Retos quitados.", 1400); } catch (e) { toast("Sin conexión."); }
   }
 
   /* ------------------------------------------------ el crupier de la mesa (el mismo sprite del juego) */
@@ -432,9 +545,9 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       <span class="top"><i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i><span class="nm${st.n ? "" : " anon"}">${esc(st.n || "Sin nombre")}</span></span>
       <span class="lg2">Juega en ${esc(LANG[st.l] || st.l)}</span>
       <span class="wh">${esc(where(st))}</span>
-      <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}${st.cam ? `<span class="tag cam">Cámara</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span></span>
+      <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}${st.cam ? `<span class="tag cam">Cámara</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span>${st.ch ? `<span class="tag live">${st.ch.split(",").length} reto${st.ch.includes(",") ? "s" : ""}</span>` : ""}</span>
       </button>`; }).join("");
-    for (const x of list) { const f = parseFx(x.st.fx); if (f && !(Date.now() - (fxAt[x.sid] || 0) < 5000)) fxs[x.sid] = f; }
+    for (const x of list) { const f = parseFx(x.st.fx); if (f && !(Date.now() - (fxAt[x.sid] || 0) < 5000)) fxs[x.sid] = f; if (!(Date.now() - (chAt[x.sid] || 0) < 5000)) chs[x.sid] = parseCh(x.st.ch); }
     L.querySelectorAll(".seat").forEach(b => { b.onclick = () => pick(b.dataset.sid); const st = b.querySelector(".stack"); if (st) st.remove(); b.insertAdjacentHTML("beforeend", stackHtml(b.dataset.sid)); });
     arc(); paintChips();
     if (sel) { const x = list.find(y => y.sid === sel); if (x) { selSt = x.st; renderFacts(); } else gone(); }
@@ -466,7 +579,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   }
   async function watch() { clearTimeout(watchT); if (!sel) return; try { await call("POST", { op: "watch", sid: sel }); } catch (e) { /* reintenta */ } watchT = setTimeout(watch, 20000); }
   addEventListener("pagehide", () => { if (sel && key) fetch(API, { method: "POST", keepalive: true, headers: { "x-mesa": key, "content-type": "application/json" }, body: JSON.stringify({ op: "unwatch", sid: sel }) }).catch(() => {}); });
-  function gone() { camStop(true); toast("Se ha levantado de la mesa."); sel = null; selSt = null; clearTimeout(watchT); document.querySelectorAll(".chip").forEach(c => (c.disabled = true)); $("txt").disabled = true; $("send").disabled = true; renderFacts(); }
+  function gone() { camStop(true); toast("Se ha levantado de la mesa."); sel = null; selSt = null; clearTimeout(watchT); document.querySelectorAll(".chip").forEach(c => (c.disabled = true)); $("txt").disabled = true; $("send").disabled = true; paintRetos(); renderFacts(); }
 
   function setupControls() {
     $("gest").innerHTML = GEST.map(g => `<option value="${g}">${GNAME[g]}</option>`).join("");
@@ -490,6 +603,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; chipHit(c, -1); }, 480); }, { passive: true });
       c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
     });
+    $("rclear").onclick = retoClear; paintRetos();
     renderCards(); renderLog();
   }
   const STY = [["", "Normal"], ["shout", "Gritando"], ["tremble", "Tembloroso"], ["whisper", "Susurro"], ["think", "Pensando"], ["dark", "Siniestro"], ["sing", "Cantando"], ["glitch", "Glitch"], ["gold", "Gran anuncio"]];

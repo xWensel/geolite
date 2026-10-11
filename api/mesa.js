@@ -5,6 +5,7 @@
      POST { op: "unwatch", sid }
      POST { op: "say", sid, t, e, g, s, p }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
      POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto/humo (v true/false), cristal/huellas/ventana (v 0-5)
+     POST { op: "ch", sid, ch, v }        ->  un reto de la Aventura (los de A.CHAL, js/challenges.js) a nivel v 0-3 (0 lo quita); ch "*" los quita todos
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
                                           ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas */
@@ -12,6 +13,7 @@ const crypto = require("crypto");
 const kv = require("./_kv");
 const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
 const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "humo", "cristal", "huellas", "ventana"];
+const CH = ["shaky", "missing", "mirror", "memory", "runes", "anagram", "riddle", "babel", "nocountry", "fakepass", "ticker", "ctrlz", "stormnight", "trap", "giants", "blur", "dark", "flicker", "wrongborders", "noborders", "spread", "tilt", "flip", "spin", "clouds", "rain", "myopia", "mosaic", "quake", "decoys", "lightning", "tremble", "ghost", "lag", "cmirror", "wind", "storm", "silence", "crack", "hang", "battery", "flaghue", "flagblur", "flagdark", "flaggray", "flagback", "flagpuzzle", "flagwind"];   // los retos que se pueden poner a mano (A.CHAL sin los absorbidos ni los de jefe)
 const KEY = process.env.MESA_KEY || "";
 const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // estilos del bocadillo (css/challenges.css, .dl-bubble.st-*)
 const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier en la pantalla del jugador: esquinas o centro grande
@@ -55,6 +57,13 @@ module.exports = async (req, res) => {
       const v = typeof b.v === "boolean" ? b.v : Number.isInteger(b.v) && b.v >= 0 && b.v <= 5 ? b.v : undefined;   // interruptor o contador
       const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
       await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "fx", fx, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
+      return res.status(200).json({ ok: true, live: !!st });
+    }
+    if (b.op === "ch") {                                             // un reto del juego: se monta en su ronda al momento y se queda hasta quitarlo
+      const ch = String(b.ch || ""); if (ch !== "*" && !CH.includes(ch)) return res.status(400).json({ ok: false });
+      const v = ch === "*" ? 0 : Number.isInteger(b.v) && b.v >= 0 && b.v <= 3 ? b.v : 0;
+      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
+      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "ch", ch, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
       return res.status(200).json({ ok: true, live: !!st });
     }
     if (b.op === "say") {
