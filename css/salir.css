@@ -52,12 +52,8 @@
   box-shadow: 0 0 0 3px #0a140f, inset 0 0 0 3px #f8b449, inset 0 0 0 5px #7a4e17, inset 0 0 0 7px #0a140f, 0 12px 0 rgba(0, 0, 0, .5), 0 34px 70px rgba(0, 0, 0, .65), 0 0 70px rgba(255, 200, 110, .12); }
 .qx.card-in .qx-card { animation: qx-card-in .6s cubic-bezier(.25, 1.45, .45, 1) forwards; }
 @keyframes qx-card-in { to { opacity: 1; transform: none; } }
-.qx-bulbs { position: absolute; inset: 10px; border-radius: 11px; pointer-events: none; filter: drop-shadow(0 0 2px rgba(255, 200, 90, .75)); transition: opacity .2s;
-  --bulb: radial-gradient(circle, #fff7dc 0 1.5px, #ffcf66 2px 2.6px, rgba(255, 190, 80, .3) 3.2px, transparent 4px);
-  background: var(--bulb) 0 0 / 18px 8px repeat-x, var(--bulb) 0 100% / 18px 8px repeat-x, var(--bulb) 0 0 / 8px 18px repeat-y, var(--bulb) 100% 0 / 8px 18px repeat-y; }
-.qx-bulbs.b { background-position: 9px 0, 9px 100%, 0 9px, 100% 9px; }
-.qx.card-in .qx-bulbs { animation: qx-chase .9s steps(1) infinite; } .qx.card-in .qx-bulbs.b { animation-delay: -.45s; }
-@keyframes qx-chase { 0% { opacity: 1; } 50% { opacity: .16; } }
+/* la marquesina de la casa (A.bulbs, js/art.js: la misma de la portada y el veredicto), por dentro del marco dorado */
+.qx-card > .mqw { --mqi: 13px; --mqb: 7px; }
 
 .qx-top { display: flex; align-items: center; gap: 10px; margin: 2px 2px 0; font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em; }
 .qx-ic .ic { display: block; width: 28px; height: 28px; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); }
@@ -83,7 +79,7 @@
 .qx.stayed .qx-go { display: none; }                                               /* "Me quedo" ocupa toda la fila (con su salto de alegria) */
 .qx.stayed .qx-stay { pointer-events: none; background: var(--brass); color: #16241c; box-shadow: 0 5px 0 #b3741c, 0 0 0 3px #fff3c8, 0 0 34px 8px rgba(248, 180, 73, .6); animation: qx-yes .5s cubic-bezier(.3, 1.6, .4, 1); }
 @keyframes qx-yes { 0% { transform: scale(.94); } 60% { transform: scale(1.04); } 100% { transform: none; } }
-.qx.stayed .qx-bulbs { animation-duration: .22s !important; } .qx.stayed .qx-bulbs.b { animation-delay: -.11s !important; }
+.qx.stayed .qx-card .mq-lit { animation-duration: .38s; }
 
 /* ------------------------------------------------ trastadas */
 /* apagon: negro total; el crupier es una silueta que habla, y solo brilla "Me quedo" */
@@ -92,7 +88,7 @@
 .qx.dark .qx-stage .dealer.big .dl-face { filter: none; }      /* v0.32: a oscuras lo pinta el sprite: silueta con los ojos encendidos */
 .qx.dark .qx-card { background: #030605; box-shadow: 0 0 0 3px #000, 0 12px 0 rgba(0, 0, 0, .5); }
 .qx.dark .qx-top, .qx.dark .qx-q, .qx.dark .qx-sub { opacity: .04; }
-.qx.dark .qx-bulbs { animation: none !important; opacity: 0; }                   /* sin luz, tampoco la marquesina */
+.qx.dark .qx-card .mqb, .qx.dark .qx-card .mq-aura { display: none; }                   /* sin luz, tampoco la marquesina */
 .qx.dark .qx-go { opacity: .05; pointer-events: none; }
 .qx.dark .qx-stay { box-shadow: 0 5px 0 var(--red-deep), 0 0 0 3px #ffd0c9, 0 0 26px 6px rgba(254, 95, 85, .75), 0 0 80px 20px rgba(254, 95, 85, .35); animation: qx-glow 1s ease-in-out infinite; }
 @keyframes qx-glow { 50% { box-shadow: 0 5px 0 var(--red-deep), 0 0 0 3px #ffd0c9, 0 0 36px 10px rgba(254, 95, 85, .9), 0 0 110px 30px rgba(254, 95, 85, .45); } }
@@ -100,8 +96,11 @@
 @keyframes qx-flick { 0% { filter: brightness(3); } 20% { filter: brightness(.2); } 45% { filter: brightness(2.2); } 60% { filter: brightness(.4); } 100% { filter: none; } }
 
 /* rabieta: marquesina roja a toda velocidad, la tarjeta arde por dentro, el foco se tine de rojo y el globo GRITA */
-.qx.rage .qx-bulbs { --bulb: radial-gradient(circle, #ffe6df 0 1.5px, #ff5a55 2px 2.6px, rgba(255, 60, 60, .35) 3.2px, transparent 4px); filter: drop-shadow(0 0 3px rgba(255, 60, 60, .9)); animation-duration: .16s !important; }
-.qx.rage .qx-bulbs.b { animation-delay: -.08s !important; }
+.qx.rage .qx-card .mq-lit { animation-duration: .3s; }
+.qx.rage .qx-card .mqb-on { stroke: #ff6a5a; } .qx.rage .qx-card .mqb-on.mqb-c { stroke: #ffe6df; }
+.qx.rage .qx-card .mqb-on.mqb-h1 { stroke: rgba(255, 200, 190, .6); } .qx.rage .qx-card .mqb-on.mqb-h2 { stroke: rgba(255, 110, 90, .36); }
+.qx.rage .qx-card .mqb-on.mqb-h3 { stroke: rgba(255, 70, 60, .22); } .qx.rage .qx-card .mqb-on.mqb-h4 { stroke: rgba(255, 50, 40, .12); }
+.qx.rage .qx-card .mq-aura { box-shadow: 0 0 20px 6px rgba(254, 70, 60, .4), 0 0 60px 14px rgba(254, 50, 40, .2); }
 .qx.rage .qx-card { box-shadow: 0 0 0 3px #0a140f, inset 0 0 0 3px #fe5f55, inset 0 0 0 5px #7a1f17, inset 0 0 0 7px #0a140f, inset 0 0 70px rgba(254, 70, 60, .35), 0 12px 0 rgba(0, 0, 0, .5), 0 0 90px rgba(254, 60, 50, .35); }
 .qx.rage .qx-beam, .qx.rage .qx-pool { filter: hue-rotate(-38deg) saturate(3.2) brightness(1.15); }
 .qx.rage .qx-dim { background: radial-gradient(ellipse 58% 66% at 50% 42%, rgba(60, 10, 10, .82), rgba(12, 2, 2, .95) 72%, rgba(3, 0, 0, .98)); }
@@ -123,7 +122,7 @@
 .qx.sad .qx-pool { filter: none; background: radial-gradient(ellipse at center, rgba(140, 180, 255, .3), rgba(120, 160, 255, .08) 45%, transparent 70%); }
 .qx.sad .qx-beam u { animation-duration: 14s; background: #d8e6ff; }
 .qx.sad .qx-dim { background: radial-gradient(ellipse 58% 66% at 50% 42%, rgba(12, 18, 30, .84), rgba(3, 5, 10, .96) 72%, rgba(1, 2, 4, .98)); }
-.qx.sad .qx-bulbs { opacity: .1; animation: none !important; }
+.qx.sad .qx-card .mq-lit { opacity: .1; animation: none; } .qx.sad .qx-card .mq-aura { display: none; }
 .qx.sad .qx-card { background: radial-gradient(130% 100% at 50% 0%, #3a4541 0%, #2a322e 52%, #1b211e 100%);
   box-shadow: 0 0 0 3px #0a140f, inset 0 0 0 3px #a99c80, inset 0 0 0 5px #4f4636, inset 0 0 0 7px #0a140f, 0 12px 0 rgba(0, 0, 0, .5), 0 34px 70px rgba(0, 0, 0, .65); }
 .qx.sad .qx-top, .qx.sad .qx-q, .qx.sad .qx-sub, .qx.sad .qx-go { filter: saturate(.25); opacity: .82; }
@@ -170,7 +169,7 @@ html.qx-crt, html.qx-crt body { background: #000 !important; }
   .qx-stage .dealer.big .dl-bubble { left: 0; right: 0; bottom: calc(100% + 4px); width: auto; max-width: none; font-size: calc(22px * var(--dll, 1)); padding: 9px 14px 23px 12px; transform-origin: 20% 100%;
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), 76px calc(100% - 12px), 56px 100%, 38px calc(100% - 12px), 0 calc(100% - 12px)); }
   .qx.shout .dealer .dl-bubble { font-size: calc(24px * var(--dll, 1)); }
-  .qx-card { padding: 18px 16px 18px; }
+  .qx-card { padding: 18px 20px 18px; } .qx-card > .mqw { --mqi: 11px; --mqb: 6px; }
   .qx-top b { font-size: 13px; } .qx-top em { font-size: 12px; } .qx-ic .ic { width: 24px; height: 24px; }
   .qx-q { font-size: calc(36px * var(--dll, 1)); margin-top: 12px; } .qx-sub { font-size: calc(20px * var(--dll, 1)); margin-bottom: 16px; }
   .qx-acts { gap: 10px; } .qx-acts .qx-stay { padding: 12px 14px; font-size: 17px; } .qx-acts .qx-go { min-width: 0; padding: 10px 14px; font-size: 13px; }

@@ -111,7 +111,7 @@ window.AIQ = window.AIQ || {};
       <div class="qx-in">
         <div class="qx-stage" id="qxStage"><i class="qx-beam">${motes}</i><i class="qx-pool"></i></div>
         <div class="qx-card" id="qxCard">
-          <i class="qx-bulbs"></i><i class="qx-bulbs b"></i>
+          ${A.bulbs()}
           <header class="qx-top"><span class="qx-ic">${A.icon("u_quit")}</span><b id="qxHead"></b><em id="qxTime"></em></header>
           <h2 class="qx-q" id="qxQ"></h2>
           <p class="qx-sub" id="qxSub"></p>
