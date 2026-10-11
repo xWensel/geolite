@@ -668,6 +668,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .offers > :nth-child(2) { --i: 1; } .gx-camp .offers > :nth-child(3) { --i: 2; } .gx-camp .offers > :nth-child(4) { --i: 3; } .gx-camp .offers > :nth-child(5) { --i: 4; }
 @keyframes cp-deal { from { opacity: 0; translate: 46px -34px; rotate: 5deg; } }   /* repartidas desde el mazo; acaban rectas */
 @keyframes cp-bob { 50% { translate: 0 -3px; } }
+.gx-camp.again .offers > .offer.pc:not(.sold) { animation-name: cp-bob; animation-duration: 5.2s; animation-timing-function: ease-in-out; animation-delay: calc(var(--i) * 420ms + .6s); }   /* repintado sin reparto: las cartas no vuelven a entrar */
 .gx-camp .offer.pc:hover:not(.sold) { transform: translateY(-6px); z-index: 4; }
 .gx-camp .offer.pc.r1 { --rc: #4fb6a0; --rcd: #17765f; } .gx-camp .offer.pc.r2 { --rc: #c78bf0; --rcd: #7a3fb0; } .gx-camp .offer.pc.r3 { --rc: #ffd95a; --rcd: #8a5a12; }
 .gx-camp .offer.pc.otool { --rc: #6c8cff; --rcd: #2d55a8; } .gx-camp .offer.pc.life { --rc: #fe5f55; --rcd: #9e2a26; }
