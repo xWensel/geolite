@@ -50,5 +50,28 @@ window.AIQ = window.AIQ || {};
      v0.3.74: una capa mas, .mq-all, con TODAS las bombillas encendidas: no se ve (opacidad 0) salvo en el destello de los premios (A.casa.destello) */
   A.bulbs = () => { const c = A.casa || {}, P = c.MQ_P || 1140, now = performance.now(), s = -Math.round((((now - (c.MQ_O || 0)) % P) + P) % P), r = k => `<rect class="${k}" pathLength="144"/>`;
     return `<span class="mqw" aria-hidden="true" style="--mq-p:${P.toFixed(2)}ms;--mq-s:${s}ms;--mq-j:${-Math.round(now % 1000)}ms"><svg class="mqb mq-base">${r("mqb-sk")}${r("mqb-off")}</svg>${[1, 2, 3].map(k => `<svg class="mqb mq-lit l${k}">${r("mqb-on mqb-h4")}${r("mqb-on mqb-h3")}${r("mqb-on mqb-h2")}${r("mqb-on mqb-h1")}${r("mqb-on")}${r("mqb-on mqb-c")}</svg>`).join("")}<svg class="mqb mq-all">${r("mqb-a mqb-h4")}${r("mqb-a mqb-h3")}${r("mqb-a mqb-h2")}${r("mqb-a mqb-h1")}${r("mqb-a")}${r("mqb-a mqb-c")}</svg><i class="mq-aura"></i></span>`; };
+  /* v0.3.96: marquesina "a la medida de la carta" (pantalla de salir, Continuar expedicion): el hueco entre bombillas es el de
+     la carta de la Aventura. Se mide la carta que haya en la portada (su perimetro, sus bombillas y su tamano) y aqui se reparte el perimetro del
+     elemento en el mismo paso; sin carta a la vista vale el ultimo hueco medido. --dn = 144 / n (n multiplo de 3: las tres tandas salen parejas) */
+  let mqGap = 12.7;
+  const px = v => parseFloat(v) || 0;
+  A.bulbFit = el => {
+    if (!el) return; if (el._mqFit) { el._mqFit(); return; }                    // ya medido: otra vez a su hora (p. ej. al abrirse)
+    el.classList.add("mq-fit");
+    const fit = () => {
+      const hero = document.querySelector(".mcard.hero"), hr = hero && hero.querySelector(".mqb rect");
+      if (hero && hr && hero.offsetWidth) {
+        const i = px(getComputedStyle(hero).getPropertyValue("--mqi")), d = px(getComputedStyle(hr).strokeDasharray.split(/[ ,]+/)[1]) || 2;
+        const P = 2 * (hero.offsetWidth + hero.offsetHeight - 4 * i);
+        if (P > 0) mqGap = P / (144 / d);
+      }
+      const cs = getComputedStyle(el.querySelector(":scope > .mqw") || el), i = px(cs.getPropertyValue("--mqi")), w = el.offsetWidth, h = el.offsetHeight;
+      if (!w || !h) return;
+      const P = 2 * (w + h - 4 * i), n = Math.max(3, 3 * Math.round(P / mqGap / 3));
+      el.style.setProperty("--dn", (144 / n).toFixed(4));
+    };
+    el._mqFit = fit; fit();
+    if (window.ResizeObserver) { const ro = new ResizeObserver(fit), hero = document.querySelector(".mcard.hero"); ro.observe(el); if (hero) ro.observe(hero); }   // y si la carta cambia de tamano, otra vez
+  };
   A.art = () => "";
 })(window.AIQ);

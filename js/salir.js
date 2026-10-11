@@ -124,6 +124,7 @@ window.AIQ = window.AIQ || {};
       </div>
       <i class="qx-rain" id="qxRain"></i>`;
     $("app").appendChild(root);
+    A.bulbFit($("qxCard"));                                              // v0.3.96: las bombillas, al paso de las de la carta de la Aventura
     $("qxStay").onclick = () => stay();
     $("qxGo").onclick = () => go();
     /* fuera de la tarjeta no pasa nada (ni se cierra por accidente): el foco vuelve a "Me quedo" */
@@ -179,6 +180,7 @@ window.AIQ = window.AIQ || {};
     $("qxStayT").textContent = t6(TX.stay); $("qxGoT").textContent = t6(st.season ? TX.goSeason : TX.go); $("qxStamp").textContent = t6(TX.stamp);
     $("qxActs").classList.remove("swap");
     root.className = "qx"; A.restyle(root); root.classList.add("on");   // la sala se apaga
+    A.bulbFit($("qxCard"));                                              // ya a la vista: se reparten las bombillas
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (A.tt && A.tt.hide) A.tt.hide();
     if (st.home) D().homeTease(false);

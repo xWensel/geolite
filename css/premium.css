@@ -75,6 +75,9 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 html:not(.sala-on) .mq-aura { display: none; }                                         /* con las Luces de la sala apagadas, sin resplandor */
 html.sala-soft .mq-aura { opacity: .6; }
 html.reduce-motion .mqb.mq-lit { animation: none; }                                     /* Movimiento minimo: quietas y todas encendidas (hasta la v0.3.73, dos de cada tres) */
+/* v0.3.96: marquesina a la medida de la carta. js/art.js (A.bulbFit) cuenta cuantas bombillas caben para que el hueco entre ellas sea el de la carta de la Aventura, y lo deja en --dn (144 / bombillas, siempre multiplo de 3: las tres tandas se reparten parejas) */
+.mq-fit.mq-fit .mqb rect { stroke-dasharray: 0 var(--dn, 2); } .mq-fit.mq-fit .mqb .mqb-on { stroke-dasharray: 0 calc(var(--dn, 2) * 3); }
+.mq-fit.mq-fit .mqb.l2 .mqb-on { stroke-dashoffset: calc(var(--dn, 2) * -1); } .mq-fit.mq-fit .mqb.l3 .mqb-on { stroke-dashoffset: calc(var(--dn, 2) * -2); }
 /* v0.3.19: las mismas bombillas en las ilustraciones (A.pic: escena de la ronda, carta del Reto diario) y en tu escalon del podio. Cada sitio ajusta
    margen (--mqi), tamano (--mqb), radio del marco (--mqr) y densidad: con pathLength 144, "0 2" son 72 bombillas, "0 3" 48 y "0 4" 36 (las encendidas, la mitad) */
 .mqb rect { rx: calc(var(--mqr, 18px) - var(--mqi)); }
