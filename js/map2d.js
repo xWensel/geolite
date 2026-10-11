@@ -178,7 +178,7 @@ window.AIQ = window.AIQ || {};
       const t = { s, cx: wx - (px - this.W / 2) / s, cy: wy + (py - this.H / 2) / s };
       if (animate) this.animateTo(t, 260); else { this.drift = null; this.view = this._clamp(t); this.anim = null; this.dirty = this.fxDirty = this.hlDirty = true; }
     }
-    nudge(dx, dy) { if (this.zzUntil && performance.now() < this.zzUntil) return; this.anim = null; this.drift = null; const v = this.view; v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); this.dirty = this.fxDirty = this.hlDirty = true; }   // mando (js/mando.js)
+    nudge(dx, dy) { if (this.zzUntil && performance.now() < this.zzUntil) return; for (const q of this.pointers.values()) q.cancel = true; this.anim = null; this.drift = null; const v = this.view; v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); this.dirty = this.fxDirty = this.hlDirty = true; }   // mando (js/mando.js)
     tapAt(px, py) { this._tap(px, py); }
     _toWorld(px, py, v = this.view) { return [v.cx + (px - this.W / 2) / v.s, v.cy - (py - this.H / 2) / v.s]; }
     toScreen(x, y, v = this.view) { return [this.W / 2 + (x - v.cx) * v.s, this.H / 2 - (y - v.cy) * v.s]; }
@@ -215,7 +215,7 @@ window.AIQ = window.AIQ || {};
       const up = e => {
         const p = this.pointers.get(e.pointerId); if (!p) return;
         this.pointers.delete(e.pointerId); cv.classList.remove("grabbing"); this.fx.classList.remove("grabbing");
-        if ((!p.moved || !p.drag) && p.pick && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") {
+        if ((!p.moved || !p.drag) && !p.cancel && p.pick && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") {
           const r = cv.getBoundingClientRect(); this._tap(e.clientX - r.left, e.clientY - r.top);
         }
         this._wasPinch = this.pointers.size > 0; if (this.pointers.size === 0) this._wasPinch = false;
@@ -223,7 +223,8 @@ window.AIQ = window.AIQ || {};
       };
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
-        e.preventDefault(); const r = cv.getBoundingClientRect();
+        e.preventDefault(); for (const q of this.pointers.values()) q.cancel = true;
+        const r = cv.getBoundingClientRect();
         const wc = A.keys && A.keys.mouse.zoomMid;   // Ajustes > Controles: zoom hacia el centro del mapa en vez del puntero
         this.zoomBy(Math.exp(-(A.keys ? A.keys.wheel(e.deltaY) : e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.01 : 0.0016) * A.mapSens.zoom), ...(wc ? [this.W / 2, this.H / 2] : (A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top])), false);
       }, { passive: false });

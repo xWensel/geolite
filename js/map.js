@@ -1245,7 +1245,7 @@ void main(){
       const up = e => {
         const p = this.pointers.get(e.pointerId); if (!p) return;
         this.pointers.delete(e.pointerId); cv.classList.remove("grabbing"); this.fx.classList.remove("grabbing");
-        if ((!p.moved || !p.drag) && p.pick && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") { const r = cv.getBoundingClientRect(); this._tap(e.clientX - r.left, e.clientY - r.top); }
+        if ((!p.moved || !p.drag) && !p.cancel && p.pick && this.pointers.size === 0 && !this._wasPinch && e.type === "pointerup") { const r = cv.getBoundingClientRect(); this._tap(e.clientX - r.left, e.clientY - r.top); }
         // inercia al soltar
         if (p.moved && p.drag && this.pointers.size === 0 && !this._wasPinch && this.samples.length > 1) {
           const t0 = this.samples[0][0], t1 = this.samples[this.samples.length - 1][0], dt = Math.max(16, t1 - t0) / 1000;
@@ -1256,7 +1256,8 @@ void main(){
       };
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up); cv.addEventListener("lostpointercapture", up);
       cv.addEventListener("wheel", e => {
-        e.preventDefault(); const r = cv.getBoundingClientRect();
+        e.preventDefault(); for (const q of this.pointers.values()) q.cancel = true;   // zoom con el boton pulsado: al soltar no se marca
+        const r = cv.getBoundingClientRect();
         const wc = A.keys && A.keys.mouse.zoomMid;   // Ajustes > Controles: zoom hacia el centro del mapa en vez del puntero
         this.zoomBy(Math.exp(-(A.keys ? A.keys.wheel(e.deltaY) : e.deltaY) * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1) * (e.ctrlKey ? 0.012 : 0.0018) * A.mapSens.zoom), ...(wc ? [this.W / 2, this.H / 2] : (A.pointer && A.pointer.zoomAt ? A.pointer.zoomAt(e.clientX - r.left, e.clientY - r.top) : [e.clientX - r.left, e.clientY - r.top])));
       }, { passive: false });
@@ -1265,6 +1266,7 @@ void main(){
     /* mando (js/mando.js): mover la camara dx, dy px de pantalla (stick derecho, borde de la pantalla) y clavar donde esta la mira */
     nudge(dx, dy) {
       if (this.zzUntil && performance.now() < this.zzUntil) return;
+      for (const q of this.pointers.values()) q.cancel = true;   // moviste el mapa (teclas, mando) con el boton pulsado: al soltar no se marca
       if (this._orient().on) { const [a0, b0] = this._orientOut(0, 0), [a1, b1] = this._orientOut(dx, dy); dx = a1 - a0; dy = b1 - b0; }
       this.anim = null; this.drift = null; this.inertia = null; this.padPanAt = performance.now();   // la Siesta (js/jefes.js) lo oye como un arrastre
       for (const v of this.tv ? [this.view, this.tv] : [this.view]) { v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); }

@@ -1184,7 +1184,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     A.audio.unlock(!S.booting);
     if (S.booting) return;
     if (e.key === "Escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else runMenu(); return; }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
-    const act = K.which(e); if (!act) return;
+    const act = K.pan(e) || K.which(e); if (!act) return;   // las flechas son tambien de cancion anterior/siguiente: el mapa va primero
     if (S.settingsOpen && !["fs", "sfx", "mus"].includes(act)) return;    // con Ajustes abierto solo valen sus atajos: Intro pulsaba el boton de la pantalla de debajo (p. ej. Jugar) y P reanudaba la pregunta tapada
     if (/^t[1-4]$/.test(act)) { if (S.run && S.phase === "asking" && !e.repeat) A.adv.toolKey(+act[1] - 1); return; }   // mantener pulsada la tecla encendia y apagaba la herramienta sin parar
     if (panKey(act, e, true)) return;
@@ -1205,7 +1205,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   });
   /* mover el mapa con el teclado (W A S D de fabrica): mientras se mantiene, con la sensibilidad de arrastre. Solo con el mapa delante y libre
      (preguntando, en el revelado o en el atlas de la Enciclopedia); nunca con un juego de la Barra, la pausa o Ajustes encima */
-  const panHeld = new Set(); let panRaf = 0, panT = 0;
+  const panHeld = new Set(); let panRaf = 0, panT = 0, panFast = false;
   const PAN = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   const panFree = () => !S.settingsOpen && !S.paused && !document.getElementById("rouOv") && ((S.phase === "asking" || S.phase === "reveal") || (A.codex && A.codex.isOpen && A.codex.isOpen()));
   function panKey(act, e, down) {
@@ -1218,11 +1218,12 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (!panHeld.size || !panFree() || !document.hasFocus()) { panHeld.clear(); panRaf = 0; return; }
     const dt = panT ? Math.min(0.05, (t - panT) / 1000) : 0.016; panT = t; let dx = 0, dy = 0;
     for (const a of panHeld) { dx += PAN[a][0]; dy += PAN[a][1]; }
-    const k = Math.min(innerWidth, innerHeight) * 0.9 * dt; if (dx || dy) map.nudge(dx * k, dy * k);   // nudge ya aplica la sensibilidad de arrastre
+    const k = Math.min(innerWidth, innerHeight) * 0.9 * dt * (panFast ? 2.2 : 1); if (dx || dy) map.nudge(dx * k, dy * k);   // nudge ya aplica la sensibilidad de arrastre
     panRaf = requestAnimationFrame(panStep);
   }
-  addEventListener("keyup", e => { const act = K.which(e); if (act) panKey(act, e, false); });
-  addEventListener("blur", () => panHeld.clear());
+  addEventListener("keyup", e => { panFast = e.shiftKey; const act = K.pan(e) || K.which(e); if (act) panKey(act, e, false); });
+  addEventListener("keydown", e => { panFast = e.shiftKey; }, true);   // Mayusculas mantenida: el mapa va mas rapido
+  addEventListener("blur", () => { panHeld.clear(); panFast = false; });
 
   /* ------------------------------------------------------------ entrada + intro del estudio */
   function requestFs() { if (window.geoliteHost) return; const el = document.documentElement; try { (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); } catch (e) { /* denegado */ } }   // en Electron el modo (Ventana / Sin bordes / Pantalla completa) ya lo pone main.js: antes "Entrar" forzaba pantalla completa en cada arranque

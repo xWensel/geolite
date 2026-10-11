@@ -13,7 +13,7 @@ window.AIQ = window.AIQ || {};
   const DEF = {
     ok: ["c:Enter", "c:Space"], pause: ["c:KeyP", null], fs: ["c:KeyF", "c:F11"], sfx: ["c:KeyM", null], mus: ["c:KeyN", null], codex: ["c:KeyC", null],
     zin: ["k:+", "k:="], zout: ["k:-", null], home: ["k:0", null], alt: ["c:Tab", null], songPrev: ["c:ArrowLeft", null],
-    up: ["c:KeyW", null], down: ["c:KeyS", null], left: ["c:KeyA", null], right: ["c:KeyD", null],
+    up: ["c:KeyW", "c:ArrowUp"], down: ["c:KeyS", "c:ArrowDown"], left: ["c:KeyA", "c:ArrowLeft"], right: ["c:KeyD", "c:ArrowRight"],
     t1: ["c:Digit1", "c:Numpad1"], t2: ["c:Digit2", "c:Numpad2"], t3: ["c:Digit3", "c:Numpad3"], t4: ["c:Digit4", "c:Numpad4"], songNext: ["c:ArrowRight", null],
   };
   const ORDER = Object.keys(DEF);
@@ -24,6 +24,7 @@ window.AIQ = window.AIQ || {};
     K.map = clone(DEF); Object.assign(K.mouse, MDEF);
     try { const d = JSON.parse(localStorage.getItem(STORE) || "{}");
       if (d.map) for (const a of ORDER) if (Array.isArray(d.map[a])) K.map[a] = [0, 1].map(i => (typeof d.map[a][i] === "string" && /^[ck]:./.test(d.map[a][i]) ? d.map[a][i] : null));
+      for (const a of ["up", "down", "left", "right"]) if (K.map[a][0] === DEF[a][0] && !K.map[a][1]) K.map[a][1] = DEF[a][1];   // guardados de antes de las flechas: W A S D de fabrica ganan tambien las flechas
       if (d.mouse) for (const k in MDEF) if (typeof d.mouse[k] === typeof MDEF[k]) K.mouse[k] = d.mouse[k];
       for (const k of ["pick", "drag"]) if (![0, 1, 2, 3, 4].includes(K.mouse[k])) K.mouse[k] = 0;
     } catch (e) { /* sin almacenamiento o JSON roto: los de fabrica */ }
@@ -45,6 +46,8 @@ window.AIQ = window.AIQ || {};
   /* la accion que hace esta tecla (o null) */
   K.which = e => { for (const a of ORDER) if (K.match(a, e)) return a; return null; };
   K.ok = e => K.match("ok", e);
+  /* la direccion de mapa que marca esta tecla (up/down/left/right o null): las flechas tambien son de la cancion anterior/siguiente en Ajustes, asi que which() no basta */
+  K.pan = e => ["up", "down", "left", "right"].find(a => K.match(a, e)) || null;
   K.tool = e => { for (let i = 1; i <= 4; i++) if (K.match("t" + i, e)) return i - 1; return -1; };
   /* las teclas de una casilla que pisarian a la que se esta grabando: [accion, casilla] */
   K.clash = (e, skipA, skipI) => { for (const a of ORDER) for (let i = 0; i < 2; i++) if (!(a === skipA && i === skipI) && hit(K.map[a][i], e)) return [a, i]; return null; };

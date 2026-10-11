@@ -504,7 +504,7 @@ window.AIQ = window.AIQ || {};
       if (ui.view.k === "detail" && e.target.tagName !== "INPUT" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) { e.stopPropagation(); e.preventDefault(); if (!lit) step(e.key === "ArrowLeft" ? -1 : 1); return; }
       { const za = e.target.tagName !== "INPUT" && stageOn() && A.keys ? A.keys.which(e) : null; if (za === "zin" || za === "zout" || za === "home") { e.stopPropagation(); e.preventDefault(); zoomStep(za === "home" ? 0 : za === "zout" ? 1 / 1.6 : 1.6); return; } }   // +/- y 0: el zoom del mapa, como en partida
       if (e.target.tagName === "INPUT") { e.stopPropagation(); return; }
-      if (!["codex", "fs", "sfx", "mus", "up", "down", "left", "right"].includes(A.keys && A.keys.which(e))) {   // v0.3.2: teclas de Ajustes > Controles (antes C, F, M y N fijas); el mapa del atlas tambien se mueve con el teclado
+      if (!A.keys || !(A.keys.pan(e) || ["codex", "fs", "sfx", "mus"].includes(A.keys.which(e)))) {   // v0.3.2: teclas de Ajustes > Controles (antes C, F, M y N fijas); el mapa del atlas tambien se mueve con el teclado
         e.stopPropagation(); if (e.key === "Enter" || e.key === " ") { const b = document.activeElement; if (!b || !$("codex").contains(b)) e.preventDefault(); } }   // Intro, espacio, P, 1-4, +/- y 0 no tocan la partida de detras
     }, true);
     root.addEventListener("click", onClick);
