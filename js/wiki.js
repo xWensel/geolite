@@ -60,10 +60,11 @@ window.AIQ = window.AIQ || {};
   /* corchetes de pronunciacion, notas y "[cita requerida]", de dentro a fuera: "[ˈba[ː]mako]" no deja un "]" colgando.
      En coreano los corchetes con hangul son titulos de obras ("[파우스트]를"): se quedan */
   const unbracket = s => { for (let p = ""; p !== s;) { p = s; s = s.replace(/\s*\[([^[\]\n]{0,90})\]/g, (m, x) => (/[가-힯]/.test(x) ? m : "")); } return s; };
-  const DD = /(?<![.\d])\.\.(?!\.)/g;                                // ".." suelto -> "." ("a.C.." y erratas); los "..." y los rangos "+5..6" se quedan
+  const TPLNUM = /&+0*\d+\.&+0*/g;                                   // clave de orden de la plantilla de cifras ("&&&&&&&&02149690.&&&&&02 149 690" -> "2 149 690")
+  const DD = /(?<![.\d])\.\.(?!\.)/g;                               // ".." suelto -> "." ("a.C.." y erratas); los "..." y los rangos "+5..6" se quedan
   /* texto largo (Enciclopedia): quita pronunciaciones y parentesis raros, sin recortar nada */
   A.cleanText = raw => {
-    let s = dewiki(String(raw || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/[ \t]+/g, " "));
+    let s = dewiki(String(raw || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(TPLNUM, "").replace(/[ \t]+/g, " "));
     s = unbracket(stripParens(s)).replace(/\s*\/[^\/\n]*[ɐ-˿̀-ͯ]+[^\/\n]*\//g, "").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").replace(DD, ".");
     s = s.replace(/[,，、;；:：]\s*([)）])/g, "$1").replace(/\s*[(（]\s*[)）]/g, "");   // "（英语：Bondi Beach，）" tras quitar la pronunciacion
     return s.replace(/\s+([,.;:])/g, "$1").replace(/,\s*\./g, ".").replace(/[ \t]{2,}/g, " ").replace(/ *\n */g, "\n").trim();
@@ -85,7 +86,7 @@ window.AIQ = window.AIQ || {};
     const rest = t.slice(start).trim(); if (rest) out.push(rest); return out;
   };
   A.cleanFact = raw => {
-    let s = dewiki(String(raw || "").replace(/[\u200B-\u200D\uFEFF]/g, "")).replace(/\s+/g, " ").trim(); if (!s) return "";
+    let s = dewiki(String(raw || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(TPLNUM, "")).replace(/\s+/g, " ").trim(); if (!s) return "";
     const truncated = !/[.!?…»”)。！？」]$/.test(s) || (SHORTEND.test(s) && !ERA.test(s));
     s = unbracket(stripParens(s)).replace(/\s*\/[^\/]*[ɐ-˿̀-ͯ]+[^\/]*\//g, "").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").replace(DD, ".");
     s = s.replace(/[,，、;；:：]\s*([)）])/g, "$1").replace(/\s*[(（]\s*[)）]/g, "");   // "（萨摩亚语发音：）" como en cleanText

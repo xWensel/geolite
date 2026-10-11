@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.83",
+      name: L("Textos limpios", "Clean texts", "Textes propres", "Textos limpos", "Saubere Texte", "Testi puliti", "", "文字更干净", "깔끔한 글", "きれいな文章", "Чистые тексты", "Czyste teksty"),
+      date: "2026-10-11",
+      summary: L("La Enciclopedia ya no muestra restos raros de Wikipedia (cadenas de «&&&&», números sueltos y comas dobles).", "The Encyclopedia no longer shows stray Wikipedia leftovers (strings of “&&&&”, loose numbers and double commas).", "L'Encyclopédie n'affiche plus de restes bizarres de Wikipédia (suites de « &&&& », nombres isolés et doubles virgules).", "A Enciclopédia já não mostra restos estranhos da Wikipédia (cadeias de «&&&&», números soltos e vírgulas duplas).", "Die Enzyklopädie zeigt keine seltsamen Wikipedia-Reste mehr (&&&&-Ketten, lose Zahlen und doppelte Kommas).", "L'Enciclopedia non mostra più strani residui di Wikipedia (sequenze di «&&&&», numeri sparsi e doppie virgole).", "", "百科全书不再显示维基百科的奇怪残留（成串的“&&&&”、零散数字和重复逗号）。", "백과사전에 더 이상 위키백과의 이상한 잔재(‘&&&&’ 문자열, 떠도는 숫자, 겹쉼표)가 보이지 않습니다.", "百科事典に、Wikipedia 由来の変な残骸（「&&&&」の列、浮いた数字、二重のカンマ）が出なくなりました。", "В Энциклопедии больше нет странных остатков Википедии (цепочек «&&&&», лишних чисел и двойных запятых).", "Encyklopedia nie pokazuje już dziwnych resztek z Wikipedii (ciągów «&&&&», luźnych liczb i podwójnych przecinków)."),
+      chapters: [
+        { id: "textos", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Textos limpios", "Clean texts", "Textes propres", "Textos limpos", "Saubere Texte", "Testi puliti", "", "文字更干净", "깔끔한 글", "きれいな文章", "Чистые тексты", "Czyste teksty"),
+          entries: [
+            E(L("Textos limpios", "Clean texts", "Textes propres", "Textos limpos", "Saubere Texte", "Testi puliti", "", "文字更干净", "깔끔한 글", "きれいな文章", "Чистые тексты", "Czyste teksty"), "fix", "0.3.83", [
+              L("Algunos textos de la Enciclopedia llevaban basura heredada de Wikipedia: cifras escritas como «&&&&0214…», notas como «[1]» y comas dobles. Está limpiado en los 12 idiomas.", "Some Encyclopedia texts carried junk inherited from Wikipedia: figures written like “&&&&0214…”, notes like “[1]” and double commas. It's cleaned up in all 12 languages.", "Certains textes de l'Encyclopédie portaient des déchets hérités de Wikipédia : des chiffres écrits « &&&&0214… », des notes comme « [1] » et des doubles virgules. C'est nettoyé dans les 12 langues.", "Alguns textos da Enciclopédia traziam lixo herdado da Wikipédia: números escritos como «&&&&0214…», notas como «[1]» e vírgulas duplas. Está limpo nos 12 idiomas.", "Einige Texte der Enzyklopädie enthielten Müll aus Wikipedia: Zahlen wie «&&&&0214…», Fußnoten wie «[1]» und doppelte Kommas. In allen 12 Sprachen bereinigt.", "Alcuni testi dell'Enciclopedia contenevano scarti ereditati da Wikipedia: cifre scritte come «&&&&0214…», note come «[1]» e doppie virgole. Ora è tutto ripulito nelle 12 lingue.", "", "百科全书中有些文字带着从维基百科继承来的杂质：写成“&&&&0214…”的数字、“[1]”这样的注释和重复的逗号。12 种语言均已清理。", "백과사전 일부 글에 위키백과에서 딸려 온 찌꺼기가 있었습니다. ‘&&&&0214…’처럼 적힌 숫자, ‘[1]’ 같은 각주, 겹쉼표 등입니다. 12개 언어 모두 정리했습니다.", "百科事典の一部の文章に、Wikipedia から引き継いだゴミが残っていました。「&&&&0214…」のような数字、「[1]」のような注、二重のカンマです。12 言語すべてで掃除しました。", "В некоторых текстах Энциклопедии остался мусор из Википедии: числа вида «&&&&0214…», сноски вроде «[1]» и двойные запятые. Всё вычищено на всех 12 языках.", "W niektórych tekstach Encyklopedii zostały śmieci odziedziczone z Wikipedii: liczby zapisane jako «&&&&0214…», przypisy typu «[1]» i podwójne przecinki. Wyczyszczono je we wszystkich 12 językach."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.82",
       name: L("Sin siseo", "No hiss", "Sans sifflement", "Sem chiado", "Ohne Zischen", "Senza sibilo", "", "没有嘶嘶声", "쉬익 소리 없음", "シューという音なし", "Без шипения", "Bez syczenia"),
       date: "2026-10-11",
