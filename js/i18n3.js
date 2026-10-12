@@ -2,6 +2,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   Object.assign(A.TR = A.TR || {}, {
+    "Inside!": ["Dedans !", "Dentro!", "Drin!", "Dentro!", "¡Adentro!", "命中！", "영역 안!", "命中！", "Попадание!", "W środku!"],
     "Doubloons ×2": ["Doublons ×2", "Dobrões ×2", "Dublonen ×2", "Dobloni ×2", "Doblones ×2", "金币 ×2", "도블론 ×2", "ダブロン×2", "Дублоны ×2", "Dublony ×2"],
     "No cards left: move on!": ["Plus de cartes : en avant !", "Não restam cartas: siga em frente!", "Keine Karten mehr: weiter geht's!", "Niente più carte: avanti!", "No quedan cartas: ¡a seguir!", "没有更多卡牌了：继续前进吧！", "남은 카드가 없습니다: 계속 진행하세요!", "カードがもうない：先へ進もう！", "Карт больше нет: продолжаем!", "Koniec kart: ruszaj dalej!"],
     "Pick ONE relic for free. Legendaries can show up here.": ["Choisis UNE relique gratuite. Des légendaires peuvent apparaître ici.", "Escolha UMA relíquia de graça. Aqui podem aparecer lendárias.", "Wähle EIN Relikt kostenlos. Hier können Legendäre auftauchen.", "Scegli UNA reliquia gratis. Qui possono uscire le leggendarie.", "Elige UNA reliquia gratis. Aquí pueden aparecer legendarias.", "免费选择一件遗物。这里可能出现传说级遗物。", "유물 하나를 무료로 선택하세요. 여기서는 전설 유물도 나올 수 있습니다.", "レリックを1つ無料で選ぼう。ここではレジェンダリーも出現する。", "Выбери ОДНУ реликвию бесплатно. Здесь могут появиться легендарные.", "Wybierz JEDEN relikt za darmo. Mogą się tu trafić legendarne."],
