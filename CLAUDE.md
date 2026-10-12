@@ -6,7 +6,7 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 ## Autoria y creditos (no se cambia sin que el autor lo pida)
 - Diseno, codigo, arte y banda sonora: Cousins Studios (el arte, con el matiz de la linea siguiente).
 - Arte: pixel art de Cousins Studios. Base ideada por el estudio y andamiaje de IA (libro de estilo propio y paleta limitada); trabajo manual y pulido humano, pieza a pieza, hasta la rejilla nativa del juego: el crupier (retrato maestro pulido a mano), iconos e insignias de logros (48 px nativos), iconos del casino, escenas, tarjetas de modo, logo y escudo. Todo el arte debe quedar a rejilla nativa y a escala entera (`image-rendering: pixelated`). Lo que se publique como arte sin ese repaso a mano no cuenta como terminado.
-- Banda sonora: creada por Cousins Studios con AKAI y exportada al motor de audio del juego (`assets/music/`, orden y titulos en `js/audio.js`). 21 canciones, 35 min 43 s. Cualquier cancion nueva se anade a esta lista y a la del README:
+- Banda sonora: creada por Cousins Studios con AKAI y exportada al motor de audio del juego (`assets/music/`, orden y titulos en `js/audio.js`). 22 canciones, 37 min 28 s. Cualquier cancion nueva se anade a esta lista y a la del README:
 01. Apuesta segura / Sure Bet (lounge nocturno, 1:30)
 02. Doble o nada / Double or Nothing (ragtime, 1:44)
 03. Ambos marcan / Both Teams to Score (bossa nova, 1:41)
@@ -28,6 +28,7 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 19. Ganador y colocado / Each Way (cha-cha-chá, 1:46)
 20. Empate no vale / Draw No Bet (ranchera, 1:43)
 21. Apuesta máxima / Max Bet (corrido, 1:45)
+22. Tipsters / Tipsters (noir, 1:45)
 - Datos y licencias: fronteras de Natural Earth, textos de Wikipedia y fotos de Wikimedia Commons con atribucion por tarjeta (`credits.html`, panel Creditos del juego), tipografias SIL OFL (Silkscreen, Jersey 15, Pixelify Sans, Fusion Pixel). Cualquier foto o fuente nueva entra en `credits.html` (`tools/build-credits.mjs`).
 
 ## Versiones (obligatorio en cada entrega)

@@ -1,6 +1,6 @@
 /*
  * Geolite - identidad sonora.
- * Los efectos se sintetizan en el navegador; la musica son las 21 pistas fijas de la BSO (assets/music/*.mp3),
+ * Los efectos se sintetizan en el navegador; la musica son las 22 pistas fijas de la BSO (assets/music/*.mp3),
  * obra del autor del juego (creada con AKAI): aqui solo se integran y reproducen.
  *  - Firma: motivo de tres notas ascendentes (sol-do-re) que suena al empezar, al superar niveles y en la victoria.
  *  - Escala pentatonica de Do mayor: cualquier nota que suene "encaja", asi nada choca.
@@ -148,7 +148,7 @@ window.AIQ = window.AIQ || {};
     lp.type = "lowpass"; lp.frequency.value = 2600; os.connect(lp).connect(g).connect(sfxBus); env(g, t, 0.004, m.v, m.d); os.start(t); os.stop(t + m.d + 0.05);
   }
 
-  /* ------------------------------------------------------------------ musica: 21 pistas fijas ("BSO" del casino) */
+  /* ------------------------------------------------------------------ musica: 22 pistas fijas ("BSO" del casino) */
   /*
    * Cada pista es un archivo real en assets/music/ (la BSO del autor del juego, creada con AKAI).
    * Aqui solo se reproducen, se encadenan solas al terminar y se anuncian con una pequena transicion.
@@ -176,6 +176,7 @@ window.AIQ = window.AIQ || {};
     ["Ganador y colocado", "Each Way", "Pari gagnant-placé", "Ganhador e colocado", "Sieg-Platz-Wette", "Vincente e piazzato", "Ganador y colocado", "独赢位置", "이치 웨이", "単勝・複勝", "Победа и место", "Wygrana i miejsce"],
     ["Empate no vale", "Draw No Bet", "Match nul remboursé", "Empate anula aposta", "Unentschieden, Geld zurück", "Pareggio rimborsato", "Empate no cuenta", "平局退款", "무승부 환불", "引き分け返金", "Ничья — возврат", "Zakład bez remisu"],
     ["Apuesta máxima", "Max Bet", "Mise maximale", "Aposta máxima", "Höchsteinsatz", "Puntata massima", "Apuesta máxima", "最大注", "최대 베팅", "マックスベット", "Максимальная ставка", "Maksymalna stawka"],
+    ["Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters"],
   ];
   const FILES = [
     "assets/music/01-lounge-nocturno.mp3", "assets/music/02-ragtime-roulette.mp3", "assets/music/03-bossa-de-medianoche.mp3",
@@ -184,7 +185,7 @@ window.AIQ = window.AIQ || {};
     "assets/music/10-cash-out.mp3", "assets/music/11-banca-al-dia.mp3", "assets/music/12-apuesta-en-vivo.mp3",
     "assets/music/13-pleno-al-quince.mp3", "assets/music/14-handicap-asiatico.mp3", "assets/music/15-funk-da-sorte.mp3",
     "assets/music/16-house-del-crupier.mp3", "assets/music/17-tecno-del-bote.mp3", "assets/music/18-merengue-del-premio.mp3",
-    "assets/music/19-cha-cha-del-casino.mp3", "assets/music/20-ranchera-de-la-suerte.mp3", "assets/music/21-corrido-del-apostador.mp3",
+    "assets/music/19-cha-cha-del-casino.mp3", "assets/music/20-ranchera-de-la-suerte.mp3", "assets/music/21-corrido-del-apostador.mp3", "assets/music/22-tipsters.mp3",
   ];
   /* v0.3.55 (el sonido de la casa, 3a): cada cancion tiene su momento y su volumen. Los archivos no se tocan: todo se decide aqui.
      - GROUPS: el reparto. La portada y los menus, las mas tranquilas (la 1.a, "Apuesta segura", es SIEMPRE la del arranque); cada acto de la
@@ -196,15 +197,15 @@ window.AIQ = window.AIQ || {};
      - LUFS: el volumen medido de cada pista (ffmpeg ebur128). Entre la mas fuerte y la mas floja habia 8,7 dB; TRIM las lleva todas a -34 LUFS
        (correccion limitada a -4 / +5,5 dB) con una ganancia por pista.
      - BPM y BEAT0 (tempo y primer pulso en ms, medidos: todas van a tempo exacto de principio a fin): el compas de la que suena, A.music.beat().
-       Las 21 arrancan en el pulso: el primer ataque cae a los 59-62 ms del archivo y la rejilla aguanta hasta el final. Ojo si entra una pista
+       Las 22 arrancan en el pulso: el primer ataque cae a los 59-62 ms del archivo y la rejilla aguanta hasta el final. Ojo si entra una pista
        nueva: el ataque mas fuerte de una cancion puede ser el contratiempo (mambo, house, cha-cha); el pulso se mide con la energia en el
        tiempo y con los graves, no con el ataque de toda la banda. */
-  const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
+  const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18, 21], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
   GROUPS.classic = GROUPS.home.concat(GROUPS.a1); GROUPS.inf = GROUPS.a2.concat(GROUPS.a3);
   const NOW = { boss: 1, win: 1 };                                      // momentos que no esperan a que acabe la cancion
-  const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4];
+  const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4, -35.1];
   const TRIM = LUFS.map(l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20));
-  const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92];
+  const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92, 92];
   const BEAT0 = 60;
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
   let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
@@ -298,7 +299,7 @@ window.AIQ = window.AIQ || {};
       return { ms: 60000 / BPM[cur], at: d.el.currentTime * 1000 - BEAT0 - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
     },
   };
-  A.audio.setSkin = () => {};   // las 21 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
+  A.audio.setSkin = () => {};   // las 22 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
   A.audio.state = () => (ctx ? ctx.state : 'none');
   A.audio.tap = () => { if (!ctx) return null; const an = ctx.createAnalyser(); an.fftSize = 2048; outTap.connect(an); return an; };   // para las pruebas: un medidor de lo que sale por los altavoces
   /* volumen 0..1 de "master" | "music" | "sfx" */
