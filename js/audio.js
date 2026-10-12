@@ -257,10 +257,11 @@ window.AIQ = window.AIQ || {};
       if (!A.audio.musicOn || !init()) return;
       if (cur < 0) useTrack(0, "cut"); else decks[di].el.play().catch(() => {});   // la primera es siempre la del arranque
     },
-    /* las flechas del reproductor: la anterior y la siguiente DENTRO del grupo del momento */
+    /* las flechas del reproductor: la anterior y la siguiente de la LISTA entera, en orden (1, 2, 3... y vuelta a la 1); el grupo del momento
+       solo manda cuando la cancion acaba sola */
     next() { A.music.step(1); },
     prev() { A.music.step(-1); },
-    step(d) { const g = group(); if (cur < 0 || g.length < 2) return; const k = g.indexOf(cur); change(g[k < 0 ? 0 : (k + d + g.length) % g.length], "soft"); },
+    step(d) { const n = FILES.length; if (cur < 0 || n < 2) return; change((cur + d + n) % n, "soft"); },
     index() { return cur; },
     count() { return FILES.length; },
     title(i = cur) { const n = NAMES[i]; if (!n) return ""; const k = A.LANGS.findIndex(l => l.code === A.lang); return n[k] || n[1]; },
