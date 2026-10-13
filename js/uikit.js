@@ -140,11 +140,28 @@
     document.addEventListener("pointerover", e => { if (e.pointerType === "touch") return; const el = find(e.target); if (el !== cur) arm(el); }, true);
     /* los controles desactivados no lanzan eventos: se buscan a mano (p. ej. "logro bloqueado" en una baraja) */
     let lastDis = 0;
+    /* v0.3.101: paneles que no captan el raton (los de lectura de la partida y la tira de retos: css/uikit.css, "paneles fantasma"). Sus globos se
+       buscan por posicion, como los de los controles desactivados; y el panel que tienes bajo el cursor se vuelve casi transparente para ver el mapa */
+    const GHOST_TT = "#chalBar .ch-chip, #plate [data-tf], #plate [data-tt], #ledger [data-tf], #ledger [data-tt], #note [data-tf], #note [data-tt], #advBar [data-tf], #advBar [data-tt]";
+    const GHOST_BOX = "#plate, #advBar, #ledger, #note", inRect = r => mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom;
+    let ghostEl = null, ghostOn = null;
+    const ghostAt = () => {
+      let best = null;
+      for (const g of document.querySelectorAll(GHOST_TT)) { const r = g.getBoundingClientRect(); if (r.width && inRect(r) && getComputedStyle(g).pointerEvents === "none") best = g; }   // el ultimo en el arbol = el mas interior
+      return best;
+    };
+    const ghostFade = () => {
+      let on = null;
+      for (const p of document.querySelectorAll(GHOST_BOX)) { if (!p.getClientRects().length) continue; const r = p.getBoundingClientRect(); if (inRect(r)) { on = p; break; } }
+      if (on) { const top = document.elementFromPoint(mx, my); if (top && on.contains(top)) on = null; }   // encima hay algo que se pulsa (un boton, una reliquia): el panel no se aparta
+      if (on !== ghostOn) { if (ghostOn) ghostOn.classList.remove("ghosted"); if (on) on.classList.add("ghosted"); ghostOn = on; }
+    };
     const disabledAt = () => { for (const d of document.querySelectorAll(":disabled[data-tt], :disabled[data-th], :disabled[data-tip]")) { const r = d.getBoundingClientRect(); if (mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom) return d; } return null; };
     document.addEventListener("pointermove", e => {
       if (e.pointerType === "touch") return; mx = e.clientX; my = e.clientY; if (shown) place();
       const now = performance.now(); if (now - lastDis < 60) return; lastDis = now;
-      const d = disabledAt(); if (d) { if (d !== cur) arm(d); } else if (cur && cur.disabled) arm(null);
+      const g = ghostAt(), d = disabledAt() || g; if (d) { if (d !== cur) arm(d); ghostEl = d === g ? g : null; } else if (cur && (cur.disabled || cur === ghostEl)) { ghostEl = null; arm(null); }
+      ghostFade();
     }, { capture: true, passive: true });
     ["pointerdown", "wheel", "keydown", "blur", "scroll"].forEach(k => window.addEventListener(k, hide, true));
     document.addEventListener("pointerout", e => { if (!e.relatedTarget) { hide(); cur = null; } }, true);

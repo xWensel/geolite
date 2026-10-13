@@ -516,7 +516,7 @@ window.AIQ = window.AIQ || {};
     S.qlist = (S.bl || S.list).filter(c => c.id !== "babel").concat(expand([{ id: S.qsub.id, lv: b.lv }]));
   }
   /* la ficha de Babel en la barra de la Aventura: la del suplente mientras dura la pregunta (renderBars ya la pinta asi; esto cubre el cambio) */
-  const syncChips = () => { const b = S.pub.find(c => c.id === "babel"); if (!b) return; document.querySelectorAll('#advBar .ch-chip[data-of="babel"]').forEach(el => { const want = S.qsub ? S.qsub.id : "babel"; if (el.dataset.ch !== want) el.outerHTML = A.chal.chip(b, el.classList.contains("sm")); }); };
+  const syncChips = () => { const b = S.pub.find(c => c.id === "babel"); if (!b) return; document.querySelectorAll('#chalBar .ch-chip[data-of="babel"]').forEach(el => { const want = S.qsub ? S.qsub.id : "babel"; if (el.dataset.ch !== want) el.outerHTML = A.chal.chip(b, el.classList.contains("sm")); }); };
   /* el nombre y el pais de debajo sufren los mismos retos de texto (el pais tambien tiembla, se borra, se cambia...) */
   function decorate(o) {
     const el = $("askName"), sub = $("askSub"); if (!el || !o) return; clearText();

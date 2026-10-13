@@ -979,7 +979,7 @@ window.AIQ = window.AIQ || {};
     return best;
   };
   /* lo que tapa el HUD en el lienzo del mapa (px): las etiquetas de las sondas lo esquivan. Se lee al sondear, no en cada fotograma */
-  const hudRects = () => { const cv = C().map.cv.getBoundingClientRect(); return ["plate", "advBar", "ledger", "rail", "dock", "note", "toolBar"].map(id => $(id)).filter(e => e && e.getClientRects().length).map(e => { const b = e.getBoundingClientRect(), up = e.id === "toolBar" ? 56 : 4; return [b.left - cv.left - 4, b.top - cv.top - up, b.right - cv.left + 4, b.bottom - cv.top + 4]; }); };
+  const hudRects = () => { const cv = C().map.cv.getBoundingClientRect(); return ["plate", "advBar", "chalBar", "ledger", "rail", "dock", "note", "toolBar"].map(id => $(id)).filter(e => e && e.getClientRects().length).map(e => { const b = e.getBoundingClientRect(), up = e.id === "toolBar" ? 56 : 4; return [b.left - cv.left - 4, b.top - cv.top - up, b.right - cv.left + 4, b.bottom - cv.top + 4]; }); };
   A.adv.probe = function (lon, lat) {
     const S = C().S, id = S.tool, t = run.tools[id], map = C().map; if (!t || t.left <= 0) { S.tool = null; renderBars(); return; }
     const o = S.qs[S.qi]; t.left--; run.qTools++; run.rTools++; S.tool = null; S.probeAt = performance.now();   // un doble clic ya no responde la pregunta (ver onPick)
@@ -1008,6 +1008,7 @@ window.AIQ = window.AIQ || {};
   function ensureBars() {
     let el = $("advBar"); if (el) return;
     el = document.createElement("div"); el.id = "advBar"; el.className = "adv-bar hidden"; ($("leftCol") || $("app")).appendChild(el);
+    const cb = document.createElement("div"); cb.id = "chalBar"; cb.className = "chal-bar hidden"; $("app").appendChild(cb);   // v0.3.101: los retos, solo iconos y arriba del todo; nunca captan el raton (el texto sale al pasar por encima, ver js/uikit.js)
     const tb = document.createElement("div"); tb.id = "toolBar"; tb.className = "tool-bar hidden"; $("app").appendChild(tb);
     if (A._noteTop && A.marcador && A.marcador.docked()) tb.style.setProperty("--note-top", A._noteTop);   // v0.3.79: lo que ocupa la nota de campo (js/game.js ya no lo escribe en la raiz)
   }
@@ -1062,7 +1063,7 @@ window.AIQ = window.AIQ || {};
   const amuOf = c => { const f = (A.CHAL[c.id] || {}).fam; return f ? perkList().find(p => p.amulet === f) : null; };
   A.adv.amuSlam = id => {
     run.amuSlam = roundNo() + ":" + (run.attempt || 0);
-    document.querySelectorAll(`#advBar .ch-amu[data-amu="${id}"]`).forEach((el, i) => { el.classList.remove("wait", "slam"); A.restyle(el); el.classList.add("slam"); setTimeout(() => A.sfx.sealPop(), 60 + i * 120); const ch = el.closest(".ch-chip"); if (ch && !document.documentElement.classList.contains("reduce-motion")) ch.animate([{ transform: "none" }, { transform: "translateX(-4px) rotate(-2deg)" }, { transform: "translateX(3px) rotate(1deg)" }, { transform: "none" }], { duration: 300, delay: 220, easing: "steps(6, end)" }); });   // la ficha encaja el golpe
+    document.querySelectorAll(`#chalBar .ch-amu[data-amu="${id}"]`).forEach((el, i) => { el.classList.remove("wait", "slam"); A.restyle(el); el.classList.add("slam"); setTimeout(() => A.sfx.sealPop(), 60 + i * 120); const ch = el.closest(".ch-chip"); if (ch && !document.documentElement.classList.contains("reduce-motion")) ch.animate([{ transform: "none" }, { transform: "translateX(-4px) rotate(-2deg)" }, { transform: "translateX(3px) rotate(1deg)" }, { transform: "none" }], { duration: 300, delay: 220, easing: "steps(6, end)" }); });   // la ficha encaja el golpe
   };
   /* premio en el veredicto (la barra esta oculta): suena una moneda por linea de reliquia al aparecer y tiembla una vez (1); lv 2 = premio medio */
   function relicPay(ids, lv = 1) {
@@ -1114,16 +1115,17 @@ window.AIQ = window.AIQ || {};
     go(); if (document.fonts && document.fonts.status !== "loaded") document.fonts.ready.then(go);   // con la letra aun sin cargar, las medidas salen cortas
   };
   function renderBars() {
-    ensureBars(); const bar = $("advBar"), tb = $("toolBar"); renderLoot();
-    if (!run || !C().S.camp || C().S.camp.mode !== "adventure" || ["title", "levelEnd", "shop"].includes(C().S.phase)) { bar.classList.add("hidden"); tb.classList.add("hidden"); return; }
+    ensureBars(); const bar = $("advBar"), tb = $("toolBar"), cb = $("chalBar"); renderLoot();
+    if (!run || !C().S.camp || C().S.camp.mode !== "adventure" || ["title", "levelEnd", "shop"].includes(C().S.phase)) { bar.classList.add("hidden"); tb.classList.add("hidden"); cb.classList.add("hidden"); return; }
     const info = actInfo(run.act), silenced = (run.boss || []).includes("silence");
     bar.classList.remove("hidden");
     bar.innerHTML = `<div class="ab-top"><span class="ab-act" data-tf="abact">${A.tx(info.n)}</span><span class="ab-coins" id="abCoins" data-tf="abcoins">${CN()}<b>${run.coins}</b></span><span class="ab-hearts" data-tf="abhearts">${hearts()}</span></div>
       <div class="ab-perks">${run.perks.map(id => `<span class="ab-perk" data-id="${id}">${ic(id)}${id === "hoard" && run.hucha ? `<b class="hc-n">${run.hucha}</b>` : ""}</span>`).join("")}</div>
-      ${(run.chal || []).length ? `<div class="ab-chal">${(A.chal.barList ? A.chal.barList(run.chal) : run.chal).map(c => { const am = amuOf(c), cc = am ? { ...c, amu: am.id, amuIco: am.ico, amuWait: run.qi === 0 && run.amuSlam !== roundNo() + ":" + (run.attempt || 0) } : c; return A.chal.chip(run.calmOn && ((perkList().find(p => p.calm) || {}).calm || []).includes((A.CHAL[c.id] || {}).fam) ? { ...cc, calm: true } : cc, true); }).join("")}</div>` : ""}
       ${A.jefes ? A.jefes.riseHtml() : ""}
       ${run.wind ? `<div class="ab-wind"><svg viewBox="-12 -12 24 24" style="transform:rotate(${run.wind.brg}deg)"><path d="M0 -9 L6 4 L0 1 L-6 4 Z"/></svg><span>${dirName(run.wind.brg)} · ${A.fmtDist(run.wind.km)}</span></div>` : ""}`;
     flashKeep(bar);
+    cb.innerHTML = (run.chal || []).length ? `${(A.chal.barList ? A.chal.barList(run.chal) : run.chal).map(c => { const am = amuOf(c), cc = am ? { ...c, amu: am.id, amuIco: am.ico, amuWait: run.qi === 0 && run.amuSlam !== roundNo() + ":" + (run.attempt || 0) } : c; return A.chal.chip(run.calmOn && ((perkList().find(p => p.calm) || {}).calm || []).includes((A.CHAL[c.id] || {}).fam) ? { ...cc, calm: true } : cc, true); }).join("")}` : "";
+    cb.classList.toggle("hidden", !cb.firstChild);
     const ids = Object.keys(run.tools);
     tb.classList.toggle("hidden", !ids.length || C().S.phase !== "asking");
     const aim = id => (id === "sonar" ? A.T("Toca el mapa para lanzar una sonda…", "Tap the map to send a probe…") : A.T("Toca el mapa para orientar la brújula…", "Tap the map to aim the compass…"));
@@ -1136,7 +1138,7 @@ window.AIQ = window.AIQ || {};
   }
   let toolSig = "";
   A.adv.refresh = renderBars;
-  A.adv.hideBars = () => { const a = $("advBar"), b = $("toolBar"), l = $("scLoot"); if (a) a.classList.add("hidden"); if (b) b.classList.add("hidden"); if (l) l.classList.add("hidden"); };
+  A.adv.hideBars = () => { const a = $("advBar"), b = $("toolBar"), l = $("scLoot"), c = $("chalBar"); if (c) c.classList.add("hidden"); if (a) a.classList.add("hidden"); if (b) b.classList.add("hidden"); if (l) l.classList.add("hidden"); };
   A.adv.hudTitle = () => { const Lv = C().S.camp.levels[0]; return run && run.inf ? `${A.tx(Lv.name)} · ${A.tx(Lv.topicName)} · ${A.fmt1(Lv.seconds)} s` : `${A.tx(Lv.name)} · ${A.tx(Lv.topicName)} · ${A.T("Objetivo", "Target")} ${A.fmt(Lv.advance)}`; };
   A.adv.toolKey = n => { const ids = run ? Object.keys(run.tools) : []; if (ids[n]) A.adv.useTool(ids[n]); };
   A.adv.cancelTool = () => { const S = C().S; if (S.tool) { S.tool = null; renderBars(); } };

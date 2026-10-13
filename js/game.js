@@ -783,7 +783,7 @@
   function revealObs() {
     const cv = map.cv.getBoundingClientRect(), out = [];
     const add = (r, p = 12) => { if (r && r.width > 1 && r.height > 1) out.push([r.left - cv.left - p, r.top - cv.top - p, r.right - cv.left + p, r.bottom - cv.top + p]); };
-    for (const id of ["plate", "advBar", "toolBar", "note", "dock"]) { const e = $(id); if (e && e.getClientRects().length) add(e.getBoundingClientRect()); }
+    for (const id of ["plate", "advBar", "chalBar", "toolBar", "note", "dock"]) { const e = $(id); if (e && e.getClientRects().length) add(e.getBoundingClientRect()); }
     if (A.marcador.docked()) add(A.marcador.finalRect());
     else { const sr = A.marcador.sheetRect(); if (sr) add(sr); else out.push([0, cv.height - Math.min(cv.height * 0.62, 440), cv.width, cv.height]); }   // ventana estrecha: la hoja del ticket, donde de verdad esta
     const d = $("dealer"), sz = innerWidth > 720 ? 320 : 170;

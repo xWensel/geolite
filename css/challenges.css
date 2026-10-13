@@ -574,3 +574,22 @@ html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class
 .dealer.lvpos .dl-bubble { order: 1; margin: 0; min-width: min(var(--hf), 420px); max-width: min(460px, 80vw); padding-bottom: 22px; transform-origin: var(--tail) 100%;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(var(--tail) + 10px) calc(100% - 12px), var(--tail) 100%, calc(var(--tail) - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
 .dealer.lvpos.lv-c .dl-bubble { max-width: min(640px, 86vw); font-size: calc(32px * var(--dll, 1)); }
+
+/* ==== v0.3.101: los retos de la ronda, arriba del todo y solo con su icono (#chalBar, js/adventure.js renderBars) ====
+   Antes eran una lista de fichas con nombre dentro de la barra del acto: con 5 retos tapaba medio mapa y, con "Controles invertidos", cruzarla
+   se comia los clics. Ahora es una tira de iconos que NUNCA capta el raton (pointer-events: none: el clic llega siempre al mapa); el nombre y
+   la descripcion salen al pasar el cursor por encima (js/uikit.js, ghostAt, que los busca por posicion). Los puntos de abajo son el nivel. */
+#chalBar { position: absolute; z-index: 6; left: 50%; top: var(--hy, 14px); transform: translateX(-50%); zoom: var(--k, 1); --vw: calc(1vw / var(--k, 1)); --vh: calc(1vh / var(--k, 1));
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 6px; max-width: calc(34 * var(--vw)); pointer-events: none; }
+#chalBar.hidden { display: none; }
+#chalBar .ch-chip { position: relative; flex-direction: column; justify-content: center; gap: 3px; width: 42px; padding: 6px 0 5px; border-radius: 0; background: #0b1d15; filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .72)); pointer-events: none; }
+#chalBar .ch-chip .ic { width: 24px; height: 24px; }
+#chalBar .ch-chip > b { display: none; }
+:root body #chalBar .ch-chip .ch-lv { display: block; font-size: 9px; line-height: 9px; letter-spacing: 1px; margin-right: -1px; }
+:root body #chalBar .ch-chip .ch-new { position: absolute; left: -4px; top: -4px; width: 9px; height: 9px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: #e2483d; box-shadow: 0 0 0 2px #0b1d15; font-size: 0; }
+#chalBar .ch-chip.ch-sealed::before { position: absolute; left: -4px; bottom: -4px; width: 9px; height: 9px; }
+#chalBar .ch-chip.ch-calm::after { position: absolute; right: 2px; top: 0; margin: 0; font-size: 11px; }
+#chalBar .ch-chip .ch-amu { right: -7px; top: -9px; width: 18px; height: 18px; } #chalBar .ch-chip .ch-amu .ic { width: 13px; height: 13px; }
+#chalBar .ch-chip.ch-hid { opacity: 1; }
+#chalBar .ch-chip.ch-hid b { display: block; letter-spacing: 0; font-size: 16px; line-height: 1; }
+@media (max-width: 900px), (max-height: 520px) { #chalBar { top: 6px; zoom: 1; max-width: 40vw; gap: 4px; } #chalBar .ch-chip { width: 32px; padding: 4px 0 3px; } #chalBar .ch-chip .ic { width: 18px; height: 18px; } }

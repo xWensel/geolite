@@ -332,3 +332,12 @@ img.ic.ic-dealer_mini_laugh, img.ic.ic-dealer_mini { image-rendering: pixelated;
 @keyframes tc-stamp { to { opacity: 1; transform: rotate(-12deg) scale(1); } }
 @keyframes tc-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-3deg); } to { opacity: 0; transform: translate(-50%, -40%) scale(.9) rotate(-3deg); } }
 .tier-card.still, .tier-card.still.stamped .tc-stamp { animation-duration: .01s; }
+
+/* ==== v0.3.101: paneles fantasma. Los paneles de LECTURA de la partida (pregunta, marcador, nota, barra del acto) no captan el raton: el clic llega
+   siempre al mapa que tienen debajo (con los controles invertidos, cruzar uno ya no se come el clic). Solo se pulsa lo que es de pulsar (botones,
+   reliquias, el ticket). Su globo lo busca js/uikit.js por posicion, y el panel que tienes bajo el cursor se vuelve casi transparente (.ghosted). */
+#leftCol > .plate-sh, #leftCol > .adv-bar, #ledgerSh, #noteSh, #plate, #ledger, #note, #advBar { pointer-events: none; }
+:is(#plate, #ledger, #note, #advBar) :is(button, a, input, select, textarea, [role="button"], [tabindex], .ab-perk, .btn-ink, .gx-btn, .tk-cx) { pointer-events: auto; }
+#ledgerSh :is(button, a, [role="button"], .btn-ink, .gx-btn, .tk-cx) { pointer-events: auto; }
+#plate, #ledger, #note, #advBar { transition: opacity .14s linear; }
+#plate.ghosted, #ledger.ghosted, #note.ghosted, #advBar.ghosted { opacity: .22; }
