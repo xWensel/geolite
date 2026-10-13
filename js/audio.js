@@ -333,7 +333,7 @@ window.AIQ = window.AIQ || {};
      Enciclopedia, Perfil y Clasificacion (abajo, mas graves y tambien subiendo: Enciclopedia, Clasificacion, Perfil) y Ajustes (arriba, el mas agudo).
      Todo entre do5 y re6 */
   const HOV_DEG = [7, 8, 9, 6, 8, 10, 7];
-  let hovT = -1, hovLast = 0, landLast = 0, flagLast = -1;
+  let hovT = -1, hovLast = 0, landLast = 0, flagLast = -1, hovStep = 0, hovDir = 1;
   const JP_GAP = 0.46;                    // segundos entre jackpots de la Enciclopedia: el ticket enciende sus casillas y el movil vibra a este mismo ritmo
   const JP_LEAD = 0.12;                   // con cuanta antelacion se crean los nodos de cada golpe del jackpot
   A.audio.jpGap = JP_GAP;
@@ -349,7 +349,19 @@ window.AIQ = window.AIQ || {};
 
   A.sfx = {
     ui: go(t => pluck(84, t, { vol: 0.05, dur: 0.12, bright: 3, rev: 0.1 })),
-    hover: go(t => noise(t, 0.02, { hp: 5000, vol: 0.02 })),
+    /* hover de cualquier control: ficha que roza el fieltro + nota de kalimba flojita. Barrer varios controles seguidos sube por la
+       pentatonica (peldano a peldano, rebota arriba y baja: nunca chilla) y al parar un instante vuelve al principio; cada vez se sortean el
+       timbre, la afinacion fina y el brillo. Comparte hovT con menuHover: si dos oyentes saltan a la vez (Enciclopedia, parche), suena uno */
+    hover: go(t => {
+      if (t - hovT < 0.06) return;
+      const r = Math.random, since = t - hovT; hovT = t;
+      if (since > 0.75) { hovStep = 0; hovDir = 1; } else { hovStep += hovDir; if (hovStep >= 6) hovDir = -1; else if (hovStep <= 0) hovDir = 1; }
+      const m = scaleNote(8 + hovStep, 60) + (r() - 0.5) * 0.08, v = 0.0105 * (0.85 + 0.3 * r());
+      noise(t, 0.006 + 0.003 * r(), { type: "bandpass", lp: 3400 + 1800 * r(), q: 1.3, vol: 0.0042 });
+      pluck(m, t + 0.003, { vol: v, dur: 0.09 + 0.05 * r(), bright: 2.6 + 1.2 * r(), rev: 0.12, wave: r() < 0.7 ? "sine" : "triangle" });
+      bell(m + 12, t + 0.007, { vol: v * 0.24, dur: 0.14 + 0.08 * r(), rev: 0.3 });
+      if (hovStep >= 3 && r() < 0.5) chirp(m + 12, t + 0.005, v * 0.1, 0.02);                 // un pellizco de 8 bits cuando la escalera se calienta
+    }),
     /* menu principal (3 modos, Enciclopedia, Clasificacion, Perfil, Ajustes): rozar una ficha de casino. Clac minimo de ficha, nota de marimba o kalimba,
        brillo de campana y una pizca de 8 bits, todo flojito. Cada boton tiene su registro (barrer las cartas suena a arpegio) y cada vez
        se sortea la nota vecina (nunca la misma que la anterior), el timbre, el brillo, la sala y el volumen: no suena dos veces igual */

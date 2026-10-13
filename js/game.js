@@ -475,9 +475,18 @@
   const MENU6 = ".hh .mcard, .hh .plq, .hh .menu-gear, #dlg > .menu-patch";                                   // .plq: las placas del pie (Enciclopedia, Clasificacion, Perfil)
   const menuK = el => (el.classList.contains("mcard") ? ({ classic: 0, adventure: 1, daily: 2, duelo: 2 })[el.dataset.mode] : ({ codexBtn: 3, profBtn: 4, rankBtn: 6, patchBtn: 3 })[el.id] ?? 5);
   let lastHover = null, ptr = "mouse";
+  /* elemento con manita (cursor: pointer) en el objetivo o sus 3 ancestros mas cercanos; el mapa y el lienzo no suenan */
+  const hoverable = t => {
+    for (let e = t, i = 0; e && e.nodeType === 1 && i < 4; e = e.parentElement, i++) {
+      if (e.tagName === "CANVAS" || e.id === "map" || e.disabled || e.getAttribute("aria-disabled") === "true") return null;
+      if (getComputedStyle(e).cursor === "pointer") return e;
+    }
+    return null;
+  };
   document.addEventListener("pointerover", e => (ptr = e.pointerType), true);
   document.addEventListener("mouseover", e => {
-    const el = e.target.closest && e.target.closest(MENU6 + ", .go, .camp, .btn-ink, .btn-line, .lv:not(:disabled), #dock button, #rail button, .seg button, .menu-gear, .cx-strip, .mode-card, .deck:not(:disabled), .asc:not(:disabled), .tool, .buy:not(:disabled), .hub-back, .inv-perk, .go2, .sup, .nr-buy, .pd-tabs button, .pd-x");
+    const t = e.target, el = t.closest && (t.closest(MENU6 + ", .go, .camp, .btn-ink, .btn-line, .lv:not(:disabled), #dock button, #rail button, .seg button, .menu-gear, .cx-strip, .mode-card, .deck:not(:disabled), .asc:not(:disabled), .tool, .buy:not(:disabled), .hub-back, .inv-perk, .go2, .sup, .nr-buy, .pd-tabs button, .pd-x")
+      || t.closest("button:not(:disabled), a[href], [role=button]:not([aria-disabled=true]), summary, label[for], input[type=checkbox], input[type=range], select, [data-hov]") || (hoverable(t)));   // cualquier control: los listados arriba y, por defecto, todo lo que es un boton de verdad o muestra la manita
     if (el && el !== lastHover) { if (!el.matches(MENU6)) A.sfx.hover(); else if (ptr === "mouse") A.sfx.menuHover(menuK(el)); }
     lastHover = el;
   });
