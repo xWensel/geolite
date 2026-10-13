@@ -48,8 +48,8 @@
 
   /* ================================================================ 3 · la barra del acto: una tira de fieltro con filo de laton; los retos, etiquetas rectas
      (el fondo va en ::before con su esquina de pixel: asi la barra no recorta lo que asoma de sus etiquetas, como el sello del amuleto) */
-  html[data-skin="casino"] body:not(.duelo-on) #leftCol .adv-bar { min-width: 224px; padding: 10px 14px 12px; gap: 8px; background: none; box-shadow: none; isolation: isolate; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
-  html[data-skin="casino"] body:not(.duelo-on) #leftCol .adv-bar::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); image-rendering: pixelated;
+  html[data-skin="casino"] body:not(.duelo-on) .adv-bar { min-width: 224px; padding: 10px 14px 12px; gap: 8px; background: none; box-shadow: none; isolation: isolate; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); }
+  html[data-skin="casino"] body:not(.duelo-on) .adv-bar::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; clip-path: var(--gx-notch); image-rendering: pixelated;
     background: url(../assets/dados/felt.png) 0 0 / 32px 32px, linear-gradient(var(--gx-felt-1), var(--gx-felt-3)); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .7); }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-top { gap: 12px; }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-act { font-size: 16px; letter-spacing: .08em; opacity: 1; color: var(--gx-acc); }

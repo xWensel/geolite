@@ -1007,11 +1007,31 @@ window.AIQ = window.AIQ || {};
   /* ---------------- barras de estado (durante la partida) ---------------- */
   function ensureBars() {
     let el = $("advBar"); if (el) return;
-    el = document.createElement("div"); el.id = "advBar"; el.className = "adv-bar hidden"; ($("leftCol") || $("app")).appendChild(el);
-    const cb = document.createElement("div"); cb.id = "chalBar"; cb.className = "chal-bar hidden"; $("app").appendChild(cb);   // v0.3.101: los retos, solo iconos y arriba del todo; nunca captan el raton (el texto sale al pasar por encima, ver js/uikit.js)
+    const top = document.createElement("div"); top.id = "topHud"; $("app").appendChild(top);   // v0.3.103: acto, monedas, vidas y retos juntos arriba del todo (antes el bloque colgaba bajo la pregunta y pisaba el monton de la Enciclopedia)
+    el = document.createElement("div"); el.id = "advBar"; el.className = "adv-bar hidden"; top.appendChild(el);
+    const cb = document.createElement("div"); cb.id = "chalBar"; cb.className = "chal-bar hidden"; top.appendChild(cb);   // v0.3.101: los retos, solo iconos y arriba del todo; nunca captan el raton (el texto sale al pasar por encima, ver js/uikit.js)
     const tb = document.createElement("div"); tb.id = "toolBar"; tb.className = "tool-bar hidden"; $("app").appendChild(tb);
     if (A._noteTop && A.marcador && A.marcador.docked()) tb.style.setProperty("--note-top", A._noteTop);   // v0.3.79: lo que ocupa la nota de campo (js/game.js ya no lo escribe en la raiz)
   }
+  /* v0.3.103: cada ilustracion trae su propio margen interior y se veia descuadrada en su casilla: se mide donde esta su contenido real (una vez por imagen)
+     y se desplaza, a pixel entero, para que quede centrada en el cuadrado */
+  const icBox = {};
+  function centerIcons(root) {
+    root.querySelectorAll(".ch-chip > .ic").forEach(im => {
+      const src = im.currentSrc || im.src, put = b => { if (!b) return; const w = im.offsetWidth || 24, k = w / b.w, dx = Math.round((b.w / 2 - b.cx) * k), dy = Math.round((b.h / 2 - b.cy) * k); im.style.translate = dx || dy ? `${dx}px ${dy}px` : ""; };
+      if (icBox[src] !== undefined) return put(icBox[src]);
+      const m = new Image(); m.onload = () => {
+        try {
+          const cv = document.createElement("canvas"); cv.width = m.naturalWidth; cv.height = m.naturalHeight; const g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(m, 0, 0);
+          const d = g.getImageData(0, 0, cv.width, cv.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+          for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (d[(y * cv.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+          icBox[src] = x1 < 0 ? null : { w: cv.width, h: cv.height, cx: (x0 + x1 + 1) / 2, cy: (y0 + y1 + 1) / 2 };
+        } catch (e) { icBox[src] = null; }
+        put(icBox[src]);
+      }; m.onerror = () => { icBox[src] = null; }; m.src = src;
+    });
+  }
+  A.adv.centerIcons = centerIcons;
   function hearts() { let h = ""; for (let i = 0; i < run.maxLives; i++) h += `<i class="hp ${i < run.lives ? "on" : ""}">${ic(i < run.lives ? "heart" : "heart_empty")}</i>`; return h; }
   /* botin en vivo en el marcador: en cuanto superas el objetivo, cuanto cobrarias ya y a cuantos puntos esta el siguiente doblon */
   function renderLoot() {
@@ -1125,7 +1145,7 @@ window.AIQ = window.AIQ || {};
       ${run.wind ? `<div class="ab-wind"><svg viewBox="-12 -12 24 24" style="transform:rotate(${run.wind.brg}deg)"><path d="M0 -9 L6 4 L0 1 L-6 4 Z"/></svg><span>${dirName(run.wind.brg)} · ${A.fmtDist(run.wind.km)}</span></div>` : ""}`;
     flashKeep(bar);
     cb.innerHTML = (run.chal || []).length ? `${(A.chal.barList ? A.chal.barList(run.chal) : run.chal).map(c => { const am = amuOf(c), cc = am ? { ...c, amu: am.id, amuIco: am.ico, amuWait: run.qi === 0 && run.amuSlam !== roundNo() + ":" + (run.attempt || 0) } : c; return A.chal.chip(run.calmOn && ((perkList().find(p => p.calm) || {}).calm || []).includes((A.CHAL[c.id] || {}).fam) ? { ...cc, calm: true } : cc, true); }).join("")}` : "";
-    cb.classList.toggle("hidden", !cb.firstChild);
+    cb.classList.toggle("hidden", !cb.firstChild); centerIcons(cb);
     const ids = Object.keys(run.tools);
     tb.classList.toggle("hidden", !ids.length || C().S.phase !== "asking");
     const aim = id => (id === "sonar" ? A.T("Toca el mapa para lanzar una sonda…", "Tap the map to send a probe…") : A.T("Toca el mapa para orientar la brújula…", "Tap the map to aim the compass…"));

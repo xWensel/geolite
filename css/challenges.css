@@ -593,3 +593,17 @@ html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class
 #chalBar .ch-chip.ch-hid { opacity: 1; }
 #chalBar .ch-chip.ch-hid b { display: block; letter-spacing: 0; font-size: 16px; line-height: 1; }
 @media (max-width: 900px), (max-height: 520px) { #chalBar { top: 6px; zoom: 1; max-width: 40vw; gap: 4px; } #chalBar .ch-chip { width: 32px; padding: 4px 0 3px; } #chalBar .ch-chip .ic { width: 18px; height: 18px; } }
+
+/* ==== v0.3.103: acto, monedas y vidas JUNTO a los retos, arriba del todo (#topHud) ====
+   El bloque del acto colgaba bajo la pregunta: ahi tapaba el monton de la Enciclopedia y tenia poco protagonismo. Ahora es una sola pieza centrada
+   (la barra del acto con todo su contenido centrado y, debajo, la tira de iconos de los retos). Nunca capta el raton (salvo las reliquias, para su texto). */
+#topHud { position: absolute; z-index: 6; left: 50%; top: var(--hy, 14px); transform: translateX(-50%); zoom: var(--k, 1); --vw: calc(1vw / var(--k, 1)); --vh: calc(1vh / var(--k, 1));
+  display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: calc(30 * var(--vw)); pointer-events: none; }
+#topHud > .adv-bar { position: relative; left: auto; top: auto; width: max-content; min-width: 0; max-width: 100%; justify-items: center; text-align: center; margin: 0; }
+#topHud > .adv-bar .ab-top, #topHud > .adv-bar .ab-perks, #topHud > .adv-bar .ab-wind { justify-content: center; }
+#topHud > .adv-bar .ab-perks { max-width: 100%; }
+#topHud > #chalBar { position: relative; left: auto; top: auto; transform: none; zoom: 1; max-width: 100%; --vw: inherit; --vh: inherit; }
+@media (max-width: 900px), (max-height: 520px) { #topHud { top: 6px; zoom: 1; max-width: 46vw; } #topHud > .adv-bar { padding: 5px 8px 6px; gap: 3px; } #topHud > .adv-bar .ab-perks { display: none; } }
+#topHud > .adv-bar { max-width: min(300px, 100%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 14px; }
+#topHud > .adv-bar .ab-top { flex: 0 0 100%; }
+#topHud > .adv-bar .ab-perks, #topHud > .adv-bar .ab-wind { flex: 0 1 auto; }
