@@ -12,10 +12,11 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 /* ---------- pantalla de inicio: cuatro cartas sobre el mapa ---------- */
 #layer:has(#dlg.home) { pointer-events: auto; background: radial-gradient(ellipse at 50% 40%, rgba(8, 20, 26, .15), rgba(5, 12, 8, .78) 78%); }
 #dlg.home { place-self: stretch; width: 100%; height: 100%; transform: none; overflow-y: auto; overflow-x: hidden; filter: none; }
+#dlg.home, #dlg.verdict, #dlg.tablewrap { scrollbar-width: none; } #dlg.home::-webkit-scrollbar, #dlg.verdict::-webkit-scrollbar, #dlg.tablewrap::-webkit-scrollbar { display: none; }   /* las piezas entran por un lado y por un momento sobresalen: sin barra que aparezca y estreche 8 px toda la pantalla (portada, veredicto, mesa) */
 .hh { min-height: 100%; display: grid; grid-template-rows: auto auto 1fr auto; padding: clamp(14px, calc(2.4 * var(--vh)), 30px) clamp(16px, calc(4 * var(--vw)), 64px) clamp(14px, calc(2.4 * var(--vh)), 26px); gap: clamp(6px, calc(1.4 * var(--vh)), 16px); }
 .hh-top { position: relative; display: flex; justify-content: center; align-items: flex-start; }
 .hh-logo { width: min(calc(64 * var(--vw)), 470px); max-height: calc(26 * var(--vh)); width: auto; height: auto; max-width: min(calc(64 * var(--vw)), 470px); filter: drop-shadow(0 8px 0 rgba(5, 12, 8, .6)) drop-shadow(0 0 30px rgba(248, 180, 73, .3)); animation: logo-in .9s var(--spring) both; }
-@keyframes logo-in { from { opacity: 0; transform: translateY(-30px) scale(.85) rotate(-3deg); } }
+@keyframes logo-in { from { opacity: 0; transform: translateY(-30px) rotate(-3deg); } }
 .hh-top h1 { font-family: var(--serif); font-size: clamp(56px, calc(8 * var(--vw)), 110px); }
 .hh-top .menu-tools { position: absolute; right: 0; top: 0; }
 .hh-tag { margin: 0; text-align: center; font-family: var(--serif); font-size: clamp(20px, calc(2.4 * var(--vw)), 32px); color: var(--brass-lt); text-shadow: 0 3px 0 rgba(5, 12, 8, .7); }
@@ -26,7 +27,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 .mcard:nth-child(1) { --rot: -4deg; animation-delay: .05s; --rc: #4fb6a0; } .mcard:nth-child(2) { --rot: -1.2deg; animation-delay: .12s; } .mcard:nth-child(3) { --rot: 1.4deg; animation-delay: .19s; --rc: #c78bf0; } .mcard:nth-child(4) { --rot: 4deg; animation-delay: .26s; --rc: #f8b449; }
 .mcard.hero { --rc: #ffd06b; width: clamp(210px, calc(24 * var(--vw)), 360px); transform: rotate(var(--rot)) translateY(-8px) scale(1.04); z-index: 2; }
 .hh.nodeal .mcard { animation: none; }
-@keyframes deal { from { opacity: 0; transform: translateY(160px) rotate(24deg) scale(.7); } }
+@keyframes deal { from { opacity: 0; transform: translateY(160px) rotate(24deg); } }
 .mcard:hover { transform: rotate(0deg) translateY(-24px) scale(1.07); z-index: 5; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px #ffd06b, inset 0 0 0 7px #16241c, 0 26px 0 3px rgba(0, 0, 0, .45), 0 0 60px rgba(255, 208, 107, .55); }
 .mcard.hero:hover { transform: rotate(0deg) translateY(-34px) scale(1.09); }
 .mcard .ix { position: absolute; z-index: 3; } .mcard .ix.tl { left: 14px; top: 14px; } .mcard .ix.br { right: 14px; bottom: 14px; } .mcard .ix b { font-size: 26px; color: #16241c; text-shadow: 0 0 4px #f6efdc, 0 0 4px #f6efdc; } .mcard[data-suit="red"] .ix b { color: #c2372e; } .mcard .ix .ic { width: 22px; height: 22px; filter: none; }

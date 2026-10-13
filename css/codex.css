@@ -245,7 +245,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 /* brillo del oro: la carta clavada en sus tres medallas */
 .cx-card.open.m3:hover::after, .cx-big.open.m3 .cx-foil { content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light; opacity: .8;
   background: radial-gradient(circle at var(--gx) var(--gy), rgba(255, 255, 255, .7), transparent 45%), conic-gradient(from 210deg at var(--gx) var(--gy), #ffd86b, #fff3c4, #f8b449, #ffe08a, #ffd86b); }
-.cx-card.fresh { animation: cx-pop .7s var(--spring) both; } @keyframes cx-pop { from { transform: scale(.7) rotate(-6deg); } }
+.cx-card.fresh { animation: cx-pop .7s var(--spring) both; } @keyframes cx-pop { from { transform: translateY(10px) rotate(-6deg); } }
 
 /* ---------- la carta abierta ---------- */
 .cx-d1 { display: grid; gap: 14px; max-width: 900px; animation: cx-up .45s var(--spring) both; } @keyframes cx-up { from { opacity: 0; transform: translateY(18px); } }

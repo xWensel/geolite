@@ -1842,7 +1842,13 @@ window.AIQ = window.AIQ || {};
     el.className = "dealer in nap"; bubble.classList.remove("on"); spr.release(); spr.set("sleep"); spr.shown(true); fitCorner(); spr.fit(); napping = true;
   };
   D.napLevel = (l, z) => { if (!napping || !el) return; el.classList.toggle("nap1", l === 1); el.classList.toggle("nap2", l === 2); el.style.setProperty("--nz", (z || 0).toFixed(2)); spr.set(l >= 2 ? "suspicious" : "sleep", { quiet: true }); };
-  D.anchor = host => { if (!host) return; ensure(); host.appendChild(el); el.classList.add("inline"); };
+  /* v0.3.104: al anclarlo en un hueco de la pantalla (veredicto, nombre) llega ya con el tamano de ese sitio: sin los modos ni las medidas de la esquina
+     que traia (cara de 336 px hasta que volvia a hablar: la pantalla se media con el, se encogia y a los 700 ms crecia al soltarse de ese tamano) */
+  D.anchor = host => {
+    if (!host) return; ensure(); host.appendChild(el);
+    el.classList.remove("camp", "screen", "pod", "home", "big", "lvpos", ...HOME_CORNERS); el.classList.add("inline");
+    el.style.bottom = el.style.top = ""; face.style.width = face.style.height = face.style.display = ""; bubble.style.marginBottom = bubble.style.maxWidth = "";
+  };
   /* secuencia de frases: [{line, mood}] */
   D.sequence = (items, done) => { let k = 0; const next = () => { if (k >= items.length) return done && done(); const it = items[k++]; D.say(it.line, { mood: it.mood, lang: it.lang, hold: 0, done: () => later(next, it.gap || 700) }); }; next(); };
   D.line = (key, i) => { const a = LINES[key]; return a ? (i == null ? rand(a) : a[i % a.length]) : null; };

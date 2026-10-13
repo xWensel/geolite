@@ -28,7 +28,7 @@
   background: var(--gx-card); color: var(--gx-ink); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -3px 0 2px var(--gx-paper-lo); font-family: var(--sans);
   transition: transform .18s cubic-bezier(.2, .9, .3, 1); animation: od-cell .28s cubic-bezier(.2, 1.1, .4, 1) both; animation-delay: calc(var(--i, 0) * 6ms); }
 .od-grid.turn .od-c { animation-name: od-turn; }
-@keyframes od-cell { from { opacity: 0; transform: scale(.8); } }
+@keyframes od-cell { from { opacity: 0; transform: translateY(6px); } }
 @keyframes od-turn { from { opacity: 0; transform: translateX(var(--dx, 18px)); } }
 .od-c.pad { background: none; box-shadow: none; animation: none; }
 .od-c b { font-weight: 400; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
