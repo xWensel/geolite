@@ -1478,7 +1478,7 @@ window.AIQ = window.AIQ || {};
     const bought = run.bought.includes(i);
     if (s.k === "perk") {
       const p = A.RELICS[s.id];                                           // la carta solo cuenta lo que hace: contra que truco sirve lo descubre el jugador leyendo
-      return `<div class="offer pc r${p.r}${s.vit ? " vit" : ""}${bought ? " sold" : ""}" data-ix="${i}" data-suit="${suitRed(p.suit) ? "red" : "blk"}">${p.r === 3 && !bought ? GLINT : ""}${ixs(p.cost, p.suit)}<span class="of-r">${s.vit ? A.tx(VIT_TAG) + " · " : ""}${p.amulet ? A.tx(AMU_TAG) : p.ventaja ? A.tx(VTG_TAG) + (perkList().some(q => q.ventaja && q.id !== s.id) ? " · " + A.tx(VTG_SWAP) : "") : A.tx(R_NAMES[p.r])}${bagN() >= maxPerks() && !p.pact && !bought && !(p.ventaja && perkList().some(q => q.ventaja && q.id !== s.id)) ? " · " + A.tx(SWAP_FOR) : ""}</span><div class="of-ico felt">${ic(p.ico)}</div><b class="of-n">${A.tx(p.n)}</b><p>${A.tx(p.d)}</p><button class="buy${chest ? " sq-fit" : ""}" ${bought ? "disabled" : ""}>${bought ? A.T("Comprado", "Owned") : chest ? A.T("Elegir gratis", "Take for free") : costHtml(s)}</button></div>`;   // sq-fit: "Elegir gratis" en una linea en todos los idiomas
+      return `<div class="offer pc r${p.r}${s.vit ? " vit" : ""}${bought ? " sold" : ""}" data-ix="${i}" data-suit="${suitRed(p.suit) ? "red" : "blk"}">${p.r === 3 && !bought ? GLINT : ""}${ixs(p.cost, p.suit)}<span class="of-r">${s.vit ? A.tx(VIT_TAG) + " · " : ""}${p.amulet ? A.tx(AMU_TAG) : p.ventaja ? A.tx(VTG_TAG) + (perkList().some(q => q.ventaja && q.id !== s.id) ? " · " + A.tx(VTG_SWAP) : "") : A.tx(R_NAMES[p.r])}</span><div class="of-ico felt">${ic(p.ico)}</div><b class="of-n">${A.tx(p.n)}</b><p>${A.tx(p.d)}</p><button class="buy${chest ? " sq-fit" : ""}" ${bought ? "disabled" : ""}>${bought ? A.T("Comprado", "Owned") : chest ? A.T("Elegir gratis", "Take for free") : costHtml(s)}</button></div>`;   // sq-fit: "Elegir gratis" en una linea en todos los idiomas
     }
     if (s.k === "tool") {
       const t = TOOLS[s.id], have = run.tools[s.id];
@@ -1490,7 +1490,7 @@ window.AIQ = window.AIQ || {};
      "Vender" encima; el segundo clic, en ese boton, la vende (antes un solo clic la vendia sin preguntar). Tambien en el cofre del jefe.
      El boton de "estoy listo" lleva la ficha de la ronda que viene (la misma de su presentacion) y su tema. */
   let swapIx = null;                                                    // carta elegida con la mochila llena: falta decir que reliquia vendes (tanda 9; desde 0.2.21 se dice "vender", no "cambiar")
-  const SWAP_FOR = L6("vende una…|sell one…|vends-en une…|venda uma…|verkauf eins…|vendine una…||先卖一件…|하나 팔기…|ひとつ売って…|продай одну…|sprzedaj jeden…"), SWAP_PICK = L6("Elige qué reliquia vendes.|Pick which relic to sell.|Choisis la relique que tu vends.|Escolha qual relíquia vender.|Wähl, welches Relikt du verkaufst.|Scegli quale reliquia vendere.||选一件要卖掉的遗物。|팔 유물을 고르세요.|売るレリックを選んで。|Выбери, какую реликвию продать.|Wybierz, który relikt sprzedać.");
+  const SWAP_PICK = L6("Elige qué reliquia vendes.|Pick which relic to sell.|Choisis la relique que tu vends.|Escolha qual relíquia vender.|Wähl, welches Relikt du verkaufst.|Scegli quale reliquia vendere.||选一件要卖掉的遗物。|팔 유물을 고르세요.|売るレリックを選んで。|Выбери, какую реликвию продать.|Wybierz, który relikt sprzedać.");
   /* vende la reliquia de la mochila y compra la carta elegida (si con lo que te dan te alcanza) */
   function swapFor(ix, id, chest) {
     const s = run.stock[ix]; swapIx = null; if (!s) return renderShop(chest); const c = chest ? 0 : cardCost(s);

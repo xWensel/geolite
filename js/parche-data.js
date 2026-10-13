@@ -34,6 +34,22 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.105",
+      name: L("El arte manda en la tienda", "Art leads in the shop", "L'illustration prend le dessus dans la boutique", "A arte manda na loja", "In der Tienda führt die Grafik", "L'arte guida il negozio", "", "插图在商店里更突出", "상점에서 그림이 먼저 눈에 띕니다", "ショップでイラストが主役に", "В магазине главное — картинка", "W sklepie liczy się ilustracja"),
+      date: "2026-10-13",
+      summary: L("Las cartas de la tienda del Campamento muestran su ilustración mucho más grande y ya no llevan el aviso «vende una…».", "The Camp shop cards show their artwork much larger and no longer carry the “sell one…” notice.", "Les cartes de la boutique du Campement affichent une illustration bien plus grande et n'ont plus la mention « vends-en une… ».", "As cartas da loja do Acampamento mostram a ilustração muito maior e já não trazem o aviso «venda uma…».", "Die Karten der Camp-Tienda zeigen ihre Grafik deutlich größer und tragen den Hinweis „verkauf eins…“ nicht mehr.", "Le carte del negozio dell'Accampamento mostrano l'illustrazione molto più grande e non portano più l'avviso «vendine una…».", "", "营地商店的卡牌插图大得多,不再带有“先卖一件…”的提示。", "캠프 상점 카드의 그림이 훨씬 커졌고 '하나 팔기…' 안내는 사라졌습니다.", "キャンプのショップのカードはイラストがずっと大きくなり、「ひとつ売って…」の表示はなくなりました。", "Карточки магазина в лагере показывают иллюстрацию намного крупнее и больше не несут пометку «продай одну…».", "Karty sklepu w obozie pokazują znacznie większą ilustrację i nie mają już dopisku „sprzedaj jeden…”."),
+      chapters: [
+        { id: "tienda", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("El arte manda en la tienda", "Art leads in the shop", "L'illustration prend le dessus dans la boutique", "A arte manda na loja", "In der Tienda führt die Grafik", "L'arte guida il negozio", "", "插图在商店里更突出", "상점에서 그림이 먼저 눈에 띕니다", "ショップでイラストが主役に", "В магазине главное — картинка", "W sklepie liczy się ilustracja"),
+          entries: [
+            E(L("Cartas de la tienda", "Shop cards", "Cartes de la boutique", "Cartas da loja", "Tienda-Karten", "Carte del negozio", "", "商店卡牌", "상점 카드", "ショップのカード", "Карточки магазина", "Karty sklepu"), "change", "0.3.105", [
+              L("La ilustración de cada carta es ahora casi el doble de grande y manda sobre la descripción.", "Each card's artwork is now almost twice as large and leads over the description.", "L'illustration de chaque carte est presque deux fois plus grande et domine la description.", "A ilustração de cada carta é agora quase duas vezes maior e manda sobre a descrição.", "Die Grafik jeder Karte ist jetzt fast doppelt so groß und steht vor der Beschreibung.", "L'illustrazione di ogni carta è ora quasi il doppio e prevale sulla descrizione.", "", "每张卡牌的插图现在几乎大了一倍,比描述更醒目。", "각 카드의 그림이 거의 두 배로 커져 설명보다 먼저 눈에 들어옵니다.", "各カードのイラストはほぼ2倍の大きさになり、説明文より目立ちます。", "Иллюстрация каждой карточки стала почти вдвое крупнее и выходит на первый план перед описанием.", "Ilustracja na każdej karcie jest teraz prawie dwa razy większa i góruje nad opisem."),
+              L("Con la mochila llena ya no aparece «vende una…» en la etiqueta de la carta: solo su rareza.", "With a full pack the card tag no longer says “sell one…”: only its rarity.", "Avec le sac plein, l'étiquette de la carte n'affiche plus « vends-en une… » : seulement sa rareté.", "Com a mochila cheia, a etiqueta da carta já não diz «venda uma…»: só a raridade.", "Bei vollem Rucksack steht auf dem Kartenschild nicht mehr „verkauf eins…“, nur noch die Seltenheit.", "Con lo zaino pieno l'etichetta della carta non dice più «vendine una…»: solo la rarità.", "", "背包已满时,卡牌标签不再显示“先卖一件…”,只显示稀有度。", "배낭이 가득 차도 카드 이름표에 '하나 팔기…'가 나오지 않고 희귀도만 표시됩니다.", "バッグが満杯でも、カードのタグに「ひとつ売って…」は出ず、レア度だけが表示されます。", "При полном рюкзаке на ярлыке карточки больше нет «продай одну…», только редкость.", "Przy pełnym plecaku etykieta karty nie pokazuje już „sprzedaj jeden…”, tylko rzadkość."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.104",
       name: L("Nada cambia de tamaño al entrar", "Nothing resizes on entry", "Rien ne change de taille à l'entrée", "Nada muda de tamanho ao entrar", "Beim Betreten ändert sich nichts an der Größe", "Niente cambia di dimensione all'ingresso", "", "进入时不再改变大小", "들어올 때 크기가 변하지 않습니다", "入るときにサイズが変わりません", "При входе ничто не меняет размер", "Nic nie zmienia rozmiaru przy wejściu"),
       date: "2026-10-13",
