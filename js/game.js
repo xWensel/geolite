@@ -537,6 +537,7 @@
   const fitRun = (d, el) => {
     if (!el) { if (A.squeeze) A.squeeze(d); return; }
     const base = uiK(); el.style.removeProperty("--k");
+    if (A.adv && A.adv.supFit && el.classList.contains("gx-camp")) A.adv.supFit(el);   // Campamento: primero la letra de la Barra, luego la escala (ver supFit)
     if (el.classList.contains("scrolls")) { if (A.squeeze) A.squeeze(el); if (el.classList.contains("rows")) wholeRows(el, base); return; }   // pantalla con desplazamiento (Perfil y Clasico): a tamano completo
     const over = () => {
       const b = el.querySelector(".scr-body");

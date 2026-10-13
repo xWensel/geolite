@@ -1331,6 +1331,19 @@ window.AIQ = window.AIQ || {};
     const t = n ? "+" + n : "", lb = nx.querySelector(".nr-more b"); if (lb.textContent !== t) lb.textContent = t;
     const th = nx.querySelector(".nr-bar b"), H = b.clientHeight, h = Math.max(24, Math.round(H * H / b.scrollHeight)); th.style.height = h + "px"; th.style.transform = `translateY(${max > 0 ? Math.round((H - h) * y / max) : 0}px)`;
   };
+  /* Las cartas de la tienda miden SIEMPRE lo mismo (gala.css: la fila de la tienda no baja de 339 px). Lo que crece con el idioma es el texto
+     de las placas de la Barra (en ruso la Oferta pasa de 2 a 5 lineas); antes eso quitaba alto a las cartas y encogia la mesa entera (k 0,98, cartas de
+     311 a 247 px). Ahora, si la mesa no cabe (o la Barra pasa de 160 px), primero baja la letra de la Barra (sf1-sf3: 17, 16, 15 px), luego la de las cartas (cp1-cp2) y solo
+     despues, como siempre, A.fitK baja la escala de la mesa. Lo llama A.fitK antes de medir */
+  A.adv.supFit = t => {
+    const sup = t.querySelector(":scope > .tb-sup"), offs = t.querySelector(".offers"), padB = parseFloat(getComputedStyle(t).paddingBottom) || 0;
+    const over = () => Math.max(0, ...[...t.children].map(c => (c.offsetParent === t ? c.offsetTop : c.offsetTop - t.offsetTop) + c.offsetHeight)) + padB > t.clientHeight + 1 || (!!sup && sup.offsetHeight > 160);   // 160: lo que mide la Barra en espanol + un poco; en ventanas altas, el idioma largo tampoco le quita alto a las cartas
+    const lv = ["sf1", "sf2", "sf3"], cv = ["cp1", "cp2"];
+    if (sup) sup.classList.remove(...lv); if (offs) offs.classList.remove(...cv);
+    if (!over()) return;
+    if (sup) for (const c of lv) { sup.classList.add(c); if (!over()) return; }
+    if (offs) for (const c of cv) { offs.classList.add(c); if (!over()) return; }
+  };
   A.adv.ticketFit = nx => {
     const b = nx.querySelector(".nr-body"); if (!b) return;
     const over = () => b.scrollHeight > b.clientHeight + 1;
