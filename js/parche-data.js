@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.123",
+      name: L("Ronda en el Duelo", "Round in the Duel", "Manche dans le Duel", "Rodada no Duelo", "Runde im Duell", "Round nel Duello", "", "对决中的回合", "대결의 라운드", "デュエルのラウンド", "Раунд в дуэли", "Runda w pojedynku"),
+      date: "2026-10-15",
+      summary: L("El contador del Duelo dice «Ronda» en vez de «Peldaño».", "The Duel counter says “Round” instead of “Rung”.", "Le compteur du Duel dit « Manche » au lieu de « Échelon ».", "O contador do Duelo diz «Rodada» em vez de «Degrau».", "Der Zähler im Duell sagt „Runde“ statt „Sprosse“.", "Il contatore del Duello dice «Round» invece di «Gradino».", "", "对决计数器显示“回合”，不再是“台阶”。", "대결 카운터가 '단계' 대신 '라운드'로 표시돼요.", "デュエルのカウンターが「ステップ」ではなく「ラウンド」と表示されます。", "Счётчик дуэли показывает «Раунд» вместо «Ступень».", "Licznik pojedynku pokazuje „Runda” zamiast „Szczebel”."),
+      chapters: [
+        { id: "duelo", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Duelo", "Duel", "Duel", "Duelo", "Duell", "Duello", "", "对决", "대결", "デュエル", "Дуэль", "Pojedynek"),
+          entries: [
+            E(L("Ronda, no peldaño", "Round, not rung", "Manche, pas échelon", "Rodada, não degrau", "Runde, nicht Sprosse", "Round, non gradino", "", "回合，不是台阶", "단계 말고 라운드", "ステップではなくラウンド", "Раунд, а не ступень", "Runda, nie szczebel"), "change", "0.3.123", [
+              L("En el Duelo, el contador de arriba dice «Ronda 3 / 12» en vez de «Peldaño».", "In the Duel, the counter at the top reads “Round 3 / 12” instead of “Rung”.", "Dans le Duel, le compteur du haut affiche « Manche 3 / 12 » au lieu de « Échelon ».", "No Duelo, o contador de cima diz «Rodada 3 / 12» em vez de «Degrau».", "Im Duell zeigt der Zähler oben „Runde 3 / 12“ statt „Sprosse“.", "Nel Duello, il contatore in alto dice «Round 3 / 12» invece di «Gradino».", "", "在对决中，顶部计数器显示“回合 3 / 12”，不再是“台阶”。", "대결에서 위쪽 카운터가 '단계' 대신 '라운드 3 / 12'로 표시돼요.", "デュエルでは、上のカウンターが「ステップ」ではなく「ラウンド 3 / 12」と表示されます。", "В дуэли счётчик сверху показывает «Раунд 3 / 12», а не «Ступень».", "W pojedynku licznik u góry pokazuje „Runda 3 / 12” zamiast „Szczebel”."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.122",
       name: L("El crupier ya no mezcla idiomas", "The dealer no longer mixes languages", "Le croupier ne mélange plus les langues", "O crupiê não mistura mais idiomas", "Der Croupier mischt keine Sprachen mehr", "Il croupier non mischia più le lingue", "", "荷官不再混用语言", "딜러가 더는 언어를 섞지 않아요", "ディーラーが言語を混ぜなくなりました", "Крупье больше не мешает языки", "Krupier już nie miesza języków"),
       date: "2026-10-15",

@@ -5,7 +5,7 @@
  *  - Los dos reciben la misma pregunta a la vez. Puntos de la ronda = solo precision: round(1000 * e^(-km / (1500 * kf))), con el factor kf por tipo
  *    de lugar de la Aventura (A.adv.kf). Sin racha, sin perks y sin puntos de rapidez.
  *  - Quien puntua menos le paga al otro (diferencia de puntos x multiplicador de la ronda). Quien se queda sin fichas, pierde. Al llegar al tope de
- *    rondas gana quien tenga mas fichas y, si empatan, se juegan rondas extra hasta deshacer el empate.
+ *    rondas gana quien tenga mas fichas y, si empatan, es empate (no hay rondas extra).
  *  - Cuando uno fija su respuesta, al otro le quedan como mucho CFG.lockRush segundos.
  *  - Cuatro mesas = cuatro ligas (Bronce, Plata, Oro y Crupier). La pregunta de cada ronda se sortea AL AZAR (sin escalera) del saco de la mesa:
  *    data/duelo-niveles.js reparte el banco (1.937 preguntas de la Aventura + los personajes de data/duelo-personas.js) en tres sacos que son los
@@ -35,7 +35,7 @@ window.AIQ = window.AIQ || {};
   const CFG = {
     stack: 2500,                                   // fichas con las que empieza cada jugador
     scale: 1500,                                   // km: puntos = round(1000 * e^(-km / (scale * kf)))
-    rounds: 12,                                    // tope de rondas; despues solo hay rondas extra si las pilas estan empatadas
+    rounds: 12,                                    // tope de rondas; al llegar se acaba siempre (pilas iguales = empate)
     mult: { from: 4, step: 0.5 },                  // x1 hasta la ronda anterior a "from"; desde ella, +step por ronda (x1,5 en la 4.a ... x5,5 en la 12.a)
     clock: [[1, 15], [5, 12], [9, 10]],            // segundos por pregunta: [desde la ronda, segundos]
     lockRush: 5,                                   // cuando uno fija su respuesta, al otro le quedan como mucho estos segundos
@@ -75,7 +75,7 @@ window.AIQ = window.AIQ || {};
   const rankOf = lp => { lp = Math.max(0, Math.floor(+lp || 0)); if (lp >= TOP) return { crupier: true, idx: 9, league: 3, pts: lp - TOP, into: (lp - TOP) % LG.per }; const i = Math.floor(lp / LG.per); return { crupier: false, idx: i, league: Math.floor(i / 3), div: i % 3, into: lp - i * LG.per }; };
   const rankName = r => (r.crupier ? A.tx(CFG.tables[3].n) : `${A.tx(CFG.tables[r.league].n)} ${DIVN[r.div]}`);
   const rankLevel = r => (r.crupier ? Math.min(LG.crupierMax, LG.crupierLv + Math.floor(r.pts / LG.crupierStep)) : LG.lv[r.idx]);
-  const rungTxt = k => `${T("Peldaño", "Rung")} ${k} / ${Math.max(CFG.rounds, k)}`;
+  const rungTxt = k => `${T("Ronda", "Round")} ${k} / ${Math.max(CFG.rounds, k)}`;
   const newSeed = () => { const AB = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < 6; i++) s += AB[Math.floor(Math.random() * AB.length)]; return s.slice(0, 3) + "-" + s.slice(3); };
 
   /* ------------------------------------------------------------------ banco de preguntas (las de A.QDIFF que existen en el banco de la Aventura) */
@@ -201,7 +201,7 @@ window.AIQ = window.AIQ || {};
     const rd = { k: cur.k, mult: cur.mult, id: cur.e.id, d: cur.d, q, me, rv, diff, owed, pay, stMe: st.me, stRv: st.rv, tier: cur.bot.tier };
     st.log.push(rd);
     if (st.me <= 0 || st.rv <= 0) st.over = { win: st.rv <= 0, ko: true, rounds: st.k };
-    else if (st.k >= CFG.rounds && st.me !== st.rv) st.over = { win: st.me > st.rv, ko: false, rounds: st.k };
+    else if (st.k >= CFG.rounds) st.over = { win: st.me > st.rv, tie: st.me === st.rv, ko: false, rounds: st.k };   // al tope se acaba siempre: con las pilas iguales es empate
     return rd;
   }
   const summary = st => ({ seed: st.seed, table: st.table.id, level: st.level, win: !!(st.over && st.over.win), ko: !!(st.over && st.over.ko), rounds: st.k, me: st.me, rv: st.rv,
@@ -619,24 +619,24 @@ window.AIQ = window.AIQ || {};
     map.clearMarks(); map.setDecoys([]); map.animateTo(map.home(), 900); map.setPick(false); pinsSet([]);
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); document.querySelectorAll(".du-fly").forEach(e => e.remove());
     for (const id of ["duHud", "duSeat", "duTools", "duFact"]) { const e = $(id); if (e) e.classList.add("hidden"); }
-    const sum = (D.last = summary(st)), was = stats(), now = st.auto || nt ? was : statsAdd(win, st.liga), pct = x => (x.d ? Math.round((100 * x.w) / x.d) : 0), fo = foe();
-    if (nt && !nt.counted) { nt.counted = true; N.score[win ? "me" : "rv"]++; }   // el marcador de la sala (los amistosos no cuentan para tus duelos contra la banca)
+    const sum = (D.last = summary(st)), was = stats(), now = st.auto || nt || o.tie ? was : statsAdd(win, st.liga), pct = x => (x.d ? Math.round((100 * x.w) / x.d) : 0), fo = foe();
+    if (nt && !nt.counted) { nt.counted = true; if (!o.tie) N.score[win ? "me" : "rv"]++; }   // el marcador de la sala (los amistosos no cuentan para tus duelos contra la banca)
     const sc = N.score, share = (w, t) => (t > 0 ? w / t : 0.5);
     const lg = !!st.liga && !st.auto && !nt, r0 = rankOf(was.lp), r1 = rankOf(now.lp), lgDelta = now.lp - was.lp, lgFrac = r => (r.crupier ? (r.pts % LG.per) / LG.per : r.into / LG.per), MYLG = CFG.tables[r1.league].chip;
-    A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.fail, 380);
+    A.sfx.stamp(); setTimeout(win ? A.sfx.victory : o.tie ? A.sfx.stamp : A.sfx.fail, 380);
     const lead = o.lost ? T("Has estado demasiado rato sin conexión.", "You were offline for too long.")
       : o.left ? (o.cut ? Tf("{name} ha perdido la conexión.", "{name} lost their connection.", { name: fo }) : Tf("{name} se ha levantado de la mesa.", "{name} left the table.", { name: fo }))
       : o.quit === "rv" ? Tf("{name} se ha rendido en la ronda {n}.", "{name} gave up in round {n}.", { name: fo, n: o.rounds })
       : o.quit ? Tf("Te has rendido en la ronda {n}.", "You gave up in round {n}.", { n: o.rounds })
       : o.ko ? (win ? Tf("{name} se ha quedado sin fichas en la ronda {n}.", "{name} ran out of chips in round {n}.", { name: fo, n: o.rounds }) : Tf("Te has quedado sin fichas en la ronda {n}.", "You ran out of chips in round {n}.", { n: o.rounds }))
-      : o.rounds > CFG.rounds ? Tf("Empate al tope: se ha decidido en la ronda extra {n}.", "Tied at the cap: settled in extra round {n}.", { n: o.rounds }) : Tf("Tope de {n} rondas: gana quien tiene más fichas.", "{n}-round cap: whoever holds more chips wins.", { n: CFG.rounds });
+      : o.tie ? Tf("Tope de {n} rondas con las pilas iguales: empate.", "{n}-round cap with equal stacks: a draw.", { n: CFG.rounds }) : Tf("Tope de {n} rondas: gana quien tiene más fichas.", "{n}-round cap: whoever holds more chips wins.", { n: CFG.rounds });
     const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "") + A.fmt(Math.abs(v)), hpx = v => (v > 0 ? 14 + 7 * Math.round((v / (2 * CFG.stack)) * 26) : 0), me = Math.max(0, st.me), rv = Math.max(0, st.rv);
     const rows = st.log.map(r => `<div class="ln"><i>${pad2(r.k)}</i><span>${(n => (r.q.kind === "flag" ? Tf("Bandera de {n}", "Flag of {n}", { n }) : n))(esc(r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name)))}</span><i>×${fmtM(r.mult)}</i><b class="${r.pay > 0 ? "up" : r.pay < 0 ? "dn" : ""}">${sgn(r.pay)}</b></div>`).join("");
     /* tarjetas nuevas: una polaroid por lugar con tarjetas ganadas en este duelo (hasta seis), con su foto de la Enciclopedia */
     const places = st.log.filter(r => r.cards && r.cards.length).map(r => ({ id: r.q.cid[r.q.cid.length - 1], n: r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name) })), nCards = st.log.reduce((n, r) => n + ((r.cards && r.cards.length) || 0), 0);
     const pol = places.length ? `<div class="pol"><span class="gx-eyb">${T("Tarjetas nuevas", "New cards")} · ${nCards}</span><div class="rw">${places.slice(0, 6).map((p, i) => `<figure class="drop" style="--d:${(1.3 + i * 0.15).toFixed(2)}s" data-id="${esc(p.id)}"><span class="ph"></span><figcaption>${esc(p.n)}</figcaption></figure>`).join("")}</div></div>` : "";
     const pile = (cls, v) => `<div class="pile ${cls}${v ? "" : " zero"}" style="--h:${hpx(v)}px"></div>`;
-    c.dialog(stage("du-fin", `<div class="tit"><span class="gx-eyb">${NAME()} · ${A.tx(tb.n)}</span><h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : T("Derrota", "Defeat")}</h2><p class="gx-lead">${lead}</p>
+    c.dialog(stage("du-fin", `<div class="tit"><span class="gx-eyb">${NAME()} · ${A.tx(tb.n)}</span><h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : o.tie ? T("Empate", "Draw") : T("Derrota", "Defeat")}</h2><p class="gx-lead">${lead}</p>
         ${nt ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Marcador de la sala", "Room score")}</b><div class="gx-bar"><i style="--s0:${share(sc.me - (win ? 1 : 0), sc.me + sc.rv - 1)};--s1:${share(sc.me, sc.me + sc.rv)}"></i></div>
           <p>${myName() || ME()} ${sc.me} · ${fo} ${sc.rv}. ${T("Amistoso: no cuenta para la liga.", "Friendly: doesn't count for the league.")}</p></div></div>`
         : lg ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(MYLG)}<b>${T("Duelo de liga", "League duel")} · ${rankName(r1)}</b><div class="gx-bar"><i style="--s0:${r1.idx > r0.idx ? 0 : lgFrac(r0)};--s1:${lgFrac(r1)}"></i></div>
