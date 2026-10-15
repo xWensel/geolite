@@ -167,9 +167,17 @@ window.AIQ = window.AIQ || {};
     get quiet() { return this.o.still || reduced(); }
     /* escala entera: el lienzo mide 96x112 pixeles de arte a k pixeles REALES de pantalla (con el zoom de la pantalla y el escalado de
        Windows) y la figura (81 filas) queda centrada en el hueco; lo que sobra del lienzo es margen transparente.
-       o.mini: hueco pequeno (tutorial): la cabeza a escala entera, sin encoger nunca el pixel */
+       o.mini: hueco pequeno (tutorial): la cabeza a escala entera, sin encoger nunca el pixel.
+       o.fixed: dentro de un escenario ya escalado a pixel entero (el Rasca): el lienzo va a `fixed` px del escenario por pixel de arte,
+       arriba a la izquierda de su hueco (el escenario pone la escala) */
     fit() {
       if (this.dead || !loaded) return;
+      if (this.o.fixed) {
+        const k = this.o.fixed, s = this.cv.style;
+        if (k !== this.k) { this.k = k; this.cv.width = W * k; this.cv.height = H * k; this.ctx = this.cv.getContext("2d"); this.ctx.imageSmoothingEnabled = false; this.key = ""; }
+        s.width = W * k + "px"; s.height = H * k + "px"; s.left = s.top = "0"; s.margin = "0"; s.transform = "none";
+        return this.draw(true);
+      }
       const cw = this.host.clientWidth, ch = this.host.clientHeight, z = this.host.currentCSSZoom || 1, dpr = window.devicePixelRatio || 1;
       const dw = cw * z * dpr, dh = ch * z * dpr;
       const slot = Math.min(dw, dh || dw); if (slot < 4 || !cw) return;

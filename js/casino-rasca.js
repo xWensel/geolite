@@ -116,7 +116,7 @@ window.AIQ = window.AIQ || {};
   const foilCache = {};
   const foilData = th => foilCache[th] || (foilCache[th] = new Promise(res => { const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = NW; c.height = NH; const g = c.getContext("2d"); g.drawImage(im, 0, 0); res(g.getImageData(0, 0, NW, NH).data); }; im.onerror = () => res(null); im.src = FOIL[th]; }));
   const cellOf = new Int8Array(NW * NH).fill(-1); for (let i = 0; i < 9; i++) { const [x0, y0] = cellXY(i); for (let y = 0; y < GEO.CELL; y++) for (let x = 0; x < GEO.CELL; x++) cellOf[(y0 + y) * NW + x0 + x] = i; }
-  const preload = () => { if (preload.done) return; preload.done = 1; ["hat", "diamond", "coin", "pin"].forEach(img); ["cenefa", "coin_cur", "coin_hold", "felt_ivory", "wall", "sweat", "palco_0", "palco_1", "palco_2", "palco_3", "palco_4", "palco_5"].forEach(n => { new Image().src = `${AS}${n}.png`; }); };
+  const preload = () => { if (preload.done) return; preload.done = 1; ["hat", "diamond", "coin", "pin"].forEach(img); ["cenefa", "coin_cur", "coin_hold", "felt_ivory", "wall", "sweat"].forEach(n => { new Image().src = `${AS}${n}.png`; }); };
 
   function spinRasca(o, done) {
     const cx = o.cx, TST = A.adv._rasca || {}, run = cx.run, out = o.out, R = REEL.find(r => r.id === o.rid) || REEL[0], th = R.theme, TH = THEMES[th], rec = o.rec;
@@ -126,10 +126,9 @@ window.AIQ = window.AIQ || {};
       <div class="ra-sign"><span class="ra-signtx"></span><i class="rou-lights top"></i><i class="rou-lights bot"></i></div>
       <div class="ra-tag"><b></b><span></span></div>
       <div class="ra-top"><div class="ra-res"><span class="ra-plate"></span><span class="ra-msg"></span></div></div>
-      <div class="ra-dealerbox bob"><img class="ra-dealer" src="${IC}dealer_neutral.webp" alt="" draggable="false"><img class="ra-sweat s1" src="${AS}sweat.png" alt="" draggable="false"><img class="ra-sweat s2" src="${AS}sweat.png" alt="" draggable="false"></div>
+      <div class="ra-dealerbox bob"><div class="ra-dealer"></div><img class="ra-sweat s1" src="${AS}sweat.png" alt="" draggable="false"><img class="ra-sweat s2" src="${AS}sweat.png" alt="" draggable="false"></div>
       <div class="ra-bubble"><span></span></div>
       <div class="ra-band"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div>
-      <div class="ra-glovelayer"><div class="ra-palco">${[0, 1, 2, 3, 4, 5].map(i => `<img class="pf-${i}" src="${AS}palco_${i}.png" alt="" draggable="false">`).join("")}</div></div>
       <div class="ra-plaque ra-pay"></div>
       <div class="ra-card off"><img class="ra-base" src="${AS}card_${th}.png" alt="" draggable="false"><div class="ra-ct"></div><div class="ra-cf"></div><div class="ra-syms"></div><canvas class="ra-foil" width="${NW}" height="${NH}"></canvas><div class="ra-hls"></div></div>
       <div class="ra-curtain l"></div><div class="ra-curtain r"></div>
@@ -153,7 +152,9 @@ window.AIQ = window.AIQ || {};
     /* ---- elementos y escala (cada pixel del arte = K pixeles de pantalla, K entero) ---- */
     const cardEl = Q(".ra-card"), band = Q(".ra-band"), symsEl = Q(".ra-syms"), hlsEl = Q(".ra-hls"), foilCv = Q(".ra-foil"), fctx = foilCv.getContext("2d"), fxCv = Q(".ra-fx"), fx = fxCv.getContext("2d");
     const coinEl = Q("#raCoin"), coinH = Q("#raCoinH"), dealerBox = Q(".ra-dealerbox"), dealerImg = Q(".ra-dealer"), btnAll = Q(".ra-btn"), hintEl = Q(".ra-hint"), bubble = Q(".ra-bubble"), bTx = bubble.firstChild;
-    const palco = Q(".ra-palco");
+    /* el crupier, animado (js/crupier.js): sus 18 caras, habla, parpadea y sus gestos; a x4 del escenario, que ya escala a pixel entero */
+    let spr = null; try { spr = A.crupier.mount(dealerImg, { fixed: 4, fidget: !reduced }); spr.set("sly", { quiet: true }); } catch (e) { spr = null; }
+    const FACE = { neutral: "sly", laugh: "laugh", angry: "angry", shock: "shock" }, rig = f => { if (spr) { try { spr.set(FACE[f] || f, { quiet: true }); } catch (e) { /* nada */ } } };
     let scale = 1, ox = 0, oy = 0, shakeX = 0, shakeY = 0, ovL = 0, ovT = 0;
     const applyTf = () => { stage.style.transform = `translate(${Math.round(ox + shakeX * scale)}px,${Math.round(oy + shakeY * scale)}px) scale(${scale})`; };
     const fit = () => {
@@ -183,17 +184,18 @@ window.AIQ = window.AIQ || {};
     let hbTimer = 0; const heartOff = () => clearTimeout(hbTimer), heartOn = () => { heartOff(); let n = 0; const beat = () => { if (!alive() || n++ > 9) return; sfx.heart(); hbTimer = setTimeout(beat, 760); }; beat(); };
 
     /* ---- el crupier: retrato con sus caras, gestos de CSS, globo (siempre 1 s mas en pantalla) y cola (nunca se le corta una frase) ---- */
-    const SP = { cur: false, pend: null }; let faceT = 0, gT = 0;
-    const setFace = f => { dealerImg.src = `${IC}dealer_${f}.webp`; clearTimeout(faceT); if (f !== "neutral" && !(card && card.tense)) faceT = setTimeout(() => { if (alive() && !(card && card.tense)) dealerImg.src = `${IC}dealer_neutral.webp`; }, 4200); };
+    const SP = { cur: false, pend: null }; let faceT = 0, gT = 0, talkIv = 0;
+    const setFace = f => { rig(f); clearTimeout(faceT); if (f !== "neutral" && !(card && card.tense)) faceT = setTimeout(() => { if (alive() && !(card && card.tense)) rig("neutral"); }, 4200); };
     function gesture(g) {
       if (reduced || !g) return;
       if (g === "sweat") { dealerBox.classList.add("sweat"); clearTimeout(gT); gT = setTimeout(() => { if (alive() && !(card && card.tense)) dealerBox.classList.remove("sweat"); }, 3600); return; }
       if (g === "peek") { dealerBox.classList.add("g-peek"); later(() => { if (!(card && card.tense)) dealerBox.classList.remove("g-peek"); }, 2600); return; }
-      if (g === "clap") return swallow(clap(3 + Math.floor(rnd() * 2)));
+      if (g === "clap") { if (spr) { try { spr.play("slow_clap"); } catch (e) { /* nada */ } } return; }   // aplaude el mismo, con su gesto
       const c = "g-" + g, dur = { tip: 620, shrug: 720, hop: 920, faint: 2850 }[g] || 700; dealerBox.classList.remove("g-tip", "g-shrug", "g-hop", "g-faint"); void dealerBox.offsetWidth; dealerBox.classList.add(c); later(() => dealerBox.classList.remove(c), dur);
     }
     function speak(p) {
       SP.cur = true; bTx.textContent = p.text; bubble.classList.add("on"); if (p.face) setFace(p.face); if (p.g) gesture(p.g);
+      if (spr) { clearInterval(talkIv); try { spr.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, p.text.length)) { clearInterval(talkIv); try { spr.talk(false); } catch (e) { /* nada */ } return; } try { spr.syl(); } catch (e) { /* nada */ } }, 70); }   // la boca al ritmo de la frase
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }
     function say(key, prio = 1, skipIfBusy) {
@@ -203,18 +205,6 @@ window.AIQ = window.AIQ || {};
       if (SP.cur) { if (!SP.pend || prio >= SP.pend.prio) SP.pend = p; return; } speak(p);
     }
     const speechIdle = () => waitFor(res => { const iv = setInterval(() => { if (!alive() || (!SP.cur && !SP.pend)) { clearInterval(iv); res(); } }, 120); });
-    let clapId = 0; const glovesOff = () => { clapId++; palco.style.opacity = 0; };
-    async function clap(n) {
-      const my = ++clapId, run1 = (d, fn) => new Promise(res => { const t0 = performance.now(), f = now => { const p = Math.min(1, (now - t0) / d); if (my === clapId && alive()) fn(p); p < 1 && my === clapId && alive() ? requestAnimationFrame(f) : res(); }; requestAnimationFrame(f); });
-      const fr = i => { palco.dataset.f = i; }, rise = y => { palco.style.transform = `translate3d(0,${Math.round(y)}px,0)`; };
-      // aplauso de palco (Pixel Lab, 128x96 a x4): los dos brazos le salen del mismo lado; la izquierda, bocarriba y quieta; la derecha cae a 75-80 grados y da palmaditas
-      fr(0); rise(260); palco.style.opacity = 1;
-      await run1(300, p => rise(lerp(260, 0, easeOut(p))));                                       // sube por detras del mostrador
-      for (let i = 0; i < n && my === clapId && alive(); i++) {
-        for (const [f, ms] of [[1, 60], [2, 80], [3, 60], [4, 60], [5, 60], [0, 80]]) { if (my !== clapId || !alive()) break; fr(f); if (f === 2) sfx.clack(); await run1(ms, () => {}); }
-      }
-      await run1(300, p => rise(lerp(0, 260, ease(p)))); if (my === clapId) palco.style.opacity = 0;
-    }
 
     /* ---- textos del escenario ---- */
     const fmtN = n => String(n);
@@ -424,7 +414,7 @@ window.AIQ = window.AIQ || {};
       px = cur.x; py = cur.y; A.sfx.rcScratch.idle(now); drawParts(dt); requestAnimationFrame(frame);
     }
     function cleanup() {
-      heartOff(); try { A.sfx.rcScratch.stop(); } catch (e) { /* nada */ } rootEl.classList.remove("ra-pad");
+      heartOff(); clearInterval(talkIv); try { if (spr) spr.destroy(); } catch (e) { /* nada */ } try { A.sfx.rcScratch.stop(); } catch (e) { /* nada */ } rootEl.classList.remove("ra-pad");
       removeEventListener("keydown", onKey, true); removeEventListener("keyup", onKeyUp, true); removeEventListener("blur", up); removeEventListener("resize", onResize);
     }
 

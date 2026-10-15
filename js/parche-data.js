@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.115",
+      name: L("El crupier del Rasca, animado", "The Scratch & win dealer, animated", "Le croupier de Gratte et gagne, animé", "O crupiê da Raspadinha, animado", "Der Rubbellos-Croupier, animiert", "Il croupier del gratta e vinci, animato", "", "刮刮乐的荷官动起来了", "스크래치 복권의 딜러가 움직여요", "スクラッチのディーラーが動き出す", "Крупье в скретч-карте ожил", "Krupier przy zdrapce ożywa"),
+      date: "2026-10-15",
+      summary: L("En Rasca y gana el crupier ya es el animado: cambia de cara, habla con la frase y aplaude él mismo cuando ganas a lo grande.", "In Scratch & win the dealer is now the animated one: he changes face, talks along with his line and claps himself when you win big.", "Dans Gratte et gagne, le croupier est désormais animé : il change de visage, parle au rythme de sa réplique et applaudit lui-même quand tu gagnes gros.", "Na Raspadinha o crupiê agora é o animado: muda de rosto, fala no ritmo da frase e aplaude ele mesmo quando você ganha alto.", "Beim Rubbellos ist der Croupier jetzt animiert: Er wechselt das Gesicht, spricht im Takt seines Satzes und applaudiert selbst, wenn du groß gewinnst.", "Al gratta e vinci il croupier ora è animato: cambia volto, parla a ritmo della battuta e applaude da solo quando vinci alla grande.", "", "刮刮乐里的荷官现在是会动的了：他会变换表情，跟着台词说话，你赢大奖时他亲自鼓掌。", "스크래치 복권의 딜러가 이제 움직여요. 표정이 바뀌고, 대사에 맞춰 말하며, 크게 이기면 직접 박수를 칩니다.", "スクラッチのディーラーが動くようになりました。表情が変わり、セリフに合わせて話し、大当たりでは自分で拍手します。", "В скретч-карте крупье теперь анимирован: меняет лицо, говорит в такт реплике и сам аплодирует, когда ты крупно выигрываешь.", "Przy zdrapce krupier jest teraz animowany: zmienia minę, mówi w rytm kwestii i sam klaszcze, gdy wygrywasz dużo."),
+      chapters: [
+        { id: "rasca", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Rasca y gana", "Scratch & win", "Gratte et gagne", "Raspadinha", "Rubbellos", "Gratta e vinci", "", "刮刮乐", "스크래치 복권", "スクラッチ", "Скретч-карта", "Zdrapka"),
+          entries: [
+            E(L("Un solo crupier, el de siempre", "One dealer, the usual one", "Un seul croupier, le même", "Um só crupiê, o de sempre", "Ein Croupier, der gewohnte", "Un solo croupier, quello di sempre", "", "只有一位荷官，还是那位", "딜러는 한 명, 늘 그 딜러", "ディーラーはひとり、いつもの彼", "Один крупье, привычный", "Jeden krupier, ten sam co zawsze"), "change", "0.3.115", [
+              L("Ya no aparecen unas manos sueltas por delante de su cara: aplaude con sus propias manos y con el mismo dibujo del resto del juego.", "No more loose hands crossing in front of his face: he claps with his own hands, in the same drawing as the rest of the game.", "Fini les mains isolées qui passaient devant son visage : il applaudit avec ses propres mains, dans le même dessin que le reste du jeu.", "Não aparecem mais mãos soltas na frente do rosto dele: ele aplaude com as próprias mãos, no mesmo desenho do resto do jogo.", "Keine losen Hände mehr vor seinem Gesicht: Er applaudiert mit seinen eigenen Händen, im selben Stil wie der Rest des Spiels.", "Niente più mani staccate davanti al suo volto: applaude con le sue mani, nello stesso disegno del resto del gioco.", "", "不再有一双单独的手挡在他脸前：他用自己的手鼓掌，画风与游戏其他部分一致。", "이제 얼굴 앞을 가로지르는 따로 노는 손은 없어요. 게임의 다른 곳과 같은 그림으로, 자기 손으로 박수를 쳐요.", "顔の前を横切る手だけの絵はなくなりました。ゲームのほかの場面と同じ絵で、自分の手で拍手します。", "Больше никаких отдельных рук перед его лицом: он хлопает своими руками, в том же рисунке, что и вся игра.", "Koniec z samymi dłońmi przed jego twarzą: klaszcze własnymi rękami, w tym samym rysunku co reszta gry."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.114",
       name: L("El crupier, redibujado", "The dealer, redrawn", "Le croupier, redessiné", "O crupiê, redesenhado", "Der Croupier, neu gezeichnet", "Il croupier, ridisegnato", "", "荷官全新绘制", "새로 그린 딜러", "描き直したディーラー", "Крупье, нарисованный заново", "Krupier narysowany od nowa"),
       date: "2026-10-15",
