@@ -218,7 +218,7 @@ window.AIQ = window.AIQ || {};
   function planCore(seed, r, asc, topic, cjk, ctx) {
     const flagRound = topic === "flag";
     const act = Math.floor(r / 4), pos = r % 4, boss = pos === 3, a = Math.min(act, 2);
-    const lv = clamp(a + 1 + (asc >= 3 ? 1 : 0), 1, 3);
+    const lv = clamp(a + 1 + (asc >= 3 ? 1 : 0) - (asc === 0 ? 1 : 0), 1, 3);   // v0.3.107: la A0 es gratis: un nivel menos (acto I y II a nivel 1, acto III a 2)
     let list = [], combo = null;
     /* trucos que en esta ronda no harian nada (texto en la de banderas, Sin pais o Adivinanza sin pais ni nota debajo, runas y sin vocales en zh/ja/ko):
        si el sorteo cae en uno, se sortea otro. Lo que ya salia bien no cambia (partidas guardadas y sobornos intactos). v0.52: tambien en los jefes
@@ -260,7 +260,7 @@ window.AIQ = window.AIQ || {};
       /* el Apagon, una vez por expedicion (asi el Foco siempre tiene su momento); si barajas esa ronda, el crupier saca otra cosa (pagaste por ello) */
       if (seed === ctx.base && r === darkRound(ctx.base)) put("dark");
       const KN = A.KN || {};   // PERILLAS de medicion (tanda 17): A.KN la rellena dev/bot.js (CFG.knobs); sin ella, el juego normal
-      const n = Math.max(0, (ctx.first && r === 0 ? 0 : COUNT[r] != null ? COUNT[r] : 3) - (a2 && KN.ruleSwap ? 1 : 0));   // A2: la regla ocupa el sitio de un reto
+      const n = Math.max(0, (ctx.first && r === 0 ? 0 : COUNT[r] != null ? COUNT[r] : 3) - (a2 && KN.ruleSwap ? 1 : 0) - (asc === 0 && KN.a0cut !== 0 && r > 0 && r % 4 !== 3 && r >= 4 ? 1 : 0) - (asc === 0 && r === 0 ? 1 : 0));   // v0.3.107: A0 gratis: un reto menos desde el acto II y R1 sin retos   // A2: la regla ocupa el sitio de un reto
       const rr = A.rng(`${seed}:fam:${r}`);
       while (list.length < n) {
         const needFlag = flagRound && !flagN;                          // ronda de banderas: su primer reto va sobre la bandera

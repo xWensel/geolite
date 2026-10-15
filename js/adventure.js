@@ -32,19 +32,21 @@ window.AIQ = window.AIQ || {};
     country: [L6("Países (haz clic dentro)|Countries (click inside)|Pays (clique dedans)|Países (clique dentro)|Länder (klicke hinein)|Paesi (clicca dentro)||国家（点击国境内）|국가 (안쪽을 클릭)|国（国内をクリック）|Страны (кликни внутри)|Kraje (kliknij w środku)"), L6("Países difíciles|Hard countries|Pays difficiles|Países difíceis|Schwierige Länder|Paesi difficili||高难国家|어려운 국가|難しい国|Сложные страны|Trudne kraje")],
     history: [L6("Batallas y sucesos famosos|Famous battles and events|Batailles et événements célèbres|Batalhas e eventos famosos|Berühmte Schlachten und Ereignisse|Battaglie ed eventi famosi||著名战役与事件|유명한 전투와 사건|有名な戦いと出来事|Знаменитые битвы и события|Słynne bitwy i wydarzenia"), L6("Historia (difícil)|History (hard)|Histoire (difficile)|História (difícil)|Geschichte (schwer)|Storia (difficile)||历史（困难）|역사 (어려움)|歴史（むずかしい）|История (сложная)|Historia (trudna)")],
     nature: [L6("Maravillas de la naturaleza|Natural wonders|Merveilles de la nature|Maravilhas da natureza|Naturwunder|Meraviglie della natura||自然奇观|자연의 경이|自然の驚異|Природные чудеса|Cuda natury"), L6("Mares y montañas|Seas and mountains|Mers et montagnes|Mares e montanhas|Meere und Berge|Mari e montagne||海洋与山脉|바다와 산|海と山|Моря и горы|Morza i góry")],
+    character: [L6("Personajes: ¿dónde nacieron?|Famous people: where were they born?|Personnages : où sont-ils nés ?|Personagens: onde nasceram?|Persönlichkeiten: wo wurden sie geboren?|Personaggi: dove sono nati?||名人：他们出生在哪里？|유명 인물: 어디서 태어났을까?|有名人：どこで生まれた？|Знаменитости: где они родились?|Sławni ludzie: gdzie się urodzili?")],
+    culture: [L6("Cultura: platos, música y fiestas|Culture: dishes, music and festivals|Culture : plats, musique et fêtes|Cultura: pratos, música e festas|Kultur: Gerichte, Musik und Feste|Cultura: piatti, musica e feste||文化：美食、音乐与节日|문화: 음식, 음악, 축제|文化：料理・音楽・祭り|Культура: блюда, музыка и праздники|Kultura: potrawy, muzyka i święta")],
     clue: [L6("Apodos y pistas|Nicknames and clues|Surnoms et indices|Apelidos e pistas|Spitznamen und Hinweise|Soprannomi e indizi||别称与线索|별명과 단서|ニックネームとヒント|Прозвища и подсказки|Przydomki i wskazówki")],
     mixed: [L6("¡Jackpot! De todo un poco|Jackpot! A bit of everything|Jackpot ! Un peu de tout|Jackpot! Um pouco de tudo|Jackpot! Von allem etwas|Jackpot! Un po' di tutto||大奖！样样都有|잭팟! 이것저것 다 있어요|ジャックポット！なんでもあり|Джекпот! Всего понемногу|Jackpot! Wszystkiego po trochu")],
     flag: [L6("Banderas del mundo|World flags|Drapeaux du monde|Bandeiras do mundo|Flaggen der Welt|Bandiere del mondo||世界国旗|세계의 국기|世界の国旗|Флаги мира|Flagi świata"), L6("El coleccionista de banderas|The flag collector|Le collectionneur de drapeaux|O colecionador de bandeiras|Der Flaggensammler|Il collezionista di bandiere||国旗收藏家|국기 수집가|国旗コレクター|Коллекционер флагов|Kolekcjoner flag")],
   };
   const featOf = o => (o ? (o.t === "c" ? C().world.byName[o.key] : A.waters && A.waters.of(o)) || null : null);   // pais o masa de agua: lo que se acierta haciendo clic dentro
-  const kf = o => KIND_FACTOR[o.area ? "country" : o.kind] || 1;                                  // una masa de agua mide como un pais (antes, como un punto: x1,4 y x1,6)
+  const kf = o => o.duelKf || KIND_FACTOR[o.area ? "country" : o.kind] || 1;                                  // una masa de agua mide como un pais (antes, como un punto: x1,4 y x1,6)
   const KIND_FACTOR = { capital: 1, city: 1, landmark: 0.9, nature: 1.5, battle: 0.9, event: 0.9, country: 0.7, clue: 1, water: 1.6, strait: 1.4 };
   /* 12 rondas: 3 actos de 4 (la 4.a es el jefe). Empieza facil y va cambiando de tema y subiendo el nivel.
      v0.20 (usuario): ciudades y monumentos tienen dos rondas (son la mayor parte del banco); capitales e historia, una; banderas siguen dobles. */
   const ROUNDS = [
     { topic: "capital", tier: 0 }, { topic: "landmark", tier: 0 }, { topic: "flag", tier: 0 }, { topic: "country", tier: 0, boss: true },
-    { topic: "city", tier: 0 }, { topic: "history", tier: 0 }, { topic: "nature", tier: 0 }, { topic: "flag", tier: 1, boss: true },
-    { topic: "city", tier: 1 }, { topic: "clue", tier: 1 }, { topic: "landmark", tier: 1 }, { topic: "mixed", tier: 1, boss: true },
+    { topic: "history", tier: 0 }, { topic: "character", tier: 0 }, { topic: "nature", tier: 0 }, { topic: "flag", tier: 1, boss: true },
+    { topic: "city", tier: 1 }, { topic: "clue", tier: 1 }, { topic: "culture", tier: 1 }, { topic: "mixed", tier: 1, boss: true },
   ];
   const roundDefOf = r => (r < ROUNDS.length ? ROUNDS[r] : (() => { const b = ROUNDS[4 + ((r - 4) % 8)]; return { ...b, tier: Math.min(2, b.tier + 1), boss: (r % 4) === 3 }; })());
 
@@ -79,6 +81,16 @@ window.AIQ = window.AIQ || {};
       seen.add("clue:" + id);
       add("clue", 1, { ...q, name: txt, answer: q.name, sub: { es: "", en: "" }, clue: true, cid: ["clue:" + id, id], topic: "clue", tier: 1, fame: diff });
     });
+    /* v0.3.107: el banco del Duelo (personajes: donde nacieron; platos, musica y fiestas: de donde son; mas monumentos, ciudades, sucesos y naturaleza).
+       Su dificultad absoluta (data/duelo-niveles.js, la misma escala 0-100 que A.QDIFF) entra en A.QDIFF para que las ventanas de la ronda las traten igual */
+    { const D = A.duelo, NV = A.DUELO_NIVELES || {};
+      if (D && D.personQ) for (const nid in NV) {
+        const person = nid.startsWith("person:"); if (!person && !nid.startsWith("x:")) continue;
+        let q = null; try { q = person ? D.personQ(nid.slice(7)) : D.extraQ(nid.slice(2)); } catch (e) { q = null; }
+        if (!q || seen.has(q.cid[0])) continue;
+        seen.add(q.cid[0]); if (A.QDIFF && A.QDIFF[q.cid[0]] == null) A.QDIFF[q.cid[0]] = NV[nid][1];
+        add(q.topic, q.tier, q);
+      } }
     return POOLS;
   }
   /* v0.20 (usuario, 2026-09-30): TODAS las preguntas del banco tienen salida en las 12 rondas (la Enciclopedia y sus logros se completan jugando la Aventura).
@@ -90,7 +102,7 @@ window.AIQ = window.AIQ || {};
      - Azar vivo (usuario, 2026-09-30): nada de mazos; todas las preguntas estan siempre en su pool y pueden repetirse, pero las que menos te han salido
        pesan algo mas en el sorteo (perfil: adv.seen). El Reto diario sortea solo con su semilla (igual para todos).
      - En una ronda, si se puede: como mucho 2 del mismo continente, nunca 2 del mismo pais ni un nombre ya preguntado en la expedicion. */
-  const ROUND_THEME = ["capital", "landmark", "flag", "country", "city", "history", "nature", "flag", "city", "clue", "landmark", "mixed"];
+  const ROUND_THEME = ["capital", "landmark", "flag", "country", "history", "character", "nature", "flag", "city", "clue", "culture", "mixed"];
   const qidOf = (q, topic) => (topic === "flag" ? "flag:" + q.cid[0] : q.cid[0]);
   const diffOf = (q, topic) => { const d = A.QDIFF && A.QDIFF[qidOf(q, topic)]; return d == null ? 50 : d; };
   const levelOf = d => clamp(Math.ceil(d / 10), 1, 10);
@@ -104,7 +116,7 @@ window.AIQ = window.AIQ || {};
   let ASSIGN = null;
   function assign() {                                                // carrete de cada ronda (0-11), de mas facil a mas dificil
     if (ASSIGN) return ASSIGN;
-    const fixed = A.CARRETES && A.CARRETES.length === 12, out = new Set(A.CARRETES_FUERA || []), all = allQ(), auto = autoAssign();
+    const fixed = false, out = new Set(A.CARRETES_FUERA || []), all = allQ(), auto = autoAssign();
     const lists = (fixed ? A.CARRETES : auto).map(ids => ids.filter(id => !out.has(id)));
     if (fixed) {                                                     // una pregunta nueva del banco que aun no esta en data/carretes.js entra donde la pondria el reparto automatico
       const has = [new Set(), new Set()]; lists.forEach((l, i) => l.forEach(id => has[ROUND_THEME[i] === "flag" ? 0 : 1].add(id)));
@@ -115,7 +127,7 @@ window.AIQ = window.AIQ || {};
   function autoAssign() {                                            // ids por ronda (la 12 no tiene carrete propio: saca de todo el banco)
     const P = pools(), out = ROUND_THEME.map(() => []);
     const byTopic = t => [].concat(...[0, 1, 2].map(x => P[(t === "flag" ? "country" : t) + "|" + x] || []));
-    for (const t of ["capital", "landmark", "flag", "country", "city", "history", "nature", "clue"]) {
+    for (const t of ["capital", "landmark", "flag", "country", "city", "history", "nature", "clue", "character", "culture"]) {
       const rs = ROUND_THEME.map((x, i) => (x === t ? i : -1)).filter(i => i >= 0), list = byTopic(t).sort(byLevel(t));
       list.forEach(q => out[t === "capital" && lvOf(q, t) >= 9 ? 4 : rs[Math.min(rs.length - 1, Math.floor((lvOf(q, t) - 1) * rs.length / 10))]].push(q.cid[0]));   // dos rondas: niveles 1-5 y 6-10; las capitales 9-10, invitadas en Grandes ciudades (R5) para suavizar la R1
     }
@@ -131,7 +143,9 @@ window.AIQ = window.AIQ || {};
        expo(x, k) = (e^(k x) - 1) / (e^k - 1)                exponencial que sale de 0 y llega a 1 (k = 0 seria recta)
      En cada ronda siguen las 3 faciles / 1 media / 1 dificil, pero como ventana alrededor de D: centros D-de, D+dm y D+dh (acotados a 0-1), con un peso de campana de ancho sg
      sobre la posicion de cada pregunta en el carrete y un suelo fl: NADA de techo duro, todo el carrete sigue en el pool (el suelo hace que lo lejano salga muy de vez en cuando) */
-  const DK0 = { lo0: 0.02, lo5: 0.75, hi0: 0.36, hi5: 0.99, ka: 0.9, kr: 2.2, de: 0.15, dm: 0.10, dh: 0.30, sg: 0.12, fl: 0.008, tw: 1, up: [0, 0, 0.02, 0.10, 0.10, 0] };   // up: empuje extra de la ventana en A3 y A4 (el experto las ganaba casi siempre); A0-A2 y A5 no cambian
+  /* v0.3.107: D es ahora la DIFICULTAD ABSOLUTA 0-1 (A.QDIFF/100) donde se centra el sorteo, no el percentil del carrete: el banco paso de 1.741 a ~3.000 preguntas
+     (muchas faciles) y el percentil se movia solo. A0 = lo mas famoso (D .02 -> .15); A5 = .45 -> .80. Mismas formulas de antes, constantes nuevas */
+  const DK0 = { lo0: 0.02, lo5: 0.42, hi0: 0.15, hi5: 0.70, ka: 2.0, kr: 1.3, minN: 40, de: 0.08, dm: 0.08, dh: 0.20, sg: 0.09, fl: 0.008, tw: 1, up: [0, 0, 0, 0, 0, 0] };
   const DKN = () => (A.KN && A.KN.dk ? Object.assign({}, DK0, A.KN.dk) : DK0);   // perillas de medicion (dev/bot.js: CFG.knobs = { dk: {...} })
   const expo = (x, k) => (Math.abs(k) < 1e-6 ? x : (Math.exp(k * x) - 1) / (Math.exp(k) - 1));
   const diffAt = (asc, pos) => { const K = DKN(), g = expo(clamp((asc | 0) / 5, 0, 1), K.ka), lo = K.lo0 + (K.lo5 - K.lo0) * g, hi = K.hi0 + (K.hi5 - K.hi0) * g; return clamp(lo + (hi - lo) * expo(clamp(pos / 11, 0, 1), K.kr) + ((K.up && K.up[clamp(asc | 0, 0, 5)]) || 0), 0, 1); };
@@ -149,14 +163,16 @@ window.AIQ = window.AIQ || {};
       list.sort(byLevel(topic));
     }
     const own = topic === "mixed" ? list : list.filter(q => q.topic === (topic === "flag" ? "country" : topic)), guests = topic === "mixed" ? [] : list.filter(q => !own.includes(q));   // invitadas: p. ej. capitales 9-10 en la R5 (las mas dificiles)
-    const n = own.length, pct = new Map(); own.forEach((q, i) => pct.set(q.cid[0], n > 1 ? i / (n - 1) : 0.5)); guests.forEach(q => pct.set(q.cid[0], 1));
+    const pct = new Map(); own.forEach(q => pct.set(q.cid[0], clamp(diffOf(q, topic === "mixed" ? q.topic : topic) / 100, 0, 1))); guests.forEach(q => pct.set(q.cid[0], 1));   // v0.3.107: la posicion es la dificultad ABSOLUTA 0-1 (no el percentil del carrete): con mas preguntas faciles el percentil se movia solo
     return (BASE[bk] = { topic, tail, list: own.concat(guests), pct });
   }
   function bandsOf(slot, pos) {                                      // franjas de una ronda para su Ascension: [facil, media, dificil] desplazadas segun D(a, r); cls(q) dice a cual de las tres se parece mas
     const K = DKN(), D = diffAt(run ? run.asc : 0, pos), key = [slot, (K.tw | 0) ? 1 : 0, D.toFixed(4), K.de, K.dm, K.dh, K.sg, K.fl].join(":");
     if (BANDS[key]) return BANDS[key];
     const base = baseOf(slot), mu = [clamp(D - K.de, 0, 1), clamp(D + K.dm, 0, 1), clamp(D + K.dh, 0, 1)], cut = [(mu[0] + mu[1]) / 2, (mu[1] + mu[2]) / 2];
-    const bell = m => { const w = new Map(); base.list.forEach(q => { const z = (base.pct.get(q.cid[0]) - m) / K.sg; w.set(q, K.fl + (1 - K.fl) * Math.exp(-0.5 * z * z)); }); return w; };
+    const bell = m => {                                            // v0.3.107: si en el tema hay pocas preguntas cerca de ese punto (p. ej. personajes faciles), la campana se ensancha hasta cubrir al menos minN
+      const ds = base.list.map(q => Math.abs(base.pct.get(q.cid[0]) - m)).sort((a, b) => a - b), need = Math.min(ds.length - 1, K.minN == null ? 40 : K.minN), sg = Math.max(K.sg, need > 0 ? ds[need] / 1.5 : 0), w = new Map();
+      base.list.forEach(q => { const z = (base.pct.get(q.cid[0]) - m) / sg; w.set(q, K.fl + (1 - K.fl) * Math.exp(-0.5 * z * z)); }); return w; };
     return (BANDS[key] = { topic: base.topic, tail: base.tail, D, pct: q => base.pct.get(q.cid[0]), cls: q => { const p = base.pct.get(q.cid[0]); return p == null || p < cut[0] ? 0 : p < cut[1] ? 1 : 2; },
       bands: [{ k: "e", n: 3, list: base.list, w: bell(mu[0]) }, { k: "m", n: 1, list: base.list, w: bell(mu[1]) }, { k: "h", n: 1, list: base.list, w: bell(mu[2]) }] });
   }
@@ -212,7 +228,7 @@ window.AIQ = window.AIQ || {};
     navigator: { ico: "deck_navigator", n: L("Navegante", "Navigator"), d: L6("Dos brújulas y el Catalejo. Nunca te pierdes.|Two compasses and the Spyglass. You never get lost.|Deux boussoles et la Longue-vue. Tu ne te perds jamais.|Duas bússolas e a Luneta. Você nunca se perde.|Zwei Kompasse und das Fernrohr. Du verirrst dich nie.|Due bussole e il Cannocchiale. Non ti perdi mai.||两个指南针加望远镜。你永远不会迷路。|나침반 두 개와 망원경. 절대 길을 잃지 않습니다.|2つのコンパスと望遠鏡。決して迷わない。|Два компаса и подзорная труба. Ты никогда не заблудишься.|Dwa kompasy i luneta. Nigdy się nie zgubisz."), tools: ["compass", "compass"], perks: ["glass"], coins: 3, lives: 3, unlock: "adv_asc", asc: 1 },
     blind: { ico: "deck_blind", n: L("Aventurero ciego", "Blind adventurer"), d: L6("Sin herramientas, con el Foco del vigilante y 4 provisiones.|No tools, but the Pit boss's spotlight and 4 provisions.|Sans outils, avec le Projecteur du chef de table et 4 provisions.|Sem ferramentas, com o Holofote do supervisor e 4 provisões.|Ohne Werkzeuge, mit dem Scheinwerfer des Pitbosses und 4 Proviant.|Senza strumenti, con il Faro del capotavolo e 4 provviste.||没有工具，携带场务经理的聚光灯与 4 份补给。|도구 없이 플로어 매니저의 스포트라이트와 식량 4개.|道具なし。ピットボスのスポットライトと食料4つで出発。|Без инструментов, с прожектором пит-босса и 4 запасами.|Bez narzędzi, z reflektorem szefa sali i 4 zapasami."), tools: [], perks: ["miner"], coins: 6, lives: 4, unlock: "adv_asc2", asc: 2 },
   };
-  const TOPIC_ICON = { capital: "t_capital", landmark: "t_landmark", city: "t_city", country: "t_country", history: "t_battle", nature: "t_nature", clue: "t_curio", mixed: "slot", flag: "t_country" };
+  const TOPIC_ICON = { capital: "t_capital", landmark: "t_landmark", city: "t_city", country: "t_country", history: "t_battle", nature: "t_nature", clue: "t_curio", character: "t_person", culture: "t_event", mixed: "slot", flag: "t_country" };
   const BOSS_IC = "boss_hat";                                        // v0.35: el jefe del acto es la chistera del crupier (los mismos pixeles de su retrato: tools/crupier/chistera.py)
   A.ADV = { TOOLS, PERKS: A.RELICS, BOSSES, DECKS, ROUNDS, TOPIC_NAMES, TOPIC_ICON, BOSS_IC, roundDefOf, chalFor: r => chalFor(r), maxPerks: () => maxPerks(), bagN: () => bagN() };
 
@@ -253,7 +269,8 @@ window.AIQ = window.AIQ || {};
      A3 Retos afilados (+1 nivel en los actos I y II), A4 Jefes con poder (+1 reto en cada jefe, tope 5, y -1 provision: medido, ver perks-revision-2026-10) y A5 Equipaje de mano (mochila de 4, 5 con el Pacto) */
   const ascFx = a => ({ target: 1 + 0.05 * a, secs: -a, lives: a >= ((A.KN || {}).provAt || 3) ? -1 : 0, price: 1 + 0.1 * a, boss2: a >= 4, pack: a >= 5 ? -1 : 0 });
   const ASC_N = [null, L6("La casa cobra|The house takes its cut|La maison encaisse|A casa cobra|Das Haus kassiert|La casa incassa||赌场收账|하우스의 수수료|ハウスの取り分|Заведение берёт своё|Kasyno bierze swoje"), L6("Reglas de la casa|House rules|Règles de la maison|Regras da casa|Hausregeln|Regole della casa||赌场规矩|하우스 룰|ハウスルール|Правила заведения|Zasady kasyna"), L6("Retos afilados|Sharpened challenges|Défis aiguisés|Desafios afiados|Geschärfte Herausforderungen|Sfide affilate||凌厉挑战|날카로워진 도전|チャレンジ強化|Заострённые испытания|Zaostrzone wyzwania"), L6("Jefes con poder|Empowered bosses|Boss puissants|Chefes com poder|Bosse mit Macht|Boss con potere||强力首领|강력한 보스|力を持つボス|Усиленные боссы|Bossowie z mocą"), L6("Equipaje de mano|Carry-on|Bagage à main|Bagagem de mão|Handgepäck|Bagaglio a mano||随身行李|기내 수하물|機内持ち込み|Ручная кладь|Bagaż podręczny")], ASC_D = [null, L6("Objetivos +5 %, −1 s y todo cuesta +10 %.|Targets +5%, −1 s and everything costs +10%.|Objectifs +5 %, −1 s et tout coûte +10 %.|Metas +5%, −1 s e tudo custa +10%.|Ziele +5 %, −1 s und alles kostet +10 %.|Obiettivi +5%, −1 s e tutto costa +10%.||目标 +5%，−1 秒，一切涨价 10%。|목표 +5%, −1초, 모든 가격 +10%.|目標+5%、−1秒、すべて+10%値上げ。|Цели +5%, −1 с, всё дороже на 10%.|Cele +5%, −1 s, wszystko droższe o 10%."), L6("Una regla de la casa en las rondas 5, 7, 9 y 11.|A house rule in rounds 5, 7, 9 and 11.|Une règle de la maison aux manches 5, 7, 9 et 11.|Uma regra da casa nas rodadas 5, 7, 9 e 11.|Eine Hausregel in Runde 5, 7, 9 und 11.|Una regola della casa nei round 5, 7, 9 e 11.||第 5、7、9、11 回合有一条赌场规矩。|5·7·9·11라운드에 하우스 룰이 하나 붙습니다.|ラウンド5・7・9・11にハウスルールが1つ。|Правило заведения в раундах 5, 7, 9 и 11.|Zasada kasyna w rundach 5, 7, 9 i 11."), L6("Retos un nivel más fuertes en los actos I y II.|Challenges one level stronger in acts I and II.|Défis d'un niveau de plus aux actes I et II.|Desafios um nível mais fortes nos atos I e II.|Herausforderungen eine Stufe stärker in Akt I und II.|Sfide di un livello più forti negli atti I e II.||第一、二幕的挑战强一级。|1·2막 도전이 한 단계 강해집니다.|第1・2幕のチャレンジが1段階強化。|Испытания в актах I и II на уровень сильнее.|Wyzwania o poziom mocniejsze w aktach I i II."), L6("Cada jefe trae un reto más (con tope de 5) y una provisión menos.|Every boss brings one more challenge (capped at 5) and you have one fewer provision.|Chaque boss apporte un défi de plus (5 au maximum) et tu as une provision de moins.|Cada chefe traz um desafio a mais (no máximo 5) e você tem uma provisão a menos.|Jeder Boss bringt eine Herausforderung mehr (höchstens 5), und du hast einen Proviant weniger.|Ogni boss porta una sfida in più (massimo 5) e hai una provvista in meno.||每个首领多一个挑战（最多 5 个），补给 −1。|보스마다 도전이 하나 더 나오고 (최대 5개) 식량이 1개 줄어듭니다.|各ボスにチャレンジが1つ増え（最大5つ）、食料が1つ減る。|Каждый босс приносит ещё одно испытание (не больше 5), и на один запас меньше.|Każdy boss przynosi jedno wyzwanie więcej (maksymalnie 5) i masz jeden zapas mniej."), L6("Mochila de 4 huecos (5 con el Pacto).|A 4-slot backpack (5 with the Pact).|Un sac de 4 emplacements (5 avec le Pacte).|Mochila de 4 espaços (5 com o Pacto).|Ein Rucksack mit 4 Plätzen (5 mit dem Pakt).|Uno zaino da 4 posti (5 con il Patto).||背包只有 4 格（有契约时 5 格）。|배낭 4칸 (계약이 있으면 5칸).|バッグは4枠（契約があれば5枠）。|Рюкзак на 4 ячейки (5 с «Договором»).|Plecak na 4 miejsca (5 z Paktem).")], ASC_K = L6("La casa cobra más: objetivos +{a} %, −{s} s, precios +{p} %.|The house takes more: targets +{a}%, −{s} s, prices +{p}%.|La maison encaisse plus : objectifs +{a} %, −{s} s, prix +{p} %.|A casa cobra mais: metas +{a}%, −{s} s, preços +{p}%.|Das Haus verlangt mehr: Ziele +{a} %, −{s} s, Preise +{p} %.|La casa incassa di più: obiettivi +{a}%, −{s} s, prezzi +{p}%.||赌场收得更多：目标 +{a}%，−{s} 秒，价格 +{p}%。|하우스가 더 챙깁니다: 목표 +{a}%, −{s}초, 가격 +{p}%.|ハウスの取り分が増える：目標+{a}%、−{s}秒、価格+{p}%。|Заведение берёт больше: цели +{a}%, −{s} с, цены +{p}%.|Kasyno bierze więcej: cele +{a}%, −{s} s, ceny +{p}%."), ASC_ALL = L6("Suma todo lo anterior.|Adds everything above.|Cumule tout ce qui précède.|Soma tudo o que veio antes.|Alles Vorherige zusammen.|Include tutti i precedenti.||叠加之前的全部效果。|이전 효과가 모두 더해집니다.|これまでの効果がすべて加わる。|Включает всё предыдущее.|Obejmuje wszystkie poprzednie."), ASC_UNLOCK = L6("Ascensión {n} desbloqueada: «{name}».|Ascension {n} unlocked: “{name}”.|Ascension {n} débloquée : « {name} ».|Ascensão {n} desbloqueada: “{name}”.|Aufstieg {n} freigeschaltet: „{name}“.|Ascensione {n} sbloccata: «{name}».||已解锁进阶 {n}：“{name}”。|어센션 {n} 해금: '{name}'.|アセンション{n}解放：「{name}」。|Восхождение {n} открыто: «{name}».|Odblokowano Wniebowstąpienie {n}: „{name}”.");
-  A.adv.ascInfo = i => ({ n: A.tx(ASC_N[i]), d: A.tx(ASC_D[i]), k: i >= 2 ? A.tx(ASC_K).replace("{a}", 5 * i).replace("{s}", i).replace("{p}", 10 * i) + " " + A.tx(ASC_ALL) : "" });
+  const OBJ_PCT = [0, 8, 18, 45, 51, 58];                               // v0.3.107: cuanto sube el objetivo del jefe final sobre la Ascension 0 (3.800 -> 4.100, 4.500, 5.500, 5.750, 6.000)
+  A.adv.ascInfo = i => ({ n: A.tx(ASC_N[i]), d: i === 1 ? A.tx(ASC_D[i]).replace(/(?<!\d)5(\s?)%/, OBJ_PCT[1] + "$1%") : A.tx(ASC_D[i]), k: i >= 2 ? A.tx(ASC_K).replace("{a}", OBJ_PCT[i]).replace("{s}", i).replace("{p}", 10 * i) + " " + A.tx(ASC_ALL) : "" });
   const roundNo = () => run.act * 4 + run.round;
   /* Reto diario: la ruta del dia baraja las rondas de cada acto (run.route[hueco] = ronda original); el jefe sigue siendo el 4.o hueco de cada acto */
   const slotOf = r => (run && run.route && r < 12 ? run.route[r] : r);
@@ -275,8 +292,13 @@ window.AIQ = window.AIQ || {};
      (la Mesa de minimos no se paga a si misma). El panel del Campamento usa target(), en directo */
   const tgtKey = () => roundNo() + ":" + (run.attempt || 0);
   const roundTarget = () => { run.tgt = run.tgt || {}; const k = tgtKey(); if (run.tgt[k] == null) run.tgt[k] = target(); return run.tgt[k]; };
-  const baseTarget = () => { const r = roundNo(), base = r >= 11 ? 4777 : 2000 + 250 * r, m = ascFx(run.asc).target; return r >= 11 && m === 1 ? base : Math.round((base * m) / 50) * 50; };
-  const target = () => { const t = { seconds: 0, target: 1 }; perkList().forEach(p => p.round && p.round(t, run)); t.target = Math.max(0.85, t.target); const r = roundNo(), base = r >= 11 ? 4777 : 2000 + 250 * r, m = ascFx(run.asc).target * t.target; return r >= 11 && m === 1 ? base : Math.round((base * m) / 50) * 50; };   // tanda 12: las rebajas del objetivo (Midas y Mesa de minimos) no pasan del −15 %
+  /* v0.3.107 (usuario): la Ascension 0 es GRATIS para cualquiera y la curva es progresiva: los objetivos de A0, A1 y A2 salen de una escalera propia (de la ronda 1 a la 12,
+     lineal: 1.500 -> 3.800, 1.700 -> 4.100 y 1.950 -> 4.500); de A3 en adelante, la de siempre (2.000 + 250 por ronda, 4.777 el jefe final) x (1 + 5 % por Ascension) */
+  const TG_S = [1500, 1700, 1950], TG_F = [3800, 4100, 4500];
+  const baseOfR = (r, asc) => { const a = asc == null ? (run ? run.asc | 0 : 0) : asc | 0; if (a >= 3) return r >= 11 ? 4777 : 2000 + 250 * r; return r >= 11 ? TG_F[a] : Math.round((TG_S[a] + (TG_F[a] - TG_S[a]) * r / 11) / 50) * 50; };
+  const tgMul = () => (!run || (run.asc | 0) < 3 ? 1 : ascFx(run.asc).target);   // la escalera de A0-A2 ya lleva su Ascension dentro
+  const baseTarget = () => { const r = roundNo(), base = baseOfR(r), m = tgMul(); return r >= 11 && m === 1 ? base : Math.round((base * m) / 50) * 50; };
+  const target = () => { const t = { seconds: 0, target: 1 }; perkList().forEach(p => p.round && p.round(t, run)); t.target = Math.max(0.85, t.target); const r = roundNo(), base = baseOfR(r), m = tgMul() * t.target; return r >= 11 && m === 1 ? base : Math.round((base * m) / 50) * 50; };   // tanda 12: las rebajas del objetivo (Midas y Mesa de minimos) no pasan del −15 %
   const shopCtx = () => { const x = { price: 0, freeReroll: 0, slots: 3 }; perkList().forEach(p => p.shop && p.shop(x, run)); return x; };
   const inflation = () => 1 + 0.25 * run.act;                            // todo cuesta mas en cada acto: el dinero pesa mas segun avanzas
   const price = c => Math.max(1, Math.round(c * ascFx(run.asc).price * inflation()) + shopCtx().price);
@@ -505,7 +527,7 @@ window.AIQ = window.AIQ || {};
   const withSub = q => { if (q.t === "p" && !q.clue && !(q.sub && (q.sub.en || q.sub.es))) { const c = CONT[continentOf(q)]; if (c) q.sub = { es: c.es, en: c.en }; } return q; };
   /* v0.20: 3 faciles, 1 media y 1 dificil de las franjas de la ronda (ver bandsOf/takeFrom), en orden barajado; al reanudar, las mismas de antes.
      v0.74: las franjas son relativas a la ventana de dificultad de la Ascension y la ronda (ver diffAt) */
-  const QV = 3;                                                      // version del sorteo: una partida guardada con el criterio de antes (v0.19-v0.73: franjas fijas) no reutiliza sus preguntas al reanudar
+  const QV = 4;                                                      // version del sorteo: una partida guardada con el criterio de antes (v0.19-v0.73: franjas fijas) no reutiliza sus preguntas al reanudar
   const ctxOf = (pos, usedIds, topic) => { const all = allQ(), ctx = { used: new Set(usedIds), names: new Set(), topic: topic === "mixed" ? null : topic }; usedIds.forEach(id => all[id] && nameKeys(all[id]).forEach(k => ctx.names.add(k))); return ctx; };
   function drawRound(pos, attempt, usedIds, n = 5) {                 // n preguntas de la ronda de la posicion pos (0-11, y la Leyenda): 3 faciles, 1 media y 1 dificil, en orden barajado
     const slot = slotOf(pos), B = bandsOf(slot, pos), rr = A.rng(`${run.seed}:q:${pos}:${attempt}`), ctx = ctxOf(pos, usedIds, B.topic), taken = [];
@@ -543,6 +565,7 @@ window.AIQ = window.AIQ || {};
   }
   A.adv._bandIdx = cid => { const pos = roundNo(), B = bandsOf(slotOf(pos), pos), q = allQ()[cid]; return q && B.pct(q) != null ? B.cls(q) : 0; };   // para las pruebas: 0 facil, 1 media, 2 dificil (relativas a la ventana de esta Ascension y ronda)
   A.adv._diff = cid => { const q = allQ()[cid]; return q ? diffOf(q, ROUND_THEME[slotOf(roundNo())]) : 50; };   // la dificultad 0-100 de una pregunta (A.QDIFF), para el bot
+  A.adv._drawRound = (pos, attempt, used, n) => drawRound(pos, attempt || 0, used || [], n);   // para las pruebas: las preguntas de una ronda con la run actual
   A.adv._allQ = allQ;                                                // para las pruebas: cid -> pregunta
   A.adv.kf = kf;                                                     // factor por tipo de lugar (el Duelo de fichas puntua con el mismo, js/duelo.js)
   A.adv.diffAt = diffAt;                                             // D(Ascension, ronda) de 0 a 1

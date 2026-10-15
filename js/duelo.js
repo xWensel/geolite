@@ -197,7 +197,7 @@ window.AIQ = window.AIQ || {};
     secs: Math.round(st.secs * 10) / 10, wall: st.t0 ? Math.round((performance.now() - st.t0) / 100) / 10 : null,
     log: st.log.map(r => ({ k: r.k, mult: r.mult, id: r.id, d: r.d, me: r.me.pts, meKm: r.me.km == null ? null : Math.round(r.me.km), rv: r.rv.pts, rvKm: r.rv.km == null ? null : Math.round(r.rv.km), tier: r.tier, pay: r.pay, stMe: r.stMe })) });
 
-  const D = A.duelo = { CFG, multOf, secsOf, rankOf, rankName, rankLevel, pool, botPlay, kmOf, ptsOf, last: null };
+  const D = A.duelo = { CFG, multOf, secsOf, rankOf, rankName, rankLevel, pool, botPlay, kmOf, ptsOf, personQ, extraQ, last: null };   // personQ/extraQ: la Aventura (v0.3.107) tambien pregunta lo del banco del Duelo
   /* cientos de duelos entre dos rivales simulados con el banco, la puntuacion y las reglas del juego (sin interfaz ni esperas): rondas, KO y duracion.
      la / lb: nivel de cada uno (por defecto, el centro de la mesa). La duracion suma lo que tarda en fijar el ultimo, el revelado y el paso de ronda.
      Con la misma semilla, el duelo i de aqui es el mismo que A.duelo.start({ seed: semilla + ":" + i, auto: {} }) jugado por la interfaz */
