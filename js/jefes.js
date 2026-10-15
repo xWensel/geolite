@@ -41,7 +41,7 @@ window.AIQ = window.AIQ || {};
   };
   function riseKick(qi) {
     if (qi > 0) say("bossRise", qi);
-    later(() => { const el = document.querySelector("#advBar .ab-rise .cur"); if (el) el.classList.add("pop"); document.querySelectorAll("#advBar .ch-chip.tw").forEach(c => c.classList.add("tw-in")); }, 40);
+    later(() => { const el = document.querySelector("#advBar .ab-rise .cur"); if (el) el.classList.add("pop"); document.querySelectorAll("#chalBar .ch-chip.tw").forEach(c => c.classList.add("tw-in")); }, 40);
     if (qi > 0 && !reduce()) {
       let e = $("bossPulse"); if (!e) { e = document.createElement("div"); e.id = "bossPulse"; document.body.appendChild(e); }
       e.style.setProperty("--q", qi); e.classList.remove("on"); void e.offsetWidth; e.classList.add("on");

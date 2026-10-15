@@ -475,9 +475,18 @@
   const MENU6 = ".hh .mcard, .hh .plq, .hh .menu-gear, #dlg > .menu-patch";                                   // .plq: las placas del pie (Enciclopedia, Clasificacion, Perfil)
   const menuK = el => (el.classList.contains("mcard") ? ({ classic: 0, adventure: 1, daily: 2, duelo: 2 })[el.dataset.mode] : ({ codexBtn: 3, profBtn: 4, rankBtn: 6, patchBtn: 3 })[el.id] ?? 5);
   let lastHover = null, ptr = "mouse";
+  /* elemento con manita (cursor: pointer) en el objetivo o sus 3 ancestros mas cercanos; el mapa y el lienzo no suenan */
+  const hoverable = t => {
+    for (let e = t, i = 0; e && e.nodeType === 1 && i < 4; e = e.parentElement, i++) {
+      if (e.tagName === "CANVAS" || e.id === "map" || e.disabled || e.getAttribute("aria-disabled") === "true") return null;
+      if (getComputedStyle(e).cursor === "pointer") return e;
+    }
+    return null;
+  };
   document.addEventListener("pointerover", e => (ptr = e.pointerType), true);
   document.addEventListener("mouseover", e => {
-    const el = e.target.closest && e.target.closest(MENU6 + ", .go, .camp, .btn-ink, .btn-line, .lv:not(:disabled), #dock button, #rail button, .seg button, .menu-gear, .cx-strip, .mode-card, .deck:not(:disabled), .asc:not(:disabled), .tool, .buy:not(:disabled), .hub-back, .inv-perk, .go2, .sup, .nr-buy, .pd-tabs button, .pd-x");
+    const t = e.target, el = t.closest && (t.closest(MENU6 + ", .go, .camp, .btn-ink, .btn-line, .lv:not(:disabled), #dock button, #rail button, .seg button, .menu-gear, .cx-strip, .mode-card, .deck:not(:disabled), .asc:not(:disabled), .tool, .buy:not(:disabled), .hub-back, .inv-perk, .go2, .sup, .nr-buy, .pd-tabs button, .pd-x")
+      || t.closest("button:not(:disabled), a[href], [role=button]:not([aria-disabled=true]), summary, label[for], input[type=checkbox], input[type=range], select, [data-hov]") || (hoverable(t)));   // cualquier control: los listados arriba y, por defecto, todo lo que es un boton de verdad o muestra la manita
     if (el && el !== lastHover) { if (!el.matches(MENU6)) A.sfx.hover(); else if (ptr === "mouse") A.sfx.menuHover(menuK(el)); }
     lastHover = el;
   });
@@ -528,6 +537,7 @@
   const fitRun = (d, el) => {
     if (!el) { if (A.squeeze) A.squeeze(d); return; }
     const base = uiK(); el.style.removeProperty("--k");
+    if (A.adv && A.adv.supFit && el.classList.contains("gx-camp")) A.adv.supFit(el);   // Campamento: primero la letra de la Barra, luego la escala (ver supFit)
     if (el.classList.contains("scrolls")) { if (A.squeeze) A.squeeze(el); if (el.classList.contains("rows")) wholeRows(el, base); return; }   // pantalla con desplazamiento (Perfil y Clasico): a tamano completo
     const over = () => {
       const b = el.querySelector(".scr-body");
@@ -774,7 +784,7 @@
   function revealObs() {
     const cv = map.cv.getBoundingClientRect(), out = [];
     const add = (r, p = 12) => { if (r && r.width > 1 && r.height > 1) out.push([r.left - cv.left - p, r.top - cv.top - p, r.right - cv.left + p, r.bottom - cv.top + p]); };
-    for (const id of ["plate", "advBar", "toolBar", "note", "dock"]) { const e = $(id); if (e && e.getClientRects().length) add(e.getBoundingClientRect()); }
+    for (const id of ["plate", "advBar", "chalBar", "toolBar", "note", "dock"]) { const e = $(id); if (e && e.getClientRects().length) add(e.getBoundingClientRect()); }
     if (A.marcador.docked()) add(A.marcador.finalRect());
     else { const sr = A.marcador.sheetRect(); if (sr) add(sr); else out.push([0, cv.height - Math.min(cv.height * 0.62, 440), cv.width, cv.height]); }   // ventana estrecha: la hoja del ticket, donde de verdad esta
     const d = $("dealer"), sz = innerWidth > 720 ? 320 : 170;

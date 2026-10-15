@@ -60,7 +60,7 @@ kbd { font-family: var(--mono); font-size: .85em; }
 .brand-sh { grid-column: 1; justify-self: start; } .plate-sh { grid-column: 2; } .ledger-sh { grid-column: 3; justify-self: end; }
 .brand { display: flex; align-items: center; gap: 10px; padding: 9px 20px 9px 13px; --c: 9px; }
 .brand-rose { width: 32px; height: 32px; color: var(--paper); --rose-hole: var(--ink); animation: spin-in 1.4s cubic-bezier(.2, .9, .2, 1) both; }
-@keyframes spin-in { from { transform: rotate(-160deg) scale(.6); opacity: 0; } }
+@keyframes spin-in { from { transform: rotate(-160deg); opacity: 0; } }
 .brand-txt { display: flex; align-items: baseline; gap: 7px; font-family: var(--serif); font-variation-settings: var(--disp); line-height: 1; }
 .brand-txt b { font-size: 24px; font-weight: 800; letter-spacing: -.01em; }
 .brand-txt i { font-family: var(--mono); font-style: normal; font-weight: 500; font-size: 14px; letter-spacing: .05em; background: var(--red); padding: 3px 6px 2px; transform: translateY(-3px) rotate(-3deg); }
@@ -132,7 +132,7 @@ html.no-shake #plate.hurry { animation: none; }   /* Vibracion = no: la placa no
 #factText:empty { display: none; }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 
-@keyframes pop-up { from { opacity: 0; transform: translateY(14px) scale(.94); } }
+@keyframes pop-up { from { opacity: 0; transform: translateY(14px); } }
 
 /* ------------------------------------------------ panel de ajustes: pantalla completa */
 .set-veil { position: absolute; inset: 0; z-index: 61; background: #060d09; animation: veil-in .25s ease both; }
@@ -283,7 +283,7 @@ button:focus-visible, .camp:focus-visible { outline: 3px solid var(--brass); out
 #layer { position: absolute; inset: 0; display: grid; pointer-events: none; z-index: 4; }
 #layer:has(#dlg.center) { background: radial-gradient(ellipse at center, rgba(4, 16, 22, .45), rgba(4, 16, 22, .82)); pointer-events: auto; }
 #layer:has(#dlg.verdict) { background: rgba(8, 20, 26, .95); pointer-events: auto; }
-#dlg { pointer-events: auto; opacity: 0; transform: translateY(16px) scale(.97); transition: opacity .3s, transform .5s var(--spring); }
+#dlg { pointer-events: auto; opacity: 0; transform: translateY(16px); transition: opacity .3s, transform .5s var(--spring); }
 #dlg.in { opacity: 1; transform: none; }
 #dlg.side { place-self: center end; margin-right: 24px; width: 352px; filter: drop-shadow(0 22px 34px rgba(2, 10, 15, .55)); }
 #dlg.menu { place-self: stretch start; width: min(580px, calc(100 * var(--vw))); transform: translateX(-40px); } #dlg.menu.in { transform: none; }

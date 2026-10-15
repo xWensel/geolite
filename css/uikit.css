@@ -175,7 +175,7 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 /* Geolite es pixel art de verdad: nada de suavizado al ampliar logos e iconos */
 .hh-logo, .gate-logo img, .brand-rose, .menu-rose { image-rendering: pixelated; }
 /* escalas enteras del logo (200 px nativos): 2x en pantallas normales, 1x en pantallas pequenas */
-.hh-logo, .gate-logo img { width: 400px !important; height: auto !important; max-height: none !important; max-width: none !important; }
+.hh-logo, .gate-logo img { width: 400px !important; height: auto !important; max-height: none !important; max-width: none !important; aspect-ratio: 600 / 177; }   /* el hueco del logo (600x177) se reserva antes de que cargue: sin el, la portada se rehacia al llegar la imagen */
 @media (max-width: 700px), (max-height: 560px) { .hh-logo, .gate-logo img { width: 200px !important; } }
 @media (min-width: 1500px) and (min-height: 900px) { .hh-logo, .gate-logo img { width: 600px !important; } .hh-logo { width: 400px !important; } }
 .brand-rose { width: 32px; height: 32px; } .menu-rose { width: 64px; height: 64px; }
@@ -332,3 +332,12 @@ img.ic.ic-dealer_mini_laugh, img.ic.ic-dealer_mini { image-rendering: pixelated;
 @keyframes tc-stamp { to { opacity: 1; transform: rotate(-12deg) scale(1); } }
 @keyframes tc-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-3deg); } to { opacity: 0; transform: translate(-50%, -40%) scale(.9) rotate(-3deg); } }
 .tier-card.still, .tier-card.still.stamped .tc-stamp { animation-duration: .01s; }
+
+/* ==== v0.3.101: paneles fantasma. Los paneles de LECTURA de la partida (pregunta, marcador, nota, barra del acto) no captan el raton: el clic llega
+   siempre al mapa que tienen debajo (con los controles invertidos, cruzar uno ya no se come el clic). Solo se pulsa lo que es de pulsar (botones,
+   reliquias, el ticket). Su globo lo busca js/uikit.js por posicion, y el panel que tienes bajo el cursor se vuelve casi transparente (.ghosted). */
+#leftCol > .plate-sh, #leftCol > .adv-bar, #ledgerSh, #noteSh, #plate, #ledger, #note, #advBar { pointer-events: none; }
+:is(#plate, #ledger, #note, #advBar) :is(button, a, input, select, textarea, [role="button"], [tabindex], .ab-perk, .btn-ink, .gx-btn, .tk-cx) { pointer-events: auto; }
+#ledgerSh :is(button, a, [role="button"], .btn-ink, .gx-btn, .tk-cx) { pointer-events: auto; }
+#plate, #ledger, #note, #advBar { transition: opacity .14s linear; }
+#plate.ghosted, #ledger.ghosted, #note.ghosted, #advBar.ghosted { opacity: .22; }

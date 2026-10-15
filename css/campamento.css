@@ -139,7 +139,7 @@ html.reduce-motion .rd.bar .rd-n.next::after { animation: none; }
 .rou-pick b { font-weight: 400; color: #fff; } .rp-k { opacity: .8; }
 .rp-dot { width: 18px; height: 18px; border-radius: 50%; box-shadow: 0 0 0 2px #0a140f, inset 0 3px 0 rgba(255, 255, 255, .35), inset 0 -3px 0 rgba(0, 0, 0, .3); }
 .rp-red { background: #d63a2f; } .rp-black { background: #23252e; } .rp-green { background: #1b8a4a; }
-@keyframes rou-drop { from { opacity: 0; transform: translateY(-26px) scale(.9); } }
+@keyframes rou-drop { from { opacity: 0; transform: translateY(-26px); } }
 .rou-band { position: relative; width: 100%; height: calc(var(--cw) * 1.5); background: #070d09; animation: rou-open .46s var(--spring) both;
   box-shadow: 0 -4px 0 #0a140f, 0 -8px 0 #f0b94f, 0 -11px 0 #9a6a1c, 0 -14px 0 #0a140f, 0 4px 0 #0a140f, 0 8px 0 #f0b94f, 0 11px 0 #9a6a1c, 0 14px 0 #0a140f, 0 40px 70px rgba(0, 0, 0, .65); }
 @keyframes rou-open { from { transform: scaleY(.05); opacity: 0; } }

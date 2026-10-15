@@ -630,6 +630,8 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp > .tb-head { grid-column: 1 / -1; grid-row: 1; }
 .gx-camp > .tb-shop { grid-column: 1 / 9; grid-row: 2; }
 .gx-camp > .tb-sup { grid-column: 1 / 9; grid-row: 3; }
+/* la tienda no baja de su alto: lo que crece con el idioma es el texto de la Barra, que ajusta su letra (A.adv.supFit) */
+.gx-camp > .tb-shop { min-height: var(--shop-min, 336px); }
 .gx-camp > .tb-tray { grid-column: 1 / 9; grid-row: 4; }
 .gx-camp > .tb-next { grid-column: 9 / 13; grid-row: 2 / 4; }
 .gx-camp > .go2-wrap { grid-column: 9 / 13; grid-row: 4; }
@@ -675,12 +677,13 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 /* la rareza, como etiqueta sobre el arte (la de la legendaria es su placa de laton, en css/campamento.css) */
 .gx-camp .offer.pc .of-r { position: absolute; left: 10px; top: 10px; z-index: 2; max-width: calc(100% - 20px); padding: 2px 8px 4px; font-family: var(--sans); font-size: 18px; line-height: 1; letter-spacing: 0; text-transform: none; text-align: left;
   color: var(--gx-ink); background: var(--rc); box-shadow: inset 0 0 0 2px var(--gx-o); }
-.gx-camp .offer.pc .of-ico { position: relative; display: grid; place-items: center; height: 64px; min-height: 0; margin: 0; padding: 18px 0 0; border: 0; border-radius: 0; overflow: hidden;
+.gx-camp .offer.pc .of-ico { position: relative; display: grid; place-items: center; height: 108px; min-height: 0; margin: 0; padding: 26px 0 0; border: 0; border-radius: 0; overflow: hidden;
   background: url(../assets/dados/felt.png) 0 0 / 32px 32px, #1a4533; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 6px 0 rgba(0, 0, 0, .22); }
-.gx-camp .offer.pc .of-ico .ic { position: static; width: 40px; height: 40px; transform: none; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.gx-camp .offer.pc .of-ico .ic { position: static; width: 72px; height: 72px; transform: none; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
 .gx-camp .offer.pc .of-n { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1; text-wrap: balance; }
 .gx-camp .offer.pc .of-n em { display: block; margin-top: 2px; font-style: normal; font-size: 18px; color: var(--rcd); }
 .gx-camp .offer.pc > p { align-self: start; margin: 0; font-size: 18px; line-height: 1.12; color: #3f5045; text-wrap: pretty; }
+.gx-camp .offers.cp1 .offer.pc > p { font-size: 17px; line-height: 1.1; } .gx-camp .offers.cp2 .offer.pc > p { font-size: 16px; line-height: 1.08; }   /* A.adv.supFit, solo si ni asi cabe */
 .gx-camp .offer.pc .buy { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 36px; margin: 0; padding: 0 10px 2px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap;
   font-family: var(--sans); font-size: 24px; line-height: 1; color: var(--gx-ttl); background: #0b2118; clip-path: var(--gx-notch);
   box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); transition: transform .12s steps(2, end), filter .12s; }
@@ -693,7 +696,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .offer.swap-src { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo), 0 0 0 3px var(--gx-gold), 0 0 22px rgba(248, 180, 73, .55); }
 /* la legendaria: su marco de oro (campamento.css), botando suave como las demas (antes a saltos) */
 .gx-camp .offers > .offer.pc.r3 { animation-timing-function: var(--gx-ease), ease-in-out; }
-.gx-camp .offer.pc.r3 .of-ico { padding-top: 0; }
+.gx-camp .offer.pc.r3 .of-ico { padding-top: 14px; }
 .table.mesa.gx-camp .offer.pc.r3 .of-r { left: -10px; right: -10px; width: fit-content; margin-inline: auto; translate: none; max-width: calc(100% + 20px); padding: 3px 8px 4px; font-weight: 400; letter-spacing: .02em; white-space: normal; text-align: center; line-height: 1.05; }   /* la placa de laton pisa el borde y sobresale un poco; con "vende una..." parte en dos lineas */   /* la placa de laton cabe en la carta */
 /* el mazo de Cambiar cartas, boca abajo al final de la fila */
 .gx-camp .offers > .tb-actions { grid-row: 1 / -1; display: flex; align-items: center; min-width: 0; padding: 0; }
@@ -722,8 +725,10 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .sp-t { display: contents; }
 .gx-camp .sp-t > b { grid-column: 2; grid-row: 1; min-width: 0; font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1; color: var(--gx-ttl); text-shadow: 0 2px 0 rgba(0, 0, 0, .4); text-transform: none; letter-spacing: 0; }
 .gx-camp .sp-t > i { grid-column: 1 / -1; grid-row: 2; font-style: normal; font-size: 18px; line-height: 1.12; color: var(--gx-txt-2); text-wrap: pretty; }
+/* A.adv.supFit: si el texto de las placas no cabe en el alto de la Barra, baja la letra por niveles (sf1-sf3) en vez de encoger las cartas */
+.gx-camp .tb-sup.sf1 .sp-t > i { font-size: 17px; line-height: 1.1; } .gx-camp .tb-sup.sf2 .sp-t > i { font-size: 16px; line-height: 1.08; } .gx-camp .tb-sup.sf3 .sp-t > i { font-size: 15px; line-height: 1.05; }
 .gx-camp .sup > em { grid-column: 3; grid-row: 1; justify-self: end; font-style: normal; }
-.gx-camp .sup > .bt-pick { grid-column: 1 / -1; grid-row: 3; justify-self: end; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; }
+.gx-camp .sup > .bt-pick { grid-column: 1 / -1; grid-row: 3; justify-self: end; display: flex; flex-wrap: nowrap; justify-content: flex-end; align-items: center; gap: 4px; }   /* una sola fila (3 botones de la Oferta: antes saltaban a dos y la Barra crecia 34 px) */
 .gx-camp .sp-p { display: inline-flex; align-items: center; gap: 2px; height: 28px; padding: 0 8px 1px 4px; font-family: var(--sans); font-size: 20px; color: var(--gx-ink); background: var(--gx-gold);
   box-shadow: inset 0 0 0 2px var(--gx-o); white-space: nowrap; }
 .gx-camp .sp-p .ic { width: 18px; height: 18px; }
@@ -736,7 +741,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .sup.fresh .sp-on { animation: sp-stamp .32s cubic-bezier(.3, 1.5, .5, 1) both; }
 @keyframes sp-stamp { from { transform: rotate(-6deg) scale(1.9); opacity: 0; } to { transform: rotate(-6deg) scale(1); opacity: 1; } }
 /* los botones de las apuestas: papel; rojo, negro y verde en la ruleta; cara y cruz en la moneda */
-.gx-camp .sup .bt-c { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; padding: 0 10px 2px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap;
+.gx-camp .sup .bt-c { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; padding: 0 7px 2px; border: 0; border-radius: 0; cursor: pointer; white-space: nowrap;
   font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; letter-spacing: 0; text-transform: none; text-shadow: none; color: var(--gx-ink); clip-path: var(--gx-notch);
   background: linear-gradient(#fffaf0 0 3px, var(--gx-paper) 3px calc(100% - 4px), #c2b28c calc(100% - 4px)); box-shadow: inset 0 0 0 2px var(--gx-o); transition: transform .12s steps(2, end); }
 .gx-camp .sup .bt-c:hover { transform: translateY(-2px); } .gx-camp .sup .bt-c:active { transform: translateY(1px); }
@@ -745,7 +750,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .sup .bt-ct { color: #fff; background: #3f7fd4; }
 .gx-camp .sup .bt-ch, .gx-camp .sup .bt-di, .gx-camp .sup .bt-gl, .gx-camp .sup .bt-pl, .gx-camp .sup .bt-ra, .gx-camp .sup .bt-cu, .gx-camp .sup .bt-cs {
   background: linear-gradient(var(--gx-gold-hi) 0 3px, var(--gx-gold) 3px calc(100% - 4px), var(--gx-gold-lo) calc(100% - 4px)); }
-.gx-camp .sup .bt-n { gap: 6px; } .gx-camp .sup .bt-n span { display: inline-flex; align-items: center; gap: 2px; font-size: 18px; color: var(--gx-ink-2); }
+.gx-camp .sup .bt-n { gap: 4px; } .gx-camp .sup .bt-n span { display: inline-flex; align-items: center; gap: 2px; font-size: 18px; color: var(--gx-ink-2); }
 .gx-camp .sup .bt-n span .ic { width: 16px; height: 16px; }
 .gx-camp .sup .bt-res { display: grid; justify-items: end; gap: 2px; font-family: var(--sans); font-size: 18px; line-height: 1.05; color: var(--gx-txt-2); text-align: right; }
 .gx-camp .sup .bt-res b { font-weight: 400; font-size: 20px; color: var(--gx-ttl); text-transform: none; letter-spacing: 0; }
@@ -939,7 +944,7 @@ html.reduce-motion .gx-camp .nr-body { scroll-behavior: auto; }
   .gx-camp .tb-head { grid-template-columns: minmax(0, 1fr) auto; } .gx-camp .tb-head > .rd { grid-column: 1 / -1; grid-row: 2; justify-self: start; max-width: 100%; overflow-x: auto; }
   .gx-camp .tb-head > .tb-right { grid-column: 2; grid-row: 1; }
   .gx-camp .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: auto; row-gap: 12px; }
-  .gx-camp .offer.pc { grid-row: auto; grid-template-rows: 64px auto 1fr auto; } .gx-camp .offers > .tb-actions { grid-column: 1 / -1; grid-row: auto; justify-content: center; }
+  .gx-camp .offer.pc { grid-row: auto; grid-template-rows: 108px auto 1fr auto; } .gx-camp .offers > .tb-actions { grid-column: 1 / -1; grid-row: auto; justify-content: center; }
   .gx-camp .tb-deck { flex-direction: row; width: auto; height: auto; }
   .gx-camp .tb-sup, .gx-camp .tb-sup.no-cas { grid-template-columns: minmax(0, 1fr); } .gx-camp .sup-void { display: none; }
   .gx-camp .tb-tray { flex-wrap: wrap; }

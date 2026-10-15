@@ -1,6 +1,6 @@
 /*
  * Geolite - identidad sonora.
- * Los efectos se sintetizan en el navegador; la musica son las 21 pistas fijas de la BSO (assets/music/*.mp3),
+ * Los efectos se sintetizan en el navegador; la musica son las 22 pistas fijas de la BSO (assets/music/*.mp3),
  * obra del autor del juego (creada con AKAI): aqui solo se integran y reproducen.
  *  - Firma: motivo de tres notas ascendentes (sol-do-re) que suena al empezar, al superar niveles y en la victoria.
  *  - Escala pentatonica de Do mayor: cualquier nota que suene "encaja", asi nada choca.
@@ -148,7 +148,7 @@ window.AIQ = window.AIQ || {};
     lp.type = "lowpass"; lp.frequency.value = 2600; os.connect(lp).connect(g).connect(sfxBus); env(g, t, 0.004, m.v, m.d); os.start(t); os.stop(t + m.d + 0.05);
   }
 
-  /* ------------------------------------------------------------------ musica: 21 pistas fijas ("BSO" del casino) */
+  /* ------------------------------------------------------------------ musica: 22 pistas fijas ("BSO" del casino) */
   /*
    * Cada pista es un archivo real en assets/music/ (la BSO del autor del juego, creada con AKAI).
    * Aqui solo se reproducen, se encadenan solas al terminar y se anuncian con una pequena transicion.
@@ -162,20 +162,21 @@ window.AIQ = window.AIQ || {};
     ["Todo al rojo", "All on Red", "Tout sur le rouge", "Tudo no vermelho", "Alles auf Rot", "Tutto sul rosso", "Todo al rojo", "全押红色", "레드에 올인", "赤に全賭け", "Всё на красное", "Wszystko na czerwone"],
     ["Huérfanos", "Orphans", "Orphelins", "Órfãos", "Orphelins", "Orfani", "Huérfanos", "孤儿注", "오르펠랭", "オーファン", "Сироты", "Sieroty"],
     ["All-in", "All In", "Tapis !", "All-in", "All-in", "All-in", "All-in", "全押", "올인", "オールイン", "Ва-банк", "All-in"],
-    ["Combinada", "Parlay", "Pari combiné", "Múltipla", "Kombiwette", "Multipla", "Parlay", "串关", "팔레이", "パーレー", "Экспресс", "Kupon łączony"],
+    ["Combinada", "Parlay", "Pari combiné", "Múltipla", "Kombiwette", "Multipla", "Combinada", "串关", "팔레이", "パーレー", "Экспресс", "Kupon łączony"],
     ["Sube la apuesta", "Raise the Stakes", "Je relance", "Aumenta a aposta", "Einsatz erhöhen", "Rilancio", "Sube la apuesta", "加注", "판돈을 올려라", "レイズ", "Поднять ставки", "Podbij stawkę"],
     ["Retirar ganancias", "Cash Out", "Encaisser", "Retirar ganhos", "Auszahlen", "Incassa", "Cobrar ganancias", "兑现离场", "캐시 아웃", "キャッシュアウト", "Забрать выигрыш", "Wypłata"],
-    ["Banca al día", "Bankroll", "Bankroll", "Banca em dia", "Bankroll", "Bankroll", "Banca al día", "资金池", "뱅크롤", "バンクロール", "Банкролл", "Kasa w porządku"],
+    ["Banca al día", "Bankroll", "Capital de jeu", "Banca em dia", "Spielkapital", "Capitale di gioco", "Banca al día", "资金池", "뱅크롤", "バンクロール", "Банкролл", "Kasa w porządku"],
     ["Apuesta en vivo", "Live Bet", "Pari en direct", "Aposta ao vivo", "Live-Wette", "Scommessa live", "Apuesta en vivo", "现场投注", "라이브 베팅", "ライブベット", "Ставка по ходу игры", "Zakład na żywo"],
     ["Pleno al quince", "Straight Up", "Plein au quinze", "Número pleno", "Volltreffer", "Pieno al quindici", "Pleno al quince", "单号直注", "스트레이트 업", "ストレートアップ", "Ставка на число", "Prosto na piętnastkę"],
     ["Hándicap asiático", "Asian Handicap", "Handicap asiatique", "Handicap asiático", "Asiatisches Handicap", "Handicap asiatico", "Hándicap asiático", "亚洲让球", "아시안 핸디캡", "アジアンハンディキャップ", "Азиатская фора", "Handicap azjatycki"],
-    ["Gran apostador", "High Roller", "Flambeur", "Grande apostador", "High Roller", "Giocatore d'alto bordo", "Gran apostador", "豪赌客", "하이 롤러", "ハイローラー", "Хайроллер", "Gruba ryba"],
+    ["Gran apostador", "High Roller", "Flambeur", "Grande apostador", "Großspieler", "Giocatore d'alto bordo", "Gran apostador", "豪赌客", "하이 롤러", "ハイローラー", "Хайроллер", "Gruba ryba"],
     ["Bote acumulado", "Progressive Jackpot", "Jackpot progressif", "Jackpot progressivo", "Progressiver Jackpot", "Jackpot progressivo", "Pozo acumulado", "累积奖池", "누적 잭팟", "プログレッシブ・ジャックポット", "Прогрессивный джекпот", "Kumulacja"],
     ["Ventaja de la casa", "House Edge", "Avantage de la maison", "Vantagem da casa", "Hausvorteil", "Vantaggio del banco", "Ventaja de la casa", "庄家优势", "하우스 엣지", "ハウスエッジ", "Преимущество казино", "Przewaga kasyna"],
     ["Mano caliente", "Hot Hand", "Main chaude", "Mão quente", "Heiße Hand", "Mano calda", "Mano caliente", "手气正旺", "핫 핸드", "ホットハンド", "Горячая рука", "Gorąca ręka"],
     ["Ganador y colocado", "Each Way", "Pari gagnant-placé", "Ganhador e colocado", "Sieg-Platz-Wette", "Vincente e piazzato", "Ganador y colocado", "独赢位置", "이치 웨이", "単勝・複勝", "Победа и место", "Wygrana i miejsce"],
     ["Empate no vale", "Draw No Bet", "Match nul remboursé", "Empate anula aposta", "Unentschieden, Geld zurück", "Pareggio rimborsato", "Empate no cuenta", "平局退款", "무승부 환불", "引き分け返金", "Ничья — возврат", "Zakład bez remisu"],
     ["Apuesta máxima", "Max Bet", "Mise maximale", "Aposta máxima", "Höchsteinsatz", "Puntata massima", "Apuesta máxima", "最大注", "최대 베팅", "マックスベット", "Максимальная ставка", "Maksymalna stawka"],
+    ["Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters"],
   ];
   const FILES = [
     "assets/music/01-lounge-nocturno.mp3", "assets/music/02-ragtime-roulette.mp3", "assets/music/03-bossa-de-medianoche.mp3",
@@ -184,7 +185,7 @@ window.AIQ = window.AIQ || {};
     "assets/music/10-cash-out.mp3", "assets/music/11-banca-al-dia.mp3", "assets/music/12-apuesta-en-vivo.mp3",
     "assets/music/13-pleno-al-quince.mp3", "assets/music/14-handicap-asiatico.mp3", "assets/music/15-funk-da-sorte.mp3",
     "assets/music/16-house-del-crupier.mp3", "assets/music/17-tecno-del-bote.mp3", "assets/music/18-merengue-del-premio.mp3",
-    "assets/music/19-cha-cha-del-casino.mp3", "assets/music/20-ranchera-de-la-suerte.mp3", "assets/music/21-corrido-del-apostador.mp3",
+    "assets/music/19-cha-cha-del-casino.mp3", "assets/music/20-ranchera-de-la-suerte.mp3", "assets/music/21-corrido-del-apostador.mp3", "assets/music/22-tipsters.mp3",
   ];
   /* v0.3.55 (el sonido de la casa, 3a): cada cancion tiene su momento y su volumen. Los archivos no se tocan: todo se decide aqui.
      - GROUPS: el reparto. La portada y los menus, las mas tranquilas (la 1.a, "Apuesta segura", es SIEMPRE la del arranque); cada acto de la
@@ -196,15 +197,15 @@ window.AIQ = window.AIQ || {};
      - LUFS: el volumen medido de cada pista (ffmpeg ebur128). Entre la mas fuerte y la mas floja habia 8,7 dB; TRIM las lleva todas a -34 LUFS
        (correccion limitada a -4 / +5,5 dB) con una ganancia por pista.
      - BPM y BEAT0 (tempo y primer pulso en ms, medidos: todas van a tempo exacto de principio a fin): el compas de la que suena, A.music.beat().
-       Las 21 arrancan en el pulso: el primer ataque cae a los 59-62 ms del archivo y la rejilla aguanta hasta el final. Ojo si entra una pista
+       Las 22 arrancan en el pulso: el primer ataque cae a los 59-62 ms del archivo y la rejilla aguanta hasta el final. Ojo si entra una pista
        nueva: el ataque mas fuerte de una cancion puede ser el contratiempo (mambo, house, cha-cha); el pulso se mide con la energia en el
        tiempo y con los graves, no con el ataque de toda la banda. */
-  const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
+  const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18, 21], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
   GROUPS.classic = GROUPS.home.concat(GROUPS.a1); GROUPS.inf = GROUPS.a2.concat(GROUPS.a3);
   const NOW = { boss: 1, win: 1 };                                      // momentos que no esperan a que acabe la cancion
-  const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4];
+  const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4, -35.1];
   const TRIM = LUFS.map(l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20));
-  const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92];
+  const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92, 92];
   const BEAT0 = 60;
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
   let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
@@ -256,10 +257,11 @@ window.AIQ = window.AIQ || {};
       if (!A.audio.musicOn || !init()) return;
       if (cur < 0) useTrack(0, "cut"); else decks[di].el.play().catch(() => {});   // la primera es siempre la del arranque
     },
-    /* las flechas del reproductor: la anterior y la siguiente DENTRO del grupo del momento */
+    /* las flechas del reproductor: la anterior y la siguiente de la LISTA entera, en orden (1, 2, 3... y vuelta a la 1); el grupo del momento
+       solo manda cuando la cancion acaba sola */
     next() { A.music.step(1); },
     prev() { A.music.step(-1); },
-    step(d) { const g = group(); if (cur < 0 || g.length < 2) return; const k = g.indexOf(cur); change(g[k < 0 ? 0 : (k + d + g.length) % g.length], "soft"); },
+    step(d) { const n = FILES.length; if (cur < 0 || n < 2) return; change((cur + d + n) % n, "soft"); },
     index() { return cur; },
     count() { return FILES.length; },
     title(i = cur) { const n = NAMES[i]; if (!n) return ""; const k = A.LANGS.findIndex(l => l.code === A.lang); return n[k] || n[1]; },
@@ -298,7 +300,7 @@ window.AIQ = window.AIQ || {};
       return { ms: 60000 / BPM[cur], at: d.el.currentTime * 1000 - BEAT0 - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
     },
   };
-  A.audio.setSkin = () => {};   // las 21 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
+  A.audio.setSkin = () => {};   // las 22 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
   A.audio.state = () => (ctx ? ctx.state : 'none');
   A.audio.tap = () => { if (!ctx) return null; const an = ctx.createAnalyser(); an.fftSize = 2048; outTap.connect(an); return an; };   // para las pruebas: un medidor de lo que sale por los altavoces
   /* volumen 0..1 de "master" | "music" | "sfx" */
@@ -331,7 +333,7 @@ window.AIQ = window.AIQ || {};
      Enciclopedia, Perfil y Clasificacion (abajo, mas graves y tambien subiendo: Enciclopedia, Clasificacion, Perfil) y Ajustes (arriba, el mas agudo).
      Todo entre do5 y re6 */
   const HOV_DEG = [7, 8, 9, 6, 8, 10, 7];
-  let hovT = -1, hovLast = 0, landLast = 0, flagLast = -1;
+  let hovT = -1, hovLast = 0, landLast = 0, flagLast = -1, hovStep = 0, hovDir = 1;
   const JP_GAP = 0.46;                    // segundos entre jackpots de la Enciclopedia: el ticket enciende sus casillas y el movil vibra a este mismo ritmo
   const JP_LEAD = 0.12;                   // con cuanta antelacion se crean los nodos de cada golpe del jackpot
   A.audio.jpGap = JP_GAP;
@@ -347,7 +349,19 @@ window.AIQ = window.AIQ || {};
 
   A.sfx = {
     ui: go(t => pluck(84, t, { vol: 0.05, dur: 0.12, bright: 3, rev: 0.1 })),
-    hover: go(t => noise(t, 0.02, { hp: 5000, vol: 0.02 })),
+    /* hover de cualquier control: ficha que roza el fieltro + nota de kalimba flojita. Barrer varios controles seguidos sube por la
+       pentatonica (peldano a peldano, rebota arriba y baja: nunca chilla) y al parar un instante vuelve al principio; cada vez se sortean el
+       timbre, la afinacion fina y el brillo. Comparte hovT con menuHover: si dos oyentes saltan a la vez (Enciclopedia, parche), suena uno */
+    hover: go(t => {
+      if (t - hovT < 0.06) return;
+      const r = Math.random, since = t - hovT; hovT = t;
+      if (since > 0.75) { hovStep = 0; hovDir = 1; } else { hovStep += hovDir; if (hovStep >= 6) hovDir = -1; else if (hovStep <= 0) hovDir = 1; }
+      const m = scaleNote(8 + hovStep, 60) + (r() - 0.5) * 0.08, v = 0.0105 * (0.85 + 0.3 * r());
+      noise(t, 0.006 + 0.003 * r(), { type: "bandpass", lp: 3400 + 1800 * r(), q: 1.3, vol: 0.0042 });
+      pluck(m, t + 0.003, { vol: v, dur: 0.09 + 0.05 * r(), bright: 2.6 + 1.2 * r(), rev: 0.12, wave: r() < 0.7 ? "sine" : "triangle" });
+      bell(m + 12, t + 0.007, { vol: v * 0.24, dur: 0.14 + 0.08 * r(), rev: 0.3 });
+      if (hovStep >= 3 && r() < 0.5) chirp(m + 12, t + 0.005, v * 0.1, 0.02);                 // un pellizco de 8 bits cuando la escalera se calienta
+    }),
     /* menu principal (3 modos, Enciclopedia, Clasificacion, Perfil, Ajustes): rozar una ficha de casino. Clac minimo de ficha, nota de marimba o kalimba,
        brillo de campana y una pizca de 8 bits, todo flojito. Cada boton tiene su registro (barrer las cartas suena a arpegio) y cada vez
        se sortea la nota vecina (nunca la misma que la anterior), el timbre, el brillo, la sala y el volumen: no suena dos veces igual */

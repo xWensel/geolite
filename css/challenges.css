@@ -57,7 +57,7 @@ body.ptr-on #map { cursor: none; }
 .dl-face { position: relative; width: 320px; height: 320px; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .4)); flex: none; }
 .cr-cv { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); image-rendering: pixelated; pointer-events: none; }
 .cr-cv.mini { transform: none; }
-.dl-bubble { position: relative; max-width: min(440px, calc(52 * var(--vw))); margin-bottom: 44px; padding: 11px 18px 13px 16px; background: #fdf5fd; color: #16241c; font-family: var(--sans); font-weight: 400; font-size: calc(27px * var(--dll, 1)); line-height: 1.12; box-shadow: inset 0 0 0 3px #16241c, 0 6px 0 rgba(0, 0, 0, .4); opacity: 0; transform: scale(.85); transform-origin: 0 100%; transition: opacity .2s, transform .3s cubic-bezier(.2, 1.6, .4, 1); clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); }
+.dl-bubble { position: relative; max-width: min(440px, calc(52 * var(--vw))); margin-bottom: 44px; padding: 11px 18px 13px 16px; background: #fdf5fd; color: #16241c; font-family: var(--sans); font-weight: 400; font-size: calc(27px * var(--dll, 1)); line-height: 1.12; box-shadow: inset 0 0 0 3px #16241c, 0 6px 0 rgba(0, 0, 0, .4); opacity: 0; transform: translateY(8px); transform-origin: 0 100%; transition: opacity .2s, transform .3s cubic-bezier(.2, 1.6, .4, 1); clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); }
 .dl-bubble.on { opacity: 1; transform: none; } .dl-bubble p { margin: 0; min-height: 1.12em; text-wrap: pretty; transition: height .2s cubic-bezier(.2, .9, .3, 1); }   /* crece renglon a renglon al escribir (js/dealer.js) */ .dl-rest { visibility: hidden; }
 /* EN DIRECTO (js/vivo.js): el autor escribe por el crupier. Piloto de estudio de television: cuadrado rojo de pixel que parpadea a golpes y la etiqueta en Silkscreen a 16 px (su rejilla) */
 .dl-live { display: none; align-items: center; gap: 7px; margin: 1px 0 6px; font-family: var(--mono); font-weight: 400; font-size: 16px; line-height: 1; letter-spacing: .02em; color: #c4152a; text-transform: uppercase; white-space: nowrap; }
@@ -220,7 +220,7 @@ html.no-shake.vivo-quake, html.reduce-motion.vivo-quake { animation: none; }
 #chOv > .chx-wins { opacity: 1; }
 .chx-win { position: absolute; pointer-events: auto; cursor: default; padding: 3px; user-select: none; -webkit-user-select: none; font: 13px/1.35 "Segoe UI", Tahoma, system-ui, -apple-system, Roboto, sans-serif; color: #111; background: #d4d0c8; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, inset 2px 2px 0 #eaeaea, inset -2px -2px 0 #808080, 0 18px 40px rgba(0, 0, 0, .55); animation: cw-in .12s ease-out; }
 .chx-win.bye { opacity: 0; transform: scale(.97); transition: opacity .12s, transform .12s; pointer-events: none; }
-@keyframes cw-in { from { opacity: 0; transform: scale(.94); } }
+@keyframes cw-in { from { opacity: 0; transform: translateY(8px); } }
 .cw-bar { display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 3px 0 5px; color: #fff; background: linear-gradient(90deg, #2a0f5c, #7b3fc4 62%, #b980ff); cursor: move; touch-action: none; }
 .cw-bar b { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12.5px; font-weight: 700; }
 .cw-app { flex: none; width: 16px; height: 16px; background: url(../assets/icons/logo_mark_s.png) center / contain no-repeat; image-rendering: pixelated; }
@@ -574,3 +574,36 @@ html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class
 .dealer.lvpos .dl-bubble { order: 1; margin: 0; min-width: min(var(--hf), 420px); max-width: min(460px, 80vw); padding-bottom: 22px; transform-origin: var(--tail) 100%;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(var(--tail) + 10px) calc(100% - 12px), var(--tail) 100%, calc(var(--tail) - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
 .dealer.lvpos.lv-c .dl-bubble { max-width: min(640px, 86vw); font-size: calc(32px * var(--dll, 1)); }
+
+/* ==== v0.3.101: los retos de la ronda, arriba del todo y solo con su icono (#chalBar, js/adventure.js renderBars) ====
+   Antes eran una lista de fichas con nombre dentro de la barra del acto: con 5 retos tapaba medio mapa y, con "Controles invertidos", cruzarla
+   se comia los clics. Ahora es una tira de iconos que NUNCA capta el raton (pointer-events: none: el clic llega siempre al mapa); el nombre y
+   la descripcion salen al pasar el cursor por encima (js/uikit.js, ghostAt, que los busca por posicion). Los puntos de abajo son el nivel. */
+#chalBar { position: absolute; z-index: 6; left: 50%; top: var(--hy, 14px); transform: translateX(-50%); zoom: var(--k, 1); --vw: calc(1vw / var(--k, 1)); --vh: calc(1vh / var(--k, 1));
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 6px; max-width: calc(34 * var(--vw)); pointer-events: none; }
+#chalBar.hidden { display: none; }
+#chalBar .ch-chip { position: relative; flex-direction: column; justify-content: center; gap: 3px; width: 42px; padding: 6px 0 5px; border-radius: 0; background: #0b1d15; filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .72)); pointer-events: none; }
+#chalBar .ch-chip .ic { width: 24px; height: 24px; }
+#chalBar .ch-chip > b { display: none; }
+:root body #chalBar .ch-chip .ch-lv { display: block; font-size: 9px; line-height: 9px; letter-spacing: 1px; margin-right: -1px; }
+:root body #chalBar .ch-chip .ch-new { position: absolute; left: -4px; top: -4px; width: 9px; height: 9px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: #e2483d; box-shadow: 0 0 0 2px #0b1d15; font-size: 0; }
+#chalBar .ch-chip.ch-sealed::before { position: absolute; left: -4px; bottom: -4px; width: 9px; height: 9px; }
+#chalBar .ch-chip.ch-calm::after { position: absolute; right: 2px; top: 0; margin: 0; font-size: 11px; }
+#chalBar .ch-chip .ch-amu { right: -7px; top: -9px; width: 18px; height: 18px; } #chalBar .ch-chip .ch-amu .ic { width: 13px; height: 13px; }
+#chalBar .ch-chip.ch-hid { opacity: 1; }
+#chalBar .ch-chip.ch-hid b { display: block; letter-spacing: 0; font-size: 16px; line-height: 1; }
+@media (max-width: 900px), (max-height: 520px) { #chalBar { top: 6px; zoom: 1; max-width: 40vw; gap: 4px; } #chalBar .ch-chip { width: 32px; padding: 4px 0 3px; } #chalBar .ch-chip .ic { width: 18px; height: 18px; } }
+
+/* ==== v0.3.103: acto, monedas y vidas JUNTO a los retos, arriba del todo (#topHud) ====
+   El bloque del acto colgaba bajo la pregunta: ahi tapaba el monton de la Enciclopedia y tenia poco protagonismo. Ahora es una sola pieza centrada
+   (la barra del acto con todo su contenido centrado y, debajo, la tira de iconos de los retos). Nunca capta el raton (salvo las reliquias, para su texto). */
+#topHud { position: absolute; z-index: 6; left: 50%; top: var(--hy, 14px); transform: translateX(-50%); zoom: var(--k, 1); --vw: calc(1vw / var(--k, 1)); --vh: calc(1vh / var(--k, 1));
+  display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: calc(30 * var(--vw)); pointer-events: none; }
+#topHud > .adv-bar { position: relative; left: auto; top: auto; width: max-content; min-width: 0; max-width: 100%; justify-items: center; text-align: center; margin: 0; }
+#topHud > .adv-bar .ab-top, #topHud > .adv-bar .ab-perks, #topHud > .adv-bar .ab-wind { justify-content: center; }
+#topHud > .adv-bar .ab-perks { max-width: 100%; }
+#topHud > #chalBar { position: relative; left: auto; top: auto; transform: none; zoom: 1; max-width: 100%; --vw: inherit; --vh: inherit; }
+@media (max-width: 900px), (max-height: 520px) { #topHud { top: 6px; zoom: 1; max-width: 46vw; } #topHud > .adv-bar { padding: 5px 8px 6px; gap: 3px; } #topHud > .adv-bar .ab-perks { display: none; } }
+#topHud > .adv-bar { max-width: min(300px, 100%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 14px; }
+#topHud > .adv-bar .ab-top { flex: 0 0 100%; }
+#topHud > .adv-bar .ab-perks, #topHud > .adv-bar .ab-wind { flex: 0 1 auto; }

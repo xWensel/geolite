@@ -45,7 +45,7 @@
 .plq:active { transform: translateY(4px) scale(.98); transition-duration: .08s; } .plq:active::after { transform: translateY(2px); }
 .plq:focus { outline: none; }
 .plq:focus-visible::before, html[data-input="pad"] .plq:focus::before { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fff; }
-@keyframes plq-in { from { opacity: 0; transform: translateY(70px) scale(.8); } }
+@keyframes plq-in { from { opacity: 0; transform: translateY(70px); } }
 @keyframes plq-bob { 50% { translate: 0 -3px; } }                                    /* respiracion muy suave (translate: no pisa el transform del raton) */
 .plq-rank { animation-name: plq-in, plq-bob-c; } @keyframes plq-bob-c { 0%, 100% { translate: 0 -3px; } 50% { translate: 0 0; } }   /* el centro respira al reves: espejo */
 
@@ -72,7 +72,7 @@ html body .plq-tag > span { font-size: 16px; }                                  
   padding: 5px 10px 4px; box-shadow: 0 4px 0 rgba(0, 0, 0, .45), 0 0 0 2px #16241c; white-space: nowrap; text-shadow: 0 0 6px #fff, 0 0 14px var(--red), 0 0 26px var(--red); transform: translateX(-50%) rotate(-2deg); pointer-events: none;
   animation: rib-in .5s var(--spring) both, neon-flicker 3.2s linear .5s infinite; }
 .plq-rib.on { display: inline-flex; } .plq-rib .ic { width: 16px; height: 16px; margin: 0; filter: none; }
-@keyframes rib-in { from { opacity: 0; transform: translateX(-50%) rotate(-2deg) scale(.3); } }
+@keyframes rib-in { from { opacity: 0; transform: translateX(-50%) rotate(-2deg) translateY(8px); } }
 
 /* ---------- version: aparte, pequena, abajo a la derecha (hermana de .hh dentro del dialogo: no se escala ni cuenta para el ajuste) ---------- */
 #dlg > .hh-ver { position: absolute; right: 14px; bottom: 7px; margin: 0; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; line-height: 1; color: rgba(242, 233, 214, .36); pointer-events: none; white-space: nowrap; }

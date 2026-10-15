@@ -91,7 +91,7 @@ Todo el arte de Geolite es pixel art de Cousins Studios. La base está ideada po
 
 ### Banda sonora
 
-Creada por Cousins Studios con AKAI; los audios se exportaron e integraron en el motor de audio del juego. 21 canciones (35 min 43 s), con título en los 12 idiomas, que rotan sin repetirse seguidas y se navegan desde Ajustes > Sonido:
+Creada por Cousins Studios con AKAI; los audios se exportaron e integraron en el motor de audio del juego. 22 canciones (37 min 28 s), con título en los 12 idiomas, que rotan sin repetirse seguidas y se navegan desde Ajustes > Sonido:
 
 
 | N.º | Título | Title | Estilo | Duración |
@@ -117,6 +117,7 @@ Creada por Cousins Studios con AKAI; los audios se exportaron e integraron en el
 | 19 | Ganador y colocado | Each Way | cha-cha-chá | 1:46 |
 | 20 | Empate no vale | Draw No Bet | ranchera | 1:43 |
 | 21 | Apuesta máxima | Max Bet | corrido | 1:45 |
+| 22 | Tipsters | Tipsters | noir | 1:45 |
 
 Los efectos de sonido del juego se sintetizan en el propio motor de audio (`js/audio.js`).
 
