@@ -107,12 +107,20 @@ window.AIQ = window.AIQ || {};
     return t && fl ? `${CIRCA[l] || CIRCA.en} ${t}` : t;
   };
   const cap = s => (s ? s.charAt(0).toLocaleUpperCase() + s.slice(1) : s);
+  /* la pregunta pasa a ser una zona de uno o varios paises; la etiqueta (donde se pinta su nombre al revelar) es el centro de su pais mas grande */
+  function zoneOf(q, zone) {
+    q.zone = zone; const f = A.waters.of(q); if (!f) return null;
+    const big = f.polys.reduce((a, b) => ((b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) > (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) ? b : a));
+    f.label = [(big.bbox[0] + big.bbox[2]) / 2, (big.bbox[1] + big.bbox[3]) / 2]; q.lon = f.label[0]; q.lat = f.label[1];
+    return q;
+  }
   let PQ = null;
   function personQ(k) {
     if (!PQ) { PQ = {}; (A.DUELO_PERSONAS || []).forEach(r => (PQ[r[0]] = r)); }
-    const r = PQ[k]; if (!r) return null; const [id, lat, lon, by, dy, names, roles, fl] = r, sub = {};
+    const r = PQ[k]; if (!r) return null; const [id, lat, lon, by, dy, names, roles, fl, , zone] = r, sub = {};
     Object.keys(names).forEach(l => { const y = yearsTxt(by, dy, l, fl), ro = cap(roles[l] || roles.en || ""); sub[l] = ro && y ? `${ro} · ${y}` : ro || y; });
-    return { t: "p", lat, lon, name: names, sub, clue: false, answer: null, fact: {}, cid: [id], kind: "character", topic: "character", tier: 0, fame: 0, cEn: [], cks: [] };
+    const q = { t: "p", lat, lon, name: names, sub, clue: false, answer: null, fact: {}, cid: [id], kind: "character", topic: "character", tier: 0, fame: 0, cEn: [], cks: [] };
+    return zone ? zoneOf(q, zone) : q;   // nacimiento disputado o compartido (Gardel, Buda...): se acierta dentro de cualquiera de sus paises
   }
   /* una pregunta de data/duelo-extra.js (estadios, platos, estilos de musica, curiosidades): una zona de uno o varios paises (se acierta dentro de cualquiera)
      o un punto. row = [id, categoria, tipo de pregunta, lat, lon, zona, nombres, sub, tipo de carta, 3 niveles, carta propia]. La etiqueta de la zona
@@ -122,8 +130,7 @@ window.AIQ = window.AIQ || {};
     if (!XQ) { XQ = {}; (A.DUELO_EXTRA || []).forEach(r => (XQ[r[0]] = r)); }
     const r = XQ[k]; if (!r) return null; const [id, cat, kind, lat, lon, zone, names, sub] = r;
     const q = { t: "p", lat, lon, name: names, sub: sub || { es: "", en: "" }, clue: false, answer: null, fact: {}, cid: [id], kind: ["origin", "found", "formed", "reign", "event", "battle", "country", "city", "nature"].includes(kind) ? kind : "landmark", topic: cat, tier: 0, fame: 0, cEn: [], cks: [], duelKf: zone ? 0.7 : 0.9 };
-    if (zone) { q.zone = zone; const f = A.waters.of(q); if (!f) return null; const big = f.polys.reduce((a, b) => ((b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) > (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) ? b : a)); f.label = [(big.bbox[0] + big.bbox[2]) / 2, (big.bbox[1] + big.bbox[3]) / 2]; q.lon = f.label[0]; q.lat = f.label[1]; }
-    return q;
+    return zone ? zoneOf(q, zone) : q;
   }
   /* cada entrada: id de A.DUELO_NIVELES, d (dificultad absoluta 1-100, la usa el rival simulado), sc (saco 0-2), la pregunta, key (el lugar que se responde: una bandera y su
      pais, o una pista y su lugar, no salen en el mismo duelo), continente y categoria */
