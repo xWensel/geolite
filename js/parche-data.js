@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.122",
+      name: L("El crupier ya no mezcla idiomas", "The dealer no longer mixes languages", "Le croupier ne mélange plus les langues", "O crupiê não mistura mais idiomas", "Der Croupier mischt keine Sprachen mehr", "Il croupier non mischia più le lingue", "", "荷官不再混用语言", "딜러가 더는 언어를 섞지 않아요", "ディーラーが言語を混ぜなくなりました", "Крупье больше не мешает языки", "Krupier już nie miesza języków"),
+      date: "2026-10-15",
+      summary: L("La frase con la que el crupier te orienta en la portada salía en todos los idiomas a la vez y no acababa nunca. Ahora la dice solo en el tuyo.", "The line the dealer uses to guide you on the home screen came out in every language at once and never ended. Now he says it only in yours.", "La réplique qui t'oriente sur l'accueil sortait dans toutes les langues à la fois et ne s'arrêtait jamais. Maintenant il ne la dit que dans la tienne.", "A fala que orienta você na tela inicial saía em todos os idiomas ao mesmo tempo e não acabava nunca. Agora ele a diz só no seu.", "Der Satz, mit dem dich der Croupier auf dem Startbildschirm einweist, kam in allen Sprachen gleichzeitig und hörte nie auf. Jetzt sagt er ihn nur in deiner.", "La frase con cui il croupier ti orienta nella schermata iniziale usciva in tutte le lingue insieme e non finiva mai. Ora la dice solo nella tua.", "", "荷官在主界面引导你的那句话会同时用所有语言说出来，而且没完没了。现在只会用你的语言说。", "딜러가 첫 화면에서 안내하던 대사가 모든 언어로 한꺼번에 나오고 끝나지 않았어요. 이제 선택한 언어로만 말해요.", "ホーム画面でディーラーが案内するセリフが全言語で同時に流れ、終わらなくなっていました。今はあなたの言語だけで話します。", "Реплика, которой крупье направляет вас на главном экране, звучала сразу на всех языках и не заканчивалась. Теперь он говорит её только на вашем.", "Kwestia, którą krupier kieruje cię na ekranie głównym, pojawiała się we wszystkich językach naraz i nie miała końca. Teraz mówi ją tylko w twoim."),
+      chapters: [
+        { id: "crupier", kicker: L("Corrección", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("El crupier", "The dealer", "Le croupier", "O crupiê", "Der Croupier", "Il croupier", "", "荷官", "딜러", "ディーラー", "Крупье", "Krupier"),
+          entries: [
+            E(L("Una sola lengua", "One language only", "Une seule langue", "Um só idioma", "Nur eine Sprache", "Una sola lingua", "", "只说一种语言", "한 가지 언어만", "言語はひとつだけ", "Только один язык", "Tylko jeden język"), "fix", "0.3.122", [
+              L("La orientación de la portada («El Clásico es para relajarse…») se dice solo en tu idioma y se corta donde acaba la frase.", "The home-screen guidance (“Classic is for relaxing…”) is said only in your language and ends where the line ends.", "L'orientation de l'accueil (« Le Classique, c'est pour se détendre… ») se dit seulement dans ta langue et s'arrête à la fin de la réplique.", "A orientação da tela inicial («O Clássico é para relaxar…») é dita só no seu idioma e termina onde a fala acaba.", "Die Einweisung auf dem Startbildschirm („Klassik ist zum Entspannen …“) wird nur in deiner Sprache gesprochen und endet mit dem Satz.", "L'orientamento della schermata iniziale («Il Classico è per rilassarsi…») si dice solo nella tua lingua e finisce dove finisce la frase.", "", "主界面的引导语（“经典模式用来放松……”）只会用你的语言说，说完就结束。", "첫 화면 안내(“클래식은 쉬엄쉬엄…”)는 선택한 언어로만 말하고 대사가 끝나면 멈춰요.", "ホーム画面の案内（「クラシックはのんびり用…」）はあなたの言語だけで話し、セリフの終わりで止まります。", "Подсказка на главном экране («Классика — чтобы расслабиться…») звучит только на вашем языке и заканчивается вместе с репликой.", "Wskazówka na ekranie głównym („Klasyczny jest do relaksu…”) brzmi tylko w twoim języku i kończy się razem z kwestią."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.121",
       name: L("El crupier, más vivo", "The dealer, more alive", "Le croupier, plus vivant", "O crupiê, mais vivo", "Der Croupier, lebendiger", "Il croupier, più vivo", "", "荷官更生动了", "더 생생해진 딜러", "もっと生き生きしたディーラー", "Крупье стал живее", "Krupier bardziej żywy"),
       date: "2026-10-15",
