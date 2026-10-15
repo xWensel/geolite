@@ -12,7 +12,7 @@ window.AIQ = window.AIQ || {};
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const TITLE = () => P6("Clasificación|Leaderboard|Classement|Placar|Rangliste|Classifica|Clasificación|排行榜|리더보드|ランキング|Рейтинг|Ranking");   // corto: cabe en la fila de la portada
   const L_TODAY = () => P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś"), L_YDAY = () => P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj");
-  const MODES = () => [["adv", "dealer_mini", A.T("Aventura", "Adventure")], ["daily", "dice", A.T("Reto diario", "Daily challenge")]].filter(m => m[0] !== "daily" || A.dailyOn !== false);   // el Reto diario, retirado por ahora (js/hub.js)
+  const MODES = () => [["adv", "dealer_mini_s", A.T("Aventura", "Adventure")], ["daily", "dice", A.T("Reto diario", "Daily challenge")]].filter(m => m[0] !== "daily" || A.dailyOn !== false);   // el Reto diario, retirado por ahora (js/hub.js)
   const PERS = m => (m === "adv" ? [["all", P6("Histórico|All time|Historique|Histórico|Gesamt|Di sempre||历史|역대|歴代|За всё время|Wszech czasów")], ["today", L_TODAY()], ["yday", L_YDAY()]] : [["today", L_TODAY()], ["yday", L_YDAY()]]);
   /* Aventura: la de siempre y la mejor expedicion de hoy / ayer; Reto diario: la puntuacion global (suma de los 3 intentos) de hoy / ayer */
   const boardOf = (m, p) => (m === "daily" ? (p === "yday" ? A.rank.daily.yesterday() : A.rank.daily.board()) : p === "today" ? A.rank.day.board() : p === "yday" ? A.rank.day.yesterday() : "adv-all");

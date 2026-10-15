@@ -36,7 +36,8 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------ expresiones: su cara, su reposo y como hablan, parpadean y respiran.
      talk:0 = habla con su propia boca (risa, enfado, sorpresa, nervios, furia, sueno); blink:0 = no parpadea; breath = ms de cada respiracion
      (0 = no respira). idle: [{x, y: el dibujo entero a pixel completo; l: "l"|"r" mira; shut: ojos cerrados; open: ojo del guino abierto;
-     off: a oscuras, ojos apagados}, ms] en bucle. enter: gesto con el que entra; fidget: gestos sueltos en reposo */
+     off: a oscuras, ojos apagados; tear: paso de la lagrima}, ms] en bucle. enter: gesto con el que entra; fidget: gestos sueltos en reposo;
+     zz: zetas del sueno. Las caras con talk:0 hablan alternando su boca con la segunda boca de Pixel Lab (tm_<cara>) */
   const EX = {
     sly: { idle: [[{}, 5200], [{ l: "l" }, 1100], [{}, 3600], [{ l: "r" }, 900]], fidget: ["shuffle", "fan_self", "hat_tip", "twirl_moustache"] },
     laugh: { talk: 0, blink: 0, breath: 0, enter: "hat_pop", idle: [[{ y: -1 }, 110], [{}, 110], [{ y: -1 }, 110], [{}, 110], [{ y: -1 }, 110], [{}, 400]] },
@@ -45,11 +46,11 @@ window.AIQ = window.AIQ || {};
     wink: { idle: [[{}, 900], [{ open: 1 }, 3600]] },
     suspicious: {},
     smug: { fidget: ["fan_self", "twirl_moustache", "preen"] },
-    sad: { breath: 2000 },
+    sad: { breath: 2000, idle: [[{}, 4600], [{ tear: 0 }, 900], [{ tear: 1 }, 160], [{ tear: 2 }, 160], [{ tear: 3 }, 140], [{ tear: 4 }, 140], [{ tear: 5 }, 140], [{}, 2600]] },   // de vez en cuando, una lagrima le baja por la mejilla
     nervous: { talk: 0, talkMs: 55, idle: [[{}, 700], [{ x: 1 }, 120], [{ x: -1 }, 120], [{}, 900]] },
     innocent: {},
     bored: { breath: 2200, talkMs: 120, fidget: ["yawn", "slow_blink"] },
-    sleep: { talk: 0, blink: 0, breath: 1600, idle: [[{}, 2500], [{ y: 2 }, 500], [{}, 300]] },
+    sleep: { talk: 0, blink: 0, breath: 1600, zz: 1, idle: [[{}, 2500], [{ y: 2 }, 500], [{}, 300]] },   // zz: las zetas suben desde la chistera
     furious: { talk: 0, breath: 0, talkMs: 60, enter: "tantrum", idle: [[{ x: -2 }, 70], [{ x: 2 }, 70], [{ y: 1 }, 150], [{}, 150]] },
     puzzled: { fidget: ["scratch_head"] },
     dare: { breath: 2400, enter: "hat_low", idle: [[{}, 3000], [{ shut: 1 }, 80]] },
@@ -98,7 +99,7 @@ window.AIQ = window.AIQ || {};
   function gx(id) {
     if (gfx[id] || GC[id]) return gfx[id] || GC[id];
     if (GQ[id]) { const g = D().gest[id], q = GQ[id]; return g ? (gfx[id] = { pm: g, frames: q.frames, peak: -1, hold: false, lock: false, keep: !!q.keep, hit: q.hit }) : null; }
-    const g = D().gest[id], t = GT[id]; if (!g || !t) return null;
+    const g = D().gest[id], t = GT[id.split("@")[0]]; if (!g || !t) return null;   // "jot@suspicious": la variante con esa cara, al tiempo del gesto
     const n = g.frames.length, cut = t.includes("cut"), ida = g.ida && !cut;
     const seq = []; for (let i = 0; i < n; i++) seq.push(i); if (ida) for (let i = n - 2; i >= 0; i--) seq.push(i);
     const per = Math.max(60, Math.min(150, Math.round(t[0] / seq.length))), extra = Math.max(0, t[0] - per * seq.length);
@@ -129,7 +130,8 @@ window.AIQ = window.AIQ || {};
     }
     c.putImageData(im, 0, 0);
   }
-  /* p: { e: cara, g: gesto de Pixel Lab (o null), f: su fotograma, l: "l"|"r", shut, open, wink, off, m: boca "eh"|"ah"|"oh", w: bandas } */
+  /* p: { e: cara, g: gesto de Pixel Lab (o null), f: su fotograma, l: "l"|"r", shut, open, wink, off, m: boca "eh"|"ah"|"oh", m2: segunda
+     boca de su cara, tear: paso de la lagrima (-1 sin), z: fotograma de las zetas (0 sin), w: bandas } */
   function compose(p) {
     ctxs();
     const c = wctx, d = D(), E = EX[p.e], cap = d.caps[p.e] || {};
@@ -139,7 +141,7 @@ window.AIQ = window.AIQ || {};
     if (p.g) {
       const g = d.gest[p.g]; put(c, R(g.frames[p.f]), 0, 0, true);
       [eo, mo] = g.al[p.f];
-      if (p.e !== "sly") { if (eo) put(c, R("fe_" + p.e), eo[0], eo[1]); if (mo) put(c, R("fm_" + p.e), mo[0], mo[1]); }
+      if (p.e !== "sly" && g.cara !== p.e) { if (eo) put(c, R("fe_" + p.e), eo[0], eo[1]); if (mo) put(c, R("fm_" + p.e), mo[0], mo[1]); }   // la variante ya lleva su cara
     } else if (p.e !== "sly") put(c, R("face_" + p.e), 0, 0, true);
     if (eo) {
       if (p.e === "wink" && p.open && !p.g) put(c, R("wink_open"));
@@ -148,8 +150,11 @@ window.AIQ = window.AIQ || {};
       if (p.shut) put(c, R("blink"), eo[0], eo[1]);
     }
     if (p.m && mo) put(c, R("mouth_" + p.m), mo[0], mo[1]);
+    if (p.m2 && mo) put(c, R("tm_" + p.e), mo[0], mo[1]);
+    if (p.tear >= 0 && eo) { const t = d.tear[p.tear]; put(c, R("tear"), eo[0] + t[0], eo[1] + t[1]); }
     if (p.g) { const oc = d.gest[p.g].oc; if (oc && oc[p.f]) put(c, R(oc[p.f])); }   // lo que tapa la cara (cartas, mano) vuelve encima de ella
     if (E.dark) { darken(c); if (!p.off && eo) put(c, R("glow_" + p.e), eo[0], eo[1]); }
+    if (p.z) put(c, R("zz_" + p.z));
     if (p.w) for (const [y0, y1, dx] of p.w) { const band = c.getImageData(0, y0, W, y1 - y0); c.clearRect(0, y0, W, y1 - y0); c.putImageData(band, dx, y0); }
     return work;
   }
@@ -208,7 +213,7 @@ window.AIQ = window.AIQ || {};
       if (this.gest && this.gest.fid) this.drop();                                     // un gesto suelto de reposo nunca se cuela en una frase
       if (expr === this.expr && !o.restart) return this;
       this.expr = expr; this.t0 = performance.now(); this.blinkAt = 0; this.mi = 0; this.fidgetAt = 0;
-      if (this.gest && !this.gest.x.hold && !this.gest.x.keep) this.drop();
+      if (this.gest && (!this.gest.x.hold && !this.gest.x.keep || this.gest.x.pm && this.gest.x.pm.cara)) this.drop();   // una variante es de su cara
       if (this.E.enter && !o.quiet && !this.quiet) this.play(this.E.enter);
       this.poke(); return this;
     }
@@ -222,7 +227,8 @@ window.AIQ = window.AIQ || {};
     }
     look(d) { this.lookO = d; this.poke(); return this; }
     play(id, done, hit) {
-      id = gestId(id); const x = id && gx(id);
+      id = gestId(id); if (id && !GC[id] && D().gest[id + "@" + this.expr]) id += "@" + this.expr;   // si hay variante con la cara de ahora, esa
+      const x = id && gx(id);
       if (!x || this.quiet && !x.hold) { if (done) setTimeout(done, 0); return this; }
       if (this.gest && this.gest.done) { const d = this.gest.done; setTimeout(d, 0); }
       const stop = x.hold ? (x.pm ? x.frames.findIndex(f => f[0] === x.peak) : x.frames.length - 1) : -1;
@@ -238,7 +244,7 @@ window.AIQ = window.AIQ || {};
     /* pose actual */
     pose(now) {
       const E = this.E, G = this.gest, cap = this.cap, frz = G && G.x.freeze;
-      const p = { e: this.expr, g: null, f: 0, x: 0, y: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, w: null };
+      const p = { e: this.expr, g: null, f: 0, x: 0, y: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, m2: 0, tear: -1, z: 0, w: null };
       if (G) {
         const fr = G.x.frames;
         while (G.i < fr.length && now - G.at >= fr[G.i][1]) {
@@ -253,13 +259,19 @@ window.AIQ = window.AIQ || {};
       const held = G && G.i === G.stop && !G.rel;                                    // gesto sostenido en su punto alto: sigue vivo (respira y parpadea)
       if (E.idle && !this.quiet && !frz && (!G || !G.x.pm || held)) {                // reposo de la expresion
         const tot = E.idle.reduce((s, f) => s + f[1], 0); let t = (now - this.t0) % tot;
-        for (const f of E.idle) { if (t < f[1]) { const q = f[0]; p.x += q.x | 0; p.y += q.y | 0; if (q.l && !p.g) p.l = q.l; if (q.shut) p.shut = 1; if (q.open) p.open = 1; if (q.off) p.off = 1; break; } t -= f[1]; }
+        for (const f of E.idle) { if (t < f[1]) { const q = f[0]; p.x += q.x | 0; p.y += q.y | 0; if (q.l && !p.g) p.l = q.l; if (q.shut) p.shut = 1; if (q.open) p.open = 1; if (q.off) p.off = 1; if (q.tear != null) p.tear = q.tear; break; } t -= f[1]; }
+      }
+      if (E.zz && !this.quiet && !frz && (!G || held)) {                               // zetas: suben 7 fotogramas y descansan 4
+        const n = D().zz || 0, k = Math.floor(((now - this.t0) % ((n + 4) * 230)) / 230) + 1; if (k <= n) p.z = k;
       }
       const br = E.breath === undefined ? 1300 : E.breath;
       if (br && !this.quiet && !frz && (!G || held)) { if (Math.floor((now - this.t0) / br) % 2) p.y += 1; }   // respira: el dibujo entero baja 1 px
       if (this.lookO != null && !p.g) p.l = this.lookO === -1 ? "l" : this.lookO === 1 ? "r" : null;
       if (this.talking && E.talk !== 0 && cap.talk && !(G && (G.x.lock || frz))) {   // habla: la boca sigue las letras; si se calla un rato, cierra
         if (now - this.lastSyl < 190) p.m = MOUTHS[this.mi % MOUTHS.length];
+      }
+      if (this.talking && E.talk === 0 && (D().talk2 || []).includes(p.e) && !(G && (G.x.lock || frz))) {   // las caras con su boca: la alternan con la segunda
+        if (now - this.lastSyl < 190 && this.mi % 2) p.m2 = 1;
       }
       if (E.blink !== 0 && cap.blink && (!G || held) && !p.shut) {                    // parpadeo al azar (tambien con movimiento reducido: no es movimiento)
         if (!this.blinkAt) this.blinkAt = now + rnd(1800, 5200);

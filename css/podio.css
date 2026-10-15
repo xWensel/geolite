@@ -18,7 +18,7 @@
 .gx-seg button:hover:not(.on) { color: var(--gx-txt); background: rgba(212, 160, 74, .12); }
 .gx-seg button.on { cursor: default; color: var(--gx-ink); background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
 .gx-seg button:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
-.pd-mi .ic { display: block; width: 28px; height: 28px; image-rendering: pixelated; }
+.pd-mi .ic { display: block; width: 28px; height: 28px; image-rendering: pixelated; } .pd-mi .ic.ic-dealer_mini_s { width: 32px; height: 32px; margin: -2px; }   /* la cabeza del crupier a 32 px nativos */
 .pd-mode:not(.on) .pd-mi .ic { filter: grayscale(.6) brightness(.8); }
 
 /* ---------- cuerpo: podio | pizarra ---------- */

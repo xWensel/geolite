@@ -2554,8 +2554,8 @@ window.AIQ = window.AIQ || {};
     const rows = [["visits", A.fmt(DS.visits || 1)], ["hours", A.fmt(Math.floor((DS.playMs || 0) / 3600000)) + " h"], ["since", since], ["streak", A.fmt(DS.streak || 1)],
       ["door", A.fmt(q.quits || 0)], ["stays", A.fmt(q.stays || 0)], ["tricks", A.fmt(q.trolls || 0)], ["nemesis", nem ? nem.p : "—"], ["hour", hi >= 0 && H[hi] > 1 ? String(hi).padStart(2, "0") + ":00" : "—"]];
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    host.innerHTML = `<h3 class="dlf-h">${A.icon("dealer_mini", "sm")}<span>${esc(A.pick6(FILE.title))}</span></h3><div class="dlf">${rows.map(([k, v]) => `<div class="dlf-r"><span>${esc(A.pick6(FILE[k]))}</span><b>${esc(v)}</b></div>`).join("")}</div>`;
-    { const ic = host.querySelector(".dlf-h .ic"), dpr = devicePixelRatio || 1; if (ic && dpr % 1) { const s = 36 * Math.max(1, Math.round(dpr)) / dpr; ic.style.width = ic.style.height = s + "px"; } }   // v0.32: su cabeza a pixel entero tambien con el escalado de Windows
+    host.innerHTML = `<h3 class="dlf-h">${A.icon("dealer_mini_s", "sm")}<span>${esc(A.pick6(FILE.title))}</span></h3><div class="dlf">${rows.map(([k, v]) => `<div class="dlf-r"><span>${esc(A.pick6(FILE[k]))}</span><b>${esc(v)}</b></div>`).join("")}</div>`;
+    { const ic = host.querySelector(".dlf-h .ic"), dpr = devicePixelRatio || 1; if (ic && dpr % 1) { const s = 32 * Math.max(1, Math.round(dpr)) / dpr; ic.style.width = ic.style.height = s + "px"; } }   // v0.32: su cabeza a pixel entero tambien con el escalado de Windows
     if (!DS.fileSeen) { DS.fileSeen = 1; saveStore(); setTimeout(() => screenSay(say1("fileFirst"), "sly"), 500); }
   };
   /* TE OLVIDA DE VERDAD: "Borrar todos mis datos". Se despide (sin que se le corte: el borrado espera a su frase) y deja de guardar nada; al volver,
