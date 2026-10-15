@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.124",
+      name: L("Empate al tope", "Draw at the cap", "Égalité au plafond", "Empate no limite", "Unentschieden am Limit", "Pareggio al limite", "", "到上限时平局", "상한에서 무승부", "上限で引き分け", "Ничья на пределе", "Remis na limicie"),
+      date: "2026-10-15",
+      summary: L("El Duelo termina siempre en la ronda 12; con las pilas iguales es empate, no rondas extra sin fin.", "The Duel always ends at round 12; with equal stacks it is a draw, not endless extra rounds.", "Le Duel se termine toujours à la manche 12 ; à égalité, c'est un match nul, plus de manches supplémentaires sans fin.", "O Duelo termina sempre na rodada 12; com as pilhas iguais é empate, sem rodadas extra infinitas.", "Das Duell endet immer in Runde 12; bei gleichen Stapeln gibt es ein Unentschieden statt endloser Zusatzrunden.", "Il Duello finisce sempre al round 12; a pile pari è pareggio, non round extra infiniti.", "", "对决总在第12回合结束；筹码相同即为平局，不再有无尽加时回合。", "대결은 항상 12라운드에 끝납니다. 칩이 같으면 무승부이며 끝없는 연장 라운드는 없습니다.", "デュエルは必ず12ラウンドで終わります。山が同じなら引き分けで、延長が延々と続くことはありません。", "Дуэль всегда заканчивается в 12-м раунде; при равных стопках — ничья, а не бесконечные доп. раунды.", "Pojedynek zawsze kończy się w rundzie 12; przy równych stosach jest remis, a nie niekończące się dodatkowe rundy."),
+      chapters: [
+        { id: "duelo", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Behebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Duelo", "Duel", "Duel", "Duelo", "Duell", "Duello", "", "对决", "대결", "デュエル", "Дуэль", "Pojedynek"),
+          entries: [
+            E(L("Se acabó el bucle", "No more endless rounds", "Fini la boucle", "Fim do ciclo", "Schluss mit der Endlosschleife", "Basta round infiniti", "", "不再无限循环", "끝없는 반복 해결", "無限ループ解消", "Конец бесконечным раундам", "Koniec z nieskończoną pętlą"), "fix", "0.3.124", [
+              L("Si llegabas a la ronda 12 con las pilas iguales (también en la revancha), el Duelo seguía a la 13, 14, 15… sin parar. Ahora acaba en la 12 con «Empate»: no suma al marcador de la sala ni a tus duelos contra la banca.", "If you reached round 12 with equal stacks (rematches too), the Duel kept going to 13, 14, 15… forever. Now it ends at 12 with “Draw”: it counts for neither the room score nor your duels against the house.", "Si vous arriviez à la manche 12 à égalité (revanche comprise), le Duel continuait aux manches 13, 14, 15… sans fin. Maintenant il s'arrête à la 12 sur « Égalité » : ni le score de la salle ni vos duels contre la banque n'en tiennent compte.", "Se chegasses à rodada 12 com as pilhas iguais (também na desforra), o Duelo seguia para a 13, 14, 15… sem parar. Agora acaba na 12 com «Empate»: não conta para o marcador da sala nem para os teus duelos contra a banca.", "Wer Runde 12 mit gleichen Stapeln erreichte (auch in der Revanche), spielte endlos weiter: 13, 14, 15… Jetzt endet das Duell in Runde 12 mit „Unentschieden“: Es zählt weder für den Raumstand noch für deine Duelle gegen die Bank.", "Se arrivavi al round 12 con pile pari (anche nella rivincita), il Duello proseguiva al 13, 14, 15… senza fine. Ora finisce al 12 con «Pareggio»: non conta né per il punteggio della sala né per i tuoi duelli contro il banco.", "", "若打到第12回合时筹码相同（包括再战），对决会一直打到第13、14、15……回合。现在它在第12回合以“平局”结束：不计入房间比分，也不计入你与庄家的对决。", "12라운드에 칩이 같으면(재대결 포함) 13, 14, 15라운드로 끝없이 이어졌습니다. 이제 12라운드에서 '무승부'로 끝나며, 방 점수에도 하우스 대결 전적에도 들어가지 않습니다.", "12ラウンドで山が同じ場合（再戦も）、デュエルは13、14、15…と延々続いていました。今は12ラウンドで「引き分け」になり、ルームのスコアにもハウスとの対戦成績にも加算されません。", "Если в 12-м раунде стопки были равны (в том числе в реванше), дуэль шла дальше: 13, 14, 15… без конца. Теперь она заканчивается на 12-м с «Ничья»: не идёт ни в счёт комнаты, ни в дуэли против банка.", "Jeśli w rundzie 12 stosy były równe (także w rewanżu), pojedynek ciągnął się dalej: 13, 14, 15… bez końca. Teraz kończy się w 12. z wynikiem „Remis”: nie wlicza się ani do wyniku pokoju, ani do pojedynków z bankiem."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.123",
       name: L("Ronda en el Duelo", "Round in the Duel", "Manche dans le Duel", "Rodada no Duelo", "Runde im Duell", "Round nel Duello", "", "对决中的回合", "대결의 라운드", "デュエルのラウンド", "Раунд в дуэли", "Runda w pojedynku"),
       date: "2026-10-15",
