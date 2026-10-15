@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.129",
+      name: L("La bandera es todo el país", "The flag is the whole country", "Le drapeau, c'est tout le pays", "A bandeira é o país inteiro", "Die Flagge ist das ganze Land", "La bandiera è tutto il paese", "", "国旗就是整个国家", "국기는 나라 전체", "国旗は国全体", "Флаг — это вся страна", "Flaga to cały kraj"),
+      date: "2026-10-16",
+      summary: L("En las banderas del Clásico vale cualquier punto del país, no solo su capital.", "In Classic flag questions, anywhere in the country counts, not just its capital.", "Dans les drapeaux du Classique, n'importe quel point du pays compte, pas seulement sa capitale.", "Nas bandeiras do Clássico vale qualquer ponto do país, não só a capital.", "Bei den Flaggen im Klassik-Modus zählt jeder Punkt des Landes, nicht nur die Hauptstadt.", "Nelle bandiere del Classico vale qualsiasi punto del paese, non solo la capitale.", "", "经典模式的国旗题中，国家境内任何一处都算数，不只是首都。", "클래식의 국기 문제에서는 수도만이 아니라 나라 안 어디든 정답입니다.", "クラシックの国旗問題では、首都だけでなく国内のどこでも正解になります。", "В флагах Классики засчитывается любая точка страны, а не только столица.", "W flagach trybu Klasycznego liczy się każdy punkt kraju, nie tylko stolica."),
+      chapters: [
+        { id: "clasico", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Behebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Clásico", "Classic", "Classique", "Clássico", "Klassik", "Classico", "", "经典", "클래식", "クラシック", "Классика", "Klasyczny"),
+          entries: [
+            E(L("Banderas con todo su territorio", "Flags with their whole territory", "Des drapeaux avec tout leur territoire", "Bandeiras com todo o seu território", "Flaggen mit ihrem ganzen Gebiet", "Bandiere con tutto il loro territorio", "", "国旗对应整片国土", "국토 전체를 가진 국기", "国土全体で答える国旗", "Флаги со всей территорией", "Flagi z całym terytorium"), "fix", "0.3.129", [
+              L("En la campaña **Banderas** (y en las banderas que salen en la **Mezcla**) la respuesta era un solo punto, la capital. Ahora es todo el país, como en la Aventura: un clic en cualquier parte de su territorio es un acierto pleno y, si caes fuera, la distancia se mide hasta su frontera.",
+                "In the **Flags** campaign (and the flags that turn up in the **Mixed Bag**) the answer was a single point, the capital. Now it is the whole country, as in Adventure: a click anywhere in its territory is a full hit and, if you land outside, the distance is measured to its border.",
+                "Dans la campagne **Drapeaux** (et pour les drapeaux qui sortent dans le **Mélange**), la réponse était un seul point, la capitale. C'est désormais tout le pays, comme dans l'Aventure : un clic n'importe où sur son territoire est un coup en plein et, si tu tombes à côté, la distance se mesure jusqu'à sa frontière.",
+                "Na campanha **Bandeiras** (e nas bandeiras que aparecem na **Mistura**) a resposta era um só ponto, a capital. Agora é o país inteiro, como na Aventura: um clique em qualquer parte do seu território é um acerto pleno e, se caíres fora, a distância mede-se até à sua fronteira.",
+                "In der Kampagne **Flaggen** (und bei den Flaggen im Modus **Gemischt**) war die Antwort ein einziger Punkt, die Hauptstadt. Jetzt ist es das ganze Land, wie im Abenteuer: Ein Klick irgendwo auf seinem Gebiet ist ein voller Treffer, und wer daneben landet, dem wird die Entfernung bis zur Grenze gemessen.",
+                "Nella campagna **Bandiere** (e nelle bandiere che escono nel **Miscuglio**) la risposta era un solo punto, la capitale. Ora è tutto il paese, come nell'Avventura: un clic in qualsiasi parte del suo territorio è un colpo pieno e, se finisci fuori, la distanza si misura fino al suo confine.",
+                "",
+                "在**国旗**战役（以及**大杂烩**中出现的国旗题）里，答案原本只是一个点：首都。现在是整个国家，和冒险模式一样：点在其国土的任何地方都算完全命中；如果点在境外，则按到其边界的距离计算。",
+                "**국기** 캠페인(그리고 **믹스**에 나오는 국기 문제)에서는 정답이 수도 한 점뿐이었습니다. 이제는 어드벤처처럼 나라 전체가 정답입니다. 국토 안 어디를 눌러도 완벽한 정답이고, 밖을 누르면 국경까지의 거리로 계산합니다.",
+                "**国旗**キャンペーン（と**ミックス**に出る国旗問題）では、答えは首都の一点だけでした。これからはアドベンチャーと同じく国全体が答えです。国土のどこをクリックしても完全正解で、外れた場合は国境までの距離で測ります。",
+                "В кампании **Флаги** (и во флагах, которые попадаются во **Всё вперемешку**) ответом была одна точка — столица. Теперь это вся страна, как в Приключении: клик в любом месте её территории — точное попадание, а если промахнёшься, расстояние считается до её границы.",
+                "W kampanii **Flagi** (i we flagach, które trafiają się w **Mieszance**) odpowiedzią był jeden punkt — stolica. Teraz jest nią cały kraj, jak w Przygodzie: kliknięcie w dowolnym miejscu jego terytorium to pełne trafienie, a jeśli trafisz obok, odległość liczy się do jego granicy."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.128",
       name: L("Clasificación limpia", "Clean leaderboard", "Classement propre", "Placar limpo", "Saubere Rangliste", "Classifica pulita", "", "干净的排行榜", "깨끗한 리더보드", "クリーンなランキング", "Честный рейтинг", "Czysty ranking"),
       date: "2026-10-16",

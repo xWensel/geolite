@@ -156,8 +156,9 @@ window.AIQ = window.AIQ || {};
             const sp = clue ? { name: d.n, sub: "" } : splitName(d.n);
             const full = !clue && (A.CLASSIC_TR || {})[d.n] ? tr6(d.n) : null;                 // traduccion del nombre completo (p. ej. "Olympia, Washington"): se parte en cada idioma
             const part = k => { const o = {}; L6.forEach(l => { const v = full[l], i = v.lastIndexOf(", "); o[l] = i > 0 ? (k ? v.slice(i + 2) : v.slice(0, i)) : (k ? "" : v); }); return o; };
+            const ck = d.ck || A.ckey(clue ? d.f : d.n), pais = kind === "flag" && ck.startsWith("c:");   // una bandera es la de un pais: se acierta en todo su territorio (km 0 dentro, si no al borde), como en la Aventura
             return {
-              t: "p", lat: d.lat, lon: d.lon, cid: [d.ck || A.ckey(clue ? d.f : d.n)], kf: d.kf || 1,
+              ...(pais ? { t: "c", key: ck.slice(2) } : { t: "p" }), lat: d.lat, lon: d.lon, cid: [ck], kf: d.kf || 1,
               name: full ? part(0) : clue && d.c6 ? { en: d.n, ...d.c6 } : tr6(sp.name), sub: full ? part(1) : tr6(sp.sub),
               clue: !!clue, answer: clue ? tr6(d.f) : null,
               fact: clue ? same("") : d.f6 ? { en: d.f, ...d.f6 } : tr6(d.f, d.f.length > 40),
