@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.116",
+      name: L("7.777 tarjetas", "7,777 cards", "7 777 cartes", "7.777 cartas", "7.777 Karten", "7.777 carte", "", "7777张卡牌", "카드 7,777장", "7,777枚のカード", "7777 карточек", "7777 kart"),
+      date: "2026-10-15",
+      summary: L("La Enciclopedia queda en 7.777 tarjetas: salen las más irrelevantes para que la cifra sea redonda.", "The Encyclopedia now holds 7,777 cards: the most irrelevant ones go so the number comes out round.", "L'Encyclopédie compte 7 777 cartes : les plus anecdotiques partent pour que le chiffre soit rond.", "A Enciclopédia fica com 7.777 cartas: saem as mais irrelevantes para a conta fechar redonda.", "Die Enzyklopädie hat jetzt 7.777 Karten: Die unwichtigsten fliegen raus, damit die Zahl rund wird.", "L'Enciclopedia arriva a 7.777 carte: escono le meno rilevanti perché la cifra torni tonda.", "", "百科现有7777张卡牌：最不相关的几张被移除，凑成一个整齐的数字。", "백과사전이 카드 7,777장이 됐어요. 가장 덜 중요한 카드를 빼서 숫자를 딱 맞췄습니다.", "百科事典は7,777枚になりました。重要度の低いカードを外して、きれいな数字に整えました。", "В Энциклопедии теперь 7777 карточек: самые незначительные убраны, чтобы число получилось ровным.", "Encyklopedia ma teraz 7777 kart: najmniej istotne odpadły, żeby liczba wyszła okrągła."),
+      chapters: [
+        { id: "siete", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Enciclopedia", "Encyclopedia", "Encyclopédie", "Enciclopédia", "Enzyklopädie", "Enciclopedia", "", "百科", "백과사전", "百科事典", "Энциклопедия", "Encyklopedia"),
+          entries: [
+            E(L("Cinco entradas menos", "Five entries fewer", "Cinq entrées de moins", "Cinco entradas a menos", "Fünf Einträge weniger", "Cinque voci in meno", "", "减少五个条目", "항목 5개 감소", "項目を5つ削減", "На пять записей меньше", "Pięć wpisów mniej"), "buff", "0.3.116", [
+              L("Quitamos las estaciones antárticas Mawson y Dumont d'Urville, el canal Lemaire, Ponta Delgada y la batalla de Curupaytí, con sus preguntas. Quedan 2.951 preguntas en el banco.", "We removed the Antarctic stations Mawson and Dumont d'Urville, the Lemaire Channel, Ponta Delgada and the Battle of Curupayty, along with their questions. The bank now has 2,951 questions.", "Nous avons retiré les stations antarctiques Mawson et Dumont d'Urville, le chenal Lemaire, Ponta Delgada et la bataille de Curupayty, avec leurs questions. La banque compte 2 951 questions.", "Retiramos as estações antárticas Mawson e Dumont d'Urville, o canal Lemaire, Ponta Delgada e a batalha de Curupaiti, com as suas perguntas. O banco fica com 2.951 perguntas.", "Wir haben die Antarktisstationen Mawson und Dumont d'Urville, den Lemaire-Kanal, Ponta Delgada und die Schlacht von Curupayty samt ihren Fragen entfernt. Die Bank hat jetzt 2.951 Fragen.", "Abbiamo tolto le stazioni antartiche Mawson e Dumont d'Urville, il Canale Lemaire, Ponta Delgada e la battaglia di Curupayty, con le loro domande. La banca ha ora 2.951 domande.", "", "移除了南极的莫森站和迪蒙·迪维尔站、勒梅尔海峡、蓬塔德尔加达和库鲁帕伊蒂战役及其题目。题库现有2951题。", "남극의 모슨 기지와 뒤몽 뒤르빌 기지, 르메르 해협, 폰타델가다, 쿠루파이티 전투와 그 문제를 뺐어요. 문제 은행은 2,951문제가 됐습니다.", "南極のモーソン基地とデュモン・デュルヴィル基地、ルメール海峡、ポンタ・デルガダ、クルパイティの戦いとその問題を外しました。問題バンクは2,951問です。", "Убрали антарктические станции Моусон и Дюмон-Дюрвиль, пролив Лемэра, Понта-Делгада и битву при Курупайти вместе с вопросами. В банке теперь 2951 вопрос.", "Usunęliśmy antarktyczne stacje Mawson i Dumont d'Urville, kanał Lemaire'a, Ponta Delgada i bitwę pod Curupayty wraz z pytaniami. W banku jest teraz 2951 pytań."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.115",
       name: L("El crupier del Rasca, animado", "The Scratch & win dealer, animated", "Le croupier de Gratte et gagne, animé", "O crupiê da Raspadinha, animado", "Der Rubbellos-Croupier, animiert", "Il croupier del gratta e vinci, animato", "", "刮刮乐的荷官动起来了", "스크래치 복권의 딜러가 움직여요", "スクラッチのディーラーが動き出す", "Крупье в скретч-карте ожил", "Krupier przy zdrapce ożywa"),
       date: "2026-10-15",
