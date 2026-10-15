@@ -24,9 +24,20 @@ window.AIQ = window.AIQ || {};
     const all = new Path2D(); all.addPath(base); all.addPath(base, new DOMMatrix().translate(-TAU, 0)); all.addPath(base, new DOMMatrix().translate(TAU, 0));
     return (f.path = all);
   }
+  /* ZONAS: una respuesta que es la union de varios paises (tango = Argentina + Uruguay, hummus = el Levante...). Se arma con los poligonos de los
+     paises del mapa (nombres de Natural Earth) y se trata como una masa de agua: km 0 dentro de cualquiera de ellos, si no distancia al borde mas cercano */
+  const zcache = {};
+  function zoneFeat(keys) {
+    const id = "zona:" + keys.join("+"); if (zcache[id]) return zcache[id];
+    const W = A.core && A.core.world && A.core.world.byName; if (!W) return null;
+    const fs = keys.map(k => W[k]).filter(Boolean); if (!fs.length) return null;
+    const polys = []; fs.forEach(f => f.polys.forEach(p => polys.push(p)));
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const p of polys) { x0 = Math.min(x0, p.bbox[0]); y0 = Math.min(y0, p.bbox[1]); x1 = Math.max(x1, p.bbox[2]); y1 = Math.max(y1, p.bbox[3]); }
+    return (zcache[id] = { name: id, water: true, zone: true, polys, bbox: [x0, y0, x1, y1], label: [(x0 + x1) / 2, (y0 + y1) / 2], ct: null });
+  }
   A.waters = {
     has: id => !!(A.WATERS && A.WATERS[id]),
     feat, path,
-    of: o => (o && o.area ? feat(o.area) : null),                 // la masa de agua de una pregunta, o null si es un punto (o un pais)
+    of: o => (o && o.area ? feat(o.area) : o && o.zone ? zoneFeat(o.zone) : null),   // la masa de agua o la zona de una pregunta, o null si es un punto (o un pais)
   };
 })(window.AIQ);

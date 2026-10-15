@@ -83,12 +83,17 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .amg input::placeholder { color: rgba(22, 36, 28, .3); }
 /* la mesa: las tres del prototipo y cuanto sabe la banca */
 .du-st .mesas { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
-.du-st .mss { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.du-st .mss { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .du-st .ms { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; align-items: center; min-height: 56px; margin: 0; padding: 6px 10px; border: 0; cursor: pointer; text-align: left; font-family: var(--sans); font-size: 18px; line-height: 1; color: var(--gx-txt-2); background: none; box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .16); }
 .du-st .ms .ic { width: 32px; height: 32px; } .du-st .ms b { display: block; font-weight: 400; font-size: 22px; color: var(--gx-ttl); white-space: nowrap; } .du-st .ms i { display: none; }
 .du-st .ms:hover, .du-st .ms.pad-hov { background: rgba(255, 207, 102, .06); }
 .du-st .ms.on { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim); background: rgba(255, 207, 102, .1); }
 .du-st .ms:focus { outline: none; } .du-st .ms:focus-visible, html[data-input="pad"] .du-st .ms:focus { box-shadow: inset 0 0 0 2px #fff; }
+/* tu liga (el duelo de liga no deja elegir mesa: sale de tu division) */
+.du-st .rkw .rk { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; align-items: center; }
+.du-st .rkw .rk .ic { width: 56px; height: 56px; }
+.du-st .rkw .rk b { display: block; font-weight: 400; font-size: 34px; line-height: 1; color: var(--gx-ttl); }
+.du-st .rkw .rk i { display: block; margin-top: 6px; font-style: normal; font-size: 20px; line-height: 1.1; color: var(--gx-txt-2); }
 .du-st .lvl { display: flex; align-items: center; gap: 10px; font-size: 20px; color: var(--gx-txt-2); white-space: nowrap; }
 .du-st .lvl b { min-width: 2ch; font-weight: 400; font-size: 30px; line-height: 1; text-align: center; color: var(--gx-ttl); }
 .du-st .lvl .gx-btn { min-width: 44px; padding-left: 12px; padding-right: 12px; }

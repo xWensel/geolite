@@ -191,11 +191,29 @@ window.AIQ = window.AIQ || {};
       add({ id: "c:" + name, type: "country", name: { en: COUNTRY_DISP[name] || name, es: o ? o.n.es : "" }, wiki: COUNTRY_WIKI[name] || name, lat, lon, country: null, fact: o ? o.f : { en: "", es: "" }, rarity: o ? rarityFor(idx, A.LEVELS.length) : 1, src: "country", nogeo: true });
     });
 
+    const P3 = new Set();                                                 // ids del Duelo con sus 3 niveles ya escritos (data/wiki)
     // 5) tarjetas curadas (personajes, sucesos, curiosidades) y su cadena de desbloqueo
     (A.CODEX_CURATED || []).forEach(c => {
       const [id, type, wiki, es, lat, lon, trig] = c;
       add({ id, type, name: { en: wiki, es }, wiki, lat, lon, country: null, fact: { en: "", es: "" }, rarity: type === "person" ? 2 : type === "event" ? 1 : 1, src: "curated", triggers: trig, nogeo: true });
       trig.forEach(t => (chain[t] = chain[t] || []).push(id));
+    });
+    // 5b) tarjetas del Duelo (data/duelo-extra.js: estadios, platos, estilos de musica...; y los personajes nuevos de data/duelo-personas.js).
+    //     row = [id, categoria, tipo de pregunta, lat, lon, zona, nombres, sub, tipo de carta, 3 niveles (1/0), carta propia (0 = ya existe curada)]
+    (A.DUELO_EXTRA || []).forEach(r => {
+      const [id, , , lat, lon, zone, names, , ctype, t3, own] = r; if (own === 0 || E[id]) { if (t3 && E[id]) P3.add(id); return; }
+      add({ id, type: ctype || "curiosity", name: { ...names }, wiki: names.en, lat: zone ? null : lat, lon: zone ? null : lon, country: null, fact: { en: "", es: "" }, rarity: 2, src: "duelo", nogeo: !!zone || lat == null, triggers: [] });
+      if (t3) P3.add(id);
+    });
+    (A.DUELO_PERSONAS || []).forEach(r => {
+      const [id, lat, lon, , , names, , , t3] = r; if (E[id]) { if (t3) P3.add(id); return; }
+      add({ id, type: "person", name: { ...names }, wiki: names.en, lat, lon, country: null, fact: { en: "", es: "" }, rarity: 2, src: "duelo", triggers: [] });
+      if (t3) P3.add(id);
+    });
+    P3.forEach(id => {
+      const p = E[id]; if (!p || E[id + "~h"]) return;
+      add({ id: id + "~h", type: "history", name: p.name, wiki: p.wiki, lat: p.lat, lon: p.lon, country: p.country, fact: { en: "", es: "" }, rarity: 2, src: "tier", tier: 2, parent: id, nogeo: p.nogeo });
+      add({ id: id + "~k", type: "curiosity", name: p.name, wiki: p.wiki, lat: p.lat, lon: p.lon, country: p.country, fact: { en: "", es: "" }, rarity: 3, src: "tier", tier: 3, parent: id, nogeo: p.nogeo });
     });
     // 6) cada lugar del banco tiene 3 entradas: el lugar (<= 300 km), su historia (<= 150 km) y su dato clave (<= 75 km)
     (A.PLACES || []).forEach(([id]) => {
@@ -208,6 +226,7 @@ window.AIQ = window.AIQ || {};
     const asked = new Set();
     (A.PLACES || []).forEach(([id, kind, , lat]) => { if (kind === "country" ? world.byName[id.slice(2)] : lat != null) asked.add(id); });   // las mismas que acepta placeQ (js/adventure.js)
     (A.CLASSIC || []).forEach(g => g.levels.forEach(L => L.dests.forEach(d => asked.add(d.ck || A.ckey(L.bonus && d.f ? d.f : d.n)))));
+    (A.DUELO_EXTRA || []).forEach(r => asked.add(r[0])); (A.DUELO_PERSONAS || []).forEach(r => asked.add(r[0]));   // lo que pregunta el Duelo
     const reach = new Set();
     asked.forEach(id => {
       const e = E[id]; if (!e) return;

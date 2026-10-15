@@ -7,8 +7,11 @@
  *  - Quien puntua menos le paga al otro (diferencia de puntos x multiplicador de la ronda). Quien se queda sin fichas, pierde. Al llegar al tope de
  *    rondas gana quien tenga mas fichas y, si empatan, se juegan rondas extra hasta deshacer el empate.
  *  - Cuando uno fija su respuesta, al otro le quedan como mucho CFG.lockRush segundos.
- *  - La pregunta de cada ronda se sortea entre las de A.QDIFF (data/dificultad.js) por una escalera de dificultad segun la mesa, con semilla
- *    (A.rng de js/rank.js): con la misma semilla sale el mismo duelo (mismas preguntas y mismas respuestas del rival).
+ *  - Cuatro mesas = cuatro ligas (Bronce, Plata, Oro y Crupier). La pregunta de cada ronda se sortea AL AZAR (sin escalera) del saco de la mesa:
+ *    data/duelo-niveles.js reparte el banco (1.937 preguntas de la Aventura + los personajes de data/duelo-personas.js) en tres sacos que son los
+ *    tercios de CADA categoria, asi las tres ligas llevan la misma mezcla; el Crupier saca de todo. Con semilla (A.rng de js/rank.js): con la
+ *    misma semilla sale el mismo duelo (mismas preguntas y mismas respuestas del rival).
+ *  - Liga (contra la banca, por ahora): 3 divisiones por liga y 100 puntos para subir; desde Oro I eres Crupier y solo sumas puntos (CFG.league).
  * TODAS las cifras estan en CFG, aqui debajo. Guarda solo tus duelos contra la banca (localStorage "atlasiq.duelo.banca") y las tarjetas de la
  * Enciclopedia que ganes (en silencio: se ensenan juntas en el veredicto). Ni logros de partida, ni perfil, ni clasificacion.
  * Entre jugadores (seccion «ENTRE JUGADORES», al final): los dos juegos sacan las mismas preguntas de la misma semilla y hacen las mismas cuentas;
@@ -41,14 +44,18 @@ window.AIQ = window.AIQ || {};
     /* el revelado, en ms desde que empieza (los de la maqueta): tu ficha, la del rival, las lineas, la fila de la cuenta, tus puntos, los suyos,
        la diferencia, por la ronda, las fichas que se pagan, su vuelo (flyN fichas, una cada flyGap, flyMs cada una) y las pilas que ruedan */
     rev: { me: 800, rv: 1000, lines: 1150, row: 1200, pm: 1500, pr: 1700, diff: 2100, mult: 2500, pay: 2900, fly: 3050, flyN: 9, flyGap: 70, flyMs: 560, roll: 3300, rollMs: 800 },
-    /* mesas: el centro de la escalera de dificultad (0-100 de A.QDIFF) y, salvo que se cambie, el nivel del rival */
+    /* las cuatro mesas = las cuatro ligas. saco: de que tercio de CADA categoria sale la pregunta (data/duelo-niveles.js: 0 el mas facil, 1 el medio, 2 el dificil;
+       null = todas, la del Crupier). Dentro del saco el sorteo es plano (sin escalera). level: cuanto sabe la banca por defecto (misma escala que la dificultad absoluta 1-100) */
     tables: [
-      { id: "baja", center: 28, chip: "chip_g", n: A.L6("Mesa baja|Low table|Table basse|Mesa baixa|Niedriger Tisch|Tavolo basso||低注桌|낮은 테이블|ローテーブル|Малый стол|Niski stół") },
-      { id: "media", center: 48, chip: "chip_b", n: A.L6("Mesa media|Middle table|Table moyenne|Mesa média|Mittlerer Tisch|Tavolo medio||中注桌|중간 테이블|ミドルテーブル|Средний стол|Średni stół") },
-      { id: "alta", center: 68, chip: "chip_k", n: A.L6("Mesa alta|High table|Table haute|Mesa alta|Hoher Tisch|Tavolo alto||高注桌|높은 테이블|ハイテーブル|Большой стол|Wysoki stół") },
+      { id: "bronce", saco: 0, level: 20, chip: "chip_r", n: A.L6("Bronce|Bronze|Bronze|Bronze|Bronze|Bronzo||青铜|브론즈|ブロンズ|Бронза|Brąz") },
+      { id: "plata", saco: 1, level: 50, chip: "chip_b", n: A.L6("Plata|Silver|Argent|Prata|Silber|Argento||白银|실버|シルバー|Серебро|Srebro") },
+      { id: "oro", saco: 2, level: 78, chip: "chip_o", n: A.L6("Oro|Gold|Or|Ouro|Gold|Oro||黄金|골드|ゴールド|Золото|Złoto") },
+      { id: "crupier", saco: null, level: 62, chip: "chip_k", n: A.L6("Crupier|Dealer|Croupier|Crupiê|Croupier|Croupier||荷官|딜러|ディーラー|Крупье|Krupier") },
     ],
-    /* escalera: la ronda k busca dificultad centro - down + (down + up) * min(1, (k - 1) / steps), con un margen de +-band, acotada a min..max */
-    ladder: { down: 22, up: 22, steps: 9, band: 5, min: 5, max: 88 },
+    /* la liga (solo contra la banca por ahora: amistosos con amigo no puntuan). 3 divisiones por liga (III, II, I) y per puntos para subir de una a otra;
+       sobre Oro I viene el Crupier, que ya solo suma puntos. Ganar suma win, perder resta loss (sin bajar del inicio de tu division: sin descensos por ahora).
+       lv: cuanto sabe la banca en cada una de las 9 divisiones (y el Crupier, desde crupierLv, sube 1 por cada crupierStep puntos hasta crupierMax) */
+    league: { per: 100, win: 25, loss: 15, lv: [14, 22, 30, 40, 50, 58, 66, 74, 82], crupierLv: 86, crupierStep: 50, crupierMax: 96 },
     /* rival simulado de nivel t ante una pregunta de dificultad d:
        sabe el lugar con probabilidad logistica((t - d) / know.k): falla know.km de mediana (lognormal, sigma know.s);
        si no, conoce la zona con probabilidad logistica((t - d + zone.off) / zone.k); si no, va perdido. t: [min, max] segundos que tarda en fijar */
@@ -63,7 +70,11 @@ window.AIQ = window.AIQ || {};
   const fmtM = m => (Number.isInteger(m) ? String(m) : A.fmt1(m));
   const multOf = k => (k < CFG.mult.from ? 1 : 1 + CFG.mult.step * (k - CFG.mult.from + 1));
   const secsOf = k => { let s = CFG.clock[0][1]; for (const [from, v] of CFG.clock) if (k >= from) s = v; return s; };
-  const targetOf = (center, k) => { const L = CFG.ladder; return clamp(center - L.down + (L.down + L.up) * Math.min(1, (k - 1) / L.steps), L.min, L.max); };
+  /* la liga: lp = tus puntos de liga. 0-899 son las nueve divisiones (Bronce III ... Oro I, 100 puntos cada una) y desde 900 eres Crupier (solo puntos) */
+  const LG = CFG.league, TOP = 9 * LG.per, DIVN = ["III", "II", "I"];
+  const rankOf = lp => { lp = Math.max(0, Math.floor(+lp || 0)); if (lp >= TOP) return { crupier: true, idx: 9, league: 3, pts: lp - TOP, into: (lp - TOP) % LG.per }; const i = Math.floor(lp / LG.per); return { crupier: false, idx: i, league: Math.floor(i / 3), div: i % 3, into: lp - i * LG.per }; };
+  const rankName = r => (r.crupier ? A.tx(CFG.tables[3].n) : `${A.tx(CFG.tables[r.league].n)} ${DIVN[r.div]}`);
+  const rankLevel = r => (r.crupier ? Math.min(LG.crupierMax, LG.crupierLv + Math.floor(r.pts / LG.crupierStep)) : LG.lv[r.idx]);
   const rungTxt = k => `${T("Peldaño", "Rung")} ${k} / ${Math.max(CFG.rounds, k)}`;
   const newSeed = () => { const AB = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < 6; i++) s += AB[Math.floor(Math.random() * AB.length)]; return s.slice(0, 3) + "-" + s.slice(3); };
 
@@ -82,27 +93,65 @@ window.AIQ = window.AIQ || {};
     }
     return (REF[q.key] = best);
   }
-  /* cada entrada: id de A.QDIFF, dificultad, pregunta, key (el lugar que se responde: una bandera y su pais, o una pista y su lugar, no salen en el mismo duelo) y continente */
+  /* un personaje como pregunta del juego: se le pide donde nacio. Debajo del nombre, su oficio y sus anos (nunca su pais: regalaria media respuesta).
+     Datos de data/duelo-personas.js: [id de su carta, lat, lon del lugar de nacimiento, ano de nacimiento, ano de muerte, nombres, oficios] */
+  const BC = { es: "a. C.", en: "BC", fr: "av. J.-C.", pt: "a.C.", de: "v. Chr.", it: "a.C.", zh: "公元前", ko: "기원전", ja: "紀元前", ru: "до н. э.", pl: "p.n.e." };
+  const BC_FRONT = { zh: 1, ko: 1, ja: 1 };                                   // en estos idiomas la era va delante del ano
+  const yearTxt = (y, l) => (y < 0 ? (BC_FRONT[l] ? `${BC[l]} ${-y}` : `${-y} ${BC[l] || BC.en}`) : String(y));
+  const CIRCA = { es: "c.", en: "c.", fr: "v.", pt: "c.", de: "ca.", it: "c.", zh: "约", ko: "약", ja: "約", ru: "ок.", pl: "ok." };   // "hacia": si algun ano no es exacto
+  const yearsTxt = (by, dy, l, fl) => {
+    let t;
+    if (by != null && dy != null) t = by < 0 && dy < 0 && !BC_FRONT[l] ? `${-by}-${-dy} ${BC[l] || BC.en}` : `${yearTxt(by, l)}-${yearTxt(dy, l)}`;
+    else if (by != null) t = `${yearTxt(by, l)}-`;                            // vivo
+    else t = dy != null ? `-${yearTxt(dy, l)}` : "";                          // solo se sabe cuando murio
+    return t && fl ? `${CIRCA[l] || CIRCA.en} ${t}` : t;
+  };
+  const cap = s => (s ? s.charAt(0).toLocaleUpperCase() + s.slice(1) : s);
+  let PQ = null;
+  function personQ(k) {
+    if (!PQ) { PQ = {}; (A.DUELO_PERSONAS || []).forEach(r => (PQ[r[0]] = r)); }
+    const r = PQ[k]; if (!r) return null; const [id, lat, lon, by, dy, names, roles, fl] = r, sub = {};
+    Object.keys(names).forEach(l => { const y = yearsTxt(by, dy, l, fl), ro = cap(roles[l] || roles.en || ""); sub[l] = ro && y ? `${ro} · ${y}` : ro || y; });
+    return { t: "p", lat, lon, name: names, sub, clue: false, answer: null, fact: {}, cid: [id], kind: "character", topic: "character", tier: 0, fame: 0, cEn: [], cks: [] };
+  }
+  /* una pregunta de data/duelo-extra.js (estadios, platos, estilos de musica, curiosidades): una zona de uno o varios paises (se acierta dentro de cualquiera)
+     o un punto. row = [id, categoria, tipo de pregunta, lat, lon, zona, nombres, sub, tipo de carta, 3 niveles, carta propia]. La etiqueta de la zona
+     (donde se pinta su nombre al revelar) es el centro de su pais mas grande */
+  let XQ = null;
+  function extraQ(k) {
+    if (!XQ) { XQ = {}; (A.DUELO_EXTRA || []).forEach(r => (XQ[r[0]] = r)); }
+    const r = XQ[k]; if (!r) return null; const [id, cat, kind, lat, lon, zone, names, sub] = r;
+    const q = { t: "p", lat, lon, name: names, sub: sub || { es: "", en: "" }, clue: false, answer: null, fact: {}, cid: [id], kind: ["origin", "found", "formed", "reign", "event", "battle", "country", "city", "nature"].includes(kind) ? kind : "landmark", topic: cat, tier: 0, fame: 0, cEn: [], cks: [], duelKf: zone ? 0.7 : 0.9 };
+    if (zone) { q.zone = zone; const f = A.waters.of(q); if (!f) return null; const big = f.polys.reduce((a, b) => ((b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) > (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) ? b : a)); f.label = [(big.bbox[0] + big.bbox[2]) / 2, (big.bbox[1] + big.bbox[3]) / 2]; q.lon = f.label[0]; q.lat = f.label[1]; }
+    return q;
+  }
+  /* cada entrada: id de A.DUELO_NIVELES, d (dificultad absoluta 1-100, la usa el rival simulado), sc (saco 0-2), la pregunta, key (el lugar que se responde: una bandera y su
+     pais, o una pista y su lugar, no salen en el mismo duelo), continente y categoria */
   function pool() {
     if (POOL) return POOL;
-    const all = A.adv._allQ(), out = [];
-    for (const id in A.QDIFF) {
-      const flag = id.startsWith("flag:"), base = all[flag ? id.slice(5) : id]; if (!base) continue;
-      const q = flag ? { ...base, kind: "flag", duelKf: A.adv.kf(base) } : base, [la, lo] = refOf(q);   // la bandera es la pregunta del pais, vista como bandera (puntua como el pais)
-      out.push({ id, d: A.QDIFF[id], q, key: q.cid[q.cid.length - 1], cont: A.continent(la, lo) });
+    const all = A.adv._allQ(), out = [], NV = A.DUELO_NIVELES || {};
+    for (const id in NV) {
+      const [sc, d] = NV[id], flag = id.startsWith("flag:"), person = id.startsWith("person:"), extra = id.startsWith("x:"); let q;
+      if (person) q = personQ(id.slice(7)); else if (extra) q = extraQ(id.slice(2)); else { const base = all[flag ? id.slice(5) : id]; q = !base ? null : flag ? { ...base, kind: "flag", duelKf: A.adv.kf(base) } : base; }   // la bandera es la pregunta del pais, vista como bandera (puntua como el pais)
+      if (!q) continue;
+      const [la, lo] = refOf(q);
+      out.push({ id, d, sc, q, key: q.cid[q.cid.length - 1], cont: A.continent(la, lo), cat: person ? "character" : extra ? (q.topic === "culture" ? "culture" : q.topic) : flag ? "flag" : q.clue ? "clue" : q.topic });
     }
     return (POOL = out);
   }
-  /* la pregunta de la ronda: dificultad cerca del peldano, sin repetir lugar y sin dos seguidas del mismo continente. Primero se sortea el continente
-     (peso = raiz de cuantas hay, para que Europa no salga una ronda si y otra no) y luego la pregunta */
+  /* la pregunta de la ronda: del saco de la mesa (o de todo el banco, en la del Crupier), al azar y sin escalera. Sin repetir lugar, sin dos seguidas del mismo
+     continente y, si se puede, de la misma categoria. Primero se sortea el continente (peso = raiz de cuantas hay, para que Europa no salga una ronda si y otra
+     no) y luego la pregunta */
   function drawQ(st) {
-    const L = CFG.ladder, tg = targetOf(st.table.center, st.k), P = pool(); let cand = [];
-    for (let band = L.band; !cand.length && band <= 40; band += 3) cand = P.filter(e => Math.abs(e.d - tg) <= band && !st.used.has(e.key) && e.cont !== st.lastCont);
-    if (!cand.length) cand = P.filter(e => !st.used.has(e.key));
+    const sc = st.table.saco, P = pool().filter(e => sc == null || e.sc === sc), free = e => !st.used.has(e.key);
+    let cand = P.filter(e => free(e) && e.cont !== st.lastCont && e.cat !== st.lastCat);
+    if (!cand.length) cand = P.filter(e => free(e) && e.cont !== st.lastCont);
+    if (!cand.length) cand = P.filter(free);
+    if (!cand.length) cand = pool().filter(free);
     const by = {}; cand.forEach(e => (by[e.cont] = by[e.cont] || []).push(e));
     const cs = Object.keys(by).sort(), w = cs.map(c => Math.sqrt(by[c].length)); let x = st.rq() * w.reduce((a, b) => a + b, 0), ci = 0;
     while (ci < cs.length - 1 && x >= w[ci]) x -= w[ci++];
-    const e = st.rq.pick(by[cs[ci]]); st.used.add(e.key); st.lastCont = e.cont; return e;
+    const e = st.rq.pick(by[cs[ci]]); st.used.add(e.key); st.lastCont = e.cont; st.lastCat = e.cat; return e;
   }
 
   /* ------------------------------------------------------------------ puntuacion (la de verdad: distancia al lugar, al pais o a la masa de agua) */
@@ -126,7 +175,7 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ el duelo: estado, ronda y pago (lo usan igual la partida y la simulacion) */
   function mkState(o = {}) {
     const table = CFG.tables.find(t => t.id === o.table) || CFG.tables[1], seed = String(o.seed || newSeed());
-    return { seed, table, level: o.level == null ? table.center : +o.level, auto: o.auto || null, net: o.net || null, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":rival"), ra: A.rng(seed + ":auto"),
+    return { seed, table, level: o.level == null ? table.level : +o.level, liga: !!o.liga, auto: o.auto || null, net: o.net || null, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":rival"), ra: A.rng(seed + ":auto"),
       me: CFG.stack, rv: CFG.stack, shown: { me: CFG.stack, rv: CFG.stack }, k: 0, used: new Set(), lastCont: null, log: [], cur: null, over: null, phase: "", secs: 0 };
   }
   function nextRound(st) {
@@ -148,14 +197,14 @@ window.AIQ = window.AIQ || {};
     secs: Math.round(st.secs * 10) / 10, wall: st.t0 ? Math.round((performance.now() - st.t0) / 100) / 10 : null,
     log: st.log.map(r => ({ k: r.k, mult: r.mult, id: r.id, d: r.d, me: r.me.pts, meKm: r.me.km == null ? null : Math.round(r.me.km), rv: r.rv.pts, rvKm: r.rv.km == null ? null : Math.round(r.rv.km), tier: r.tier, pay: r.pay, stMe: r.stMe })) });
 
-  const D = A.duelo = { CFG, multOf, secsOf, targetOf, pool, botPlay, kmOf, ptsOf, last: null };
+  const D = A.duelo = { CFG, multOf, secsOf, rankOf, rankName, rankLevel, pool, botPlay, kmOf, ptsOf, last: null };
   /* cientos de duelos entre dos rivales simulados con el banco, la puntuacion y las reglas del juego (sin interfaz ni esperas): rondas, KO y duracion.
      la / lb: nivel de cada uno (por defecto, el centro de la mesa). La duracion suma lo que tarda en fijar el ultimo, el revelado y el paso de ronda.
      Con la misma semilla, el duelo i de aqui es el mismo que A.duelo.start({ seed: semilla + ":" + i, auto: {} }) jugado por la interfaz */
   D.sim = (o = {}) => {
     const n = o.n || 300, rows = [];
     for (let i = 0; i < n; i++) {
-      const st = mkState({ table: o.table, level: o.lb, seed: (o.seed || "sim") + ":" + i }), la = o.la == null ? st.table.center : o.la; let secs = CFG.introSecs, ask = 0, lead4 = 0;
+      const st = mkState({ table: o.table, level: o.lb, seed: (o.seed || "sim") + ":" + i }), la = o.la == null ? st.table.level : o.la; let secs = CFG.introSecs, ask = 0, lead4 = 0;
       while (!st.over && st.k < CFG.rounds + 40) {
         const cur = nextRound(st), a = botPlay(st.ra, cur.q, cur.d, la), [ta, tb] = lockTimes(a.t, cur.bot.t, cur.secs);
         settle(st, { lon: a.lon, lat: a.lat, t: ta }, { lon: cur.bot.lon, lat: cur.bot.lat, t: tb });
@@ -167,7 +216,7 @@ window.AIQ = window.AIQ || {};
     }
     const q = (a, p) => { const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; }, pct = f => Math.round((1000 * rows.filter(f).length) / n) / 10, R = rows.map(r => r.rounds), Sx = rows.map(r => r.secs);
     const l4 = rows.filter(r => r.lead4 != null);
-    return { n, table: o.table || "media", la: o.la, lb: o.lb, rounds: { p10: q(R, 0.1), p50: q(R, 0.5), p90: q(R, 0.9), mean: Math.round((10 * R.reduce((a, b) => a + b, 0)) / n) / 10 },
+    return { n, table: o.table || "plata", la: o.la, lb: o.lb, rounds: { p10: q(R, 0.1), p50: q(R, 0.5), p90: q(R, 0.9), mean: Math.round((10 * R.reduce((a, b) => a + b, 0)) / n) / 10 },
       ko: pct(r => r.ko), winA: pct(r => r.win), extra: pct(r => r.rounds > CFG.rounds), secs: { p10: Math.round(q(Sx, 0.1)), p50: Math.round(q(Sx, 0.5)), p90: Math.round(q(Sx, 0.9)) },
       askPerRound: Math.round((10 * rows.reduce((a, r) => a + r.ask, 0)) / R.reduce((a, b) => a + b, 0)) / 10, lead4wins: l4.length ? Math.round((1000 * l4.filter(r => r.lead4).length) / l4.length) / 10 : null,
       hist: R.reduce((h, x) => ((h[x] = (h[x] || 0) + 1), h), {}), rows: o.detail ? rows : undefined };
@@ -183,7 +232,7 @@ window.AIQ = window.AIQ || {};
   const myName = () => { const n = A.profile && A.profile.get().name; return n ? esc(n) : ""; };
   const foeRaw = () => (st && st.net ? st.net.his || RIVAL() : BANK()), foe = () => esc(foeRaw());   // el de enfrente: la banca o, en la sala privada, tu amigo
   const cut = (s, n) => { const a = [...String(s)]; return a.length > n ? a.slice(0, n - 1).join("") + "…" : String(s); };
-  const range = t => `${targetOf(t.center, 1)} ${T("a", "to")} ${targetOf(t.center, CFG.ladder.steps + 1)}`;
+  const span = t => (t.saco == null ? T("todas las preguntas", "every question") : [T("el tercio fácil", "the easy third"), T("el tercio medio", "the middle third"), T("el tercio difícil", "the hard third")][t.saco]);
   const row = (a, b) => `<div class="gx-lead-row"><span>${a}</span><s></s><b>${b}</b></div>`;
   const tableOf = id => CFG.tables.find(t => t.id === id) || CFG.tables[1];
   const inRow = n => (n === 1 ? T("1 seguida", "1 in a row") : Tf("{n} seguidas", "{n} in a row", { n }));
@@ -191,9 +240,11 @@ window.AIQ = window.AIQ || {};
 
   /* tus duelos contra la banca (lo unico que guarda el prototipo, junto a las tarjetas de la Enciclopedia) */
   const SKEY = "atlasiq.duelo.banca";
-  const stats = () => { let o = {}; try { o = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; } catch (e) { /* sin almacenamiento */ } return { d: +o.d || 0, w: +o.w || 0, s: +o.s || 0 }; };
+  const stats = () => { let o = {}; try { o = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; } catch (e) { /* sin almacenamiento */ } return { d: +o.d || 0, w: +o.w || 0, s: +o.s || 0, lp: Math.max(0, Math.floor(+o.lp || 0)) }; };
   D.stats = stats;                                                        // la carta de la portada ensena tus duelos ganados (js/hub.js)
-  const statsAdd = win => { const o = stats(); o.d++; if (win) { o.w++; o.s++; } else o.s = 0; try { localStorage.setItem(SKEY, JSON.stringify(o)); } catch (e) { /* sin almacenamiento */ } return o; };
+  const statsAdd = (win, liga) => { const o = stats(); o.d++; if (win) { o.w++; o.s++; } else o.s = 0;
+    if (liga) { const r = rankOf(o.lp), floor = r.crupier ? TOP : r.idx * LG.per; o.lp = Math.max(floor, o.lp + (win ? LG.win : -LG.loss)); }   // sin bajar del inicio de tu division: sin descensos por ahora
+    try { localStorage.setItem(SKEY, JSON.stringify(o)); } catch (e) { /* sin almacenamiento */ } return o; };
 
   /* escala del duelo: el diseno es a 1280 x 720 y se escala entero (como las pantallas de gala), sin pasar de la escala de la interfaz.
      La variable solo se escribe si cambia (una variable en el cuerpo recalcula los estilos de toda la pagina) */
@@ -250,43 +301,46 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ================================================================== 1 · LA SALA: tu ficha de socio y las tres puertas («Retar a un amigo» y «Contra el crupier»; la liga, mas adelante) */
-  const sel = { table: "media", level: null, door: "crupier", msg: "" };
+  const sel = { table: "plata", level: null, door: "liga", msg: "" };
   const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."],
     ver: ["Tu amigo y tú tenéis versiones distintas del juego.", "You and your friend are on different versions of the game."], closed: ["La sala se ha cerrado.", "The room was closed."],
     short: ["El código tiene 5 letras o números.", "The code has 5 letters or digits."], net: ["No se ha podido conectar con la sala. Inténtalo otra vez.", "Couldn't reach the room. Try again."] };
   const whyTxt = w => { const a = WHY[w] || WHY.net; return T(a[0], a[1]); };
   const salaMsg = (t, bad) => { const e = $("duAmgTx"); if (!e) return; e.textContent = t || T("¿Tu amigo ya tiene sala? Escribe su código.", "Does your friend already have a room? Type their code."); e.classList.toggle("bad", !!bad); };
-  const lvOf = () => (sel.level == null ? tableOf(sel.table).center : sel.level);
+  const lvOf = () => (sel.level == null ? tableOf(sel.table).level : sel.level);
   let greeted = false;
   D.open = () => {
     const c = C(), S = c.S; if (S.booting || S.phase !== "title") return;
     pool(); fitDk(); S.hub = "duelo";                                     // S.hub: Esc vuelve a la portada (js/game.js)
     const s = stats(), nm = myName();
     const door = (i, id, ill, t, d, tag, cls, on) => `<div class="doorw ${on ? "on" : "off"} rise" style="--d:${(0.1 + i * 0.08).toFixed(2)}s"${on ? ` data-door="${id}" role="button" tabindex="0"` : ""}><div class="gx-paper door">${ill}<h3 class="ink">${t}</h3><p>${d}</p><span class="tag ${cls}">${tag}</span></div></div>`;
-    const ms = t => `<button type="button" class="ms${t.id === sel.table ? " on" : ""}" data-t="${t.id}" aria-pressed="${t.id === sel.table}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${T("dificultad", "difficulty")} ${range(t)}</i></span></button>`;
+    const ms = t => `<button type="button" class="ms${t.id === sel.table ? " on" : ""}" data-t="${t.id}" aria-pressed="${t.id === sel.table}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${span(t)}</i></span></button>`;
     c.dialog(stage("lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l" id="duH">${NAME()}</h2><span class="gx-eyb">${T("Prototipo", "Prototype")}</span></div>
       <div class="socio gx-sh fromL"><div class="gx-paper"><span class="gx-eyb">${T("Tu ficha", "Your chip")}</span>
-        <div class="who">${A.icon(ME_CHIP)}<div><b>${nm || T("Jugador", "Player")}</b><span>${T("Sin liga todavía", "No league yet")}</span></div></div>
-        <p class="gx-note">${T("Las ligas llegarán más adelante. De momento: amistosos con un amigo y práctica contra la banca.", "Leagues come later. For now: friendlies with a friend and practice against the house.")}</p>
+        <div class="who">${A.icon(ME_CHIP)}<div><b>${nm || T("Jugador", "Player")}</b><span id="duRankSub"></span></div></div>
+        <p class="gx-note">${T("Duelos de liga contra la banca: gana puntos y sube de división. Con un amigo, amistosos sin puntos.", "League duels against the house: earn points and climb divisions. With a friend, friendlies without points.")}</p>
         <div class="gx-hr"></div>
-        <div class="rows">${row(T("Duelos", "Duels"), s.d)}${row(T("Victorias", "Wins"), s.w)}${row(T("Racha", "Streak"), s.s ? inRow(s.s) : "—")}<div class="gx-lead-row"><span>${T("Tu mesa", "Your table")}</span><s></s><b id="duTm"></b></div></div>
+        <div class="rows">${row(T("Duelos", "Duels"), s.d)}${row(T("Victorias", "Wins"), s.w)}${row(T("Racha", "Streak"), s.s ? inRow(s.s) : "—")}<div class="gx-lead-row"><span>${T("Tu liga", "Your league")}</span><s></s><b id="duTm"></b></div></div>
       </div></div>
       <div class="puertas gx-sh"><div class="gx-pnl"><span class="gx-eyb">${T("Elige duelo", "Pick a duel")}</span>
         <div class="doors" id="duDoors">
-          ${door(0, "liga", `<div class="ill" style="background-image:url(assets/gen/card_compete.webp)"></div>`, T("Duelo de liga", "League duel"), T("Un rival de tu liga, o su partida grabada si no hay nadie.", "A rival from your league, or their recorded game if no one's around."), T("Pronto", "Soon"), "line", false)}
+          ${door(0, "liga", `<div class="ill" style="background-image:url(assets/gen/card_compete.webp)"></div>`, T("Duelo de liga", "League duel"), T("La banca a tu medida, con puntos de liga. Sube de división.", "The house, sized to you, with league points. Climb divisions."), T("Con puntos", "With points"), "", true)}
           ${door(1, "amigo", `<div class="ill amigo">${A.icon("chip_o")}${A.icon("chip_p")}</div>`, T("Retar a un amigo", "Challenge a friend"), T("Abre una sala y pásale el código. O entra en la suya.", "Open a room and send them the code. Or join theirs."), T("Con código", "With a code"), "", true)}
           ${door(2, "crupier", `<div class="ill" style="background-image:url(assets/gen/card_adv.webp);background-color:#5a1420"></div>`, T("Contra el crupier", "Against the dealer"), T("Práctica contra la banca. Tú eliges cuánto sabe.", "Practice against the house. You choose how much it knows."), T("Práctica", "Practice"), "", true)}
         </div>
         <div class="amg hidden" id="duRowA"><span id="duAmgTx" role="status"></span><input id="duCode" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="duJoin">${T("Entrar", "Join")}</button></span></div>
         <div class="mesas" id="duRowB"><div class="mss" id="duMesas">${CFG.tables.map(ms).join("")}</div>
           <div class="lvl"><span>${T("La banca sabe", "The house knows")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvDn" aria-label="-">−</button></span><b id="duLv"></b><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvUp" aria-label="+">+</button></span></div></div>
+        <div class="mesas rkw hidden" id="duRowL"><div class="rk"><span id="duRkIc"></span><span><b id="duRk"></b><i id="duRkS"></i></span></div></div>
         <div class="regl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
       </div></div>
       <div class="ft"><div class="seatw" id="duSalaSeat"></div><div class="gx-acts"><button type="button" class="gx-btn gho" id="duHow">${T("Cómo se juega", "How to play")}</button>${primary("duGo", T("Sentarse a la mesa", "Take a seat"))}</div></div>`), "tablewrap");
-    const paint = () => { const t = tableOf(sel.table), am = sel.door === "amigo"; $("duLv").textContent = lvOf(); $("duTm").textContent = `${T("dificultad", "difficulty")} ${range(t)}`;
+    const paint = () => { const am = sel.door === "amigo", lg = sel.door === "liga", r = rankOf(stats().lp), rn = rankName(r), pts = r.crupier ? `${r.pts} ${T("puntos", "points")}` : `${r.into} / ${LG.per}`;
+      $("duLv").textContent = lvOf(); $("duTm").textContent = rn; $("duRankSub").textContent = `${rn} · ${pts}`;
+      $("duRkIc").innerHTML = A.icon(CFG.tables[r.league].chip); $("duRk").textContent = rn; $("duRkS").textContent = `${pts} · ${span(CFG.tables[r.league])} · ${T("La banca sabe", "The house knows")} ${rankLevel(r)}`;
       document.querySelectorAll("#duDoors .doorw.on").forEach(x => { const on = x.dataset.door === sel.door; x.classList.toggle("eleg", on); x.setAttribute("aria-pressed", on); });
-      $("duRowA").classList.toggle("hidden", !am); $("duRowB").classList.toggle("hidden", am);
-      $("duGo").querySelector("span").textContent = am ? T("Abrir una sala", "Open a room") : T("Sentarse a la mesa", "Take a seat"); };
+      $("duRowA").classList.toggle("hidden", !am); $("duRowB").classList.toggle("hidden", am || lg); $("duRowL").classList.toggle("hidden", !lg);
+      $("duGo").querySelector("span").textContent = am ? T("Abrir una sala", "Open a room") : lg ? T("Jugar duelo de liga", "Play a league duel") : T("Sentarse a la mesa", "Take a seat"); };
     paint(); salaMsg(sel.msg, !!sel.msg); sel.msg = "";
     $("hubBack").onclick = () => { A.sfx.ui(); unseat(); A.hub.screen("home"); };
     $("duDoors").onclick = e => { const b = e.target.closest(".doorw.on"); if (!b || b.dataset.door === sel.door) return; sel.door = b.dataset.door; A.sfx.card(); paint(); };
@@ -298,7 +352,7 @@ window.AIQ = window.AIQ || {};
       document.querySelectorAll("#duMesas .ms").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); }); paint(); };
     const step = d => () => { sel.level = clamp(lvOf() + d, 4, 96); A.sfx.ui(); paint(); };
     $("duLvDn").onclick = step(-4); $("duLvUp").onclick = step(4);
-    $("duGo").onclick = () => { if (sel.door === "amigo") return roomNew(); A.sfx.depart(); D.start({ table: sel.table, level: lvOf() }); };
+    $("duGo").onclick = () => { if (sel.door === "amigo") return roomNew(); A.sfx.depart(); D.start(sel.door === "liga" ? { liga: true } : { table: sel.table, level: lvOf() }); };
     let k = 0; const how = () => { if (k > 2 || !$("duSalaSeat")) return; speak(line("how", k++), { done: how }); };
     $("duHow").onclick = () => { A.sfx.ui(); if (k > 0 && k < 3) return; k = 0; how(); };   // el crupier lo explica en tres frases
     seat($("duSalaSeat")); if (!greeted) { greeted = true; speak(line("sala", s.d ? 1 : 0)); }
@@ -309,6 +363,7 @@ window.AIQ = window.AIQ || {};
   D.start = (o = {}) => {
     const c = C(), S = c.S; if (S.duel) D.leave(true); else seat(null);
     c.openSettings(false); A.audio.unlock(); pool(); fitDk();
+    if (o.liga) { const r = rankOf(stats().lp); o = { ...o, table: CFG.tables[r.league].id, level: o.level == null ? rankLevel(r) : o.level }; }   // duelo de liga: la mesa y la banca salen de tu division
     st = S.duel = mkState(o);
     S.run = null; S.tool = null; S.ranked = null; S.level = 0; S.qs = []; S.qi = 0; S.levelScore = 0; S.runTotal = 0; S.streak = 0; S.hits = 0; S.log = null;
     S.camp = { id: "duelo", mode: "duel", title: A.L6(NAME6), home: { lat: 0, lon: 0, zoom: 1 }, levels: [{ kind: "city", seconds: secsOf(1), advance: 0, maxPerQ: 1000, name: st.table.n }] };
@@ -324,7 +379,7 @@ window.AIQ = window.AIQ || {};
     const room = w => row(T("Fichas", "Chips"), A.fmt(CFG.stack)) + row(T("Victorias en la sala", "Wins in this room"), w);
     const card = (side, chip, name, tag, cls, rws) => `<div class="cardw ${side} ${side === "l" ? "fromL" : "fromR"}" style="--d:.15s"><div class="gx-paper pc">${A.icon(chip)}<h3 class="ink">${name}</h3><span class="tag ${cls}">${tag}</span><div class="rows">${rws}</div></div></div>`;
     const lad = Array.from({ length: CFG.rounds }, (_, i) => `<div class="pop" style="--d:${(0.6 + i * 0.05).toFixed(2)}s"><i style="--h:${8 + Math.round(multOf(i + 1) * 6)}px"></i><span>×${fmtM(multOf(i + 1))}</span></div>`).join("");
-    c.dialog(stage("vs", `<div class="top"><span class="gx-eyb">${A.tx(tb.n)} · ${T("dificultad", "difficulty")} ${range(tb)}</span></div>
+    c.dialog(stage("vs", `<div class="top"><span class="gx-eyb">${st.liga ? `${T("Duelo de liga", "League duel")} · ${rankName(rankOf(s.lp))}` : `${A.tx(tb.n)} · ${span(tb)}`}</span></div>
       ${card("l", ME_CHIP, nm || T("Jugador", "Player"), ME(), "me", nt ? room(N.score.me) : row(T("Duelos", "Duels"), s.d) + row(T("Victorias", "Wins"), s.w) + row(T("Racha", "Streak"), s.s || "—"))}
       <div class="mid"><div class="seatw" id="duVsSeat"></div><b class="rise" style="--d:.35s">${A.fmt(2 * CFG.stack)}</b><span class="gx-note rise" style="--d:.4s">${T("fichas en juego", "chips at stake")}</span></div>
       ${card("r", RV_CHIP, foe(), RIVAL(), "rv", nt ? room(N.score.rv) : row(T("Nivel", "Level"), st.level) + row(T("Duelos contigo", "Duels with you"), s.d) + row(T("Victorias", "Wins"), s.d - s.w))}
@@ -428,7 +483,7 @@ window.AIQ = window.AIQ || {};
     c.nextQuestion();                                                     // placa, reloj, mapa listo para el clic y D.hud()
     cur.t0 = performance.now(); cur.rvAt = Math.min(cur.bot.t, cur.secs - 0.4);
     if (st.net) { const nt = st.net; cur.t0 = S.t0 = Rd().perfAt(nt.s); cur.rvAt = Infinity; nt.want = st.k; nt.ack = nt.rdy = false; nt.s = 0; netLoop(); }   // entre jugadores, el reloj es el del servidor: empieza para los dos a la vez
-    if (st.auto) { cur.auto = botPlay(st.ra, cur.q, cur.d, st.auto.level == null ? st.table.center : st.auto.level); cur.autoAt = Math.min(cur.auto.t, cur.secs - 0.4); }
+    if (st.auto) { cur.auto = botPlay(st.ra, cur.q, cur.d, st.auto.level == null ? st.table.level : st.auto.level); cur.autoAt = Math.min(cur.auto.t, cur.secs - 0.4); }
   }
   /* cuando uno fija, al otro le quedan como mucho lockRush segundos: el reloj de la placa salta a ese tiempo */
   function rush() { const S = C().S, left = S.limit - (performance.now() - S.t0 - S.pausedAcc) / 1000; if (left > CFG.lockRush) S.t0 -= (left - CFG.lockRush) * 1000; }
@@ -553,9 +608,10 @@ window.AIQ = window.AIQ || {};
     map.clearMarks(); map.setDecoys([]); map.animateTo(map.home(), 900); map.setPick(false); pinsSet([]);
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); document.querySelectorAll(".du-fly").forEach(e => e.remove());
     for (const id of ["duHud", "duSeat", "duTools", "duFact"]) { const e = $(id); if (e) e.classList.add("hidden"); }
-    const sum = (D.last = summary(st)), was = stats(), now = st.auto || nt ? was : statsAdd(win), pct = x => (x.d ? Math.round((100 * x.w) / x.d) : 0), fo = foe();
+    const sum = (D.last = summary(st)), was = stats(), now = st.auto || nt ? was : statsAdd(win, st.liga), pct = x => (x.d ? Math.round((100 * x.w) / x.d) : 0), fo = foe();
     if (nt && !nt.counted) { nt.counted = true; N.score[win ? "me" : "rv"]++; }   // el marcador de la sala (los amistosos no cuentan para tus duelos contra la banca)
     const sc = N.score, share = (w, t) => (t > 0 ? w / t : 0.5);
+    const lg = !!st.liga && !st.auto && !nt, r0 = rankOf(was.lp), r1 = rankOf(now.lp), lgDelta = now.lp - was.lp, lgFrac = r => (r.crupier ? (r.pts % LG.per) / LG.per : r.into / LG.per), MYLG = CFG.tables[r1.league].chip;
     A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.fail, 380);
     const lead = o.lost ? T("Has estado demasiado rato sin conexión.", "You were offline for too long.")
       : o.left ? (o.cut ? Tf("{name} ha perdido la conexión.", "{name} lost their connection.", { name: fo }) : Tf("{name} se ha levantado de la mesa.", "{name} left the table.", { name: fo }))
@@ -572,6 +628,8 @@ window.AIQ = window.AIQ || {};
     c.dialog(stage("du-fin", `<div class="tit"><span class="gx-eyb">${NAME()} · ${A.tx(tb.n)}</span><h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : T("Derrota", "Defeat")}</h2><p class="gx-lead">${lead}</p>
         ${nt ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Marcador de la sala", "Room score")}</b><div class="gx-bar"><i style="--s0:${share(sc.me - (win ? 1 : 0), sc.me + sc.rv - 1)};--s1:${share(sc.me, sc.me + sc.rv)}"></i></div>
           <p>${myName() || ME()} ${sc.me} · ${fo} ${sc.rv}. ${T("Amistoso: no cuenta para la liga.", "Friendly: doesn't count for the league.")}</p></div></div>`
+        : lg ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(MYLG)}<b>${T("Duelo de liga", "League duel")} · ${rankName(r1)}</b><div class="gx-bar"><i style="--s0:${r1.idx > r0.idx ? 0 : lgFrac(r0)};--s1:${lgFrac(r1)}"></i></div>
+          <p>${lgDelta >= 0 ? "+" : "−"}${Math.abs(lgDelta)} ${T("puntos de liga", "league points")} · ${r1.crupier ? `${r1.pts} ${T("puntos", "points")}` : `${r1.into} / ${LG.per}`}. ${r1.idx > r0.idx ? `${T("¡Ascenso a", "Promoted to")} ${rankName(r1)}!` : tally(now)}</p></div></div>`
         : `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Contra la banca", "Against the house")}</b><div class="gx-bar"><i style="--s0:${pct(was) / 100};--s1:${pct(now) / 100}"></i></div>
           <p>${tally(now)} ${now.s > 1 ? Tf("Racha de {n} seguidas.", "{n} in a row.", { n: now.s }) : !win && was.s > 1 ? T("Racha cortada.", "Streak broken.") : ""}</p></div></div>`}${pol}</div>
       <div class="tk drop" style="--d:.15s"><div class="gx-paper"><span class="gx-eyb">${T("La cuenta", "The tally")}</span>${rows}<div class="gx-hr"></div>${row(T("Tu pila", "Your stack"), A.fmt(me))}</div></div>
@@ -581,7 +639,7 @@ window.AIQ = window.AIQ || {};
     document.querySelectorAll("#dlg .pol figure").forEach(f => { const id = f.dataset.id, k = A.mediaKey(id), im = new Image(); im.alt = ""; im.decoding = "async"; im.onload = () => f.querySelector(".ph").replaceWith(im); im.onerror = () => { if (!im.dataset.b) { im.dataset.b = 1; im.src = A.media(`assets/wiki/card/${k}.webp`); } }; im.src = A.media(`assets/wiki/th/${k}.webp`); });
     $("duExit").onclick = () => c.showHub("home");
     if (nt) $("duRoom").onclick = roomBack;
-    else { $("duRematch").onclick = () => D.start({ table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
+    else { $("duRematch").onclick = () => D.start(s.liga ? { liga: true, auto: s.auto } : { table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
     seat($("duVdSeat"));
     if (nt) speak(line(o.lost ? "lost2" : o.left ? "left2" : o.quit === "rv" ? "quit2" : o.quit ? "quit" : win ? "win2" : "lose2"), win ? { gesture: "hat_tip" } : { face: "sly" });
     else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "laugh" });
@@ -603,7 +661,7 @@ window.AIQ = window.AIQ || {};
   const sendV = body => { const q = ++N.q, code = N.code; return send(body).then(x => { if (N.code !== code) return; if (x && x.ok) { if (q < N.qa) return; N.qa = q; } netView(x, code); }); };
   /* la firma del duelo: version del juego, reglas y banco de preguntas. Solo se sientan juntos dos juegos que vayan a sacar el mismo duelo */
   const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
-  let SIG = ""; const sig = () => SIG || (SIG = "d1." + A.VERSION + "." + hash(JSON.stringify([CFG.stack, CFG.scale, CFG.rounds, CFG.mult, CFG.clock, CFG.lockRush, CFG.ladder, CFG.tables.map(t => [t.id, t.center])]) + pool().map(e => e.id + ":" + e.d + ":" + e.cont).join("|")));
+  let SIG = ""; const sig = () => SIG || (SIG = "d1." + A.VERSION + "." + hash(JSON.stringify([CFG.stack, CFG.scale, CFG.rounds, CFG.mult, CFG.clock, CFG.lockRush, CFG.league, CFG.tables.map(t => [t.id, t.saco, t.level])]) + pool().map(e => e.id + ":" + e.sc + ":" + e.d + ":" + e.cont).join("|")));
 
   /* ---------------- abrir una sala o entrar en la de tu amigo (desde «Retar a un amigo») */
   async function roomNew() {
@@ -629,7 +687,7 @@ window.AIQ = window.AIQ || {};
   /* ---------------- 6 · LA SALA PRIVADA: los dos asientos, la mesa (la elige el anfitrion) y «Repartir» */
   function roomOpen() {
     const c = C(), S = c.S; fitDk(); S.hub = "duelo";
-    const tile = t => `<button type="button" class="ms" data-t="${t.id}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${T("dificultad", "difficulty")} ${range(t)}</i></span></button>`;
+    const tile = t => `<button type="button" class="ms" data-t="${t.id}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${span(t)}</i></span></button>`;
     c.dialog(stage("pv", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${T("Salir de la sala", "Leave the room")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${T("Sala privada", "Private room")}</h2><span class="gx-eyb">${T("Amistoso · no cuenta para la liga", "Friendly · doesn't count for the league")}</span></div>
       <div class="tbl gx-sh"><div class="gx-pnl"><div class="asi" id="duSwH"></div>
         <div class="opc"><span class="gx-eyb" id="duRoomEyb"></span><div class="mss" id="duMesas">${CFG.tables.map(tile).join("")}</div>

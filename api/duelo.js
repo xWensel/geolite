@@ -38,7 +38,7 @@ const endOf = (R, b) => { const s = +R["s:" + b] || 0; if (!s) return 0; const e
 function view(R, code, role, now, n, k) {
   const other = role === "h" ? "g" : "h", ago = r => Math.max(0, now - (+R[r + "s"] || 0));
   const seat = r => (R[r] ? { n: R[r + "n"] || "", on: ago(r) < 10000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
-  const o = { ok: true, now, code, role, st: R.st || "lobby", n: +R.n || 0, t: R.t || "media", h: seat("h"), g: seat("g") };
+  const o = { ok: true, now, code, role, st: R.st || "lobby", n: +R.n || 0, t: R.t || "plata", h: seat("h"), g: seat("g") };
   if (o.st === "play") o.seed = R.seed;
   if (n != null && n === o.n) { const q = R["q:" + n]; if (q) { o.quit = q[0] === role ? "me" : "his"; if (q[1] === "!") o.gone = true; } }
   if (k && n === o.n && o.st === "play") {
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
   const pid = b.pid, a = String(b.a || ""), now = Date.now(), ver = VER.test(String(b.ver || "")) ? String(b.ver) : "", send = o => res.status(200).json(o);
   try {
     if (a === "new") {
-      const t = TABLE.test(String(b.t || "")) ? b.t : "media";
+      const t = TABLE.test(String(b.t || "")) ? b.t : "plata";
       for (let i = 0; i < 4; i++) {
         const code = rnd(5), got = await run([["HSETNX", key(code), "h", pid], ["EXPIRE", key(code), TTL]]);
         if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "hn", clean(b.name), "hs", now, "hr", 1, "st", "lobby", "n", 0, "t", t, "ver", ver]]), code, "h", now));
