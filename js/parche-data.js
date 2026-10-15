@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.126",
+      name: L("Banderas enteras", "Whole flags", "Drapeaux entiers", "Bandeiras inteiras", "Ganze Flaggen", "Bandiere intere", "", "完整的国旗", "온전한 국기", "国旗を丸ごと", "Флаги целиком", "Całe flagi"),
+      date: "2026-10-16",
+      summary: L("Las banderas que no son rectángulos de 3:2, como la de Suiza, ya no salen cortadas en la Enciclopedia.", "Flags that aren't 3:2 rectangles, like Switzerland's, are no longer cut off in the Encyclopedia.", "Les drapeaux qui ne sont pas des rectangles 3:2, comme celui de la Suisse, ne sont plus coupés dans l'Encyclopédie.", "As bandeiras que não são retângulos de 3:2, como a da Suíça, já não aparecem cortadas na Enciclopédia.", "Flaggen, die keine 3:2-Rechtecke sind, etwa die der Schweiz, werden in der Enzyklopädie nicht mehr abgeschnitten.", "Le bandiere che non sono rettangoli 3:2, come quella della Svizzera, non escono più tagliate nell'Enciclopedia.", "", "不是 3:2 比例的国旗（例如瑞士国旗）在百科中不再被裁切。", "스위스 국기처럼 3:2 비율이 아닌 국기가 백과사전에서 더 이상 잘리지 않습니다.", "スイスのように3:2ではない国旗が、百科事典で切れなくなりました。", "Флаги с пропорциями не 3:2, как у Швейцарии, больше не обрезаются в Энциклопедии.", "Flagi o proporcjach innych niż 3:2, jak flaga Szwajcarii, nie są już przycinane w Encyklopedii."),
+      chapters: [
+        { id: "enciclopedia", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Behebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Enciclopedia", "Encyclopedia", "Encyclopédie", "Enciclopédia", "Enzyklopädie", "Enciclopedia", "", "百科", "백과사전", "百科事典", "Энциклопедия", "Encyklopedia"),
+          entries: [
+            E(L("Cada bandera, con su forma", "Every flag in its own shape", "Chaque drapeau dans sa forme", "Cada bandeira com a sua forma", "Jede Flagge in ihrer Form", "Ogni bandiera con la sua forma", "", "每面国旗保持原形", "국기마다 제 모양 그대로", "国旗は本来の形で", "Каждый флаг в своей форме", "Każda flaga w swoim kształcie"), "fix", "0.3.126", [
+              L("Suiza y el Vaticano (cuadradas), Nepal (en pico), Catar o el Reino Unido (alargadas), Bélgica o Mónaco salían recortadas. Ahora cada bandera se ve entera y con su forma real en la lista de países, en la cabecera del país, junto al nombre en la ficha y en el globo del mapa.",
+                "Switzerland and Vatican City (square), Nepal (pennant-shaped), Qatar or the United Kingdom (elongated), Belgium or Monaco were cropped. Now every flag shows whole and in its real shape in the country list, the country header, next to the name on the card and in the map tooltip.",
+                "La Suisse et le Vatican (carrés), le Népal (en fanion), le Qatar ou le Royaume-Uni (allongés), la Belgique ou Monaco étaient rognés. Désormais chaque drapeau s'affiche en entier et sous sa vraie forme : dans la liste des pays, l'en-tête du pays, à côté du nom sur la fiche et dans l'infobulle de la carte.",
+                "A Suíça e o Vaticano (quadradas), o Nepal (em flâmula), o Catar ou o Reino Unido (alongadas), a Bélgica ou o Mónaco apareciam cortadas. Agora cada bandeira vê-se inteira e com a sua forma real na lista de países, no cabeçalho do país, junto ao nome na ficha e no balão do mapa.",
+                "Die Schweiz und der Vatikan (quadratisch), Nepal (wimpelförmig), Katar oder das Vereinigte Königreich (langgezogen), Belgien oder Monaco waren beschnitten. Jetzt erscheint jede Flagge vollständig und in ihrer echten Form: in der Länderliste, im Kopf der Länderseite, neben dem Namen im Eintrag und im Hinweis auf der Weltkarte.",
+                "Svizzera e Vaticano (quadrate), Nepal (a gagliardetto), Qatar o Regno Unito (allungate), Belgio o Monaco uscivano tagliate. Ora ogni bandiera si vede intera e con la sua forma reale nell'elenco dei paesi, nell'intestazione del paese, accanto al nome nella scheda e nel fumetto della mappa.",
+                "",
+                "瑞士和梵蒂冈（正方形）、尼泊尔（三角旗形）、卡塔尔或英国（狭长）、比利时或摩纳哥的国旗以前会被裁掉一部分。现在每面国旗都以完整的真实形状显示：国家列表、国家页顶部、卡片名称旁以及地图提示中。",
+                "스위스와 바티칸(정사각형), 네팔(삼각기 모양), 카타르나 영국(가로로 긴 모양), 벨기에나 모나코 국기가 잘려 보였습니다. 이제 모든 국기가 국가 목록, 국가 머리말, 카드의 이름 옆, 지도 말풍선에서 실제 모양 그대로 온전히 보입니다.",
+                "スイスとバチカン（正方形）、ネパール（三角旗の形）、カタールやイギリス（横長）、ベルギーやモナコの国旗は一部が切れていました。今後は国の一覧、国のヘッダー、カードの名前の横、地図のツールチップで、どの国旗も本来の形のまま丸ごと表示されます。",
+                "Флаги Швейцарии и Ватикана (квадратные), Непала (в форме вымпела), Катара или Великобритании (вытянутые), Бельгии или Монако обрезались. Теперь каждый флаг виден целиком и в своей настоящей форме: в списке стран, в шапке страны, рядом с названием в карточке и в подсказке на карте.",
+                "Flagi Szwajcarii i Watykanu (kwadratowe), Nepalu (w kształcie proporczyka), Kataru czy Wielkiej Brytanii (wydłużone), Belgii czy Monako były przycięte. Teraz każda flaga jest widoczna w całości i w swoim prawdziwym kształcie: na liście krajów, w nagłówku kraju, obok nazwy na karcie i w dymku na mapie."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.125",
       name: L("Sin pausa entre jugadores", "No pause between players", "Pas de pause entre joueurs", "Sem pausa entre jogadores", "Keine Pause zwischen Spielern", "Niente pausa tra giocatori", "", "玩家对战无暂停", "플레이어 대결엔 일시정지 없음", "プレイヤー対戦にポーズなし", "Без паузы между игроками", "Bez pauzy między graczami"),
       date: "2026-10-16",

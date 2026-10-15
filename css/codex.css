@@ -132,7 +132,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-chip2 em { grid-column: 4; font-style: normal; font-size: 20px; color: var(--cx1); white-space: nowrap; font-variant-numeric: tabular-nums; } .cx-chip2 em i { font-style: normal; font-size: 18px; color: var(--gx-txt-2); }
 .cx-mtip { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 6px 8px; pointer-events: none; white-space: nowrap; clip-path: var(--gx-notch);
   background: rgba(5, 18, 16, .95); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(78, 227, 193, .55); } .cx-mtip.hidden { display: none; } .cx-mtip.flip { transform: translateX(calc(-100% - 28px)); }
-.cx-mtip img { width: 30px; height: 20px; object-fit: cover; box-shadow: 0 0 0 2px var(--gx-o); } .cx-mtip b { font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; } .cx-mtip em { font-style: normal; font-size: 18px; color: var(--cx1); }
+.cx-mtip img { flex: none; box-shadow: 0 0 0 2px var(--gx-o); }   /* la medida, en linea: 20 px de alto y el ancho de su forma (js/codex.js, flagCss) */ .cx-mtip b { font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; } .cx-mtip em { font-style: normal; font-size: 18px; color: var(--cx1); }
 .cx-leg { position: absolute; left: 0; bottom: 20px; right: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; width: max-content; max-width: calc(100% - 64px); padding: 8px 14px 9px; clip-path: var(--gx-notch);
   background: rgba(5, 18, 16, .92); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(78, 227, 193, .4); font-size: 18px; color: var(--gx-txt-2); }
 .cx-leg:empty { display: none; }
@@ -162,7 +162,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-ct:hover { transform: translateY(-2px); background: rgba(78, 227, 193, .1); box-shadow: inset 0 0 0 2px var(--cx1); }
 .cx-ct:focus { outline: none; } .cx-ct:focus-visible, html[data-input="pad"] .cx-ct:focus { box-shadow: inset 0 0 0 2px #fff; }
 .cx-ct-f { position: relative; width: 72px; height: 48px; display: grid; place-items: center; overflow: hidden; background: #0d2219; box-shadow: 0 0 0 2px var(--gx-o); }
-.cx-ct-f .cx-flag { width: 100%; height: 100%; object-fit: cover; } .cx-ct-f > .ic { width: 40px; height: 40px; } .cx-ct-f > b { font-family: var(--serif); font-size: 34px; color: rgba(78, 227, 193, .55); }
+.cx-ct-f .cx-flag { box-shadow: 0 0 0 2px var(--gx-o); } .cx-ct-f:has(> .cx-flag) { background: none; box-shadow: none; overflow: visible; } .cx-ct.teased .cx-sil { visibility: hidden; }   /* la bandera entera y a su forma en el hueco de 72x48: el filete la abraza a ella, no al hueco */ .cx-ct-f > .ic { width: 40px; height: 40px; } .cx-ct-f > b { font-family: var(--serif); font-size: 34px; color: rgba(78, 227, 193, .55); }
 .cx-sil { width: 72px; height: 48px; image-rendering: pixelated; } .cx-ct-f.q .cx-sil { display: none; }
 .cx-ct-f.q::after, .cx-gh-f.q::after { content: "?"; font-family: var(--serif); font-size: 34px; line-height: 1; color: rgba(78, 227, 193, .55); }
 .cx-ct-t { grid-column: 2 / -1; display: grid; gap: 3px; min-width: 0; } .cx-ct-t b { font-family: var(--sans); font-weight: 400; font-size: 21px; line-height: 1; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -179,7 +179,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-gh-f { position: relative; display: grid; place-items: center; width: 216px; aspect-ratio: 3 / 2; padding: 8px; border: 0; border-radius: 0; cursor: pointer; background: var(--gx-card);
   box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); transition: transform .15s steps(2, end); box-sizing: content-box; }
 .cx-gh-f:hover { transform: translateY(-2px); } .cx-gh-f.nofile { cursor: default; } .cx-gh-f.nofile:hover { transform: none; }
-.cx-gh-f .cx-flag { width: 100%; height: 100%; object-fit: cover; box-shadow: 0 0 0 2px var(--gx-o); } .cx-gh-f > .ic { width: 96px; height: 96px; image-rendering: pixelated; }
+.cx-gh-f .cx-flag { position: absolute; inset: 8px; margin: auto; max-width: calc(100% - 16px); max-height: calc(100% - 16px); box-shadow: 0 0 0 2px var(--gx-o); }   /* entera y a su forma dentro del hueco 3:2, mida 216 o 168 px (la imagen, de 168 px de alto, siempre se reduce) */ .cx-gh-f > .ic { width: 96px; height: 96px; image-rendering: pixelated; }
 .cx-gh-f.unk { background: repeating-linear-gradient(45deg, rgba(78, 227, 193, .1) 0 2px, transparent 2px 9px), #0d2e30; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(78, 227, 193, .35); }
 .cx-sil.big { width: 192px; height: 128px; } .cx-gh-f.q .cx-sil { display: none; } .cx-gh-f.q::after { font-size: 81px; }
 .cx-gh-f .cx-pips { position: absolute; left: 50%; bottom: -10px; transform: translateX(-50%); padding: 4px 6px; background: var(--gx-card); box-shadow: inset 0 0 0 2px var(--gx-o); }
@@ -187,7 +187,7 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 /* lo que dice de donde es: una linea de texto (antes, pastillas en mayusculas) */
 .cx-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 0; margin: 0; font-size: 18px; color: var(--cxt); }
 .cx-tags span { display: inline-flex; align-items: center; gap: 6px; } .cx-tags span + span::before { content: "·"; margin: 0 8px; opacity: .55; }
-.cx-tags .ic.sm { width: 20px; height: 20px; margin: 0; } .cx-tflag { width: 24px; height: 16px; object-fit: cover; box-shadow: 0 0 0 2px var(--gx-o); }
+.cx-tags .ic.sm { width: 20px; height: 20px; margin: 0; } .cx-tflag { flex: none; box-shadow: 0 0 0 2px var(--gx-o); }
 .cx-gh-s { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; } .cx-gh-s > span { font-size: 18px; color: var(--gx-txt-2); }
 .cx-gh-t > .cx-mb { height: 10px; max-width: 560px; }
 .cx-gh-d { margin: 0; max-width: 64ch; font-size: 19px; line-height: 1.35; color: var(--gx-txt-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -203,7 +203,6 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-sec3 { margin-top: 26px; } .cx-sub2 { margin: 4px 0 18px; content-visibility: auto; contain-intrinsic-size: auto 240px; }
 .cx-sub2 h4 { display: flex; align-items: center; gap: 8px; margin: 0 4px 6px; font-weight: 400; } .cx-sub2 h4 .ic { width: 28px; height: 28px; image-rendering: pixelated; }
 .cx-sub2 h4 b { font-family: var(--sans); font-weight: 400; font-size: 21px; } .cx-sub2 h4 em { font-style: normal; font-size: 18px; color: var(--cxt); }
-.cx-flag.fit { object-fit: contain !important; background: var(--gx-o); }
 .cx-ph-h { display: flex; align-items: center; gap: 16px; } .cx-ph-h > div { display: grid; gap: 6px; } .cx-ph-h p { max-width: 70ch; }
 
 /* ---------- cartas: naipes de gala (papel con filete y esquina recta); boca abajo, el dorso del aparato ---------- */
@@ -372,7 +371,7 @@ html.reduce-motion .cx-card.fresh, html.reduce-motion .cx-d1 { animation: none !
 html:lang(ko) #codex :is(.cx-nv b, .cx-jump b, .cx-ct-t b, .cx-pn, .cx-rh b, .cx-main h2, .cx-sh b) { word-break: keep-all; overflow-wrap: anywhere; }
 html:lang(ja) #codex :is(.cx-nv b, .cx-ct-t b, .cx-pn) { word-break: auto-phrase; }
 /* el crupier ensena 3 s un pais sin descubrir: su bandera sobre la silueta */
-.cx-ct-f .cx-tease { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; }
+.cx-ct-f .cx-tease { position: absolute; inset: 0; margin: auto; z-index: 2; }
 
 /* banderas pixel art de cada pais en las tarjetas relacionadas (assets/flags/p, tools/flags_pixel.py) */
 .cx-pxf { image-rendering: pixelated; object-fit: contain; }

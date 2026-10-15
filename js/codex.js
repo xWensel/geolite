@@ -428,8 +428,11 @@ window.AIQ = window.AIQ || {};
   /* banderas ya rasterizadas (tools/flags-raster.cjs): los SVG con escudo se pintan en el hilo principal y una pagina con 40 daba un tiron */
   const hasFlag = ne => { const en = neEn[ne]; return !!(en && A.FLAGS && A.FLAGS[en]); };   // los 199 paises la tienen (data/flags.js); si faltara una, sale el icono de pais
   const flagSrc = ne => { const en = neEn[ne], F = en && A.FLAGS && A.FLAGS[en]; return F ? `assets/flags/r/${A.mediaKey(en)}.webp` : A.media(`assets/wiki/card/${A.mediaKey("c:" + ne)}.webp`); };
-  const flagFit = ne => { const en = neEn[ne], F = en && A.FLAGS && A.FLAGS[en], r = F ? F[1] / F[2] : 1.5; return r < 1.25 || r > 2.1 ? " fit" : ""; };   // Nepal, Suiza, Vaticano, Catar...: enteras
-  const flagImg = (ne, cls = "") => (hasFlag(ne) ? `<img class="cx-flag${flagFit(ne)}${cls}" alt="" src="${esc(flagSrc(ne))}" decoding="async" draggable="false">` : A.icon("t_country"));
+  /* cada bandera entera y con SU forma (Suiza y el Vaticano cuadradas, Nepal en pico, Catar alargada), encajada en un hueco de w x h: nunca se recorta.
+     Medida en pixeles enteros y puesta en linea: con width/height al 100 % la casilla de 72x48 la dibujaba a 72x72 y su overflow le cortaba arriba y abajo */
+  const flagSz = (ne, w, h) => { const en = neEn[ne], F = en && A.FLAGS && A.FLAGS[en], r = F ? F[1] / F[2] : 1.5; return r > w / h ? [w, Math.round(w / r)] : [Math.round(h * r), h]; };
+  const flagCss = (ne, w, h) => { const [fw, fh] = flagSz(ne, w, h); return `width:${fw}px;height:${fh}px`; };
+  const flagImg = (ne, w, h) => (hasFlag(ne) ? `<img class="cx-flag" alt="" src="${esc(flagSrc(ne))}"${w ? ` style="${flagCss(ne, w, h)}"` : ""} decoding="async" draggable="false">` : A.icon("t_country"));   // sin medida: la encaja el CSS (la cabecera del pais mide 216 o 168 px segun la ventana)
 
   /* ================================================================== interfaz */
   const S = {
@@ -705,7 +708,7 @@ window.AIQ = window.AIQ || {};
   function tileHTML(g) {
     const s = gStats(g), known = gKnown(g), full = s.u >= s.t;
     return `<button type="button" class="cx-ct${known ? "" : " unk"}${full ? " full" : ""}" data-go="g:${esc(g.key)}" data-tf="cxTile">
-      <span class="cx-ct-f">${known ? (g.ne ? flagImg(g.ne) : A.icon("t_country")) : g.ne ? `<canvas class="cx-sil" data-ne="${esc(g.ne)}"></canvas>` : `<b>?</b>`}</span>
+      <span class="cx-ct-f">${known ? (g.ne ? flagImg(g.ne, 72, 48) : A.icon("t_country")) : g.ne ? `<canvas class="cx-sil" data-ne="${esc(g.ne)}"></canvas>` : `<b>?</b>`}</span>
       <span class="cx-ct-t"><b${known ? fsAttr(gName(g), 21, 12.5) : ""}>${known ? esc(gName(g)) : "???"}</b><i>${esc(placesTxt(s))}</i></span>
       <em class="cx-ct-p">${pctOf(s)} %</em>${s.nw ? `<u>${s.nw > 99 ? "99+" : s.nw}</u>` : ""}${mbar(s)}</button>`;
   }
@@ -848,7 +851,7 @@ window.AIQ = window.AIQ || {};
           ${tr ? `<div class="cx-dmeds">${[0, 1, 2].map(i => `<span data-tt="${esc(P(S[MED[i]]) + " · " + P(S.within).replace("{km}", kmTxt(L[i])) + "\n" + (m > i ? P(S.got) : P(S.miss)))}">${medal(i, m > i)}<em>&lt; ${esc(kmTxt(L[i]))}</em></span>`).join("")}</div>` : ""}
         </div>
         <div class="cx-dinfo">
-          <div class="cx-d-top"><p class="cx-tags"><span>${esc(typeLabel(e.type))}</span>${g ? `<span>${g.ne && gKnown(g) && hasFlag(g.ne) ? `<img class="cx-tflag" alt="" src="${esc(flagSrc(g.ne))}">` : A.icon("k_" + g.reg.cont, "sm")}${esc(where)}</span><span>${esc(regName(g.reg))}</span>` : ""}</p>${nav}</div>
+          <div class="cx-d-top"><p class="cx-tags"><span>${esc(typeLabel(e.type))}</span>${g ? `<span>${g.ne && gKnown(g) && hasFlag(g.ne) ? `<img class="cx-tflag" alt="" src="${esc(flagSrc(g.ne))}" style="${flagCss(g.ne, 64, 16)}">` : A.icon("k_" + g.reg.cont, "sm")}${esc(where)}</span><span>${esc(regName(g.reg))}</span>` : ""}</p>${nav}</div>
           <h2>${un ? esc(nameOf(e, rec)) : "???"}</h2>
           ${un && rec && rec.desc ? `<p class="cx-desc">${esc(cap(rec.desc))}</p>` : ""}
           ${un && A.tx(e.fact) ? `<blockquote class="cx-fact">${esc(A.tx(e.fact))}</blockquote>` : ""}
@@ -1051,7 +1054,7 @@ window.AIQ = window.AIQ || {};
     const box = stage.getBoundingClientRect(), z = box.width / Math.max(1, stage.clientWidth);
     if (tip._ne !== ne) {                                               // solo al cambiar de pais: contenido nuevo y una medida
       const g = index().gs["c:" + ne], s = gStats(g), known = gKnown(g);
-      tip.innerHTML = `${known && hasFlag(ne) ? `<img alt="" src="${esc(flagSrc(ne))}">` : ""}<b>${known ? esc(gName(g)) : "???"}</b><em>${pctOf(s)} %</em>`;
+      tip.innerHTML = `${known && hasFlag(ne) ? `<img alt="" src="${esc(flagSrc(ne))}" style="${flagCss(ne, 80, 20)}">` : ""}<b>${known ? esc(gName(g)) : "???"}</b><em>${pctOf(s)} %</em>`;
       tip.classList.remove("hidden"); map.cv.style.cursor = "pointer"; tip._ne = ne; tip._w = tip.offsetWidth;
     }
     const x = (cx - box.left) / z, y = (cy - box.top) / z, bw = box.width / z, w = tip._w || 0;
@@ -1145,7 +1148,7 @@ window.AIQ = window.AIQ || {};
     const t = [...g.querySelectorAll(".cx-ct.unk")].find(el => seen(el) && el.querySelector("canvas.cx-sil"));
     const tg = t && index().gs[t.dataset.go.slice(2)];
     if (tg && tg.ne && hasFlag(tg.ne)) {
-      const f = t.querySelector(".cx-ct-f"), nb = t.querySelector(".cx-ct-t b"), img = new Image(); img.className = "cx-tease cx-flag" + flagFit(tg.ne); img.alt = ""; img.onerror = () => img.remove(); img.src = flagSrc(tg.ne);
+      const f = t.querySelector(".cx-ct-f"), nb = t.querySelector(".cx-ct-t b"), img = new Image(); img.className = "cx-tease cx-flag"; img.style.cssText = flagCss(tg.ne, 72, 48); img.alt = ""; img.onerror = () => img.remove(); img.src = flagSrc(tg.ne);
       flip(t, () => { f.appendChild(img); nb.textContent = cName(tg.ne); t.classList.add("teased"); A.sfx.card(); });
       setTimeout(() => { if (t.isConnected) flip(t, () => { img.remove(); nb.textContent = "???"; t.classList.remove("teased"); }); }, 3400);
       return true;
@@ -1157,7 +1160,7 @@ window.AIQ = window.AIQ || {};
         const lon = (c.bx[0] + c.bx[2]) / 2, lat = (c.bx[1] + c.bx[3]) / 2, pt = map.lonLatToScreen(lon, lat), cx = r.left + pt[0], cy = r.top + pt[1];
         if (cx < st.left + 60 || cx > st.right - 60 || cy < st.top + 40 || cy > st.bottom - 40) continue;
         const tip = $("cxTip"); map.setHighlight(c.x.ne); A.sfx.card();
-        tip._ne = null; tip.innerHTML = `${hasFlag(c.x.ne) ? `<img alt="" src="${esc(flagSrc(c.x.ne))}">` : ""}<b>${esc(cName(c.x.ne))}</b>`; tip.classList.remove("hidden");
+        tip._ne = null; tip.innerHTML = `${hasFlag(c.x.ne) ? `<img alt="" src="${esc(flagSrc(c.x.ne))}" style="${flagCss(c.x.ne, 80, 20)}">` : ""}<b>${esc(cName(c.x.ne))}</b>`; tip.classList.remove("hidden");
         const z = st.width / Math.max(1, $("cxStage").clientWidth), w = tip.offsetWidth;
         tip.style.left = Math.max(6, (cx - st.left) / z - w / 2) + "px"; tip.style.top = Math.max(4, (cy - st.top) / z - 44) + "px";
         setTimeout(() => { if (!isOpen()) return; map.setHighlight(mapCtx.hi); if (tip._ne == null) tip.classList.add("hidden"); }, 3400);
