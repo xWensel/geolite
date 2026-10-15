@@ -377,3 +377,7 @@ html:lang(ja) #codex :is(.cx-nv b, .cx-ct-t b, .cx-pn) { word-break: auto-phrase
 /* banderas pixel art de cada pais en las tarjetas relacionadas (assets/flags/p, tools/flags_pixel.py) */
 .cx-pxf { image-rendering: pixelated; object-fit: contain; }
 .cx-rel .cx-ic.cx-pxf { width: 26px; height: 26px; margin: -2px 0; }
+
+/* v0.3.x: flechas para recorrer todo el monton de tarjetas nuevas (y teclas izquierda/derecha) */
+.cx-arr { position: absolute; z-index: 100; top: 50%; width: 44px; height: 56px; margin-top: -28px; display: grid; place-items: center; cursor: pointer; font-family: var(--mono); font-size: 34px; line-height: 1; color: var(--paper); background: var(--ink); box-shadow: 0 4px 0 rgba(0,0,0,.35); user-select: none; }
+.cx-arr.l { left: -14px; } .cx-arr.r { right: -14px; } .cx-arr:hover { filter: brightness(1.25); } .cx-arr:active { transform: translateY(2px); }

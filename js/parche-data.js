@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.111",
+      name: L("Todas las tarjetas nuevas, a tu ritmo", "All new cards, at your pace", "Toutes les nouvelles cartes, à ton rythme", "Todas as cartas novas, ao seu ritmo", "Alle neuen Karten, in deinem Tempo", "Tutte le nuove carte, coi tuoi tempi", "", "所有新卡片，随你翻看", "새 카드를 전부 원하는 속도로", "新しいカードを自分のペースで", "Все новые карточки — в твоём темпе", "Wszystkie nowe karty we własnym tempie"),
+      date: "2026-10-15",
+      summary: L("El montón de tarjetas nuevas tiene flechas (y las teclas izquierda y derecha) para recorrerlas todas, y puedes pulsar cualquiera para abrir su ficha.", "The pile of new cards has arrows (and the left and right keys) to browse them all, and you can click any of them to open its entry.", "La pile de nouvelles cartes a des flèches (et les touches gauche et droite) pour toutes les parcourir, et tu peux cliquer sur l'une d'elles pour ouvrir sa fiche.", "A pilha de cartas novas tem setas (e as teclas esquerda e direita) para percorrê-las todas, e você pode clicar em qualquer uma para abrir a ficha.", "Der Stapel neuer Karten hat Pfeile (und die Tasten links und rechts), um sie alle durchzublättern; ein Klick öffnet die Karte.", "Il mucchio di carte nuove ha le frecce (e i tasti sinistra e destra) per scorrerle tutte, e puoi cliccarne una per aprirne la scheda.", "", "新卡片堆现在有箭头（以及左右方向键），可以逐张浏览，点击任意一张即可打开它。", "새 카드 더미에 화살표(와 좌우 방향키)가 생겨 모두 넘겨 볼 수 있고, 아무 카드나 눌러 열 수 있습니다。", "新しいカードの山に矢印（と左右キー）が付き、すべて見られます。どれでもクリックで開けます。", "У стопки новых карточек появились стрелки (и клавиши влево и вправо): можно пролистать все и нажать на любую.", "Stos nowych kart ma strzałki (i klawisze lewo/prawo), by przejrzeć wszystkie, a kliknięcie otwiera kartę."),
+      chapters: [
+        { id: "tarjetas", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioria", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Todas las tarjetas nuevas, a tu ritmo", "All new cards, at your pace", "Toutes les nouvelles cartes, à ton rythme", "Todas as cartas novas, ao seu ritmo", "Alle neuen Karten, in deinem Tempo", "Tutte le nuove carte, coi tuoi tempi", "", "所有新卡片，随你翻看", "새 카드를 전부 원하는 속도로", "新しいカードを自分のペースで", "Все новые карточки — в твоём темпе", "Wszystkie nowe karty we własnym tempie"),
+          entries: [
+            E(L("Montón de tarjetas nuevas", "New card pile", "Pile de nouvelles cartes", "Pilha de cartas novas", "Stapel neuer Karten", "Mucchio di carte nuove", "", "新卡片堆", "새 카드 더미", "新しいカードの山", "Стопка новых карточек", "Stos nowych kart"), "buff", "0.3.111", [
+              L("Flechas ‹ › y teclas izquierda/derecha para ver todas las tarjetas conseguidas; al usarlas, el montón se queda hasta que lo cierres.", "‹ › arrows and the left/right keys let you see every card you won; once you use them the pile stays until you close it.", "Des flèches ‹ › et les touches gauche/droite pour voir toutes les cartes gagnées ; dès que tu les utilises, la pile reste jusqu'à ce que tu la fermes.", "Setas ‹ › e teclas esquerda/direita para ver todas as cartas conseguidas; ao usá-las, a pilha fica até você fechá-la.", "Pfeile ‹ › und die Tasten links/rechts zeigen alle gewonnenen Karten; sobald du sie nutzt, bleibt der Stapel, bis du ihn schließt.", "Frecce ‹ › e tasti sinistra/destra per vedere tutte le carte ottenute; una volta usati, il mucchio resta finché non lo chiudi.", "", "用 ‹ › 箭头和左右方向键查看获得的所有卡片；一旦使用，卡片堆会保留到你关闭为止。", "‹ › 화살표와 좌우 방향키로 얻은 카드를 모두 볼 수 있고, 사용하면 닫을 때까지 더미가 남습니다.", "‹ › 矢印と左右キーで獲得したカードをすべて見られ、操作すると閉じるまで山が残ります。", "Стрелки ‹ › и клавиши влево/вправо показывают все полученные карточки; после этого стопка остаётся, пока ты её не закроешь.", "Strzałki ‹ › i klawisze lewo/prawo pokazują wszystkie zdobyte karty; po ich użyciu stos zostaje, dopóki go nie zamkniesz."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.110",
       name: L("La Ascensión 4, al alcance", "Ascension 4, within reach", "L'Ascension 4, à portée de main", "A Ascensão 4, ao alcance", "Aufstieg 4 in Reichweite", "L'Ascensione 4, a portata di mano", "", "触手可及的进阶4", "손에 닿는 승급 4", "手の届くアセンション4", "Восхождение 4 — по силам", "Wzniesienie 4 w zasięgu"),
       date: "2026-10-15",
