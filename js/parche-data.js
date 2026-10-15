@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.117",
+      name: L("El aplauso de palco", "The box-seat applause", "L'applaudissement de loge", "O aplauso de camarote", "Applaus aus der Loge", "L'applauso da palco", "", "包厢式鼓掌", "특별석 박수", "ボックス席の拍手", "Аплодисменты из ложи", "Oklaski z loży"),
+      date: "2026-10-15",
+      summary: L("En Rasca y gana, cuando ganas a lo grande, el crupier se guarda las cartas en la chaqueta y te aplaude con tres palmaditas de palco, cada una con su chasquido.", "In Scratch & Win, when you win big, the dealer tucks his cards into his jacket and applauds you with three box-seat pats on his palm, each with its own clap.", "Au jeu à gratter, quand tu gagnes gros, le croupier range ses cartes dans sa veste et t'applaudit de trois petites tapes de loge, chacune avec son claquement.", "Na raspadinha, quando você ganha alto, o crupiê guarda as cartas no paletó e aplaude você com três tapinhas de camarote, cada um com seu estalo.", "Beim Rubbellos steckt der Croupier bei einem großen Gewinn seine Karten ins Jackett und applaudiert dir mit drei Klapsen wie aus der Loge, jeder mit seinem Klatschen.", "Al gratta e vinci, quando vinci alla grande, il croupier si infila le carte nella giacca e ti applaude con tre colpetti da palco, ognuno col suo schiocco.", "", "刮刮乐里，你赢大奖时，荷官会把牌收进外套，像包厢里的绅士那样轻拍手掌三下为你鼓掌，每一下都有响声。", "긁는 복권에서 크게 이기면 딜러가 카드를 재킷에 넣고 특별석 신사처럼 손바닥을 세 번 두드려 박수를 쳐요. 칠 때마다 소리가 나요.", "スクラッチで大当たりすると、ディーラーはカードを上着にしまい、ボックス席の紳士のように手のひらを三回たたいて拍手します。たたくたびに音が鳴ります。", "В лотерее при крупном выигрыше крупье прячет карты в пиджак и аплодирует тебе тремя хлопками по ладони, как из ложи, и каждый хлопок слышно.", "Przy zdrapce, gdy wygrywasz dużo, krupier chowa karty do marynarki i bije ci brawo trzema klepnięciami w dłoń jak z loży, każde z własnym klaśnięciem."),
+      chapters: [
+        { id: "rasca", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Rasca y gana", "Scratch & Win", "Jeu à gratter", "Raspadinha", "Rubbellos", "Gratta e vinci", "", "刮刮乐", "긁는 복권", "スクラッチ", "Лотерея", "Zdrapka"),
+          entries: [
+            E(L("Tres palmaditas de palco", "Three box-seat pats", "Trois tapes de loge", "Três tapinhas de camarote", "Drei Klapse aus der Loge", "Tre colpetti da palco", "", "包厢式轻拍三下", "특별석 박수 세 번", "ボックス席の拍手を三回", "Три хлопка из ложи", "Trzy klepnięcia z loży"), "change", "0.3.117", [
+              L("Su cara sigue siendo la de la frase todo el rato, también cuando las cartas le pasan por delante.", "His face keeps matching his line the whole time, even when the cards pass in front of it.", "Son visage reste celui de sa réplique tout du long, même quand les cartes passent devant.", "O rosto dele acompanha a fala o tempo todo, mesmo quando as cartas passam na frente.", "Sein Gesicht passt die ganze Zeit zu seinem Satz, auch wenn die Karten davor vorbeiziehen.", "Il suo volto resta quello della battuta per tutto il tempo, anche quando le carte gli passano davanti.", "", "整个过程中他的表情始终与台词一致，纸牌从脸前经过时也不例外。", "카드가 얼굴 앞을 지나갈 때도 표정은 내내 대사와 맞아요.", "カードが顔の前を通るときも、表情はずっとセリフに合ったままです。", "Его лицо всё время соответствует реплике, даже когда карты проходят перед ним.", "Jego mina przez cały czas pasuje do kwestii, nawet gdy karty przesuwają się przed twarzą."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.116",
       name: L("7.777 tarjetas", "7,777 cards", "7 777 cartes", "7.777 cartas", "7.777 Karten", "7.777 carte", "", "7777张卡牌", "카드 7,777장", "7,777枚のカード", "7777 карточек", "7777 kart"),
       date: "2026-10-15",

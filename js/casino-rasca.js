@@ -190,7 +190,7 @@ window.AIQ = window.AIQ || {};
       if (reduced || !g) return;
       if (g === "sweat") { dealerBox.classList.add("sweat"); clearTimeout(gT); gT = setTimeout(() => { if (alive() && !(card && card.tense)) dealerBox.classList.remove("sweat"); }, 3600); return; }
       if (g === "peek") { dealerBox.classList.add("g-peek"); later(() => { if (!(card && card.tense)) dealerBox.classList.remove("g-peek"); }, 2600); return; }
-      if (g === "clap") { if (spr) { try { spr.play("slow_clap"); } catch (e) { /* nada */ } } return; }   // aplaude el mismo, con su gesto
+      if (g === "clap") { if (spr) { try { spr.play("palco_clap", null, () => alive() && sfx.clack()); } catch (e) { /* nada */ } } return; }   // aplauso de palco: guarda las cartas y da tres palmaditas (suena cada toque)
       const c = "g-" + g, dur = { tip: 620, shrug: 720, hop: 920, faint: 2850 }[g] || 700; dealerBox.classList.remove("g-tip", "g-shrug", "g-hop", "g-faint"); void dealerBox.offsetWidth; dealerBox.classList.add(c); later(() => dealerBox.classList.remove(c), dur);
     }
     function speak(p) {

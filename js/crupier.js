@@ -1,5 +1,5 @@
 /*
- * Geolite - DON CRUPIER, el sprite animado. Todo el arte es de Pixel Lab: 18 caras y 40 gestos dibujados enteros a 96 px (lienzo de 96x112:
+ * Geolite - DON CRUPIER, el sprite animado. Todo el arte es de Pixel Lab: 18 caras, 40 gestos y el aplauso de palco dibujados enteros a 96 px (lienzo de 96x112:
  * 16 filas arriba para la chistera que salta) y piezas de vida que se ponen encima (tres bocas para hablar, parpadeo y mirada). El codigo
  * solo elige el dibujo y pone las piezas; nunca dibuja. Los 8 gestos sencillos (asentir, mecerse, temblar, acercarse, helarse, guinar...)
  * mueven el dibujo entero a pixel completo.
@@ -7,7 +7,7 @@
  *   const s = A.crupier.mount(host, o)    pinta el crupier dentro de `host` (un <canvas> nitido: escala ENTERA de pixel de pantalla)
  *   s.set("laugh")                        expresion (A.crupier.list()); cada una con su reposo, su parpadeo y su forma de hablar
  *   s.talk(true) / s.syl() / s.talk(false)  boca al ritmo de la frase (dealer.js llama a syl() en cada letra que suena)
- *   s.play("hat_off_bow", fin)            gesto de un solo disparo (A.crupier.gestures()) y vuelve a su cara; los "hold" se
+ *   s.play("hat_off_bow", fin, alToque)   gesto de un solo disparo (A.crupier.gestures()) y vuelve a su cara; los "hold" se
  *   s.release()                           quedan en su pose hasta release() (p. ej. al acabar la frase)
  *   s.look(-1|0|1|2|null)                 hacia donde mira (solo con los ojos de su cara normal: -1 izquierda, 1 derecha)
  *   s.fit()                               recalcula la escala (se llama sola al cambiar de tamano o de pantalla)
@@ -84,9 +84,20 @@ window.AIQ = window.AIQ || {};
     slow_blink: { frames: [[{ shut: 1 }, 800]] },
     wink: { frames: [[{ wink: 1 }, 820]] },
   };
+  /* gestos encadenados de Pixel Lab: su lista de [fotograma, ms] tal cual. keep = sigue aunque cambie la cara de la frase (la cara va
+     encima); hit = el fotograma del toque, que avisa a quien lo pidio: play(id, fin, alToque) */
+  const GQ = {
+    palco_clap: (() => {                       // guarda las cartas en la chaqueta (0-7), tres palmaditas de palco (8-15: la mano toca en el 10) y las saca
+      const up = [0, 1, 2, 3, 4, 5, 6].map(f => [f, 110]), s = [...up, [7, 260]];
+      for (let r = 0; r < 3; r++) for (let f = 8; f < 16; f++) s.push([f, f === 11 ? 140 : f === 12 ? 60 : 85]);
+      s.push([7, 300], ...up.reverse());
+      return { frames: s, hit: 10, keep: 1 };
+    })(),
+  };
   const gfx = {};   // gesto de Pixel Lab -> { frames: [[indice del fotograma, ms]], peak, hold, lock }
   function gx(id) {
     if (gfx[id] || GC[id]) return gfx[id] || GC[id];
+    if (GQ[id]) { const g = D().gest[id], q = GQ[id]; return g ? (gfx[id] = { pm: g, frames: q.frames, peak: -1, hold: false, lock: false, keep: !!q.keep, hit: q.hit }) : null; }
     const g = D().gest[id], t = GT[id]; if (!g || !t) return null;
     const n = g.frames.length, cut = t.includes("cut"), ida = g.ida && !cut;
     const seq = []; for (let i = 0; i < n; i++) seq.push(i); if (ida) for (let i = n - 2; i >= 0; i--) seq.push(i);
@@ -95,7 +106,7 @@ window.AIQ = window.AIQ || {};
     return (gfx[id] = { pm: g, frames: seq.map((f, i) => [f, per + (i === peak ? extra : 0)]), peak, hold: t.includes("hold"), lock: t.includes("lock") });
   }
   const exprId = id => EX[id] ? id : ALIAS.expr[id] || "sly";
-  const gestId = id => { const g = GC[id] || GT[id] ? id : ALIAS.gest[id]; return g && (GC[g] || (D().gest[g] && GT[g])) ? g : null; };
+  const gestId = id => { const g = GC[id] || GT[id] || GQ[id] ? id : ALIAS.gest[id]; return g && (GC[g] || (D().gest[g] && (GT[g] || GQ[g]))) ? g : null; };
 
   /* ------------------------------------------------------------ composicion: un lienzo de trabajo de 96x112 compartido */
   let work, wctx;
@@ -137,6 +148,7 @@ window.AIQ = window.AIQ || {};
       if (p.shut) put(c, R("blink"), eo[0], eo[1]);
     }
     if (p.m && mo) put(c, R("mouth_" + p.m), mo[0], mo[1]);
+    if (p.g) { const oc = d.gest[p.g].oc; if (oc && oc[p.f]) put(c, R(oc[p.f])); }   // lo que tapa la cara (cartas, mano) vuelve encima de ella
     if (E.dark) { darken(c); if (!p.off && eo) put(c, R("glow_" + p.e), eo[0], eo[1]); }
     if (p.w) for (const [y0, y1, dx] of p.w) { const band = c.getImageData(0, y0, W, y1 - y0); c.clearRect(0, y0, W, y1 - y0); c.putImageData(band, dx, y0); }
     return work;
@@ -196,7 +208,7 @@ window.AIQ = window.AIQ || {};
       if (this.gest && this.gest.fid) this.drop();                                     // un gesto suelto de reposo nunca se cuela en una frase
       if (expr === this.expr && !o.restart) return this;
       this.expr = expr; this.t0 = performance.now(); this.blinkAt = 0; this.mi = 0; this.fidgetAt = 0;
-      if (this.gest && !this.gest.x.hold) this.drop();
+      if (this.gest && !this.gest.x.hold && !this.gest.x.keep) this.drop();
       if (this.E.enter && !o.quiet && !this.quiet) this.play(this.E.enter);
       this.poke(); return this;
     }
@@ -209,12 +221,12 @@ window.AIQ = window.AIQ || {};
       this.poke(); return this;
     }
     look(d) { this.lookO = d; this.poke(); return this; }
-    play(id, done) {
+    play(id, done, hit) {
       id = gestId(id); const x = id && gx(id);
       if (!x || this.quiet && !x.hold) { if (done) setTimeout(done, 0); return this; }
       if (this.gest && this.gest.done) { const d = this.gest.done; setTimeout(d, 0); }
       const stop = x.hold ? (x.pm ? x.frames.findIndex(f => f[0] === x.peak) : x.frames.length - 1) : -1;
-      this.gest = { id, x, i: this.quiet ? Math.max(0, stop) : 0, at: performance.now(), done, stop, rel: false }; this.poke(); return this;
+      this.gest = { id, x, i: this.quiet ? Math.max(0, stop) : 0, at: performance.now(), done, hit, stop, rel: false }; this.poke(); return this;
     }
     release() {
       const G = this.gest; if (!G || !G.x.hold) return this;
@@ -229,7 +241,11 @@ window.AIQ = window.AIQ || {};
       const p = { e: this.expr, g: null, f: 0, x: 0, y: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, w: null };
       if (G) {
         const fr = G.x.frames;
-        while (G.i < fr.length && now - G.at >= fr[G.i][1]) { if (G.i === G.stop && !G.rel) break; G.at += fr[G.i][1]; G.i++; }
+        while (G.i < fr.length && now - G.at >= fr[G.i][1]) {
+          if (G.i === G.stop && !G.rel) break;
+          G.at += fr[G.i][1]; G.i++;
+          if (G.hit && fr[G.i] && fr[G.i][0] === G.x.hit) { try { G.hit(); } catch (e) { /* nada */ } }   // el toque del gesto (p. ej. suena la palmada)
+        }
         if (G.i >= fr.length) { const d = G.done; this.gest = null; this.fidgetAt = 0; if (d) setTimeout(d, 0); return this.pose(now); }
         const f = fr[G.i];
         if (G.x.pm) { p.g = G.id; p.f = f[0]; } else Object.assign(p, f[0]);
@@ -286,7 +302,7 @@ window.AIQ = window.AIQ || {};
   A.crupier = {
     mount: (host, o) => new Sprite(host, o),
     list: () => Object.keys(EX),
-    gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(GC)],
+    gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)],
     expr: exprId, gest: gestId,
     ready: whenReady, load,
     /* tamano de CSS exacto para un hueco de `css` px como mucho: la figura (81 filas) a k pixeles reales por pixel (k <= kMax si se da) */
