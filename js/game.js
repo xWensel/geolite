@@ -435,7 +435,7 @@
     let syncT = 0; addEventListener("resize", () => { if (!S.settingsOpen) return; clearTimeout(syncT); syncT = setTimeout(sync, 160); });   // la escala posible depende del tamano de la ventana
     A.syncWin = sync;
     if (host && host.onScreenChange) host.onScreenChange(() => { if (S.settingsOpen) sync(); });
-    if (host && host.onWindowModeChange) host.onWindowModeChange(() => { sync(); $("fsBtn").classList.toggle("on", cur() === "full"); }); }
+    if (host && host.onWindowModeChange) host.onWindowModeChange(() => { sync(); if ($("fsBtn")) $("fsBtn").classList.toggle("on", cur() === "full"); }); }
   document.querySelector('[data-seg="gfx"]').addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.quality) return;
     S.quality = b.dataset.v; save(); A.sfx.ui(); map.setQuality(S.quality); syncSettings();
@@ -671,7 +671,7 @@
     S.phase = "asking"; S.paused = false; S.tense = false; S.limit = (!S.run && q() && q().tpq) || lv().seconds; S.t0 = performance.now(); S.pausedAcc = 0; S.lastTick = -1; S.lastTimeStr = "";
     map.clearMarks(); map.animateTo(map.home(), 800); map.setPick(true); A.music.mode(1);
     closeDialog(); setPrompt(); setTimer(S.limit);
-    $("plate").classList.remove("hidden", "hurry"); $("pauseBtn").classList.remove("hidden"); $("factText").textContent = "";
+    $("plate").classList.remove("hidden", "hurry"); $("pauseBtn").classList.toggle("hidden", !!(S.duel && S.duel.net)); $("factText").textContent = "";
     if (S.run) A.adv.onQuestion();
     if (A.codex && A.codex.toastAside) A.codex.toastAside();         // el monton de tarjetas nuevas no se queda tapando el mapa con el reloj corriendo
     updateHud();
@@ -1174,8 +1174,6 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (document.fullscreenElement) document.exitFullscreen();
     else (document.documentElement.requestFullscreen || (() => {})).call(document.documentElement);
   }
-  $("fsBtn").onclick = toggleFs;
-  document.addEventListener("fullscreenchange", () => $("fsBtn").classList.toggle("on", !!document.fullscreenElement));
 
   document.addEventListener("pointerdown", e => {
     A.audio.unlock(!S.booting);
@@ -1191,7 +1189,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (e.target && e.target.tagName === "INPUT") { if (e.key === "Escape") openSettings(false); return; }
     A.audio.unlock(!S.booting);
     if (S.booting) return;
-    if (e.key === "Escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else runMenu(); return; }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
+    if (e.key === "Escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else if (S.duel && S.duel.net) openSettings(true); else runMenu(); return; }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
     const act = K.pan(e) || K.which(e); if (!act) return;   // las flechas son tambien de cancion anterior/siguiente: el mapa va primero
     if (S.settingsOpen && !["fs", "sfx", "mus"].includes(act)) return;    // con Ajustes abierto solo valen sus atajos: Intro pulsaba el boton de la pantalla de debajo (p. ej. Jugar) y P reanudaba la pregunta tapada
     if (/^t[1-4]$/.test(act)) { if (S.run && S.phase === "asking" && !e.repeat) A.adv.toolKey(+act[1] - 1); return; }   // mantener pulsada la tecla encendia y apagaba la herramienta sin parar
@@ -1200,7 +1198,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     else if (act === "codex") { if (S.phase === "title") (A.codex.isOpen() ? A.codex.close() : A.codex.open()); }
     else if (act === "sfx") toggleSwitch("sfx");
     else if (act === "mus") toggleSwitch("music");
-    else if (act === "pause") (S.duel && S.duel.net ? runMenu() : togglePause());
+    else if (act === "pause") { if (!(S.duel && S.duel.net)) togglePause(); }
     else if (act === "zin") map.zoomBy(1.6);
     else if (act === "zout") map.zoomBy(1 / 1.6);
     else if (act === "home") $("zoomHome").click();
