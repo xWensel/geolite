@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.127",
+      name: L("Cartas en español", "Cards in Spanish", "Fiches en espagnol", "Cartas em espanhol", "Karten auf Spanisch", "Carte in spagnolo", "", "西班牙语卡片", "스페인어 카드", "スペイン語のカード", "Карточки на испанском", "Karty po hiszpańsku"),
+      date: "2026-10-16",
+      summary: L("Veinte cartas de la Enciclopedia que salían en inglés ahora se leen en español.", "Twenty Encyclopedia cards that showed in English now read in Spanish.", "Vingt fiches de l'Encyclopédie qui s'affichaient en anglais se lisent désormais en espagnol.", "Vinte cartas da Enciclopédia que apareciam em inglês passam a aparecer em espanhol.", "Zwanzig Karten der Enzyklopädie, die auf Englisch erschienen, sind jetzt auf Spanisch zu lesen.", "Venti carte dell'Enciclopedia che comparivano in inglese ora si leggono in spagnolo.", "", "二十张原本显示英文的百科卡片，现在可以用西班牙语阅读。", "영어로 나오던 백과사전 카드 스무 장이 이제 스페인어로 표시됩니다.", "英語で表示されていた百科事典のカード20枚が、スペイン語で読めるようになりました。", "Двадцать карточек Энциклопедии, которые показывались на английском, теперь читаются на испанском.", "Dwadzieścia kart Encyklopedii, które pojawiały się po angielsku, jest teraz po hiszpańsku."),
+      chapters: [
+        { id: "enciclopedia", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Behebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Enciclopedia", "Encyclopedia", "Encyclopédie", "Enciclopédia", "Enzyklopädie", "Enciclopedia", "", "百科", "백과사전", "百科事典", "Энциклопедия", "Encyklopedia"),
+          entries: [
+            E(L("Veinte cartas, en español", "Twenty cards, in Spanish", "Vingt fiches en espagnol", "Vinte cartas em espanhol", "Zwanzig Karten auf Spanisch", "Venti carte in spagnolo", "", "二十张西班牙语卡片", "스페인어로 된 카드 스무 장", "スペイン語になった20枚のカード", "Двадцать карточек на испанском", "Dwadzieścia kart po hiszpańsku"), "fix", "0.3.127", [
+              L("Veinte lugares de la Enciclopedia, entre ellos Taree, Nambucca Heads, el puente de Penang, la mezquita de Jumeirah o el shish kebab, salían en inglés cuando jugabas en español. Ahora llevan su texto traducido al español.",
+                "Twenty Encyclopedia places, among them Taree, Nambucca Heads, the Penang Bridge, the Jumeirah Mosque and the shish kebab, appeared in English when you played in Spanish. They now carry their text translated into Spanish.",
+                "Vingt lieux de l'Encyclopédie, dont Taree, Nambucca Heads, le pont de Penang, la mosquée de Jumeirah et le shish kebab, s'affichaient en anglais quand on jouait en espagnol. Leur texte est désormais traduit en espagnol.",
+                "Vinte lugares da Enciclopédia, entre eles Taree, Nambucca Heads, a ponte de Penang, a mesquita de Jumeirah e o shish kebab, apareciam em inglês quando se jogava em espanhol. Agora têm o texto traduzido para espanhol.",
+                "Zwanzig Orte der Enzyklopädie, darunter Taree, Nambucca Heads, die Penang-Brücke, die Jumeirah-Moschee und der Shish Kebab, erschienen auf Englisch, wenn man auf Spanisch spielte. Jetzt ist ihr Text ins Spanische übersetzt.",
+                "Venti luoghi dell'Enciclopedia, tra cui Taree, Nambucca Heads, il ponte di Penang, la moschea di Jumeirah e lo shish kebab, comparivano in inglese giocando in spagnolo. Ora hanno il testo tradotto in spagnolo.",
+                "",
+                "百科中的二十个地点，包括 Taree、Nambucca Heads、槟城大桥、朱美拉清真寺和烤肉串，以前用西班牙语游玩时会显示英文。现在它们都有了西班牙语译文。",
+                "스페인어로 플레이하면 영어로 나오던 백과사전 장소 스무 곳(Taree, Nambucca Heads, 페낭 대교, 주메이라 모스크, 시시 케밥 등)의 글이 이제 스페인어로 번역되어 표시됩니다.",
+                "スペイン語でプレイすると英語のまま表示されていた百科事典の20か所（Taree、Nambucca Heads、ペナン橋、ジュメイラ・モスク、シシカバブなど）に、スペイン語の訳文が付きました。",
+                "Двадцать мест Энциклопедии, среди них Taree, Nambucca Heads, мост Пенанг, мечеть Джумейра и шиш-кебаб, показывались на английском, когда вы играли на испанском. Теперь их текст переведён на испанский.",
+                "Dwadzieścia miejsc w Encyklopedii, w tym Taree, Nambucca Heads, most Penang, meczet Dżumejra i szisz kebab, pojawiało się po angielsku podczas gry po hiszpańsku. Teraz mają tekst przetłumaczony na hiszpański."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.126",
       name: L("Banderas enteras", "Whole flags", "Drapeaux entiers", "Bandeiras inteiras", "Ganze Flaggen", "Bandiere intere", "", "完整的国旗", "온전한 국기", "国旗を丸ごと", "Флаги целиком", "Całe flagi"),
       date: "2026-10-16",
