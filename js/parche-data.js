@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.109",
+      name: L("La cima, un poco más cerca", "The summit, a little closer", "Le sommet, un peu plus proche", "O cume, um pouco mais perto", "Der Gipfel, ein Stück näher", "La vetta, un po' più vicina", "", "巅峰近了一点", "정상이 조금 더 가까워졌어요", "頂上が少し近づきました", "Вершина стала чуть ближе", "Szczyt trochę bliżej"),
+      date: "2026-10-15",
+      summary: L("Las Ascensiones 4 y 5 piden algo menos de puntos: la A4 iguala el objetivo de la A3 y la A5 baja del +25 % al +22 %.", "Ascensions 4 and 5 ask for slightly fewer points: A4 matches A3's target and A5 drops from +25% to +22%.", "Les Ascensions 4 et 5 demandent un peu moins de points : l'A4 égale l'objectif de l'A3 et l'A5 passe de +25 % à +22 %.", "As Ascensões 4 e 5 pedem um pouco menos de pontos: a A4 iguala o objetivo da A3 e a A5 desce de +25 % para +22 %.", "Aufstieg 4 und 5 verlangen etwas weniger Punkte: A4 entspricht dem Ziel von A3, A5 sinkt von +25 % auf +22 %.", "Le Ascensioni 4 e 5 chiedono un po' meno punti: l'A4 pareggia l'obiettivo dell'A3 e l'A5 scende da +25 % a +22 %.", "", "进阶4和5所需分数略有下调：A4与A3目标分相同，A5从+25%降到+22%。", "승급 4와 5의 목표 점수가 조금 낮아졌어요. A4는 A3과 같고, A5는 +25%에서 +22%로 내려갑니다.", "アセンション4と5の必要点がわずかに下がりました。A4はA3と同じ目標、A5は+25%から+22%に。", "Для восхождений 4 и 5 нужно чуть меньше очков: A4 сравнялось с целью A3, а A5 снизилось с +25 % до +22 %.", "Wzniesienia 4 i 5 wymagają nieco mniej punktów: A4 ma cel jak A3, a A5 spada z +25 % do +22 %."),
+      chapters: [
+        { id: "curva2", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Curva de las Ascensiones", "Ascension curve", "Courbe des Ascensions", "Curva das Ascensões", "Aufstiegskurve", "Curva delle Ascensioni", "", "进阶曲线", "승급 곡선", "アセンションの曲線", "Кривая восхождений", "Krzywa Wzniesień"),
+          entries: [
+            E(L("Objetivos de la A4 y la A5", "A4 and A5 targets", "Objectifs de l'A4 et de l'A5", "Objetivos da A4 e da A5", "Ziele von A4 und A5", "Obiettivi di A4 e A5", "", "A4与A5的目标分", "A4와 A5의 목표", "A4とA5の目標", "Цели A4 и A5", "Cele A4 i A5"), "buff", "0.3.109", [
+              L("La A4 pide lo mismo que la A3 (+15 %), y la A5 pasa de +25 % a +22 %: sus jefes con poder, su provisión menos y su mochila de 4 huecos siguen siendo el reto.", "A4 asks for the same as A3 (+15%) and A5 goes from +25% to +22%: their empowered bosses, one fewer provision and 4-slot bag are still the challenge.", "L'A4 demande autant que l'A3 (+15 %) et l'A5 passe de +25 % à +22 % : ses boss renforcés, sa provision en moins et son sac à 4 emplacements restent le défi.", "A A4 pede o mesmo que a A3 (+15 %) e a A5 passa de +25 % para +22 %: os seus chefes com poder, uma provisão a menos e a mochila de 4 lugares continuam a ser o desafio.", "A4 verlangt dasselbe wie A3 (+15 %), A5 geht von +25 % auf +22 %: stärkere Bosse, ein Proviant weniger und der 4-Plätze-Rucksack bleiben die Herausforderung.", "L'A4 chiede quanto l'A3 (+15 %) e l'A5 passa da +25 % a +22 %: i boss potenziati, una provvista in meno e lo zaino da 4 posti restano la sfida.", "", "A4的目标与A3相同（+15%），A5从+25%降到+22%：强化首领、少一份补给和只有4格的背包依然是挑战。", "A4는 A3과 같은 목표(+15%)를 요구하고, A5는 +25%에서 +22%로 내려갑니다. 강화된 보스, 보급 하나 감소, 4칸 가방은 여전히 도전이에요.", "A4はA3と同じ目標（+15%）、A5は+25%から+22%に。強化ボス、補給1つ減、4枠のバッグは変わらず試練です。", "A4 требует столько же, сколько A3 (+15 %), а A5 снизилось с +25 % до +22 %: усиленные боссы, на один запас меньше и рюкзак на 4 места остаются испытанием.", "A4 wymaga tyle co A3 (+15 %), a A5 spada z +25 % do +22 %: wzmocnieni bossowie, jedna prowiant mniej i plecak na 4 miejsca nadal są wyzwaniem."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.108",
       name: L("Todas las preguntas acaban saliendo", "Every question eventually shows up", "Toutes les questions finissent par sortir", "Todas as perguntas acabam por sair", "Jede Frage kommt irgendwann dran", "Tutte le domande prima o poi escono", "", "每道题最终都会出现", "모든 문제가 결국 나옵니다", "すべての問題がいずれ出題される", "Каждый вопрос рано или поздно выпадет", "Każde pytanie w końcu się pojawi"),
       date: "2026-10-15",
