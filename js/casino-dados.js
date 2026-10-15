@@ -19,7 +19,7 @@ window.AIQ = window.AIQ || {};
   const easeOut = p => 1 - Math.pow(1 - p, 3), smooth = p => p * p * (3 - 2 * p);
   const preload = () => { if (preload.done) return; preload.done = 1; ["cup_back", "cup_front", "dice_ivory_0", "dice_ivory_1", "dice_ivory_2", "dice_burg_0", "dice_burg_1", "dice_burg_2", "ring", "felt", "rail_h", "rail_l", "rail_r", "sh_cup", "sh_l", "sh_m", "sh_s", "cenefa"].forEach(n => { new Image().src = `assets/dados/${n}.png`; }); ["reach", "half", "grab_sq", "grab"].forEach(n => { new Image().src = `assets/trile/hand_${n}.png`; }); };
   /* la mano del crupier (la misma del trile): baja abierta, cierra, aprieta y agarra; al soltar se abre y sube. Se apoya por el centro de los nudillos */
-  const HAND = { reach: [224, 296], half: [224, 296], grab_sq: [176, 284], grab: [176, 280] };
+  const HAND = { reach: [384, 360], half: [384, 360], grab_sq: [384, 360], grab: [384, 360] };   // las manos del trile (Pixel Lab, 96x90 a x4), por la punta de los dedos
   const HAND_HTML = Object.entries(HAND).map(([n, [w, h]]) => `<img class="hf-${n}" src="assets/trile/hand_${n}.png" width="${w}" height="${h}" style="left:${-w / 2}px;top:${-h}px" alt="" draggable="false">`).join("");
   function handStep(g, now, tx, ty) {
     if (g.tv !== g.ptv) { g.ptv = g.tv; g.t0 = now; g.at = 0; }
@@ -222,7 +222,7 @@ window.AIQ = window.AIQ || {};
         const a = S.shaking, ph = [-15, 0, 15, 0][Math.floor(now / 52) % 4];
         S.cup.phi = ph * Math.min(1, a); S.cup.dx = Math.sin(now / 37) * 5 * a; S.cup.dy = -Math.abs(Math.sin(now / 61)) * 9 * a;
       }
-      handStep(S.glove, now, S.px + S.cup.dx, S.py + S.cup.dy - 76);                        // la mano sigue al cubilete por los nudillos
+      handStep(S.glove, now, S.px + S.cup.dx, S.py + S.cup.dy - 52);                        // la mano sigue al cubilete por la punta de los dedos (rodean lo alto)
       drawCup(S); S.dice.forEach(d => drawDie(d, now));
     }
     const killPend = () => { pend.forEach(e => e.rej(CANCEL)); pend.clear(); };

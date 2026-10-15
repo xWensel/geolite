@@ -2098,7 +2098,7 @@ window.AIQ = window.AIQ || {};
       const TH = 360 * rouI(6, 8) + E; return { L, deg: t => TH * (1 - Math.pow(1 - Math.min(1, t / T), 3)), total: T }; } },
   };
   function spinCoin(o, done) {
-    const { pick, out, win, pay } = o, edge = out === "edge", cw = Math.max(60, Math.min(116, Math.round(innerHeight * 0.125), Math.round(innerWidth / 7))), k = Math.max(2, Math.min(3, Math.round(cw * 1.5 / 64))), fw = 64 * k, NF = 24;   // fotograma de 64 px logicos, ampliado en entero
+    const { pick, out, win, pay } = o, edge = out === "edge", cw = Math.max(60, Math.min(116, Math.round(innerHeight * 0.125), Math.round(innerWidth / 7))), k = Math.max(1, Math.min(2, Math.round(cw * 1.5 / 96))), fw = 96 * k, NF = 24;   // fotograma de 96 px logicos (la moneda de Pixel Lab), ampliado en entero
     const msg = edge ? A.tx(CT.edgeMsg) + " +" + pay : win ? A.tx(BT.won) + " +" + pay : A.tx(BT.lost);
     const sh = rouShell(`coin ${edge ? "win edge" : win ? "win" : "lose"}`,
       `<div class="rou-stage"><div class="rou-top"><b class="rou-no">${A.tx(BT2.noMore)}</b><div class="rou-res"><span class="rr-plate rc-coin"><b>${A.tx(CT[out])}</b>${win || edge ? `<i>${edge ? "×6" : "×2"}</i>` : ""}</span><span class="rr-msg">${msg}</span></div>
@@ -2237,7 +2237,7 @@ window.AIQ = window.AIQ || {};
   const CUPS_CFG = [{ n: 6, dur: 640, rots: 0, feints: 0 }, { n: 9, dur: 440, rots: 2, feints: 1 }, { n: 12, dur: 310, rots: 3, feints: 2 }];   // por ficha: cambios, ms por cambio, rotaciones de tres y falsos pases
   const CUPS_SLOT = [620, 960, 1300], CUPS_GY = 790;
   let cupsStake = 0;
-  const cupsPreload = () => { if (cupsPreload.done) return; cupsPreload.done = 1; ["cup", "hand_reach", "hand_half", "hand_grab_sq", "hand_grab", "hand_open", "coin_flat", "ring", "shadow", "felt", "cenefa"].forEach(n => { new Image().src = `assets/trile/${n}.png`; }); };
+  const cupsPreload = () => { if (cupsPreload.done) return; cupsPreload.done = 1; ["cup", "hand_reach", "hand_half", "hand_grab_sq", "hand_grab", "hand_open0", "hand_open1", "hand_open2", "hand_open3", "hand_open4", "hand_open5", "coin_flat", "ring", "shadow", "felt", "cenefa"].forEach(n => { new Image().src = `assets/trile/${n}.png`; }); };
   /* la lista de cambios (sembrada: la misma tirada baila igual); ranuras 0-1-2 de izquierda a derecha */
   function cupsMoves(seed, tier) {
     const c = CUPS_CFG[tier] || CUPS_CFG[0], rnd = A.rng(seed), pairs = [[0, 1], [1, 2], [0, 2]], mv = []; let rots = c.rots, last = "";
@@ -2273,15 +2273,15 @@ window.AIQ = window.AIQ || {};
       const num = mk("tr-num", String(i + 1)); num.style.transform = `translate3d(${x - 40}px,${GY + 52}px,0)`;
       return { id: i, x, arc: 0, lift: 0, hl: 0, z: 10 + i, num, sh: mk("tr-shadow", IMG("shadow", 176, 48)), el: mk("tr-cup", IMG("cup", 192, 224)) };
     });
-    const coin = { cup: o.coinId, show: false, el: mk("tr-coin", IMG("coin_flat", 76, 52)) };
+    const coin = { cup: o.coinId, show: false, el: mk("tr-coin", IMG("coin_flat", 120, 64)) };   // la moneda de mesa (30x16) a x4
     const spinEl = mk("tr-spin"), gloveLayer = mk("tr-glovelayer");
-    /* la mano del crupier (su derecha de dorso; la otra, su espejo): baja abierta, cierra, aprieta y agarra; al soltar se abre y sube.
-       Cada fotograma se apoya por el centro de los nudillos (el punto que sigue al cubilete) */
-    const HAND = { reach: [224, 296], half: [224, 296], grab_sq: [176, 284], grab: [176, 280] };
+    /* la mano del crupier (su derecha de dorso; la otra, su espejo), de Pixel Lab a x4: baja abierta, cierra, aprieta y agarra con el menique
+       estirado; al soltar se abre y sube. Cada fotograma (96x90) se apoya por la punta de los dedos, en el centro (el punto que sigue al cubilete) */
+    const HAND = { reach: [384, 360], half: [384, 360], grab_sq: [384, 360], grab: [384, 360] };
     const handHTML = Object.entries(HAND).map(([n, [w, h]]) => `<img class="hf-${n}" src="assets/trile/hand_${n}.png" width="${w}" height="${h}" style="left:${-w / 2}px;top:${-h}px" alt="" draggable="false">`).join("");
     const gloves = [0, 1].map(i => ({ tv: 0, on: 0, x: 0, y: 0, cup: null, f: "", t0: 0, at: 0, el: mk("tr-glove" + (i ? " r" : ""), handHTML, gloveLayer) }));
-    const openGlove = { vis: 0, tv: 0, x: 0, y: 0, el: mk("tr-glove open", IMG("hand_open", 224, 296)) };
-    const jokeCoin = mk("tr-coin", IMG("coin_flat", 76, 52)); jokeCoin.style.display = "none"; jokeCoin.style.zIndex = 102;
+    const openGlove = { vis: 0, tv: 0, x: 0, y: 0, f: 0, el: mk("tr-glove open", [0, 1, 2, 3, 4, 5].map(i => `<img class="ho-${i}" src="assets/trile/hand_open${i}.png" width="384" height="364" alt="" draggable="false">`).join("")) };   // la palma: sube cerrada y se abre (6 fotogramas)
+    const jokeCoin = mk("tr-coin", IMG("coin_flat", 120, 64)); jokeCoin.style.display = "none"; jokeCoin.style.zIndex = 102;
     const order = [0, 1, 2], slotOf = id => order.indexOf(id), cupTop = c => GY - ANCH + c.arc - Math.round((c.lift + c.hl * 0.11) * LIFT);
     const render = () => {
       if (!alive()) return;
@@ -2290,12 +2290,12 @@ window.AIQ = window.AIQ || {};
         c.sh.style.transform = `translate3d(${Math.round(c.x - 88)}px,${Math.round(GY - 18 + c.arc * 0.25)}px,0)`; c.sh.style.opacity = Math.max(0.25, 1 - 0.4 * c.lift - Math.abs(c.arc) * 0.004);
       }
       const cc = cups[coin.cup];                                                              // el doblon acompana a su cubilete (arco incluido) y queda en el tapete al levantarlo
-      coin.el.style.display = coin.show ? "block" : "none"; if (coin.show) coin.el.style.transform = `translate3d(${Math.round(cc.x - 38)}px,${Math.round(GY - 32 + cc.arc)}px,0)`;
+      coin.el.style.display = coin.show ? "block" : "none"; if (coin.show) coin.el.style.transform = `translate3d(${Math.round(cc.x - 60)}px,${Math.round(GY - 44 + cc.arc)}px,0)`;
       const now = performance.now();
       for (const g of gloves) {
         if (g.tv !== g.ptv) { g.ptv = g.tv; g.t0 = now; g.at = 0; }
         if (g.cup != null) {
-          const c = cups[g.cup], tx = c.x, ty = cupTop(c) + 40;                                // los nudillos, 10 px de arte por debajo de la boca del cubilete
+          const c = cups[g.cup], tx = c.x, ty = cupTop(c) + 64;                                // la punta de los dedos, 16 px de arte por debajo de lo alto del cubilete (lo rodean)
           if (g.tv) { if (!g.on) { g.on = 1; g.x = tx; g.y = ty - 300; } g.x += (tx - g.x) * 0.42; g.y += (ty - g.y) * 0.42; if (!g.at && Math.abs(ty - g.y) < 6) g.at = now; }
           else if (g.on) { g.x += (tx - g.x) * 0.42; g.y += (ty - 340 - g.y) * 0.2; if (g.y < ty - 320) g.on = 0; }
         }
@@ -2303,7 +2303,7 @@ window.AIQ = window.AIQ || {};
         if (f !== g.f) { g.f = f; g.el.dataset.f = f; }
         g.el.style.display = g.on ? "block" : "none"; if (g.on) g.el.style.transform = `translate3d(${Math.round(g.x)}px,${Math.round(g.y)}px,0)`;
       }
-      openGlove.vis += (openGlove.tv - openGlove.vis) * 0.3; openGlove.el.style.opacity = openGlove.vis; openGlove.el.style.transform = `translate3d(${Math.round(openGlove.x)}px,${Math.round(openGlove.y + (1 - openGlove.vis) * 70)}px,0)`;
+      openGlove.vis += (openGlove.tv - openGlove.vis) * 0.3; openGlove.el.style.opacity = openGlove.vis; openGlove.el.dataset.f = openGlove.f; openGlove.el.style.transform = `translate3d(${Math.round(openGlove.x)}px,${Math.round(openGlove.y + (1 - openGlove.vis) * 70)}px,0)`;
       requestAnimationFrame(render);
     };
     requestAnimationFrame(render);
@@ -2378,10 +2378,12 @@ window.AIQ = window.AIQ || {};
           release(); ov.classList.add("lose");
           if (joke) {                                                                          // el chiste del trilero: los tres vacios; suelta el doblon de entre los dedos, guina y se lo guarda
             ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh"); await sleep(800);
-            openGlove.x = 640; openGlove.y = 300; openGlove.tv = 1; jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 74}px,${openGlove.y + 124}px,0)`;
+            openGlove.x = 560; openGlove.y = 232; openGlove.f = 0; openGlove.tv = 1; await sleep(reduced ? 0 : 280);   // la mano sube cerrada...
+            for (let f = 1; f <= 5; f++) { openGlove.f = f; if (!reduced) await sleep(60); }                       // ...y se abre: el doblon, en la palma
+            jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 132}px,${openGlove.y + 208}px,0)`;
             A.sfx.cupWink(); sh.outcome(); say("trileJoke"); plate("joke", A.tx(TRL.joke), "", "−" + o.stake); ov.classList.add("flash"); A.casa.perdida();
             sh.hold(5200); await sleep(2600);
-            await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 74, 860, e))}px,${Math.round(lerp(openGlove.y + 124, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
+            await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 132, 860, e))}px,${Math.round(lerp(openGlove.y + 208, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
             jokeCoin.style.display = "none"; A.sfx.stamp();
           } else { sh.outcome(); face("laugh"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
         }

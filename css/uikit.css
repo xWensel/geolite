@@ -313,8 +313,7 @@ body.tk-on .rail-sh { display: none; }
 .hh-tag .tag-fix { display: inline-block; margin-left: 6px; color: #ff6a5c; font-family: var(--sans); font-weight: 400; transform: rotate(-4deg); }
 /* su expediente en Ajustes > Datos */
 .dl-file .dlf-h { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; } .dl-file .dlf-h .ic { width: 36px; height: 36px; image-rendering: pixelated; }   /* v0.32: la cabeza del crupier a 36 px nativos (dealer.js lo ajusta al pixel real) */
-img.ic.ic-dealer_mini_laugh, img.ic.ic-dealer_mini { image-rendering: pixelated; }
-.ic.badge .bd-in.ic-dealer_mini_laugh { left: calc(50% - 18px); top: calc(50% - 18px); width: 36px; height: 36px; }   /* la cabeza a 36 px exactos sobre la ficha */
+img.ic.ic-dealer_mini { image-rendering: pixelated; } img.ic.sm.ic-dealer_mini { width: 26px; height: 26px; }   /* la cabeza mini (52 px nativos) a la mitad exacta en los iconos pequenos */
 .dlf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 14px; }
 .dlf-r { display: flex; flex-direction: column; gap: 1px; min-width: 0; } .dlf-r span { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .dlf-r b { font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1.1; overflow-wrap: anywhere; }

@@ -382,7 +382,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .pf-tx i { font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; overflow-wrap: anywhere; text-wrap: pretty; }   /* sin A.squeeze (data-nosq): media cada texto al abrir */
 .pf-row.hid .pf-tx b { letter-spacing: .2em; }
 .pf-row.hid .pf-tx i { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: center; }   /* la pista del crupier: su cara y su frase */
-.pf-tx .pf-hint { display: block; width: 36px; height: 36px; image-rendering: pixelated; }
+.pf-tx .pf-hint { display: block; width: 52px; height: 52px; image-rendering: pixelated; }
 .pf-mt { display: grid; gap: 6px; justify-items: end; min-width: 0; font-size: 18px; color: var(--gx-ink-2); }
 .pf-mt b { font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; color: var(--gx-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pf-mt .gx-bar { width: 100%; height: 10px; }

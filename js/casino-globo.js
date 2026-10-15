@@ -241,9 +241,9 @@ window.AIQ = window.AIQ || {};
     const mY = B.envHide ? yM : yM;   // la boca (donde se atan las cuerdas)
     if (!B.envHide && B.mode !== "pop") { rope(CXB - 11, mY, bx + 3, yB + 1, "#f2c070"); rope(CXB + 11, mY, bx + 40, yB + 1, "#a05a30"); rope(CXB - 4, mY, CXB - 12 + sw, yB + 3, "#d89a52"); rope(CXB + 4, mY, CXB + 11 + sw, yB + 3, "#a05a30"); }
     bc.drawImage(IMG.burner, CXB - 7, yM + 12);
-    // el crupier asoma: sus pixeles de dealer_mini (cara + sombrero), medio escondido tras el borde
-    const hy = yB - 32 + hb + Math.round(B.duck * 30), hh = IMG.head_n.height;
-    if (B.hatOff) bc.drawImage(headImg, 0, 17, 36, hh - 17, CXB - 18 + sw, hy + 17, 36, hh - 17); else bc.drawImage(headImg, CXB - 18 + sw, hy);
+    // el crupier asoma: su cabeza mini de Pixel Lab (52 px: la chistera, filas 0-31, y la cara), medio escondido tras el borde
+    const hy = yB - 44 + hb + Math.round(B.duck * 30), hh = IMG.head_n.height;
+    if (B.hatOff) bc.drawImage(headImg, 0, 32, 52, hh - 32, CXB - 26 + sw, hy + 32, 52, hh - 32); else bc.drawImage(headImg, CXB - 26 + sw, hy);
     bc.drawImage(IMG.basket, bx, yB);
     // soplo del quemador: llama doble por delante de la tela
     if (B.blast > 0 && fl) { const g = B.blast; bc.globalAlpha = Math.min(1, g * 1.6); bc.drawImage(IMG["flame_" + ((f + 1) % 4)], CXB - 8, yM - 14); bc.drawImage(IMG["flame_" + ((f + 2) % 4)], CXB - 8, yM - 36); bc.globalAlpha = 1; }
@@ -299,7 +299,7 @@ window.AIQ = window.AIQ || {};
       if (o2.beam && o.t >= dur * .85) { const bw = 10 + Math.min(1, (o.t - dur * .85) * 6) * 34, by = o2.beamTo || 230; for (let r = y + 12; r < by; r += 2) { const w = bw * ((r - y) / (by - y)) + 6; fr(x - w / 2, r, w, 1, "#9af8ff", .24); fr(x - w / 2, r + 1, w, 1, "#9af8ff", .1); } }
       spr(IMG.ufo, x - 20, y - 9, { k: .35 }); } });
   }
-  const hatFx = (x, y) => add({ life: 3, x, y, vx: (rnd() - .3) * 70, vy: -150, u: (o, dt) => { o.vy += 300 * dt; o.x += o.vx * dt; o.y += o.vy * dt; }, d: o => ctx.drawImage(IMG.head_n, 0, 0, 36, 17, Math.round(o.x), Math.round(o.y), 36, 17) });
+  const hatFx = (x, y) => add({ life: 3, x, y, vx: (rnd() - .3) * 70, vy: -150, u: (o, dt) => { o.vy += 300 * dt; o.x += o.vx * dt; o.y += o.vy * dt; }, d: o => ctx.drawImage(IMG.head_n, 5, 0, 42, 32, Math.round(o.x), Math.round(o.y), 42, 32) });   // la chistera de la cabeza mini (42x32)
       /* ------------------------------------------------------------------ eventos de ambiente (decorado; independientes del reventon) */
   function spawnEvent(id) {
     const dir = rnd() < .5 ? 1 : -1, yTop = 20 + rnd() * 60;
@@ -387,7 +387,7 @@ window.AIQ = window.AIQ || {};
   function pop(g, mega) {
     const p = tgt(), a = g ? .55 : 1;
     shreds(p.x, p.y + 30, g ? 34 : 74, liveCols(), a, mega ? 1.35 : 1); ring(p.x, p.y + 40, "#fff6c8", mega ? 70 : 54, .5, a); puffs(p.x, p.y + 44, g ? 5 : 10, 56, a);
-    BC.mode = "pop"; BC.envHide = true; BC.vy = -50; BC.hatOff = true; hatFx(p.x - 18, p.y + ENVH + GAP - 30);
+    BC.mode = "pop"; BC.envHide = true; BC.vy = -50; BC.hatOff = true; hatFx(p.x - 21, p.y + ENVH + GAP - 44);
     sfx.pop(g); if (!g) { kick(12, 650); wash("rgba(255,255,255,.55)"); }
   }
   const BURST = {

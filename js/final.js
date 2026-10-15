@@ -96,7 +96,7 @@ window.AIQ = window.AIQ || {};
   function rollHTML(o) {
     const sec = (h, body, cls = "") => `<section class="${cls}"><i class="fin-pip"></i>${h ? `<h3>${P6(h)}</h3>` : ""}${body}</section>`;
     const n = t => `<p class="fin-n">${t}</p>`, s = t => `<p class="fin-s">${t}</p>`;
-    const mug = A.crupier && A.crupier.still ? A.crupier.still("smug", 1) : "";
+    const mug = A.crupier && A.crupier.still ? A.crupier.still("smug", 1, "head") : "";   // la cabeza (64x64 a 1:1)
     const rows = (o.stats || []).map(([k, v]) => `<div class="fin-tk-r"><span>${esc(k)}</span><i></i><b>${esc(v)}</b></div>`).join("");
     let when = ""; try { when = new Date().toLocaleString(locale(), { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }); } catch (e) { /* formato */ }
     return [

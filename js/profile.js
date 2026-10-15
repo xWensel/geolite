@@ -279,7 +279,7 @@ window.AIQ = window.AIQ || {};
   function fakeToast(a) {
     let el = document.getElementById("achFake");
     if (!el) { el = document.createElement("div"); el.id = "achFake"; document.getElementById("app").appendChild(el); }
-    el.innerHTML = `<span class="ach-ico"><span class="ic badge">${A.icon("blank_boss", "bd-base")}${A.icon("dealer_mini_laugh", "bd-in")}</span></span><span class="ach-t"><em>${A.T("Logro desbloqueado", "Achievement unlocked")}</em><b>${a.name}</b><i>${a.desc}</i></span><b class="ach-stamp">${A.pick6(STAMP)}</b>`;
+    el.innerHTML = `<span class="ach-ico"><span class="ic badge">${A.icon("blank_boss", "bd-base")}${A.icon("ach_casino_falso", "bd-in")}</span></span><span class="ach-t"><em>${A.T("Logro desbloqueado", "Achievement unlocked")}</em><b>${a.name}</b><i>${a.desc}</i></span><b class="ach-stamp">${A.pick6(STAMP)}</b>`;
     el.className = "ach-toast ach-fake"; A.restyle(el); el.classList.add("in"); A.sfx.ach();
     setTimeout(() => { el.classList.add("fooled"); A.sfx.stamp(); if (A.haptic) A.haptic([30, 40, 70]); A.ach.emit("dealer", { fake: true }); }, 1300);
     setTimeout(() => { if (a.then) a.then(); }, 2000);

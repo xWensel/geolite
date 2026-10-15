@@ -244,7 +244,7 @@ html.reduce-motion .rou-no { display: none; }
 .rou.cups .tr-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; user-select: none; }
 .rou.cups .tr-stage img { image-rendering: pixelated; display: block; }
 .rou.cups .tr-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 38%, #3d1024 0%, #14050e 58%, #05010a 100%); }
-.rou.cups .tr-dealer { position: absolute; left: 800px; top: 100px; width: 320px; height: 320px; z-index: 2; }
+.rou.cups .tr-dealer { position: absolute; left: 751px; top: 44px; width: 384px; height: 384px; z-index: 2; image-rendering: pixelated; }   /* 96 px de arte a x4 (el pixel de la mesa) */
 .rou.cups .tr-bubble { position: absolute; left: 1160px; top: 150px; max-width: 560px; z-index: 6; padding: 14px 20px 12px; background: #fff; color: #120a2a; border: 4px solid #0a0048; box-shadow: 0 6px 0 #0a0048;
   font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; pointer-events: none; }
 .rou.cups .tr-bubble.on { opacity: 1; transform: none; }
@@ -272,7 +272,7 @@ html.reduce-motion .rou-no { display: none; }
 .rou.cups .tr-num { position: absolute; z-index: 4; width: 80px; text-align: center; font: 900 54px/1 var(--serif); color: #f6c453; text-shadow: 0 4px 0 #0a140f; opacity: .9; transition: transform .15s, color .15s; }
 .rou.cups .tr-num.hot { color: #fff3b0; transform: translateY(-4px); }
 .rou.cups .tr-shadow { position: absolute; left: 0; top: 0; width: 176px; height: 48px; z-index: 5; }
-.rou.cups .tr-coin { position: absolute; left: 0; top: 0; width: 76px; height: 52px; z-index: 6; }
+.rou.cups .tr-coin { position: absolute; left: 0; top: 0; width: 120px; height: 64px; z-index: 6; image-rendering: pixelated; }
 .rou.cups .tr-cup { position: absolute; left: 0; top: 0; width: 192px; height: 224px; will-change: transform; }
 .rou.cups .tr-cup.pick { cursor: pointer; }
 .rou.cups .tr-glovelayer { position: absolute; inset: 0; z-index: 100; pointer-events: none; clip-path: inset(452px 0 0 0); }
@@ -280,5 +280,6 @@ html.reduce-motion .rou-no { display: none; }
 .rou.cups .tr-glove:not(.open) img { position: absolute; display: none; }
 .rou.cups .tr-glove[data-f=reach] .hf-reach, .rou.cups .tr-glove[data-f=half] .hf-half, .rou.cups .tr-glove[data-f=grab_sq] .hf-grab_sq, .rou.cups .tr-glove[data-f=grab] .hf-grab { display: block; }
 .rou.cups .tr-glove.r img { transform: scaleX(-1); }
-.rou.cups .tr-glove.open { display: block; z-index: 101; width: 224px; height: 296px; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 36px); mask-image: linear-gradient(to top, transparent 0, #000 36px); }
+.rou.cups .tr-glove.open { display: block; z-index: 101; width: 384px; height: 364px; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 36px); mask-image: linear-gradient(to top, transparent 0, #000 36px); }
+.rou.cups .tr-glove.open img { position: absolute; left: 0; top: 0; display: none; image-rendering: pixelated; } .rou.cups .tr-glove.open[data-f="0"] .ho-0, .rou.cups .tr-glove.open[data-f="1"] .ho-1, .rou.cups .tr-glove.open[data-f="2"] .ho-2, .rou.cups .tr-glove.open[data-f="3"] .ho-3, .rou.cups .tr-glove.open[data-f="4"] .ho-4, .rou.cups .tr-glove.open[data-f="5"] .ho-5 { display: block; }   /* la palma del chiste: sube cerrada y se abre */
 .rou.cups .tr-spin { position: absolute; left: 0; top: 0; width: 192px; height: 192px; z-index: 120; background: url(../assets/icons/coin_spin.webp) 0 0 / 4608px 192px no-repeat; image-rendering: pixelated; display: none; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .35)); }

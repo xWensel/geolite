@@ -1668,7 +1668,7 @@ window.AIQ = window.AIQ || {};
     const top = [box("plate"), box("advBar"), pile ? null : box("cxToast"), nav ? nav.getBoundingClientRect() : null].filter(r => hits(r, L, L + maxS + 360)).reduce((m, r) => Math.max(m, r.bottom), R.top) + 10;   // v0.32: tampoco pisa el aviso de tarjeta nueva
     const lows = [box("dock"), box("note"), box("toolBar")]; if (sheet) lows.push(sheet);
     let floor = R.bottom - 8; for (const r of lows) if (hits(r, L, L + maxS)) floor = Math.min(floor, r.top - 8);
-    const sn = A.crupier.snap(Math.min(maxS, floor - top), mob ? 0 : Math.floor(3 * (devicePixelRatio || 1) + 0.25));   // v0.32: x3 si cabe, si no x2 o x1 (pixel entero)
+    const sn = A.crupier.snap(Math.min(maxS, floor - top), mob ? 0 : Math.floor(4 * (devicePixelRatio || 1) + 0.25));   // x4 si cabe (la figura de 81 filas: el tamano de antes a x3), si no menos (pixel entero)
     let sz = sn.css, noFace = sz < 84 || cap(L + sz + 4) < 150, x0 = L, room = 0, bh = 90;   // sin sitio para el globo entre la cara y la hoja: habla solo con el globo
     for (let pass = 0; ; pass++) {
       if (noFace) { sz = 0; fs.display = "none"; } else { fs.display = ""; fs.width = fs.height = sz + "px"; }
@@ -2434,7 +2434,7 @@ window.AIQ = window.AIQ || {};
     const tray = !wide && document.querySelector("#dlg .table.mesa.gx-camp .tb-tray"), ap = $("app");
     if (tray && ap) {
       const T = tray.getBoundingClientRect(), L = (tray.lastElementChild || tray).getBoundingClientRect(), A0 = ap.getBoundingClientRect(), k = A.uiK ? A.uiK() : 1;
-      const room = Math.floor(T.right - L.right + 40 * k), sn = A.crupier.snap(Math.min(224, Math.round(T.height + 30 * k))), hf = sn.css;   // +40: se apoya un poco sobre el final de la ultima columna (el rotulo de Provisiones) mientras habla
+      const room = Math.floor(T.right - L.right + 40 * k), sn = A.crupier.snap(Math.min(248, Math.round(T.height + 30 * k))), hf = sn.css;   // +40: se apoya un poco sobre el final de la ultima columna (el rotulo de Provisiones) mientras habla
       if (!sn.k || hf > room) return null;
       return { r: Math.round(A0.right - T.right + 10 * k), b: Math.round(A0.bottom - T.bottom + 6 * k), hf, hb: Math.min(420, Math.round(T.width * 0.55)) };
     }
@@ -2442,7 +2442,7 @@ window.AIQ = window.AIQ || {};
     const R = of.getBoundingClientRect(), f = wide ? { left: R.left + (R.width - wide) / 2 } : first.getBoundingClientRect(), A0 = app.getBoundingClientRect(), k = A.uiK ? A.uiK() : 1;   // wide: la mesa esta vacia salvo una carta de ese ancho en el centro (la legendaria)
     /* v0.36: que no tape (casi) nada. Se sienta en el hueco libre de la izquierda, un poco mas arriba que antes: sus pies quedan por encima de la mochila y del
        boton "Vender" que sale sobre la reliquia levantada (18 px del lienzo), y el globo termina antes de la carta (que gira y crece al pasar el raton) */
-    const lift = Math.round(18 * k), room = Math.floor(f.left - R.left - 26 * k), sn = A.crupier.snap(Math.min(224, Math.round(room * 0.6), Math.round(R.height - lift - 110))), hf = sn.css;   // v0.32: el busto a pixel entero (x2 o x1)
+    const lift = Math.round(18 * k), room = Math.floor(f.left - R.left - 26 * k), sn = A.crupier.snap(Math.min(248, Math.round(room * 0.6), Math.round(R.height - lift - 110))), hf = sn.css;   // v0.32: el busto a pixel entero (x2 o x1)
     if (room < 190 || !sn.k) return null;
     return { l: Math.round(R.left - A0.left + 6), b: Math.round(A0.bottom - R.bottom + 4 + lift), hf, hb: Math.min(380, room) };
   }

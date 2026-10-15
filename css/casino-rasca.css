@@ -37,9 +37,9 @@
 .rou.rasca .ra-res.on .ra-msg { animation: ra-up .45s .25s var(--spring) both; }
 @keyframes ra-stamp { from { opacity: 0; transform: scale(1.7) rotate(-5deg); } }
 @keyframes ra-up { from { opacity: 0; transform: translateY(14px); } }
-/* el crupier mira por encima del mostrador: asoma por detras, mas grande que en el trile (64 px logicos x6) */
-.rou.rasca .ra-dealerbox { position: absolute; left: 1010px; top: -6px; width: 384px; height: 384px; z-index: 2; will-change: transform; transition: transform .32s steps(5); }
-.rou.rasca .ra-dealer { width: 384px; height: 384px; }
+/* el crupier mira por encima del mostrador: asoma por detras (su retrato de 96 px a x4, el pixel del escenario) */
+.rou.rasca .ra-dealerbox { position: absolute; left: 993px; top: -6px; width: 384px; height: 384px; z-index: 2; will-change: transform; transition: transform .32s steps(5); }
+.rou.rasca .ra-dealer { width: 384px; height: 384px; image-rendering: pixelated; }
 .rou.rasca .ra-dealerbox.bob .ra-dealer { animation: ra-bob2 1.2s ease-in-out infinite; }
 @keyframes ra-bob2 { 50% { transform: translateY(-6px); } }
 .rou.rasca .ra-dealerbox.g-peek { transform: translate(-150px, 26px); }
@@ -52,8 +52,8 @@
 @keyframes ra-hop { 20% { transform: translateY(-30px); } 40% { transform: translateY(0); } 60% { transform: translateY(-18px); } 80% { transform: translateY(0); } }
 @keyframes ra-faint { 0% { transform: translateY(0); } 25% { transform: translateY(380px); } 70% { transform: translateY(380px); } 100% { transform: translateY(0); } }
 .rou.rasca .ra-sweat { position: absolute; width: 36px; height: 44px; opacity: 0; }
-.rou.rasca .ra-sweat.s1 { left: 296px; top: 160px; }
-.rou.rasca .ra-sweat.s2 { left: 104px; top: 176px; }
+.rou.rasca .ra-sweat.s1 { left: 244px; top: 152px; }
+.rou.rasca .ra-sweat.s2 { left: 100px; top: 160px; }   /* en las sienes de su cara de 96 px */
 .rou.rasca .ra-dealerbox.sweat .ra-sweat { animation: ra-drip .9s steps(6) infinite; }
 .rou.rasca .ra-dealerbox.sweat .ra-sweat.s2 { animation-delay: .45s; }
 @keyframes ra-drip { 0% { opacity: 0; transform: translateY(-8px); } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(54px); } }
@@ -62,10 +62,9 @@
 .rou.rasca .ra-bubble::before { content: ""; position: absolute; left: -22px; top: 26px; border: 12px solid transparent; border-right: 14px solid #1d0a3d; }
 .rou.rasca .ra-bubble::after { content: ""; position: absolute; left: -15px; top: 30px; border: 8px solid transparent; border-right: 10px solid #fff; }
 .rou.rasca .ra-glovelayer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-.rou.rasca .ra-gl { position: absolute; top: 340px; width: 240px; height: 248px; will-change: transform; opacity: 0; }
-.rou.rasca .ra-gl.l { left: 860px; }
-.rou.rasca .ra-gl.r { left: 1360px; }
-.rou.rasca .ra-gl.r { transform: scaleX(-1); }
+.rou.rasca .ra-palco { position: absolute; left: 700px; top: 0; width: 512px; height: 384px; will-change: transform; opacity: 0; -webkit-mask-image: linear-gradient(to left, transparent 16px, #000 88px); mask-image: linear-gradient(to left, transparent 16px, #000 88px); }   /* el aplauso de palco: sus mangas se funden hacia el crupier */
+.rou.rasca .ra-palco img { position: absolute; left: 0; top: 0; width: 512px; height: 384px; display: none; image-rendering: pixelated; }
+.rou.rasca .ra-palco[data-f="0"] .pf-0, .rou.rasca .ra-palco[data-f="1"] .pf-1, .rou.rasca .ra-palco[data-f="2"] .pf-2, .rou.rasca .ra-palco[data-f="3"] .pf-3, .rou.rasca .ra-palco[data-f="4"] .pf-4, .rou.rasca .ra-palco[data-f="5"] .pf-5 { display: block; }
 /* el mostrador: marfil con filo de laton y bombillas (como las bandas de las ruletas) */
 .rou.rasca .ra-band { position: absolute; left: 0; top: 330px; width: 1920px; height: 680px; z-index: 3; overflow: visible;
   background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, radial-gradient(ellipse at 50% 44%, #fbf1d6 0%, #ead9ad 52%, #c3a875 100%);

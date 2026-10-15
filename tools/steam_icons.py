@@ -25,7 +25,8 @@ def badge(frame: str, icon: str, bg=True) -> Image.Image:
     """insignia a 64 px nativos (un pixel por pixel de arte) ampliada x8 por vecino mas cercano"""
     img = Image.new("RGBA", (SIZE, SIZE), (BG + (255,)) if bg else (0, 0, 0, 0))
     img.alpha_composite(Image.open(ICONS / f"{frame}.webp").convert("RGBA").resize((SIZE, SIZE), Image.NEAREST))
-    img.alpha_composite(Image.open(ICONS / f"{icon}.webp").convert("RGBA").resize((48, 48), Image.NEAREST), (8, 8))
+    ill = Image.open(ICONS / f"{icon}.webp").convert("RGBA"); n = ill.width // 8   # x8 de su rejilla nativa: 48 px (52 la cabeza riendo del crupier)
+    img.alpha_composite(ill.resize((n, n), Image.NEAREST), ((SIZE - n) // 2, (SIZE - n) // 2))
     return img.resize((WORK, WORK), Image.NEAREST)
 
 
