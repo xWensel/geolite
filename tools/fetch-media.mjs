@@ -15,13 +15,14 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = new Set(process.argv.slice(2));
 const CHECK = args.has("--check"), LITE = args.has("--lite");
 const SETS = [
-  { dir: "th", base: "https://xwensel.github.io/geolite-media/assets/wiki/th/" },
-  { dir: "card", base: "https://xwensel.github.io/geolite-media/assets/wiki/card/" },
-  ...(LITE ? [] : [{ dir: "hd", base: f => `https://xwensel.github.io/${f.charAt(0).toLowerCase() < "d" ? "geolite-media-hd" : f.charAt(0).toLowerCase() <= "n" ? "geolite-media-hd2" : "geolite-media-hd3"}/assets/wiki/hd/` }]),
+  { dir: "th", base: f => `https://xwensel.github.io/${M2.has(f) ? "geolite-media-2" : "geolite-media"}/assets/wiki/th/` },
+  { dir: "card", base: f => `https://xwensel.github.io/${M2.has(f) ? "geolite-media-2" : "geolite-media"}/assets/wiki/card/` },
+  ...(LITE ? [] : [{ dir: "hd", base: f => `https://xwensel.github.io/${M2.has(f) ? "geolite-media-hd4" : f.charAt(0).toLowerCase() < "d" ? "geolite-media-hd" : f.charAt(0).toLowerCase() <= "n" ? "geolite-media-hd2" : "geolite-media-hd3"}/assets/wiki/hd/` }]),
 ];
 const safe = s => s.replace(/[^A-Za-z0-9._-]/g, "_");                            // mismo criterio que A.mediaKey (js/wiki.js)
 const img = JSON.parse(fs.readFileSync(path.join(ROOT, "data/wiki/img.json"), "utf8"));
 const keys = Object.keys(img).map(safe);
+const M2 = new Set((fs.readFileSync(path.join(ROOT, "data/media2.js"), "utf8").match(/MEDIA2 = "([^"]*)"/) || [, ""])[1].split(" "));   // fotos nuevas (v0.3.106): repositorios geolite-media-2 y geolite-media-hd4
 
 const todo = [];
 for (const s of SETS) {

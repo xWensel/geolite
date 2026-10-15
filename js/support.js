@@ -1,7 +1,7 @@
 /* Geolite - textos ES/EN, calculo de IQ e insignia. */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  A.VERSION = "0.3.105";
+  A.VERSION = "0.3.106";
   A.lang = "es";
   /* fotos de la Enciclopedia: en la web salen de GitHub Pages (pesan ~1 GB y Vercel no las admite), repartidas en dos webs para no pasar
      del limite de 1 GB de cada una; en local y en Electron (127.0.0.1) salen de la carpeta del juego. Las publica tools/publish-media.mjs.
@@ -10,7 +10,9 @@ window.AIQ = window.AIQ || {};
   const LOCAL = typeof location === "undefined" || !/^https?:$/.test(location.protocol) || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   /* las fotos HD (2,3 GB) no caben en una sola web de GitHub Pages (1 GB): van en 3 repositorios por la inicial del archivo (a-c, d-n, o-z); tools/publish-media.mjs usa la misma regla */
   const HD = ["geolite-media-hd", "geolite-media-hd2", "geolite-media-hd3"], hdRepo = f => { const c = f.charAt(0).toLowerCase(); return HD[c < "d" ? 0 : c <= "n" ? 1 : 2]; };
-  A.media = p => { if (LOCAL) return p; if (p.startsWith("assets/wiki/hd/")) return "https://xwensel.github.io/" + hdRepo(p.slice(15)) + "/" + p; for (const k in MEDIA) if (p.startsWith(k)) return MEDIA[k] + p; return p; };
+  /* fotos nuevas (v0.3.106): viven en geolite-media-2 (tarjeta y miniatura) y geolite-media-hd4 (HD); la lista de claves esta en data/media2.js */
+  let M2 = null; const inM2 = p => { const k = p.slice(p.lastIndexOf("/") + 1).replace(/\.webp$/, ""); return (M2 = M2 || new Set((A.MEDIA2 || "").split(" "))).has(k); };
+  A.media = p => { if (LOCAL) return p; if (/^assets\/wiki\/(hd|card|th)\//.test(p) && inM2(p)) return "https://xwensel.github.io/" + (p.startsWith("assets/wiki/hd/") ? "geolite-media-hd4" : "geolite-media-2") + "/" + p; if (p.startsWith("assets/wiki/hd/")) return "https://xwensel.github.io/" + hdRepo(p.slice(15)) + "/" + p; for (const k in MEDIA) if (p.startsWith(k)) return MEDIA[k] + p; return p; };
   /* enlace para compartir: en Electron (y en local) la direccion es 127.0.0.1:puerto, que no le sirve a nadie: se comparte la web publica */
   const SITE = "https://geolite-game.vercel.app/";
   A.shareUrl = () => (LOCAL ? SITE : location.href.split("#")[0]);

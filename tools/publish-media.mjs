@@ -20,7 +20,12 @@ const TARGETS = [
   { repo: "geolite-media-hd", dirs: ["assets/wiki/hd"], what: "fotos HD (hasta 1920 px), archivos de la a a la c", part: 0 },
   { repo: "geolite-media-hd2", dirs: ["assets/wiki/hd"], what: "fotos HD (hasta 1920 px), archivos de la d a la n", part: 1 },
   { repo: "geolite-media-hd3", dirs: ["assets/wiki/hd"], what: "fotos HD (hasta 1920 px), archivos de la o a la z", part: 2 },
+  // desde la v0.3.106 lo nuevo vive aparte (no cabia en los anteriores): la lista de claves esta en data/media2.js
+  { repo: "geolite-media-2", dirs: ["assets/wiki/card", "assets/wiki/th"], what: "tarjetas y miniaturas nuevas (desde la v0.3.106)", m2: true },
+  { repo: "geolite-media-hd4", dirs: ["assets/wiki/hd"], what: "fotos HD nuevas (desde la v0.3.106, hasta 1600 px)", m2: true },
 ];
+const M2 = new Set((fs.readFileSync(path.join(ROOT, "data/media2.js"), "utf8").match(/MEDIA2 = "([^"]*)"/) || [, ""])[1].split(" "));
+const keyOf = f => f.replace(/\.webp$/, "");
 const hdPart = f => { const c = f.charAt(0).toLowerCase(); return c < "d" ? 0 : c <= "n" ? 1 : 2; };   // misma regla que js/support.js
 const DRY = process.argv.includes("--dry");
 const git = (cwd, ...args) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
@@ -33,7 +38,7 @@ for (const t of TARGETS) {
   if (!fs.existsSync(dest)) { if (DRY) { console.log(`${t.repo}: sin clonar todavia`); continue; } execFileSync("git", ["clone", `https://github.com/${OWNER}/${t.repo}.git`, dest], { stdio: "inherit" }); }
   let added = 0, changed = 0, removed = 0;
   for (const d of t.dirs) {
-    const src = path.join(ROOT, d), out = path.join(dest, d), have = new Set(list(src).filter(f => t.part == null || hdPart(f) === t.part));
+    const src = path.join(ROOT, d), out = path.join(dest, d), have = new Set(list(src).filter(f => (t.part == null || hdPart(f) === t.part) && (t.m2 ? M2.has(keyOf(f)) : !M2.has(keyOf(f)))));
     if (!DRY) fs.mkdirSync(out, { recursive: true });
     for (const f of have) {
       const a = fs.statSync(path.join(src, f)), bp = path.join(out, f), b = fs.existsSync(bp) && fs.statSync(bp);
