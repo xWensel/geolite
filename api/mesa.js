@@ -8,7 +8,12 @@
      POST { op: "ch", sid, ch, v }        ->  un reto de la Aventura (los de A.CHAL, js/challenges.js) a nivel v 0-3 (0 lo quita); ch "*" los quita todos
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
-                                          ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas */
+                                          ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas
+   Clasificacion (moderacion de las tablas de api/submit.js):
+     GET ?lb=adv-all&o=0                  ->  { ok, rows: [{ id, name, score, ip, ban }], count }  50 filas desde el puesto o, con el id y la red cifrada
+     GET ?bans=1                          ->  { ok, ids: [...], ips: [...] }  los vetados
+     POST { op: "lbdel", id, board?, ban }  ->  quita a ese jugador de board (o de TODAS las tablas) y, con ban, veta su id y su red
+     POST { op: "unban", id?, ip? }       ->  levanta el veto */
 const crypto = require("crypto");
 const kv = require("./_kv");
 const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
@@ -17,6 +22,7 @@ const CH = ["shaky", "missing", "mirror", "memory", "runes", "anagram", "riddle"
 const KEY = process.env.MESA_KEY || "";
 const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // estilos del bocadillo (css/challenges.css, .dl-bubble.st-*)
 const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier en la pantalla del jugador: esquinas o centro grande
+const UID = /^[a-z0-9]{1,24}$/i, TAG = /^[a-f0-9]{16}$/;
 const same = (a, b) => { const h = x => crypto.createHash("sha256").update(String(x)).digest(); return crypto.timingSafeEqual(h(a), h(b)); };
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store"); res.setHeader("X-Robots-Tag", "noindex");
@@ -29,6 +35,15 @@ module.exports = async (req, res) => {
     const now = Date.now();
     if (req.method === "GET") {
       if (req.query && req.query.rtc) { const id = String(req.query.rtc); if (!SID.test(id)) return res.status(400).json({ ok: false }); const [o] = await kv.pipeline([["GETDEL", "vivo:rtc:" + id]]); let offer = null; try { offer = JSON.parse(o); } catch (e) { /* aun no */ } return res.status(200).json({ ok: true, offer }); }
+      if (req.query && req.query.lb) {                              // una tabla de la clasificacion, con lo que hace falta para moderarla
+        const board = String(req.query.lb), o = Math.max(0, Math.min(100000, parseInt(req.query.o, 10) || 0)), lb = "lb:" + board;
+        if (!kv.BOARD.test(board)) return res.status(400).json({ ok: false });
+        const [z, count, bid, bip] = await kv.pipeline([["ZRANGE", lb, o, o + 49, "REV", "WITHSCORES"], ["ZCARD", lb], ["SMEMBERS", "ban:id"], ["SMEMBERS", "ban:ip"]]);
+        const ids = [], sc = []; for (let i = 0; i < (z || []).length; i += 2) { ids.push(z[i]); sc.push(+z[i + 1]); }
+        const [nm, ips] = ids.length ? await kv.pipeline([["HMGET", "names:" + board, ...ids], ["HMGET", "lbip", ...ids]]) : [[], []];
+        return res.status(200).json({ ok: true, count: +count || 0, rows: ids.map((id, i) => ({ id, name: nm[i] || "—", score: sc[i], ip: ips[i] || "", ban: bid.includes(id) || (!!ips[i] && bip.includes(ips[i])) })) });
+      }
+      if (req.query && req.query.bans) { const [ids, ips] = await kv.pipeline([["SMEMBERS", "ban:id"], ["SMEMBERS", "ban:ip"]]); return res.status(200).json({ ok: true, ids: ids || [], ips: ips || [] }); }
       if (req.query && req.query.log) { const [l] = await kv.pipeline([["LRANGE", "vivo:log", 0, 199]]); return res.status(200).json({ ok: true, log: (l || []).map(x => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean) }); }
       const [, ids] = await kv.pipeline([["ZREMRANGEBYSCORE", "vivo:idx", 0, now - 80000], ["ZRANGE", "vivo:idx", 0, 199, "WITHSCORES"]]);
       const sids = [], at = {}; for (let i = 0; i < (ids || []).length; i += 2) { sids.push(ids[i]); at[ids[i]] = +ids[i + 1]; }
@@ -41,6 +56,22 @@ module.exports = async (req, res) => {
     }
     if (req.method !== "POST") return res.status(405).json({ ok: false });
     let b; try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch (e) { return res.status(400).json({ ok: false }); }
+    if (b && b.op === "unban") {
+      const id = String(b.id || ""), ip = String(b.ip || ""), cmds = [...(UID.test(id) ? [["SREM", "ban:id", id]] : []), ...(TAG.test(ip) ? [["SREM", "ban:ip", ip]] : [])];
+      if (!cmds.length) return res.status(400).json({ ok: false });
+      await kv.pipeline(cmds); return res.status(200).json({ ok: true });
+    }
+    if (b && b.op === "lbdel") {                                     // fuera de la clasificacion: de una tabla o de todas (las del dia, la de siempre y el Reto diario)
+      const id = String(b.id || ""); if (!UID.test(id)) return res.status(400).json({ ok: false });
+      let boards = [];
+      if (b.board) { if (!kv.BOARD.test(String(b.board))) return res.status(400).json({ ok: false }); boards = [String(b.board)]; }
+      else { let cur = "0"; for (let i = 0; i < 50; i++) { const [[c, keys]] = await kv.pipeline([["SCAN", cur, "MATCH", "lb:*", "COUNT", 1000]]); (keys || []).forEach(k => { const bd = k.slice(3); if (kv.BOARD.test(bd)) boards.push(bd); }); cur = String(c); if (cur === "0") break; } }
+      const cmds = []; boards.forEach(bd => cmds.push(["ZREM", "lb:" + bd, id], ["HDEL", "names:" + bd, id], ["HDEL", "tries:" + bd, id], ["DEL", "tr:" + bd + ":" + id]));
+      const [[ip]] = await kv.pipeline([["HMGET", "lbip", id]]);
+      const out = cmds.length ? await kv.pipeline(cmds) : [];
+      if (b.ban) await kv.pipeline([["SADD", "ban:id", id], ...(ip ? [["SADD", "ban:ip", ip]] : [])]);
+      return res.status(200).json({ ok: true, removed: out.filter((r, i) => i % 4 === 0 && r).length, ip: b.ban ? ip || "" : "" });
+    }
     if (!b || !SID.test(String(b.sid || ""))) return res.status(400).json({ ok: false });
     const sid = b.sid, wk = "vivo:w:" + sid;
     if (b.op === "watch") { await kv.pipeline([["SET", wk, 1, "EX", 45]]); return res.status(200).json({ ok: true }); }

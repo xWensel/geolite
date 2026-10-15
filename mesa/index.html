@@ -245,6 +245,17 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
 .lg.ko b { color: #ff9a9a; font-weight: 400; }
 .lg b { font-weight: 400; }
 .lg em { display: block; font-style: normal; font-size: 17px; color: var(--dim); }
+/* clasificacion: borrar trampas y vetar */
+.lbList { display: grid; gap: 4px; max-height: 360px; overflow: auto; margin-top: 10px; }
+.lbr { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; padding: 5px 6px; background: rgba(0, 0, 0, .28); font-size: 20px; }
+.lbr i { font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--brass); }
+.lbr b { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lbr span { font-family: var(--mono); font-size: 8px; color: var(--cream); }
+.lbr em { grid-column: 2 / -1; font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--dim); overflow-wrap: anywhere; }
+.lbr.ban { box-shadow: inset 3px 0 0 var(--red); } .lbr.ban b { color: #ff9a9a; }
+.st.red { color: #ffb3b3; box-shadow: inset 0 0 0 1px rgba(232, 40, 58, .6); } .st.red:hover { background: rgba(155, 20, 34, .5); }
+.st:disabled { opacity: .4; }
+.lbFoot { display: flex; gap: 6px; align-items: center; margin-top: 8px; } .lbFoot span { flex: 1; font-family: var(--mono); font-size: 8px; color: var(--dim); }
 .toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 120px); padding: 10px 16px; background: #120a04; box-shadow: inset 0 0 0 2px var(--brass); font-family: var(--mono); font-size: 16px; color: var(--brass-lt); transition: transform .3s cubic-bezier(.2, 1.4, .4, 1); z-index: 60; max-width: calc(100vw - 32px); text-align: center; }
 .toast.on { transform: translate(-50%, 0); }
 @media (max-width: 640px) { .print h1 { font-size: 40px; } .seat { width: 100%; } .felt.main { padding: 14px 12px 24px; } .table { padding: 10px; } }
@@ -303,6 +314,8 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       <section class="plaque"><span class="lbl m">Cartas · frases rápidas</span><div class="cards" id="quick"></div></section>
       <section class="plaque"><span class="lbl m">El jugador</span><div id="facts"><p class="none" style="margin:0">Elige un asiento de la mesa.</p></div></section>
       <section class="plaque"><span class="lbl m">Lo que le has dicho</span><div class="log" id="log"></div></section>
+      <section class="plaque"><span class="lbl m">Clasificación · moderación</span><div class="styles" id="lbTabs"></div><div class="lbList" id="lbList"></div>
+        <div class="lbFoot"><span id="lbCount"></span><button class="st" id="lbPrev" type="button">◀</button><button class="st" id="lbNext" type="button">▶</button><button class="st" id="lbReload" type="button">Recargar</button></div></section>
     </aside>
   </div>
 </div>
@@ -525,7 +538,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   function enter(j) {
     $("door").classList.add("hidden"); $("app").classList.remove("hidden");
     if (!spr) { spr = mount($("face")); setupControls(); }
-    if (j) got(j); poll();
+    if (j) got(j); poll(); lbLoad();
   }
   async function poll() {
     clearTimeout(pollT);
@@ -655,6 +668,48 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     const L = $("log"), a = said[sel] || [];
     L.innerHTML = !sel ? `<p class="none" style="margin:0">—</p>` : a.length ? a.slice().reverse().map(x => `<div class="lg${x.ok ? "" : " ko"}"><i>${new Date(x.at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</i><b>${esc(x.t)}${x.es ? `<em>${esc(x.es)}</em>` : ""}</b></div>`).join("") : `<p class="none" style="margin:0">Todavía nada. Rompe el hielo.</p>`;
   }
+
+  /* ------------------------------------------------ clasificacion: quitar puntuaciones falsas y vetar a quien las mete (api/mesa.js ?lb=)
+     Borrar quita al jugador de TODAS las tablas (siempre, dias y Reto diario); Vetar ademas bloquea su id y su red (la IP llega cifrada) */
+  const dk = d => "advd-" + (d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate());   // "Hoy" y "Ayer" con la fecha local, como el juego
+  const LBT = [["adv-all", "Siempre"], ["today", "Hoy"], ["yday", "Ayer"], ["bans", "Vetados"]];
+  let lbTab = "adv-all", lbO = 0, lbN = 0;
+  const lbBoard = () => lbTab === "today" ? dk(new Date()) : lbTab === "yday" ? dk(new Date(Date.now() - 864e5)) : lbTab;
+  function lbTabs() {
+    $("lbTabs").innerHTML = LBT.map(([k, n]) => `<button class="st${k === lbTab ? " on" : ""}" type="button" data-k="${k}">${n}</button>`).join("");
+    $("lbTabs").querySelectorAll(".st").forEach(b => b.onclick = () => { lbTab = b.dataset.k; lbO = 0; lbLoad(); });
+  }
+  async function lbLoad() {
+    lbTabs(); const L = $("lbList"), bans = lbTab === "bans";
+    $("lbPrev").disabled = bans || lbO === 0; $("lbNext").disabled = true;
+    try {
+      if (bans) {
+        const j = await call("GET", null, "?bans=1"); if (!j.ok) throw 0;
+        const all = j.ids.map(v => ["id", v]).concat(j.ips.map(v => ["ip", v]));
+        $("lbCount").textContent = j.ids.length + " ids · " + j.ips.length + " redes";
+        L.innerHTML = all.length ? all.map(([k, v]) => `<div class="lbr ban"><i>${k === "id" ? "ID" : "RED"}</i><b>${esc(v)}</b><span></span><span></span><button class="st" type="button" data-un="${k}" data-v="${esc(v)}">Quitar veto</button></div>`).join("") : `<p class="none" style="margin:0">Nadie vetado.</p>`;
+        L.querySelectorAll("[data-un]").forEach(b => b.onclick = async () => { b.disabled = true; try { const r = await call("POST", { op: "unban", [b.dataset.un]: b.dataset.v }); toast(r.ok ? "Veto levantado." : "No se pudo."); } catch (e) { toast("Sin conexión."); } lbLoad(); });
+        return;
+      }
+      const j = await call("GET", null, "?lb=" + encodeURIComponent(lbBoard()) + "&o=" + lbO); if (!j.ok) throw 0;
+      lbN = j.count; $("lbNext").disabled = lbO + 50 >= lbN;
+      $("lbCount").textContent = lbN ? `${lbO + 1}-${Math.min(lbN, lbO + 50)} de ${lbN}` : "";
+      L.innerHTML = j.rows.length ? j.rows.map((r, i) => `<div class="lbr${r.ban ? " ban" : ""}"><i>${lbO + i + 1}</i><b title="${esc(r.name)}">${esc(r.name)}</b><span>${fmt(r.score)}</span>
+        <button class="st" type="button" data-del="${esc(r.id)}" data-n="${esc(r.name)}" data-s="${r.score}">Borrar</button><button class="st red" type="button" data-ban="${esc(r.id)}" data-n="${esc(r.name)}" data-s="${r.score}"${r.ban ? " disabled" : ""}>${r.ban ? "Vetado" : "Vetar"}</button>
+        <em>id ${esc(r.id)}${r.ip ? " · red " + esc(r.ip) : ""}</em></div>`).join("") : `<p class="none" style="margin:0">Tabla vacía.</p>`;
+      L.querySelectorAll("[data-del],[data-ban]").forEach(b => b.onclick = async () => {
+        const ban = !!b.dataset.ban, id = b.dataset.ban || b.dataset.del;
+        if (!confirm(`${ban ? "¿Vetar" : "¿Borrar"} a «${b.dataset.n}» (${fmt(+b.dataset.s)} puntos)?\n\nSale de TODAS las tablas${ban ? " y su id y su red ya no podrán enviar puntuaciones" : ""}.`)) return;
+        b.disabled = true;
+        try { const r = await call("POST", { op: "lbdel", id, ban }); toast(r.ok ? `Quitado de ${r.removed} ${r.removed === 1 ? "tabla" : "tablas"}${ban ? (r.ip ? " · id y red vetados" : " · id vetado") : ""}.` : "No se pudo."); }
+        catch (e) { toast("Sin conexión."); }
+        lbLoad();
+      });
+    } catch (e) { if (key) L.innerHTML = `<p class="none" style="margin:0">No se pudo leer la tabla.</p>`; }
+  }
+  $("lbPrev").onclick = () => { lbO = Math.max(0, lbO - 50); lbLoad(); };
+  $("lbNext").onclick = () => { if (lbO + 50 < lbN) { lbO += 50; lbLoad(); } };
+  $("lbReload").onclick = () => lbLoad();
 
   /* ------------------------------------------------ lanzar una ficha: vuela de la bandeja a su asiento y el efecto cae en su partida */
   /* una ficha: d = +1 (clic: poner, encender o un rayo mas) o -1 (clic derecho: quitar o apagar) */

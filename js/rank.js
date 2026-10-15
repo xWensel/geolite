@@ -39,6 +39,13 @@ window.AIQ = window.AIQ || {};
   const post = body => (line = line.catch(() => null).then(async () => {
     try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }, 20000); return j && j.ok ? j : null; } catch (e) { return null; }
   }));
+  /* boleto de partida (api/submit.js): el servidor lo da al empezar una expedicion y sin el ninguna puntuacion entra ni sube. pf = { run, x }:
+     el boleto y el desglose de la partida con que el servidor rehace la cuenta (se guarda con la fila para poder reenviarla) */
+  R.ticket = async () => {
+    if (!(await R.check())) return null;
+    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ op: "run", id: A.profile.get().id }) }); return j && j.ok && j.run ? j.run : null; } catch (e) { return null; }
+  };
+  const pfOf = r => (r && r.pf && r.pf.run ? { run: r.pf.run, x: r.pf.x } : {});
   R.localTop = (board, n = 20, o = 0) => ((A.profile.get().boards[board] || []).slice().sort((a, b) => b.score - a.score).slice(o, o + n));
   /* {global, rows:[{id?,name,score,tries?}], me?:{rank,score}, count?}: con el servidor, tu puesto aunque no estes entre los n primeros
      (el servidor solo devuelve el id de tu propia fila: los de los demas no se ensenan) */
@@ -49,7 +56,7 @@ window.AIQ = window.AIQ || {};
       const st = !again && /^daily-\d{8}$/.test(board) && R.daily.get(board);
       if (st && st.done && (!j.me || j.me.score < st.total)) { await R.daily.submit(board); return R.top(board, n, true, o); }
       const mine = !again && /^(advd-\d{8}|adv-all)$/.test(board) && (A.profile.get().boards[board] || []).find(r => r.id === A.profile.get().id);   // la Aventura tambien: una expedicion que no llego al servidor se reenvia al ver la tabla
-      if (mine && (!j.me || j.me.score < mine.score)) { await post({ board, id: mine.id, name: R.name(), score: mine.score, nd: 1 }); return R.top(board, n, true, o); }
+      if (mine && (!j.me || j.me.score < mine.score)) { await post({ board, id: mine.id, name: R.name(), score: mine.score, nd: 1, ...pfOf(mine) }); return R.top(board, n, true, o); }
       return { global: true, rows: j.rows, me: j.me || null, count: j.count || j.rows.length };
     } } catch (e) { /* cae a local */ } }
     const all = R.localTop(board, 1e4), my = all.findIndex(r => r.id === A.profile.get().id);   // tu puesto aunque no salga en la pagina, como con el servidor
@@ -68,11 +75,11 @@ window.AIQ = window.AIQ || {};
   /* entrada: {score, extra:{...}}. Devuelve {rank?, record}. */
   R.submit = async (board, entry) => {
     const P = A.profile.get(), rec = A.profile.record(board, entry.score);
-    const row = { id: P.id, name: R.name(), score: entry.score, ts: Date.now(), extra: entry.extra || {} };
+    const row = { id: P.id, name: R.name(), score: entry.score, ts: Date.now(), extra: entry.extra || {}, ...(entry.pf ? { pf: entry.pf } : {}) };
     const list = (P.boards[board] = P.boards[board] || []);
-    const mine = list.find(r => r.id === P.id); if (mine) { if (row.score > mine.score) Object.assign(mine, row); } else list.push(row);
+    const mine = list.find(r => r.id === P.id); if (mine) { if (row.score > mine.score) { delete mine.pf; Object.assign(mine, row); } } else list.push(row);
     P.boards[board] = list.sort((a, b) => b.score - a.score).slice(0, 50); A.profile.save(); R.ver++;
-    const global = (await R.check()) ? await post({ board, ...row, nd: 1 }) : null; R.ver++;
+    const global = (await R.check()) ? await post({ board, id: row.id, name: row.name, score: row.score, nd: 1, ...pfOf(row) }) : null; R.ver++;
     return { record: rec, global };
   };
   /* v0.37: cambias de nombre -> se cambia en tus filas locales y se reenvia a las tablas que se ven (Aventura, hoy y ayer). El servidor se queda con
@@ -83,9 +90,9 @@ window.AIQ = window.AIQ || {};
     A.profile.save(); R.ver++;
     if (!(await R.check())) return;
     const adv = (P.boards["adv-all"] || []).find(r => r.id === P.id), jobs = [];
-    if (adv) jobs.push(post({ board: "adv-all", id: P.id, name, score: adv.score, nd: 1 }));   // nd: cambiar de nombre ya no mete tu mejor marca de siempre en "Hoy"
-    for (const b of [R.day.board(), R.day.yesterday()]) { const m = (P.boards[b] || []).find(r => r.id === P.id); if (m) jobs.push(post({ board: b, id: P.id, name, score: m.score })); }
-    for (const b of [R.daily.board(), R.daily.yesterday()]) { const st = R.daily.get(b); if (st.done) jobs.push(post({ board: b, id: P.id, name, tries: st.tries.filter(t => !t.live).map(t => t.s || 0) })); }
+    if (adv) jobs.push(post({ board: "adv-all", id: P.id, name, score: adv.score, nd: 1, ...pfOf(adv) }));   // nd: cambiar de nombre ya no mete tu mejor marca de siempre en "Hoy"
+    for (const b of [R.day.board(), R.day.yesterday()]) { const m = (P.boards[b] || []).find(r => r.id === P.id); if (m) jobs.push(post({ board: b, id: P.id, name, score: m.score, ...pfOf(m) })); }
+    for (const b of [R.daily.board(), R.daily.yesterday()]) { const st = R.daily.get(b); if (st.done) jobs.push(post({ board: b, id: P.id, name, ...DY.body(st) })); }
     await Promise.all(jobs); R.ver++;
   };
   /* v0.3.19: "Hoy" y "Ayer" de la Aventura: la mejor expedicion de cada jugador ese dia (los intentos del Reto diario van a sus propias tablas,
@@ -95,13 +102,13 @@ window.AIQ = window.AIQ || {};
     board: dayKey,
     yesterday: () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); },
     /* cada expedicion de la Aventura acabada pasa por aqui con su puntuacion final; el servidor y el perfil se quedan con la mejor del dia */
-    async submit(score) {
-      score = Math.max(0, Math.round(score || 0)); const board = dayKey(), P = A.profile.get();
+    async submit(score, pf) {
+      score = Math.max(0, Math.round(score || 0)); const board = dayKey(), P = A.profile.get(), pd = pf ? { pf } : {};
       const list = (P.boards[board] = P.boards[board] || []), mine = list.find(r => r.id === P.id);
-      if (mine) { if (score > mine.score) Object.assign(mine, { score, name: R.name(), ts: Date.now() }); } else list.push({ id: P.id, name: R.name(), score, ts: Date.now() });
+      if (mine) { if (score > mine.score) { delete mine.pf; Object.assign(mine, { score, name: R.name(), ts: Date.now(), ...pd }); } } else list.push({ id: P.id, name: R.name(), score, ts: Date.now(), ...pd });
       const keep = [board, R.day.yesterday()]; Object.keys(P.boards).forEach(k => { if (/^(day|advd)-\d{8}$/.test(k) && !keep.includes(k)) delete P.boards[k]; });   // solo hoy y ayer (day-: las de antes, de cualquier modo)
       A.profile.save(); R.ver++;
-      const global = (await R.check()) ? await post({ board, id: P.id, name: R.name(), score }) : null; R.ver++;
+      const global = (await R.check()) ? await post({ board, id: P.id, name: R.name(), score, ...pfOf(list.find(r => r.id === P.id)) }) : null; R.ver++;
       return { global };
     },
     /* las expediciones de hoy y de ayer jugadas ANTES de existir estas tablas tambien cuentan: tu mejor Aventura (su fila de "adv-all" lleva la fecha
@@ -111,18 +118,19 @@ window.AIQ = window.AIQ || {};
       const P = A.profile.get(), days = [dayKey(), R.day.yesterday()], best = {};
       const add = (ts, s) => { const b = ts ? dayKey(new Date(ts)) : ""; if (days.includes(b) && s > (best[b] || 0)) best[b] = Math.round(s); };
       const adv = (P.boards["adv-all"] || []).find(r => r.id === P.id); if (adv) add(adv.ts, adv.score || 0);
+      const pd = adv && adv.pf ? { pf: adv.pf } : {};                                                 // el boleto de esa expedicion: con el, el servidor la deja entrar en su dia
       const sent = (P.dayFill = P.dayFill && typeof P.dayFill === "object" ? P.dayFill : {}), jobs = [];
       Object.keys(sent).forEach(k => { if (!days.includes(k)) delete sent[k]; });
       for (const b of days) {
         const s = best[b]; if (!s) continue;
         const list = (P.boards[b] = P.boards[b] || []), mine = list.find(r => r.id === P.id);
         if (mine && mine.score >= s) continue;                                                      // ya la apunto una partida nueva (y la subio R.day.submit)
-        if (mine) Object.assign(mine, { score: s, name: R.name() }); else list.push({ id: P.id, name: R.name(), score: s, ts: Date.now() });
+        if (mine) { delete mine.pf; Object.assign(mine, { score: s, name: R.name(), ...pd }); } else list.push({ id: P.id, name: R.name(), score: s, ts: Date.now(), ...pd });
         if ((sent[b] || 0) < s) jobs.push(b);
       }
       A.profile.save(); if (!jobs.length) return; R.ver++;
       if (!(await R.check())) return;
-      for (const b of jobs) { const s = P.boards[b].find(r => r.id === P.id).score; if (await post({ board: b, id: P.id, name: R.name(), score: s })) sent[b] = s; }
+      for (const b of jobs) { const m = P.boards[b].find(r => r.id === P.id), s = m.score; if (await post({ board: b, id: P.id, name: R.name(), score: s, ...pfOf(m) })) sent[b] = s; }
       A.profile.save(); R.ver++;
     },
   };
@@ -194,16 +202,18 @@ window.AIQ = window.AIQ || {};
     finish(board, k, s, info = {}) {
       const P = A.profile.get(); DY.get(board); const d = (P.daily[board] = P.daily[board] || { v: 2, tries: [] });
       while (d.tries.length < k) d.tries.push({ s: 0, ts: Date.now() });
-      d.tries[k - 1] = { s: Math.max(0, Math.round(s || 0)), r: info.r || 0, won: !!info.won, ts: Date.now() }; A.profile.save();
+      d.tries[k - 1] = { s: Math.max(0, Math.round(s || 0)), r: info.r || 0, won: !!info.won, ts: Date.now(), ...(info.pf ? { pf: info.pf } : {}) }; A.profile.save();
       return DY.submit(board);
     },
     /* la puntuacion global (suma de los intentos cerrados) va a la tabla local y, si hay servidor, a la global */
+    /* lo que se envia de un dia: la puntuacion de cada intento cerrado y el boleto de su partida (sin el, un intento nuevo no entra) */
+    body(st) { const done = st.tries.filter(t => !t.live); return { tries: done.map(t => t.s || 0), proofs: done.map(t => (t.pf && t.pf.run ? { run: t.pf.run, x: t.pf.x } : null)) }; },
     async submit(board) {
       const P = A.profile.get(), st = DY.get(board), tries = st.tries.filter(t => !t.live).map(t => t.s || 0);
       const row = { id: P.id, name: R.name(), score: st.total, tries, ts: Date.now() };
       P.boards[board] = (P.boards[board] || []).filter(r => r.id !== P.id).concat(row).sort((a, b) => b.score - a.score).slice(0, 50);
       A.profile.record(board, st.total); A.profile.save(); R.ver++;
-      const global = (await R.check()) ? await post({ board, id: row.id, name: row.name, tries }) : null; R.ver++;
+      const global = (await R.check()) ? await post({ board, id: row.id, name: row.name, ...DY.body(st) }) : null; R.ver++;
       return { total: st.total, global };
     },
   };

@@ -63,7 +63,7 @@ Las fichas son de 2, 5 o 10 doblones. Los retornos se comprueban enumerando toda
 - **Aventura** (`adv-all`): la mejor expedición de cada jugador (`ZADD GT`).
 - **Sala privada del Duelo de fichas** (`POST /api/duelo`, clave `duelo:<código>`, caduca a la hora; cliente en `js/duelo-red.js`): un relevo entre dos jugadores. Solo guarda la sala, la hora a la que empieza cada ronda y las dos respuestas: cada juego saca las mismas preguntas de la semilla que reparte el servidor y hace las mismas cuentas. La respuesta del otro no se entrega hasta que la tuya está guardada. No guarda puntuaciones ni clasificación.
 
-**Antitrampas:** la puntuación es de confianza (límites de plausibilidad y de frecuencia). Reproducir cada partida en servidor a partir de la semilla y los clics es el siguiente paso previsto.
+**Antitrampas:** cada expedición pide al empezar un **boleto de partida** al servidor (`{ op: "run" }` en `api/submit.js`, 30 por hora y red). Ninguna puntuación entra ni sube sin el boleto de su partida: el servidor rehace la cuenta final con el desglose (puntos de las preguntas, rondas superadas, victoria, Ascensión), pone un tope de 5.500 puntos por pregunta, exige al menos 1,5 s de reloj por pregunta desde que se dio el boleto y cada boleto vale para una sola puntuación. Repetir la que ya tienes (cambio de nombre) no lo necesita. La mesa del autor (`/mesa`, pestaña Clasificación) borra filas y veta ids y redes (la IP se guarda cifrada). Sigue siendo de confianza, porque la partida se juega en el navegador: reproducir cada partida en servidor a partir de la semilla y los clics es el siguiente paso previsto.
 
 ## Estructura
 

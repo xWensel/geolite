@@ -265,6 +265,15 @@ window.AIQ = window.AIQ || {};
   A.adv.countSeen = countSeen;
   A.adv.roundPool = r => poolFor(r).length;
   const persist = () => { try { if (run) { if (!run.practice) localStorage.setItem(slot, JSON.stringify(run)); } else localStorage.removeItem(slot); } catch (e) { /* sin almacenamiento */ } };
+  /* boleto de partida (A.rank.ticket, api/submit.js): sin el, la puntuacion no entra en la clasificacion. Se pide al empezar y, si no llego
+     (sin red, servidor dormido, una partida guardada de antes), al empezar cada ronda; viaja con la partida guardada */
+  let tkBusy = false;
+  const ticket = () => {
+    const r = run; if (!r || r.practice || r.tk || tkBusy || !A.rank.ticket) return; tkBusy = true;
+    A.rank.ticket().then(t => { tkBusy = false; if (t && run === r && !r.tk) { r.tk = t; persist(); } }, () => { tkBusy = false; });
+  };
+  /* lo que el servidor necesita para rehacer la cuenta de finalOf: puntos de las preguntas, rondas superadas, victoria, Ascension y preguntas contestadas */
+  const proofOf = r => (r.tk ? { run: r.tk, x: { s: r.score, c: r.cleared, w: r.won ? 1 : 0, a: Math.max(0, Math.min(5, r.asc | 0)), q: Math.max(r.qTotal || 0, r.cleared) } } : null);
 
   /* tanda 17: Ascensiones con identidad. A1 La casa cobra (+5 % objetivo, -1 s, +10 % precios: sube un escalon por Ascension), A2 Reglas de la casa (una regla en R5, R7, R9 y R11),
      A3 Retos afilados (+1 nivel en los actos I y II), A4 Jefes con poder (+1 reto en cada jefe, tope 5, y -1 provision: medido, ver perks-revision-2026-10) y A5 Equipaje de mano (mochila de 4, 5 con el Pacto) */
@@ -452,7 +461,7 @@ window.AIQ = window.AIQ || {};
       livesLostAct: 0, shieldAct: -1, leftSum: 0, roundScore: 0, rGood: 0, qTotal: 0, stats: { bulls: 0, best: 0, coinsEarned: 0 }, t0: Date.now(),
     };
     d.tools.forEach(t => addTool(t)); if (bonus && bonus.buy) bonus.buy(run);
-    persist(); A.ach.emit("adv", { kind: "start" }); if (!practice) { A.profile.get().adv.runs++; A.profile.save(); }
+    persist(); ticket(); A.ach.emit("adv", { kind: "start" }); if (!practice) { A.profile.get().adv.runs++; A.profile.save(); }
     startRound();
   };
   /* Reto diario: gasta uno de los 3 intentos de hoy y empieza con la mano del dia (baraja, ascension, regalo y ruta) y la semilla de ESE intento */
@@ -615,7 +624,7 @@ window.AIQ = window.AIQ || {};
     };
   }
   function startRound(keep) {
-    run.phase = "round"; if (A.coverMap) A.coverMap("camp", false);   // sales del Campamento: el mapa vuelve a dibujarse al instante
+    run.phase = "round"; ticket(); if (A.coverMap) A.coverMap("camp", false);   // sales del Campamento: el mapa vuelve a dibujarse al instante
     A.casa.acto(run.act);                                              // la noche avanza con los actos (js/casa.js)
     if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; run.calmOn = false; refillTools(); }
     const Lv = roundLevel(keep), S = C().S;
@@ -2628,14 +2637,15 @@ window.AIQ = window.AIQ || {};
     if (win && run.won && !daily) P.adv.asc = Math.max(P.adv.asc, Math.min(5, run.asc + 1));   // el Reto diario no desbloquea ascensiones de la Aventura
     A.profile.save();
     const hadBest = (P.records["adv-all"] || 0) > 0, rec = !daily && A.profile.record("adv-all", final);   // la primera expedicion siempre es "record": el crupier solo lo celebra si habia uno que batir
-    if (!daily) A.rank.submit("adv-all", { score: final, extra: { deck: run.deck, asc: run.asc, r: run.cleared } });
-    if (!daily) A.rank.day.submit(final);                                                      // "Hoy" y "Ayer" de la Aventura: la mejor expedicion del dia (el Reto diario tiene sus tablas)
+    const pf = proofOf(run);
+    if (!daily) A.rank.submit("adv-all", { score: final, extra: { deck: run.deck, asc: run.asc, r: run.cleared }, pf });
+    if (!daily) A.rank.day.submit(final, pf);                                                      // "Hoy" y "Ayer" de la Aventura: la mejor expedicion del dia (el Reto diario tiene sus tablas)
     A.ach.emit("adv", { kind: "end", score: final, won: !!run.won });
     /* Reto diario: el intento se cierra y suma a la puntuacion global del dia (las partidas del formato antiguo, sin numero de intento, cuentan como el primero) */
     let day = null, sent = null;
     if (wasRanked && board) {
       const DY = A.rank.daily, k = run.dailyTry || (DY.get(board).tries.length ? 0 : 1);
-      if (k) { sent = DY.finish(board, k, final, { r: run.cleared, won: !!run.won }); day = { k, ...DY.get(board) }; }
+      if (k) { sent = DY.finish(board, k, final, { r: run.cleared, won: !!run.won, pf }); day = { k, ...DY.get(board) }; }
       A.ach.emit("daily", {});
     }
     const r = run; run = null; persist(); C().S.run = null; A.chal.end(); A.dealer.enable(true);

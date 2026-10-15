@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.128",
+      name: L("Clasificación limpia", "Clean leaderboard", "Classement propre", "Placar limpo", "Saubere Rangliste", "Classifica pulita", "", "干净的排行榜", "깨끗한 리더보드", "クリーンなランキング", "Честный рейтинг", "Czysty ranking"),
+      date: "2026-10-16",
+      summary: L("Las puntuaciones inventadas ya no entran en la Clasificación: solo cuentan las expediciones jugadas de verdad.", "Made-up scores no longer get into the Leaderboard: only expeditions actually played count.", "Les scores inventés n'entrent plus dans le Classement : seules comptent les expéditions vraiment jouées.", "Pontuações inventadas não entram mais no Placar: só contam as expedições jogadas de verdade.", "Erfundene Punktzahlen kommen nicht mehr in die Rangliste: Es zählen nur wirklich gespielte Expeditionen.", "I punteggi inventati non entrano più in Classifica: contano solo le spedizioni giocate davvero.", "", "编造的分数不再进入排行榜：只计算真正玩过的远征。", "지어낸 점수는 더 이상 리더보드에 오르지 않습니다. 실제로 플레이한 원정만 집계됩니다.", "でっち上げのスコアはもうランキングに入りません。実際にプレイした遠征だけが数えられます。", "Выдуманные очки больше не попадают в рейтинг: засчитываются только по-настоящему сыгранные экспедиции.", "Zmyślone wyniki nie trafiają już do rankingu: liczą się tylko naprawdę rozegrane wyprawy."),
+      chapters: [
+        { id: "clasificacion", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Behebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Clasificación", "Leaderboard", "Classement", "Placar", "Rangliste", "Classifica", "", "排行榜", "리더보드", "ランキング", "Рейтинг", "Ranking"),
+          entries: [
+            E(L("Solo cuentan las partidas de verdad", "Only real games count", "Seules les vraies parties comptent", "Só contam as partidas de verdade", "Nur echte Läufe zählen", "Contano solo le partite vere", "", "只有真正的对局才算数", "실제 판만 인정됩니다", "本当に遊んだゲームだけが数えられる", "Считаются только настоящие партии", "Liczą się tylko prawdziwe gry"), "fix", "0.3.128", [
+              L("Alguien metía en la Clasificación puntuaciones inventadas sin jugar. Ahora cada expedición recibe del servidor un boleto al empezar y solo entra la puntuación de una partida jugada de verdad. Las falsas se han retirado.",
+                "Someone was slipping made-up scores into the Leaderboard without playing. Now every expedition gets a ticket from the server when it starts, and only the score of a game actually played gets in. The fake ones have been removed.",
+                "Quelqu'un glissait dans le Classement des scores inventés sans jouer. Désormais, chaque expédition reçoit un ticket du serveur au départ, et seul entre le score d'une partie vraiment jouée. Les faux scores ont été retirés.",
+                "Alguém estava colocando no Placar pontuações inventadas sem jogar. Agora cada expedição recebe um bilhete do servidor ao começar, e só entra a pontuação de uma partida jogada de verdade. As falsas foram removidas.",
+                "Jemand hat erfundene Punktzahlen in die Rangliste geschmuggelt, ohne zu spielen. Jetzt bekommt jede Expedition beim Start ein Ticket vom Server, und nur die Punktzahl eines wirklich gespielten Laufs kommt hinein. Die falschen wurden entfernt.",
+                "Qualcuno infilava in Classifica punteggi inventati senza giocare. Ora ogni spedizione riceve un biglietto dal server all'inizio ed entra solo il punteggio di una partita giocata davvero. Quelli falsi sono stati rimossi.",
+                "",
+                "有人不玩游戏就往排行榜里塞编造的分数。现在每次远征开始时都会从服务器领取一张凭证，只有真正玩过的对局分数才能上榜。假分数已被删除。",
+                "누군가 플레이하지 않고 지어낸 점수를 리더보드에 넣고 있었습니다. 이제 모든 원정은 시작할 때 서버에서 티켓을 받고, 실제로 플레이한 판의 점수만 올라갑니다. 가짜 점수는 삭제했습니다.",
+                "プレイせずにでっち上げのスコアをランキングに入れる人がいました。今後は遠征の開始時にサーバーからチケットを受け取り、実際にプレイしたゲームのスコアだけが載ります。偽のスコアは削除しました。",
+                "Кто-то подбрасывал в рейтинг выдуманные очки, не играя. Теперь каждая экспедиция при старте получает от сервера билет, и в рейтинг попадают только очки по-настоящему сыгранной партии. Фальшивые удалены.",
+                "Ktoś wrzucał do rankingu zmyślone wyniki bez grania. Teraz każda wyprawa dostaje na starcie bilet z serwera i do rankingu trafia tylko wynik naprawdę rozegranej gry. Fałszywe wyniki usunięto."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.127",
       name: L("Cartas en español", "Cards in Spanish", "Fiches en espagnol", "Cartas em espanhol", "Karten auf Spanisch", "Carte in spagnolo", "", "西班牙语卡片", "스페인어 카드", "スペイン語のカード", "Карточки на испанском", "Karty po hiszpańsku"),
       date: "2026-10-16",

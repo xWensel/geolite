@@ -3,6 +3,8 @@
 const URL_ = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 exports.configured = !!(URL_ && TOKEN);
+/* la IP de quien envia, cifrada con el token de Redis como sal (secreto del servidor): sirve para vetar a un tramposo sin guardar IPs en claro */
+exports.ipTag = ip => require("crypto").createHmac("sha256", String(TOKEN || "x")).update("ip:" + ip).digest("hex").slice(0, 16);
 exports.pipeline = async cmds => {
   const r = await fetch(URL_ + "/pipeline", { method: "POST", headers: { Authorization: "Bearer " + TOKEN, "content-type": "application/json" }, body: JSON.stringify(cmds), signal: AbortSignal.timeout(4000) });   // Redis colgado: 502 en vez de dejar la funcion esperando
   if (!r.ok) throw new Error("kv " + r.status);
