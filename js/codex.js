@@ -1306,6 +1306,7 @@ window.AIQ = window.AIQ || {};
     _load: (id, lang) => loadContent(E[id], lang || A.wlang()), _toast: ids => toast(ids),
     _index: () => index(), _groupStats: key => gStats(index().gs[key]), _map: () => map, _ui: () => ui,
     ids: () => order.slice(),
+    onUnlock: f => { listeners.push(f); },                          // los retos del Club (entrega 3) cuentan las tarjetas nuevas (js/club-retos.js)
     regionNames: ne => (REG_OF[ne] ? REG_OF[ne].names : ""),         // nombre de la familia de un pais, "es|en|..." (sin montar el atlas)
     /* el truco de pruebas (js/truco.js): todas las tarjetas (las tres medallas de cada lugar), ya vistas; sin el monton de la esquina ni los logros */
     _todo() { const now = Date.now(); let n = 0; for (const id in E) { if (!store.unlocked[id]) { store.unlocked[id] = { t: now, tier: 3 }; n++; } store.seen[id] = 1; } save(); dirty(); return order.length; },

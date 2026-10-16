@@ -82,6 +82,7 @@ window.AIQ = window.AIQ || {};
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     if (A.club) A.club.wire(() => screen("profile"));                      // tu tarjeta de socio: abre el Perfil y cuenta las fichas de oro nuevas
     if ($("bqBtn")) $("bqBtn").onclick = () => { A.sfx.card(); screen("boutique"); };   // v0.3.132: la boutique, bajo la tarjeta de socio
+    if ($("rtBtn")) $("rtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // entrega 3 del Club: los retos, junto a la tienda (js/club-retos.js)
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura
     if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
@@ -544,7 +545,7 @@ window.AIQ = window.AIQ || {};
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open() }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
   }
   /* el Reto diario de hoy tal cual, sin cerrar nada (precalentamiento de la puerta): sin ids, es una copia */

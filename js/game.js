@@ -861,6 +861,11 @@
     /* v0.2.15: acierto = la misma regla que la racha (<= 300 km, el anillo exterior). Te llevas la bandera: en el mapa se iza en el sitio
        (FLAG_AT, con su corneta) y en el ticket va junto al nombre; si fallas, el mastil se queda vacio. T_SLAM: golpe de la caja de la racha */
     const hit = !!guess && (adv ? adv.hit : km <= lim[0]), fl = flagsOf(o), up = hit && fl.length > 0, FLAG_AT = 650 + HS, T_SLAM = 1300 + HS;
+    /* entrega 3 del Club: la respuesta, para los retos de la casa (js/club-retos.js; la practica no cuenta) */
+    if (A.clubRetos && !(S.run && S.run.practice)) {
+      const pt = ans || labelAt, kd = o.kind || L.kind, fr = kd === "flag" || !!(S.run && o.t === "c" && A.adv.isFlagRound && A.adv.isFlagRound());
+      A.clubRetos.q({ hit, bull: !!guess && km <= 25, ratio: guess ? ratio : 0, streak: S.streak || 0, cont: pt ? A.continent(pt[1], pt[0]) : null, cap: kd === "capital", flag: fr, water: !!af, ctry: o.t === "c" && !af && !fr });
+    }
     const label = o.clue ? A.tx(o.answer) : A.tx(o.name);
     /* tu chincheta, por el camino corto: si cruza el antimeridiano (Fiyi y Samoa) se dibuja en la copia del mundo junto al objetivo */
     const refLon = ans ? ans[0] : labelAt ? labelAt[0] : null, gLon = guess ? (refLon == null ? guess.lon : guess.lon + 360 * Math.round((refLon - guess.lon) / 360)) : null;
@@ -1032,6 +1037,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (levelPerfect) { A.profile.get().stats.perfectRounds++; A.profile.save(); }
     A.ach.emit("level", { perfect: levelPerfect });
     const L = lv(), pass = S.levelScore >= L.advance, p = prog(S.camp.id); if (!pass) S.clean = false;
+    if (pass && A.clubRetos && S.camp.mode === "classic") A.clubRetos.ev("lvl", { perfect: levelPerfect });   // entrega 3 del Club: los retos del Clasico
     map.clearMarks(); map.animateTo(map.home(), 900); map.setPick(false);
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("factText").textContent = ""; $("streakChip").classList.add("hidden");
     S.phase = "levelEnd";
@@ -1054,6 +1060,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const L = lv(), tier = A.iqTier(iq), tierName = A.t("tier." + tier);
     const shown = win ? S.runTotal : S.runTotal + S.levelScore;
     if (S.camp.mode === "classic") {
+      if (win && A.clubRetos) A.clubRetos.ev("camp");
       if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }

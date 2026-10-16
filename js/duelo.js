@@ -540,6 +540,10 @@ window.AIQ = window.AIQ || {};
     if (!cur.rvLocked) { cur.rvLocked = true; cur.rvT = Math.min(cur.rvAt, tEnd); }
     const rd = settle(st, cur.meAns, net ? net.rv : { lon: cur.bot.lon, lat: cur.bot.lat, t: cur.rvT }), me = rd.me, rv = rd.rv, g = cur.meAns, tok = st.k, live = () => st && st.k === tok && st.phase === "reveal";
     if ((!st.auto || st.auto.club) && A.club) A.club.q(me.pts / 1000);                      // el Club de la casa: experiencia por precision (se cobra en el veredicto)
+    if ((!st.auto || st.auto.club) && A.clubRetos) {                     // entrega 3 del Club: la respuesta, para los retos de la casa (auto.club: las pruebas)
+      const lim = A.codexLimits ? A.codexLimits({ id: q.cid[0], cids: q.cid }) : [300], wa = !!(A.waters && A.waters.of(q)), ok = !!g && me.km != null;
+      A.clubRetos.q({ hit: ok && me.km <= lim[0], bull: ok && me.km <= 25, ratio: me.pts / 1000, streak: 0, cont: cur.e && cur.e.cont, cap: q.kind === "capital", flag: q.kind === "flag", water: wa, ctry: q.t === "c" && !wa && q.kind !== "flag" });
+    }
     const cx = g && !st.auto && A.codexUnlock ? A.codexUnlock(q, me.km) : { added: [], level: 0 }; rd.cards = cx.added;   // la Enciclopedia, en silencio: se ensena en el veredicto
     D.hud();
     /* el objetivo, como en el revelado de siempre: el lugar con su bandera en el mastil, el pais resaltado o la masa de agua */
@@ -625,6 +629,7 @@ window.AIQ = window.AIQ || {};
     const sc = N.score, share = (w, t) => (t > 0 ? w / t : 0.5);
     const lg = !!st.liga && !st.auto && !nt, r0 = rankOf(was.lp), r1 = rankOf(now.lp), lgDelta = now.lp - was.lp, lgFrac = r => (r.crupier ? (r.pts % LG.per) / LG.per : r.into / LG.per), MYLG = CFG.tables[r1.league].chip;
     A.sfx.stamp(); setTimeout(win ? A.sfx.victory : o.tie ? A.sfx.stamp : A.sfx.fail, 380);
+    if ((!st.auto || st.auto.club) && A.clubRetos && !(o.quit && o.quit !== "rv" && (o.rounds || 0) < 3)) A.clubRetos.ev("duel", { win, tie: !!o.tie });   // entrega 3 del Club (rendirse al empezar no cuenta como jugado)
     const club = (!st.auto || st.auto.club) && A.club ? (A.club.bonus(win ? A.club.bonusFor("duel") : 0), A.club.cash()) : null;   // el Club de la casa: su recibo, bajo la liga
     const lead = o.lost ? T("Has estado demasiado rato sin conexión.", "You were offline for too long.")
       : o.left ? (o.cut ? Tf("{name} ha perdido la conexión.", "{name} lost their connection.", { name: fo }) : Tf("{name} se ha levantado de la mesa.", "{name} left the table.", { name: fo }))

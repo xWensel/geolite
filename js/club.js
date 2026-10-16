@@ -14,7 +14,7 @@
  *   A.club.cash()           cobra lo pendiente -> { gain, from, to, fichas, ups } o null
  *   A.club.strip(res)       el bloque del ticket (HTML)          A.club.play(res, el)  su animacion: barra, sello de nivel, premio y fichas
  *   A.club.card()           la tarjeta de socio de la portada     A.club.wire()         su cuenta de fichas y su clic
- *   A.club.level()  A.club.fichas()  A.club.tierOf(nivel)  A.club.need(nivel)
+ *   A.club.level()  A.club.fichas()  A.club.tierOf(nivel)  A.club.need(nivel)  A.club.give(n) (lo que pagan los retos, js/club-retos.js)
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -94,10 +94,11 @@ window.AIQ = window.AIQ || {};
   function q(ratio) { const c = st(); const r = Math.max(0, Math.min(1, +ratio || 0)); c.pend += r * CFG.xpQ; c.pq++; }
   function bonus(n) { const c = st(); c.pend += Math.max(0, +n || 0); }
   function cash() {
-    const c = st(), gain = Math.round(c.pend || 0); if (gain <= 0) { c.pend = 0; c.pq = 0; return null; }
+    const c = st(), gain = Math.max(0, Math.round(c.pend || 0)), retos = A.clubRetos ? A.clubRetos.take() : [];   // entrega 3: los retos cumplidos se tachan en el mismo recibo
+    if (gain <= 0 && !retos.length) { c.pend = 0; c.pq = 0; return null; }
     const from = levelOf(c.xp); c.xp += gain; c.pend = 0; const pq = c.pq; c.pq = 0;
     const to = levelOf(c.xp), fichas = fichasFor(from.lvl, to.lvl); c.f += fichas; save();
-    return { gain, pq, from, to, fichas, ups: to.lvl - from.lvl };
+    return { gain, pq, from, to, fichas, ups: to.lvl - from.lvl, retos };
   }
 
   /* ------------------------------------------------------------------ el ticket: Club de la casa, +exp, la barra y lo que paga */
@@ -109,8 +110,16 @@ window.AIQ = window.AIQ || {};
     return `<div class="club-tk" data-ck>
       <div class="ck-h"><span class="ck-t">${fi()}${esc(P6(TX.club))}</span><b class="ck-g">+<span class="ck-gn">0</span> ${esc(P6(TX.xp))}</b></div>
       <div class="ck-row"><span class="ck-lv" data-lv>${esc(P6(TX.lvS).replace("{n}", res.from.lvl))}</span><span class="ck-bar"><i style="width:${f0}%"></i></span><span class="ck-lv nx" data-nx>${esc(P6(TX.lvS).replace("{n}", res.from.lvl + 1))}</span></div>
-      <div class="ck-pay" hidden><span class="ck-up" data-up></span><b class="ck-f">+<span data-f>0</span>${fi("sm")}</b></div>
+      <div class="ck-pay" hidden><span class="ck-up" data-up></span><b class="ck-f">+<span data-f>0</span>${fi("sm")}</b></div>${retoRows(res.retos)}
     </div>`;
+  }
+  /* entrega 3: los retos cumplidos en la partida, uno por fila (hasta 3; si hay mas, una fila que los suma). Se tachan en play() */
+  function retoRows(list) {
+    if (!list || !list.length) return "";
+    const shown = list.length > 3 ? list.slice(0, 2) : list, rest = list.slice(shown.length), RT = A.clubRetos.tx;
+    const r1 = x => `<div class="ck-rt" data-rt><span class="ck-rti">${A.icon(x.ic)}</span><span class="ck-rtx"><em>${esc(x.g)}</em><span>${esc(x.tx)}</span></span><b class="ck-f">+${x.pay}${fi("sm")}</b></div>`;
+    const more = rest.length ? `<div class="ck-rt sum" data-rt><span class="ck-rti">${A.icon("journal")}</span><span class="ck-rtx"><em>${esc(P6(RT.tab))}</em><span>${esc(P6(RT.more).replace("{n}", rest.length))}</span></span><b class="ck-f">+${rest.reduce((a, x) => a + x.pay, 0)}${fi("sm")}</b></div>` : "";
+    return `<div class="ck-rts">${shown.map(r1).join("")}${more}</div>`;
   }
   /* la animacion: cuenta la experiencia, llena la barra y, en cada nivel que cruza, el sello, el premio (1, 2 o 3 golpes de la casa) y las fichas */
   function play(res, root, delay = 1500) {
@@ -154,6 +163,12 @@ window.AIQ = window.AIQ || {};
         T(() => { bar.style.transition = "none"; bar.style.width = "0%"; }, t - 1);
       }
     });
+    /* entrega 3: los retos cumplidos se tachan uno a uno, con su sello y sus fichas */
+    el.querySelectorAll("[data-rt]").forEach((row, i) => T(() => {
+      row.classList.add("on");
+      if (A.sfx && A.sfx.passStamp) A.sfx.passStamp(); else if (A.sfx && A.sfx.stamp) A.sfx.stamp();
+      if (A.sfx && A.sfx.coin) setTimeout(() => A.sfx.coin(i), 180);
+    }, t + 250 + i * (reduce ? 0 : 520)));
   }
 
   /* ------------------------------------------------------------------ la tarjeta de socio de la portada */
@@ -169,7 +184,7 @@ window.AIQ = window.AIQ || {};
       <span class="sc-c"><b>${esc(P6(RANKS[t][0]))}</b><i>${esc(P6(TX.lv).replace("{n}", L.lvl))}</i></span>
       <span class="sc-bar" aria-label="${esc(P6(TX.left).replace("{n}", A.fmt(L.need - L.into)).replace("{m}", L.lvl + 1))}"><i style="width:${pct(L.into, L.need)}%"></i></span>
       <span class="sc-f">${fi("sc")}<b id="socioF">${A.fmt(c.fSeen == null ? c.f : c.fSeen)}</b></span>
-    </button>${A.boutique ? `<button type="button" class="hh-bq" id="bqBtn">${A.icon ? A.icon("purse") : ""}<span>${esc(P6(TX.shop))}</span></button>` : ""}</span>`;
+    </button><span class="hh-tabs">${A.boutique ? `<button type="button" class="hh-bq" id="bqBtn">${A.icon ? A.icon("purse") : ""}<span>${esc(P6(TX.shop))}</span></button>` : ""}${A.clubRetos ? A.clubRetos.tab() : ""}</span></span>`;
   }
   /* al volver a la portada con fichas nuevas, la tarjeta las cuenta delante de ti (moneda a moneda), con su brillo */
   function wire(onOpen) {
@@ -193,6 +208,7 @@ window.AIQ = window.AIQ || {};
     CFG, RANKS, need, levelOf, tierOf, groupOf, q, bonus, cash, strip, play, card, wire, tierNow,
     level: () => levelOf(st().xp).lvl, xp: () => st().xp, fichas: () => st().f,
     /* v0.3.132: gastar fichas de oro (la boutique). La tarjeta no las cuenta hacia arriba: lo gastado ya se ha visto irse */
+    give(n) { const c = st(); n = Math.max(0, Math.round(n)); c.f += n; save(); return c.f; },   // entrega 3: lo que pagan los retos (la tarjeta lo cuenta al volver: fSeen no se toca)
     spend(n) { const c = st(); n = Math.max(0, Math.round(n)); if (!(c.f >= n)) return false; c.f -= n; c.fSeen = Math.min(c.fSeen == null ? c.f : c.fSeen, c.f); save(); return true; },
     bonusFor: kind => (kind === "win" ? CFG.bonus.win : kind === "ok" ? CFG.bonus.ok : kind === "duel" ? CFG.bonus.duel : 0),
     tx: TX, tierName: t => P6(RANKS[Math.max(0, Math.min(RANKS.length - 1, t | 0))][0]),
