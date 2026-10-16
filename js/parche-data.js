@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.142",
+      name: L("Las fichas, con la Tierra de hoy", "The chips, with today's Earth", "Les jetons, avec la Terre actuelle", "As fichas, com a Terra de hoje", "Die Chips mit der neuen Erde", "Le fiche, con la Terra di oggi", "", "筹码换上新地球", "새 지구를 담은 칩", "新しい地球のチップ", "Фишки с новой Землёй", "Żetony z nową Ziemią"),
+      date: "2026-10-16",
+      summary: L("Las fichas de colores llevan ahora la misma Tierra que el logo, el escudo y los logros.", "The coloured chips now carry the same Earth as the logo, the emblem and the achievements.", "Les jetons de couleur portent maintenant la même Terre que le logo, l'emblème et les succès.", "As fichas coloridas agora levam a mesma Terra do logo, do emblema e das conquistas.", "Die farbigen Chips tragen jetzt dieselbe Erde wie das Logo, das Emblem und die Erfolge.", "Le fiche colorate ora hanno la stessa Terra del logo, dell'emblema e degli obiettivi.", "", "彩色筹码现在用的是和标志、徽标、成就同一个地球。", "색깔 칩에 이제 로고, 엠블럼, 업적과 같은 지구가 들어가요.", "色つきのチップに、ロゴ・エンブレム・実績と同じ地球が入りました。", "На цветных фишках теперь та же Земля, что на логотипе, эмблеме и в достижениях.", "Kolorowe żetony mają teraz tę samą Ziemię co logo, emblemat i osiągnięcia."),
+      chapters: [
+        { id: "fichas", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Fichas", "Chips", "Jetons", "Fichas", "Chips", "Fiche", "", "筹码", "칩", "チップ", "Фишки", "Żetony"),
+          entries: [
+            E(L("La Tierra nueva en las fichas", "The new Earth on the chips", "La nouvelle Terre sur les jetons", "A nova Terra nas fichas", "Die neue Erde auf den Chips", "La nuova Terra sulle fiche", "", "筹码上的新地球", "칩 위의 새 지구", "チップに新しい地球", "Новая Земля на фишках", "Nowa Ziemia na żetonach"), "change", "0.3.142", [
+              L("Las fichas de colores que ves en la tarjeta del Club, la tienda, el Duelo y el botón de Continuar llevaban todavía la Tierra del logo antiguo. Ahora llevan la nueva, la misma del logo, el escudo y los logros, sin hielo en el borde y bien centrada en la ficha.",
+                "The coloured chips on the Club card, the shop, the Duel and the Continue button still carried the old logo's Earth. Now they carry the new one, the same as on the logo, the emblem and the achievements, with no ice on its edge and neatly centred on the chip.",
+                "Les jetons de couleur de la carte du Club, de la boutique, du Duel et du bouton Continuer portaient encore la Terre de l'ancien logo. Ils portent maintenant la nouvelle, la même que sur le logo, l'emblème et les succès, sans glace sur le bord et bien centrée sur le jeton.",
+                "As fichas coloridas do cartão do Clube, da loja, do Duelo e do botão Continuar ainda levavam a Terra do logo antigo. Agora levam a nova, a mesma do logo, do emblema e das conquistas, sem gelo na borda e bem centralizada na ficha.",
+                "Die farbigen Chips auf der Clubkarte, im Shop, im Duell und auf der Schaltfläche Weiter trugen noch die Erde des alten Logos. Jetzt tragen sie die neue, dieselbe wie Logo, Emblem und Erfolge, ohne Eis am Rand und sauber mittig auf dem Chip.",
+                "Le fiche colorate della tessera del Club, del negozio, del Duello e del pulsante Continua avevano ancora la Terra del vecchio logo. Ora hanno quella nuova, la stessa del logo, dell'emblema e degli obiettivi, senza ghiaccio sul bordo e ben centrata sulla fiche.",
+                "",
+                "俱乐部会员卡、商店、对决和“继续”按钮上的彩色筹码，用的还是旧标志的地球。现在换成了新的，和标志、徽标、成就里的一样，边缘没有冰，并且端正地居中在筹码上。",
+                "클럽 카드, 상점, 결투, 이어하기 버튼에 있는 색깔 칩에는 아직 옛 로고의 지구가 들어 있었어요. 이제 로고, 엠블럼, 업적과 같은 새 지구가 들어가요. 가장자리에 얼음도 없고 칩 한가운데에 반듯하게 놓였어요.",
+                "クラブのカード、ショップ、デュエル、「つづける」ボタンの色つきチップには、まだ旧ロゴの地球が入っていました。いまはロゴ・エンブレム・実績と同じ新しい地球です。ふちに氷はなく、チップのまんなかにきちんと収まっています。",
+                "Цветные фишки на карте Клуба, в магазине, в Дуэли и на кнопке «Продолжить» всё ещё несли Землю старого логотипа. Теперь на них новая — та же, что на логотипе, эмблеме и в достижениях, без льда по краю и ровно по центру фишки.",
+                "Kolorowe żetony na karcie Klubu, w sklepie, w Pojedynku i na przycisku Kontynuuj miały jeszcze Ziemię ze starego logo. Teraz mają nową, tę samą co logo, emblemat i osiągnięcia, bez lodu na krawędzi i równo pośrodku żetonu."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.141",
       name: L("El logo, más equilibrado", "A better-balanced logo", "Un logo mieux équilibré", "Um logo mais equilibrado", "Ein ausgewogeneres Logo", "Un logo più equilibrato", "", "更均衡的标志", "더 균형 잡힌 로고", "バランスのよくなったロゴ", "Более сбалансированный логотип", "Lepiej wyważone logo"),
       date: "2026-10-16",
