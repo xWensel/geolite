@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.161",
+      name: L("Tu carta se inclina", "Your card tilts", "Ta carte s'incline", "O teu cartão inclina", "Deine Karte neigt sich", "La tua carta si inclina", "", "你的卡片会倾斜", "카드가 기울어집니다", "カードが傾く", "Карта наклоняется", "Karta się przechyla"),
+      date: "2026-10-16",
+      summary: L("La carta de socio de la portada vuelve a inclinarse hacia el ratón, como en el Perfil.", "The member card on the title screen tilts toward the mouse again, as in the Profile.", "La carte de membre de l'accueil s'incline de nouveau vers la souris, comme dans le Profil.", "O cartão de sócio da capa volta a inclinar-se para o rato, como no Perfil.", "Die Mitgliedskarte auf dem Titelbild neigt sich wieder zur Maus, wie im Profil.", "La carta del socio in copertina torna a inclinarsi verso il mouse, come nel Profilo.", "", "主页上的会员卡再次随鼠标倾斜，就像在个人资料中一样。", "표지의 회원 카드가 프로필에서처럼 다시 마우스 쪽으로 기웁니다.", "表紙の会員カードが、プロフィールと同じようにマウスに向かってまた傾くようになりました。", "Карта участника на главном экране снова наклоняется к мыши, как в Профиле.", "Karta członka na ekranie głównym znów przechyla się w stronę myszy, jak w Profilu."),
+      chapters: [
+        { id: "portada", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Portada", "Title screen", "Accueil", "Capa", "Titelbild", "Copertina", "", "主页", "표지", "表紙", "Главный экран", "Ekran główny"),
+          entries: [
+            E(L("La carta sigue al ratón", "The card follows the mouse", "La carte suit la souris", "O cartão segue o rato", "Die Karte folgt der Maus", "La carta segue il mouse", "", "卡片跟随鼠标", "카드가 마우스를 따라갑니다", "カードがマウスに追従", "Карта следует за мышью", "Karta podąża za myszą"), "change", "0.3.161", [
+              L("La carta de socio de la portada se redibujaba sin parar en algunas pantallas y perdía su inclinación: ahora **se inclina de lado a lado** al pasar el ratón, con su brillo, y además gasta menos.", "The title-screen member card kept redrawing itself on some screens and lost its tilt: it now **tilts from side to side** under the mouse, with its shine, and it is lighter on the game too.", "La carte de membre de l'accueil se redessinait sans cesse sur certains écrans et perdait son inclinaison : elle **s'incline maintenant de côté à côté** sous la souris, avec son reflet, et pèse moins sur le jeu.", "O cartão de sócio da capa redesenhava-se sem parar em alguns ecrãs e perdia a inclinação: agora **inclina-se de um lado para o outro** com o rato, com o seu brilho, e pesa menos no jogo.", "Die Mitgliedskarte auf dem Titelbild zeichnete sich auf manchen Bildschirmen ständig neu und verlor ihre Neigung: Jetzt **neigt sie sich von Seite zu Seite**, sobald die Maus darüber fährt, mit ihrem Glanz, und belastet das Spiel weniger.", "La carta del socio in copertina si ridisegnava di continuo su alcuni schermi e perdeva l'inclinazione: ora **si inclina da un lato all'altro** sotto il mouse, con il suo riflesso, e pesa meno sul gioco.", "", "主页上的会员卡在某些屏幕上会不停重绘并失去倾斜效果：现在鼠标经过时它会**左右倾斜**并带有光泽，同时更省性能。", "표지의 회원 카드가 일부 화면에서 계속 다시 그려져 기울기가 사라졌습니다. 이제 마우스를 올리면 빛과 함께 **좌우로 기울어지고**, 게임도 더 가볍습니다.", "表紙の会員カードが一部の画面で描き直され続け、傾きが消えていました。今はマウスを乗せると輝きとともに**左右に傾き**、動作も軽くなりました。", "Карта участника на главном экране на некоторых мониторах бесконечно перерисовывалась и теряла наклон: теперь она **наклоняется из стороны в сторону** под мышью, с бликом, и меньше нагружает игру.", "Karta członka na ekranie głównym na niektórych ekranach rysowała się bez końca i traciła przechył: teraz **przechyla się na boki** pod myszą, z połyskiem, i mniej obciąża grę.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.160",
       name: L("Continuar, a la medida", "Continue, to size", "Continuer, à la bonne taille", "Continuar, na medida", "Weiter, passend", "Continua, su misura", "", "继续按钮合身", "이어하기, 알맞게", "つづきを、ちょうどよく", "Продолжить по размеру", "Kontynuuj w sam raz"),
       date: "2026-10-16",

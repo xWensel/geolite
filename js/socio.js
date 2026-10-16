@@ -137,7 +137,8 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- montarla: escala entera, textos, brillo e inclinacion */
   const reduce = () => document.documentElement.classList.contains("reduce-motion");
-  function realPerCss(el) { const w = el.offsetWidth; if (!w) return 0; return (el.getBoundingClientRect().width / w) * (devicePixelRatio || 1); }
+  /* el ancho se lee del estilo (decimal), no de offsetWidth (redondeado): con un ancho redondeado la medida bailaba entre dos valores y la carta se redibujaba sin parar (y borraba la inclinacion) */
+  function realPerCss(el) { const w = parseFloat(el.style.width) || el.offsetWidth; if (!w) return 0; return (el.getBoundingClientRect().width / w) * (devicePixelRatio || 1); }
   /* cuantos pixeles reales hace cada pixel de arte: el mayor entero que cabe en el ancho pedido, pero nunca menos de 2 pixeles de DISENO
      por pixel de arte (por debajo, la letra minima de la Deck ya no cabe en sus bandas) */
   function scaleFor(host, w) { const r = realPerCss(host) || 1, s = Math.max(2, Math.ceil(2 * r - 0.01), Math.floor((w * r) / 96 + 0.01)); return { s, d: s / r }; }
