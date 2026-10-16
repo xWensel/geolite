@@ -1,6 +1,8 @@
 /*
  * Geolite - EL LOGO (v0.3.130): rotulo de marquesina, la Tierra girando (56 fotogramas, empieza en Espana-Africa),
  * la carta con la ficha y la chistera siempre encima. Lo usan la portada (.hh-logo) y la pantalla de entrada (#gateLogo).
+ * La luz no gira con la Tierra: su volumen (medialuna de sombra abajo a la derecha, la luz de las letras) y la sombra de
+ * contacto de la chistera y la carta van pintados igual en los 56 fotogramas (geolite-art-tools/pixellab/logo/volumen).
  *
  * Arte: assets/logo/ (capas sacadas de geolite-art-tools/pixellab/logo/capas; el fijo, assets/logo.png, es el fotograma 0).
  * Se pinta en un lienzo a la resolucion real de la pantalla: a escala ENTERA si cabe (pixel nitido) y, si no cabe, reducido
@@ -10,7 +12,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const W = 664, H = 206;                                    // el logo entero (caja comun de todas las capas)
-  const CAPAS = { rot: ["assets/logo/rotulo.png", 0, 17], tierra: ["assets/logo/tierra.png", 203, 35], somb: ["assets/logo/sombras.png", 0, 0], carta: ["assets/logo/carta.png", 301, 36], chis: ["assets/logo/chistera.png", 206, 0] };   // v0.3.141: la bola centrada con las letras y el mismo espaciado en todas
+  const CAPAS = { rot: ["assets/logo/rotulo.png", 0, 17], tierra: ["assets/logo/tierra.png", 203, 35], carta: ["assets/logo/carta.png", 301, 36], chis: ["assets/logo/chistera.png", 206, 0] };   // v0.3.141: la bola centrada con las letras y el mismo espaciado en todas
   const N = 56, FS = 144;                                    // fotogramas de la Tierra (tira de 144x144)
   const DUR = i => (i >= 1 && i <= 15 ? 90 : 70);            // el tramo Espana -> Pacifico va un poco mas lento (mismos tiempos que la prueba aprobada)
   const img = {}; let ready = null;
@@ -37,7 +39,7 @@ window.AIQ = window.AIQ || {};
       c.imageSmoothingEnabled = sc < 1; c.imageSmoothingQuality = "high";
       for (const kk of keys) { const im = img[kk]; if (im) c.drawImage(im, Math.round(CAPAS[kk][1] * cv._sc), Math.round(CAPAS[kk][2] * cv._sc), Math.round(im.width * cv._sc), Math.round(im.height * cv._sc)); }
       return o; };
-    cv._back = capa(["rot"]); cv._front = capa(["somb", "carta", "chis"]); cv._f = -1;
+    cv._back = capa(["rot"]); cv._front = capa(["carta", "chis"]); cv._f = -1;
     /* resplandor y sombra: lienzos ESTATICOS detras (la silueta del logo, pintada una vez). Antes eran filter: drop-shadow sobre el lienzo vivo y la GPU
        rehacia los dos desenfoques en cada fotograma de la Tierra; ahora el lienzo vivo va sin filtros y el desenfoque se calcula una sola vez */
     for (const [sh, col] of [[cv._gl, "#f8b449"], [cv._sh, "#050c08"]]) {

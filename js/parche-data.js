@@ -34,6 +34,46 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.145",
+      name: L("El logo, con volumen", "A logo with depth", "Un logo en relief", "Um logo com volume", "Ein Logo mit Tiefe", "Un logo con volume", "", "更有立体感的标志", "입체감이 생긴 로고", "立体感が出たロゴ", "Объёмный логотип", "Logo z głębią"),
+      date: "2026-10-16",
+      summary: L("La Tierra del logo tiene ahora sombra de esfera: una media luna oscura abajo a la derecha que no se mueve mientras gira.", "The Earth in the logo now has a sphere's shading: a dark crescent at the bottom right that stays put while it spins.", "La Terre du logo a maintenant l'ombre d'une sphère : un croissant sombre en bas à droite qui reste immobile pendant qu'elle tourne.", "A Terra do logo agora tem sombra de esfera: uma meia-lua escura embaixo, à direita, que fica parada enquanto ela gira.", "Die Erde im Logo hat jetzt die Schattierung einer Kugel: eine dunkle Sichel unten rechts, die stillsteht, während sie sich dreht.", "La Terra del logo ora ha l'ombra di una sfera: una mezzaluna scura in basso a destra che resta ferma mentre gira.", "", "标志里的地球现在有了球体的明暗：右下方一道暗色月牙，地球转动时它保持不动。", "로고 속 지구에 이제 구의 음영이 생겼어요. 오른쪽 아래의 어두운 초승달 그림자는 지구가 도는 동안에도 그대로 있어요.", "ロゴの地球に球体の陰影がついた。右下の暗い三日月形の影は、地球が回っても動かない。", "У Земли в логотипе теперь есть объём: тёмный полумесяц справа внизу остаётся на месте, пока она вращается.", "Ziemia w logo ma teraz cieniowanie kuli: ciemny półksiężyc w prawym dolnym rogu stoi w miejscu, gdy ona się obraca."),
+      chapters: [
+        { id: "logo", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Logo", "Logo", "Logo", "Logo", "Logo", "Logo", "", "标志", "로고", "ロゴ", "Логотип", "Logo"),
+          entries: [
+            E(L("La Tierra, con sombra de esfera", "The Earth, shaded like a sphere", "La Terre, ombrée comme une sphère", "A Terra, com sombra de esfera", "Die Erde, schattiert wie eine Kugel", "La Terra, ombreggiata come una sfera", "", "地球有了球体阴影", "구처럼 음영이 생긴 지구", "球体の陰影がついた地球", "Земля с тенью, как у шара", "Ziemia z cieniem kuli"), "change", "0.3.145", [
+              L("La luz viene de arriba a la izquierda, como en las letras: la Tierra se oscurece en dos tonos hacia abajo a la derecha y la sombra se queda quieta mientras los continentes pasan por debajo, igual que en un globo de verdad. Las sombras sueltas que salían en algunos continentes se han ido, y la sombra de la chistera y la carta usa ahora el mismo tono.",
+                "The light comes from the top left, as on the letters: the Earth darkens in two tones towards the bottom right, and the shadow stays still while the continents pass beneath it, just like a real globe. The stray shading that showed up on some continents is gone, and the shadow of the top hat and the card now uses the same tone.",
+                "La lumière vient d'en haut à gauche, comme sur les lettres : la Terre s'assombrit en deux tons vers le bas à droite, et l'ombre reste immobile pendant que les continents passent dessous, comme sur un vrai globe. Les ombres isolées qui apparaissaient sur certains continents ont disparu, et l'ombre du haut-de-forme et de la carte prend maintenant le même ton.",
+                "A luz vem de cima, à esquerda, como nas letras: a Terra escurece em dois tons para baixo, à direita, e a sombra fica parada enquanto os continentes passam por baixo dela, como num globo de verdade. As sombras soltas que apareciam em alguns continentes sumiram, e a sombra da cartola e da carta agora usa o mesmo tom.",
+                "Das Licht kommt von oben links, wie bei den Buchstaben: Die Erde wird nach unten rechts in zwei Stufen dunkler, und der Schatten bleibt stehen, während die Kontinente darunter vorbeiziehen – wie bei einem echten Globus. Die losen Schatten, die auf manchen Kontinenten auftauchten, sind weg, und der Schatten von Zylinder und Karte hat jetzt denselben Ton.",
+                "La luce arriva dall'alto a sinistra, come sulle lettere: la Terra si scurisce in due toni verso il basso a destra e l'ombra resta ferma mentre i continenti le passano sotto, proprio come su un vero mappamondo. Le ombre sparse che comparivano su alcuni continenti sono sparite, e l'ombra del cilindro e della carta ora usa lo stesso tono.",
+                "",
+                "光从左上方照来，和字母一样：地球朝右下方分两层逐渐变暗，阴影保持不动，大陆从它下面转过，就像真正的地球仪。部分大陆上零散的阴影去掉了，礼帽和纸牌投下的阴影也改用同一色调。",
+                "빛은 글자처럼 왼쪽 위에서 와요. 지구는 오른쪽 아래로 갈수록 두 단계로 어두워지고, 그림자는 멈춘 채 대륙이 그 아래로 지나가요. 진짜 지구본처럼요. 일부 대륙에 생기던 어색한 음영은 없어졌고, 실크해트와 카드의 그림자도 같은 색조를 써요.",
+                "光は文字と同じく左上から。地球は右下に向かって2段階で暗くなり、影は止まったまま、その下を大陸が通り過ぎていく。本物の地球儀のように。一部の大陸に出ていたばらばらの影はなくなり、シルクハットとカードの影も同じ色調になった。",
+                "Свет падает сверху слева, как на буквах: Земля в два тона темнеет к правому нижнему краю, а тень стоит на месте, пока под ней проплывают континенты, — как у настоящего глобуса. Случайные тени на некоторых континентах исчезли, а тень от цилиндра и карты теперь того же тона.",
+                "Światło pada z lewej u góry, jak na literach: Ziemia ciemnieje w dwóch tonach ku prawemu dołowi, a cień stoi w miejscu, gdy kontynenty przesuwają się pod nim — jak na prawdziwym globusie. Przypadkowe cienie na niektórych kontynentach zniknęły, a cień cylindra i karty ma teraz ten sam odcień."),
+            ]),
+            E(L("Esquinas limpias", "Clean corners", "Des coins nets", "Cantos limpos", "Saubere Ecken", "Angoli puliti", "", "干净的边角", "깔끔해진 모서리", "きれいになった角", "Чистые углы", "Czyste narożniki"), "fix", "0.3.145", [
+              L("La esquina de abajo a la izquierda de la última E tenía un trozo de contorno de más y una rayita suelta en el fieltro: ahora es igual que la de la primera E. Fuera también un píxel oscuro en la misma esquina de la L.",
+                "The bottom-left corner of the last E had an extra bit of outline and a stray line in the felt: it now matches the first E. A dark pixel in the same corner of the L is gone too.",
+                "Le coin inférieur gauche du dernier E avait un bout de contour en trop et un petit trait isolé dans le feutre : il est maintenant identique à celui du premier E. Un pixel sombre dans le même coin du L a aussi disparu.",
+                "O canto inferior esquerdo do último E tinha um pedaço de contorno a mais e um risquinho solto no feltro: agora é igual ao do primeiro E. Também sumiu um pixel escuro no mesmo canto do L.",
+                "Die untere linke Ecke des letzten E hatte ein Stück Kontur zu viel und einen losen Strich im Filz: Jetzt sieht sie aus wie beim ersten E. Auch ein dunkles Pixel in derselben Ecke des L ist weg.",
+                "L'angolo in basso a sinistra dell'ultima E aveva un pezzo di contorno in più e una lineetta isolata nel feltro: ora è uguale a quello della prima E. Sparito anche un pixel scuro nello stesso angolo della L.",
+                "",
+                "最后一个 E 的左下角多出一截描边，绒布上还有一道零散的细线：现在它和第一个 E 完全一样。L 同一位置的一个深色像素也去掉了。",
+                "마지막 E의 왼쪽 아래 모서리에 윤곽선이 조금 더 붙어 있었고 펠트 위에 선이 하나 떠 있었어요. 이제 첫 번째 E와 똑같아요. L의 같은 모서리에 있던 어두운 픽셀도 없앴어요.",
+                "最後のEの左下の角に、余分な輪郭とフェルト上の細い線が残っていた。いまは最初のEと同じになった。Lの同じ角にあった暗いピクセルも消えた。",
+                "В левом нижнем углу последней E был лишний кусок контура и одинокая чёрточка на сукне: теперь он такой же, как у первой E. Убран и тёмный пиксель в том же углу L.",
+                "Lewy dolny róg ostatniego E miał kawałek konturu za dużo i luźną kreskę na suknie: teraz wygląda tak samo jak w pierwszym E. Zniknął też ciemny piksel w tym samym rogu L."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.144",
       name: L("Todo combina", "Everything matches", "Tout s'accorde", "Tudo combina", "Alles passt zusammen", "Tutto si abbina", "", "全都能搭", "모두 어울려요", "全部組み合わせられる", "Всё сочетается", "Wszystko pasuje"),
       date: "2026-10-16",
