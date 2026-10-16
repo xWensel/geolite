@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.141",
+      name: L("El logo, más equilibrado", "A better-balanced logo", "Un logo mieux équilibré", "Um logo mais equilibrado", "Ein ausgewogeneres Logo", "Un logo più equilibrato", "", "更均衡的标志", "더 균형 잡힌 로고", "バランスのよくなったロゴ", "Более сбалансированный логотип", "Lepiej wyważone logo"),
+      date: "2026-10-16",
+      summary: L("La Tierra del logo sube hasta quedar centrada con las letras, y todas las letras guardan ahora el mismo espacio entre sí.", "The Earth in the logo moves up to sit centred with the letters, and every letter now keeps the same spacing.", "La Terre du logo remonte pour être centrée avec les lettres, et toutes les lettres gardent désormais le même espacement.", "A Terra do logo sobe até ficar centralizada com as letras, e todas as letras agora mantêm o mesmo espaçamento.", "Die Erde im Logo rückt nach oben, mittig zu den Buchstaben, und alle Buchstaben haben jetzt denselben Abstand.", "La Terra del logo sale fino a essere centrata con le lettere, e ora tutte le lettere hanno la stessa spaziatura.", "", "标志里的地球上移，与字母居中对齐，所有字母之间的间距也统一了。", "로고 속 지구가 위로 올라가 글자들과 가운데가 맞춰졌고, 모든 글자 간격도 똑같아졌어요.", "ロゴの地球が上がって文字と中心がそろい、文字どうしの間隔もすべて同じになりました。", "Земля в логотипе поднялась и теперь стоит по центру букв, а расстояние между всеми буквами стало одинаковым.", "Ziemia w logo przesunęła się w górę i jest teraz wyśrodkowana z literami, a wszystkie litery mają taki sam odstęp."),
+      chapters: [
+        { id: "logo", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Logo", "Logo", "Logo", "Logo", "Logo", "Logo", "", "标志", "로고", "ロゴ", "Логотип", "Logo"),
+          entries: [
+            E(L("La bola, centrada con el texto", "The globe, centred on the text", "Le globe, centré sur le texte", "O globo, centralizado com o texto", "Der Globus, mittig zum Text", "Il globo, centrato sul testo", "", "地球与文字居中对齐", "글자와 가운데를 맞춘 지구", "文字と中心をそろえた地球", "Шар по центру текста", "Glob wyśrodkowany z tekstem"), "change", "0.3.141", [
+              L("La Tierra sube hasta quedar centrada con las letras: ahora asoma un poco por arriba y por abajo, y el aro de fieltro que la rodea también, en vez de colgar solo por abajo. Las letras van más juntas y todas con el mismo espacio entre sí, también junto a la bola. Y fuera unos píxeles sueltos que asomaban en las esquinas de abajo del rótulo.",
+                "The Earth moves up until it's centred with the letters: it now peeks out a little at the top and bottom, and so does the felt ring around it, instead of hanging out only at the bottom. The letters sit closer together, all with the same spacing, next to the globe too. And a few stray pixels at the bottom corners of the sign are gone.",
+                "La Terre remonte jusqu'à être centrée avec les lettres : elle dépasse maintenant un peu en haut et en bas, tout comme l'anneau de feutre qui l'entoure, au lieu de dépasser seulement en bas. Les lettres sont plus serrées, toutes avec le même espacement, y compris près du globe. Et quelques pixels isolés aux coins inférieurs de l'enseigne ont disparu.",
+                "A Terra sobe até ficar centralizada com as letras: agora aparece um pouco para cima e para baixo, assim como o aro de feltro ao seu redor, em vez de sobrar só embaixo. As letras ficam mais juntas, todas com o mesmo espaçamento, inclusive ao lado do globo. E sumiram uns pixels soltos nos cantos de baixo do letreiro.",
+                "Die Erde rückt nach oben, bis sie mittig zu den Buchstaben steht: Jetzt ragt sie oben und unten ein wenig heraus, genau wie der Filzring um sie herum, statt nur unten überzustehen. Die Buchstaben rücken enger zusammen, alle mit demselben Abstand, auch neben dem Globus. Und ein paar lose Pixel in den unteren Ecken des Schilds sind weg.",
+                "La Terra sale fino a essere centrata con le lettere: ora sporge un po' sopra e sotto, come l'anello di feltro che la circonda, invece di sporgere solo in basso. Le lettere sono più vicine, tutte con la stessa spaziatura, anche accanto al globo. E sono spariti alcuni pixel sparsi negli angoli in basso dell'insegna.",
+                "",
+                "地球上移，直到与字母居中对齐：现在它在上下都稍稍探出一点，周围的绒布圆环也一样，不再只在下方突出。字母靠得更紧，彼此间距一致，地球两侧也是。招牌底部两角的几个零散像素也去掉了。",
+                "지구가 위로 올라가 글자들과 가운데가 맞춰졌어요. 이제 위아래로 조금씩 튀어나오고, 지구를 감싼 펠트 고리도 마찬가지예요. 아래로만 삐져나오지 않아요. 글자들은 더 가까워졌고, 지구 옆까지 모두 같은 간격이에요. 간판 아래쪽 양 모서리에 튀어나와 있던 픽셀 몇 개도 없앴어요.",
+                "地球が上がって文字と中心がそろいました。いまは上と下に少しずつはみ出し、まわりのフェルトの輪も同じです。下だけにはみ出すことはもうありません。文字どうしは近づき、地球の両側も含めてすべて同じ間隔です。看板の下の角にはみ出していたドットもいくつか消しました。",
+                "Земля поднялась и теперь стоит по центру букв: она чуть выступает сверху и снизу, как и фетровое кольцо вокруг неё, а не торчит только снизу. Буквы стоят теснее, и расстояние между ними везде одинаковое, в том числе рядом с шаром. А несколько лишних пикселей в нижних углах вывески исчезли.",
+                "Ziemia przesunęła się w górę i jest wyśrodkowana z literami: teraz wystaje trochę u góry i u dołu, tak jak filcowy pierścień wokół niej, zamiast wystawać tylko na dole. Litery stoją bliżej siebie, wszystkie w tym samym odstępie, także obok globu. Zniknęło też kilka luźnych pikseli w dolnych rogach szyldu."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.140",
       name: L("Piezas para el crupier", "Pieces for the dealer", "Des pièces pour le croupier", "Peças para o crupiê", "Extras für den Croupier", "Pezzi per il croupier", "", "荷官的饰品", "딜러의 소품", "ディーラーの小物", "Аксессуары для крупье", "Dodatki dla krupiera"),
       date: "2026-10-16",

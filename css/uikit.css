@@ -190,9 +190,9 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 .gate-logo .geo-logo { display: flex; }
 .gate-logo .geo-logo > img { width: 100% !important; height: 100% !important; aspect-ratio: auto; filter: none; animation: none; }
 /* escalas enteras del logo (200 px nativos): 2x en pantallas normales, 1x en pantallas pequenas */
-.hh-logo, .gate-logo img, .gate-logo .geo-logo { width: 400px !important; height: auto !important; max-height: none !important; max-width: none !important; aspect-ratio: 679 / 232; }   /* el hueco del logo (679x232) se reserva antes de que cargue: sin el, la portada se rehacia al llegar la imagen */
+.hh-logo, .gate-logo img, .gate-logo .geo-logo { width: 400px !important; height: auto !important; max-height: none !important; max-width: none !important; aspect-ratio: 664 / 206; }   /* el hueco del logo (664x206) se reserva antes de que cargue: sin el, la portada se rehacia al llegar la imagen */
 @media (max-width: 700px), (max-height: 560px) { .hh-logo, .gate-logo img, .gate-logo .geo-logo { width: 200px !important; } }
-@media (min-width: 1500px) and (min-height: 900px) { .gate-logo img, .gate-logo .geo-logo { width: 679px !important; } .hh-logo { width: 400px !important; } }   /* la entrada, a 1:1 de su rejilla; la portada guarda su hueco de siempre (la k de la portada ya lo agranda) */
+@media (min-width: 1500px) and (min-height: 900px) { .gate-logo img, .gate-logo .geo-logo { width: 664px !important; } .hh-logo { width: 400px !important; } }   /* la entrada, a 1:1 de su rejilla; la portada guarda su hueco de siempre (la k de la portada ya lo agranda) */
 .brand-rose { width: 32px; height: 32px; } .menu-rose { width: 64px; height: 64px; }
 .gate-logo { width: auto !important; display: flex; justify-content: center; }
 

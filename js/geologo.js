@@ -9,8 +9,8 @@
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  const W = 679, H = 232;                                    // el logo entero (caja comun de todas las capas)
-  const CAPAS = { rot: ["assets/logo/rotulo.png", 0, 47], tierra: ["assets/logo/tierra.png", 212, 61], somb: ["assets/logo/sombras.png", 0, 0], carta: ["assets/logo/carta.png", 310, 62], chis: ["assets/logo/chistera.png", 215, 26] };
+  const W = 664, H = 206;                                    // el logo entero (caja comun de todas las capas)
+  const CAPAS = { rot: ["assets/logo/rotulo.png", 0, 17], tierra: ["assets/logo/tierra.png", 203, 35], somb: ["assets/logo/sombras.png", 0, 0], carta: ["assets/logo/carta.png", 301, 36], chis: ["assets/logo/chistera.png", 206, 0] };   // v0.3.141: la bola centrada con las letras y el mismo espaciado en todas
   const N = 56, FS = 144;                                    // fotogramas de la Tierra (tira de 144x144)
   const DUR = i => (i >= 1 && i <= 15 ? 90 : 70);            // el tramo Espana -> Pacifico va un poco mas lento (mismos tiempos que la prueba aprobada)
   const img = {}; let ready = null;
