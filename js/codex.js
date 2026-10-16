@@ -294,6 +294,8 @@ window.AIQ = window.AIQ || {};
      que da nombre a la familia delante. Cada pais de la Enciclopedia esta en una sola. Nombres: es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl */
   const P = s => A.pick6(s);
   const CONTS = ["eu", "as", "af", "na", "sa", "oc", "sea"];
+  /* icono del continente en las etiquetas (20 px): su version de 20 px nativos, k_<c>_s (la de 28 es la de los encabezados); el mar no tiene */
+  const kTag = c => A.icon("k_" + c + (c === "sea" ? "" : "_s"), "sm");
   const RG = (id, cont, names, countries, more) => ({ id, cont, names, countries, ...(more || {}) });
   const REGIONS = [
     RG("uk-irlanda", "eu", "Reino Unido e Irlanda|United Kingdom & Ireland|Royaume-Uni et Irlande|Reino Unido e Irlanda|Vereinigtes Königreich und Irland|Regno Unito e Irlanda||英国与爱尔兰|영국과 아일랜드|イギリスとアイルランド|Великобритания и Ирландия|Wielka Brytania i Irlandia", ["United Kingdom", "Ireland"]),
@@ -725,7 +727,7 @@ window.AIQ = window.AIQ || {};
     const flag = g.ne && known ? flagImg(g.ne) : g.ne ? `<canvas class="cx-sil big" data-ne="${esc(g.ne)}"></canvas>` : A.icon(g.sea ? "k_sea" : "t_country");
     const head = `<header class="cx-gh">
         <button type="button" class="cx-gh-f${known ? "" : " unk"}${c ? "" : " nofile"}" ${c ? `data-go="d:${esc(c)}"` : ""}>${flag}${c && tiered(c) ? pips(cm) : ""}</button>
-        <div class="cx-gh-t"><p class="cx-tags"><span>${A.icon("k_" + g.reg.cont, "sm")}${esc(contName(g.reg.cont))}</span><span>${esc(regName(g.reg))}</span></p>
+        <div class="cx-gh-t"><p class="cx-tags"><span>${kTag(g.reg.cont)}${esc(contName(g.reg.cont))}</span><span>${esc(regName(g.reg))}</span></p>
           <h2>${known ? esc(gName(g)) : "???"}</h2>
           <div class="cx-gh-s"><em class="cx-pct">${pctOf(s)} %</em><span>${esc(placesTxt(s))}</span>${medCounts(s, scaleOf([g]))}</div>${mbar(s)}
           ${known ? `<p class="cx-gh-d" id="cxGhd"></p>` : `<p class="cx-gh-d">${esc(P(S.lockedCHint).replace("{km}", kmTxt(300)))}</p>`}
@@ -851,7 +853,7 @@ window.AIQ = window.AIQ || {};
           ${tr ? `<div class="cx-dmeds">${[0, 1, 2].map(i => `<span data-tt="${esc(P(S[MED[i]]) + " · " + P(S.within).replace("{km}", kmTxt(L[i])) + "\n" + (m > i ? P(S.got) : P(S.miss)))}">${medal(i, m > i)}<em>&lt; ${esc(kmTxt(L[i]))}</em></span>`).join("")}</div>` : ""}
         </div>
         <div class="cx-dinfo">
-          <div class="cx-d-top"><p class="cx-tags"><span>${esc(typeLabel(e.type))}</span>${g ? `<span>${g.ne && gKnown(g) && hasFlag(g.ne) ? `<img class="cx-tflag" alt="" src="${esc(flagSrc(g.ne))}" style="${flagCss(g.ne, 64, 16)}">` : A.icon("k_" + g.reg.cont, "sm")}${esc(where)}</span><span>${esc(regName(g.reg))}</span>` : ""}</p>${nav}</div>
+          <div class="cx-d-top"><p class="cx-tags"><span>${esc(typeLabel(e.type))}</span>${g ? `<span>${g.ne && gKnown(g) && hasFlag(g.ne) ? `<img class="cx-tflag" alt="" src="${esc(flagSrc(g.ne))}" style="${flagCss(g.ne, 64, 16)}">` : kTag(g.reg.cont)}${esc(where)}</span><span>${esc(regName(g.reg))}</span>` : ""}</p>${nav}</div>
           <h2>${un ? esc(nameOf(e, rec)) : "???"}</h2>
           ${un && rec && rec.desc ? `<p class="cx-desc">${esc(cap(rec.desc))}</p>` : ""}
           ${un && A.tx(e.fact) ? `<blockquote class="cx-fact">${esc(A.tx(e.fact))}</blockquote>` : ""}

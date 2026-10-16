@@ -34,6 +34,46 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.162",
+      name: L("Continentes de la Enciclopedia", "Encyclopedia continents", "Continents de l'Encyclopédie", "Continentes da Enciclopédia", "Kontinente der Enzyklopädie", "Continenti dell'Enciclopedia", "", "百科中的大洲", "백과사전의 대륙", "百科事典の大陸", "Континенты Энциклопедии", "Kontynenty Encyklopedii"),
+      date: "2026-10-16",
+      summary: L("Los logros de continente de la Enciclopedia y sus iconos pequeños, con la forma del mapa del juego.", "The Encyclopedia's continent achievements and its small icons, with the shape from the game's map.", "Les succès de continent de l'Encyclopédie et ses petites icônes, avec la forme de la carte du jeu.", "As conquistas de continente da Enciclopédia e os ícones pequenos, com a forma do mapa do jogo.", "Die Kontinent-Erfolge der Enzyklopädie und ihre kleinen Symbole, in der Form der Spielkarte.", "Gli obiettivi di continente dell'Enciclopedia e le sue icone piccole, con la forma della mappa del gioco.", "", "百科的大洲成就和小图标，都换成了游戏地图上的形状。", "백과사전의 대륙 업적과 작은 아이콘이 게임 지도의 모양으로 바뀌었어요.", "百科事典の大陸の実績と小さなアイコンが、ゲームの地図の形になりました。", "Достижения-континенты Энциклопедии и её маленькие значки — теперь по форме карты игры.", "Osiągnięcia kontynentów w Encyklopedii i jej małe ikony mają teraz kształt z mapy gry."),
+      chapters: [
+        { id: "continentes", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Enciclopedia", "Encyclopedia", "Encyclopédie", "Enciclopédia", "Enzyklopädie", "Enciclopedia", "", "百科", "백과사전", "百科事典", "Энциклопедия", "Encyklopedia"),
+          entries: [
+            E(L("Seis insignias nuevas", "Six new badges", "Six nouveaux insignes", "Seis insígnias novas", "Sechs neue Abzeichen", "Sei nuovi distintivi", "", "六枚新徽章", "새 배지 여섯 개", "新しいバッジ6つ", "Шесть новых значков", "Sześć nowych odznak"), "change", "0.3.162", [
+              L("Los logros de completar **África**, **Asia**, **Europa**, **Norteamérica**, **Oceanía** y **Sudamérica** en la Enciclopedia dibujan el continente con la forma del mapa del juego, con la corona siempre en el mismo sitio, arriba. También en sus iconos de Steam.",
+                "The achievements for completing **Africa**, **Asia**, **Europe**, **North America**, **Oceania** and **South America** in the Encyclopedia draw the continent with the shape from the game's map, with the crown always in the same spot, on top. Their Steam icons too.",
+                "Les succès pour compléter **Afrique**, **Asie**, **Europe**, **Amérique du Nord**, **Océanie** et **Amérique du Sud** dans l'Encyclopédie dessinent le continent avec la forme de la carte du jeu, avec la couronne toujours au même endroit, en haut. Leurs icônes Steam aussi.",
+                "As conquistas de completar **África**, **Ásia**, **Europa**, **América do Norte**, **Oceania** e **América do Sul** na Enciclopédia desenham o continente com a forma do mapa do jogo, com a coroa sempre no mesmo lugar, em cima. Os ícones da Steam também.",
+                "Die Erfolge für **Afrika**, **Asien**, **Europa**, **Nordamerika**, **Ozeanien** und **Südamerika** in der Enzyklopädie zeigen den Kontinent in der Form der Spielkarte, mit der Krone immer an derselben Stelle, oben. Auch ihre Steam-Symbole.",
+                "Gli obiettivi per completare **Africa**, **Asia**, **Europa**, **Nord America**, **Oceania** e **Sud America** nell'Enciclopedia disegnano il continente con la forma della mappa del gioco, con la corona sempre nello stesso punto, in alto. Anche le loro icone di Steam.",
+                "",
+                "在百科中集齐**非洲**、**亚洲**、**欧洲**、**北美洲**、**大洋洲**和**南美洲**的成就，现在按游戏地图的形状画出大洲，王冠始终在同一个位置：正上方。Steam 图标也一并更新。",
+                "백과사전에서 **아프리카**, **아시아**, **유럽**, **북아메리카**, **오세아니아**, **남아메리카**를 완성하는 업적이 게임 지도 모양으로 대륙을 그리고, 왕관은 늘 같은 자리인 위쪽에 있어요. 스팀 아이콘도 바뀌었어요.",
+                "百科事典で**アフリカ**、**アジア**、**ヨーロッパ**、**北アメリカ**、**オセアニア**、**南アメリカ**をそろえる実績は、ゲームの地図の形で大陸を描き、王冠はいつも同じ場所、いちばん上にあります。Steamのアイコンも同じです。",
+                "Достижения за **Африку**, **Азию**, **Европу**, **Северную Америку**, **Океанию** и **Южную Америку** в Энциклопедии рисуют континент по форме карты игры, а корона всегда на одном месте — сверху. Иконки в Steam тоже.",
+                "Osiągnięcia za ukończenie **Afryki**, **Azji**, **Europy**, **Ameryki Północnej**, **Oceanii** i **Ameryki Południowej** w Encyklopedii rysują kontynent w kształcie z mapy gry, a korona jest zawsze w tym samym miejscu, na górze. Ich ikony w Steam też."),
+            ]),
+            E(L("Iconos a su tamaño", "Icons at their own size", "Des icônes à leur taille", "Ícones no tamanho certo", "Symbole in ihrer Größe", "Icone a misura", "", "按实际尺寸绘制的图标", "제 크기의 아이콘", "ちょうどのサイズのアイコン", "Значки в своём размере", "Ikony we właściwym rozmiarze"), "fix", "0.3.162", [
+              L("Los iconos de continente de la Enciclopedia estaban dibujados a 64 px y se encogían hasta 28 y 20, perdiendo píxeles por el camino. Ahora están hechos a su tamaño: 28 px en los encabezados y 20 px en las etiquetas.",
+                "The Encyclopedia's continent icons were drawn at 64 px and shrunk down to 28 and 20, losing pixels on the way. Now they're made at their own size: 28 px in the headings and 20 px in the tags.",
+                "Les icônes de continent de l'Encyclopédie étaient dessinées en 64 px et rétrécies à 28 et 20, en perdant des pixels au passage. Elles sont maintenant faites à leur taille : 28 px dans les titres et 20 px dans les étiquettes.",
+                "Os ícones de continente da Enciclopédia eram desenhados em 64 px e encolhidos para 28 e 20, perdendo pixels no caminho. Agora são feitos no tamanho certo: 28 px nos títulos e 20 px nas etiquetas.",
+                "Die Kontinent-Symbole der Enzyklopädie waren in 64 px gezeichnet und wurden auf 28 und 20 verkleinert, wobei Pixel verloren gingen. Jetzt sind sie in ihrer Größe gemacht: 28 px in den Überschriften und 20 px in den Schildchen.",
+                "Le icone di continente dell'Enciclopedia erano disegnate a 64 px e rimpicciolite a 28 e 20, perdendo pixel per strada. Ora sono fatte a misura: 28 px nei titoli e 20 px nelle etichette.",
+                "",
+                "百科里的大洲图标原本按 64 像素绘制，再缩小到 28 和 20 像素，过程中会丢掉像素。现在按实际尺寸绘制：标题里 28 像素，标签里 20 像素。",
+                "백과사전의 대륙 아이콘은 64px로 그려서 28px와 20px로 줄이느라 픽셀이 빠졌어요. 이제는 제 크기로 만들었어요. 제목은 28px, 태그는 20px예요.",
+                "百科事典の大陸アイコンは64pxで描いて28と20に縮めていたので、途中でピクセルが欠けていた。今はそのサイズで作ってある。見出しは28px、タグは20px。",
+                "Значки континентов в Энциклопедии были нарисованы в 64 px и уменьшались до 28 и 20, теряя по пути пиксели. Теперь они сделаны в своём размере: 28 px в заголовках и 20 px в метках.",
+                "Ikony kontynentów w Encyklopedii były rysowane w 64 px i zmniejszane do 28 i 20, przez co gubiły piksele. Teraz są zrobione we właściwym rozmiarze: 28 px w nagłówkach i 20 px w etykietach."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.161",
       name: L("Tu carta se inclina", "Your card tilts", "Ta carte s'incline", "O teu cartão inclina", "Deine Karte neigt sich", "La tua carta si inclina", "", "你的卡片会倾斜", "카드가 기울어집니다", "カードが傾く", "Карта наклоняется", "Karta się przechyla"),
       date: "2026-10-16",
