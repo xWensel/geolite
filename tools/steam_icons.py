@@ -2,7 +2,7 @@
 
 Lee docs/steam/achievements.json (node tools/steam-achievements.mjs) y compone cada insignia igual que el
 juego (css/premium.css .ic.badge): ficha del color de su modo a tamano completo + la ilustracion propia del
-logro (assets/icons/ach_<id>.webp, tools/ach_pixel.py: 48 px nativos) al 75 % en el pixel (8, 8) de la ficha de 64 (centrada):
+logro (assets/icons/ach_<id>.webp: 48 px nativos x8, dibujadas con Pixel Lab en geolite-art-tools/pixellab/logros) al 75 % en el pixel (8, 8) de la ficha de 64 (centrada):
 ficha e ilustracion comparten rejilla, asi que a 64 px cada pixel del icono es un pixel del arte (vecino mas cercano).
 La version bloqueada es la del juego: escala de grises y brillo al 60 %.
 

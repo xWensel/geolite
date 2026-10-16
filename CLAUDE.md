@@ -39,7 +39,7 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 
 ## Build limpia (regla de fondo)
 - El repositorio solo contiene lo que el juego usa HOY: nada de iconos, escenas, codigo, migraciones de guardados antiguos ni carpetas de pruebas que ya no se usen. Antes de cada entrega, lo que sobra se borra (git guarda el historial; la v0.3.0 parte del commit `60acc9a`).
-- `tools/` solo guarda lo que construye y publica el juego: `steam-pack.mjs`, `steam-upload.mjs`, `steam-achievements.mjs`, `steam_icons.py`, `ach_pixel.py`, `audit-licenses.mjs`, `build-credits.mjs`, `bundle-media.py`, `wiki-thumbs.py`, `publish-media.mjs`, `fetch-media.mjs`, `linux_tar.py`. Los generadores de arte y de datos se retiraron en la v0.3.0; si hicieran falta, se recuperan del historial de git.
+- `tools/` solo guarda lo que construye y publica el juego: `steam-pack.mjs`, `steam-upload.mjs`, `steam-achievements.mjs`, `steam_icons.py`, `audit-licenses.mjs`, `build-credits.mjs`, `bundle-media.py`, `wiki-thumbs.py`, `publish-media.mjs`, `fetch-media.mjs`, `linux_tar.py`. Los generadores de arte y de datos se retiraron en la v0.3.0; si hicieran falta, se recuperan del historial de git.
 
 ## Fotos de la Enciclopedia
 - TODA carta tiene foto real, libre para uso comercial (dominio publico, CC0, CC BY o CC BY-SA) con autor y licencia en `data/wiki/img.json` (se muestran en la ficha y en `credits.html`). Nunca se usa una ilustracion de relleno en su lugar, y el aviso de tarjeta nueva y la ficha ensenan la foto del lugar.

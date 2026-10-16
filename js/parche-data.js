@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.137",
+      name: L("Las insignias nuevas", "The new badges", "Les nouveaux badges", "As novas insígnias", "Die neuen Abzeichen", "I nuovi distintivi", "", "全新徽章", "새 배지", "新しいバッジ", "Новые значки", "Nowe odznaki"),
+      date: "2026-10-16",
+      summary: L("Los 100 logros estrenan insignia, dibujadas de nuevo con las piezas del propio juego.", "All 100 achievements get new badges, redrawn with the game's own pieces.", "Les 100 succès ont de nouveaux badges, redessinés avec les pièces du jeu lui-même.", "As 100 conquistas ganham insígnias novas, redesenhadas com as peças do próprio jogo.", "Alle 100 Erfolge bekommen neue Abzeichen, neu gezeichnet mit den Teilen des Spiels selbst.", "I 100 obiettivi hanno nuovi distintivi, ridisegnati con i pezzi del gioco stesso.", "", "100 个成就换上新徽章，用游戏自己的元素重新绘制。", "100개 업적이 게임 속 요소로 다시 그린 새 배지를 달았어요.", "100の実績が、ゲームそのもののパーツで描き直した新しいバッジになりました。", "У всех 100 достижений новые значки, перерисованные из деталей самой игры.", "Wszystkie 100 osiągnięć ma nowe odznaki, narysowane z elementów samej gry."),
+      chapters: [
+        { id: "insignias", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Logros", "Achievements", "Succès", "Conquistas", "Erfolge", "Obiettivi", "", "成就", "업적", "実績", "Достижения", "Osiągnięcia"),
+          entries: [
+            E(L("Cien insignias a juego", "A hundred matching badges", "Cent badges assortis", "Cem insígnias combinando", "Hundert passende Abzeichen", "Cento distintivi abbinati", "", "一百枚配套徽章", "어울리는 배지 100개", "そろいの100バッジ", "Сто значков в одном стиле", "Sto pasujących odznak"), "change", "0.3.137", [
+              L("Las 100 insignias de logro están dibujadas de nuevo, a juego con el crupier y el logo. Cada una usa las piezas del propio juego: la chincheta del mapa, la Tierra, la chistera del crupier, las medallas, el doblón, los corazones de provisiones y los continentes con el color de la Enciclopedia. Y hablan el mismo idioma: la **corona** es completarlo todo; la **chincheta**, acertar; el **laurel**, ser leyenda. También son nuevos sus iconos en Steam.",
+                "All 100 achievement badges have been redrawn to match the dealer and the logo. Each one uses the game's own pieces: the map pin, the Earth, the dealer's top hat, the medals, the doubloon, the provision hearts and the continents in their Encyclopedia colours. And they speak the same language: the **crown** means completing everything, the **pin** means a hit, the **laurel** means legend. Their Steam icons are new too.",
+                "Les 100 badges de succès ont été redessinés pour s'accorder au croupier et au logo. Chacun reprend les pièces du jeu : l'épingle de la carte, la Terre, le haut-de-forme du croupier, les médailles, le doublon, les cœurs de provisions et les continents aux couleurs de l'Encyclopédie. Et ils parlent la même langue : la **couronne**, c'est tout compléter ; l'**épingle**, viser juste ; le **laurier**, entrer dans la légende. Leurs icônes Steam sont nouvelles aussi.",
+                "As 100 insígnias de conquista foram redesenhadas para combinar com o crupiê e o logo. Cada uma usa as peças do próprio jogo: o alfinete do mapa, a Terra, a cartola do crupiê, as medalhas, o dobrão, os corações de provisões e os continentes com as cores da Enciclopédia. E falam a mesma língua: a **coroa** é completar tudo; o **alfinete**, acertar; o **louro**, virar lenda. Os ícones na Steam também são novos.",
+                "Alle 100 Erfolgsabzeichen wurden neu gezeichnet, passend zum Croupier und zum Logo. Jedes verwendet die Teile des Spiels: die Kartennadel, die Erde, den Zylinder des Croupiers, die Medaillen, die Dublone, die Proviantherzen und die Kontinente in den Farben der Enzyklopädie. Und sie sprechen dieselbe Sprache: Die **Krone** heißt alles vollständig, die **Nadel** ein Treffer, der **Lorbeer** Legende. Auch ihre Steam-Symbole sind neu.",
+                "I 100 distintivi degli obiettivi sono stati ridisegnati per abbinarsi al croupier e al logo. Ognuno usa i pezzi del gioco: lo spillo della mappa, la Terra, il cilindro del croupier, le medaglie, il doblone, i cuori delle provviste e i continenti con i colori dell'Enciclopedia. E parlano la stessa lingua: la **corona** è completare tutto, lo **spillo** è fare centro, l'**alloro** è diventare leggenda. Anche le loro icone su Steam sono nuove.",
+                "",
+                "全部 100 枚成就徽章都重新绘制，与荷官和标志风格一致。每一枚都用上游戏里的元素：地图图钉、地球、荷官的礼帽、奖牌、金币、补给红心，以及按百科全书配色的各大洲。它们还说着同一种语言：**皇冠**代表全部完成，**图钉**代表命中，**月桂**代表传奇。它们在 Steam 上的图标也换新了。",
+                "업적 배지 100개를 딜러와 로고에 맞춰 새로 그렸어요. 하나하나 게임 속 요소를 썼어요. 지도 핀, 지구, 딜러의 실크해트, 메달, 도블론, 식량 하트, 그리고 백과사전 색깔의 대륙들. 모두 같은 언어로 말해요. **왕관**은 전부 완성, **핀**은 명중, **월계관**은 전설이에요. Steam 아이콘도 새로워졌어요.",
+                "実績バッジ100個を、ディーラーとロゴに合わせて描き直しました。どれもゲームのパーツを使っています。地図のピン、地球、ディーラーのシルクハット、メダル、ダブロン、食料のハート、そして百科事典の色の大陸。同じ言葉で語ります。**王冠**はすべて達成、**ピン**は的中、**月桂冠**は伝説。Steamのアイコンも新しくなりました。",
+                "Все 100 значков достижений перерисованы в одном стиле с крупье и логотипом. В каждом — детали самой игры: булавка карты, Земля, цилиндр крупье, медали, дублон, сердца запасов и континенты в цветах Энциклопедии. И говорят они на одном языке: **корона** — собрать всё, **булавка** — попадание, **лавр** — легенда. Значки в Steam тоже новые.",
+                "Wszystkie 100 odznak osiągnięć narysowano od nowa, w stylu krupiera i logo. Każda korzysta z elementów gry: pinezki z mapy, Ziemi, cylindra krupiera, medali, dublona, serc zapasów i kontynentów w kolorach Encyklopedii. I mówią tym samym językiem: **korona** to ukończyć wszystko, **pinezka** to trafienie, **laur** to legenda. Ich ikony w Steam też są nowe."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.136",
       name: L("El logo, bien encajado", "A logo that fits together", "Un logo bien emboîté", "O logo, bem encaixado", "Ein Logo, das zusammenpasst", "Il logo, ben incastrato", "", "合为一体的标志", "하나로 맞물린 로고", "ひとつに収まったロゴ", "Логотип, собранный воедино", "Logo, które do siebie pasuje"),
       date: "2026-10-16",
