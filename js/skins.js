@@ -148,8 +148,8 @@ window.AIQ = window.AIQ || {};
   const fill = (s, n) => A.pick6(s).replace("{n}", n);
   /* la boutique: precio en fichas de oro (rara 150, legendaria 400) y la oferta de la casa: una mesa que aun no tienes, -30 %, que cambia cada lunes */
   const PRICE = { r: 150, l: 400 }, OFF = 0.3;
-  const SHOP_HOW = "En la boutique del Club: {n} fichas de oro.|In the Club boutique: {n} gold chips.|À la boutique du Club : {n} jetons d'or.|Na boutique do Clube: {n} fichas de ouro.|In der Club-Boutique: {n} Goldchips.|Nella boutique del Club: {n} fiche d'oro.||在俱乐部精品店：{n} 金筹码。|클럽 부티크에서: 골드 칩 {n}개.|クラブのブティックで金のチップ{n}枚。|В бутике клуба: {n} золотых фишек.|W butiku klubu: {n} złotych żetonów.";
-  const SHOP_WON = "Comprada en la boutique del Club.|Bought in the Club boutique.|Achetée à la boutique du Club.|Comprada na boutique do Clube.|In der Club-Boutique gekauft.|Comprata nella boutique del Club.||在俱乐部精品店购得。|클럽 부티크에서 구입했어요.|クラブのブティックで購入。|Куплен в бутике клуба.|Kupiony w butiku klubu.";
+  const SHOP_HOW = "En la tienda del Club: {n} fichas de oro.|In the Club boutique: {n} gold chips.|À la boutique du Club : {n} jetons d'or.|Na boutique do Clube: {n} fichas de ouro.|In der Club-Boutique: {n} Goldchips.|Nella boutique del Club: {n} fiche d'oro.||在俱乐部精品店：{n} 金筹码。|클럽 부티크에서: 골드 칩 {n}개.|クラブのブティックで金のチップ{n}枚。|В бутике клуба: {n} золотых фишек.|W butiku klubu: {n} złotych żetonów.";
+  const SHOP_WON = "Comprada en la tienda del Club.|Bought in the Club boutique.|Achetée à la boutique du Club.|Comprada na boutique do Clube.|In der Club-Boutique gekauft.|Comprata nella boutique del Club.||在俱乐部精品店购得。|클럽 부티크에서 구입했어요.|クラブのブティックで購入。|Куплен в бутике клуба.|Kupiony w butiku klubu.";
   const weekNo = (t = Date.now()) => Math.floor((t / 864e5 + 3) / 7);       // semanas que empiezan en lunes (el 1-1-1970 fue jueves)
   A.mesas = {
     list: A.MESAS,

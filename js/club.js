@@ -44,7 +44,7 @@ window.AIQ = window.AIQ || {};
   const P6 = s => A.pick6(s);
 
   const TX = {
-    shop: "La boutique|The boutique|La boutique|A boutique|Die Boutique|La boutique||精品店|부티크|ブティック|Бутик|Butik",
+    shop: "La tienda|The boutique|La boutique|A boutique|Die Boutique|La boutique||精品店|부티크|ブティック|Бутик|Butik",
     club: "Club de la casa|The House Club|Le Club de la maison|Clube da casa|Club des Hauses|Club della casa||赌场俱乐部|하우스 클럽|ハウスクラブ|Клуб заведения|Klub kasyna",
     card: "Tarjeta de socio|Member card|Carte de membre|Cartão de sócio|Mitgliedskarte|Tessera socio||会员卡|회원 카드|会員カード|Клубная карта|Karta członkowska",
     no: "N.º|No.|N°|Nº|Nr.|N.||No.|No.|No.|№|Nr",

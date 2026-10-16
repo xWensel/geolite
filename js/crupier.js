@@ -12,7 +12,8 @@
  *   s.look(-1|0|1|2|null)                 hacia donde mira (solo con los ojos de su cara normal: -1 izquierda, 1 derecha)
  *   s.fit()                               recalcula la escala (se llama sola al cambiar de tamano o de pantalla)
  * o: { fidget: false } sin gestos sueltos, { still: true } quieto (sin respirar, parpadear ni gestos sueltos: capturas y movimiento
- *    reducido), { mini: true } solo la cabeza (tutorial)
+ *    reducido), { mini: true } solo la cabeza (tutorial), { floor: true } de pie en el borde de abajo (con bottom: 0 en su CSS),
+ *    { atlas } su propia ropa (el probador de la boutique)
  * Durante un gesto se ve el dibujo del gesto; si la cara de la frase no es la normal, sus ojos y su boca se ponen encima en los
  * fotogramas en que la cabeza esta en su sitio (crupier-data.js dice donde, al pixel).
  * Datos (atlas + rectangulos + gestos): js/crupier-data.js, generado por geolite-art-tools/pixellab/crupier/derivados/rig/build_rig.py.
@@ -23,8 +24,10 @@ window.AIQ = window.AIQ || {};
   const FIG = 81;                              // alto de la figura quieta (chistera incluida): la unidad de los huecos
   const CX = 52.5, CY = 65;                    // centro de la figura quieta en el lienzo (para centrarla en su hueco)
   const HX = 48, HY = 56;                      // centro de la cabeza (recorte de la cabeza: tutorial y fotos fijas; la chistera entera)
+  const FLOOR = 106;                           // primera fila vacia bajo la figura quieta (o.floor la apoya en el borde del hueco)
   const D = () => A.CRUPIER_DATA;
   let img = null, loaded = false; const onload = [];
+  let dressed = null, cur = null;              // v0.3.134: el atlas con la ropa puesta (js/vestuario.js) y el que se esta usando al componer
   const whenReady = fn => { if (loaded) fn(); else { onload.push(fn); load(); } };
   function load() {
     if (img) return; img = new Image(); img.decoding = "async";
@@ -116,7 +119,7 @@ window.AIQ = window.AIQ || {};
   function put(c, r, dx, dy, clear) {                 // pinta una pieza del atlas en su sitio (+ desplazamiento); clear: borra antes su rectangulo
     if (!r) return; const x = r[4] + (dx | 0), y = r[5] + (dy | 0);
     if (clear) c.clearRect(x, y, r[2], r[3]);
-    c.drawImage(img, r[0], r[1], r[2], r[3], x, y, r[2], r[3]);
+    c.drawImage(cur || img, r[0], r[1], r[2], r[3], x, y, r[2], r[3]);
   }
   const INK = [1, 0, 63], RIM = [35, 3, 97], DIM = [70, 10, 40], OUTLINE = [29, 10, 61];
   const REDS = new Set(["232,40,58", "168,20,46"]);
@@ -132,8 +135,8 @@ window.AIQ = window.AIQ || {};
   }
   /* p: { e: cara, g: gesto de Pixel Lab (o null), f: su fotograma, l: "l"|"r", shut, open, wink, off, m: boca "eh"|"ah"|"oh", m2: segunda
      boca de su cara, tear: paso de la lagrima (-1 sin), z: fotograma de las zetas (0 sin), w: bandas } */
-  function compose(p) {
-    ctxs();
+  function compose(p, atlas) {
+    ctxs(); cur = atlas || dressed || img;
     const c = wctx, d = D(), E = EX[p.e], cap = d.caps[p.e] || {};
     c.clearRect(0, 0, W, H);
     put(c, d.master);
@@ -206,6 +209,7 @@ window.AIQ = window.AIQ || {};
       if (mini !== this.mini) { this.mini = mini; this.cv.classList.toggle("mini", mini); this.host.style.overflow = mini ? "hidden" : ""; }
       if (mini) { s.margin = ""; s.left = (Math.round(cw * z * dpr / 2) - HX * k) * per + "px"; s.top = (Math.round(ch * z * dpr / 2) - HY * k) * per + "px"; }
       else { s.left = s.top = ""; s.marginLeft = -Math.round((CX - W / 2) * k) * per + "px"; s.marginTop = -Math.round((CY - H / 2) * k) * per + "px"; }
+      if (this.o.floor) s.marginBottom = -Math.round((H - FLOOR) * k) * per + "px";       // o.floor: de pie en el borde de abajo del hueco (con bottom: 0 en su CSS)
       this.draw(true);
     }
     set(expr, o = {}) {
@@ -294,7 +298,7 @@ window.AIQ = window.AIQ || {};
       const now = performance.now(); this.fidget(now);
       const p = this.pose(now), key = JSON.stringify(p);
       if (!force && key === this.key) return;
-      this.key = key; compose(p);
+      this.key = key; compose(p, this.o.atlas);
       const c = this.ctx, k = this.k; c.clearRect(0, 0, this.cv.width, this.cv.height); c.drawImage(work, 0, 0, W, H, p.x * k, p.y * k, W * k, H * k);
     }
     /* reloj propio: solo repinta cuando cambia algo (nada de 60 fps): ~30 ms con gesto o habla, si no a su ritmo */
@@ -307,12 +311,17 @@ window.AIQ = window.AIQ || {};
       this.timer = setTimeout(() => this.tick(), busy ? 33 : this.visible ? 90 : 400);
     }
     poke() { if (loaded && !this.dead) { clearTimeout(this.timer); this.timer = setTimeout(() => this.tick(), 0); } }
+    dress(atlas) { this.o.atlas = atlas || null; this.key = ""; this.poke(); }
     destroy() { this.dead = true; clearTimeout(this.timer); if (this.ro) this.ro.disconnect(); live.delete(this); this.cv.remove(); }
   }
   addEventListener("resize", () => live.forEach(s => s.fit()));                     // tambien cambia devicePixelRatio (otro monitor, zoom)
 
   A.crupier = {
     mount: (host, o) => new Sprite(host, o),
+    /* v0.3.134: la ropa (js/vestuario.js): el atlas recoloreado (o null = la de siempre); todos los crupieres vivos se repintan al momento.
+       Un sprite puede llevar la suya con mount(host, { atlas }) (el probador de la boutique) y cambiarla con s.dress(atlas) */
+    dress(atlas) { dressed = atlas || null; live.forEach(s => { s.key = ""; s.poke(); }); },
+    atlas: () => img, isReady: () => loaded,
     list: () => Object.keys(EX),
     gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)],
     expr: exprId, gest: gestId,
@@ -323,9 +332,9 @@ window.AIQ = window.AIQ || {};
       return k < 1 ? { k: 0, css: 0 } : { k, css: FIG * k / dpr };
     },
     /* imagen fija de una expresion (fotos, tutorial): dataURL del lienzo entero (96x112 * k) o, con crop "head", de la cabeza (64x64 * k) */
-    still(expr = "sly", k = 4, crop) {
+    still(expr = "sly", k = 4, crop, atlas) {
       if (!loaded) return null;
-      const src = compose({ e: exprId(expr), g: null, f: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, w: null });
+      const src = compose({ e: exprId(expr), g: null, f: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, w: null }, atlas);
       const [sx, sy, sw, sh] = crop === "head" ? [HX - 32, HY - 32, 64, 64] : [0, 0, W, H];
       const c = document.createElement("canvas"); c.width = sw * k; c.height = sh * k;
       const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(src, sx, sy, sw, sh, 0, 0, sw * k, sh * k);

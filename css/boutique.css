@@ -79,6 +79,7 @@
 .bq-pager { display: flex; align-items: center; gap: 12px; flex: none; font-family: var(--mono); font-size: 18px; color: var(--gx-ink-2); font-variant-numeric: tabular-nums; }
 .bq-pager .gx-btn { min-width: 48px; font-size: 26px; }
 .bq-pager .gx-btn[disabled] { opacity: .35; pointer-events: none; }
+.bq-pager[hidden] { display: none; }
 
 /* la mesa elegida */
 .bq-det { height: 100%; display: grid; gap: 10px; align-content: start; padding: 18px 22px 20px; }
@@ -122,3 +123,39 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 .hh-top .hh-bq:hover, .hh-top .hh-bq.pad-hov { filter: brightness(1.06); transform: translateY(-2px); }
 .hh-top .hh-bq:focus { outline: none; }
 .hh-top .hh-bq:focus-visible, html[data-input="pad"] .hh-top .hh-bq:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
+
+/* ---------------------------------------------------------------- v0.3.134: las dos secciones (Mesas y Vestuario) y el vestuario del crupier
+   Las secciones van en la cabecera, entre el titulo y el monedero, como un selector de laton sobre la sala.
+   Vestuario: las 12 piezas de 6 en 6 (retratos del crupier con esa pieza, a pixel entero: js/boutique.js fitThumbs) y, a la derecha,
+   el probador: el crupier animado con lo que llevas mas la pieza elegida (A.crupier.mount con su propio atlas). */
+.bq-cats { justify-self: center; display: flex; padding: 4px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.bq-cat-t { display: inline-flex; align-items: center; gap: 10px; margin: 0; padding: 8px 18px 9px 12px; border: 0; font: inherit; font-family: var(--sans); font-size: 26px; line-height: 1; white-space: nowrap; cursor: pointer; color: var(--gx-txt); background: none; }
+.bq-cat-t .ic { width: 36px; height: 36px; image-rendering: pixelated; flex: none; }
+.bq-cat-t:hover, .bq-cat-t.pad-hov { background: rgba(255, 243, 214, .08); }
+.bq-cat-t.on { color: var(--gx-ink); background: linear-gradient(180deg, var(--gx-gold-hi) 0, var(--gx-gold) 55%, #e89a32 100%); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 rgba(0, 0, 0, .16); }
+.bq-cat-t:focus { outline: none; }
+.bq-cat-t:focus-visible, html[data-input="pad"] .bq-cat-t:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
+
+.bq-cat.vest { grid-template-rows: minmax(0, 1fr); }
+.bq-items.vest { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 14px; }
+/* el retrato: sobre tapete, con un foco suave detras (la luz va detras del crupier, nunca encima) */
+.bq-vth { aspect-ratio: 6 / 7; overflow: hidden; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
+.bq-vth img { position: absolute; left: 0; top: 0; max-width: none; object-fit: fill; image-rendering: pixelated; }
+.bq-vit { grid-template-rows: auto auto minmax(0, 1fr); }
+.bq-vit .bq-nm { font-size: 19px; line-height: 1.02; overflow-wrap: break-word; hyphens: manual; }
+.bq-vp { display: flex; align-items: flex-end; min-height: 26px; padding: 0 2px; }
+.bq-vp .bq-pr { font-size: 22px; gap: 5px; }
+.bq-vp .bq-fi { width: 22px; height: 22px; }
+
+/* el probador */
+.bq-det.vest { gap: 9px; }
+.bq-prob { position: relative; display: block; height: 280px; overflow: hidden; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); }
+.bq-prob.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
+.bq-probh { position: absolute; inset: 0; }
+.bq-probh .cr-cv { top: auto; bottom: 0; transform: translateX(-50%); }
+.bq-probl { position: absolute; left: 10px; top: 10px; z-index: 1; font-family: var(--mono); font-size: 16px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; padding: 4px 7px 3px; color: var(--gx-ink);
+  background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
+/* comprada: el probador se enciende (sin escalar: el crupier sigue a pixel entero) */
+.bq-det.bq-sold .bq-prob { animation: bq-lit .9s var(--gx-ease) both; }
+@keyframes bq-lit { 0% { filter: brightness(1); } 30% { filter: brightness(1.4); } 100% { filter: brightness(1); } }
+html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }

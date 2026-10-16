@@ -437,8 +437,8 @@ window.AIQ = window.AIQ || {};
   /* v0.3.62: la pagina "Mesas" del libro (el catalogo, js/skins.js) */
   const MESAS_T = () => A.pick6("Mesas|Tables|Tables|Mesas|Tische|Tavoli||牌桌|테이블|テーブル|Столы|Stoły");
   const MESAS_TX = {
-    eyb: "Se ganan en la mesa o en la boutique|Won at the table or in the boutique|À gagner à la table ou à la boutique|Ganham-se na mesa ou na boutique|Am Tisch verdient oder in der Boutique|Si vincono al tavolo o in boutique||在牌桌上赢来，或在精品店购得|테이블에서 따내거나 부티크에서|テーブルで勝ち取るか、ブティックで|Выигрываются за столом или в бутике|Wygrywane przy stole albo w butiku",
-    shop: "Boutique|Boutique|Boutique|Boutique|Boutique|Boutique||精品店|부티크|ブティック|Бутик|Butik",
+    eyb: "Se ganan en la mesa o en la tienda|Won at the table or in the boutique|À gagner à la table ou à la boutique|Ganham-se na mesa ou na boutique|Am Tisch verdient oder in der Boutique|Si vincono al tavolo o in boutique||在牌桌上赢来，或在精品店购得|테이블에서 따내거나 부티크에서|テーブルで勝ち取るか、ブティックで|Выигрываются за столом или в бутике|Wygrywane przy stole albo w butiku",
+    shop: "Tienda|Boutique|Boutique|Boutique|Boutique|Boutique||精品店|부티크|ブティック|Бутик|Butik",
     on: "En uso|In use|Utilisée|Em uso|Im Einsatz|In uso||使用中|사용 중|使用中|Выбран|W użyciu",
     use: "Usar|Use|Utiliser|Usar|Benutzen|Usa||使用|사용|使う|Выбрать|Użyj",
     lk: "Cerrada|Locked|Fermée|Fechada|Gesperrt|Chiuso||未解锁|잠김|未解放|Закрыт|Zamknięty",

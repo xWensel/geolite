@@ -14,7 +14,7 @@ window.AIQ = window.AIQ || {};
   const C = () => A.core, $ = id => document.getElementById(id), P6 = s => A.pick6(s);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const TX = {
-    title: "La boutique|The boutique|La boutique|A boutique|Die Boutique|La boutique||精品店|부티크|ブティック|Бутик|Butik",
+    title: "La tienda|The boutique|La boutique|A boutique|Die Boutique|La boutique||精品店|부티크|ブティック|Бутик|Butik",
     all: "Todas|All|Toutes|Todas|Alle|Tutte||全部|전체|すべて|Все|Wszystkie",
     rare: "Raras|Rare|Rares|Raras|Selten|Rare||稀有|레어|レア|Редкие|Rzadkie",
     leg: "Legendarias|Legendary|Légendaires|Lendárias|Legendär|Leggendarie||传说|전설|レジェンド|Легендарные|Legendarne",
@@ -29,14 +29,38 @@ window.AIQ = window.AIQ || {};
     using: "La llevas puesta|You're using it|Tu l'utilises|Você está usando|Liegt gerade auf|La stai usando||正在使用|사용 중|使用中|Уже на карте|W użyciu",
     try: "Probar en el mapa|Try it on the map|L'essayer sur la carte|Testar no mapa|Auf der Karte ansehen|Provala sulla mappa||在地图上试试|지도에서 미리 보기|マップで試す|Примерить на карте|Przymierz na mapie",
     trying: "Probando: {m}|Trying: {m}|Essai : {m}|Testando: {m}|Vorschau: {m}|Prova: {m}||试用：{m}|미리 보기: {m}|お試し中：{m}|Примерка: {m}|Przymiarka: {m}",
-    tryBack: "Volver a la boutique|Back to the boutique|Retour à la boutique|Voltar à boutique|Zurück zur Boutique|Torna alla boutique||返回精品店|부티크로 돌아가기|ブティックに戻る|Назад в бутик|Wróć do butiku",
+    tryBack: "Volver a la tienda|Back to the boutique|Retour à la boutique|Voltar à boutique|Zurück zur Boutique|Torna alla boutique||返回精品店|부티크로 돌아가기|ブティックに戻る|Назад в бутик|Wróć do butiku",
     offer: "Oferta de la casa|House offer|Offre de la maison|Oferta da casa|Angebot des Hauses|Offerta della casa||本店特价|하우스 특가|ハウスの特売|Предложение заведения|Oferta kasyna",
     till: "hasta el lunes|until Monday|jusqu'à lundi|até segunda|bis Montag|fino a lunedì||截至周一|월요일까지|月曜まで|до понедельника|do poniedziałku",
     bought: "Comprada esta semana|Bought this week|Achetée cette semaine|Comprada esta semana|Diese Woche gekauft|Comprato questa settimana||本周已购买|이번 주 구매 완료|今週購入済み|Куплено на этой неделе|Kupione w tym tygodniu",
-    empty: "Aún no tienes ninguna de la boutique. Cada nivel del Club te paga fichas de oro.|You don't have any from the boutique yet. Every Club level pays you gold chips.|Tu n'en as encore aucune de la boutique. Chaque niveau du Club te paie en jetons d'or.|Você ainda não tem nenhuma da boutique. Cada nível do Clube paga fichas de ouro.|Du hast noch keinen aus der Boutique. Jede Club-Stufe zahlt dir Goldchips.|Non ne hai ancora nessuno della boutique. Ogni livello del Club ti paga in fiche d'oro.||你还没有精品店的牌桌。俱乐部每升一级都付你金筹码。|아직 부티크 테이블이 없어요. 클럽 레벨마다 골드 칩을 받아요.|ブティックのテーブルはまだない。クラブのレベルが上がるたびに金のチップがもらえる。|Из бутика пока ничего нет. Каждый уровень клуба платит золотыми фишками.|Nie masz jeszcze żadnego z butiku. Każdy poziom klubu płaci złotymi żetonami.",
+    empty: "Aún no tienes ninguna de la tienda. Cada nivel del Club te paga fichas de oro.|You don't have any from the boutique yet. Every Club level pays you gold chips.|Tu n'en as encore aucune de la boutique. Chaque niveau du Club te paie en jetons d'or.|Você ainda não tem nenhuma da boutique. Cada nível do Clube paga fichas de ouro.|Du hast noch keinen aus der Boutique. Jede Club-Stufe zahlt dir Goldchips.|Non ne hai ancora nessuno della boutique. Ogni livello del Club ti paga in fiche d'oro.||你还没有精品店的牌桌。俱乐部每升一级都付你金筹码。|아직 부티크 테이블이 없어요. 클럽 레벨마다 골드 칩을 받아요.|ブティックのテーブルはまだない。クラブのレベルが上がるたびに金のチップがもらえる。|Из бутика пока ничего нет. Каждый уровень клуба платит золотыми фишками.|Nie masz jeszcze żadnego z butiku. Każdy poziom klubu płaci złotymi żetonami.",
+  };
+  /* v0.3.134: el vestuario del crupier (js/vestuario.js) */
+  const VX = {
+    cMesas: "Mesas|Tables|Tables|Mesas|Tische|Tavoli||牌桌|테이블|テーブル|Столы|Stoły",
+    cVest: "Vestuario|Wardrobe|Garde-robe|Guarda-roupa|Garderobe|Guardaroba||衣橱|의상실|衣装|Гардероб|Garderoba",
+    traje: "Trajes|Suits|Costumes|Ternos|Anzüge|Abiti||西装|정장|スーツ|Костюмы|Garnitury",
+    pajarita: "Pajaritas|Bow ties|Nœuds papillon|Gravatas|Fliegen|Papillon||领结|나비넥타이|蝶ネクタイ|Бабочки|Muchy",
+    casa: "De la casa|House|Maison|Da casa|Vom Haus|Della casa||本店原装|기본|定番|От заведения|Firmowe",
+    antifaz: "Antifaces|Masks|Loups|Máscaras|Masken|Maschere||面具|가면|仮面|Маски|Maski",
+    mine: "Tuyo|Yours|À toi|Seu|Deins|Tuo||已拥有|보유|所持|Твоё|Twoje",
+    on: "Puesto|Wearing|Porté|Vestido|Angezogen|Indossato||穿着|착용 중|着用中|Надето|Założone",
+    tierR: "Vestuario|Wardrobe|Garde-robe|Guarda-roupa|Garderobe|Guardaroba||服饰|의상|衣装|Одежда|Garderoba",
+    tierL: "Vestuario legendario|Legendary wardrobe|Garde-robe légendaire|Guarda-roupa lendário|Legendäre Garderobe|Guardaroba leggendario||传说服饰|전설 의상|レジェンド衣装|Легендарная одежда|Legendarna garderoba",
+    slot: {
+      traje: "Traje|Suit|Costume|Terno|Anzug|Abito||西装|정장|スーツ|Костюм|Garnitur",
+      pajarita: "Pajarita y cinta|Bow tie and band|Nœud papillon et ruban|Gravata e fita|Fliege und Hutband|Papillon e nastro||领结和帽带|나비넥타이와 띠|蝶ネクタイとリボン|Бабочка и лента|Mucha i wstążka",
+      antifaz: "Antifaz|Mask|Loup|Máscara|Maske|Maschera||面具|가면|仮面|Маска|Maska",
+      chistera: "Chistera|Top hat|Haut-de-forme|Cartola|Zylinder|Cilindro||礼帽|실크해트|シルクハット|Цилиндр|Cylinder",
+    },
+    wear: "Ponértelo|Put it on|Le mettre|Vestir|Anziehen|Indossalo||穿上|착용하기|着る|Надеть|Załóż",
+    off: "Quitártelo|Take it off|L'enlever|Tirar|Ausziehen|Toglilo||脱下|벗기|脱ぐ|Снять|Zdejmij",
+    empty: "Aún no tienes ropa del vestuario. Cada nivel del Club te paga fichas de oro.|You don't have anything from the wardrobe yet. Every Club level pays you gold chips.|Tu n'as encore rien de la garde-robe. Chaque niveau du Club te paie en jetons d'or.|Você ainda não tem nada do guarda-roupa. Cada nível do Clube paga fichas de ouro.|Du hast noch nichts aus der Garderobe. Jede Club-Stufe zahlt dir Goldchips.|Non hai ancora niente del guardaroba. Ogni livello del Club ti paga in fiche d'oro.||你还没有衣橱里的衣服。俱乐部每升一级都付你金筹码。|아직 의상실 옷이 없어요. 클럽 레벨마다 골드 칩을 받아요.|衣装はまだ何もない。クラブのレベルが上がるたびに金のチップがもらえる。|Из гардероба пока ничего нет. Каждый уровень клуба платит золотыми фишками.|Nie masz jeszcze nic z garderoby. Każdy poziom klubu płaci złotymi żetonami.",
+    prob: "Probador|Fitting room|Cabine d'essayage|Provador|Umkleide|Camerino||试衣间|피팅룸|試着室|Примерочная|Przymierzalnia",
   };
   const PER = 12, TRY_MS = 7000;
-  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null };
+  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null };
+  const V = () => A.vestuario;
   const fi = (cls = "") => `<img class="bq-fi${cls ? " " + cls : ""}" src="assets/icons/ficha_oro.webp" alt="">`;
   const M = () => A.mesas;
   const list = () => {
@@ -86,24 +110,84 @@ window.AIQ = window.AIQ || {};
       <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqPrev"${ST.page ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.page + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqNext"${ST.page < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
       <div class="bq-items" id="bqItems">${items.length ? items.map(item).join("") : `<p class="bq-empty">${esc(P6(TX.empty))}</p>`}</div>`;
   }
+  /* las dos secciones de la boutique, en la cabecera: Mesas y Vestuario */
+  const catTabs = () => V() ? `<nav class="bq-cats" aria-label="${esc(P6(TX.title))}">${[["mesas", VX.cMesas, "chip_g"], ["vest", VX.cVest, "boss_hat"]].map(([k, t, ic]) =>
+    `<button type="button" class="bq-cat-t${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}">${A.icon(ic)}<span>${esc(P6(t))}</span></button>`).join("")}</nav>` : "";
+  const catBody = () => ST.cat === "vest" ? `<div id="bqGrid" class="bq-gw">${vGridHtml()}</div>` : `${offerHtml()}<div id="bqGrid" class="bq-gw">${gridHtml()}</div>`;
   function html() {
     const have = A.club ? A.club.fichas() : 0, lv = A.club ? P6(A.club.tx.lv).replace("{n}", A.club.level()) : "";
     return `<div class="gx-veil bq-veil"></div><section class="bq-screen gx-stage" aria-labelledby="bqH" data-nosq>
       <div class="gx-grid bq-grid">
         <header class="bq-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l bq-h" id="bqH"><span class="bq-hic">${A.icon("purse")}</span><span><span class="gx-eyb">${esc(A.club ? P6(A.club.tx.club) : "")}${lv ? " · " + esc(lv) : ""}</span>${esc(P6(TX.title))}</span></h2>
-          <span class="bq-wal" aria-label="${esc(A.club ? P6(A.club.tx.fichas) : "")}">${fi()}<b id="bqWal">${A.fmt(have)}</b></span>${A.hub.tools()}</header>
-        <div class="gx-sh bq-left"><div class="gx-paper bq-cat">${offerHtml()}<div id="bqGrid" class="bq-gw">${gridHtml()}</div></div></div>
-        <div class="gx-sh bq-right"><div class="gx-paper bq-det" id="bqDet">${detHtml()}</div></div>
+          ${catTabs()}<span class="bq-wal" aria-label="${esc(A.club ? P6(A.club.tx.fichas) : "")}">${fi()}<b id="bqWal">${A.fmt(have)}</b></span>${A.hub.tools()}</header>
+        <div class="gx-sh bq-left"><div class="gx-paper bq-cat${ST.cat === "vest" ? " vest" : ""}" id="bqCat">${catBody()}</div></div>
+        <div class="gx-sh bq-right"><div class="gx-paper bq-det${ST.cat === "vest" ? " vest" : ""}" id="bqDet">${ST.cat === "vest" ? vDetHtml() : detHtml()}</div></div>
       </div></section>`;
   }
+
+  /* ---------------------------------------------------------------- el vestuario: las 12 piezas (6 x 2) y el probador a la derecha */
+  /* las pestanas: un hueco cada una (los 12 colores de la carta, en su orden), las legendarias y lo tuyo; 12 por pagina */
+  const vOf = t => { const all = V().items; return t === "l" ? all.filter(i => i.r === "l") : t === "mine" ? all.filter(i => !i.casa && V().owned(i.id)) : all.filter(i => i.slot === t && i.r !== "l"); };
+  const vList = () => vOf(ST.vtab);
+  const vState = id => V().wearing(id) ? "on" : V().owned(id) ? "got" : "";
+  const vPrice = id => `<span class="bq-pr">${fi()}<b>${A.fmt(V().price(id))}</b></span>`;               // (en la ficha, el precio va en el boton de comprar)
+  function vItem(it) {
+    const s = vState(it.id);
+    return `<button type="button" class="bq-it bq-vit${it.id === ST.vsel ? " sel" : ""}${s ? " " + s : ""}${it.r === "l" ? " leg" : ""}" data-vid="${it.id}" aria-pressed="${it.id === ST.vsel}">
+      <span class="bq-th bq-vth"><img src="${V().thumb(V().with(it.id, {}), 1)}" alt="" width="96" height="112" decoding="async"></span>
+      <b class="bq-nm">${esc(V().name(it.id))}</b>
+      <span class="bq-vp">${s === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : it.casa ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : s ? `<em class="bq-own">${esc(P6(VX.mine))}</em>` : vPrice(it.id)}</span></button>`;
+  }
+  function vGridHtml() {
+    const L = vList(), pages = Math.max(1, Math.ceil(L.length / PER)); ST.vpage = Math.min(ST.vpage, pages - 1);
+    const items = L.slice(ST.vpage * PER, ST.vpage * PER + PER);
+    const tab = (k, tx) => `<button type="button" class="bq-tab bq-vtab${ST.vtab === k ? " on" : ""}" data-vtab="${k}" aria-pressed="${ST.vtab === k}"><span>${esc(P6(tx))}</span><i>${vOf(k).length}</i></button>`;
+    return `<div class="bq-bar"><nav class="bq-tabs">${tab("traje", VX.traje)}${tab("antifaz", VX.antifaz)}${tab("pajarita", VX.pajarita)}${tab("l", TX.leg)}${tab("mine", VX.mine)}</nav>
+      <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqVPrev"${ST.vpage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.vpage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqVNext"${ST.vpage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
+      <div class="bq-items vest" id="bqItems">${items.length ? items.map(vItem).join("") : `<p class="bq-empty">${esc(P6(VX.empty))}</p>`}</div>`;
+  }
+  function vDetHtml() {
+    const id = ST.vsel, it = V().get(id), s = vState(id), have = A.club ? A.club.fichas() : 0, p = V().price(id), leg = it.r === "l";
+    let act;
+    if (s === "on" && it.casa) act = `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(VX.on))}</span></button>`;
+    else if (s === "on") act = `<button type="button" class="gx-btn gho wide" id="bqOff"><span>${esc(P6(VX.off))}</span></button>`;
+    else if (s === "got") act = `<button type="button" class="gx-btn pri wide" id="bqWear"><span>${esc(P6(VX.wear))}</span></button>`;
+    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
+    else act = `<button type="button" class="gx-btn pri wide${ST.armed === id ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === id ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
+    return `<span class="bq-prob${leg ? " leg" : ""}"><span class="bq-probl">${esc(P6(VX.prob))}</span><span class="bq-probh" id="bqProb"></span></span>
+      <span class="gx-eyb bq-tier">${esc(P6(leg ? VX.tierL : it.casa ? VX.casa : VX.tierR))} · ${esc(P6(VX.slot[it.slot]))}</span>
+      <h3 class="gx-t-m bq-dn">${esc(V().name(id))}</h3>
+      <p class="bq-dd">${esc(V().desc(id))}</p>
+      <div class="bq-acts">${act}</div>`;
+  }
+  /* las miniaturas, nitidas: el retrato a 1 pixel por pixel de arte y la caja lo amplia un numero ENTERO de veces en pixeles reales de pantalla
+     (la figura centrada y de pie en el borde de abajo; lo que sobra arriba es el hueco de la chistera que salta) */
+  function fitThumbs() {
+    document.querySelectorAll("#dlg .bq-vth").forEach(b => {
+      const im = b.querySelector("img"); if (!im) return;
+      const z = b.currentCSSZoom || 1, dpr = window.devicePixelRatio || 1, per = 1 / (z * dpr), rw = b.clientWidth * z * dpr, rh = b.clientHeight * z * dpr;
+      if (!rw) return;
+      const k = Math.max(1, Math.floor(Math.min(rw / 72, rh / 84)));
+      const st = im.style; st.width = 96 * k * per + "px"; st.height = 112 * k * per + "px";
+      st.left = Math.round((rw - 96 * k) / 2 - 4.5 * k) * per + "px"; st.top = Math.round(rh - 112 * k + 6 * k) * per + "px";
+    });
+  }
+  /* el probador: el crupier de verdad (respira, parpadea y hace sus gestos) con lo que llevas mas la pieza elegida */
+  function dropProb() { if (ST.spr) { try { ST.spr.destroy(); } catch (e) {} ST.spr = null; } }
+  function mountProb() {
+    dropProb();
+    const host = $("bqProb"); if (!host || !A.crupier || !V()) return;
+    try { ST.spr = A.crupier.mount(host, { atlas: V().atlasFor(V().with(ST.vsel)), floor: true }); } catch (e) { ST.spr = null; }
+  }
+  const vPaint = () => { fitThumbs(); mountProb(); };
 
   /* pintar solo lo que cambia (la rejilla, la ficha y la oferta), conservando el foco */
   function repaint(focusSel) {
     const g = $("bqGrid"), d = $("bqDet"); if (!g || !d) return;
     const fid = document.activeElement && document.activeElement.id, fdata = document.activeElement && document.activeElement.dataset;
-    g.innerHTML = gridHtml(); d.innerHTML = detHtml();
-    const of = document.querySelector("#dlg .bq-offer"); if (of) of.outerHTML = offerHtml();
+    if (ST.cat === "vest") { g.innerHTML = vGridHtml(); d.innerHTML = vDetHtml(); vPaint(); }
+    else { g.innerHTML = gridHtml(); d.innerHTML = detHtml(); const of = document.querySelector("#dlg .bq-offer"); if (of) of.outerHTML = offerHtml(); }
     const w = $("bqWal"); if (w && A.club) w.textContent = A.fmt(A.club.fichas());
     wireInner();
     let f = null;
@@ -111,6 +195,8 @@ window.AIQ = window.AIQ || {};
     else if (fid) f = $(fid);
     else if (fdata && fdata.id) f = document.querySelector(`#dlg .bq-it[data-id="${fdata.id}"]`);
     else if (fdata && fdata.tab) f = document.querySelector(`#dlg .bq-tab[data-tab="${fdata.tab}"]`);
+    else if (fdata && fdata.vid) f = document.querySelector(`#dlg .bq-vit[data-vid="${fdata.vid}"]`);
+    else if (fdata && fdata.vtab) f = document.querySelector(`#dlg .bq-vtab[data-vtab="${fdata.vtab}"]`);
     if (f && !f.disabled) f.focus({ preventScroll: true });
   }
   function pick(id, focus) {
@@ -120,14 +206,58 @@ window.AIQ = window.AIQ || {};
   }
   function wireInner() {
     const sc = document.querySelector("#dlg .bq-screen"); if (!sc) return;
-    sc.querySelectorAll(".bq-it, .bq-offer").forEach(b => { b.onclick = () => pick(b.dataset.id, b.classList.contains("bq-offer") ? "#dlg .bq-offer" : null); });
-    sc.querySelectorAll(".bq-tab").forEach(b => { b.onclick = () => { if (ST.tab === b.dataset.tab) return; ST.tab = b.dataset.tab; ST.page = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-tab[data-tab="${ST.tab}"]`); }; });
+    sc.querySelectorAll(".bq-it:not(.bq-vit), .bq-offer").forEach(b => { b.onclick = () => pick(b.dataset.id, b.classList.contains("bq-offer") ? "#dlg .bq-offer" : null); });
+    sc.querySelectorAll(".bq-tab:not(.bq-vtab)").forEach(b => { b.onclick = () => { if (ST.tab === b.dataset.tab) return; ST.tab = b.dataset.tab; ST.page = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-tab[data-tab="${ST.tab}"]`); }; });
     const pv = $("bqPrev"), nx = $("bqNext");
     if (pv) pv.onclick = () => { if (ST.page > 0) { ST.page--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqPrev:not([disabled]), #bqNext"); } };
     if (nx) nx.onclick = () => { ST.page++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqNext:not([disabled]), #bqPrev"); };
     const tr = $("bqTry"); if (tr) tr.onclick = () => tryOn(ST.sel);
     const us = $("bqUse"); if (us) us.onclick = () => { if (M().use(ST.sel)) { if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqTry"); } };
-    const bu = $("bqBuy"); if (bu) bu.onclick = () => buy(ST.sel);
+    const bu = $("bqBuy"); if (bu) bu.onclick = () => (ST.cat === "vest" ? vBuy(ST.vsel) : buy(ST.sel));
+    sc.querySelectorAll(".bq-vit").forEach(b => { b.onclick = () => { const id = b.dataset.vid; if (ST.busy) return; if (id !== ST.vsel) { ST.vsel = id; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg .bq-vit[data-vid="${id}"]`); }; });
+    sc.querySelectorAll(".bq-vtab").forEach(b => { b.onclick = () => { if (ST.vtab === b.dataset.vtab) return; ST.vtab = b.dataset.vtab; ST.vpage = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-vtab[data-vtab="${ST.vtab}"]`); }; });
+    const vp = $("bqVPrev"), vn = $("bqVNext");
+    if (vp) vp.onclick = () => { if (ST.vpage > 0) { ST.vpage--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqVPrev:not([disabled]), #bqVNext"); } };
+    if (vn) vn.onclick = () => { ST.vpage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqVNext:not([disabled]), #bqVPrev"); };
+    const we = $("bqWear"); if (we) we.onclick = () => { if (!V().wear(ST.vsel)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqOff"); if (ST.spr) ST.spr.play("preen"); };
+    const ofb = $("bqOff"); if (ofb) ofb.onclick = () => { V().takeOff(ST.vsel); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqWear"); };
+  }
+  /* cambiar de seccion: solo cambian la izquierda y la derecha (la cabecera se queda); el vestuario espera a tener su atlas listo */
+  function setCat(k) {
+    if (k === ST.cat || ST.busy || (k === "vest" && !V())) return;
+    const go = () => {
+      if (!$("bqCat")) return;
+      if (ST.trying) tryOff(true);
+      ST.cat = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card();
+      if (k !== "vest") dropProb();
+      document.querySelectorAll("#dlg .bq-cat-t").forEach(b => { const on = b.dataset.cat === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+      const ca = $("bqCat"), d = $("bqDet");
+      ca.classList.toggle("vest", k === "vest"); d.classList.toggle("vest", k === "vest");
+      ca.innerHTML = catBody(); d.innerHTML = k === "vest" ? vDetHtml() : detHtml();
+      wireInner(); if (k === "vest") vPaint();
+      const f = document.querySelector(`#dlg .bq-cat-t[data-cat="${k}"]`); if (f) f.focus({ preventScroll: true });
+    };
+    if (k === "vest") { if (!ST.vsel) ST.vsel = (vOf(ST.vtab).find(i => !V().owned(i.id)) || vOf(ST.vtab)[0]).id; V().ready(go); } else go();
+  }
+  /* comprar ropa: como una mesa (dos pulsaciones, premio, monedero que baja), pero te quedas en la boutique: se la pone al momento y se luce */
+  function vBuy(id) {
+    if (ST.busy || !id || V().owned(id)) return;
+    const have = A.club ? A.club.fichas() : 0, p = V().price(id);
+    if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
+    if (ST.armed !== id) { ST.armed = id; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === id && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
+    ST.armed = null;
+    if (!V().buy(id)) return;
+    const leg = V().get(id).r === "l";
+    repaint("#bqOff");
+    { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
+    if (A.casa && A.casa.premio) A.casa.premio(leg ? 3 : 2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(leg ? 3 : 2);
+    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.haptic) A.haptic(leg ? [30, 60, 40] : [24]);
+    const w = $("bqWal"), to = A.club.fichas(), n = 10;
+    for (let i = 1; i <= n; i++) setTimeout(() => { if (w && w.isConnected) w.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
+    const card = document.querySelector(`#dlg .bq-vit[data-vid="${id}"]`), det = $("bqDet");
+    if (card) card.classList.add("bq-sold"); if (det) det.classList.add("bq-sold");
+    setTimeout(() => { if (ST.spr) ST.spr.play("preen"); }, 260);
   }
 
   /* comprar: primero se arma (rojo, «¿Seguro?»); la segunda pulsacion paga. Si te faltan fichas, nada (zumbido) */
@@ -194,13 +324,19 @@ window.AIQ = window.AIQ || {};
     ST.sel = id && shop.some(m => m.id === id) ? id : ST.sel && shop.some(m => m.id === ST.sel) ? ST.sel : o ? o.id : (shop.find(m => !M().owned(m.id)) || shop[0]).id;
     ST.armed = null; ST.busy = false;
     if (id) { ST.tab = "all"; const L = list(), i = L.findIndex(m => m.id === id); ST.page = i >= 0 ? Math.floor(i / PER) : 0; }
-    c.dialog(html(), "tablewrap");
-    A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
-    wireInner();
-    setTimeout(() => { const f = document.querySelector(`#dlg .bq-it[data-id="${ST.sel}"]`) || document.querySelector("#dlg .bq-offer") || $("bqTry"); if (f) f.focus({ preventScroll: true }); }, 80);
+    if (id || !V()) ST.cat = "mesas";                                   // desde Perfil > Mesas se abre en las mesas
+    if (ST.cat === "vest" && !ST.vsel) ST.vsel = vOf(ST.vtab)[0].id;
+    const draw = () => {
+      c.dialog(html(), "tablewrap");
+      A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
+      document.querySelectorAll("#dlg .bq-cat-t").forEach(b => { b.onclick = () => setCat(b.dataset.cat); });
+      wireInner(); if (ST.cat === "vest") vPaint();
+      setTimeout(() => { const f = ST.cat === "vest" ? document.querySelector(`#dlg .bq-vit[data-vid="${ST.vsel}"]`) : document.querySelector(`#dlg .bq-it[data-id="${ST.sel}"]`) || document.querySelector("#dlg .bq-offer") || $("bqTry"); if (f) f.focus({ preventScroll: true }); }, 80);
+    };
+    if (ST.cat === "vest") V().ready(draw); else draw();
   }
   /* si se sale de la boutique a mitad de una prueba, el mapa vuelve a tu mesa */
-  const leave = () => { if (ST.trying) tryOff(true); ST.armed = null; };
+  const leave = () => { if (ST.trying) tryOff(true); ST.armed = null; dropProb(); };
 
-  A.boutique = { open, leave, want: id => { ST.next = id; }, get trying() { return ST.trying; } };
+  A.boutique = { open, leave, want: id => { ST.next = id; }, cat: k => { ST.cat = k; }, get trying() { return ST.trying; } };
 })(window.AIQ);
