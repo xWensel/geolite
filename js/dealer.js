@@ -2144,7 +2144,7 @@ window.AIQ = window.AIQ || {};
     if (b.fake) { fakeAch(b.fake, b.n); homeT = setTimeout(homeTick, 30000 + Math.random() * 20000); return; }
     ensure(); homeCorner = corner;
     if (b.tag && !tagFix()) { homeT = setTimeout(homeTick, 5000); return; }
-    if (b.card) tierCard(b.card);
+    if (b.card) tierStamp();
     if (b.afk) D.say(b.t, { mood: b.mood, hold: 0, done: startDoze });
     else if (b.chain) chain(b.chain); else if (b.t) D.say(b.t, { mood: b.mood || "sly", hold: holdFor(b.t) });
     homeT = setTimeout(homeTick, (b.wait || 0) + (homeN <= 2 ? 14000 + Math.random() * 10000 : 35000 + Math.random() * 25000));   // al llegar, seguido; luego, espaciado
@@ -2583,23 +2583,19 @@ window.AIQ = window.AIQ || {};
   /* ---------------------------------------------------------------- TANDA 5 (v0.20): LOS ARCOS ENTRE SESIONES
      DE TURISTA A SOCIO: desde el Club de la casa (js/club.js) tu categoria sale de tu nivel de socio: habitual desde el 5, rival desde el 20 y
      socio desde el 50. Nadie baja: si ya te habia subido por lo que hiciste antes (visitas, conquistas, dianas, Ascension 5), la conservas.
-     Al subir, en la apertura siguiente sella tu tarjeta de socio; su tono en la portada y en la partida cambia con ella. */
+     Al subir, en la apertura siguiente sella tu tarjeta de socio de la portada; su tono en la portada y en la partida cambia con ella. */
   const tGroup = n => (A.club ? A.club.groupOf(n) : Math.min(3, n | 0));     // el tono y la tarjeta van por tramos de la escalera (js/club.js)
   /* las 4 categorias de antes pasan a su escalon de la escalera de 15 (Turista 0, Habitual 2, Rival 6, Socio 11) */
   if (DS.tier != null && DS.tierV !== 2) { DS.tier = [0, 2, 6, 11][Math.max(0, Math.min(3, DS.tier | 0))]; DS.tierV = 2; saveStore(); }
   else if (DS.tierV !== 2) { DS.tierV = 2; }
   function tierNow() { return Math.max(A.club ? A.club.tierOf(A.club.level()) : 0, DS.tier || 0); }
   if (DS.tier == null) { DS.tier = firstVisit ? 0 : Math.max(0, tierNow() - 1); saveStore(); }
-  function tierCard(n) {
-    const P = A.profile.get() || {}, S = A.core && A.core.S, reduced = (S && S.reduce);
-    const no = "N.º|No.|N°|Nº|Nr.|N.||No.|No.|No.|№|Nr", title = "Tarjeta de socio|Member card|Carte de membre|Cartão de sócio|Mitgliedskarte|Tessera socio||会员卡|회원 카드|会員カード|Клубная карта|Karta członkowska";
-    const num = String((A.rank && A.rank.hash ? A.rank.hash(P.id + ":socio") : 421) % 10000).padStart(4, "0");
-    const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    const c = document.createElement("div"); c.className = "tier-card t" + tGroup(n) + (reduced ? " still" : "");
-    c.innerHTML = `<header><span>${A.icon("chip_r")}</span><b>${esc(A.pick6(title))}</b><em>${esc(A.pick6(no))} ${num}</em></header><p>${esc(who() || A.pick6("Anónimo|Anonymous|Anonyme|Anônimo|Anonym|Anonimo||匿名|익명|匿名|Аноним|Anonim"))}</p><b class="tc-stamp">${esc(A.club ? A.club.tierName(n) : "")}</b>`;
-    $("app").appendChild(c); A.sfx.card();
-    setTimeout(() => { c.classList.add("stamped"); A.sfx.stamp(); if (A.haptic) A.haptic([30, 40, 70]); }, 900);
-    setTimeout(() => { c.classList.add("out"); setTimeout(() => c.remove(), 600); }, 6200);
+  /* sube de categoria: el crupier sella la tarjeta de socio de la portada en su sitio (v0.3.155: ya no sale otra en mitad de la pantalla) */
+  function tierStamp() {
+    setTimeout(() => {
+      const el = document.querySelector("#socioBtn .sc-c b"); if (!el) return;
+      el.classList.remove("sc-stamp"); A.restyle(el); el.classList.add("sc-stamp"); A.sfx.stamp(); if (A.haptic) A.haptic([30, 40, 70]);
+    }, 900);
   }
 
   /* EL MARCADOR HISTORICO: rondas que le ganas y que te gana (tambien jefes, en el Reto diario tambien). La primera vez que vas por delante (con 30 o

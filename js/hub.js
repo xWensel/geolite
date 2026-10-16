@@ -82,7 +82,7 @@ window.AIQ = window.AIQ || {};
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     if (A.club) A.club.wire(() => screen("profile"));                      // tu tarjeta de socio: abre el Perfil y cuenta las fichas de oro nuevas
     if ($("bqBtn")) $("bqBtn").onclick = () => { A.sfx.card(); screen("boutique"); };   // v0.3.132: la boutique, bajo la tarjeta de socio
-    if ($("rtBtn")) $("rtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // entrega 3 del Club: los retos, junto a la tienda (js/club-retos.js)
+    if ($("clubRtBtn")) $("clubRtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // entrega 3 del Club: los retos, junto a la tienda (js/club-retos.js)
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura
     if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura

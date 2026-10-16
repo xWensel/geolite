@@ -251,7 +251,7 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ la pestana de laton de la portada (junto a la tienda) */
   function tab() {
     const [a, b] = todayDone(), tt = A.ttAttr ? A.ttAttr(P6(TX.title), P6(TX.tip)) : "";
-    return `<button type="button" class="hh-bq hh-rt" id="rtBtn" ${tt}>${A.icon("journal")}<span>${esc(P6(TX.tab))}</span>${b ? `<b class="hh-rtn${a >= b ? " ok" : ""}">${a}/${b}</b>` : ""}</button>`;
+    return `<button type="button" class="hh-bq hh-rt" id="clubRtBtn" ${tt}>${A.icon("journal")}<span>${esc(P6(TX.tab))}</span>${b ? `<b class="hh-rtn${a >= b ? " ok" : ""}">${a}/${b}</b>` : ""}</button>`;
   }
 
   /* ------------------------------------------------------------------ la pantalla: Hoy, Esta semana y Encargos */
