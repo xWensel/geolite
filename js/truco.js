@@ -92,14 +92,14 @@ window.AIQ = window.AIQ || {};
   /* ---------------------------------------------------------------- el aviso */
   function aviso(on, r) {
     const old = $("truco"); if (old) old.remove();
-    const el = document.createElement("div"); el.id = "truco"; el.className = "tr-veil"; el.setAttribute("role", "status");
+    const el = document.createElement("div"); el.id = "truco"; el.className = "tq-veil"; el.setAttribute("role", "status");
     const lines = on && r ? [fill("ach", r.ach), fill("codex", r.codex), fill("mesas", r.mesas), fill("vest", r.vest), fill("club", r.club) + " · " + fill("fichas", r.fichas), fill("clasico", r.clasico), P6(TX.asc)] : [];
-    el.innerHTML = `<div class="tr-card gx-paper${on ? "" : " off"}">
-      <span class="gx-eyb tr-eyb">${esc(P6(TX.eyb))}</span>
-      <b class="tr-plate">${esc(P6(on ? TX.on : TX.off))}</b>
-      ${lines.length ? `<ul class="tr-list">${lines.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
-      <p class="tr-foot">${esc(P6(on ? TX.footOn : TX.footOff))}</p>
-      <span class="tr-key">${esc(P6(TX.tecla))}</span></div>`;
+    el.innerHTML = `<div class="tq-card gx-paper${on ? "" : " off"}">
+      <span class="gx-eyb tq-eyb">${esc(P6(TX.eyb))}</span>
+      <b class="tq-plate">${esc(P6(on ? TX.on : TX.off))}</b>
+      ${lines.length ? `<ul class="tq-list">${lines.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+      <p class="tq-foot">${esc(P6(on ? TX.footOn : TX.footOff))}</p>
+      <span class="tq-key">${esc(P6(TX.tecla))}</span></div>`;
     document.body.appendChild(el);
     requestAnimationFrame(() => el.classList.add("in"));
     const t0 = performance.now();

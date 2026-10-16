@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.163",
+      name: L("La mochila, en su sitio", "The pack, back in place", "La sacoche, à sa place", "A mochila, no lugar", "Der Rucksack, wieder am Platz", "Lo zaino, al suo posto", "", "背包回到原位", "가방, 제자리로", "バッグが元の位置に", "Сумка на месте", "Plecak na swoim miejscu"),
+      date: "2026-10-16",
+      summary: L("Las reliquias, herramientas y provisiones del Campamento vuelven a quedar alineadas bajo su rótulo.", "The Camp's relics, tools and provisions line up under their headings again.", "Les reliques, outils et provisions du Camp sont de nouveau alignés sous leur titre.", "As relíquias, ferramentas e provisões do Acampamento voltam a ficar alinhadas sob o seu título.", "Relikte, Werkzeuge und Vorräte im Lager stehen wieder bündig unter ihrer Überschrift.", "Reliquie, strumenti e provviste dell'Accampamento tornano allineati sotto il loro titolo.", "", "营地里的遗物、工具和补给重新对齐到各自的标题下方。", "캠프의 유물, 도구, 보급품이 다시 제목 아래에 정렬됩니다.", "キャンプの遺物・道具・補給品が、見出しの下にきちんと並ぶようになりました。", "Реликвии, инструменты и припасы в лагере снова выровнены под своими заголовками.", "Relikwie, narzędzia i zapasy w obozie znów są ustawione pod swoimi nagłówkami."),
+      chapters: [
+        { id: "mochila", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Campamento", "Camp", "Camp", "Acampamento", "Lager", "Accampamento", "", "营地", "캠프", "キャンプ", "Лагерь", "Obóz"),
+          entries: [
+            E(L("Mochila alineada", "Pack aligned", "Sacoche alignée", "Mochila alinhada", "Rucksack ausgerichtet", "Zaino allineato", "", "背包已对齐", "가방 정렬", "バッグの整列", "Сумка выровнена", "Plecak wyrównany"), "fix", "0.3.163", [
+              L("Las cartas de la mochila se descolocaban y quedaban lejos de su rótulo (Reliquias, Herramientas, Provisiones). Ya van pegadas a su título, como siempre.", "The pack cards were shifting away from their headings (Relics, Tools, Provisions). They sit right under their titles again.", "Les cartes de la sacoche se décalaient loin de leur titre (Reliques, Outils, Provisions). Elles sont de nouveau collées à leur titre.", "As cartas da mochila se desalinhavam e ficavam longe do título (Relíquias, Ferramentas, Provisões). Voltam a ficar junto ao título.", "Die Karten im Rucksack verrutschten und lagen weit von ihrer Überschrift (Relikte, Werkzeuge, Vorräte). Sie sitzen wieder direkt darunter.", "Le carte dello zaino si spostavano lontano dal titolo (Reliquie, Strumenti, Provviste). Tornano attaccate al loro titolo.", "", "背包里的卡牌会错位，离标题（遗物、工具、补给）很远。现在又紧贴各自的标题了。", "가방의 카드가 제목(유물, 도구, 보급품)에서 멀리 밀려나 있었습니다. 이제 다시 제목 바로 아래에 붙습니다.", "バッグのカードが見出し（遺物・道具・補給品）から離れてずれていました。見出しのすぐ下に戻りました。", "Карточки в сумке съезжали далеко от заголовков (Реликвии, Инструменты, Припасы). Теперь они снова под своими заголовками.", "Karty w plecaku uciekały daleko od nagłówków (Relikwie, Narzędzia, Zapasy). Znów są tuż pod swoimi tytułami."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.162",
       name: L("Continentes de la Enciclopedia", "Encyclopedia continents", "Continents de l'Encyclopédie", "Continentes da Enciclopédia", "Kontinente der Enzyklopädie", "Continenti dell'Enciclopedia", "", "百科中的大洲", "백과사전의 대륙", "百科事典の大陸", "Континенты Энциклопедии", "Kontynenty Encyklopedii"),
       date: "2026-10-16",
