@@ -139,10 +139,11 @@ window.AIQ = window.AIQ || {};
   const vList = () => vOf(ST.vtab);
   const vState = id => V().wearing(id) ? "on" : V().owned(id) ? "got" : "";
   const vPrice = id => `<span class="bq-pr">${fi()}<b>${A.fmt(V().price(id))}</b></span>`;               // (en la ficha, el precio va en el boton de comprar)
+  /* cada tarjeta: el crupier con lo que llevas puesto MAS esa prenda (todo se combina: se ve como quedaria) */
   function vItem(it) {
     const s = vState(it.id);
     return `<button type="button" class="bq-it bq-vit${it.id === ST.vsel ? " sel" : ""}${s ? " " + s : ""}${it.r === "l" ? " leg" : ""}" data-vid="${it.id}" aria-pressed="${it.id === ST.vsel}">
-      <span class="bq-th bq-vth"><img src="${V().thumb(V().with(it.id, {}), 1)}" alt="" width="96" height="112" decoding="async"></span>
+      <span class="bq-th bq-vth"><img src="${V().thumb(V().with(it.id), 1)}" alt="" width="96" height="112" decoding="async"></span>
       <b class="bq-nm">${esc(V().name(it.id))}</b>
       <span class="bq-vp">${s === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : it.casa ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : s ? `<em class="bq-own">${esc(P6(VX.mine))}</em>` : vPrice(it.id)}</span></button>`;
   }
