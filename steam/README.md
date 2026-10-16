@@ -9,6 +9,8 @@
 6. Logros: `node tools/steam-achievements.mjs` y `python tools/steam_icons.py` generan `docs/steam/achievements.csv` y los 200 iconos
    (`docs/steam/icons/<id>.jpg` y `<id>_locked.jpg`, 64x64). Se cargan en Stats & Achievements y hay que pulsar **Publish**.
 7. Launch options (SteamPipe -> Installation -> General): ejecutable `Geolite.exe` (demo: `GeoliteDemo.exe`), Windows 64.
+8. Iconos (Store Admin -> Graphical Assets / Client Images): `steam/arte/icono_comunidad_184.jpg` (Community Icon) e
+   `steam/arte/icono_cliente.ico` (Client Icon, 32x32). El ejecutable ya lleva `assets/desktop/icon.ico` (32, 48, 64, 96 y 256).
 
 ## 1. Cada version
 Atajo: `node tools/steam-upload.mjs` (o `--demo`) empaqueta, rellena el .vdf con `steam/ids.local.json` (lo crea la primera vez, fuera de git)

@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.132",
+      name: L("El escudo nuevo", "The new emblem", "Le nouvel emblème", "O novo emblema", "Das neue Emblem", "Il nuovo emblema", "", "全新徽标", "새 엠블럼", "新しいエンブレム", "Новая эмблема", "Nowy emblemat"),
+      date: "2026-10-16",
+      summary: L("El escudo de Geolite se pone a juego con el logo nuevo: la Tierra en su placa de fieltro verde, con la chistera del crupier y la carta.", "Geolite's emblem now matches the new logo: the Earth on its green felt plate, with the dealer's top hat and the card.", "L'emblème de Geolite s'accorde au nouveau logo : la Terre sur sa plaque de feutre vert, avec le haut-de-forme du croupier et la carte.", "O emblema do Geolite agora combina com o novo logo: a Terra na sua placa de feltro verde, com a cartola do crupiê e a carta.", "Das Emblem von Geolite passt jetzt zum neuen Logo: die Erde auf ihrer grünen Filzplakette, mit dem Zylinder des Croupiers und der Karte.", "L'emblema di Geolite ora si abbina al nuovo logo: la Terra sulla sua placca di feltro verde, con il cilindro del croupier e la carta.", "", "Geolite 的徽标换成了与新标志配套的样子：绿色台呢圆牌上的地球，配上荷官的礼帽和纸牌。", "Geolite의 엠블럼이 새 로고와 어울리게 바뀌었어요. 초록 펠트 원판 위의 지구에 딜러의 실크해트와 카드가 함께해요.", "Geoliteのエンブレムが新しいロゴとおそろいになりました。緑のフェルトのプレートに地球、ディーラーのシルクハットとカードを添えて。", "Эмблема Geolite теперь в пару новому логотипу: Земля на зелёной суконной плашке, с цилиндром крупье и картой.", "Emblemat Geolite pasuje teraz do nowego logo: Ziemia na zielonej suknowej plakietce, z cylindrem krupiera i kartą."),
+      chapters: [
+        { id: "escudo", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Menú, escritorio y navegador", "Menu, desktop and browser", "Menu, bureau et navigateur", "Menu, área de trabalho e navegador", "Menü, Desktop und Browser", "Menu, desktop e browser", "", "菜单、桌面与浏览器", "메뉴, 바탕화면, 브라우저", "メニュー、デスクトップ、ブラウザ", "Меню, рабочий стол и браузер", "Menu, pulpit i przeglądarka"),
+          entries: [
+            E(L("El escudo, a juego con el logo", "The emblem, matching the logo", "L'emblème, assorti au logo", "O emblema, combinando com o logo", "Das Emblem, passend zum Logo", "L'emblema, abbinato al logo", "", "与标志配套的徽标", "로고와 짝을 이룬 엠블럼", "ロゴとおそろいのエンブレム", "Эмблема в пару логотипу", "Emblemat do pary z logo"), "change", "0.3.132", [
+              L("El escudo, el dibujo pequeño que representa a Geolite, es nuevo: la Tierra del logo en su placa de fieltro verde, con la chistera del crupier y la carta con la ficha. Lo verás en el menú, en el icono del juego en el escritorio y en la barra de tareas, en la pestaña del navegador y en la imagen que sale al compartir el enlace. Los tamaños pequeños están dibujados aparte para que se vean nítidos.",
+                "The emblem, the small picture that stands for Geolite, is new: the Earth from the logo on its green felt plate, with the dealer's top hat and the card with the chip. You'll see it in the menu, in the game's icon on your desktop and taskbar, in the browser tab and in the picture shown when you share the link. The small sizes are drawn separately so they stay sharp.",
+                "L'emblème, le petit dessin qui représente Geolite, est nouveau : la Terre du logo sur sa plaque de feutre vert, avec le haut-de-forme du croupier et la carte avec le jeton. Tu le verras dans le menu, dans l'icône du jeu sur le bureau et dans la barre des tâches, dans l'onglet du navigateur et dans l'image affichée quand tu partages le lien. Les petites tailles sont dessinées à part pour rester nettes.",
+                "O emblema, o desenho pequeno que representa o Geolite, é novo: a Terra do logo na sua placa de feltro verde, com a cartola do crupiê e a carta com a ficha. Você vai vê-lo no menu, no ícone do jogo na área de trabalho e na barra de tarefas, na aba do navegador e na imagem que aparece ao compartilhar o link. Os tamanhos pequenos são desenhados à parte para ficarem nítidos.",
+                "Das Emblem, das kleine Bild, das für Geolite steht, ist neu: die Erde aus dem Logo auf ihrer grünen Filzplakette, mit dem Zylinder des Croupiers und der Karte mit dem Chip. Du siehst es im Menü, im Spielsymbol auf dem Desktop und in der Taskleiste, im Browser-Tab und im Bild, das beim Teilen des Links erscheint. Die kleinen Größen sind eigens gezeichnet, damit sie scharf bleiben.",
+                "L'emblema, il piccolo disegno che rappresenta Geolite, è nuovo: la Terra del logo sulla sua placca di feltro verde, con il cilindro del croupier e la carta con la fiche. Lo vedrai nel menu, nell'icona del gioco sul desktop e nella barra delle applicazioni, nella scheda del browser e nell'immagine che compare quando condividi il link. Le misure piccole sono disegnate a parte per restare nitide.",
+                "",
+                "徽标，也就是代表 Geolite 的小图，焕然一新：标志里的地球放在绿色台呢圆牌上，配上荷官的礼帽和带筹码的纸牌。你会在菜单、桌面和任务栏上的游戏图标、浏览器标签页，以及分享链接时显示的图片里看到它。小尺寸都是单独绘制的，保证清晰。",
+                "Geolite를 나타내는 작은 그림, 엠블럼이 새로워졌어요. 로고의 지구가 초록 펠트 원판 위에 있고, 딜러의 실크해트와 칩을 곁들인 카드가 함께해요. 메뉴, 바탕화면과 작업 표시줄의 게임 아이콘, 브라우저 탭, 링크를 공유할 때 나오는 이미지에서 볼 수 있어요. 작은 크기는 선명하게 보이도록 따로 그렸어요.",
+                "Geoliteを表す小さな絵、エンブレムが新しくなりました。ロゴの地球を緑のフェルトのプレートに載せ、ディーラーのシルクハットとチップ付きのカードを添えています。メニュー、デスクトップとタスクバーのゲームアイコン、ブラウザのタブ、リンクを共有したときの画像で見られます。小さいサイズはくっきり見えるよう、別々に描いています。",
+                "Эмблема — маленькая картинка, которая обозначает Geolite, — новая: Земля из логотипа на зелёной суконной плашке, с цилиндром крупье и картой с фишкой. Ты увидишь её в меню, в значке игры на рабочем столе и панели задач, на вкладке браузера и на картинке, которая появляется, когда делишься ссылкой. Маленькие размеры нарисованы отдельно, чтобы оставаться чёткими.",
+                "Emblemat, czyli mały obrazek, który oznacza Geolite, jest nowy: Ziemia z logo na zielonej suknowej plakietce, z cylindrem krupiera i kartą z żetonem. Zobaczysz go w menu, w ikonie gry na pulpicie i pasku zadań, na karcie przeglądarki i na obrazku, który pojawia się, gdy udostępniasz link. Małe rozmiary są narysowane osobno, żeby były ostre."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.131",
       name: L("El Club de la casa", "The House Club", "Le Club de la maison", "O Clube da casa", "Der Club des Hauses", "Il Club della casa", "", "赌场俱乐部", "하우스 클럽", "ハウスクラブ", "Клуб заведения", "Klub kasyna"),
       date: "2026-10-16",

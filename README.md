@@ -91,7 +91,7 @@ Todo el arte de Geolite es pixel art de Cousins Studios. La base está ideada po
 - **Don Crupier:** retrato maestro pulido a mano; capas, caras, manos, expresiones y gestos animados por capas.
 - **Iconos:** insignias de logros (48 px nativos sobre su ficha), iconos del casino, reliquias, herramientas, jefes, retos, barajas, tipos de tarjeta e interfaz.
 - **Escenas y tarjetas:** jefes, actos, Campamento, cofre, victoria y derrota, las tarjetas de modo y las mesas de cada juego del casino.
-- **Marca:** logo (rótulo de bombillas sobre fieltro verde; la O es la Tierra, que gira bajo la chistera del crupier junto a la carta y la ficha; por capas, a la resolución real de la pantalla) y escudo (la Tierra con la carta y la ficha, en PNG a escala entera).
+- **Marca:** logo (rótulo de bombillas sobre fieltro verde; la O es la Tierra, que gira bajo la chistera del crupier junto a la carta y la ficha; por capas, a la resolución real de la pantalla) y escudo (la Tierra del logo en su placa de fieltro verde con la chistera y la carta: 256 px y versiones de 96, 48 y 32 px dibujadas aparte, a escala entera).
 
 ### Banda sonora
 
