@@ -29,7 +29,7 @@
 /* ---------------------------------------------------------------- puntero */
 #ptr { position: absolute; left: 0; top: 0; z-index: 40; pointer-events: none; display: none; will-change: transform; }
 #ptr.on { display: block; }
-.ptr-cv { position: absolute; left: -64px; top: -64px; width: 128px; height: 128px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .45)) drop-shadow(0 0 12px rgba(248, 180, 73, .25)); }
+.ptr-cv { position: absolute; left: -65px; top: -65px; width: 128px; height: 128px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .45)) drop-shadow(0 0 12px rgba(248, 180, 73, .25)); }
 .ptr-tag { position: absolute; left: 0; top: 44px; transform: translateX(-50%); white-space: pre; text-align: center; display: none; font-family: var(--mono); font-weight: 700; font-size: 15.5px; letter-spacing: .06em; color: #ffe08a; background: rgba(22, 36, 28, .92); padding: 5px 9px; border: 2px solid #f8b449; box-shadow: 0 4px 0 rgba(0, 0, 0, .4); line-height: 1.35; }
 .ptr-tag.on { display: block; }
 .ptr-ghost { position: absolute; left: 0; top: 0; width: 18px; height: 18px; display: none; border: 3px dashed #fe5f55; box-sizing: border-box; transform-origin: center; background: rgba(254, 95, 85, .18); }

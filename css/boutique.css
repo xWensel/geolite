@@ -116,24 +116,21 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 .bq-tryl .gx-paper { display: flex; align-items: center; gap: 22px; padding: 14px 18px 14px 24px; }
 .bq-tryl b { font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1; color: var(--gx-ink); white-space: nowrap; }
 
-/* el boton de la portada: una pestana de laton colgada bajo la tarjeta de socio */
-.hh-top .hh-bq { display: flex; align-items: center; gap: 10px; width: max-content; margin: 8px 0 0 14px; padding: 6px 16px 8px 10px; border: 0; cursor: pointer; font: inherit; font-family: var(--sans); font-size: 24px; line-height: 1;
-  color: var(--gx-ink); background: linear-gradient(180deg, var(--gx-gold-hi) 0, var(--gx-gold) 55%, #e89a32 100%); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 rgba(0, 0, 0, .16); }
-.hh-top .hh-bq .ic { width: 32px; height: 32px; image-rendering: pixelated; }
-.hh-top .hh-bq:hover, .hh-top .hh-bq.pad-hov { filter: brightness(1.06); transform: translateY(-2px); }
-.hh-top .hh-bq:focus { outline: none; }
-.hh-top .hh-bq:focus-visible, html[data-input="pad"] .hh-top .hh-bq:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
 
 /* ---------------------------------------------------------------- v0.3.134: las dos secciones (Mesas y Vestuario) y el vestuario del crupier
    Las secciones van en la cabecera, entre el titulo y el monedero, como un selector de laton sobre la sala.
    Vestuario: las 12 piezas de 6 en 6 (retratos del crupier con esa pieza, a pixel entero: js/boutique.js fitThumbs) y, a la derecha,
    el probador: el crupier animado con lo que llevas mas la pieza elegida (A.crupier.mount con su propio atlas). */
-.bq-cats { justify-self: center; display: flex; padding: 4px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.bq-cats { justify-self: center; display: flex; max-width: 100%; min-width: 0; overflow: hidden; padding: 4px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
 .bq-cat-t { display: inline-flex; align-items: center; gap: 10px; margin: 0; padding: 8px 18px 9px 12px; border: 0; font: inherit; font-family: var(--sans); font-size: 26px; line-height: 1; white-space: nowrap; cursor: pointer; color: var(--gx-txt); background: none; }
 .bq-cat-t .ic { width: 36px; height: 36px; image-rendering: pixelated; flex: none; }
 .bq-cat-t:hover, .bq-cat-t.pad-hov { background: rgba(255, 243, 214, .08); }
 .bq-cat-t.on { color: var(--gx-ink); background: linear-gradient(180deg, var(--gx-gold-hi) 0, var(--gx-gold) 55%, #e89a32 100%); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 rgba(0, 0, 0, .16); }
 .bq-cat-t:focus { outline: none; }
+.bq-cats.t1 .bq-cat-t { gap: 7px; padding: 7px 12px 8px 8px; font-size: 23px; }
+.bq-cats.t1 .bq-cat-t .ic { width: 30px; height: 30px; }
+.bq-cats.t2 .bq-cat-t:not(.on) { padding: 7px 9px 8px; }
+.bq-cats.t2 .bq-cat-t:not(.on) span { display: none; }
 .bq-cat-t:focus-visible, html[data-input="pad"] .bq-cat-t:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
 
 .bq-cat.vest { grid-template-rows: minmax(0, 1fr); }
@@ -164,3 +161,21 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 .bq-det.bq-sold .bq-prob { animation: bq-lit .9s var(--gx-ease) both; }
 @keyframes bq-lit { 0% { filter: brightness(1); } 30% { filter: brightness(1.4); } 100% { filter: brightness(1); } }
 html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
+
+/* ---------------------------------------------------------------- los punteros (js/punteros.js): miniaturas animadas en lienzo, al pixel */
+.bq-items.punt { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bq-th.bq-pth { aspect-ratio: 4 / 3; overflow: hidden; }   /* alto para que todos los reticulos quepan a x2 en la Deck y a x3 a 1080p */
+.bq-pth canvas, .bq-pprev canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+/* el precio y el estado van en la fila del nombre: nada tapa el dibujo */
+.bq-prow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 8px; min-width: 0; }
+.bq-prow .bq-nm { flex: 1 1 auto; min-width: min-content; overflow-wrap: normal; padding: 0 2px; }   /* una palabra no se parte: antes baja la etiqueta */
+.bq-prow .bq-pr { font-size: 20px; gap: 4px; }
+.bq-prow .bq-pr .bq-fi { width: 18px; height: 18px; }
+.bq-prow .bq-own { font-size: 14px; padding: 3px 5px 2px; }
+/* la vista grande: 16:10 si cabe, y si la descripcion es larga (ruso a 720) cede lo que falte; el lienzo llena su caja (js/boutique.js lo mide en
+   pixeles reales), asi la caja no depende del lienzo y la etiqueta nunca pisa el marco */
+.bq-det.punt { grid-template-rows: minmax(0, auto) auto auto auto auto; }
+.bq-dth.bq-pprev { aspect-ratio: 16 / 10; width: 100%; align-self: stretch; min-height: 0; margin-bottom: 8px; }   /* stretch explicito: con aspect-ratio Chrome no estira y la caja se salia de su fila */
+.bq-pprev canvas { position: absolute; inset: 0; }
+.bq-tryt { display: grid; gap: 4px; }
+.bq-tryt i { font-style: normal; font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--gx-ink-2); }

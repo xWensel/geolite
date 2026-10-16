@@ -871,7 +871,7 @@
     const refLon = ans ? ans[0] : labelAt ? labelAt[0] : null, gLon = guess ? (refLon == null ? guess.lon : guess.lon + 360 * Math.round((refLon - guess.lon) / 360)) : null;
     map.setMarks({
       guess: guess ? [gLon, guess.lat] : null, answer: ans, highlight: isC && !af ? o.key : null, area: af || null, label, labelAt,
-      dist: guess && km > 0 ? fmtKm(km) : "", pop: total ? "+" + A.fmt(total) : null,
+      dist: guess && km > 0 ? fmtKm(km) : "", pop: total ? "+" + A.fmt(total) : null, bull: !!guess && tier === 4,   // bull: con «¡Diana!» la diana de la tienda (js/punteros.js) sustituye a los anillos
       flags: up ? fl.map(flagImg) : null,
       rings: guess && !isC ? { r: lim, n: cxr.level, at: [0, 1, 2].map(i => JP_AT + i * JP_MS) } : null,   // anillos 300/150/75 km: se encienden con los jackpots
     });

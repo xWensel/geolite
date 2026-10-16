@@ -195,6 +195,7 @@ body.duelo-on .rail-sh { top: 58%; }                                            
 .du-pins .pn .in.drop { animation: du-chip .28s cubic-bezier(.3, 1.3, .5, 1) both; }
 @keyframes du-chip { from { opacity: 0; transform: translateY(-26px); } }
 .du-pins .pn canvas { position: absolute; left: 0; top: 0; translate: -50% -50%; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .5)); }
+.du-pins .pn canvas.pin { translate: -53.125% -100%; image-rendering: pixelated; }   /* la chincheta de la tienda (js/punteros.js): la punta (columna 8 de 16, su centro = 8,5/16) en el sitio */
 html body .du-pins .pn .tag { position: absolute; top: 0; font-size: calc(16px * var(--dk, 1)); padding: .2em .4em .14em; box-shadow: 0 0 0 2px var(--gx-o); translate: 0 -50%; }
 .du-pins .pn.l .tag { right: calc(18px * var(--dk, 1)); } .du-pins .pn.r .tag { left: calc(18px * var(--dk, 1)); }
 .du-pins .pn.up .tag { translate: 0 -150%; } .du-pins .pn.dn .tag { translate: 0 50%; }

@@ -1834,20 +1834,25 @@ void main(){
         this._rk = this._lk;                                              // la copia del mundo del objetivo (los anillos van en la misma)
         const G = m.guess && this.lonLatToScreen(m.guess[0], m.guess[1], m.gct, undefined, Aa ? wA : undefined);   // tu chincheta, a la copia mas cercana a la respuesta
         const fl = m.flags && m.flags.length ? m.flags : null;           // v0.2.15: acierto con bandera (la chincheta del objetivo pasa a mastil)
+        const dia = Aa && m.bull && A.punteros ? (m.skin && m.skin.dia) || A.punteros.current("dia") : "casa";
         if (Aa && m.rings) this._rings(c, m, Aa, age);                    // anillos de la Enciclopedia, debajo de todo
         const ds = G && Aa ? this._line(c, m, G, Aa, age) : null;
         if (Aa) {
           const k = clamp((age - 480) / 600, 0, 1);
           if (age > 480) {
             const t = ((age - 480) % 1900) / 1900;
-            c.strokeStyle = `rgba(242,233,214,${0.85 * (1 - t)})`; c.lineWidth = 2.5; c.beginPath(); c.arc(Aa[0], Aa[1], 10 + t * 48, 0, Math.PI * 2); c.stroke();
-            c.strokeStyle = this._rgba(sk.red, 0.6 * (1 - t)); c.lineWidth = 2; c.beginPath(); c.arc(Aa[0], Aa[1], 8 + t * 30, 0, Math.PI * 2); c.stroke();
+            /* con una diana de la tienda (js/punteros.js) no hay anillos: la diana sale mas abajo, ENCIMA de la bandera y de las chinchetas */
+            if (dia === "casa") {
+              c.strokeStyle = `rgba(242,233,214,${0.85 * (1 - t)})`; c.lineWidth = 2.5; c.beginPath(); c.arc(Aa[0], Aa[1], 10 + t * 48, 0, Math.PI * 2); c.stroke();
+              c.strokeStyle = this._rgba(sk.red, 0.6 * (1 - t)); c.lineWidth = 2; c.beginPath(); c.arc(Aa[0], Aa[1], 8 + t * 30, 0, Math.PI * 2); c.stroke();
+            }
           }
           if (!fl) this._pin(c, Aa[0], Aa[1], sk.red, sk.paper, age - 480, k);
         }
-        if (G) this._pin(c, G[0], G[1], sk.ink, sk.paper, age, 1);
+        if (G) this._myPin(c, G[0], G[1], age, m);
         const at = Aa || (m.labelAt && this.lonLatToScreen(m.labelAt[0], m.labelAt[1], m.act));
         if (fl && at) this._flagPole(c, fl, at[0], at[1], age, now);      // encima de tu chincheta: la bandera es el premio
+        if (dia !== "casa" && age > 480) A.punteros.diana(c, Aa[0], Aa[1], ((age - 480) % 1900) / 1000, dia, m._dp || (m._dp = A.punteros.parts(Math.round(Aa[0] * 7 + Aa[1]))), { dpr: this.dpr });
         if (ds) this._distChip(c, m, ds, age);                            // encima de las chinchetas (antes quedaba debajo y la tapaba el pin de la respuesta)
         if (at && m.label && age > 520) {
           const g = fl && this._flagGeom(fl.length), lx = g ? at[0] + g.cx : at[0], ly = g ? at[1] - g.h - 17 : at[1] - (Aa ? 66 : 10);
@@ -1882,6 +1887,8 @@ void main(){
     _rgba(h, a) { const [r, g, b] = hex(h); return `rgba(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)},${a})`; }
     _line(c, m, G, Aa, age) {
       const k = clamp((age - 300) / 500, 0, 1), e = easeIO(k); if (k <= 0) return;
+      const lin = A.punteros ? (m.skin && m.skin.lin) || A.punteros.current("lin") : "casa";   // la linea de la tienda (js/punteros.js)
+      if (lin !== "casa" && A.punteros.drawLine(c, G, Aa, e, lin, { dpr: this.dpr })) return m.dist && k >= 1 ? [G, Aa] : null;
       c.save(); c.setLineDash([1, 9]); c.lineCap = "round"; c.lineWidth = 4; c.strokeStyle = this._rgba(this.sk.ink, 0.9);
       const segs = [[G, Aa]];                                           // las dos chinchetas ya van en la copia mas cercana: el camino corto, cruce o no el antimeridiano
       const trace = () => { c.beginPath(); for (const [a, b] of segs) { c.moveTo(a[0], a[1]); c.lineTo(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e); } c.stroke(); };
@@ -1970,6 +1977,17 @@ void main(){
         else { c.setLineDash([2, 7]); c.lineCap = "round"; c.globalAlpha = 0.85 * grow * fade; c.lineWidth = 3.4; c.strokeStyle = this._rgba(sk.ink, 0.7); c.stroke(); c.lineWidth = 1.3; c.strokeStyle = this._rgba(sk.paper, 0.95); c.stroke(); c.setLineDash([]); c.lineCap = "butt"; }   // dos tonos, como la linea de distancia: se ve en tierra clara y en el mar
       }
       c.restore();
+    }
+    /* tu chincheta: la de la tienda (js/punteros.js, al pixel a x2 con la punta en el sitio) o la de siempre; cae igual, con su rebote */
+    _myPin(c, x, y, age, m) {
+      const id = A.punteros ? (m && m.skin && m.skin.pin) || A.punteros.current("pin") : "casa", pc = id !== "casa" && A.punteros.pinCanvas(id);
+      if (!pc) return this._pin(c, x, y, this.sk.ink, this.sk.paper, age, 1);
+      if (age < 0) return;
+      const k = Math.min(1, age / 520), drop = (1 - easeOutBounce(k)) * -90;
+      c.save(); c.fillStyle = "rgba(0,0,0,.32)"; c.beginPath(); c.ellipse(x, y + 1, 9 * (0.4 + 0.6 * k), 3.6 * (0.4 + 0.6 * k), 0, 0, Math.PI * 2); c.fill();
+      /* a escala entera de la pantalla y en pixeles enteros, con el centro de la columna 8 (la de la punta) sobre x y la punta sobre y */
+      const dp = this.dpr || 1, kk = Math.max(2, Math.round(2 * dp)), w = (16 * kk) / dp, h = (24 * kk) / dp;
+      c.imageSmoothingEnabled = false; c.drawImage(pc, Math.round((x - (8.5 * kk) / dp) * dp) / dp, Math.round((y - h + drop) * dp) / dp, w, h); c.restore();
     }
     _pin(c, x, y, fill, ring, age, alpha, noShadow) {
       if (age < 0 || alpha <= 0) return;

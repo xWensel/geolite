@@ -2593,7 +2593,7 @@ window.AIQ = window.AIQ || {};
   /* sube de categoria: el crupier sella la tarjeta de socio de la portada en su sitio (v0.3.155: ya no sale otra en mitad de la pantalla) */
   function tierStamp() {
     setTimeout(() => {
-      const el = document.querySelector("#socioBtn .sc-c b"); if (!el) return;
+      const el = document.querySelector("#socioBtn .sc-cat"); if (!el) return;
       el.classList.remove("sc-stamp"); A.restyle(el); el.classList.add("sc-stamp"); A.sfx.stamp(); if (A.haptic) A.haptic([30, 40, 70]);
     }, 900);
   }

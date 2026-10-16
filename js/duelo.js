@@ -460,7 +460,10 @@ window.AIQ = window.AIQ || {};
   function pinAdd(m) {
     const host = $("duPins"), P = st.pins = st.pins || { list: [], tgt: null, rect: null, sig: "" }, dk = parseFloat(document.body.style.getPropertyValue("--dk")) || 1;
     m.el = document.createElement("div"); m.el.className = "pn " + m.who; m.el.innerHTML = `<div class="in${m.drop ? " drop" : ""}"><span class="tag ${m.who} hidden"></span></div>`;
-    m.el.firstElementChild.prepend(fichaCv(m.who === "me" ? ME_FICHA : RV_FICHA, 24 * dk)); host.appendChild(m.el); P.list.push(m); P.sig = "";
+    /* los punteros de la tienda (js/punteros.js): tu chincheta sustituye a tu ficha, y entre amigos el rival ve la suya (la sala guarda su estilo) */
+    const pid = !A.punteros ? "casa" : m.who === "me" ? A.punteros.current("pin") : st.net ? A.punteros.parse(st.net.hisC).pin : "casa", pc = pid !== "casa" && A.punteros.pinCanvas(pid);
+    let mk; if (pc) { mk = document.createElement("canvas"); mk.width = 16; mk.height = 24; mk.className = "pin"; mk.getContext("2d").drawImage(pc, 0, 0); const dp = window.devicePixelRatio || 1, kk = Math.max(2, Math.round(2 * dk * dp)); mk.style.width = (16 * kk) / dp + "px"; mk.style.height = (24 * kk) / dp + "px"; }   // a escala entera de la pantalla
+    m.el.firstElementChild.prepend(mk || fichaCv(m.who === "me" ? ME_FICHA : RV_FICHA, 24 * dk)); host.appendChild(m.el); P.list.push(m); P.sig = "";
   }
   const pinTag = (who, txt) => { const m = st.pins && st.pins.list.find(x => x.who === who); if (!m) return; const t = m.el.querySelector(".tag"); t.textContent = txt; t.classList.remove("hidden"); st.pins.sig = ""; };
   function pinsTick() {
@@ -687,7 +690,7 @@ window.AIQ = window.AIQ || {};
   /* ---------------- abrir una sala o entrar en la de tu amigo (desde «Retar a un amigo») */
   async function roomNew() {
     if (N.busy) return; N.busy = true; A.sfx.ui(); salaMsg(T("Abriendo la sala…", "Opening the room…"));
-    const v = await Rd().call({ a: "new", name: rawName(), ver: sig(), t: sel.table }); N.busy = false;
+    const v = await Rd().call({ a: "new", name: rawName(), ver: sig(), t: sel.table, c: A.punteros ? A.punteros.code() : "" }); N.busy = false;
     if (!inSala()) { if (v.ok) Rd().call({ a: "bye", code: v.code }); return; }   // se fue mientras se abria
     if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
     roomSet(v);
@@ -696,7 +699,7 @@ window.AIQ = window.AIQ || {};
     code = String(code || "").toUpperCase(); if (N.busy) return;
     if (code.length !== 5) { A.sfx.deny(); return salaMsg(whyTxt("short"), true); }
     N.busy = true; A.sfx.ui(); salaMsg(T("Llamando a la puerta…", "Knocking on the door…"));
-    const v = await Rd().call({ a: "join", code, name: rawName(), ver: sig() }); N.busy = false;
+    const v = await Rd().call({ a: "join", code, name: rawName(), ver: sig(), c: A.punteros ? A.punteros.code() : "" }); N.busy = false;
     if (!inSala()) { if (v.ok) Rd().call({ a: "bye", code }); return; }
     if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
     roomSet(v);
@@ -794,7 +797,7 @@ window.AIQ = window.AIQ || {};
     if (st && st.net) return duelView(v);
     if (!inRoom()) return;
     if (N.setT) { if (v.t === N.setT.t || N.role !== "h" || performance.now() - N.setT.at > 4000) N.setT = null; else v.t = N.setT.t; }   // la mesa recien elegida no parpadea si llega una respuesta de antes del cambio
-    if (v.st === "play" && v.n > N.n && v.seed) { N.n = v.n; const o = hisSeat(v); return void D.start({ table: v.t, seed: v.seed, net: { n: v.n, his: (o && o.n) || "", want: 0, s: 0 } }); }   // el anfitrion ha repartido
+    if (v.st === "play" && v.n > N.n && v.seed) { N.n = v.n; const o = hisSeat(v); return void D.start({ table: v.t, seed: v.seed, net: { n: v.n, his: (o && o.n) || "", hisC: (o && o.c) || "", want: 0, s: 0 } }); }   // el anfitrion ha repartido
     roomPaint();
   }
 

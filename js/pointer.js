@@ -81,35 +81,37 @@ window.AIQ = window.AIQ || {};
     c.clearRect(0, 0, 64, 64);
     const shrink = P.m && P.m.tinyDark ? 0.55 : 1;
     const R = (19 - (P.press > 0 ? 3 * Math.min(1, P.press / 100) : 0) + (tool ? Math.sin(t * 6) * 0.6 : 0)) * shrink;
-    const ring = hotCol || (tool === "sonar" || tool === "compass" ? CYAN : land ? GOLD : TEAL);
-    circle(cx, cy, Math.round(R) + 1, INK); circle(cx, cy, Math.round(R) - 2, INK);                     // borde oscuro
-    circle(cx, cy, Math.round(R), ring); circle(cx, cy, Math.round(R) - 1, ring);
-    if (steady) {                                                                                       // Mano firme: cuatro cierres fijos (el pulso ya no baila) y un segundo aro dorado
-      circle(cx, cy, Math.round(R) + 2, GOLD2);
-      for (let k = 0; k < 4; k++) { const a0 = Math.PI / 4 + (k * Math.PI) / 2 - 0.3; arc(cx, cy, Math.round(R), a0, a0 + 0.6, GOLD2); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.6, GOLD2); arc(cx, cy, Math.round(R) + 2, a0, a0 + 0.6, WHITE); }
-    } else for (let k = 0; k < 3; k++) { const a0 = t * 0.9 + (k * Math.PI * 2) / 3; arc(cx, cy, Math.round(R), a0, a0 + 0.5, WHITE); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.5, WHITE); }   // segmentos que giran
-    for (let k = 0; k < 4; k++) {                                                                        // muescas cardinales
-      const a = (k * Math.PI) / 2, dx = Math.cos(a), dy = Math.sin(a);
-      for (let d = -7; d <= 1; d++) { px(cx + dx * (R + d) + dy, cy + dy * (R + d) + dx, INK); px(cx + dx * (R + d) - dy, cy + dy * (R + d) - dx, INK); }
-      for (let d = -6; d <= 0; d++) px(cx + dx * (R + d), cy + dy * (R + d), ring);
+    const skin = A.punteros && A.punteros.ret();                                                         // los punteros de la tienda (js/punteros.js): otra forma, los mismos avisos
+    const ring = hotCol || (tool === "sonar" || tool === "compass" ? CYAN : land ? (skin ? skin.land : GOLD) : (skin ? skin.sea : TEAL));
+    if (skin) skin.ring(px, t, cx, cy, R, ring, { steady });                                             // simetrico al pixel; con Mano firme, su segundo aro dorado
+    else {
+      circle(cx, cy, Math.round(R) + 1, INK); circle(cx, cy, Math.round(R) - 2, INK);                     // borde oscuro
+      circle(cx, cy, Math.round(R), ring); circle(cx, cy, Math.round(R) - 1, ring);
+      if (steady) {                                                                                       // Mano firme: cuatro cierres fijos (el pulso ya no baila) y un segundo aro dorado
+        circle(cx, cy, Math.round(R) + 2, GOLD2);
+        for (let k = 0; k < 4; k++) { const a0 = Math.PI / 4 + (k * Math.PI) / 2 - 0.3; arc(cx, cy, Math.round(R), a0, a0 + 0.6, GOLD2); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.6, GOLD2); arc(cx, cy, Math.round(R) + 2, a0, a0 + 0.6, WHITE); }
+      } else for (let k = 0; k < 3; k++) { const a0 = t * 0.9 + (k * Math.PI * 2) / 3; arc(cx, cy, Math.round(R), a0, a0 + 0.5, WHITE); arc(cx, cy, Math.round(R) - 1, a0, a0 + 0.5, WHITE); }   // segmentos que giran
+      for (let k = 0; k < 4; k++) {                                                                        // muescas cardinales
+        const a = (k * Math.PI) / 2, dx = Math.cos(a), dy = Math.sin(a);
+        for (let d = -7; d <= 1; d++) { px(cx + dx * (R + d) + dy, cy + dy * (R + d) + dx, INK); px(cx + dx * (R + d) - dy, cy + dy * (R + d) - dx, INK); }
+        for (let d = -6; d <= 0; d++) px(cx + dx * (R + d), cy + dy * (R + d), ring);
+      }
     }
     if (tool === "sonar") { const p = (t * 1.2) % 1, rr = 4 + p * (R - 6); circle(cx, cy, Math.round(rr), `rgba(127,227,255,${(1 - p).toFixed(2)})`); }
     if (tool === "compass") { const a = t * 1.4; for (let d = 3; d < 13; d++) { px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, d > 9 ? RED : WHITE); } px(cx, cy - 15, WHITE); }
     // esquinas de "mira": rojas si un reto toca ese eje, turquesa si un perk lo cubre (TL pulso, TR vista, BR luz, BL controles)
     { const B = Math.round(R) + 5 + (P.press > 0 ? -2 : 0), open = tool ? 3 : 0;
       const bad = [mm.tremble || mm.dizzy, mm.cblur || mm.lag || mm.ghost, mm.blink || mm.tinyDark, mm.cmirror], good = [steady || halo, scope || guard, anchor, shades];
-      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy], q) => {
-        const col = bad[q] ? RED : good[q] ? TEAL : ring;
-        for (let k = 0; k < 6; k++) {
-          px(cx + sx * (B - open) - sx * k, cy + sy * (B - open), INK); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, INK);
-          px(cx + sx * (B - open) - sx * k, cy + sy * (B - open), col); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, col);
-        } });
+      const cols = [0, 1, 2, 3].map(q => (bad[q] ? RED : good[q] ? TEAL : ring));
+      if (A.punteros && A.punteros.corners) A.punteros.corners(px, cx, cy, B - open, cols);                // con su contorno, iguales en las cuatro
+      else [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy], q) => {
+        for (let k = 0; k < 6; k++) { px(cx + sx * (B - open) - sx * k, cy + sy * (B - open), cols[q]); px(cx + sx * (B - open), cy + sy * (B - open) - sy * k, cols[q]); } });
       marks(t, cx, cy, Math.round(R), { halo, scope, guard, shades, anchor, mirror: mm.cmirror }); }
-    if (!tool) { const a = t * 2.4; for (let d = 4; d < Math.round(R) - 2; d++) px(cx + Math.cos(a) * d, cy + Math.sin(a) * d, `rgba(255,224,138,${(0.55 * d / R).toFixed(2)})`); }
-    // chincheta central
-    const pin = [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]];
-    for (const [a, b] of pin) for (const [oa, ob] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) px(cx + a + oa, cy + b + ob, INK);
-    for (const [a, b] of pin) px(cx + a, cy + b, RED); px(cx - 1, cy - 1, WHITE); px(cx, cy - 1, "#ffb0a8");
+    // chincheta central (la linea de radar que giraba dentro se quito: el reticulo es simetrico y lo que se mueve es el destello del aro)
+    if (A.punteros && A.punteros.centerPin) A.punteros.centerPin(px, cx, cy);
+    else { const pin = [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]];
+      for (const [a, b] of pin) for (const [oa, ob] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) px(cx + a + oa, cy + b + ob, INK);
+      for (const [a, b] of pin) px(cx + a, cy + b, RED); }
     if (P.press > 0) { const k = 1 - P.press / 100; circle(cx, cy, Math.round(R + 2 + k * 8), `rgba(255,247,230,${(1 - k).toFixed(2)})`); }
     if (P.m && P.m.dizzy) for (let k = 0; k < 3; k++) {                                                 // Mareo: estrellitas que dan vueltas
       const a = t * 3.1 + (k * Math.PI * 2) / 3, sx = Math.round(cx + Math.cos(a) * (R + 9)), sy = Math.round(cy + Math.sin(a) * (R + 9) * 0.45 - 4), col = k === 1 ? WHITE : GOLD2;
@@ -213,7 +215,8 @@ window.AIQ = window.AIQ || {};
     P.x = clampN(x, 0, W); P.y = clampN(y, 0, H);
   }
   function apply(now) {
-    const x = P.x, y = P.y, fx = P.st.fx || {}, m = P.m; root.style.transform = `translate(${x}px,${y}px)`;
+    const x = P.x, y = P.y, fx = P.st.fx || {}, m = P.m, dp = window.devicePixelRatio || 1;
+    root.style.transform = `translate(${Math.round(x * dp) / dp}px,${Math.round(y * dp) / dp}px)`;   // en pixeles enteros de la pantalla: el pixel art no se reparte entre dos
     if (A.chal && A.chal.pointer) A.chal.pointer(x, y);
     if (map && A.chal) { const r = A.chal.lensRadius ? A.chal.lensRadius() : 0; map.setLens(r > 0 ? { x, y, r } : null); }
     let a = 1, sc = 1, neon = false;
@@ -257,7 +260,10 @@ window.AIQ = window.AIQ || {};
     mag = document.createElement("canvas"); mag.id = "ptrMag"; mag.width = mag.height = 168;
     guideX = document.createElement("i"); guideX.className = "ptr-gx"; guideY = document.createElement("i"); guideY.className = "ptr-gy";
     const app = $("app"); app.append(guideX, guideY, mag, root);
-    cv = root.querySelector(".ptr-cv"); c = cv.getContext("2d"); tag = root.querySelector(".ptr-tag"); ghost = root.querySelector(".ptr-ghost"); windEl = root.querySelector(".ptr-wind"); mctx = mag.getContext("2d");
+    cv = root.querySelector(".ptr-cv"); c = cv.getContext("2d");
+    /* a escala entera de la pantalla (x2 a 100 %, x3 a 125-150 %...) y con el pixel del centro sobre la punta del raton: ningun pixel sale mas gordo */
+    const fitCv = () => { const dp = window.devicePixelRatio || 1, k = Math.max(2, Math.round(2 * dp)); cv.style.width = cv.style.height = (64 * k) / dp + "px"; cv.style.left = cv.style.top = -(32 * k + Math.floor(k / 2)) / dp + "px"; };
+    fitCv(); addEventListener("resize", fitCv); tag = root.querySelector(".ptr-tag"); ghost = root.querySelector(".ptr-ghost"); windEl = root.querySelector(".ptr-wind"); mctx = mag.getContext("2d");
     /* el reticulo entra en el lienzo (con el raton en (x, y) del lienzo): el filtro de retraso y el viento parten de donde esta el reticulo, no del raton */
     const enter = (x, y) => {
       const r = map.cv.getBoundingClientRect(); cvL = r.left; cvT = r.top; P.rx = x; P.ry = y;

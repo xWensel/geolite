@@ -7,13 +7,13 @@
  * Tiran de la geografia y de todos los modos (dianas, capitales, banderas, mares, la Enciclopedia, el Clasico, la Aventura y el Duelo).
  * Nunca piden gastar ni jugar mas rapido. Un reto del dia que solo sale en un modo va, como mucho, uno por dia.
  * Lo cumplido se paga al momento (A.club.give: la tarjeta de la portada lo cuenta al volver) y se tacha en el recibo del Club del veredicto
- * siguiente (A.club.cash -> res.retos, js/club.js). La pantalla es del hub: A.hub.screen("retos"), con la pestana de laton bajo la tarjeta.
+ * siguiente (A.club.cash -> res.retos, js/club.js). La pantalla es del hub: A.hub.screen("retos"), desde la placa de la izquierda de la portada.
  *
  * Estado en el perfil: P.club.r = { v, since (primer dia), d: { "AAAA-MM-DD": [reto x3] }, gone: [dias ya cumplidos], w: { k (lunes), list },
  *   e: { seq, list }, pend: [cumplidos por ensenar] };  reto = { k (tipo), n (meta), c (continente), p (progreso), done, pay (encargos), fresh }.
  * Avisos:  A.clubRetos.q({ hit, bull, ratio, streak, cont, cap, flag, water, ctry })   una respuesta (no en la practica ni en los duelos automaticos)
  *          A.clubRetos.ev(t, datos)    t = duel {win} | lvl {perfect} | camp | round {n, boss} | advWin;   las tarjetas nuevas llegan solas (A.codex.onUnlock)
- *          A.clubRetos.take()  los cumplidos por ensenar (y se vacian)          A.clubRetos.open()  la pantalla          A.clubRetos.tab()  la pestana
+ *          A.clubRetos.take()  los cumplidos por ensenar (y se vacian)          A.clubRetos.open()  la pantalla (placa de la portada en js/hub.js)
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -248,12 +248,6 @@ window.AIQ = window.AIQ || {};
   function take() { const r = state(); if (!r || !r.pend.length) return []; const out = r.pend.map(x => Object.assign({}, x, { ic: iconOf(x), tx: text(x), g: P6(x.g === "d" ? TX.gD : x.g === "w" ? TX.gW : TX.gE) })); r.pend = []; save(); return out; }
   const todayDone = () => { const r = state(); if (!r) return [0, 0]; const L = r.d[dayKey(new Date())] || []; return [L.filter(x => x.done).length, L.length]; };
 
-  /* ------------------------------------------------------------------ la pestana de laton de la portada (junto a la tienda) */
-  function tab() {
-    const [a, b] = todayDone(), tt = A.ttAttr ? A.ttAttr(P6(TX.title), P6(TX.tip)) : "";
-    return `<button type="button" class="hh-bq hh-rt" id="clubRtBtn" ${tt}>${A.icon("journal")}<span>${esc(P6(TX.tab))}</span>${b ? `<b class="hh-rtn${a >= b ? " ok" : ""}">${a}/${b}</b>` : ""}</button>`;
-  }
-
   /* ------------------------------------------------------------------ la pantalla: Hoy, Esta semana y Encargos */
   const fi = cls => `<img class="ck-fi${cls ? " " + cls : ""}" src="assets/icons/ficha_oro.webp" alt="" draggable="false">`;
   const UI = { day: 0 };
@@ -312,5 +306,5 @@ window.AIQ = window.AIQ || {};
   }
 
   if (A.codex && A.codex.onUnlock) A.codex.onUnlock(cards);
-  A.clubRetos = { q, ev, take, open, tab, state, text, iconOf, todayDone, CAT, tx: TX };
+  A.clubRetos = { q, ev, take, open, state, text, iconOf, todayDone, CAT, tx: TX };
 })(window.AIQ);

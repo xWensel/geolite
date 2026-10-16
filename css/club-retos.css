@@ -1,12 +1,6 @@
 /* ---------------------------------------------------------------- LOS RETOS DEL CLUB DE LA CASA (entrega 3, js/club-retos.js)
-   La pestana de laton junto a la tienda, la pantalla (Hoy / Esta semana / Encargos, tres papeles de 4 columnas) y las filas del recibo.
+   La placa de la portada (js/hub.js), la pantalla (Hoy / Esta semana / Encargos, tres papeles de 4 columnas) y las filas del recibo.
    Misma escala y sistema que la tienda (gx-stage con --k, cabecera .bq-head). Letra minima de la Deck: 16 px Silkscreen y 18 px Jersey. */
-
-/* ---------- la portada: la tienda y los retos, dos pestanas de laton del mismo ancho colgadas bajo la tarjeta de socio */
-.hh-top .hh-tabs { display: grid; justify-items: stretch; width: max-content; gap: 6px; margin: 8px 0 0 14px; }
-.hh-top .hh-tabs .hh-bq { margin: 0; width: auto; }
-.hh-top .hh-rtn { margin-left: auto; font-family: var(--mono); font-weight: 400; font-size: 16px; line-height: 1; padding: 4px 6px 3px; color: var(--gx-acc); background: var(--gx-ink); }
-.hh-top .hh-rtn.ok { color: var(--gx-ink); background: #8fd4a4; }
 
 /* ---------- la pantalla (espacio de diseno 1280 x 720, como el resto del hub) */
 .rt-screen { z-index: 1; }

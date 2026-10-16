@@ -1,8 +1,8 @@
 /* POST /api/duelo  (cuerpo text/plain con JSON, sin preflight: el juego de escritorio llama desde http://127.0.0.1)
    La sala privada del Duelo de fichas (js/duelo-red.js): un relevo minimo entre DOS jugadores. Cada cliente saca las mismas preguntas de la misma
    semilla y hace las mismas cuentas; aqui solo viven la sala, el reloj de cada ronda y las dos respuestas. Todo caduca a la hora.
-     { a: "new", pid, name, ver, t }            abre una sala y devuelve su codigo (5 letras o cifras, sin las que se confunden)
-     { a: "join", pid, code, name, ver }        el invitado se sienta (why: "none" no existe, "full" completa, "ver" versiones distintas)
+     { a: "new", pid, name, ver, t, c }         abre una sala y devuelve su codigo (5 letras o cifras, sin las que se confunden); c: su estilo
+     { a: "join", pid, code, name, ver, c }     el invitado se sienta (why: "none" no existe, "full" completa, "ver" versiones distintas)
      { a: "poll", pid, code, n, k }             pregunta el estado (n = duelo, k = la ronda por la que pregunta)
      { a: "set", pid, code, t }                 el anfitrion cambia de mesa (solo en la sala)
      { a: "deal", pid, code }                   el anfitrion reparte: empieza el duelo n + 1 con una semilla nueva (los dos tienen que estar en la sala)
@@ -27,6 +27,8 @@ const CODE = /^[A-HJKMNP-Z2-9]{5}$/, PID = /^[a-z0-9]{10,24}$/, TABLE = /^[a-z]{
 const rnd = n => { const b = crypto.randomBytes(n); let s = ""; for (let i = 0; i < n; i++) s += AB[b[i] % AB.length]; return s; };
 const clean = v => [...String(v == null ? "" : v).normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1").trim()].slice(0, 16).join("").trim();   // el mismo filtro que la clasificacion (api/submit.js)
 const int = (v, a, b) => { v = Math.floor(+v); return Number.isFinite(v) && v >= a && v <= b ? v : null; };
+/* el estilo de cada jugador (js/punteros.js: «chincheta.linea.diana»): su rival ve su chincheta en lugar de su ficha */
+const cos = v => (/^[a-z]{1,10}(\.[a-z]{1,10}){0,3}$/.test(String(v || "")) ? String(v) : "");
 const key = c => "duelo:" + c;
 const obj = a => { const o = {}; if (Array.isArray(a)) for (let i = 0; i + 1 < a.length; i += 2) o[a[i]] = String(a[i + 1]); else if (a && typeof a === "object") for (const k in a) o[k] = String(a[k]); return o; };
 const run = cmds => kv.pipeline(cmds.map(c => c.map(String)));
@@ -37,7 +39,7 @@ const endOf = (R, b) => { const s = +R["s:" + b] || 0; if (!s) return 0; const e
 
 function view(R, code, role, now, n, k) {
   const other = role === "h" ? "g" : "h", ago = r => Math.max(0, now - (+R[r + "s"] || 0));
-  const seat = r => (R[r] ? { n: R[r + "n"] || "", on: ago(r) < 10000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
+  const seat = r => (R[r] ? { n: R[r + "n"] || "", c: R[r + "c"] || "", on: ago(r) < 10000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
   const o = { ok: true, now, code, role, st: R.st || "lobby", n: +R.n || 0, t: R.t || "plata", h: seat("h"), g: seat("g") };
   if (o.st === "play") o.seed = R.seed;
   if (n != null && n === o.n) { const q = R["q:" + n]; if (q) { o.quit = q[0] === role ? "me" : "his"; if (q[1] === "!") o.gone = true; } }
@@ -63,7 +65,7 @@ module.exports = async (req, res) => {
       const t = TABLE.test(String(b.t || "")) ? b.t : "plata";
       for (let i = 0; i < 4; i++) {
         const code = rnd(5), got = await run([["HSETNX", key(code), "h", pid], ["EXPIRE", key(code), TTL]]);
-        if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "hn", clean(b.name), "hs", now, "hr", 1, "st", "lobby", "n", 0, "t", t, "ver", ver]]), code, "h", now));
+        if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "hn", clean(b.name), "hc", cos(b.c), "hs", now, "hr", 1, "st", "lobby", "n", 0, "t", t, "ver", ver]]), code, "h", now));
       }
       return res.status(503).json({ ok: false, why: "busy" });
     }
@@ -77,7 +79,7 @@ module.exports = async (req, res) => {
         if (R.g && R.g !== pid) await run([["HDEL", key(code), "g", "gn", "gs", "gx", "gr"]]);       // el invitado anterior se fue a medio duelo: su asiento queda libre
         const got = await run([["HSETNX", key(code), "g", pid], ["HGET", key(code), "g"]]);          // si entran dos a la vez, se sienta el primero
         if (got[1] !== pid) return send({ ok: false, why: "full" });
-        R = await write(code, [["HSET", key(code), "gn", clean(b.name), "gs", now, "gr", 1], ["HDEL", key(code), "gx"]]);
+        R = await write(code, [["HSET", key(code), "gn", clean(b.name), "gc", cos(b.c), "gs", now, "gr", 1], ["HDEL", key(code), "gx"]]);
       }
       return send(view(R, code, R.h === pid ? "h" : "g", now));
     }

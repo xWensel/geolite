@@ -66,7 +66,7 @@ window.AIQ = window.AIQ || {};
     prob: "Probador|Fitting room|Cabine d'essayage|Provador|Umkleide|Camerino||试衣间|피팅룸|試着室|Примерочная|Przymierzalnia",
   };
   const PER = 12, TRY_MS = 7000;
-  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null };
+  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null, psel: null, ptab: "ret", ppage: 0, ptry: null };
   const V = () => A.vestuario;
   const fi = (cls = "") => `<img class="bq-fi${cls ? " " + cls : ""}" src="assets/icons/ficha_oro.webp" alt="">`;
   const M = () => A.mesas;
@@ -118,9 +118,9 @@ window.AIQ = window.AIQ || {};
       <div class="bq-items" id="bqItems">${items.length ? items.map(item).join("") : `<p class="bq-empty">${esc(P6(TX.empty))}</p>`}</div>`;
   }
   /* las dos secciones de la boutique, en la cabecera: Mesas y Vestuario */
-  const catTabs = () => V() ? `<nav class="bq-cats" aria-label="${esc(P6(TX.title))}">${[["mesas", VX.cMesas, "chip_g"], ["vest", VX.cVest, "boss_hat"]].map(([k, t, ic]) =>
-    `<button type="button" class="bq-cat-t${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}">${A.icon(ic)}<span>${esc(P6(t))}</span></button>`).join("")}</nav>` : "";
-  const catBody = () => ST.cat === "vest" ? `<div id="bqGrid" class="bq-gw">${vGridHtml()}</div>` : `${offerHtml()}<div id="bqGrid" class="bq-gw">${gridHtml()}</div>`;
+  const catTabs = () => V() ? `<nav class="bq-cats" aria-label="${esc(P6(TX.title))}">${[["mesas", VX.cMesas, "chip_g"], ["vest", VX.cVest, "boss_hat"]].concat(A.punteros ? [["punt", PX.cPunt, "crosshair"]] : []).map(([k, t, ic]) =>
+    `<button type="button" class="bq-cat-t${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}" title="${esc(P6(t))}" aria-label="${esc(P6(t))}">${A.icon(ic)}<span>${esc(P6(t))}</span></button>`).join("")}</nav>` : "";
+  const catBody = () => ST.cat === "vest" ? `<div id="bqGrid" class="bq-gw">${vGridHtml()}</div>` : ST.cat === "punt" ? `<div id="bqGrid" class="bq-gw">${pGridHtml()}</div>` : `${offerHtml()}<div id="bqGrid" class="bq-gw">${gridHtml()}</div>`;
   function html() {
     const have = A.club ? A.club.fichas() : 0, lv = A.club ? P6(A.club.tx.lv).replace("{n}", A.club.level()) : "";
     return `<div class="gx-veil bq-veil"></div><section class="bq-screen gx-stage" aria-labelledby="bqH" data-nosq>
@@ -128,8 +128,8 @@ window.AIQ = window.AIQ || {};
         <header class="bq-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l bq-h" id="bqH"><span class="bq-hic">${A.icon("purse")}</span><span><span class="gx-eyb">${esc(A.club ? P6(A.club.tx.club) : "")}${lv ? " · " + esc(lv) : ""}</span>${esc(P6(TX.title))}</span></h2>
           ${catTabs()}<span class="bq-wal" aria-label="${esc(A.club ? P6(A.club.tx.fichas) : "")}">${fi()}<b id="bqWal">${A.fmt(have)}</b></span>${A.hub.tools()}</header>
-        <div class="gx-sh bq-left"><div class="gx-paper bq-cat${ST.cat === "vest" ? " vest" : ""}" id="bqCat">${catBody()}</div></div>
-        <div class="gx-sh bq-right"><div class="gx-paper bq-det${ST.cat === "vest" ? " vest" : ""}" id="bqDet">${ST.cat === "vest" ? vDetHtml() : detHtml()}</div></div>
+        <div class="gx-sh bq-left"><div class="gx-paper bq-cat${ST.cat === "vest" ? " vest" : ST.cat === "punt" ? " punt" : ""}" id="bqCat">${catBody()}</div></div>
+        <div class="gx-sh bq-right"><div class="gx-paper bq-det${ST.cat === "vest" ? " vest" : ST.cat === "punt" ? " punt" : ""}" id="bqDet">${ST.cat === "vest" ? vDetHtml() : ST.cat === "punt" ? pDetHtml() : detHtml()}</div></div>
       </div></section>`;
   }
 
@@ -190,11 +190,113 @@ window.AIQ = window.AIQ || {};
   }
   const vPaint = () => { fitThumbs(); mountProb(); };
 
+  /* ---------------------------------------------------------------- los punteros (js/punteros.js): reticulo, chincheta, linea y diana, por
+     separado y combinables. Miniaturas animadas (un solo bucle, a ~16 fps, solo con la seccion abierta) y «Probar en el mapa» sobre el mapa de verdad */
+  const PX = {
+    cPunt: "Punteros|Pointers|Pointeurs|Ponteiros|Zeiger|Puntatori||指针|포인터|ポインター|Указатели|Wskaźniki",
+    use: "Usar|Use|Utiliser|Usar|Verwenden|Usa||使用|사용|使う|Использовать|Użyj",
+    hint: "Haz clic en el mapa: el lugar está en el centro|Click on the map: the place is in the centre|Clique sur la carte : le lieu est au centre|Clique no mapa: o lugar está no centro|Klick auf die Karte: Der Ort liegt in der Mitte|Fai clic sulla mappa: il luogo è al centro||点击地图：地点就在中央|지도를 클릭하세요. 장소는 가운데예요|マップをクリック。場所は真ん中|Нажми на карту: место в центре|Kliknij mapę: miejsce jest na środku",
+    empty: "Aún no tienes punteros de la tienda. Cada nivel del Club te paga fichas de oro.|You don't have any pointers from the boutique yet. Every Club level pays you gold chips.|Tu n'as encore aucun pointeur de la boutique. Chaque niveau du Club te paie en jetons d'or.|Você ainda não tem ponteiros da boutique. Cada nível do Clube paga fichas de ouro.|Du hast noch keine Zeiger aus der Boutique. Jede Club-Stufe zahlt dir Goldchips.|Non hai ancora puntatori della boutique. Ogni livello del Club ti paga in fiche d'oro.||你还没有精品店的指针。俱乐部每升一级都会给你金筹码。|아직 부티크 포인터가 없어요. 클럽 레벨마다 골드 칩을 받아요.|まだブティックのポインターはない。クラブのレベルごとに金のチップがもらえる。|У тебя пока нет указателей из бутика. Каждый уровень клуба платит золотыми фишками.|Nie masz jeszcze wskaźników z butiku. Każdy poziom Klubu płaci złotymi żetonami.",
+  };
+  const PU = () => A.punteros;
+  const pOf = t => t === "mine" ? PU().SLOTS.flatMap(s => PU().list(s).filter(id => id !== "casa" && PU().owned(s, id)).map(id => [s, id])) : PU().list(t).map(id => [t, id]);
+  const pState = (s, id) => (PU().current(s) === id ? "on" : PU().owned(s, id) ? "got" : "");
+  function pItem([s, id]) {
+    const k = s + ":" + id, st = pState(s, id);
+    return `<button type="button" class="bq-it bq-pit${k === ST.psel ? " sel" : ""}${st ? " " + st : ""}" data-pid="${k}" aria-pressed="${k === ST.psel}">
+      <span class="bq-th bq-pth"><canvas width="160" height="100" data-pt="${k}"></canvas></span>
+      <span class="bq-prow"><b class="bq-nm">${esc(PU().name(s, id))}</b>${st === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : id === "casa" ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : st ? `<em class="bq-own">${esc(P6(VX.mine))}</em>` : `<span class="bq-pr">${fi()}<b>${A.fmt(PU().price(s, id))}</b></span>`}</span></button>`;
+  }
+  function pGridHtml() {
+    const L = pOf(ST.ptab), pages = Math.max(1, Math.ceil(L.length / PER)); ST.ppage = Math.min(ST.ppage, pages - 1);
+    const items = L.slice(ST.ppage * PER, ST.ppage * PER + PER);
+    const tab = (k, tx) => `<button type="button" class="bq-tab bq-ptab${ST.ptab === k ? " on" : ""}" data-ptab="${k}" aria-pressed="${ST.ptab === k}"><span>${esc(tx)}</span><i>${pOf(k).length}</i></button>`;
+    return `<div class="bq-bar"><nav class="bq-tabs">${PU().SLOTS.map(s => tab(s, PU().slotPlural(s))).join("")}${tab("mine", P6(VX.mine))}</nav>
+      <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqPPrev"${ST.ppage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.ppage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqPNext"${ST.ppage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
+      <div class="bq-items punt" id="bqItems">${items.length ? items.map(pItem).join("") : `<p class="bq-empty">${esc(P6(PX.empty))}</p>`}</div>`;
+  }
+  function pDetHtml() {
+    const [s, id] = ST.psel.split(":"), st = pState(s, id), have = A.club ? A.club.fichas() : 0, p = PU().price(s, id);
+    let act;
+    if (st === "on") act = `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(VX.on))}</span></button>`;
+    else if (st === "got") act = `<button type="button" class="gx-btn pri wide" id="bqPUse"><span>${esc(P6(PX.use))}</span></button>`;
+    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
+    else act = `<button type="button" class="gx-btn pri wide${ST.armed === ST.psel ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === ST.psel ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
+    return `<span class="bq-dth bq-pprev"><canvas width="320" height="200" id="bqPCv"></canvas></span>
+      <span class="gx-eyb bq-tier">${esc(PU().slotName(s))}${id === "casa" ? " · " + esc(P6(VX.casaL)) : ""}</span>
+      <h3 class="gx-t-m bq-dn">${esc(PU().name(s, id))}</h3>
+      <p class="bq-dd">${esc(PU().slotDesc(s))}</p>
+      <div class="bq-acts"><button type="button" class="gx-btn gho wide" id="bqPTry"><span>${esc(P6(TX.try))}</span></button>${act}</div>`;
+  }
+  let pRaf = 0, pLast = 0;
+  /* el lienzo, del tamano que ocupa en pixeles reales de la pantalla (zoom de la portada incluido): asi el pixel art va a escala entera */
+  function pFit(cv, ratio) {
+    const r = cv.getBoundingClientRect(), dp = window.devicePixelRatio || 1, W = Math.max(16, Math.round(r.width * dp)), H = ratio ? Math.round(W * ratio) : Math.max(10, Math.round(r.height * dp));
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; cv._still = 0; }
+  }
+  function pAnim(now) {
+    pRaf = 0; if (ST.cat !== "punt" || !document.querySelector("#dlg .bq-screen") || document.hidden) return;
+    if (now - pLast > 60) {
+      pLast = now; const t = now / 1000;
+      document.querySelectorAll("#dlg canvas[data-pt]").forEach(cv => { pFit(cv); if (cv._still) return; const [s, id] = cv.dataset.pt.split(":"); PU().thumb(cv, s, id, t); if (s === "pin") cv._still = 1; });
+      const big = $("bqPCv"); if (big && ST.psel) { pFit(big); const [s, id] = ST.psel.split(":"); if (!(s === "pin" && big._still === ST.psel)) { PU().thumb(big, s, id, t, true); if (s === "pin") big._still = ST.psel; } }
+    }
+    pRaf = requestAnimationFrame(pAnim);
+  }
+  const pStart = () => { if (!pRaf) pRaf = requestAnimationFrame(pAnim); };
+  /* comprar un puntero: como la ropa (dos pulsaciones, premio, monedero que baja) y queda puesto */
+  function pBuy(k) {
+    if (ST.busy || !k) return;
+    const [s, id] = k.split(":"); if (PU().owned(s, id)) return;
+    const have = A.club ? A.club.fichas() : 0, p = PU().price(s, id);
+    if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
+    if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
+    ST.armed = null;
+    if (!PU().buy(s, id)) return;
+    repaint("#bqPTry");
+    { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
+    if (A.casa && A.casa.premio) A.casa.premio(2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(2);
+    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.haptic) A.haptic([24]);
+    const w = $("bqWal"), to = A.club.fichas(), n = 10;
+    for (let i = 1; i <= n; i++) setTimeout(() => { if (w && w.isConnected) w.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
+    const card = document.querySelector(`#dlg .bq-pit[data-pid="${k}"]`), det = $("bqDet");
+    if (card) card.classList.add("bq-sold"); if (det) det.classList.add("bq-sold");
+  }
+  /* «Probar en el mapa»: la tienda se aparta, el reticulo sale en el mapa de verdad y cada clic deja tu chincheta, la linea hasta el centro
+     y, si lo clavas, la diana. Se vuelve con el boton o con Esc */
+  function pTryOn() {
+    if (ST.ptry || ST.busy || !ST.psel) return;
+    const map = C().map; if (!map || !map.screenToLonLat || !map.setMarks) return;
+    const [s, id] = ST.psel.split(":"); PU().tryOn(s, id);
+    const drift = !!map.drift; if (map.stopDrift) map.stopDrift();   // el mapa de la portada va a la deriva: quieto, para que el lugar siga en el centro
+    const tgt = map.screenToLonLat(map.W / 2, map.H / 2);
+    ST.ptry = { onPick: map.onPick, pick: map.pickEnabled, drift };
+    document.body.classList.add("bq-try"); map.clearMarks(); map.setPick(true);
+    /* diana: lo que la partida llama «¡Diana!» (75 km) o, con el mapa lejos, a menos de 30 px del centro (si no, con el mundo entero a la vista
+       seria imposible verla) */
+    map.onPick = (lon, lat) => { const km = A.geo.haversine(lat, lon, tgt[1], tgt[0]), q = map.lonLatToScreen(lon, lat), px = Math.hypot(q[0] - map.W / 2, q[1] - map.H / 2); map.setMarks({ guess: [lon, lat], answer: tgt, dist: km >= 1 ? A.fmtDist(km) : "", bull: km <= 75 || px <= 30 }); if (A.sfx && A.sfx.pin) A.sfx.pin(); };
+    if (A.sfx && A.sfx.card) A.sfx.card();
+    const lab = document.createElement("div"); lab.className = "bq-tryl"; lab.id = "bqTryL";
+    lab.innerHTML = `<div class="gx-paper"><span class="bq-tryt"><b>${esc(P6(TX.trying).replace("{m}", PU().name(s, id)))}</b><i>${esc(P6(PX.hint))}</i></span><button type="button" class="gx-btn sm" id="bqTryBack"><span>${esc(P6(TX.tryBack))}</span>${A.gala.keyHint("Esc", "b")}</button></div>`;
+    document.body.appendChild(lab);
+    $("bqTryBack").onclick = () => pTryOff();
+  }
+  function pTryOff(quiet) {
+    if (!ST.ptry) return;
+    const map = C().map, o = ST.ptry; ST.ptry = null;
+    if (map) { map.onPick = o.onPick; map.setPick(o.pick); map.clearMarks(); if (o.drift && !map.drift && !map.anim) map.drift = { base: { ...map.view }, t0: performance.now() }; }
+    PU().tryOff(); document.body.classList.remove("bq-try");
+    const l = $("bqTryL"); if (l) l.remove();
+    if (!quiet) { if (A.sfx && A.sfx.card) A.sfx.card(); const f = $("bqPTry"); if (f) f.focus({ preventScroll: true }); }
+  }
+
   /* pintar solo lo que cambia (la rejilla, la ficha y la oferta), conservando el foco */
   function repaint(focusSel) {
     const g = $("bqGrid"), d = $("bqDet"); if (!g || !d) return;
     const fid = document.activeElement && document.activeElement.id, fdata = document.activeElement && document.activeElement.dataset;
     if (ST.cat === "vest") { g.innerHTML = vGridHtml(); d.innerHTML = vDetHtml(); vPaint(); }
+    else if (ST.cat === "punt") { g.innerHTML = pGridHtml(); d.innerHTML = pDetHtml(); pStart(); }
     else { g.innerHTML = gridHtml(); d.innerHTML = detHtml(); const of = document.querySelector("#dlg .bq-offer"); if (of) of.outerHTML = offerHtml(); }
     const w = $("bqWal"); if (w && A.club) w.textContent = A.fmt(A.club.fichas());
     wireInner();
@@ -205,6 +307,8 @@ window.AIQ = window.AIQ || {};
     else if (fdata && fdata.tab) f = document.querySelector(`#dlg .bq-tab[data-tab="${fdata.tab}"]`);
     else if (fdata && fdata.vid) f = document.querySelector(`#dlg .bq-vit[data-vid="${fdata.vid}"]`);
     else if (fdata && fdata.vtab) f = document.querySelector(`#dlg .bq-vtab[data-vtab="${fdata.vtab}"]`);
+    else if (fdata && fdata.pid) f = document.querySelector(`#dlg .bq-pit[data-pid="${fdata.pid}"]`);
+    else if (fdata && fdata.ptab) f = document.querySelector(`#dlg .bq-ptab[data-ptab="${fdata.ptab}"]`);
     if (f && !f.disabled) f.focus({ preventScroll: true });
   }
   function pick(id, focus) {
@@ -221,7 +325,14 @@ window.AIQ = window.AIQ || {};
     if (nx) nx.onclick = () => { ST.page++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqNext:not([disabled]), #bqPrev"); };
     const tr = $("bqTry"); if (tr) tr.onclick = () => tryOn(ST.sel);
     const us = $("bqUse"); if (us) us.onclick = () => { if (M().use(ST.sel)) { if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqTry"); } };
-    const bu = $("bqBuy"); if (bu) bu.onclick = () => (ST.cat === "vest" ? vBuy(ST.vsel) : buy(ST.sel));
+    const bu = $("bqBuy"); if (bu) bu.onclick = () => (ST.cat === "vest" ? vBuy(ST.vsel) : ST.cat === "punt" ? pBuy(ST.psel) : buy(ST.sel));
+    sc.querySelectorAll(".bq-pit").forEach(b => { b.onclick = () => { const k = b.dataset.pid; if (ST.busy) return; if (k !== ST.psel) { ST.psel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg .bq-pit[data-pid="${k}"]`); }; });
+    sc.querySelectorAll(".bq-ptab").forEach(b => { b.onclick = () => { if (ST.ptab === b.dataset.ptab) return; ST.ptab = b.dataset.ptab; ST.ppage = 0; const L = pOf(ST.ptab); if (L.length && !L.some(x => x.join(":") === ST.psel)) ST.psel = L[0].join(":"); if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-ptab[data-ptab="${ST.ptab}"]`); }; });
+    const pp = $("bqPPrev"), pn = $("bqPNext");
+    if (pp) pp.onclick = () => { if (ST.ppage > 0) { ST.ppage--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqPPrev:not([disabled]), #bqPNext"); } };
+    if (pn) pn.onclick = () => { ST.ppage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqPNext:not([disabled]), #bqPPrev"); };
+    const pu = $("bqPUse"); if (pu) pu.onclick = () => { const [s, id] = ST.psel.split(":"); if (!PU().wear(s, id)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqPTry"); };
+    const ptb = $("bqPTry"); if (ptb) ptb.onclick = pTryOn;
     sc.querySelectorAll(".bq-vit").forEach(b => { b.onclick = () => { const id = b.dataset.vid; if (ST.busy) return; if (id !== ST.vsel) { ST.vsel = id; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg .bq-vit[data-vid="${id}"]`); }; });
     sc.querySelectorAll(".bq-vtab").forEach(b => { b.onclick = () => { if (ST.vtab === b.dataset.vtab) return; ST.vtab = b.dataset.vtab; ST.vpage = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-vtab[data-vtab="${ST.vtab}"]`); }; });
     const vp = $("bqVPrev"), vn = $("bqVNext");
@@ -230,9 +341,16 @@ window.AIQ = window.AIQ || {};
     const we = $("bqWear"); if (we) we.onclick = () => { if (!V().wear(ST.vsel)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqOff"); if (ST.spr) ST.spr.play("preen"); };
     const ofb = $("bqOff"); if (ofb) ofb.onclick = () => { V().takeOff(ST.vsel); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqWear"); };
   }
+  /* las pestañas de la cabecera caben siempre: si en un idioma no caben, primero se aprietan y despues las que no estan puestas se quedan en su
+     icono (el nombre sigue en title y aria-label) */
+  function fitCats() {
+    const n = document.querySelector("#dlg .bq-cats"); if (!n) return;
+    n.classList.remove("t1", "t2");
+    for (const c of ["t1", "t2"]) { if (n.scrollWidth <= n.clientWidth + 1) break; n.classList.add(c); }
+  }
   /* cambiar de seccion: solo cambian la izquierda y la derecha (la cabecera se queda); el vestuario espera a tener su atlas listo */
   function setCat(k) {
-    if (k === ST.cat || ST.busy || (k === "vest" && !V())) return;
+    if (k === ST.cat || ST.busy || (k === "vest" && !V()) || (k === "punt" && !PU())) return;
     const go = () => {
       if (!$("bqCat")) return;
       if (ST.trying) tryOff(true);
@@ -240,9 +358,11 @@ window.AIQ = window.AIQ || {};
       if (k !== "vest") dropProb();
       document.querySelectorAll("#dlg .bq-cat-t").forEach(b => { const on = b.dataset.cat === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
       const ca = $("bqCat"), d = $("bqDet");
-      ca.classList.toggle("vest", k === "vest"); d.classList.toggle("vest", k === "vest");
-      ca.innerHTML = catBody(); d.innerHTML = k === "vest" ? vDetHtml() : detHtml();
-      wireInner(); if (k === "vest") vPaint();
+      ca.classList.toggle("vest", k === "vest"); d.classList.toggle("vest", k === "vest"); ca.classList.toggle("punt", k === "punt"); d.classList.toggle("punt", k === "punt");
+      if (k === "punt" && !ST.psel) ST.psel = (pOf("ret").find(([s, id]) => !PU().owned(s, id)) || ["ret", "casa"]).join(":");
+      ca.innerHTML = catBody(); d.innerHTML = k === "vest" ? vDetHtml() : k === "punt" ? pDetHtml() : detHtml();
+      wireInner(); if (k === "vest") vPaint(); if (k === "punt") pStart();
+      fitCats();
       const f = document.querySelector(`#dlg .bq-cat-t[data-cat="${k}"]`); if (f) f.focus({ preventScroll: true });
     };
     if (k === "vest") { if (!ST.vsel) ST.vsel = (vOf(ST.vtab).find(i => !V().owned(i.id)) || vOf(ST.vtab)[0]).id; V().ready(go); } else go();
@@ -318,6 +438,7 @@ window.AIQ = window.AIQ || {};
   }
   /* Esc (y el boton B, que llega como Esc) durante la prueba: vuelve a la boutique, no a la portada */
   addEventListener("keydown", e => {
+    if (ST.ptry && e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); pTryOff(); return; }
     if (!ST.trying) return;
     if (e.key === "Escape" || e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopImmediatePropagation(); tryOff(); }
   }, true);
@@ -334,17 +455,19 @@ window.AIQ = window.AIQ || {};
     if (id) { ST.tab = "all"; const L = list(), i = L.findIndex(m => m.id === id); ST.page = i >= 0 ? Math.floor(i / PER) : 0; }
     if (id || !V()) ST.cat = "mesas";                                   // desde Perfil > Mesas se abre en las mesas
     if (ST.cat === "vest" && !ST.vsel) ST.vsel = vOf(ST.vtab)[0].id;
+    if (ST.cat === "punt" && (!PU() || !ST.psel)) { if (!PU()) ST.cat = "mesas"; else ST.psel = "ret:casa"; }
     const draw = () => {
       c.dialog(html(), "tablewrap");
       A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
       document.querySelectorAll("#dlg .bq-cat-t").forEach(b => { b.onclick = () => setCat(b.dataset.cat); });
-      wireInner(); if (ST.cat === "vest") vPaint();
-      setTimeout(() => { const f = ST.cat === "vest" ? document.querySelector(`#dlg .bq-vit[data-vid="${ST.vsel}"]`) : document.querySelector(`#dlg .bq-it[data-id="${ST.sel}"]`) || document.querySelector("#dlg .bq-offer") || $("bqTry"); if (f) f.focus({ preventScroll: true }); }, 80);
+      wireInner(); if (ST.cat === "vest") vPaint(); if (ST.cat === "punt") pStart();
+      fitCats(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCats);
+      setTimeout(() => { const f = ST.cat === "vest" ? document.querySelector(`#dlg .bq-vit[data-vid="${ST.vsel}"]`) : ST.cat === "punt" ? document.querySelector(`#dlg .bq-pit[data-pid="${ST.psel}"]`) : document.querySelector(`#dlg .bq-it[data-id="${ST.sel}"]`) || document.querySelector("#dlg .bq-offer") || $("bqTry"); if (f) f.focus({ preventScroll: true }); }, 80);
     };
     if (ST.cat === "vest") V().ready(draw); else draw();
   }
   /* si se sale de la boutique a mitad de una prueba, el mapa vuelve a tu mesa */
-  const leave = () => { if (ST.trying) tryOff(true); ST.armed = null; dropProb(); };
+  const leave = () => { if (ST.trying) tryOff(true); if (ST.ptry) pTryOff(true); ST.armed = null; dropProb(); };
 
   A.boutique = { open, leave, want: id => { ST.next = id; }, cat: k => { ST.cat = k; }, get trying() { return ST.trying; } };
 })(window.AIQ);

@@ -13,7 +13,7 @@
  *   A.club.q(ratio)         una pregunta respondida (0-1)        A.club.bonus(n)       experiencia por terminar
  *   A.club.cash()           cobra lo pendiente -> { gain, from, to, fichas, ups } o null
  *   A.club.strip(res)       el bloque del ticket (HTML)          A.club.play(res, el)  su animacion: barra, sello de nivel, premio y fichas
- *   A.club.card()           la tarjeta de socio de la portada     A.club.wire()         su cuenta de fichas y su clic
+ *   A.club.card()           el sitio de la carta del socio (js/socio.js)   A.club.wire()   la pinta, su cuenta de fichas y su clic
  *   A.club.level()  A.club.fichas()  A.club.tierOf(nivel)  A.club.need(nivel)  A.club.give(n) (lo que pagan los retos, js/club-retos.js)
  */
 window.AIQ = window.AIQ || {};
@@ -172,23 +172,18 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ la tarjeta de socio de la portada */
-  const memberNo = () => { const P = prof(); return String((A.rank && A.rank.hash ? A.rank.hash(P.id + ":socio") : 421) % 10000).padStart(4, "0"); };
   const dealerTier = () => (A.dealer && A.dealer.tier ? A.dealer.tier() : 0);
   function tierNow() { return Math.max(tierOf(levelOf(st().xp).lvl), dealerTier()); }
+  /* v0.3.157: la carta del socio (js/socio.js) se pinta al montar la portada (wire); aqui solo su sitio. La tienda y los retos van en la fila de placas */
   function card() {
     const c = st(), P = prof(), L = levelOf(c.xp), t = tierNow();
-    const tt = A.ttAttr ? A.ttAttr(P6(TX.card), P6(TX.tip)) : "";
-    return `<span class="hh-socio-w"><button type="button" class="hh-socio t${groupOf(t)}" id="socioBtn" ${tt}>
-      <span class="sc-h">${A.icon ? A.icon("chip_r") : ""}<b>${esc(P6(TX.card))}</b></span>
-      <span class="sc-nm"><span class="sc-n">${esc(P.name || P6(TX.anon))}</span><em>${esc(P6(TX.no))} ${memberNo()}</em></span>
-      <span class="sc-c"><b>${esc(P6(RANKS[t][0]))}</b><i>${esc(P6(TX.lv).replace("{n}", L.lvl))}</i></span>
-      <span class="sc-bar" aria-label="${esc(P6(TX.left).replace("{n}", A.fmt(L.need - L.into)).replace("{m}", L.lvl + 1))}"><i style="width:${pct(L.into, L.need)}%"></i></span>
-      <span class="sc-f">${fi("sc")}<b id="socioF">${A.fmt(c.fSeen == null ? c.f : c.fSeen)}</b></span>
-    </button><span class="hh-tabs">${A.boutique ? `<button type="button" class="hh-bq" id="bqBtn">${A.icon ? A.icon("purse") : ""}<span>${esc(P6(TX.shop))}</span></button>` : ""}${A.clubRetos ? A.clubRetos.tab() : ""}</span></span>`;
+    const tt = A.ttAttr ? A.ttAttr(P6(TX.card), P6(TX.tip)) : "", lab = `${P6(TX.card)}: ${P.name || P6(TX.anon)} · ${P6(RANKS[t][0])} · ${P6(TX.lv).replace("{n}", L.lvl)}`;
+    return `<span class="hh-socio-w sc-v2"><button type="button" class="hh-socio sc-v2" id="socioBtn" ${tt} aria-label="${esc(lab)}"><span id="socioCard"></span></button></span>`;
   }
   /* al volver a la portada con fichas nuevas, la tarjeta las cuenta delante de ti (moneda a moneda), con su brillo */
   function wire(onOpen) {
     const b = document.getElementById("socioBtn"); if (!b) return;
+    if (A.socio) A.socio.mount(document.getElementById("socioCard"), { w: 192, id: "socioF", hover: b });   // la carta, antes de contar sus fichas
     if (onOpen) b.onclick = () => { if (A.sfx && A.sfx.card) A.sfx.card(); onOpen(); };
     const c = st(), from = c.fSeen == null ? c.f : c.fSeen, to = c.f;
     if (to > from) {

@@ -26,51 +26,10 @@
 @keyframes ck-pop { from { transform: scale(.55) rotate(-5deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes ck-glow { from { box-shadow: 0 0 0 0 rgba(255, 207, 102, .9); } to { box-shadow: 0 0 0 14px rgba(255, 207, 102, 0); } }
 
-/* ---------- la tarjeta de socio de la portada: bajo el boton de salir, ladeada como las cartas; su color es tu categoria (como la que sella el crupier) */
-.hh-top .hh-socio-w { position: absolute; left: 0; top: 74px; z-index: 2; width: 300px; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .55)); transform: rotate(-2.5deg); transform-origin: 30% 50%; transition: transform .2s cubic-bezier(.2, 1.1, .4, 1); }
-.hh-top .hh-socio-w:hover, .hh-top .hh-socio-w:focus-within { transform: rotate(0) translateY(-3px); }
-.hh-top .hh-socio { width: 100%; display: grid; gap: 6px; padding: 12px 14px 13px; text-align: left;
-  font: inherit; color: #16241c; background: linear-gradient(180deg, #fffaec 0, #f1e6c8 100%); border: 0; cursor: pointer; clip-path: var(--gx-notch); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .16); }
-.hh-top .hh-socio:focus-visible { outline: none; }
-.hh-top .hh-socio:focus-visible { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
-.hh-socio.t1 { background: linear-gradient(180deg, #eef0f3 0, #cfd3d9 100%); }
-.hh-socio.t2 { background: linear-gradient(180deg, #ffd479 0, #e2a73c 100%); }
-.hh-socio.t3 { background: linear-gradient(180deg, #2a2830 0, #141317 100%); color: #f2d58a; box-shadow: inset 0 0 0 3px #f2d58a, inset 0 0 0 6px rgba(242, 213, 138, .25); }
-.hh-socio .sc-h { display: flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--mono); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; line-height: 1; }
-.hh-socio .sc-h .ic { width: 24px; height: 24px; flex: none; }
-.hh-socio .sc-h b { font-weight: 400; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hh-socio .sc-h em { margin-left: auto; font-style: normal; opacity: .7; white-space: nowrap; }
-.hh-socio .sc-n { font-family: var(--sans); font-size: 30px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hh-socio .sc-c { display: flex; justify-content: space-between; gap: 10px; font-family: var(--mono); font-size: 16px; text-transform: uppercase; line-height: 1; }
-.hh-socio .sc-c b, .hh-socio .sc-c i { font-weight: 400; font-style: normal; white-space: nowrap; }
-.hh-socio .sc-bar { position: relative; height: 10px; background: rgba(0, 0, 0, .14); box-shadow: inset 0 0 0 2px currentColor; }
-.hh-socio .sc-bar i { position: absolute; left: 2px; top: 2px; bottom: 2px; max-width: calc(100% - 4px); background: currentColor; opacity: .75; }
-.hh-socio .sc-f { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 28px; line-height: 1; }
-.hh-socio .sc-f b { font-weight: 400; font-variant-numeric: tabular-nums; }
-.hh-socio.gain .sc-f { animation: sc-gain .22s ease-in-out 6 alternate; }
-.hh-socio.gain .ck-fi { animation: sc-spin .44s ease-in-out 3; }
+/* ---------- la tarjeta de socio de la portada: su sitio, arriba a la izquierda (la carta la dibuja js/socio.js; estilos en css/socio.css) */
+.hh-top .hh-socio-w { position: absolute; left: 0; top: 74px; z-index: 2; }
 @keyframes sc-gain { to { transform: scale(1.12); } }
 @keyframes sc-spin { 50% { transform: scaleX(.2); } }
-html.no-shake .hh-socio.gain .sc-f, html.no-shake .hh-socio.gain .ck-fi { animation: none; }
-
-/* ---------- el Perfil: categoria, nivel y fichas de oro bajo "Socio desde" */
-.pf-club { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: var(--mono); font-size: 16px; text-transform: uppercase; line-height: 1.1; color: var(--gx-ink-2); }
-.pf-club b { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sans); font-weight: 400; font-size: 22px; text-transform: none; color: var(--gx-gold-lo); }
-.ck-fi.pf { width: 24px; height: 24px; }
 
 /* pantallas estrechas (la web en movil): la tarjeta deja de flotar */
-@media (max-width: 900px) { .hh-top .hh-socio-w { position: static; margin: 8px auto 0; transform: none; } }
-
-/* ---------- la tarjeta de la portada por tramos: papel para los primeros escalones y la de leyenda, la ultima */
-.hh-socio.t0 { background: linear-gradient(180deg, #fffaec 0, #f1e6c8 100%); color: #16241c; }
-.hh-socio.t4 { background: linear-gradient(150deg, #4a1430 0, #22091c 55%, #120612 100%); color: #ffe39a; box-shadow: inset 0 0 0 3px #ffcf66, inset 0 0 0 7px rgba(255, 207, 102, .22), 0 10px 0 rgba(0, 0, 0, .45); }
-.hh-socio.t4 { box-shadow: inset 0 0 0 3px #ffcf66, inset 0 0 0 7px rgba(255, 207, 102, .22); }
-.hh-socio .sc-nm { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
-.hh-socio .sc-nm .sc-n { min-width: 0; }
-.hh-socio .sc-nm em { font-style: normal; font-family: var(--mono); font-size: 16px; opacity: .7; white-space: nowrap; }
-.pf-since.pf-club { text-transform: none; letter-spacing: 0; font-family: inherit; font-size: inherit; color: inherit; }
-.pf-since.pf-club > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* al subir de categoria el crupier la sella aqui mismo, en la tarjeta de la portada (antes salia otra en mitad de la pantalla) */
-.hh-socio .sc-c b.sc-stamp { display: inline-block; animation: sc-stamp .5s cubic-bezier(.2, 1.6, .4, 1) both; }
-@keyframes sc-stamp { from { transform: scale(2.2) rotate(-8deg); opacity: 0; } 60% { opacity: 1; } to { transform: none; opacity: 1; } }
-html.reduce-motion .hh-socio .sc-c b.sc-stamp { animation: none; }
+@media (max-width: 900px) { .hh-top .hh-socio-w { position: static; margin: 8px auto 0; } }

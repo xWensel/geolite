@@ -24,6 +24,12 @@
    Columnas de las placas: como minimo las de las cartas; las dos laterales siempre iguales (1fr) aunque un nombre sea mas largo (ru, ja) */
 .hh-bottom { justify-self: center; width: max-content; max-width: 100%; display: grid; justify-items: stretch; gap: clamp(10px, calc(1.8 * var(--vh)), 18px); }
 .hh-deck { display: grid; grid-template-columns: minmax(var(--cw), 1fr) minmax(var(--hw), max-content) minmax(var(--cw), 1fr); gap: var(--cg); align-items: stretch; }
+/* v0.3.157: cinco placas en espejo. Las tres de dentro siguen alineadas con las cartas; Retos y La tienda, del mismo ancho, a los lados */
+.hh-deck.five { width: min(calc(100 * var(--vw) - 96px), 1150px); grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.12fr) repeat(2, minmax(0, 1fr)); }
+.hh-bottom:has(.hh-deck.five) { width: auto; }
+.hh-deck.five .plq { gap: 9px; padding: 8px 10px 12px; }                              /* cinco en fila: icono y letra un punto mas pequenos */
+.hh-deck.five .plq-ic .ic { width: 36px; height: 36px; }
+.hh-deck.five .plq-t > b { font-size: 23px; }
 .hh-bottom .hh-resume { flex: none; box-sizing: border-box; width: auto; max-width: none; margin: 0; }   /* en una sola fila, del ancho de las placas */
 .hh-bottom:has(.hh-cont) { row-gap: 22px; }                                                        /* las bombillas de Continuar no tocan las placas */
 .hh-bottom:has(.hh-cont):has(.plq-rib.on) { row-gap: 40px; }   /* la cinta de tu puesto no toca el banner */
@@ -41,6 +47,9 @@
 .plq-codex { --tilt: -2deg; --d: .38s; }
 .plq-rank { --c1: #ffd95a; --c2: #f5a623; --c3: #c46a1b; --c4: #7f3a1a; --d: .3s; }
 .plq-prof { --c1: #b36cff; --c2: #8440e0; --c3: #5a2ab0; --c4: #351a70; --tilt: 2deg; --d: .38s; }
+.plq-retos { --c1: #ff8a8a; --c2: #e2404c; --c3: #a8142e; --c4: #5a0c1c; --tilt: -3deg; --d: .46s; }   /* los dos extremos, en espejo: rojo y azul */
+.plq-shop { --c1: #8fc4ff; --c2: #3f86e8; --c3: #2358b4; --c4: #13306a; --tilt: 3deg; --d: .46s; }
+.plq-fi { width: 16px; height: 16px; image-rendering: pixelated; flex: none; }
 .plq:hover { transform: translateY(-7px) rotate(var(--tilt)) scale(1.05); z-index: 2; } .plq:hover::before { filter: brightness(1.08); } .plq:hover::after { transform: translateY(11px); }
 .plq:active { transform: translateY(4px) scale(.98); transition-duration: .08s; } .plq:active::after { transform: translateY(2px); }
 .plq:focus { outline: none; }
@@ -83,6 +92,7 @@ html body #dlg > .hh-ver { font-size: 12px; }
   .hh-top { flex-direction: row; } .hh-top .menu-tools { position: absolute; right: 0; top: 0; margin: 0; }   /* el engranaje arriba a la derecha tambien aqui: espejo del boton de salir */
   .hh-bottom { width: 100%; justify-items: center; }
   .hh-deck { width: min(100%, 760px); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .hh-deck.five { width: 100%; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
   .hh-bottom .hh-resume { width: min(100%, 760px); min-width: 0; }
   .hh { padding-bottom: 26px; }                                                        /* hueco para la version */
 }
@@ -105,6 +115,7 @@ html body #dlg > .hh-ver { font-size: 12px; }
 /* movil horizontal: placas bajas en una fila */
 @media (max-height: 520px) and (orientation: landscape) {
   .hh-deck { width: min(100%, 700px); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .hh-deck.five { width: 100%; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
   .plq { min-height: 0; gap: 8px; padding: 7px 10px 10px; } .plq::before { inset: 5px 5px 8px; }
   .plq-ic .ic { width: 30px; height: 30px; } .plq-t { gap: 4px; } .plq-t > b { font-size: 19px; }
   .hh .mcard.hero { padding: 24px 13px 13px; --mqi: 7.5px; --mqb: 4px; } .hh .mcard.hero .mc-ribbon { font-size: 11px; padding: 3px 8px 2px; top: -8px; }   /* la cinta "Modo principal" no tapa el nombre de la carta */
