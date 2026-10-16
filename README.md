@@ -43,6 +43,10 @@ Cada Campamento sortea un juego de los ocho. Todos se deciden con la semilla de 
 
 Las fichas son de 2, 5 o 10 doblones. Los retornos se comprueban enumerando todas las combinaciones.
 
+## El Club de la casa
+
+Experiencia, nivel de socio y fichas de oro (`js/club.js`). Cada pregunta de la Aventura, el Clásico y el Duelo da hasta 10 de experiencia según la precisión (la misma que puntúa); superar una ronda o un nivel suma 5, ganar la partida 15 y ganar un duelo 10. Se cobra en el ticket de cada veredicto: pasar del nivel L al siguiente cuesta `min(400 + 20·(L−1), 1200)`, cada nivel paga 10 fichas de oro y cada 10 niveles el cofre de la casa paga 30 más. El nivel da la categoría, una escalera de 15 que el crupier sella en la tarjeta de socio: Turista, Mirón, Habitual, Apostador, Trotamundos, Cartógrafo, Rival, Contador de cartas, Geógrafo, Gran apostador, Almirante, Socio, Embajador, Crupier honorario y Leyenda de la casa (tarjeta de papel, plata, oro, negra y de leyenda). Nadie baja de categoría. La tarjeta de socio está siempre en la portada, arriba a la izquierda, y abre el Perfil. A los perfiles con historia la casa les reconoce lo jugado con la experiencia de sus preguntas.
+
 ## Logros
 
 100 logros agrupados por horas de juego (Primeros pasos, Primera sesión, Unas horas, Jugador habitual, Maestría y Secretos). Cuentan preguntas, dianas, rachas, tarjetas de la Enciclopedia por tipo y por continente, campañas del Clásico, medallas, Reto diario (sus logros no se pueden ganar mientras esté retirado), cada Ascensión y el casino. Cada logro tiene su insignia propia y se envía a Steamworks con su nombre interno (`API name` = id de `js/profile.js`). La exportación para el panel de Steam se genera con `node tools/steam-achievements.mjs` y `python tools/steam_icons.py` (`docs/steam/`).

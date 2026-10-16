@@ -56,7 +56,7 @@ window.AIQ = window.AIQ || {};
       ${id === "adventure" ? BULBS : ""}${badge ? `<span class="mc-ribbon">${badge}</span>` : ""}<span class="mc-win">${A.pic(art)}</span><b class="mc-name">${title}</b><span class="mc-stat sq-fit">${meta}</span></button>`;
     const noDeal = homeDealt; homeDealt = true;                       // las cartas se reparten solo la primera vez que se ve la portada; al volver de Perfil & co. ya estan en la mesa
     c.dialog(`<div class="hh${noDeal ? " nodeal" : ""}">
-      <div class="hh-top">${A.salir ? A.salir.button() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${tools()}</div>
+      <div class="hh-top">${A.salir ? A.salir.button() : ""}${A.club ? A.club.card() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${tools()}</div>
       <p class="hh-tag">${A.t("title.tag")}</p>
       <div class="hh-cards">
         ${mc("classic", "K", "s_palm", "card_classic", T("Clásico", "Classic"), T("Regiones del mundo, banderas, pistas, sucesos y personajes, contra el reloj.", "Regions of the world, flags, clues, events and famous people, against the clock."), T("Directo al grano", "No frills"))}
@@ -80,6 +80,7 @@ window.AIQ = window.AIQ || {};
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
+    if (A.club) A.club.wire(() => screen("profile"));                      // tu tarjeta de socio: abre el Perfil y cuenta las fichas de oro nuevas
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura
     if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
@@ -501,8 +502,8 @@ window.AIQ = window.AIQ || {};
           <h2 class="gx-t-l pf-h" id="pfH"><span class="pf-hic">${A.icon("m_prof")}</span>${T("Perfil", "Profile")}</h2>
           <span class="pf-sum"><span class="gx-eyb">${T("Logros", "Achievements")}</span><b>${A.fmt(done)}<i> / ${A.fmt(total)}</i></b><span class="gx-bar"><i style="width:${pct(done, total)}%"></i></span></span>${tools()}</header>
         <div class="pf-left">
-          <div class="gx-paper pf-socio"><span class="gx-eyb">${A.pick6("Ficha de socio|Member card|Carte de membre|Ficha de sócio|Mitgliedskarte|Tessera del socio||会员卡|회원 카드|会員カード|Карта игрока|Karta członkowska")}</span>
-            <b class="pf-name">${esc(nm)}</b>${since ? `<span class="pf-since">${since}</span>` : ""}<div class="gx-hr"></div>
+          <div class="gx-paper pf-socio"><span class="gx-eyb">${A.club ? `${esc(A.club.tierName(A.club.tierNow()))} · ${esc(A.pick6(A.club.tx.lv).replace("{n}", A.club.level()))}` : A.pick6("Ficha de socio|Member card|Carte de membre|Ficha de sócio|Mitgliedskarte|Tessera del socio||会员卡|회원 카드|会員カード|Карта игрока|Karta członkowska")}</span>
+            <b class="pf-name">${esc(nm)}</b>${since || A.club ? `<span class="pf-since pf-club"><span>${since}</span>${A.club ? `<b><img class="ck-fi pf" src="assets/icons/ficha_oro.webp" alt="">${A.fmt(A.club.fichas())}</b>` : ""}</span>` : ""}<div class="gx-hr"></div>
             ${stat("a_pin", T("Preguntas", "Questions"), A.fmt(s.questions))}${stat("a_target", T("Dianas", "Bullseyes"), A.fmt(s.bulls))}${stat("a_lens", T("Error medio", "Avg. error"), A.fmtDist(avg))}
             ${stat("a_flame", T("Mejor racha", "Best streak"), A.fmt(s.bestStreak))}${stat("m_codex", T("Enciclopedia", "Encyclopedia"), A.fmt(st.u) + " / " + A.fmt(st.t))}${stat("crown", T("Récord aventura", "Adventure best"), A.fmt(P.adv.bestScore))}</div>
           <nav class="pf-idx" id="pfIdx" aria-label="${T("Logros", "Achievements")}">${ix("near", "u_star", NEAR(), near.length, " hot")}${tiers.map(x => ix(x.i, "tier_" + x.i, A.tx(x.t.n), `${x.n} / ${x.list.length}`, x.n === x.list.length ? " full" : "")).join("")}${ix("mesas", "chip_g", MESAS_T(), `${A.mesas.count()} / ${A.mesas.list.length}`, A.mesas.count() === A.mesas.list.length ? " full" : "")}</nav>

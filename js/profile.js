@@ -314,6 +314,7 @@ window.AIQ = window.AIQ || {};
   const BULL_KM = 25;
   A.profile.question = ({ km, inside, area, ratio, streak, left, limit, timeout }) => {
     const s = P.stats; s.questions++; A._sessionQ++;
+    if (A.club) A.club.q(timeout ? 0 : ratio);                              // el Club de la casa: experiencia por precision (js/club.js)
     if (timeout) { s.timeouts++; save(); A.ach.emit("q", { timeout: true }); return; }
     s.km += km || 0; s.seconds += Math.max(0, limit - left); if (ratio >= 0.4) s.hits++;
     const bull = inside || area || (km != null && km <= BULL_KM); if (bull) s.bulls++; if (inside) s.inside++;

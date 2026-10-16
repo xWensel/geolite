@@ -993,6 +993,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
      abajo a la derecha y el principal, el ultimo, con su tecla. meter: [puntos, objetivo] dibuja la barra bajo el titular */
   const TICKET_HEAD = "Casa Geolite · caja|Geolite House · cashier|Maison Geolite · caisse|Casa Geolite · caixa|Haus Geolite · Kasse|Casa Geolite · cassa||Geolite 赌场 · 收银台|Geolite 하우스 · 계산대|Geolite ハウス・会計|Дом Geolite · касса|Dom Geolite · kasa";
   function verdict({ kind, level, tag, title, text, stats, stamp, iq, tier, tierName, buttons, art, lines, meter, places: withPlaces }) {
+    /* el Club de la casa: terminar suma un poco y aqui se cobra la experiencia de la ronda o el nivel (recibo propio bajo el titular, js/club.js) */
+    const club = A.club ? (A.club.bonus(A.club.bonusFor(kind)), A.club.cash()) : null;
     const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     const chip = kind === "" ? "chip_r" : art === "chest" ? "chip_p" : kind === "win" ? "chip_b" : "chip_g";
     const log = withPlaces && S.log && S.qs && S.log.length === S.qs.length ? S.log : [];   // lugar a lugar, solo si la ronda se jugo entera en esta sesion (reanudada a medias, no)
@@ -1012,7 +1014,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const btn = b => { const h = `<button class="gx-btn${b.primary ? " pri" : b.ghost ? " gho sm" : ""}" id="${b.id}" ${b.primary ? "data-primary" : ""}><span>${b.label}</span>${b.primary ? A.gala.keyHint("Enter", "a") : ""}</button>`;
       return h; };                                                                               // v0.3.76: el boton principal ya no lleva bombillas alrededor (peticion del autor)
     dialog(`<div class="vd gx-vd gx-layer gx-in${kind === "" ? " lose" : ""}${two && !(A.dealer && A.dealer.on) ? " wide" : ""}">
-      <div class="gx-vd-head gx-from-left"><span class="gx-eyb">${tag || A.t("v.level", { n: pad2(level) })}</span><h2 class="gx-t-xl">${title}</h2><p class="gx-lead">${text}</p>${bar}${A.bulbs()}</div>
+      <div class="gx-vd-head gx-from-left"><span class="gx-eyb">${tag || A.t("v.level", { n: pad2(level) })}</span><h2 class="gx-t-xl">${title}</h2><p class="gx-lead">${text}</p>${bar}${A.bulbs()}${club ? `<div class="gx-vd-club gx-paper">${A.club.strip(club)}</div>` : ""}</div>
       <div class="gx-vd-mid gx-sh">${ticket}</div>
       <div class="gx-vd-side"><div class="gx-vd-medal ${kind}">${art === "chest" ? `<i class="gx-vd-crown">${A.icon("crown")}</i>` : ""}${A.icon(chip)}</div><div class="gx-vd-dealer" id="vdDealer"></div>${idc}</div>
       <div class="gx-vd-acts"><div class="gx-acts">${order.filter(b => b.ghost).map(btn).join("")}</div><div class="gx-acts">${order.filter(b => !b.ghost).map(btn).join("")}</div></div>
@@ -1021,6 +1023,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (iq != null) { const el = $("iqNum"); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, iq, { ms: 1400, delay: 1000 })); }
     buttons.forEach(b => ($(b.id).onclick = b.onclick));
     if (A.dealer && A.dealer.on) A.dealer.anchor($("vdDealer"));                // el crupier habla dentro del veredicto, sin tapar botones
+    if (club) A.club.play(club, document.querySelector("#dlg .gx-vd-club"), 1700);
   }
 
   function finishLevel() {

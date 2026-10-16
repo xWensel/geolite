@@ -539,6 +539,7 @@ window.AIQ = window.AIQ || {};
     st.phase = "reveal"; S.phase = "reveal"; S.tense = false; map.setPick(false); A.music.mode(1); $("plate").classList.remove("hurry"); st.rolled = false;
     if (!cur.rvLocked) { cur.rvLocked = true; cur.rvT = Math.min(cur.rvAt, tEnd); }
     const rd = settle(st, cur.meAns, net ? net.rv : { lon: cur.bot.lon, lat: cur.bot.lat, t: cur.rvT }), me = rd.me, rv = rd.rv, g = cur.meAns, tok = st.k, live = () => st && st.k === tok && st.phase === "reveal";
+    if ((!st.auto || st.auto.club) && A.club) A.club.q(me.pts / 1000);                      // el Club de la casa: experiencia por precision (se cobra en el veredicto)
     const cx = g && !st.auto && A.codexUnlock ? A.codexUnlock(q, me.km) : { added: [], level: 0 }; rd.cards = cx.added;   // la Enciclopedia, en silencio: se ensena en el veredicto
     D.hud();
     /* el objetivo, como en el revelado de siempre: el lugar con su bandera en el mastil, el pais resaltado o la masa de agua */
@@ -624,6 +625,7 @@ window.AIQ = window.AIQ || {};
     const sc = N.score, share = (w, t) => (t > 0 ? w / t : 0.5);
     const lg = !!st.liga && !st.auto && !nt, r0 = rankOf(was.lp), r1 = rankOf(now.lp), lgDelta = now.lp - was.lp, lgFrac = r => (r.crupier ? (r.pts % LG.per) / LG.per : r.into / LG.per), MYLG = CFG.tables[r1.league].chip;
     A.sfx.stamp(); setTimeout(win ? A.sfx.victory : o.tie ? A.sfx.stamp : A.sfx.fail, 380);
+    const club = (!st.auto || st.auto.club) && A.club ? (A.club.bonus(win ? A.club.bonusFor("duel") : 0), A.club.cash()) : null;   // el Club de la casa: su recibo, bajo la liga
     const lead = o.lost ? T("Has estado demasiado rato sin conexión.", "You were offline for too long.")
       : o.left ? (o.cut ? Tf("{name} ha perdido la conexión.", "{name} lost their connection.", { name: fo }) : Tf("{name} se ha levantado de la mesa.", "{name} left the table.", { name: fo }))
       : o.quit === "rv" ? Tf("{name} se ha rendido en la ronda {n}.", "{name} gave up in round {n}.", { name: fo, n: o.rounds })
@@ -642,7 +644,7 @@ window.AIQ = window.AIQ || {};
         : lg ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(MYLG)}<b>${T("Duelo de liga", "League duel")} · ${rankName(r1)}</b><div class="gx-bar"><i style="--s0:${r1.idx > r0.idx ? 0 : lgFrac(r0)};--s1:${lgFrac(r1)}"></i></div>
           <p>${lgDelta >= 0 ? "+" : "−"}${Math.abs(lgDelta)} ${T("puntos de liga", "league points")} · ${r1.crupier ? `${r1.pts} ${T("puntos", "points")}` : `${r1.into} / ${LG.per}`}. ${r1.idx > r0.idx ? `${T("¡Ascenso a", "Promoted to")} ${rankName(r1)}!` : tally(now)}</p></div></div>`
         : `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Contra la banca", "Against the house")}</b><div class="gx-bar"><i style="--s0:${pct(was) / 100};--s1:${pct(now) / 100}"></i></div>
-          <p>${tally(now)} ${now.s > 1 ? Tf("Racha de {n} seguidas.", "{n} in a row.", { n: now.s }) : !win && was.s > 1 ? T("Racha cortada.", "Streak broken.") : ""}</p></div></div>`}${pol}</div>
+          <p>${tally(now)} ${now.s > 1 ? Tf("Racha de {n} seguidas.", "{n} in a row.", { n: now.s }) : !win && was.s > 1 ? T("Racha cortada.", "Streak broken.") : ""}</p></div></div>`}${club ? `<div class="du-club rise" style="--d:1.05s"><div class="gx-paper">${A.club.strip(club)}</div></div>` : ""}${pol}</div>
       <div class="tk drop" style="--d:.15s"><div class="gx-paper"><span class="gx-eyb">${T("La cuenta", "The tally")}</span>${rows}<div class="gx-hr"></div>${row(T("Tu pila", "Your stack"), A.fmt(me))}</div></div>
       <div class="mesa"><div class="col"><b class="me">${A.fmt(me)}</b><span>${myName() || ME()}</span>${pile("me", me)}</div><div class="col"><b class="rv">${A.fmt(rv)}</b><span>${fo}</span>${pile("rv", rv)}</div><div class="dais"></div></div>
       <div class="seatw" id="duVdSeat"></div>
@@ -652,6 +654,7 @@ window.AIQ = window.AIQ || {};
     if (nt) $("duRoom").onclick = roomBack;
     else { $("duRematch").onclick = () => D.start(s.liga ? { liga: true, auto: s.auto } : { table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
     seat($("duVdSeat"));
+    if (club) A.club.play(club, document.querySelector("#dlg .du-club"), 1900);
     if (nt) speak(line(o.lost ? "lost2" : o.left ? "left2" : o.quit === "rv" ? "quit2" : o.quit ? "quit" : win ? "win2" : "lose2"), win ? { gesture: "hat_tip" } : { face: "sly" });
     else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "laugh" });
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
