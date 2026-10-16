@@ -44,6 +44,7 @@ window.AIQ = window.AIQ || {};
   const P6 = s => A.pick6(s);
 
   const TX = {
+    shop: "La boutique|The boutique|La boutique|A boutique|Die Boutique|La boutique||精品店|부티크|ブティック|Бутик|Butik",
     club: "Club de la casa|The House Club|Le Club de la maison|Clube da casa|Club des Hauses|Club della casa||赌场俱乐部|하우스 클럽|ハウスクラブ|Клуб заведения|Klub kasyna",
     card: "Tarjeta de socio|Member card|Carte de membre|Cartão de sócio|Mitgliedskarte|Tessera socio||会员卡|회원 카드|会員カード|Клубная карта|Karta członkowska",
     no: "N.º|No.|N°|Nº|Nr.|N.||No.|No.|No.|№|Nr",
@@ -168,7 +169,7 @@ window.AIQ = window.AIQ || {};
       <span class="sc-c"><b>${esc(P6(RANKS[t][0]))}</b><i>${esc(P6(TX.lv).replace("{n}", L.lvl))}</i></span>
       <span class="sc-bar" aria-label="${esc(P6(TX.left).replace("{n}", A.fmt(L.need - L.into)).replace("{m}", L.lvl + 1))}"><i style="width:${pct(L.into, L.need)}%"></i></span>
       <span class="sc-f">${fi("sc")}<b id="socioF">${A.fmt(c.fSeen == null ? c.f : c.fSeen)}</b></span>
-    </button></span>`;
+    </button>${A.boutique ? `<button type="button" class="hh-bq" id="bqBtn">${A.icon ? A.icon("purse") : ""}<span>${esc(P6(TX.shop))}</span></button>` : ""}</span>`;
   }
   /* al volver a la portada con fichas nuevas, la tarjeta las cuenta delante de ti (moneda a moneda), con su brillo */
   function wire(onOpen) {
@@ -191,6 +192,8 @@ window.AIQ = window.AIQ || {};
   A.club = {
     CFG, RANKS, need, levelOf, tierOf, groupOf, q, bonus, cash, strip, play, card, wire, tierNow,
     level: () => levelOf(st().xp).lvl, xp: () => st().xp, fichas: () => st().f,
+    /* v0.3.132: gastar fichas de oro (la boutique). La tarjeta no las cuenta hacia arriba: lo gastado ya se ha visto irse */
+    spend(n) { const c = st(); n = Math.max(0, Math.round(n)); if (!(c.f >= n)) return false; c.f -= n; c.fSeen = Math.min(c.fSeen == null ? c.f : c.fSeen, c.f); save(); return true; },
     bonusFor: kind => (kind === "win" ? CFG.bonus.win : kind === "ok" ? CFG.bonus.ok : kind === "duel" ? CFG.bonus.duel : 0),
     tx: TX, tierName: t => P6(RANKS[Math.max(0, Math.min(RANKS.length - 1, t | 0))][0]),
   };

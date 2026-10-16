@@ -81,6 +81,7 @@ window.AIQ = window.AIQ || {};
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     if (A.club) A.club.wire(() => screen("profile"));                      // tu tarjeta de socio: abre el Perfil y cuenta las fichas de oro nuevas
+    if ($("bqBtn")) $("bqBtn").onclick = () => { A.sfx.card(); screen("boutique"); };   // v0.3.132: la boutique, bajo la tarjeta de socio
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura
     if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
@@ -432,10 +433,12 @@ window.AIQ = window.AIQ || {};
   };
   const NEAR = () => A.pick6("A punto|Almost there|Presque|Quase lá|Fast geschafft|Quasi fatto||即将达成|거의 다 왔어요|あと少し|Почти|Prawie");
   let pfPage = null;                                                    // pagina abierta del libro (se recuerda mientras dure la sesion)
+  let msPage = 0;                                                       // v0.3.132: pagina de Mesas (de 6 en 6: las 6 de trofeo y luego las de la boutique)
   /* v0.3.62: la pagina "Mesas" del libro (el catalogo, js/skins.js) */
   const MESAS_T = () => A.pick6("Mesas|Tables|Tables|Mesas|Tische|Tavoli||牌桌|테이블|テーブル|Столы|Stoły");
   const MESAS_TX = {
-    eyb: "Se ganan en la mesa|Won at the table|Elles se gagnent à la table|Ganham-se na mesa|Am Tisch verdient|Si vincono al tavolo||在牌桌上赢来|테이블에서 따내는 것|テーブルで勝ち取る|Выигрываются за столом|Wygrywa się je przy stole",
+    eyb: "Se ganan en la mesa o en la boutique|Won at the table or in the boutique|À gagner à la table ou à la boutique|Ganham-se na mesa ou na boutique|Am Tisch verdient oder in der Boutique|Si vincono al tavolo o in boutique||在牌桌上赢来，或在精品店购得|테이블에서 따내거나 부티크에서|テーブルで勝ち取るか、ブティックで|Выигрываются за столом или в бутике|Wygrywane przy stole albo w butiku",
+    shop: "Boutique|Boutique|Boutique|Boutique|Boutique|Boutique||精品店|부티크|ブティック|Бутик|Butik",
     on: "En uso|In use|Utilisée|Em uso|Im Einsatz|In uso||使用中|사용 중|使用中|Выбран|W użyciu",
     use: "Usar|Use|Utiliser|Usar|Benutzen|Usa||使用|사용|使う|Выбрать|Użyj",
     lk: "Cerrada|Locked|Fermée|Fechada|Gesperrt|Chiuso||未解锁|잠김|未解放|Закрыт|Zamknięty",
@@ -477,12 +480,14 @@ window.AIQ = window.AIQ || {};
     const mesasPage = () => {
       const M = A.mesas, cur = M.current(), n = M.count(), tot = M.list.length, tx = k => esc(A.pick6(MESAS_TX[k]));
       const card = m => {
-        const own = M.owned(m.id), on = m.id === cur;
-        return `<button type="button" class="ms-card${on ? " on" : own ? " got" : " lk"}" data-mesa="${m.id}"${own ? "" : ' aria-disabled="true"'}${on ? ' aria-pressed="true"' : ""}><span class="ms-th"><img src="assets/mesas/${m.id}.webp" alt="" width="640" height="360" decoding="async"><em class="ms-st">${tx(on ? "on" : own ? "use" : "lk")}</em></span>
+        const own = M.owned(m.id), on = m.id === cur, shop = !own && !!m.shop;
+        return `<button type="button" class="ms-card${on ? " on" : own ? " got" : shop ? " lk shop" : " lk"}" data-mesa="${m.id}"${own || shop ? "" : ' aria-disabled="true"'}${on ? ' aria-pressed="true"' : ""}><span class="ms-th"><img src="assets/mesas/${m.id}.webp" alt="" width="640" height="360" decoding="async"><em class="ms-st">${tx(on ? "on" : own ? "use" : shop ? "shop" : "lk")}</em></span>
           <span class="ms-tx"><b>${esc(M.name(m.id))}</b><i>${esc(own ? M.desc(m.id) : M.how(m.id))}</i></span></button>`;
       };
-      return `<header class="pf-bh"><span class="pf-bic">${A.icon("chip_g")}</span><span class="pf-bt"><span class="gx-eyb">${tx("eyb")}</span><h3 class="gx-t-m">${MESAS_T()}</h3></span><span class="pf-bc"><b>${n}<i> / ${tot}</i></b><span class="gx-bar"><i style="width:${pct(n, tot)}%"></i></span></span></header>
-        <div class="gx-hr"></div><div class="ms-grid" id="msGrid">${M.list.map(card).join("")}</div><p class="ms-note">${tx("note")}</p>`;
+      const PERM = 6, pages = Math.max(1, Math.ceil(M.list.length / PERM)); msPage = Math.max(0, Math.min(msPage, pages - 1));
+      const pager = pages > 1 ? `<span class="ms-pg"><button type="button" class="gx-btn sm gho" data-msp="-1"${msPage ? "" : " disabled"} aria-label="‹">‹</button><i>${msPage + 1} / ${pages}</i><button type="button" class="gx-btn sm gho" data-msp="1"${msPage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></span>` : "";
+      return `<header class="pf-bh ms-bh"><span class="pf-bic">${A.icon("chip_g")}</span><span class="pf-bt"><span class="gx-eyb">${tx("eyb")}</span><h3 class="gx-t-m">${MESAS_T()}</h3></span>${pager}<span class="pf-bc"><b>${n}<i> / ${tot}</i></b><span class="gx-bar"><i style="width:${pct(n, tot)}%"></i></span></span></header>
+        <div class="gx-hr"></div><div class="ms-grid" id="msGrid">${M.list.slice(msPage * PERM, msPage * PERM + PERM).map(card).join("")}</div><p class="ms-note">${tx("note")}</p>`;
     };
     const book = () => {
       if (pfPage === "mesas") return mesasPage();
@@ -521,7 +526,10 @@ window.AIQ = window.AIQ || {};
     };
     /* elegir mesa: las tuyas se ponen al pulsarlas (el mapa de detras cambia al momento); las cerradas no hacen nada */
     $("pfBook").onclick = e => {
+      const pg = e.target.closest("[data-msp]");
+      if (pg) { if (pg.disabled) return; msPage += +pg.dataset.msp; A.sfx.card(); $("pfBook").innerHTML = v.book(); const b = $("pfBook").querySelector(`[data-msp="${pg.dataset.msp}"]:not([disabled])`) || $("pfBook").querySelector("[data-msp]:not([disabled])"); if (b) b.focus({ preventScroll: true }); return; }
       const c = e.target.closest(".ms-card"); if (!c) return; const id = c.dataset.mesa;
+      if (!A.mesas.owned(id) && A.mesas.get(id).shop && A.boutique) { A.sfx.card(); A.boutique.want(id); screen("boutique"); return; }   // v0.3.132: las de la boutique llevan a ella
       if (!A.mesas.owned(id)) { if (A.sfx.buzz) A.sfx.buzz(0); return; }
       if (id === A.mesas.current() || !A.mesas.use(id)) return;
       if (A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]);
@@ -534,8 +542,9 @@ window.AIQ = window.AIQ || {};
   function screen(id) {
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
+    if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open() }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
   }
   /* el Reto diario de hoy tal cual, sin cerrar nada (precalentamiento de la puerta): sin ids, es una copia */

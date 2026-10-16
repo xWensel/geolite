@@ -1037,6 +1037,18 @@ html[data-skin] body .menu-gear.menu-patch .ic { width: 30px; height: 30px; }
 .ms-card.on .ms-st { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
 .ms-card.lk .ms-st { color: var(--gx-paper-lo); background: var(--gx-ink); }
 .ms-note { margin: 10px 2px 0; font-size: 18px; line-height: 1.15; color: var(--gx-ink-2); }
+/* v0.3.132: con las de la boutique ya no caben todas: de 6 en 6, con las paginas en la cabecera; las de la boutique que no tienes, en gris
+   como las cerradas pero con su etiqueta de laton (llevan a la boutique) */
+.pf-bh.ms-bh { grid-template-columns: 48px minmax(0, 1fr) auto 200px; }
+.ms-pg { display: inline-flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; color: var(--gx-ink-2); }
+.ms-pg i { font-style: normal; font-variant-numeric: tabular-nums; }
+.ms-pg .gx-btn { min-width: 56px; font-size: 26px; }
+.ms-pg .gx-btn[disabled] { opacity: .35; pointer-events: none; }
+.ms-card.lk.shop { cursor: pointer; }
+.ms-card.lk.shop:hover, .ms-card.lk.shop.pad-hov { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.ms-card.lk.shop .ms-th img { filter: grayscale(.85) brightness(.7) contrast(.95); }
+.ms-card.lk.shop .ms-st { color: var(--gx-ink); background: var(--gx-gold); }
+@media (max-width: 899px), (max-height: 519px) { .pf-bh.ms-bh { grid-template-columns: 40px minmax(0, 1fr); } .ms-pg { grid-column: 1 / -1; justify-self: start; } }
 @media (max-width: 899px), (max-height: 519px) { .ms-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* el estreno. La portada se aparta (y vuelve) con un fundido, y con ella la luz de la sala, que vive dentro de #layer: la mesa se ve entera.

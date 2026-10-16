@@ -64,8 +64,8 @@ ${ORI}`;
 layout(location=0) in vec2 a_pos; layout(location=1) in float a_ci; layout(location=2) in float a_ct;
 uniform vec2 u_center; uniform float u_scale; uniform vec2 u_res; uniform vec2 u_off;
 ${DISTORT}
-flat out float v_ci;
-void main(){ vec2 p=orp((xf(a_pos,a_ct)-u_center)*u_scale)+u_off; gl_Position=vec4(p/(0.5*u_res),0.0,1.0); v_ci=a_ci; }`;
+flat out float v_ci; out vec2 v_w;
+void main(){ vec2 p=orp((xf(a_pos,a_ct)-u_center)*u_scale)+u_off; gl_Position=vec4(p/(0.5*u_res),0.0,1.0); v_ci=a_ci; v_w=a_pos; }`;
 
   const FS_SIL = `#version 300 es
 precision mediump float; out vec4 o; void main(){ o=vec4(1.0); }`;
@@ -73,7 +73,9 @@ precision mediump float; out vec4 o; void main(){ o=vec4(1.0); }`;
 precision mediump float; uniform vec4 u_col; out vec4 o; void main(){ o=u_col; }`;
 
   const NOISE = `
-float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }`;
+float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f); return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y); }
+float fbm(vec2 p){ float s=0.0, a=0.5; for(int i=0;i<4;i++){ s+=a*vn(p); p=p*2.03+vec2(17.1,9.7); a*=0.5; } return s/0.9375; }`;
 
   /* tierra: color de paleta + sombreado de litoral + tratamiento propio de cada skin */
   const FS_LAND = `#version 300 es
@@ -81,6 +83,7 @@ precision highp float;
 flat in float v_ci;
 uniform vec3 u_pal[8]; uniform vec2 u_res; uniform sampler2D u_blurN; uniform vec4 u_fx; uniform int u_style; uniform float u_dpr;
 uniform float u_flat; uniform vec3 u_flatc; uniform vec3 u_lens;   // mapa mudo: todos los paises del mismo color (salvo dentro de la lupa)
+in vec2 v_w; uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform float u_scale;
 out vec4 o;
 ${NOISE}
 void main(){
@@ -92,6 +95,16 @@ void main(){
   c*=mix(1.0-u_fx.x,1.0,ao);
   if(u_style>=1){                                   // casino y mesas de pano: cara de carta con brillo suave
     c*=1.0+0.05*uv.y; c=mix(c,vec3(1.0),0.05*smoothstep(0.6,1.0,n));
+  }
+  if(u_mat>0){                                      // materiales de las mesas: la textura de las piezas va pegada al mapa (se mueve con el)
+    vec2 P=floor(v_w*u_scale/(u_dpr*2.0));
+    if(u_mat==1){ float g=sin(P.y*0.9+fbm(P*vec2(0.02,0.08))*9.0); c*=1.0-0.035*step(0.6,g); }
+    else if(u_mat==3){ float h=step(0.5,fract((P.x+P.y)/4.0)); c=mix(u_mc2,c,0.78+0.1*h+0.05*(hash(P)-0.5)); }
+    else if(u_mat==4){ float rim=1.0-smoothstep(0.5,0.86,n); rim=floor(rim*4.0+0.5)/4.0; c=mix(c,u_mc1,rim*0.6); }
+    else if(u_mat==5){ float st=fbm(P*0.012); c*=0.98+0.03*floor(st*3.0)/2.0; }
+    else if(u_mat==8){ float h=step(0.75,fract((P.x-P.y)/4.0)); c=mix(c,u_mc1,h*0.18); }
+    else if(u_mat==16){ float h=step(0.5,fract((P.x+P.y)/3.0)); c=mix(vec3(1.0),c,0.72+0.2*h); }
+    else if(u_mat==22){ float rim=1.0-smoothstep(0.5,0.78,n); c*=(1.0-0.14*floor(rim*3.0)/3.0)*(0.97+0.05*floor(fbm(P*0.01)*3.0)/2.0); }
   }
   c+=(hash(f)-0.5)*u_fx.y;
   o=vec4(c,1.0);
@@ -125,7 +138,13 @@ void main(){
 }`;
   const FS_LINE = `#version 300 es
 precision highp float; in float v_d; in float v_hw; in float v_brd; uniform vec4 u_col; uniform float u_lineA; uniform vec3 u_lens; uniform float u_lmode; out vec4 o;
-void main(){ float a=clamp(v_hw-abs(v_d)+0.5,0.0,1.0); float m=1.0; if(u_lmode>0.5){ float inl=1.0-smoothstep(u_lens.z-6.0,u_lens.z,length(gl_FragCoord.xy-u_lens.xy)); m=u_lmode<1.5?1.0-inl:inl; } o=vec4(u_col.rgb,u_col.a*a*mix(1.0,u_lineA,v_brd)*m); }`;   // Mapa mudo: solo desaparecen las fronteras interiores (a_brd=1); las costas siempre se ven
+uniform vec4 u_ccol; uniform float u_lmat; uniform float u_ldpr;
+${NOISE}
+void main(){ float a=clamp(v_hw-abs(v_d)+0.5,0.0,1.0); float m=1.0; if(u_lmode>0.5){ float inl=1.0-smoothstep(u_lens.z-6.0,u_lens.z,length(gl_FragCoord.xy-u_lens.xy)); m=u_lmode<1.5?1.0-inl:inl; }
+  vec3 lc=(u_ccol.a>0.0&&v_brd<0.5)?u_ccol.rgb:u_col.rgb; float la=u_col.a;
+  if(u_lmat>0.5&&u_lmat<1.5) la*=0.6+0.4*hash(floor(gl_FragCoord.xy/max(u_ldpr,1.0)));            // tiza
+  else if(u_lmat>1.5) lc=mix(lc,vec3(1.0),0.6*clamp(1.0-abs(v_d)/max(v_hw*0.5,0.5),0.0,1.0));     // neon: alma blanca
+  o=vec4(lc,la*a*mix(1.0,u_lineA,v_brd)*m); }`;   // Mapa mudo: solo desaparecen las fronteras interiores (a_brd=1); las costas siempre se ven
 
   const VS_FULL = `#version 300 es
 void main(){ vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2)); gl_Position=vec4(p*2.0-1.0,0.0,1.0); }`;
@@ -146,11 +165,213 @@ uniform sampler2D u_blurN; uniform sampler2D u_blurW; uniform sampler2D u_swirl;
 uniform vec3 u_oTop; uniform vec3 u_oBot; uniform vec3 u_shallow; uniform vec3 u_grid; uniform vec3 u_tropic;
 uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3; uniform float u_calm; uniform vec4 u_felt;
 uniform vec4 u_gp; // stepA, stepB, tB, gridAlpha
+uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform sampler2D u_blurX;
 out vec4 o;
 const float D2R=0.017453292519943295;
 ${NOISE}
 ${ORI}
 float lineAlpha(float dpx){ return clamp(0.5*u_dpr*1.2+0.5-dpx,0.0,1.0); }
+float band(float v){ float fw=fwidth(v)+1e-4; float d=abs(fract(v+0.5)-0.5); return 1.0-smoothstep(fw*0.5,fw*1.5,d); }
+float rumbo(vec2 wp, vec2 C){                                    // rosa de los vientos: 16 rumbos desde C (coordenadas del mundo)
+  vec2 v=wp-C; v.x=mod(v.x+3.14159265,6.2831853)-3.14159265; float Lw=length(v); v*=u_scale;
+  float a=atan(v.y,v.x), stp=6.2831853/16.0, da=mod(a+stp*0.5,stp)-stp*0.5, k=floor(mod((a+stp*0.5)/stp,16.0));
+  return lineAlpha(abs(sin(da))*length(v))*(0.45+0.55*(1.0-mod(k,2.0)))*smoothstep(0.04,0.1,Lw)*(1.0-smoothstep(1.6,2.4,Lw));
+}
+vec3 mesa(vec3 b, vec2 q, vec2 frag, vec2 wp, float n, float w, float x){
+  if(u_mat==1){                                                  // madera: tablas con veta (u_mp = alto de tabla, largo, contraste)
+    float H=u_mp.x, row=floor(q.y/H), yy=q.y-row*H, jx=q.x+hash(vec2(row,3.7))*977.0, col=floor(jx/u_mp.y), xx=jx-col*u_mp.y, k=hash(vec2(row,col));
+    float fig=sin(q.y*0.55+k*20.0+fbm(vec2(jx*0.012,row*3.1+k*9.0))*9.0+fbm(vec2(jx*0.05,q.y*0.2))*1.4)*0.5+0.5;
+    vec3 c=b*(0.9+0.18*k)*(1.0+u_mp.z*(floor(fig*3.0)/2.0-0.5));
+    c=mix(c,u_mc1,step(0.9,fig)*0.45);
+    c=mix(c,u_mc1,clamp(step(yy,0.5)+step(xx,0.5),0.0,1.0)*0.9);
+    c=mix(c,u_mc2,step(H-1.5,yy)*0.35);
+    return c;
+  }
+  if(u_mat==2){                                                  // marmol: nube + vetas (u_mp.x = escala)
+    vec2 p=q*u_mp.x; float cl=fbm(p*0.5);
+    float t=p.x*0.42+p.y*0.26+fbm(p*0.35+vec2(fbm(p*0.5)*1.5,fbm(p*0.5+5.2)*1.5))*4.2;
+    float sv=abs(sin(t)), wv=fbm(p*0.9+3.0);                                                  // la veta se adelgaza y se corta a trozos
+    float v1=(1.0-step(0.025+0.035*wv,sv))*step(0.38,wv), v2=1.0-step(0.1,sv);
+    float t2=p.x*0.18-p.y*0.62+fbm(p*0.7+11.0)*6.0; float v3=(1.0-step(0.022,abs(sin(t2))))*step(0.5,fbm(p*0.6+21.0));
+    vec3 c=b*(0.97+0.05*floor(cl*3.0)/2.0);
+    c=mix(c,u_mc2,v2*0.12*u_mp.y*u_mp.z); c=mix(c,u_mc1,max(v1*0.8,v3*0.4)*u_mp.z);            // u_mp.z = vetas (0: mar limpio)
+    vec2 uv=frag/u_res; float sh=exp(-pow((uv.y-0.6+0.3*(uv.x-0.5))*2.4,2.0));
+    return c*(1.0+0.07*floor(sh*3.0)/2.0);
+  }
+  if(u_mat==3){                                                  // pizarra: borrones de tiza
+    float sm=fbm(q*vec2(0.012,0.04)+vec2(0.0,fbm(q*0.008)*3.0));
+    vec3 c=mix(b,u_mc1,floor(sm*4.0)/4.0*u_mp.x);
+    return c*(1.0+0.02*(hash(q)-0.5));
+  }
+  if(u_mat==4){                                                  // neon: halo de costa a bandas
+    float h=smoothstep(0.0,0.5,n)*0.75+smoothstep(0.0,0.3,w)*0.25, fl=1.0;
+    if(u_mp.y>0.0){ float ft=floor(u_time*14.0); fl=1.0-u_mp.y*0.65*step(0.94,hash(vec2(ft,7.7))); h*=0.7+0.3*step(0.5,fract(h*3.0-u_time*0.7)); }
+    return b+u_mc1*floor(h*5.0)/5.0*u_mp.x*fl;
+  }
+  if(u_mat==5){                                                  // carta nautica: pergamino, isobatas y rumbos
+    float st=fbm(q*0.015), st2=fbm(q*0.04+3.0);
+    vec3 c=b*(0.97+0.05*floor(st*3.0)/2.0);
+    c=mix(c,u_mc2,step(0.68,st2)*0.1);
+    float d=max(x*1.5,w); float iso=band(d*u_mp.x)*smoothstep(0.015,0.05,d)*(1.0-step(0.48,n));
+    float rh=max(rumbo(wp,vec2(-0.61,0.445)),max(rumbo(wp,vec2(1.31,-0.266)),rumbo(wp,vec2(-2.62,0.055))));
+    c=mix(c,u_mc2,floor(smoothstep(0.0,0.35,d)*3.0)/3.0*0.14);
+    return mix(c,u_mc1,max(iso*0.5*u_mp.y,rh*0.42*u_mp.z));                                    // u_mp.y/z = isobatas y rumbos (0: mar limpio)
+  }
+  if(u_mat==6){                                                  // fondo marino: bandas de profundidad
+    float d=clamp(max(x*1.5,w)*u_mp.x,0.0,1.0), lev=floor(d*5.0)/5.0;
+    vec3 c=mix(b,u_mc1,lev);
+    return mix(c,u_mc2,band(d*5.0)*step(0.12,d)*0.35*u_mp.y);
+  }
+  if(u_mat==7){                                                  // terciopelo: pelo aplastado en vetas largas, brillo a bandas
+    vec2 p=q*u_mp.x*vec2(0.55,1.3); float s=fbm(p+vec2(fbm(p*0.6)*1.6,fbm(p*0.6+7.0)*0.6));
+    float lev=floor(clamp((s-0.25)*1.9,0.0,1.0)*4.0)/3.0;
+    vec2 uv=frag/u_res; float sh=exp(-pow((uv.y-0.62+0.25*(uv.x-0.5))*2.6,2.0));
+    return mix(b*0.78,u_mc1,lev*(0.25+0.45*sh));
+  }
+  if(u_mat==8){                                                  // cianotipo: plano con rejilla fina
+    float m=fbm(q*0.016); vec3 c=b*(0.94+0.08*floor(m*3.0)/2.0);
+    vec2 g=mod(floor(frag/u_dpr),10.0), G=mod(floor(frag/u_dpr),50.0);
+    float fine=clamp((1.0-step(0.5,g.x))+(1.0-step(0.5,g.y)),0.0,1.0), maj=clamp((1.0-step(0.5,G.x))+(1.0-step(0.5,G.y)),0.0,1.0);
+    return mix(c,u_mc1,fine*0.07+maj*0.1);
+  }
+  if(u_mat==9){                                                  // laton cepillado en planchas con remaches (u_mp.x = lado de plancha)
+    vec2 uv=frag/u_res; float sh=exp(-pow((uv.y-0.58+0.35*(uv.x-0.5))*2.2,2.0));          // brillo ancho del metal, en diagonal
+    float s=hash(vec2(floor(q.x/37.0),q.y))*0.5+vn(vec2(q.x*0.006,q.y*1.0+3.0))*0.5;        // cepillado: rayas de un pixel de alto
+    vec3 c=b*(0.82+0.34*floor(sh*4.0)/3.0)*(0.96+0.06*s);
+    vec2 cell=mod(q,u_mp.x), cq=abs(cell-u_mp.x*0.5);
+    c=mix(c,u_mc1,clamp((1.0-step(1.0,cell.x))+(1.0-step(1.0,cell.y)),0.0,1.0)*0.8);                 // junta de las planchas
+    c=mix(c,u_mc2,clamp(step(1.0,cell.x)*(1.0-step(2.0,cell.x))+step(1.0,cell.y)*(1.0-step(2.0,cell.y)),0.0,1.0)*0.45);
+    vec2 rq=cq-vec2(u_mp.x*0.5-6.0); float rv=length(rq);                                      // remaches en las esquinas
+    c=mix(c,u_mc1,(1.0-step(2.6,rv))*0.8); c=mix(c,u_mc2,(1.0-step(1.2,length(rq-vec2(0.7,0.7))))*0.9);
+    return c;
+  }
+  if(u_mat==10){                                                 // hielo: placas con grietas (u_mp.x = tamano de placa)
+    vec2 p=q*u_mp.x, ip=floor(p), fp=fract(p); float d1=8.0, d2=8.0;
+    for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(float(i),float(j)); vec2 o=vec2(hash(ip+g),hash(ip+g+31.7))*0.85+0.075; float d=length(g+o-fp); if(d<d1){ d2=d1; d1=d; } else if(d<d2) d2=d; }
+    vec2 io=ip; float best=8.0;
+    for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(float(i),float(j)); vec2 o=vec2(hash(ip+g),hash(ip+g+31.7))*0.85+0.075; float d=length(g+o-fp); if(d<best){ best=d; io=ip+g; } }
+    vec3 c=b*(0.96+0.06*floor(fbm(q*0.015)*3.0)/2.0);
+    c=mix(c,u_mc2,floor(hash(io)*3.0)/2.0*0.18*u_mp.z);                                    // cada placa con su tono
+    float e=d2-d1, k=hash(io+7.3);
+    float crack=(1.0-step(u_mp.x*(0.6+0.9*k),e))*step(0.35,k);                             // no todas las juntas se ven
+    c=mix(c,u_mc1,crack*0.42*u_mp.y);
+    return mix(c,u_mc1,(1.0-smoothstep(0.0,0.5,1.0-smoothstep(0.0,0.45,n)))*0.0+smoothstep(0.05,0.45,n)*0.28);   // escarcha junto a la costa
+  }
+  if(u_mat==11){                                                 // moqueta del casino: rombos y florones (u_mp.x = lado de la baldosa)
+    float T=u_mp.x; vec2 cid=floor(q/T), t=mod(q,T)-T*0.5+0.5; float d=abs(t.x)+abs(t.y);
+    vec3 c=b*(1.0-0.06*mod(cid.x+cid.y,2.0));
+    c=mix(c,u_mc2,(step(T*0.44,d)*(1.0-step(T*0.44+1.0,d)))*0.55);                            // filete del rombo
+    c=mix(c,u_mc1,(1.0-step(T*0.16,d))*0.6);                                                 // rombo de dentro
+    c=mix(c,u_mc2,(1.0-step(T*0.06,d))*0.8);
+    vec2 a=abs(t); float pet=(1.0-step(1.5,min(a.x,a.y)))*step(T*0.22,max(a.x,a.y))*(1.0-step(T*0.34,max(a.x,a.y)));   // cruz de petalos
+    c=mix(c,u_mc1,pet*0.45);
+    float cor=1.0-step(2.2,length(a-vec2(T*0.5-0.5)));                                       // botones en las esquinas
+    return mix(c,u_mc2,cor*0.7);
+  }
+  if(u_mat==12||u_mat==13){                                      // kintsugi (oro) y volcan (lava): u_mp.x = escala de las placas
+    vec2 p=q*u_mp.x; vec2 wq=p+vec2(fbm(p*0.8),fbm(p*0.8+4.1))*0.85;
+    vec2 ip=floor(wq), fp=fract(wq); float d1=8.0, d2=8.0; vec2 c1=ip, c2=ip;
+    for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(float(i),float(j)); vec2 o=vec2(hash(ip+g),hash(ip+g+31.7))*0.8+0.1; float d=length(g+o-fp);
+      if(d<d1){ d2=d1; c2=c1; d1=d; c1=ip+g; } else if(d<d2){ d2=d; c2=ip+g; } }
+    float e=d2-d1, k=hash(c1+c2+0.37), keep=step(0.3,k);                                     // cada junta, su grosor; algunas no se abren
+    float core=(1.0-step(u_mp.x*(0.9+1.3*k),e))*keep;
+    vec3 c=b*(0.93+0.09*floor(fbm(q*0.012)*3.0)/2.0);
+    if(u_mat==12){
+      float run=fract((q.x*0.7+q.y)*0.0016-u_time*u_mp.y);                                     // el brillo que recorre el oro
+      float glint=(1.0-smoothstep(0.0,0.035,abs(run-0.5)))*step(0.001,u_mp.y);
+      c*=1.0-(1.0-step(u_mp.x*(2.6+1.3*k),e))*keep*(1.0-core)*0.35;                            // la loza se hunde junto a la grieta
+      return mix(c,mix(u_mc1,u_mc2,max(glint,step(0.75,hash(floor(q/2.0)))*0.35)),core);
+    }
+    float hot=(1.0-smoothstep(0.0,u_mp.x*9.0,e))*keep;
+    float pulse=0.72+0.28*sin(u_time*u_mp.y+hash(c1+c2)*6.2832);                              // cada grieta respira a su ritmo
+    c=mix(c,u_mc1,floor(hot*4.0)/4.0*0.85*pulse);
+    return mix(c,u_mc2,core*(0.55+0.45*pulse));
+  }
+  if(u_mat==14){                                                 // laca y brasas: u_mp = (fuerza del halo, respiracion, barrido de luz, px)
+    float h=smoothstep(0.0,0.5,n)*0.7+smoothstep(0.0,0.32,w)*0.3;
+    float pulse=1.0-u_mp.y*0.5*(1.0-sin(u_time*1.1+sin(u_time*0.37)*1.7));
+    vec3 c=b*(0.95+0.06*floor(fbm(q*0.01)*3.0)/2.0);
+    c=mix(c,u_mc1,floor(h*4.0)/4.0*u_mp.x*pulse);
+    c=mix(c,u_mc2,floor(smoothstep(0.55,1.0,h)*2.0)/2.0*u_mp.x*0.6*pulse);
+    float run=fract((frag.x*0.6+frag.y)/(u_res.x+u_res.y)-u_time*0.045);                        // el reflejo cruza la mesa despacio
+    float sw=exp(-pow((run-0.5)*14.0,2.0));
+    return c+u_mc2*floor(sw*4.0)/4.0*u_mp.z;
+  }
+  if(u_mat==15){                                                 // azulejo: baldosas con su dibujo (u_mp.x = lado)
+    float T=u_mp.x; vec2 cid=floor(q/T), t=mod(q,T)-T*0.5+0.5, a=abs(t); float mx=max(a.x,a.y), d=a.x+a.y;
+    vec3 c=b*(0.97+0.05*hash(cid));
+    float ring=step(T*0.36,mx)*(1.0-step(T*0.36+1.0,mx));
+    float rombo=(1.0-step(T*0.24,d))*step(T*0.14,d), punto=1.0-step(T*0.06,d), flor=1.0-step(T*0.13,length(a-vec2(T*0.5)));
+    c=mix(c,u_mc1,max(max(ring,rombo),max(punto,flor))*0.85);
+    return mix(c,u_mc2,step(T*0.5-1.0,mx)*0.6);
+  }
+  if(u_mat==16){                                                 // cuaderno: papel cuadriculado y margen rojo (u_mp.x = cuadro, u_mp.y = margen, en px)
+    vec2 px=floor(frag/u_dpr), g=mod(px,u_mp.x); float sq=clamp((1.0-step(0.5,g.x))+(1.0-step(0.5,g.y)),0.0,1.0);
+    float W=floor(u_res.x/u_dpr), mg=step(u_mp.y,px.x)*(1.0-step(u_mp.y+2.0,px.x));
+    return mix(mix(b,u_mc1,sq*0.4),u_mc2,mg*0.75);
+  }
+  if(u_mat==18){                                                 // ajedrez: casillas de dos maderas (u_mp.x = casilla)
+    float S=u_mp.x; vec2 cid=floor(q/S), t=mod(q,S); float k=mod(cid.x+cid.y,2.0);
+    vec2 qq=k>0.5?q.yx:q; float fig=sin(qq.y*0.5+fbm(vec2(qq.x*0.02,qq.y*0.06)+cid*3.1)*6.0)*0.5+0.5;
+    vec3 c=mix(b,u_mc1,k)*(0.95+0.07*floor(fig*3.0)/2.0);
+    return mix(c,u_mc2,clamp((1.0-step(1.0,t.x))+(1.0-step(1.0,t.y)),0.0,1.0)*0.5);
+  }
+  if(u_mat==19){                                                 // despacho: cuero con greca dorada junto al borde (u_mp.x = margen de la greca, px)
+    vec3 c=b*(0.93+0.1*floor(fbm(q*0.012)*4.0)/3.0);
+    vec2 px=floor(frag/u_dpr), R=floor(u_res/u_dpr), e=min(px,R-1.0-px); float de=min(e.x,e.y), m=u_mp.x;
+    float f1=step(m,de)*(1.0-step(m+2.0,de)), f2=step(m+6.0,de)*(1.0-step(m+7.0,de));
+    float corner=1.0-step(4.0,max(abs(e.x-m-3.0),abs(e.y-m-3.0)));
+    c=mix(c,b*0.7,(1.0-step(m,de))*0.45);
+    return mix(c,u_mc1,max(max(f1,f2*0.8),corner));
+  }
+  if(u_mat==20){                                                 // jade: piedra translucida con nubes y su reflejo
+    vec2 p=q*u_mp.x; float s=fbm(p+vec2(fbm(p*0.5)*1.2,fbm(p*0.5+3.0)*1.2));
+    vec3 c=mix(b,u_mc1,floor(clamp((s-0.3)*1.8,0.0,1.0)*5.0)/4.0*0.3);
+    vec2 uv=frag/u_res; float sh=exp(-pow((uv.y-0.62+0.3*(uv.x-0.5))*2.2,2.0));
+    return c+u_mc2*floor(sh*3.0)/2.0*0.07;
+  }
+  if(u_mat==21){                                                 // seda: pliegues anchos con brillo de raso (u_mp.x = pliegues)
+    vec2 uv=frag/u_res; float t=(uv.x*0.8+uv.y*1.3)*u_mp.x+fbm(q*0.004)*1.4;
+    float f=0.5+0.5*sin(t);
+    return mix(b*0.86,u_mc1,floor(pow(f,1.6)*8.0)/7.0*0.5);
+  }
+  if(u_mat==22){                                                 // acuarela: aguadas y el pigmento que se junta en la orilla
+    float s=fbm(q*0.006+vec2(fbm(q*0.01)*1.5));
+    vec3 c=mix(b,u_mc1,floor(s*4.0)/3.0*0.42);
+    float rim=smoothstep(0.2,0.48,n)*(1.0-step(0.5,n));
+    return mix(c,u_mc1*0.85,floor(rim*3.0)/3.0*0.4);
+  }
+  if(u_mat==23){                                                 // aurora: cortinas de luz que se mecen (u_mp.x = velocidad)
+    vec2 uv=frag/u_res; float t=u_time*u_mp.x;
+    float y0=0.6+0.09*sin(uv.x*5.0+t*0.5)+0.07*(fbm(vec2(uv.x*3.0,t*0.15))-0.5);
+    float above=uv.y-y0, a=smoothstep(-0.015,0.0,above)*exp(-max(above,0.0)*7.0);
+    a*=0.55+0.45*fbm(vec2(uv.x*9.0+t*0.2,t*0.1));
+    vec3 col=mix(u_mc1,u_mc2,smoothstep(0.0,0.22,above));
+    return b+col*floor(a*6.0)/5.0*0.8;
+  }
+  if(u_mat==24){                                                 // tesoro: oro fundido que se mueve despacio (u_mp.x = escala, u_mp.y = velocidad)
+    float t=u_time*u_mp.y; vec2 p=q*u_mp.x;
+    float s=fbm(p+vec2(t*0.3,t*0.2)+vec2(fbm(p*0.7-t*0.15)*1.3));
+    vec2 uv=frag/u_res; float sh=exp(-pow((uv.y-0.6+0.3*(uv.x-0.5))*2.0,2.0));
+    return mix(u_mc1,u_mc2,0.2+0.62*floor(clamp(s*0.7+sh*0.35,0.0,1.0)*8.0)/7.0);
+  }
+  if(u_mat==25){                                                 // recreativa: olas de 8 bits con ciclo de color hacia la costa
+    float d=clamp(max(x*1.5,w)*u_mp.x,0.0,1.0), k=floor(d*6.0);
+    float tone=floor(fract(k/3.0-u_time*u_mp.y)*3.0)/2.0;
+    vec3 c=mix(b,u_mc1,step(0.01,d)*(0.3+0.5*tone)*(0.35+0.65*d));
+    return mix(c,u_mc2,step(0.9,d)*0.55);
+  }
+  if(u_mat==26){                                                 // tormenta: sombras de nubes que pasan (los relampagos van en el posproceso)
+    float t=u_time*u_mp.y; float s=fbm(q*u_mp.x+vec2(t*0.4,t*0.1));
+    return b*(0.72+0.5*floor(s*4.0)/3.0);
+  }
+  if(u_mat==27){                                                 // nacar: tornasol que cambia despacio (u_mp.z = fuerza del color)
+    vec2 uv=frag/u_res; float s=fbm(q*u_mp.x)+uv.x*0.6+uv.y*0.4+u_time*u_mp.y;
+    float h=floor(fract(s)*12.0)/12.0;
+    return mix(b,0.5+0.5*cos(6.2832*(h+vec3(0.0,0.33,0.67))),u_mp.z);
+  }
+  return b;
+}
 float gridLevel(float stp, vec2 wp, float lonDeg, float latDeg, float pxPerDeg){
   float dl=abs(mod(lonDeg+stp*0.5,stp)-stp*0.5);
   float lonLine=floor(lonDeg/stp+0.5)*stp;
@@ -176,6 +397,7 @@ void main(){
   if(u_style==1){ ocean=mix(texture(u_swirl,uv).rgb,mix(u_sw1,u_sw2,0.5),u_calm*0.45); ocean=mix(ocean,u_shallow,shal*0.55); }   // u_calm: en partida el remolino baja la voz (js/casa.js)
   else if(u_style==2){                                          // v0.3.62, mesa de pano: liso y quieto. u_felt = (pelo, sombra de contacto, luz de costa, lampara)
     ocean=mix(u_oBot,u_oTop,uv.y)+u_felt.w*exp(-r*r*2.4);
+    if(u_mat>0) ocean=mesa(ocean,floor(frag/(u_dpr*max(u_mp.w,1.0))),frag,wp,n,w,texture(u_blurX,uv).r);
     ocean=mix(ocean,u_shallow,shal*u_felt.z);
     ocean*=1.0-u_felt.y*smoothstep(0.02,0.55,n);                 // las piezas apoyan en el pano: sombra de contacto pegada a la costa
     vec2 px=floor(frag/u_dpr);
@@ -231,7 +453,7 @@ void main(){ o=vec4(swirl(gl_FragCoord.xy),1.0); }`;
   const FS_POST = `#version 300 es
 precision highp float;
 uniform sampler2D u_scene; uniform vec2 u_res; uniform vec2 u_zc; uniform float u_zv; uniform vec2 u_pv; uniform float u_vig; uniform float u_grain; uniform vec3 u_tint; uniform float u_time;
-uniform float u_crt; uniform float u_dpr; uniform float u_lite;
+uniform float u_crt; uniform float u_dpr; uniform float u_lite; uniform vec4 u_fx2;
 out vec4 o;
 ${NOISE}
 void main(){
@@ -264,6 +486,30 @@ void main(){
     if(u_lite<0.5){ vec3 bl=vec3(0.0); for(int i=0;i<6;i++){ float a=float(i)*1.0472; bl+=texture(u_scene,suv+vec2(cos(a),sin(a))*3.5*u_dpr/u_res).rgb; } bl/=6.0;
     col+=max(bl-0.72,0.0)*0.4; }                                  // resplandor de fosforo
     }
+  if(u_fx2.x>0.5&&u_fx2.x<1.5){                                 // tele de tubo: blanco y negro azulado, banda que sube, barrido marcado, interferencias
+    float lum=dot(col,vec3(0.299,0.587,0.114)); col=mix(col,vec3(lum)*vec3(0.88,0.96,1.08),u_fx2.z);
+    float roll=fract(uv.y*0.8-u_time*0.06); col*=1.0+0.08*smoothstep(0.0,0.1,roll)*(1.0-smoothstep(0.1,0.32,roll));
+    col*=0.9+0.1*(0.5+0.5*sin(fr.y*3.14159265/(1.5*u_dpr)));
+    float gt=floor(u_time*3.0), gy=hash(vec2(gt,1.7)), on=step(0.8,hash(vec2(gt,4.2)));
+    col+=on*0.07*(1.0-smoothstep(0.0,0.006,abs(uv.y-gy)));
+    col+=(hash(floor(frag/u_dpr)+fract(u_time*7.13)*91.0)-0.5)*u_fx2.y;
+  } else if(u_fx2.x>1.5&&u_fx2.x<2.5){                                        // cine antiguo: sepia, parpadeo del proyector, rayas y motas a 12 fps
+    float lum=dot(col,vec3(0.299,0.587,0.114)); col=mix(col,vec3(lum)*vec3(1.1,0.95,0.74),u_fx2.z);
+    float ft=floor(u_time*12.0);
+    col*=0.93+0.07*hash(vec2(ft,2.3));
+    for(int i=0;i<2;i++){ float sx=hash(vec2(ft*0.37+float(i),5.1)), sc=step(0.55,hash(vec2(ft,float(i)+8.0))); col*=1.0-sc*0.3*(1.0-step(1.0*u_dpr,abs(fr.x-sx*u_res.x))); }
+    vec2 dp=floor(frag/(3.0*u_dpr)); col=mix(col,vec3(0.12,0.09,0.05),step(0.99965,hash(dp+ft*13.1))*0.8);
+    col+=(hash(floor(frag/u_dpr)+fract(u_time*12.0)*37.0)-0.5)*u_fx2.y;
+  }
+  else if(u_fx2.x>2.5&&u_fx2.x<3.5){                            // bolsillo: bloques de 2 px, cuatro verdes y tramado ordenado
+    vec2 bs=vec2(2.0*u_dpr), bi=floor(frag/bs); vec3 s=texture(u_scene,(bi+0.5)*bs/u_res).rgb;
+    vec2 bp=mod(bi,2.0); float th=(bp.y*2.0+bp.x==0.0?0.0:(bp.y*2.0+bp.x==1.0?2.0:(bp.y*2.0+bp.x==2.0?3.0:1.0)))/4.0+0.125;
+    float lev=clamp(floor(dot(s,vec3(0.299,0.587,0.114))*3.0+th),0.0,3.0);
+    col=lev<0.5?vec3(0.06,0.22,0.06):lev<1.5?vec3(0.19,0.38,0.19):lev<2.5?vec3(0.55,0.67,0.06):vec3(0.61,0.74,0.06);
+  } else if(u_fx2.x>3.5){                                        // tormenta: relampagos de vez en cuando (doble golpe) y luz fria
+    float ft=floor(u_time*10.0); float f=max(step(0.975,hash(vec2(ft,3.3))),step(0.975,hash(vec2(ft-1.0,3.3)))*0.55);
+    col=mix(col,col*1.7+vec3(0.12,0.14,0.2),f*u_fx2.y); col*=vec3(0.93,0.97,1.06);
+  }
   vec2 q2=uv-0.5; float v=1.0-u_vig*smoothstep(0.30,0.95,length(q2*vec2(1.05,1.0))+min(abs(zvA)*0.01,0.04));
   col*=v*u_tint;
   col+=(hash(frag+fract(floor(u_time*8.0)*0.137)*61.0)-0.5)*u_grain;   // grano a ~8 fps: cine, no vibracion
@@ -673,6 +919,7 @@ void main(){
         raw: st, oTop: hex(st.oceanTop), oBot: hex(st.oceanBot), shallow: hex(st.shallow), grid: hex(st.grid), tropic: hex(st.tropic),
         sw: (st.swirl || ["#123a3a", "#1c6b5b", "#7a2b3f"]).map(hex),
         pal: st.land.map(hex), line: st.line, hl: hex(st.hl || "#e0492b"),
+        mat: st.mat || 0, mc1: hex(st.mc1 || "#000000"), mc2: hex(st.mc2 || "#000000"), mp: st.mp || [0, 0, 0, 1], ccol: st.coast || [0, 0, 0, 0], lmat: st.lmat || 0,
       };
     }
     setStyle(st) { this.sk = st; this.ms = this._prepStyle(st); if (this.T && this.T.swirl) this.T.swirl.ok = false; this._silKey = null; this.dirty = this.fxDirty = true; }
@@ -1400,6 +1647,7 @@ void main(){
       if (cw - hwx < BX0 - 1e-3) cxs.push(cw + TWO_PI);
       const silW = Math.max(2, Math.round(W / 3)), silH = Math.max(2, Math.round(H / 3));
       const sil = this._target("sil", silW, silH), bA = this._target("bA", silW, silH), bN = this._target("bN", silW, silH), bW = this._target("bW", silW, silH);
+      const bX = st.wide ? this._target("bX", silW, silH) : null;
       const scene = this._target("scene", sw, sh, mos < 0.999 ? gl.NEAREST : gl.LINEAR);
       gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST);
 
@@ -1418,7 +1666,7 @@ void main(){
       }
 
       // 1) silueta de tierra a baja resolucion (solo se repite si la vista o las deformaciones cambian)
-      const e0 = this._eff(), key = [v.cx, v.cy, v.s, silW, silH, ...e0.sh, ...e0.rot, ...e0.sc, ...e0.cen, e0.oa, e0.mx];   // la silueta va girada con el mapa (aguas someras y sombreado de costa en su sitio)
+      const e0 = this._eff(), key = [v.cx, v.cy, v.s, silW, silH, ...e0.sh, ...e0.rot, ...e0.sc, ...e0.cen, e0.oa, e0.mx, !!bX];   // la silueta va girada con el mapa (aguas someras y sombreado de costa en su sitio)
       const same = this._silKey && this._silTex === bW.tex && this._silKey.length === key.length && this._silKey.every((x, i) => x === key[i]);
       if (!same) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, sil.fbo); gl.viewport(0, 0, silW, silH); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
@@ -1434,6 +1682,7 @@ void main(){
       gl.activeTexture(gl.TEXTURE0); gl.uniform1i(P.blur.u.u_tex, 0);
       blur(sil, bA, 1, 0); blur(bA, bN, 0, 1);       // estrecho
       blur(bN, bA, 3.2, 0); blur(bA, bW, 0, 3.2);    // ancho
+      if (bX) { blur(bW, bA, 7, 0); blur(bA, bX, 0, 7); }   // extra ancho: isobatas
       this._silKey = key; this._silTex = bW.tex;
       }
 
@@ -1444,6 +1693,8 @@ void main(){
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.ocean.u.u_blurN, 0);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bW.tex); gl.uniform1i(P.ocean.u.u_blurW, 1);
       if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(P.ocean.u.u_swirl, 2); }
+      gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, (bX || bW).tex); gl.uniform1i(P.ocean.u.u_blurX, 3);
+      gl.uniform1i(P.ocean.u.u_mat, ms.mat); this._u(P.ocean, "u_mc1", ...ms.mc1); this._u(P.ocean, "u_mc2", ...ms.mc2); this._u(P.ocean, "u_mp", ...ms.mp);
       this._u(P.ocean, "u_center", cw, v.cy); this._u(P.ocean, "u_scale", sc); this._u(P.ocean, "u_res", sw, sh); this._u(P.ocean, "u_dpr", dpr * RS); this._setDist(P.ocean);
       this._u(P.ocean, "u_oTop", ...ms.oTop); this._u(P.ocean, "u_oBot", ...ms.oBot); this._u(P.ocean, "u_shallow", ...ms.shallow); this._u(P.ocean, "u_grid", ...ms.grid); this._u(P.ocean, "u_tropic", ...ms.tropic);
       this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(P.ocean, "u_felt", f[0], f[1], f[2], f[3]); }
@@ -1462,6 +1713,7 @@ void main(){
       gl.useProgram(P.land); this._setDist(P.land); this._u(P.land, "u_off", 0, 0);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.land.u.u_blurN, 0);
       gl.uniform1i(P.land.u.u_style, st.style || 0); this._u(P.land, "u_dpr", dpr * RS);
+      gl.uniform1i(P.land.u.u_mat, ms.mat); this._u(P.land, "u_mc1", ...ms.mc1); this._u(P.land, "u_mc2", ...ms.mc2); this._u(P.land, "u_mp", ...ms.mp);
       { const ef = this._eff(), fl = ef.flat != null ? ef.flat : Math.max(0, 1 - ef.lineA), lu = this._lensU(dpr * RS, H, ef); this._u(P.land, "u_flat", fl); this._u(P.land, "u_flatc", ...ms.pal[0]); this._u(P.land, "u_lens", lu[0], lu[1], lu[2]); }
       this._u(P.land, "u_scale", sc); this._u(P.land, "u_res", sw, sh); this._u(P.land, "u_fx", st.ao, st.grain, 0, 0);
       if (this._palFor !== ms) { this._palFor = ms; this._pal = new Float32Array(24); ms.pal.forEach((c, i) => this._pal.set(c, i * 3)); } gl.uniform3fv(P.land.u.u_pal, this._pal);
@@ -1495,6 +1747,7 @@ void main(){
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount);
       }
       this._u(P.line, "u_width", lw); this._u(P.line, "u_off", 0, 0); this._u(P.line, "u_col", st.line[0], st.line[1], st.line[2], st.line[3] * lcov);
+      this._u(P.line, "u_ccol", ...ms.ccol); this._u(P.line, "u_lmat", ms.lmat); this._u(P.line, "u_ldpr", dpr * RS * 2);
       const lensOn = this.lens && this.lens.r > 0 && this.dist.spec && (this._eff().wob > 0.002 || this._eff().lineA < 0.98);
       if (lensOn) {                                                     // fuera de la lupa: fronteras deformadas; dentro: las verdaderas
         const [lx, ly] = this._crt(this.lens.x, this.lens.y), k = dpr * RS, e = this._eff();
@@ -1503,6 +1756,7 @@ void main(){
         this._u(P.line, "u_wob", 0); this._u(P.line, "u_lineA", 1); this._u(P.line, "u_lmode", 2); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount);
         this._u(P.line, "u_lmode", 0); this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_lineA", e.lineA);
       } else { this._u(P.line, "u_lmode", 0); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount); }
+      this._u(P.line, "u_ccol", 0, 0, 0, 0); this._u(P.line, "u_lmat", 0);
       if (hl && hl.gl.sn) {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, hl.gl.s0 * 16);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, hl.gl.s0);
@@ -1524,6 +1778,7 @@ void main(){
       this._u(P.post, "u_res", this.cv.width, this.cv.height); this._u(P.post, "u_zc", zc[0] * dpr, (H - zc[1]) * dpr);
       const fxk = this.blurOn === false ? 0 : 1;
       this._u(P.post, "u_zv", this.zv * fxk); this._u(P.post, "u_pv", this.pv[0] * dpr * 0.06 * fxk, -this.pv[1] * dpr * 0.06 * fxk);
+      this._u(P.post, "u_fx2", ...(st.fx2 || [0, 0, 0, 0]));
       this._u(P.post, "u_crt", st.crt ? 1 : 0); this._u(P.post, "u_lite", this.lite ? 1 : 0); this._u(P.post, "u_dpr", dpr);
       this._u(P.post, "u_vig", st.vignette * (this.vigK == null ? 1 : this.vigK)); this._u(P.post, "u_grain", st.postGrain); this._u(P.post, "u_tint", ...st.tint); this._u(P.post, "u_time", now / 1000);   // vigK: con la luz de la sala (js/casa.js) la vineta del mapa pesa la mitad
       gl.drawArrays(gl.TRIANGLES, 0, 3);

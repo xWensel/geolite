@@ -1,0 +1,124 @@
+/* ---------------------------------------------------------------- LA BOUTIQUE del Club de la casa (v0.3.132, js/boutique.js)
+   Misma escala y sistema que el Perfil (gx-stage con --k, rejilla de 12 columnas, papel con muesca, botones de laton).
+   Izquierda (8 columnas): la oferta de la casa, los filtros y las mesas de 12 en 12 (4 x 3); derecha (4): la mesa elegida.
+   Medidas pensadas en el espacio de diseno 1920 x 1080: las 12 caben sin desplazarse (en la Deck sobra alto). */
+.bq-screen { z-index: 1; }
+.bq-veil { background: radial-gradient(120% 90% at 50% 40%, rgba(4, 12, 9, .55), rgba(2, 6, 4, .86)); }
+.bq-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
+.bq-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 24px; min-width: 0; }
+.bq-head #hubBack .ic { width: 22px; height: 22px; }
+.bq-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.bq-h > span:last-child { display: grid; gap: 6px; }
+.bq-h .gx-eyb { font-size: 16px; }
+.bq-hic .ic { display: block; width: 56px; height: 56px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
+.bq-wal { grid-column: 4; display: inline-flex; align-items: center; gap: 12px; padding: 6px 18px 8px 12px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.bq-wal b { font-family: var(--sans); font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; }
+.bq-head .menu-tools { grid-column: 5; }
+.bq-fi { width: 32px; height: 32px; image-rendering: pixelated; flex: none; display: inline-block; }
+.bq-wal .bq-fi { width: 40px; height: 40px; }
+.bq-fi.sm { width: 24px; height: 24px; }
+
+.bq-left { grid-column: 1 / 9; grid-row: 2; min-width: 0; min-height: 0; }
+.bq-cat { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; padding: 16px 20px 18px; }
+.bq-gw { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; min-height: 0; }
+.bq-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.bq-right { grid-column: 9 / 13; grid-row: 2; min-width: 0; min-height: 0; }
+
+/* la oferta de la casa: terciopelo granate con filete de laton, como el cupon */
+.bq-offer { display: grid; grid-template-columns: 128px minmax(0, 1fr) auto; gap: 16px; align-items: center; margin: 0; padding: 10px 18px 10px 12px; border: 0; text-align: left; font: inherit; cursor: pointer;
+  color: #fff3d6; background: linear-gradient(90deg, #5a1420 0, #7a1c2c 60%, #6a1826 100%); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim), inset 0 0 0 6px var(--gx-o); }
+.bq-offer:hover, .bq-offer.pad-hov { filter: brightness(1.08); }
+.bq-offer.sel { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-rim-hi), inset 0 0 0 7px var(--gx-o); }
+.bq-offer:focus { outline: none; }
+.bq-offer:focus-visible, html[data-input="pad"] .bq-offer:focus { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-gold-hi), inset 0 0 0 7px var(--gx-o); }
+.bq-oth { display: block; width: 128px; aspect-ratio: 2.4 / 1; object-fit: cover; box-shadow: 0 0 0 2px var(--gx-o); }
+.bq-otx { display: grid; gap: 4px; min-width: 0; }
+.bq-otx .gx-eyb { color: var(--gx-gold-hi); font-size: 16px; }
+.bq-otx b { font-family: var(--sans); font-weight: 400; font-size: 28px; line-height: 1; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.bq-otx b i { font-style: normal; font-family: var(--mono); font-size: 18px; padding: 3px 7px 2px; color: var(--gx-ink); background: var(--gx-gold); box-shadow: 0 0 0 2px var(--gx-o); }
+.bq-offer .bq-pr { color: #fff3d6; }
+.bq-offer .bq-pr s { color: #e6b8a8; }
+
+/* los filtros */
+.bq-tabs { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.bq-tab { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 5px 11px 6px; border: 0; font: inherit; font-family: var(--sans); font-size: 20px; white-space: nowrap; line-height: 1; cursor: pointer;
+  color: var(--gx-ink); background: none; box-shadow: inset 0 0 0 2px var(--gx-line); }
+.bq-tab i { font-style: normal; font-family: var(--mono); font-size: 16px; color: var(--gx-ink-2); }
+.bq-tab:hover, .bq-tab.pad-hov { background: #fffaf0; }
+.bq-tab.on { color: var(--gx-ttl); background: var(--gx-ink); box-shadow: inset 0 0 0 2px var(--gx-o); }
+.bq-tab.on i { color: var(--gx-acc); }
+.bq-tab:focus { outline: none; }
+.bq-tab:focus-visible, html[data-input="pad"] .bq-tab:focus { box-shadow: inset 0 0 0 2px var(--gx-o), 0 0 0 2px var(--gx-red); }
+
+/* las mesas: 4 x 3 */
+.bq-items { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: max-content; gap: 12px 14px; align-content: start; min-height: 0; }
+.bq-it { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 7px; margin: 0; padding: 8px 8px 9px; align-content: start; border: 0; text-align: left; font: inherit; color: var(--gx-ink); background: none; cursor: pointer; box-shadow: inset 0 0 0 2px var(--gx-line); min-width: 0; }
+.bq-it:hover, .bq-it.pad-hov { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.bq-it.sel { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-rim), inset 0 0 0 7px var(--gx-o); }
+.bq-it:focus { outline: none; }
+.bq-it:focus-visible::after, html[data-input="pad"] .bq-it:focus::after { content: ""; position: absolute; inset: 8px; box-shadow: 0 0 0 2px var(--gx-red); animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
+.bq-th { position: relative; display: block; aspect-ratio: 2.6 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 4px 0 2px rgba(22, 36, 28, .3); }
+.bq-th img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.bq-it.leg .bq-th { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 4px var(--gx-rim), 0 0 0 6px var(--gx-o), 0 6px 0 4px rgba(22, 36, 28, .3); }
+.bq-nm { display: block; font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; min-width: 0; overflow-wrap: anywhere; text-wrap: balance; padding: 0 2px; }
+/* el precio (o tu estado) como una placa de papel abajo a la derecha de la captura */
+.bq-pb { position: absolute; right: 5px; bottom: 5px; padding: 2px 6px 2px 3px; background: var(--gx-paper); box-shadow: 0 0 0 2px var(--gx-o); }
+.bq-th .bq-own { position: absolute; right: 6px; bottom: 6px; }
+.bq-pb .bq-pr { font-size: 20px; gap: 4px; }
+.bq-pb .bq-fi { width: 18px; height: 18px; }
+.bq-pb .bq-pr s { font-size: 16px; }
+.bq-pr { display: inline-flex; align-items: center; gap: 6px; flex: none; font-family: var(--sans); font-size: 24px; line-height: 1; color: var(--gx-ink); font-variant-numeric: tabular-nums; }
+.bq-pr .bq-fi { width: 26px; height: 26px; }
+.bq-pr s { font-size: 18px; color: var(--gx-ink-2); margin-right: 2px; }
+.bq-pr.big { font-size: 34px; gap: 8px; }
+.bq-pr.big .bq-fi { width: 36px; height: 36px; }
+.bq-pr.big s { font-size: 22px; }
+.bq-own { flex: none; font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; padding: 4px 6px 3px; color: var(--gx-ink); background: var(--gx-paper); box-shadow: 0 0 0 2px var(--gx-o); }
+.bq-own.on { background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
+.bq-empty { grid-column: 1 / -1; margin: 18px 4px; font-size: 22px; line-height: 1.2; color: var(--gx-ink-2); }
+.bq-pager { display: flex; align-items: center; gap: 12px; flex: none; font-family: var(--mono); font-size: 18px; color: var(--gx-ink-2); font-variant-numeric: tabular-nums; }
+.bq-pager .gx-btn { min-width: 48px; font-size: 26px; }
+.bq-pager .gx-btn[disabled] { opacity: .35; pointer-events: none; }
+
+/* la mesa elegida */
+.bq-det { height: 100%; display: grid; gap: 10px; align-content: start; padding: 18px 22px 20px; }
+.bq-dth { position: relative; display: block; aspect-ratio: 2 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); overflow: hidden; }
+.bq-dth img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.bq-dth.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
+/* la legendaria tiene su brillo: un reflejo de laton que cruza la captura de vez en cuando (solo transform y opacity) */
+.bq-dth.leg::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 28%; background: linear-gradient(90deg, transparent, rgba(255, 240, 200, .35), transparent); transform: translateX(-120%) skewX(-18deg); animation: bq-shine 3.6s ease-in-out infinite; pointer-events: none; }
+@keyframes bq-shine { 0%, 60% { transform: translateX(-120%) skewX(-18deg); opacity: 0; } 62% { opacity: 1; } 100% { transform: translateX(420%) skewX(-18deg); opacity: 0; } }
+html.reduce-motion .bq-dth.leg::after { animation: none; display: none; }
+.bq-tier { margin-top: 4px; }
+.bq-dn { color: var(--gx-ink); text-shadow: none; text-wrap: balance; }
+.bq-dd { margin: 0; font-size: 21px; line-height: 1.18; color: var(--gx-ink); text-wrap: pretty; }
+.bq-dp { display: flex; align-items: center; }
+.bq-acts { display: grid; gap: 10px; margin-top: 4px; }
+.bq-acts .gx-btn.wide { justify-content: space-between; }
+.bq-bp { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+/* armado: la segunda pulsacion paga (rojo, como el «¿Seguro?» del resto del juego) */
+.bq-acts .gx-btn.pri.armed { --h: var(--gx-red-hi); --m: var(--gx-red); --l: var(--gx-red-lo); color: #fff; }
+.bq-acts .gx-btn.armed > span:first-child { white-space: normal; line-height: 1.05; text-align: left; }
+.bq-short { opacity: .7; cursor: default; }
+.bq-short:hover { transform: none; filter: none; }
+.bq-no { animation: bq-no .32s steps(4, end); }
+@keyframes bq-no { 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+
+/* vendida: la captura salta y se le enciende el laton */
+.bq-it.bq-sold .bq-th, .bq-det.bq-sold .bq-dth { animation: bq-sold .9s var(--gx-ease) both; }
+@keyframes bq-sold { 0% { transform: scale(1); filter: brightness(1); } 30% { transform: scale(1.06) rotate(-1deg); filter: brightness(1.45); } 100% { transform: scale(1); filter: brightness(1); } }
+html.reduce-motion .bq-it.bq-sold .bq-th, html.reduce-motion .bq-det.bq-sold .bq-dth { animation: none; }
+
+/* probar en el mapa: la boutique se aparta (y con ella la luz de la sala, que vive en #layer) y queda el mapa con un cartel abajo */
+body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s ease; }
+.bq-tryl { position: fixed; left: 50%; bottom: 40px; z-index: 30; transform: translateX(-50%); zoom: var(--k); }
+.bq-tryl .gx-paper { display: flex; align-items: center; gap: 22px; padding: 14px 18px 14px 24px; }
+.bq-tryl b { font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1; color: var(--gx-ink); white-space: nowrap; }
+
+/* el boton de la portada: una pestana de laton colgada bajo la tarjeta de socio */
+.hh-top .hh-bq { display: flex; align-items: center; gap: 10px; width: max-content; margin: 8px 0 0 14px; padding: 6px 16px 8px 10px; border: 0; cursor: pointer; font: inherit; font-family: var(--sans); font-size: 24px; line-height: 1;
+  color: var(--gx-ink); background: linear-gradient(180deg, var(--gx-gold-hi) 0, var(--gx-gold) 55%, #e89a32 100%); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 rgba(0, 0, 0, .16); }
+.hh-top .hh-bq .ic { width: 32px; height: 32px; image-rendering: pixelated; }
+.hh-top .hh-bq:hover, .hh-top .hh-bq.pad-hov { filter: brightness(1.06); transform: translateY(-2px); }
+.hh-top .hh-bq:focus { outline: none; }
+.hh-top .hh-bq:focus-visible, html[data-input="pad"] .hh-top .hh-bq:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
