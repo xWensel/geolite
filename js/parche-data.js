@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.164",
+      name: L("La chincheta, en su sitio", "The pin, in its place", "L'épingle, à sa place", "O alfinete no lugar", "Der Pin an seinem Platz", "La puntina al suo posto", "", "图钉归位", "핀은 제자리에", "ピンはいつもの場所に", "Булавка на своём месте", "Pinezka na swoim miejscu"),
+      date: "2026-10-16",
+      summary: L("En los cinco logros de continente del Clásico, la chincheta va siempre en el mismo sitio: arriba y centrada.", "In the Classic's five continent achievements, the pin always sits in the same spot: on top, centred.", "Dans les cinq succès de continent du Classique, l'épingle est toujours au même endroit : en haut, au centre.", "Nas cinco conquistas de continente do Clássico, o alfinete fica sempre no mesmo lugar: em cima e ao centro.", "In den fünf Kontinent-Erfolgen des Klassik-Modus sitzt der Pin immer an derselben Stelle: oben in der Mitte.", "Nei cinque obiettivi di continente del Classico la puntina è sempre nello stesso punto: in alto, al centro.", "", "经典模式五个大洲成就里的图钉，现在总在同一个位置：正上方居中。", "클래식 대륙 업적 다섯 개의 핀이 이제 늘 같은 자리, 위쪽 가운데에 있어요.", "クラシックの大陸の実績5つで、ピンはいつも同じ場所、上の真ん中に。", "В пяти достижениях-континентах Классики булавка всегда на одном месте — сверху по центру.", "W pięciu osiągnięciach kontynentów trybu Klasycznego pinezka jest zawsze w tym samym miejscu: na górze, pośrodku."),
+      chapters: [
+        { id: "chincheta", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Logros", "Achievements", "Succès", "Conquistas", "Erfolge", "Obiettivi", "", "成就", "업적", "実績", "Достижения", "Osiągnięcia"),
+          entries: [
+            E(L("Todas iguales", "All alike", "Toutes pareilles", "Todas iguais", "Alle gleich", "Tutte uguali", "", "整齐划一", "모두 똑같이", "そろえて", "Все одинаково", "Wszystkie jednakowo"), "change", "0.3.164", [
+              L("Como la corona en los de la Enciclopedia, la chincheta de los logros de **Norteamérica**, **Latinoamérica**, **Europa**, **Asia** y **Oceanía** va siempre arriba y centrada, sea cual sea el continente. También en sus iconos de Steam.",
+                "Just like the crown on the Encyclopedia ones, the pin on the **North America**, **Latin America**, **Europe**, **Asia** and **Oceania** achievements always sits on top, centred, whatever the continent. Their Steam icons too.",
+                "Comme la couronne sur ceux de l'Encyclopédie, l'épingle des succès **Amérique du Nord**, **Amérique latine**, **Europe**, **Asie** et **Océanie** est toujours en haut, au centre, quel que soit le continent. Leurs icônes Steam aussi.",
+                "Como a coroa nas da Enciclopédia, o alfinete das conquistas de **América do Norte**, **América Latina**, **Europa**, **Ásia** e **Oceania** fica sempre em cima e ao centro, seja qual for o continente. Os ícones da Steam também.",
+                "Wie die Krone bei denen der Enzyklopädie sitzt der Pin bei den Erfolgen für **Nordamerika**, **Lateinamerika**, **Europa**, **Asien** und **Ozeanien** immer oben in der Mitte, egal welcher Kontinent. Auch ihre Steam-Symbole.",
+                "Come la corona in quelli dell'Enciclopedia, la puntina degli obiettivi **Nord America**, **America Latina**, **Europa**, **Asia** e **Oceania** è sempre in alto, al centro, qualunque sia il continente. Anche le loro icone di Steam.",
+                "",
+                "就像百科成就里的王冠一样，**北美洲**、**拉丁美洲**、**欧洲**、**亚洲**和**大洋洲**成就里的图钉，不管是哪个大洲，都固定在正上方居中。Steam 图标也一并更新。",
+                "백과사전 업적의 왕관처럼, **북아메리카**, **라틴 아메리카**, **유럽**, **아시아**, **오세아니아** 업적의 핀도 어느 대륙이든 늘 위쪽 가운데에 있어요. 스팀 아이콘도 바뀌었어요.",
+                "百科事典の実績の王冠と同じく、**北アメリカ**、**ラテンアメリカ**、**ヨーロッパ**、**アジア**、**オセアニア**の実績のピンは、どの大陸でもいつも上の真ん中に。Steamのアイコンも同じです。",
+                "Как корона в достижениях Энциклопедии, булавка в достижениях **Северная Америка**, **Латинская Америка**, **Европа**, **Азия** и **Океания** всегда сверху по центру, какой бы ни был континент. Иконки в Steam тоже.",
+                "Jak korona w osiągnięciach Encyklopedii, pinezka w osiągnięciach **Ameryka Północna**, **Ameryka Łacińska**, **Europa**, **Azja** i **Oceania** jest zawsze na górze, pośrodku, bez względu na kontynent. Ich ikony w Steam też."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.163",
       name: L("La mochila, en su sitio", "The pack, back in place", "La sacoche, à sa place", "A mochila, no lugar", "Der Rucksack, wieder am Platz", "Lo zaino, al suo posto", "", "背包回到原位", "가방, 제자리로", "バッグが元の位置に", "Сумка на месте", "Plecak na swoim miejscu"),
       date: "2026-10-16",
