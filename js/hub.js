@@ -96,6 +96,24 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ Clasico: campanas */
   /* portada de cada campana: minicarta pixel art (un protagonista sobre el foco de su color), assets/gen/camp_<id>.webp */
   const campArt = x => `assets/gen/camp_${x.id.replace(/^c-/, "")}.webp`;
+  /* en el naipe la portada va ENTERA y a escala entera de pixeles reales: de las dos versiones (la de 90x60, guardada a x6, y la de naipe de 68x60,
+     nativa) se pinta la que salga mas grande en su hueco, centrada sobre el fondo oscuro. Se mide una vez al abrir y al cambiar el tamano de la ventana */
+  const campNaipe = x => `assets/gen/camp_${x.id.replace(/^c-/, "")}_n.webp`;
+  const clFit = () => {
+    const cards = $("clCards"), boxes = cards ? [...cards.querySelectorAll(".cl-artbox")] : []; if (!boxes.length) return;
+    const dpr = window.devicePixelRatio || 1, r = (boxes[0].currentCSSZoom || 1) * dpr, b0 = boxes[0].getBoundingClientRect(), W = b0.width * dpr, H = b0.height * dpr;
+    if (W < 1 || H < 1) return;
+    const ks = (w, h, ok) => { let k = Math.max(1, Math.floor(Math.min(W / w, H / h) + 0.01)); while (k > 1 && !ok(k)) k--; return k; };
+    const kw = ks(90, 60, k => 6 % k === 0), kn = ks(68, 60, () => true);   // la de 90 esta a x6: solo escalas que dividen 6 dejan los pixeles iguales
+    const v = kw * kw * 90 * 60 >= kn * kn * 68 * 60 ? { w: 90 * kw, h: 60 * kw, k: "w" } : { w: 68 * kn, h: 60 * kn, k: "n" };
+    cards.style.setProperty("--cl-aw", v.w / r + "px"); cards.style.setProperty("--cl-ah", v.h / r + "px");
+    boxes.forEach(bx => {   // centrada y con su esquina en un pixel real: sin medio pixel no hay columnas dobles
+      const b = bx.getBoundingClientRect(), L = b.left * dpr, T = b.top * dpr, im = bx.firstElementChild, s = im.dataset[v.k];
+      im.style.left = (Math.round(L + (b.width * dpr - v.w) / 2) - L) / r + "px"; im.style.top = (Math.round(T + (b.height * dpr - v.h) / 2) - T) / r + "px";
+      if (im.getAttribute("src") !== s) im.src = s;
+    });
+  };
+  addEventListener("resize", () => { if ($("clCards")) requestAnimationFrame(clFit); });   // tras el resto: el zoom del escenario (--k) cambia en otro resize
   /* v0.3.46: Naipe de gala, "carta de campanas" (mesa de diseño, paso 3). 12 columnas: las 12 campanas a la vista como naipes pequenos sobre el fieltro
      (1-7: ilustracion, nombre, sus 10 niveles y la medalla; sin desplazar, tambien en la Deck) y la ficha de papel de la elegida (8-12: ilustracion
      grande, que es, tu record, desde que nivel empezar en diez casillas y "Jugar el nivel N"). Elegir campana o nivel solo repinta la ficha */
@@ -118,7 +136,7 @@ window.AIQ = window.AIQ || {};
     const pips = (x, p) => `<span class="cl-pips">${x.levels.map((_, k) => `<i class="${p.best && k < p.unlocked ? "on" : ""}"></i>`).join("")}</span>`;
     const cards = camps.map(x => {
       const p = c.prog(x.id), md = medal(x.id);
-      return `<button type="button" class="cl-card${x.id === campId ? " sel" : ""}" data-id="${x.id}" aria-pressed="${x.id === campId}"><img class="cl-art" src="${campArt(x)}" alt="" aria-hidden="true" draggable="false" decoding="async">
+      return `<button type="button" class="cl-card${x.id === campId ? " sel" : ""}" data-id="${x.id}" aria-pressed="${x.id === campId}"><span class="cl-artbox"><img class="cl-art" src="${campArt(x)}" data-w="${campArt(x)}" data-n="${campNaipe(x)}" alt="" aria-hidden="true" draggable="false" decoding="async"></span>
         <b>${A.tx(x.title)}</b>${pips(x, p)}${md ? `<span class="cl-md">${A.icon("medal_" + md)}</span>` : ""}</button>`;
     }).join("");
     const counts = ["gold", "silver", "bronze"].map(m => `<span class="cl-mc" ${A.ttAttr(A.pick6("Medallas|Medals|Médailles|Medalhas|Medaillen|Medaglie||奖牌|메달|メダル|Медали|Medale"), "")}>${A.icon("medal_" + m)}<b>${camps.filter(x => medal(x.id) === m).length}</b></span>`).join("");
@@ -139,6 +157,7 @@ window.AIQ = window.AIQ || {};
     wireTools(); $("hubBack").onclick = () => screen("home");
     /* una palabra que no cabe en su naipe ("Исторические"): la letra baja de punto en punto, nunca por debajo de los 18 px de la Deck */
     document.querySelectorAll(".cl-card b").forEach(b => { for (let f = 20; f > 18 && b.scrollWidth > b.clientWidth + 1; ) b.style.fontSize = --f + "px"; });
+    clFit(); setTimeout(clFit, 700);   // otra vez cuando el escenario ha terminado de entrar: la esquina en pixel real se mide quieta
     if (A.coverMap) A.coverMap("classic", true, () => !!document.querySelector("#dlg .cl-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
     const wireFicha = () => {
       document.querySelectorAll(".cl-lv").forEach(b => (b.onclick = () => {

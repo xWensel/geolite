@@ -34,6 +34,46 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.157",
+      name: L("Portadas del Clásico", "Classic covers", "Couvertures du Classique", "Capas do Clássico", "Klassik-Titelbilder", "Copertine del Classico", "", "经典模式新封面", "클래식 새 표지", "クラシックの新しい表紙", "Новые обложки Классики", "Okładki trybu Klasycznego"),
+      date: "2026-10-16",
+      summary: L("Las doce campañas del Clásico estrenan portada, y su carta la enseña entera y nítida.", "All twelve Classic campaigns get new covers, and their cards show them whole and crisp.", "Les douze campagnes du Classique ont une nouvelle couverture, et leur carte la montre en entier et bien nette.", "As doze campanhas do Clássico ganham capa nova, e a carta mostra a capa inteira e nítida.", "Alle zwölf Klassik-Kampagnen bekommen neue Titelbilder, und ihre Karten zeigen sie ganz und gestochen scharf.", "Le dodici campagne del Classico hanno una nuova copertina, e la loro carta la mostra intera e nitida.", "", "经典模式的十二个战役都换上了新封面，卡片上完整、清晰地显示。", "클래식의 캠페인 열두 개가 새 표지를 달았고, 카드에 표지가 잘리지 않고 선명하게 보여요.", "クラシックの12のキャンペーンに新しい表紙がつき、カードには表紙が欠けずにくっきり表示されます。", "У всех двенадцати кампаний Классики новые обложки, и карточка показывает их целиком и чётко.", "Wszystkie dwanaście kampanii trybu Klasycznego ma nowe okładki, a ich karty pokazują je w całości i ostro."),
+      chapters: [
+        { id: "portadas", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Clásico", "Classic", "Classique", "Clássico", "Klassik", "Classico", "", "经典", "클래식", "クラシック", "Классика", "Klasyczny"),
+          entries: [
+            E(L("Doce portadas nuevas", "Twelve new covers", "Douze nouvelles couvertures", "Doze capas novas", "Zwölf neue Titelbilder", "Dodici nuove copertine", "", "十二张新封面", "새 표지 열두 장", "新しい表紙12枚", "Двенадцать новых обложек", "Dwanaście nowych okładek"), "change", "0.3.157", [
+              L("Los continentes salen del mapa del propio juego y tienen su forma real: **Norteamérica** (EE. UU., Canadá y Groenlandia), **Latinoamérica**, **Europa**, **Asia** y **Oceanía**. Las demás campañas llevan el dibujo de su logro, y **Mezcla**, dos dados nuevos.",
+                "The continents come from the game's own map and have their real shape: **North America** (the US, Canada and Greenland), **Latin America**, **Europe**, **Asia** and **Oceania**. The other campaigns show the picture from their achievement, and **Mixed Bag** gets two new dice.",
+                "Les continents viennent de la carte du jeu et ont leur vraie forme : **Amérique du Nord** (États-Unis, Canada et Groenland), **Amérique latine**, **Europe**, **Asie** et **Océanie**. Les autres campagnes portent le dessin de leur succès, et **Mélange**, deux nouveaux dés.",
+                "Os continentes vêm do próprio mapa do jogo e têm a forma real: **América do Norte** (EUA, Canadá e Groenlândia), **América Latina**, **Europa**, **Ásia** e **Oceania**. As outras campanhas trazem o desenho da sua conquista, e **Mistura**, dois dados novos.",
+                "Die Kontinente stammen aus der Karte des Spiels und haben ihre echte Form: **Nordamerika** (USA, Kanada und Grönland), **Lateinamerika**, **Europa**, **Asien** und **Ozeanien**. Die anderen Kampagnen zeigen das Bild ihres Erfolgs, und **Gemischt** bekommt zwei neue Würfel.",
+                "I continenti vengono dalla mappa del gioco e hanno la loro forma reale: **Nord America** (Stati Uniti, Canada e Groenlandia), **America Latina**, **Europa**, **Asia** e **Oceania**. Le altre campagne mostrano il disegno del loro obiettivo, e **Miscuglio** due dadi nuovi.",
+                "",
+                "各大洲直接取自游戏自己的地图，形状真实：**北美洲**（美国、加拿大和格陵兰）、**拉丁美洲**、**欧洲**、**亚洲**和**大洋洲**。其他战役用的是对应成就的图案，**大杂烩**则换成了两颗新骰子。",
+                "대륙은 게임 지도에서 그대로 가져와 실제 모양을 하고 있어요. **북아메리카**(미국, 캐나다, 그린란드), **라틴 아메리카**, **유럽**, **아시아**, **오세아니아**. 다른 캠페인은 해당 업적의 그림을, **믹스**는 새 주사위 두 개를 달았어요.",
+                "大陸はゲーム自身の地図から取った本当の形です。**北アメリカ**（アメリカ、カナダ、グリーンランド）、**ラテンアメリカ**、**ヨーロッパ**、**アジア**、**オセアニア**。ほかのキャンペーンは実績の絵、**ミックス**は新しいサイコロ2つ。",
+                "Континенты взяты с карты самой игры и имеют настоящую форму: **Северная Америка** (США, Канада и Гренландия), **Латинская Америка**, **Европа**, **Азия** и **Океания**. На остальных кампаниях — рисунок их достижения, а у **Всё вперемешку** — два новых кубика.",
+                "Kontynenty pochodzą z mapy samej gry i mają prawdziwy kształt: **Ameryka Północna** (USA, Kanada i Grenlandia), **Ameryka Łacińska**, **Europa**, **Azja** i **Oceania**. Pozostałe kampanie mają rysunek swojego osiągnięcia, a **Mieszanka** dwie nowe kostki."),
+            ]),
+            E(L("Enteras y nítidas", "Whole and crisp", "Entières et nettes", "Inteiras e nítidas", "Ganz und scharf", "Intere e nitide", "", "完整又清晰", "잘리지 않고 선명하게", "欠けずにくっきり", "Целиком и чётко", "W całości i ostro"), "fix", "0.3.157", [
+              L("Las cartas del Clásico recortaban los lados de la portada y la estiraban un poco, así que los píxeles salían desiguales. Ahora la portada se ve entera y a escala exacta: en la Steam Deck, cada píxel del dibujo son 2×2 de la pantalla.",
+                "The Classic cards cut off the sides of the cover and stretched it slightly, so the pixels came out uneven. Now the cover shows whole and at an exact scale: on the Steam Deck, each pixel of the art is 2×2 screen pixels.",
+                "Les cartes du Classique coupaient les côtés de la couverture et l'étiraient un peu, donc les pixels étaient inégaux. Maintenant la couverture s'affiche en entier et à l'échelle exacte : sur le Steam Deck, chaque pixel du dessin fait 2×2 pixels d'écran.",
+                "As cartas do Clássico cortavam as laterais da capa e a esticavam um pouco, então os pixels saíam desiguais. Agora a capa aparece inteira e em escala exata: no Steam Deck, cada pixel do desenho ocupa 2×2 pixels da tela.",
+                "Die Klassik-Karten schnitten die Seiten des Titelbilds ab und streckten es leicht, deshalb waren die Pixel ungleich groß. Jetzt erscheint das Titelbild ganz und in exaktem Maßstab: Auf dem Steam Deck ist jeder Pixel der Zeichnung 2×2 Bildschirmpixel groß.",
+                "Le carte del Classico tagliavano i lati della copertina e la stiravano un po', quindi i pixel venivano diseguali. Ora la copertina si vede intera e in scala esatta: sullo Steam Deck ogni pixel del disegno occupa 2×2 pixel dello schermo.",
+                "",
+                "经典模式的卡片以前会裁掉封面两侧并稍微拉伸，像素大小不一。现在封面完整显示、按整数倍缩放：在 Steam Deck 上，图中每个像素正好占屏幕 2×2 个像素。",
+                "클래식 카드가 표지 양옆을 자르고 살짝 늘려서 픽셀 크기가 들쭉날쭉했어요. 이제 표지가 잘리지 않고 정확한 배율로 보여요. 스팀 덱에서는 그림의 픽셀 하나가 화면 픽셀 2×2예요.",
+                "クラシックのカードは表紙の両端を切り、少し引き伸ばしていたので、ピクセルの大きさがそろっていなかった。今は表紙が欠けずに正確な倍率で表示される。Steam Deckでは、絵の1ピクセルが画面の2×2ピクセル。",
+                "Карточки Классики обрезали обложку по бокам и слегка растягивали её, поэтому пиксели выходили разными. Теперь обложка видна целиком и в точном масштабе: на Steam Deck каждый пиксель рисунка — это 2×2 пикселя экрана.",
+                "Karty trybu Klasycznego przycinały boki okładki i lekko ją rozciągały, więc piksele wychodziły nierówne. Teraz okładka jest widoczna w całości i w dokładnej skali: na Steam Decku każdy piksel rysunku to 2×2 piksele ekranu."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.156",
       name: L("La categoría, en tu tarjeta", "Your rank, on your card", "Ta catégorie, sur ta carte", "A categoria, no seu cartão", "Deine Stufe, auf deiner Karte", "La categoria, sulla tua tessera", "", "等级印在你的卡上", "등급은 내 카드에", "称号はきみのカードに", "Категория — на твоей карте", "Ranga na twojej karcie"),
       date: "2026-10-16",

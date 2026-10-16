@@ -516,7 +516,8 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .cl-card { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px; min-width: 0; min-height: 0; padding: 8px 8px 10px; border: 0; cursor: pointer; text-align: left;
   background: var(--gx-card); color: var(--gx-ink); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); font-family: var(--sans);
   transition: transform .18s cubic-bezier(.2, .9, .3, 1); }   /* sin clip-path: con su contorno oscuro de 2 px el escalon no se ve, y recortar 12 naipes costaba 5 fotogramas al abrir */
-.cl-art { display: block; width: 100%; height: 100%; min-height: 0; object-fit: cover; image-rendering: pixelated; box-shadow: 0 0 0 2px var(--gx-o); }
+.cl-artbox { position: relative; display: block; min-width: 0; min-height: 0; overflow: hidden; background: var(--gx-o); box-shadow: 0 0 0 2px var(--gx-o); }   /* la portada entera, centrada; js/hub.js (clFit) le da escala entera y sitio */
+.cl-art { position: absolute; left: 0; top: 0; display: block; width: var(--cl-aw, 100%); height: var(--cl-ah, 100%); object-fit: contain; image-rendering: pixelated; }
 .cl-card b { height: 2em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 400; font-size: 20px; line-height: 1; min-width: 0; }   /* dos lineas: cortado con "…", en ruso "Eventos" y "Personajes" quedaban iguales */
 .cl-pips { display: flex; gap: 3px; } .cl-pips i { flex: 1 1 0; height: 8px; background: #ded2b4; box-shadow: inset 0 0 0 2px var(--gx-o); } .cl-pips i.on { background: var(--gx-gold-lo); }   /* niveles jugados: ocre oscuro, que se distinga del papel */
 .cl-card .cl-md { position: absolute; right: 4px; top: 4px; }
