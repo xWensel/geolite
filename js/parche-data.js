@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.152",
+      name: L("El hueco entre la L y la I, en espejo", "The notch between the L and the I, mirrored", "Le creux entre le L et le I, en miroir", "O vão entre o L e o I, espelhado", "Die Kerbe zwischen L und I, gespiegelt", "L'incavo tra la L e la I, a specchio", "", "L 与 I 之间的凹槽，左右对称了", "L과 I 사이 홈, 좌우 대칭으로", "LとIのあいだのくぼみを左右対称に", "Впадина между L и I — зеркально", "Wnęka między L i I w lustrze"),
+      date: "2026-10-16",
+      summary: L("El hueco que baja entre la L y la I tiene ahora las dos paredes iguales y queda centrado entre las dos letras.", "The notch that dips between the L and the I now has two identical walls and sits centred between the two letters.", "Le creux qui descend entre le L et le I a maintenant deux parois identiques et se trouve centré entre les deux lettres.", "O vão que desce entre o L e o I agora tem as duas paredes iguais e fica centralizado entre as duas letras.", "Die Kerbe, die zwischen L und I nach unten reicht, hat jetzt zwei gleiche Wände und sitzt mittig zwischen den beiden Buchstaben.", "L'incavo che scende tra la L e la I ora ha due pareti identiche ed è centrato tra le due lettere.", "", "L 与 I 之间向下延伸的凹槽，现在两侧槽壁完全一样，并且位于两个字母正中。", "L과 I 사이로 내려오는 홈의 양쪽 벽이 이제 똑같고, 두 글자 정가운데에 놓여요.", "LとIのあいだに下りるくぼみは、両側の壁が同じになり、2文字のちょうど真ん中に収まった。", "У впадины, что спускается между L и I, теперь одинаковые стенки, и она стоит точно посередине между буквами.", "Wnęka, która schodzi między L i I, ma teraz dwie jednakowe ściany i stoi dokładnie pośrodku między literami."),
+      chapters: [
+        { id: "logo", kicker: L("Arreglo", "Fix", "Correctif", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Logo", "Logo", "Logo", "Logo", "Logo", "Logo", "", "标志", "로고", "ロゴ", "Логотип", "Logo"),
+          entries: [
+            E(L("Paredes iguales", "Identical walls", "Des parois identiques", "Paredes iguais", "Gleiche Wände", "Pareti identiche", "", "两侧槽壁一致", "똑같아진 양쪽 벽", "そろった両側の壁", "Одинаковые стенки", "Jednakowe ściany"), "fix", "0.3.152", [
+              L("La pared del lado de la I tenía un escalón 1 px más estrecho, estaba 1 px corrida y llevaba dos píxeles sueltos, y el hueco quedaba más cerca de la L que de la I. Ahora las dos paredes son el espejo una de la otra, con 8 px de fieltro a cada lado, y fuera también la raya de canto que la L llevaba pegada a su contorno.",
+                "The wall on the I side had a step 1 px narrower, sat 1 px off and carried two stray pixels, and the notch was closer to the L than to the I. Now each wall mirrors the other, with 8 px of felt on either side, and the edge line stuck to the L's outline is gone too.",
+                "La paroi côté I avait une marche plus étroite d'1 px, était décalée d'1 px et portait deux pixels isolés, et le creux était plus près du L que du I. Désormais, chaque paroi est le miroir de l'autre, avec 8 px de feutre de chaque côté, et le trait d'arête collé au contour du L a aussi disparu.",
+                "A parede do lado do I tinha um degrau 1 px mais estreito, estava 1 px deslocada e levava dois pixels soltos, e o vão ficava mais perto do L do que do I. Agora uma parede é o espelho da outra, com 8 px de feltro de cada lado, e também sumiu a linha de borda que o L levava colada ao contorno.",
+                "Die Wand auf der Seite des I hatte eine 1 px schmalere Stufe, saß 1 px versetzt und hatte zwei lose Pixel, und die Kerbe lag näher am L als am I. Jetzt ist jede Wand das Spiegelbild der anderen, mit 8 px Filz auf jeder Seite, und auch die Kantenlinie, die am Umriss des L klebte, ist weg.",
+                "La parete dal lato della I aveva un gradino più stretto di 1 px, era spostata di 1 px e aveva due pixel isolati, e l'incavo era più vicino alla L che alla I. Ora ogni parete è lo specchio dell'altra, con 8 px di feltro per lato, ed è sparita anche la linea di bordo attaccata al contorno della L.",
+                "",
+                "I 一侧的槽壁原本有一级台阶窄了 1 像素、整体偏了 1 像素，还带着两个零散像素，而且凹槽离 L 比离 I 更近。现在两侧槽壁互为镜像，每侧各留 8 像素绒布；L 描边旁多出的那道边线也去掉了。",
+                "I 쪽 벽은 계단 하나가 1px 좁았고, 1px 어긋나 있었으며, 픽셀 두 개가 떠 있었어요. 홈도 I보다 L에 더 가까웠고요. 이제 두 벽이 서로 거울처럼 같고, 양쪽에 펠트가 8px씩 있어요. L의 윤곽선에 붙어 있던 테두리 선도 없앴어요.",
+                "I側の壁は段が1px狭く、1pxずれていて、はみ出したピクセルが2つあった。くぼみもIよりLに寄っていた。いまは両側の壁が鏡写しになり、左右それぞれ8pxのフェルトがある。Lの輪郭に貼りついていた縁の線も消えた。",
+                "Стенка со стороны I имела ступеньку на 1 px уже, была сдвинута на 1 px и несла два лишних пикселя, а сама впадина стояла ближе к L, чем к I. Теперь стенки — зеркальное отражение друг друга, по 8 px сукна с каждой стороны, а линия кромки, прилипшая к контуру L, убрана.",
+                "Ściana od strony I miała stopień węższy o 1 px, była przesunięta o 1 px i miała dwa luźne piksele, a wnęka stała bliżej L niż I. Teraz ściany są swoim lustrzanym odbiciem, z 8 px sukna po każdej stronie, a zniknęła też linia krawędzi przyklejona do konturu L."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.151",
       name: L("La T, como las demás", "The T, like the rest", "Le T, comme les autres", "O T, como as outras", "Das T wie die anderen", "La T, come le altre", "", "T 和其他字母一致了", "다른 글자와 똑같아진 T", "ほかの文字とそろったT", "Буква T — как остальные", "Litera T jak pozostałe"),
       date: "2026-10-16",
