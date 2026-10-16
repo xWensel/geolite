@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.149",
+      name: L("Herramientas nuevas", "New tools", "Nouveaux outils", "Ferramentas novas", "Neue Werkzeuge", "Nuovi strumenti", "", "全新道具", "새 도구", "新しい道具", "Новые инструменты", "Nowe narzędzia"),
+      date: "2026-10-16",
+      summary: L("Las herramientas de la Aventura, el café y el seguro estrenan dibujo, a juego con las reliquias.", "The Adventure's tools, the espresso and the insurance get new art, matching the relics.", "Les outils de l'Aventure, le café et l'assurance ont un nouveau dessin, assorti aux reliques.", "As ferramentas da Aventura, o café e o seguro ganham desenho novo, combinando com as relíquias.", "Die Werkzeuge des Abenteuers, der Espresso und die Versicherung bekommen neue Bilder, passend zu den Relikten.", "Gli strumenti dell'Avventura, il caffè e l'assicurazione hanno un nuovo disegno, abbinato alle reliquie.", "", "冒险模式的道具、咖啡和保险换上新图，与遗物风格一致。", "모험 모드의 도구, 커피, 보험이 유물과 어울리는 새 그림으로 바뀌었어요.", "アドベンチャーの道具、コーヒー、保険が、レリックとそろった新しい絵になりました。", "Инструменты Приключения, кофе и страховка получили новые рисунки в одном стиле с реликвиями.", "Narzędzia Przygody, kawa i ubezpieczenie mają nowe rysunki, pasujące do reliktów."),
+      chapters: [
+        { id: "herramientas", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Aventura", "Adventure", "Aventure", "Aventura", "Abenteuer", "Avventura", "", "冒险", "모험", "アドベンチャー", "Приключение", "Przygoda"),
+          entries: [
+            E(L("Herramientas a juego", "Matching tools", "Des outils assortis", "Ferramentas combinando", "Passende Werkzeuge", "Strumenti abbinati", "", "配套的道具", "어울리는 도구", "そろいの道具", "Инструменты в одном стиле", "Pasujące narzędzia"), "change", "0.3.149", [
+              L("Las siete herramientas (Sonar, Brújula, Pase VIP, Nota del crupier, Reloj de arena, Interruptor y Descarte) y los dos suministros de la Rueda, el **café** y el **seguro**, están dibujados de nuevo, a juego con las reliquias. El Pase VIP lleva la ficha con la Tierra, y el seguro es un paraguas que protege el corazón de las provisiones.",
+                "The seven tools (Sonar, Compass, VIP pass, Dealer's note, Hourglass, Master switch and Discard) and the Wheel's two supplies, the **espresso** and the **insurance**, have been redrawn to match the relics. The VIP pass carries the chip with the Earth, and the insurance is an umbrella sheltering the provision heart.",
+                "Les sept outils (Sonar, Boussole, Pass VIP, Note du croupier, Sablier, Interrupteur général et Défausse) et les deux fournitures de la Roue, le **café** et l'**assurance**, ont été redessinés pour s'accorder aux reliques. Le Pass VIP porte le jeton à la Terre, et l'assurance est un parapluie qui protège le cœur des provisions.",
+                "As sete ferramentas (Sonar, Bússola, Passe VIP, Nota do crupiê, Ampulheta, Interruptor geral e Descarte) e os dois suprimentos da Roda, o **café** e o **seguro**, foram redesenhados para combinar com as relíquias. O Passe VIP traz a ficha com a Terra, e o seguro é um guarda-chuva que protege o coração das provisões.",
+                "Die sieben Werkzeuge (Sonar, Kompass, VIP-Pass, Notiz des Croupiers, Sanduhr, Hauptschalter und Abwurf) und die beiden Vorräte des Rads, der **Espresso** und die **Versicherung**, wurden neu gezeichnet, passend zu den Relikten. Der VIP-Pass trägt den Chip mit der Erde, und die Versicherung ist ein Schirm, der das Proviantherz schützt.",
+                "I sette strumenti (Sonar, Bussola, Pass VIP, Nota del croupier, Clessidra, Interruttore generale e Scarto) e le due provviste della Ruota, il **caffè** e l'**assicurazione**, sono stati ridisegnati per abbinarsi alle reliquie. Il Pass VIP porta la fiche con la Terra, e l'assicurazione è un ombrello che ripara il cuore delle provviste.",
+                "",
+                "七件道具（声呐、指南针、VIP 通行证、荷官的便条、沙漏、总开关和弃牌）以及转盘的两种补给——**咖啡**和**保险**——都重新绘制，与遗物风格一致。VIP 通行证上印着带地球的筹码，保险则是一把为补给红心遮挡的伞。",
+                "도구 7개(소나, 나침반, VIP 패스, 딜러의 메모, 모래시계, 메인 스위치, 버리기)와 룰렛 휠의 보급품 두 가지인 **커피**와 **보험**을 유물과 어울리게 새로 그렸어요. VIP 패스에는 지구가 담긴 칩이 있고, 보험은 식량 하트를 지켜 주는 우산이에요.",
+                "7つの道具（ソナー、コンパス、VIPパス、ディーラーのメモ、砂時計、マスタースイッチ、捨て札）と、ホイールの2つの補給品、**コーヒー**と**保険**を、レリックとそろうように描き直しました。VIPパスには地球のチップがつき、保険は食料のハートを守る傘です。",
+                "Семь инструментов (Сонар, Компас, VIP-пропуск, Записка крупье, Песочные часы, Главный выключатель и Сброс) и два припаса Колеса — **кофе** и **страховка** — перерисованы в одном стиле с реликвиями. На VIP-пропуске — фишка с Землёй, а страховка — это зонт, который укрывает сердце запасов.",
+                "Siedem narzędzi (Sonar, Kompas, Karta VIP, Liścik od krupiera, Klepsydra, Wyłącznik główny i Odrzut) oraz dwa zapasy Koła, **kawa** i **ubezpieczenie**, narysowano od nowa, w stylu reliktów. Karta VIP ma żeton z Ziemią, a ubezpieczenie to parasol, który osłania serce zapasów."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.148",
       name: L("Corazones simétricos", "Symmetrical hearts", "Des cœurs symétriques", "Corações simétricos", "Symmetrische Herzen", "Cuori simmetrici", "", "对称的红心", "대칭이 된 하트", "左右対称のハート", "Симметричные сердца", "Symetryczne serca"),
       date: "2026-10-16",
