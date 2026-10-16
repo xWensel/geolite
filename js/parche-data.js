@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.155",
+      name: L("Barajas nuevas", "New decks", "Nouveaux paquets", "Baralhos novos", "Neue Decks", "Nuovi mazzi", "", "全新套牌", "새 덱", "新しいデッキ", "Новые колоды", "Nowe talie"),
+      date: "2026-10-16",
+      summary: L("Las cuatro barajas de la Aventura estrenan retrato, con el estilo del crupier y los colores del juego.", "The Adventure's four decks get new portraits, in the dealer's style and the game's colours.", "Les quatre paquets de l'Aventure ont un nouveau portrait, dans le style du croupier et aux couleurs du jeu.", "Os quatro baralhos da Aventura ganham retrato novo, no estilo do crupiê e com as cores do jogo.", "Die vier Decks des Abenteuers bekommen neue Porträts, im Stil des Croupiers und in den Farben des Spiels.", "I quattro mazzi dell'Avventura hanno un nuovo ritratto, nello stile del croupier e con i colori del gioco.", "", "冒险模式的四套牌换上新头像，采用荷官的画风和游戏的配色。", "모험 모드의 덱 네 개가 딜러의 화풍과 게임의 색으로 그린 새 초상화를 달았어요.", "アドベンチャーの4つのデッキに、ディーラーと同じ画風とゲームの色で描いた新しい肖像がつきました。", "Четыре колоды Приключения получили новые портреты в стиле крупье и в цветах игры.", "Cztery talie Przygody mają nowe portrety, w stylu krupiera i w kolorach gry."),
+      chapters: [
+        { id: "barajas", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Aventura", "Adventure", "Aventure", "Aventura", "Abenteuer", "Avventura", "", "冒险", "모험", "アドベンチャー", "Приключение", "Przygoda"),
+          entries: [
+            E(L("Cuatro retratos a juego", "Four matching portraits", "Quatre portraits assortis", "Quatro retratos combinando", "Vier passende Porträts", "Quattro ritratti abbinati", "", "四幅配套的头像", "어울리는 초상화 네 장", "そろいの肖像4枚", "Четыре портрета в одном стиле", "Cztery pasujące portrety"), "change", "0.3.155", [
+              L("El **Explorador**, el **Historiador**, el **Navegante** y el **Aventurero ciego** tienen retrato nuevo: el mismo estilo que el crupier, los colores del juego y el objeto de su baraja en la mano (el Sonar, el Libro de la casa, el Catalejo y el Foco). Y el Aventurero ciego lleva, por fin, una venda en los ojos.",
+                "The **Explorer**, the **Historian**, the **Navigator** and the **Blind adventurer** have new portraits: the same style as the dealer, the game's colours and their deck's item in hand (the Sonar, the House ledger, the Spyglass and the Spotlight). And the Blind adventurer finally wears a blindfold.",
+                "L'**Explorateur**, l'**Historien**, le **Navigateur** et l'**Aventurier aveugle** ont un nouveau portrait : le même style que le croupier, les couleurs du jeu et l'objet de leur paquet en main (le Sonar, le Registre de la maison, la Longue-vue et le Projecteur). Et l'Aventurier aveugle porte enfin un bandeau sur les yeux.",
+                "O **Explorador**, o **Historiador**, o **Navegador** e o **Aventureiro cego** têm retrato novo: o mesmo estilo do crupiê, as cores do jogo e o objeto do seu baralho na mão (o Sonar, o Livro da casa, a Luneta e o Holofote). E o Aventureiro cego finalmente usa uma venda nos olhos.",
+                "Der **Entdecker**, der **Historiker**, der **Navigator** und der **Blinde Abenteurer** haben neue Porträts: derselbe Stil wie der Croupier, die Farben des Spiels und der Gegenstand ihres Decks in der Hand (das Sonar, das Hausregister, das Fernrohr und der Scheinwerfer). Und der Blinde Abenteurer trägt endlich eine Augenbinde.",
+                "L'**Esploratore**, lo **Storico**, il **Navigatore** e l'**Avventuriero cieco** hanno un nuovo ritratto: lo stesso stile del croupier, i colori del gioco e l'oggetto del loro mazzo in mano (il Sonar, il Registro della casa, il Cannocchiale e il Riflettore). E l'Avventuriero cieco porta finalmente una benda sugli occhi.",
+                "",
+                "**探险家**、**历史学家**、**航海家**和**盲眼冒险者**都换上了新头像：与荷官相同的画风、游戏的配色，手里拿着各自套牌的物品（声呐、赌场账簿、望远镜和聚光灯）。盲眼冒险者终于蒙上了眼罩。",
+                "**탐험가**, **역사가**, **항해사**, **눈먼 모험가**가 새 초상화를 받았어요. 딜러와 같은 화풍, 게임의 색, 그리고 손에는 각자 덱의 물건(소나, 하우스 장부, 망원경, 스포트라이트)을 들고 있어요. 눈먼 모험가는 드디어 눈가리개를 했어요.",
+                "**探検家**、**歴史家**、**航海者**、**盲目の冒険者**に新しい肖像がつきました。ディーラーと同じ画風、ゲームの色、そして手にはそれぞれのデッキの道具（ソナー、ハウスの帳簿、望遠鏡、スポットライト）。盲目の冒険者は、ようやく目隠しをしています。",
+                "У **Исследователя**, **Историка**, **Штурмана** и **Слепого авантюриста** новые портреты: тот же стиль, что у крупье, цвета игры и предмет их колоды в руках (Сонар, Книга заведения, Подзорная труба и Прожектор). А Слепой авантюрист наконец носит повязку на глазах.",
+                "**Odkrywca**, **Historyk**, **Nawigator** i **Ślepy awanturnik** mają nowe portrety: ten sam styl co krupier, kolory gry i przedmiot swojej talii w ręku (Sonar, Księga kasyna, Luneta i Reflektor). A Ślepy awanturnik wreszcie ma opaskę na oczach."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.154",
       name: L("Retos de la casa", "House challenges", "Défis de la maison", "Desafios da casa", "Aufgaben des Hauses", "Sfide della casa", "", "本店挑战", "하우스 도전", "ハウスの挑戦", "Задания заведения", "Wyzwania kasyna"),
       date: "2026-10-16",
