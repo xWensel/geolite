@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.147",
+      name: L("El escudo, con volumen", "An emblem with depth", "Un emblème en relief", "Um emblema com volume", "Ein Emblem mit Tiefe", "Un emblema con volume", "", "更有立体感的徽标", "입체감이 생긴 엠블럼", "立体感が出たエンブレム", "Объёмная эмблема", "Emblemat z głębią"),
+      date: "2026-10-16",
+      summary: L("El escudo estrena la misma Tierra con volumen que el logo, en todos sus tamaños.", "The emblem now has the same Earth with depth as the logo, in every size.", "L'emblème reprend la même Terre en relief que le logo, dans toutes ses tailles.", "O emblema agora tem a mesma Terra com volume do logo, em todos os tamanhos.", "Das Emblem hat jetzt dieselbe Erde mit Tiefe wie das Logo, in allen Größen.", "L'emblema ora ha la stessa Terra con volume del logo, in tutte le misure.", "", "徽标在所有尺寸上都换上了和标志一样有立体感的地球。", "엠블럼에도 이제 모든 크기에서 로고와 같은 입체감 있는 지구가 들어가요.", "エンブレムのすべてのサイズに、ロゴと同じ立体感のある地球が入りました。", "На эмблеме во всех размерах теперь та же объёмная Земля, что и на логотипе.", "Emblemat we wszystkich rozmiarach ma teraz tę samą Ziemię z głębią co logo."),
+      chapters: [
+        { id: "escudo", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Menú, escritorio y navegador", "Menu, desktop and browser", "Menu, bureau et navigateur", "Menu, área de trabalho e navegador", "Menü, Desktop und Browser", "Menu, desktop e browser", "", "菜单、桌面与浏览器", "메뉴, 바탕화면, 브라우저", "メニュー、デスクトップ、ブラウザ", "Меню, рабочий стол и браузер", "Menu, pulpit i przeglądarka"),
+          entries: [
+            E(L("La sombra de esfera, también en el escudo", "Sphere shading on the emblem too", "L'ombre de sphère, aussi sur l'emblème", "A sombra de esfera, também no emblema", "Kugelschattierung auch im Emblem", "L'ombra di sfera, anche sull'emblema", "", "徽标也有了球体明暗", "엠블럼에도 구의 음영", "エンブレムにも球体の陰影", "Объём шара — и на эмблеме", "Cieniowanie kuli także w emblemacie"), "change", "0.3.147", [
+              L("La Tierra del escudo tiene ahora la misma sombra de esfera que la del logo: el mar y los continentes se oscurecen en una media luna abajo a la derecha, con la luz arriba a la izquierda, y la chistera y la carta proyectan su sombra sobre ella. Lo verás en el menú, en el icono del juego y en la pestaña del navegador.",
+                "The Earth on the emblem now has the same sphere shading as the logo's: the sea and the continents darken in a crescent at the bottom right, with the light at the top left, and the top hat and the card cast their shadow on it. You'll see it in the menu, in the game's icon and in the browser tab.",
+                "La Terre de l'emblème a maintenant la même ombre de sphère que celle du logo : la mer et les continents s'assombrissent en croissant en bas à droite, avec la lumière en haut à gauche, et le haut-de-forme et la carte y projettent leur ombre. Tu la verras dans le menu, dans l'icône du jeu et dans l'onglet du navigateur.",
+                "A Terra do emblema agora tem a mesma sombra de esfera da do logo: o mar e os continentes escurecem em uma meia-lua embaixo, à direita, com a luz em cima, à esquerda, e a cartola e a carta projetam sua sombra sobre ela. Você vai vê-la no menu, no ícone do jogo e na aba do navegador.",
+                "Die Erde im Emblem hat jetzt dieselbe Kugelschattierung wie die im Logo: Meer und Kontinente werden in einer Sichel unten rechts dunkler, das Licht kommt von oben links, und Zylinder und Karte werfen ihren Schatten darauf. Du siehst es im Menü, im Spielsymbol und im Browser-Tab.",
+                "La Terra dell'emblema ora ha la stessa ombra di sfera di quella del logo: il mare e i continenti si scuriscono in una mezzaluna in basso a destra, con la luce in alto a sinistra, e il cilindro e la carta vi proiettano la loro ombra. La vedrai nel menu, nell'icona del gioco e nella scheda del browser.",
+                "",
+                "徽标里的地球现在有了和标志一样的球体明暗：海洋和大陆在右下方的月牙处变暗，光从左上方照来，礼帽和纸牌也在它上面投下影子。你会在菜单、游戏图标和浏览器标签页里看到它。",
+                "엠블럼 속 지구에도 이제 로고와 같은 구의 음영이 생겼어요. 빛은 왼쪽 위에서 오고, 바다와 대륙이 오른쪽 아래 초승달 모양으로 어두워지며, 실크해트와 카드가 그 위에 그림자를 드리워요. 메뉴, 게임 아이콘, 브라우저 탭에서 볼 수 있어요.",
+                "エンブレムの地球にも、ロゴと同じ球体の陰影がつきました。光は左上から当たり、海と大陸は右下の三日月形に暗くなり、シルクハットとカードが影を落とします。メニュー、ゲームのアイコン、ブラウザのタブで見られます。",
+                "У Земли на эмблеме теперь тот же объём шара, что и на логотипе: свет падает слева сверху, море и материки темнеют полумесяцем справа внизу, а цилиндр и карта отбрасывают на неё тень. Ты увидишь это в меню, в значке игры и во вкладке браузера.",
+                "Ziemia w emblemacie ma teraz to samo cieniowanie kuli co w logo: światło pada z lewej u góry, morze i kontynenty ciemnieją półksiężycem w prawym dolnym rogu, a cylinder i karta rzucają na nią cień. Zobaczysz to w menu, w ikonie gry i w karcie przeglądarki."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.146",
       name: L("Reliquias nuevas", "New relics", "Nouvelles reliques", "Relíquias novas", "Neue Relikte", "Nuove reliquie", "", "全新遗物", "새 유물", "新しいレリック", "Новые реликвии", "Nowe relikty"),
       date: "2026-10-16",
