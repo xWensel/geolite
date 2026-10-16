@@ -642,7 +642,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 /* cabecera: el acto y el titulo (con la ficha de la Ascension), la ruta y, a la derecha, el menu y los doblones */
 .gx-camp .tb-head { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; min-width: 0; }
 .gx-camp .tb-title { display: grid; gap: 2px; min-width: 0; }
-.gx-camp .tb-title .tag { margin: 0; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: none; box-shadow: none; border-radius: 0; }
+.gx-camp .tb-title .tag { margin: 0; padding: 0; white-space: normal; text-wrap: balance; line-height: 1.05; background: none; box-shadow: none; border-radius: 0; }
 .gx-camp .tb-trow { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .gx-camp .tb-trow h2 { white-space: nowrap; }
 .gx-camp .tb-asc { position: relative; flex: none; width: 32px; height: 32px; cursor: help; }

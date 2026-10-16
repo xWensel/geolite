@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.165",
+      name: L("El título del acto, entero", "The act title, in full", "Le titre de l'acte, en entier", "O título do ato, inteiro", "Der Aktitel, vollständig", "Il titolo dell'atto, intero", "", "幕标题完整显示", "막 제목이 끝까지", "幕のタイトルを最後まで", "Название акта целиком", "Tytuł aktu w całości"),
+      date: "2026-10-16",
+      summary: L("En el Campamento, la línea de arriba con el acto y la ronda ya no se corta con puntos suspensivos.", "In the Camp, the top line with the act and round no longer gets cut off with an ellipsis.", "Au Campement, la ligne du haut avec l'acte et la manche n'est plus coupée par des points de suspension.", "No Acampamento, a linha de cima com o ato e a rodada já não é cortada com reticências.", "Im Lager wird die obere Zeile mit Akt und Runde nicht mehr mit Auslassungspunkten abgeschnitten.", "All'Accampamento, la riga in alto con atto e round non viene più tagliata con i puntini di sospensione.", "", "在营地里，顶部的幕与回合标题不再被省略号截断。", "캠프 위쪽의 막과 라운드 줄이 더 이상 말줄임표로 잘리지 않아요.", "キャンプ上部の幕とラウンドの行が「…」で切れなくなりました。", "В Лагере верхняя строка с актом и раундом больше не обрезается многоточием.", "W Obozie górna linia z aktem i rundą nie jest już ucinana wielokropkiem."),
+      chapters: [
+        { id: "titulo", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Campamento", "Camp", "Campement", "Acampamento", "Lager", "Accampamento", "", "营地", "캠프", "キャンプ", "Лагерь", "Obóz"),
+          entries: [
+            E(L("Sin puntos suspensivos", "No more ellipsis", "Fini les points de suspension", "Sem reticências", "Keine Auslassungspunkte mehr", "Niente più puntini", "", "不再有省略号", "말줄임표 없이", "「…」なしで", "Без многоточия", "Bez wielokropka"), "fix", "0.3.165", [
+              L("El título de arriba del **Campamento** (acto y nombre de la ronda) se muestra siempre entero: si no cabe en una línea, baja a una segunda en vez de cortarse con «…».", "The title at the top of the **Camp** (act and round name) always shows in full: if it doesn't fit on one line it wraps to a second instead of being cut off with “…”.", "Le titre en haut du **Campement** (acte et nom de la manche) s'affiche toujours en entier : s'il ne tient pas sur une ligne, il passe à la suivante au lieu d'être coupé par « … ».", "O título no topo do **Acampamento** (ato e nome da rodada) aparece sempre inteiro: se não couber numa linha, passa para uma segunda em vez de ser cortado com «…».", "Der Titel oben im **Lager** (Akt und Rundenname) wird immer vollständig angezeigt: Passt er nicht in eine Zeile, bricht er in eine zweite um, statt mit „…“ abgeschnitten zu werden.", "Il titolo in alto all'**Accampamento** (atto e nome del round) si vede sempre per intero: se non sta in una riga va a capo invece di essere tagliato con «…».", "", "**营地**顶部的标题（幕和回合名称）现在总是完整显示：一行放不下时会换到第二行，而不是被“…”截断。", "**캠프** 위쪽 제목(막과 라운드 이름)이 항상 끝까지 보여요. 한 줄에 안 들어가면 “…”로 잘리는 대신 다음 줄로 넘어가요.", "**キャンプ**上部のタイトル（幕とラウンド名）は常に最後まで表示されます。1行に収まらない時は「…」で切れず、2行目に折り返します。", "Заголовок вверху **Лагеря** (акт и название раунда) теперь всегда виден целиком: если он не помещается в строку, переносится на вторую, а не обрезается «…».", "Tytuł na górze **Obozu** (akt i nazwa rundy) jest zawsze widoczny w całości: jeśli nie mieści się w jednej linii, przechodzi do drugiej zamiast być ucinany „…”."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.164",
       name: L("La chincheta, en su sitio", "The pin, in its place", "L'épingle, à sa place", "O alfinete no lugar", "Der Pin an seinem Platz", "La puntina al suo posto", "", "图钉归位", "핀은 제자리에", "ピンはいつもの場所に", "Булавка на своём месте", "Pinezka na swoim miejscu"),
       date: "2026-10-16",
