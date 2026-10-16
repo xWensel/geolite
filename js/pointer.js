@@ -136,17 +136,20 @@ window.AIQ = window.AIQ || {};
   /* Cursor parpadeante: tubo de neon moribundo (tramos irregulares y tartamudeo al encenderse; de media sigue apagado lo mismo) */
   const hash1 = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
   function neonOn(now, b) { const u = now / 1000 / b.period, n = Math.floor(u), ph = u - n, duty = b.duty + 0.02 + (hash1(n) - 0.5) * 0.3; if (ph >= duty) return false; return ph > 0.08 || Math.floor(now / 25) % 2 === 0; }
-  let ghostWas = true;
+  let ghostWas = true, thruOn = false;
 
   /* "Lo que ves es lo que pulsas": con un reto que separa el reticulo del raton (invertido, mareo, retraso, viento...), las cartas de la mano de abajo se
      pulsan con el raton de verdad, y el jugador lleva el RETICULO a la carta. Si el reticulo esta encima de una carta, esa carta se ilumina y el clic la usa
      (js/map.js _tap) en vez de poner la chincheta debajo, que respondia la pregunta. Con el reticulo invisible (Cursor fantasma) no cuenta */
-  const uiAt = () => { if (!P.on || !vis) return null; const el = document.elementFromPoint(cvL + P.x, cvT + P.y); return el && el.closest ? el.closest("#toolBar .tool") : null; };
+  const uiAt = () => { if (!P.on || !vis) return null; const x = cvL + P.x, y = cvT + P.y; for (const el of document.querySelectorAll("#toolBar .tool")) { const r = el.getBoundingClientRect(); if (r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return el; } return null; };   // por rectangulo: con el cursor invertido los paneles no reciben el raton (pointer-events: none) y elementFromPoint no los veria
   P.uiAt = uiAt;
   const markAim = el => { if (el === aimEl) return; if (aimEl) aimEl.classList.remove("aim"); if (el) el.classList.add("aim"); aimEl = el; };
   /* ---------------------------------------------------------------- bucle */
   function frame(now) {
-    raf = requestAnimationFrame(frame); if (!P.on) return;
+    raf = requestAnimationFrame(frame);
+    /* con el cursor invertido el raton de verdad puede quedar sobre la pregunta o la puntuacion mientras el reticulo esta en el mapa: esos paneles dejan pasar el raton al mapa */
+    const thru = !!(map && map.pickEnabled && P.m && P.m.cmirror); if (thru !== thruOn) { thruOn = thru; document.body.classList.toggle("ptr-thru", thru); }
+    if (!P.on) return;
     if (P.press > 0) P.press = Math.max(0, P.press - 16);
     eff(now); apply(now); if (now - lastDraw > 30 || P.press > 0) { lastDraw = now; draw(now); }
     const fx = P.st.fx || {};
