@@ -56,7 +56,7 @@ window.AIQ = window.AIQ || {};
       ${id === "adventure" ? BULBS : ""}${badge ? `<span class="mc-ribbon">${badge}</span>` : ""}<span class="mc-win">${A.pic(art)}</span><b class="mc-name">${title}</b><span class="mc-stat sq-fit">${meta}</span></button>`;
     const noDeal = homeDealt; homeDealt = true;                       // las cartas se reparten solo la primera vez que se ve la portada; al volver de Perfil & co. ya estan en la mesa
     c.dialog(`<div class="hh${noDeal ? " nodeal" : ""}">
-      <div class="hh-top">${A.salir ? A.salir.button() : ""}<img class="hh-logo" src="assets/logo.png" alt="Geolite" onerror="this.outerHTML='<h1>Geo<em>lite</em></h1>'">${tools()}</div>
+      <div class="hh-top">${A.salir ? A.salir.button() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${tools()}</div>
       <p class="hh-tag">${A.t("title.tag")}</p>
       <div class="hh-cards">
         ${mc("classic", "K", "s_palm", "card_classic", T("Clásico", "Classic"), T("Regiones del mundo, banderas, pistas, sucesos y personajes, contra el reloj.", "Regions of the world, flags, clues, events and famous people, against the clock."), T("Directo al grano", "No frills"))}
@@ -73,6 +73,7 @@ window.AIQ = window.AIQ || {};
         </div>
       </div></div>
       <span class="hh-ver">Geolite · v${A.VERSION}</span>${A.parche ? A.parche.button() : ""}`, "home");               // fuera de .hh: no cuenta para la composicion ni para A.fitK
+    if (A.geoLogo) A.geoLogo.mount(document.querySelector("#dlg .hh-logo"));   // el logo vivo: la Tierra gira bajo la chistera (js/geologo.js)
     wireTools(); A.podio.wire(); if (A.parche) A.parche.wire();                                      // Clasificacion: js/podio.js
     fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
     if (A.salir) A.salir.wire();                                      // salir del juego: js/salir.js

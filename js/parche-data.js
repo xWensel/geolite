@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.130",
+      name: L("El logo nuevo", "The new logo", "Le nouveau logo", "O novo logo", "Das neue Logo", "Il nuovo logo", "", "全新标志", "새 로고", "新しいロゴ", "Новый логотип", "Nowe logo"),
+      date: "2026-10-16",
+      summary: L("Geolite estrena logo: el rótulo de bombillas de siempre, rehecho con más detalle, y la Tierra girando bajo la chistera del crupier.", "Geolite has a new logo: the same light-bulb marquee, redrawn in finer detail, with the Earth spinning under the dealer's top hat.", "Geolite étrenne un nouveau logo : l'enseigne à ampoules de toujours, redessinée avec plus de détails, et la Terre qui tourne sous le haut-de-forme du croupier.", "O Geolite estreia logo: o letreiro de lâmpadas de sempre, redesenhado com mais detalhe, e a Terra girando sob a cartola do crupiê.", "Geolite hat ein neues Logo: die bekannte Glühbirnen-Leuchtschrift, detailreicher neu gezeichnet, und die Erde dreht sich unter dem Zylinder des Croupiers.", "Geolite ha un nuovo logo: la solita insegna di lampadine, ridisegnata con più dettagli, e la Terra che gira sotto il cilindro del croupier.", "", "Geolite 换上了新标志：熟悉的灯泡招牌重新绘制、细节更丰富，地球在荷官的礼帽下旋转。", "Geolite의 새 로고: 익숙한 전구 간판을 더 섬세하게 다시 그렸고, 딜러의 실크해트 아래에서 지구가 돌아요.", "Geoliteのロゴが新しくなりました。おなじみの電球の看板をより細かく描き直し、ディーラーのシルクハットの下で地球が回ります。", "У Geolite новый логотип: знакомая вывеска с лампочками, перерисованная детальнее, и Земля, которая вращается под цилиндром крупье.", "Geolite ma nowe logo: znajomy szyld z żarówkami, narysowany od nowa z większą liczbą szczegółów, i Ziemia, która kręci się pod cylindrem krupiera."),
+      chapters: [
+        { id: "logo", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新增", "신규", "新規", "Новое", "Nowość"),
+          title: L("Portada y pantalla de entrada", "Title screen and entrance screen", "Accueil et écran d'entrée", "Tela inicial e tela de entrada", "Titelbildschirm und Eingangsbildschirm", "Schermata iniziale e schermata d'ingresso", "", "首页与入口画面", "타이틀 화면과 입구 화면", "タイトル画面と入口の画面", "Заставка и экран входа", "Ekran tytułowy i ekran wejścia"),
+          entries: [
+            E(L("La Tierra gira bajo la chistera", "The Earth spins under the top hat", "La Terre tourne sous le haut-de-forme", "A Terra gira sob a cartola", "Die Erde dreht sich unter dem Zylinder", "La Terra gira sotto il cilindro", "", "地球在礼帽下旋转", "실크해트 아래에서 도는 지구", "シルクハットの下で回る地球", "Земля вращается под цилиндром", "Ziemia kręci się pod cylindrem"), "new", "0.3.130", [
+              L("El logo de la portada y de la pantalla de entrada es nuevo: el rótulo de bombillas sobre fieltro verde, con la **O** convertida en la Tierra, que gira despacio bajo la chistera del crupier, junto a la carta y la ficha. Se pinta a la resolución real de tu pantalla para que se vea nítido. Con **Movimiento** en «Mínimo», la Tierra se queda quieta.",
+                "The logo on the title screen and the entrance screen is new: the light-bulb marquee on green felt, with the **O** turned into the Earth, slowly spinning under the dealer's top hat, next to the card and the chip. It is drawn at your screen's real resolution so it stays sharp. With **Motion** on \"Minimal\", the Earth stays still.",
+                "Le logo de l'accueil et de l'écran d'entrée est nouveau : l'enseigne à ampoules sur feutre vert, avec le **O** devenu la Terre, qui tourne lentement sous le haut-de-forme du croupier, à côté de la carte et du jeton. Il est dessiné à la résolution réelle de ton écran pour rester net. Avec **Mouvement** sur « Minimal », la Terre reste immobile.",
+                "O logo da tela inicial e da tela de entrada é novo: o letreiro de lâmpadas sobre feltro verde, com o **O** transformado na Terra, que gira devagar sob a cartola do crupiê, ao lado da carta e da ficha. É desenhado na resolução real da sua tela para ficar nítido. Com **Movimento** em \"Mínimo\", a Terra fica parada.",
+                "Das Logo auf dem Titelbildschirm und dem Eingangsbildschirm ist neu: die Glühbirnen-Leuchtschrift auf grünem Filz, das **O** ist jetzt die Erde und dreht sich langsam unter dem Zylinder des Croupiers, neben der Karte und dem Chip. Es wird in der echten Auflösung deines Bildschirms gezeichnet, damit es scharf bleibt. Steht **Bewegung** auf „Minimal“, bleibt die Erde stehen.",
+                "Il logo della schermata iniziale e della schermata d'ingresso è nuovo: l'insegna di lampadine sul feltro verde, con la **O** diventata la Terra, che gira piano sotto il cilindro del croupier, accanto alla carta e alla fiche. Viene disegnato alla risoluzione reale del tuo schermo, così resta nitido. Con **Movimento** su «Minimo», la Terra resta ferma.",
+                "",
+                "首页和入口画面的标志焕然一新：绿色台呢上的灯泡招牌，字母 **O** 变成了地球，在荷官的礼帽下缓缓旋转，旁边是纸牌和筹码。它按你屏幕的真实分辨率绘制，始终清晰。**动态效果**设为“最少”时，地球保持不动。",
+                "타이틀 화면과 입구 화면의 로고가 새로워졌어요. 초록 펠트 위의 전구 간판에서 **O**가 지구가 되어, 카드와 칩 옆에서 딜러의 실크해트 아래로 천천히 돕니다. 화면의 실제 해상도로 그려서 선명하게 보여요. **움직임**을 '최소'로 하면 지구가 멈춰 있어요.",
+                "タイトル画面と入口の画面のロゴが新しくなりました。緑のフェルトに電球の看板、**O** は地球になり、カードとチップのそばでディーラーのシルクハットの下をゆっくり回ります。画面の実際の解像度で描くので、くっきり見えます。**動き**を「最小」にすると、地球は止まったままです。",
+                "Логотип на заставке и на экране входа новый: вывеска с лампочками на зелёном сукне, где **O** стала Землёй, которая медленно вращается под цилиндром крупье рядом с картой и фишкой. Он рисуется в настоящем разрешении твоего экрана, поэтому остаётся чётким. Если **Движение** стоит на «Минимум», Земля не вращается.",
+                "Logo na ekranie tytułowym i na ekranie wejścia jest nowe: szyld z żarówkami na zielonym suknie, w którym **O** stało się Ziemią, powoli kręcącą się pod cylindrem krupiera obok karty i żetonu. Rysujemy je w prawdziwej rozdzielczości twojego ekranu, żeby było ostre. Gdy **Ruch** jest na „Minimalny”, Ziemia stoi w miejscu."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.129",
       name: L("La bandera es todo el país", "The flag is the whole country", "Le drapeau, c'est tout le pays", "A bandeira é o país inteiro", "Die Flagge ist das ganze Land", "La bandiera è tutto il paese", "", "国旗就是整个国家", "국기는 나라 전체", "国旗は国全体", "Флаг — это вся страна", "Flaga to cały kraj"),
       date: "2026-10-16",

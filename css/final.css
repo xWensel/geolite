@@ -41,7 +41,7 @@
 .fin-s { margin: 10px 0 0; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1.12; color: rgba(242, 233, 214, .62); text-wrap: balance; }
 .fin-pip { display: block; width: 6px; height: 6px; margin: 0 auto 28px; background: var(--brass); box-shadow: 0 0 0 2px #000, 0 0 12px rgba(248, 180, 73, .6); transform: rotate(45deg); }
 .fin-open { height: calc(100vh / var(--k, 1)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 !important; margin-bottom: 40px; }
-.fin-logo { width: min(470px, 78vw); image-rendering: pixelated; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .6)) drop-shadow(0 0 36px rgba(248, 180, 73, .3)); }
+.fin-logo { width: min(470px, 78vw); image-rendering: auto; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .6)) drop-shadow(0 0 36px rgba(248, 180, 73, .3)); }
 .fin-by { margin: 40px 0 10px; font-family: var(--mono); font-size: 16px; letter-spacing: .14em; color: rgba(242, 233, 214, .62); text-transform: uppercase; }
 .fin-cs { width: min(330px, 62vw); }
 .fin-cs svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .6)); }
