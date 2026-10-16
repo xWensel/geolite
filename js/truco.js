@@ -71,7 +71,8 @@ window.AIQ = window.AIQ || {};
     /* el vestuario, entero (sin ponerse nada) */
     const vs = P.vest = P.vest && typeof P.vest === "object" ? P.vest : { own: {}, wear: {} }; vs.own = vs.own || {}; vs.wear = vs.wear || {};
     if (A.vestuario) A.vestuario.items.forEach(it => { if (!it.casa && !vs.own[it.id]) vs.own[it.id] = now; });
-    if (A.punteros && A.punteros._todo) A.punteros._todo();                                            // los punteros de la tienda (sin ponerse nada)
+    if (A.punteros && A.punteros._todo) A.punteros._todo();
+    if (A.socio && A.socio._todo) A.socio._todo();                                                    // los iconos y titulos de la tienda (los de logros salen de los logros)                                            // los punteros de la tienda (sin ponerse nada)
     /* el Clasico: todos los niveles de las 12 campanas */
     const camps = A.CAMPAIGNS || [];
     if (C && C.prog) { camps.forEach(cp => { const p = C.prog(cp.id); p.unlocked = Math.max(p.unlocked || 1, cp.levels.length); }); C.save(); }

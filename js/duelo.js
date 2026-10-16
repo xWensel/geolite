@@ -253,6 +253,7 @@ window.AIQ = window.AIQ || {};
   const SKEY = "atlasiq.duelo.banca";
   const stats = () => { let o = {}; try { o = JSON.parse(localStorage.getItem(SKEY) || "{}") || {}; } catch (e) { /* sin almacenamiento */ } return { d: +o.d || 0, w: +o.w || 0, s: +o.s || 0, lp: Math.max(0, Math.floor(+o.lp || 0)) }; };
   D.stats = stats;                                                        // la carta de la portada ensena tus duelos ganados (js/hub.js)
+  D.stats = () => stats();                                               // los duelos ganados a la banca (el titulo «Le gana a la banca», js/socio.js)
   const statsAdd = (win, liga) => { const o = stats(); o.d++; if (win) { o.w++; o.s++; } else o.s = 0;
     if (liga) { const r = rankOf(o.lp), floor = r.crupier ? TOP : r.idx * LG.per; o.lp = Math.max(floor, o.lp + (win ? LG.win : -LG.loss)); }   // sin bajar del inicio de tu division: sin descensos por ahora
     try { localStorage.setItem(SKEY, JSON.stringify(o)); } catch (e) { /* sin almacenamiento */ } return o; };

@@ -179,3 +179,23 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-pprev canvas { position: absolute; inset: 0; }
 .bq-tryt { display: grid; gap: 4px; }
 .bq-tryt i { font-style: normal; font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--gx-ink-2); }
+
+/* ---------------------------------------------------------------- «Tu carta» (js/socio.js): iconos y titulos */
+.bq-items.carta { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.bq-th.bq-cth { aspect-ratio: 1 / 1; overflow: hidden; background: #245a41; }
+.bq-cth canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.bq-cth.bq-ttl { display: grid; place-items: center; padding: 0 8px; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
+.bq-tplate { display: grid; place-items: center; min-height: 34px; max-width: 100%; padding: 4px 8px 5px; font-size: 19px; text-align: center; color: #ffd98a; background: #2a1e14; box-shadow: inset 0 2px 0 #4a3624, 0 0 0 2px #120e1c, 0 4px 0 2px rgba(2, 6, 4, .45); font-family: var(--sans); font-size: 20px; line-height: 1; text-shadow: 0 2px 0 #120e1c; }
+.bq-tplate span { text-wrap: balance; }
+.bq-cth.bq-ttl.off .bq-tplate { color: #9a8a70; background: #241c14; filter: grayscale(.6); }
+.bq-own.lk { display: inline-grid; place-items: center; padding: 2px 4px; }
+.bq-own.lk .ic { width: 18px; height: 18px; image-rendering: pixelated; }
+.bq-cit.bq-ttl .bq-nm { font-family: var(--mono); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-ink-2); }
+.bq-det.carta { grid-template-rows: auto auto auto auto auto; }
+.bq-dth.bq-cprev { aspect-ratio: auto; display: grid; place-items: center; padding: 14px 0 18px; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); }
+.bq-how { font-weight: 400; color: var(--gx-ink); }
+.bq-acts .gx-btn .ic { width: 22px; height: 22px; image-rendering: pixelated; }
+.bq-cit .bq-nm { font-size: 18px; line-height: 1; }
+.bq-cit .bq-prow { align-items: flex-start; }
+.bq-cat.carta .bq-tabs { flex-wrap: nowrap; min-width: 0; }
+.bq-cat.carta .bq-tab { padding-left: 10px; padding-right: 10px; white-space: nowrap; }
