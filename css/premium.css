@@ -16,7 +16,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
 #dlg.home, #dlg.verdict, #dlg.tablewrap { scrollbar-width: none; } #dlg.home::-webkit-scrollbar, #dlg.verdict::-webkit-scrollbar, #dlg.tablewrap::-webkit-scrollbar { display: none; }   /* las piezas entran por un lado y por un momento sobresalen: sin barra que aparezca y estreche 8 px toda la pantalla (portada, veredicto, mesa) */
 .hh { min-height: 100%; display: grid; grid-template-rows: auto auto 1fr auto; padding: clamp(14px, calc(2.4 * var(--vh)), 30px) clamp(16px, calc(4 * var(--vw)), 64px) clamp(14px, calc(2.4 * var(--vh)), 26px); gap: clamp(6px, calc(1.4 * var(--vh)), 16px); }
 .hh-top { position: relative; display: flex; justify-content: center; align-items: flex-start; }
-.hh-logo { width: min(calc(64 * var(--vw)), 470px); max-height: calc(26 * var(--vh)); width: auto; height: auto; max-width: min(calc(64 * var(--vw)), 470px); filter: drop-shadow(0 8px 0 rgba(5, 12, 8, .6)) drop-shadow(0 0 30px rgba(248, 180, 73, .3)); animation: logo-in .9s var(--spring) both; }
+.hh-logo { width: min(calc(64 * var(--vw)), 470px); max-height: calc(26 * var(--vh)); width: auto; height: auto; max-width: min(calc(64 * var(--vw)), 470px); animation: logo-in .9s var(--spring) both; }
 @keyframes logo-in { from { opacity: 0; transform: translateY(-30px) rotate(-3deg); } }
 .hh-top h1 { font-family: var(--serif); font-size: clamp(56px, calc(8 * var(--vw)), 110px); }
 .hh-top .menu-tools { position: absolute; right: 0; top: 0; }

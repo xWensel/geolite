@@ -177,7 +177,16 @@ html[data-skin="casino"] #askSub { font-family: inherit; }
 /* v0.3.130: el logo vivo (js/geologo.js). La caja reserva el hueco; dentro, un lienzo a pixeles reales (escala entera si cabe) */
 .geo-logo { display: flex; align-items: center; justify-content: center; }
 .geo-logo > img { display: block; width: 100%; height: 100%; }
+.geo-logo { position: relative; }
 .geo-logo > canvas { display: block; flex: none; }
+/* el lienzo vivo va sin filtros; detras, resplandor y sombra estaticos (silueta del logo con el desenfoque calculado una sola vez) */
+.geo-logo > .geo-main { position: relative; z-index: 2; }
+.geo-logo > .geo-gl, .geo-logo > .geo-sh { position: absolute; z-index: 0; pointer-events: none; }
+.geo-logo > .geo-sh { z-index: 1; }
+.geo-logo > .geo-gl { opacity: .3; filter: blur(30px); }
+.geo-logo > .geo-sh { opacity: .6; transform: translateY(8px); }
+.gate-logo .geo-logo > .geo-gl { opacity: .25; filter: blur(34px); }
+.gate-logo .geo-logo > .geo-sh { opacity: .55; filter: blur(15px); transform: translateY(10px); }
 .gate-logo .geo-logo { display: flex; }
 .gate-logo .geo-logo > img { width: 100% !important; height: 100% !important; aspect-ratio: auto; filter: none; animation: none; }
 /* escalas enteras del logo (200 px nativos): 2x en pantallas normales, 1x en pantallas pequenas */

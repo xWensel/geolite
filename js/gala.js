@@ -36,17 +36,22 @@ window.AIQ = window.AIQ || {};
   /* precalentamiento (v0.3.35): la primera vez que la GPU pinta estas superficies y su entrada compila sus shaders (~80 ms, un tiron en la
      primera pausa de una instalacion nueva; luego quedan en la cache del disco). Se pinta una muestra animada, una vez, a opacidad .004 (1/255: la GPU la dibuja, el ojo no; a .02 se veian fantasmas de las pantallas del juego sobre la puerta),
      cuando la pantalla esta quieta (la puerta de entrada) */
-  let warmed = false;
+  let warmed = false, warmEl = null, warmSh = null;
   function warm() {
     if (warmed || reduced()) return; warmed = true;
     const w = document.createElement("div"); w.setAttribute("aria-hidden", "true"); w.inert = true;
-    w.style.cssText = "position:fixed;inset:0;opacity:.004;pointer-events:none;z-index:2147483000";
+    /* Ya NO se pinta encima de la puerta (a 1/255 de opacidad, en monitores oscuros u OLED se adivinaban las pantallas: "modales raros"):
+       va DETRAS de la puerta, que es opaca, a opacidad plena, y se retira en cuanto se entra. Si no hay puerta, queda el pintado casi invisible de siempre */
+    const gate = document.getElementById("gate"), boot = gate && gate.parentElement, behind = !!(boot && boot.id === "boot" && !gate.classList.contains("hidden"));
+    w.style.cssText = behind ? "position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden" : "position:fixed;inset:0;opacity:.004;pointer-events:none;z-index:2147483000";
+    warmEl = w;
     const abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnÑñOoPpQqRrSsTtUuVvWwXxYyZz ÁáÉéÍíÓóÚúÜü¿?¡!·/.,:%+-0123456789";   // los glifos tambien se rasterizan la primera vez, a cada tamano
     w.innerHTML = `<div class="gx-pause gx-layer gx-in"><div class="gx-veil"></div><div class="gx-spot"></div><div class="gx-stage"><div class="gx-grid"><div class="gx-sh gx-railw gx-from-left"><section class="gx-pnl gx-rail">
       <div class="gx-head"><span class="gx-eyb">${abc}</span><h2 class="gx-t-l">${abc}</h2><p class="gx-lead">${abc}</p></div><div class="gx-paper"><div class="gx-lead-row"><span>${abc}</span><s></s><b>0 <small>/ 1</small></b></div><div class="gx-bar"><i style="width:40%"></i></div></div>
       <div class="gx-acts col"><button class="gx-btn pri wide" tabindex="-1">${abc} <span class="gx-k"><kbd class="k-kb">Esc</kbd></span></button><button class="gx-btn wide" tabindex="-1">${abc}</button></div>
       <div class="gx-foot"><div class="gx-hr"></div><div class="gx-acts"><button class="gx-btn gho sm" tabindex="-1">${abc}</button></div><p class="gx-note">${abc}</p></div></section></div></div></div></div>`;
-    document.body.appendChild(w); setTimeout(() => w.remove(), 900 + 5 * 400);
+    if (behind) boot.insertBefore(w, gate); else document.body.appendChild(w);
+    setTimeout(() => w.remove(), 900 + 5 * 400);
     /* v0.3.41: cada pieza en su propio momento (las tres a la vez paraban el fundido de la puerta): el Perfil (fichas, papel grande y su sombra)
        a los 400 ms, Ajustes a los 800 y el Reto diario a los 1.200: cada una en su momento, sin juntar sus parones */
     setTimeout(() => { try { if (w.isConnected && A.hub && A.hub.profileHtml) w.insertAdjacentHTML("beforeend", `<div style="position:absolute;inset:0">${A.hub.profileHtml()}</div>`); } catch (e) { /* sin perfil aun */ } }, 400);
@@ -57,11 +62,14 @@ window.AIQ = window.AIQ || {};
     /* v0.3.38: Ajustes tambien (su primera apertura daba 11 fotogramas perdidos): se pinta el de verdad, casi invisible y sin recibir clics */
     const sh = document.getElementById("setSh");
     if (sh && sh.classList.contains("hidden")) setTimeout(() => {
-      if (!sh.classList.contains("hidden")) return;
+      if (!sh.classList.contains("hidden") || !warmEl) return;
       sh.style.opacity = ".004"; sh.style.pointerEvents = "none"; sh.classList.remove("hidden");
-      setTimeout(() => { sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); }, 900);
+      warmSh = () => { warmSh = null; sh.style.opacity = ""; sh.style.pointerEvents = ""; if (!(A.core && A.core.S.settingsOpen)) sh.classList.add("hidden"); };
+      setTimeout(() => { if (warmSh) warmSh(); }, 900);
     }, 800);
   }
+  /* al entrar al juego se quita todo el precalentamiento: nada de el puede verse al fundirse la puerta */
+  function cool() { if (warmEl) { warmEl.remove(); warmEl = null; } if (warmSh) warmSh(); }
   /* v0.3.43: pasar pagina en una lista (Clasificacion, Reto diario). La lista vieja sale hacia un lado y la nueva entra del otro A LA VEZ, solo con
      transform y opacity (la GPU las mueve sin rehacer la pagina) y una curva continua: nada de steps(), que daba saltos de unas 11 imagenes por
      segundo. La copia vieja se pone encima en su sitio exacto (el padre tiene que ser su offsetParent) y se quita al terminar */
@@ -84,5 +92,5 @@ window.AIQ = window.AIQ || {};
   /* glifo de la accion: tecla con teclado y boton con mando (css/mando.css decide cual se ve) */
   const keyHint = (kb, pad) => `<span class="gx-k"><kbd class="k-kb">${kb}</kbd>${pad ? `<i class="gl" data-gl="${pad}"></i>` : ""}</span>`;
 
-  A.gala = { enter, keyHint, warm, turn, OUT_MS, get warmed() { return warmed; } };
+  A.gala = { enter, keyHint, warm, cool, turn, OUT_MS, get warmed() { return warmed; } };
 })(window.AIQ);

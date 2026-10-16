@@ -19,7 +19,7 @@ window.AIQ = window.AIQ || {};
   }))));
   const quieto = () => document.documentElement.classList.contains("reduce-motion");
   const vivos = new Set();                                   // lienzos montados
-  let f = 0, acc = 0, last = 0, raf = 0;
+  let f = 0, a = 0, acc = 0, last = 0, raf = 0;
 
   /* la resolucion del lienzo sale de la caja a la vista (incluye el zoom de la portada) y de los pixeles reales de la pantalla */
   function ajusta(cv) {
@@ -38,14 +38,31 @@ window.AIQ = window.AIQ || {};
       for (const kk of keys) { const im = img[kk]; if (im) c.drawImage(im, Math.round(CAPAS[kk][1] * cv._sc), Math.round(CAPAS[kk][2] * cv._sc), Math.round(im.width * cv._sc), Math.round(im.height * cv._sc)); }
       return o; };
     cv._back = capa(["rot"]); cv._front = capa(["carta", "chis"]); cv._f = -1;
+    /* resplandor y sombra: lienzos ESTATICOS detras (la silueta del logo, pintada una vez). Antes eran filter: drop-shadow sobre el lienzo vivo y la GPU
+       rehacia los dos desenfoques en cada fotograma de la Tierra; ahora el lienzo vivo va sin filtros y el desenfoque se calcula una sola vez */
+    for (const [sh, col] of [[cv._gl, "#f8b449"], [cv._sh, "#050c08"]]) {
+      if (!sh) continue;
+      sh.width = bw; sh.height = bh; sh.style.width = cv.style.width; sh.style.height = cv.style.height;
+      sh.style.left = cv.offsetLeft + "px"; sh.style.top = cv.offsetTop + "px";
+      const c = sh.getContext("2d"); c.clearRect(0, 0, bw, bh); c.imageSmoothingEnabled = sc < 1; c.imageSmoothingQuality = "high";
+      c.drawImage(cv._back, 0, 0); if (img.tierra) c.drawImage(img.tierra, 0, 0, FS, FS, Math.round(CAPAS.tierra[1] * cv._sc), Math.round(CAPAS.tierra[2] * cv._sc), Math.round(FS * cv._sc), Math.round(FS * cv._sc)); c.drawImage(cv._front, 0, 0);
+      c.globalCompositeOperation = "source-in"; c.fillStyle = col; c.fillRect(0, 0, bw, bh); c.globalCompositeOperation = "source-over";
+    }
   }
 
+  /* el giro es fluido: entre un fotograma y el siguiente se funde (a, 0..1) a la frecuencia de la pantalla, en vez de saltar a ~13 por segundo.
+     Los bordes de la esfera son identicos en todos los fotogramas, asi que solo se mezcla lo de dentro (continentes y nubes) */
   function pinta(cv) {
-    if (cv._f === f || !cv._back) return; cv._f = f;
+    const key = f * 64 + Math.round(a * 48);
+    if (cv._f === key || !cv._back) return; cv._f = key;
     const c = cv.getContext("2d"), s = cv._sc, t = img.tierra;
     c.clearRect(0, 0, cv.width, cv.height); c.imageSmoothingEnabled = s < 1; c.imageSmoothingQuality = "high";
     c.drawImage(cv._back, 0, 0);
-    if (t) c.drawImage(t, f * FS, 0, FS, FS, Math.round(CAPAS.tierra[1] * s), Math.round(CAPAS.tierra[2] * s), Math.round(FS * s), Math.round(FS * s));
+    if (t) {
+      const dx = Math.round(CAPAS.tierra[1] * s), dy = Math.round(CAPAS.tierra[2] * s), d = Math.round(FS * s);
+      c.drawImage(t, f * FS, 0, FS, FS, dx, dy, d, d);
+      if (a > 0.02) { c.globalAlpha = a; c.drawImage(t, ((f + 1) % N) * FS, 0, FS, FS, dx, dy, d, d); c.globalAlpha = 1; }
+    }
     c.drawImage(cv._front, 0, 0);
   }
 
@@ -53,9 +70,10 @@ window.AIQ = window.AIQ || {};
     raf = 0;
     for (const cv of vivos) if (!cv.isConnected) vivos.delete(cv);
     if (!vivos.size) return;
-    if (quieto()) { f = 0; acc = 0; vivos.forEach(pinta); return; }          // quieta en Espana-Africa; vuelve a girar al cambiar el ajuste
+    if (quieto()) { f = 0; a = 0; acc = 0; vivos.forEach(pinta); return; }          // quieta en Espana-Africa; vuelve a girar al cambiar el ajuste
     const dt = last ? Math.min(250, now - last) : 0; last = now; acc += dt;
     while (acc >= DUR(f)) { acc -= DUR(f); f = (f + 1) % N; }
+    const u = Math.max(0, (acc / DUR(f) - 0.2) / 0.8); a = u * u * (3 - 2 * u);   // se queda un momento en el fotograma y funde el resto
     vivos.forEach(pinta);
     if (!document.hidden) raf = requestAnimationFrame(tick);
   }
@@ -69,8 +87,10 @@ window.AIQ = window.AIQ || {};
     if (!box) return;
     load().then(() => requestAnimationFrame(() => {
       if (!box.isConnected) return;
-      const cv = document.createElement("canvas"); cv.setAttribute("aria-hidden", "true");
-      box.replaceChildren(cv); ajusta(cv); pinta(cv); vivos.add(cv); arranca();
+      const cv = document.createElement("canvas"); cv.setAttribute("aria-hidden", "true"); cv.className = "geo-main";
+      cv._gl = document.createElement("canvas"); cv._gl.className = "geo-gl"; cv._sh = document.createElement("canvas"); cv._sh.className = "geo-sh";
+      for (const x of [cv._gl, cv._sh]) x.setAttribute("aria-hidden", "true");
+      box.replaceChildren(cv._gl, cv._sh, cv); ajusta(cv); pinta(cv); vivos.add(cv); arranca();
       /* la entrada del logo (logo-in) lo gira y lo desplaza: medido a mitad saldria mas grande de lo que es. Al acabar, se vuelve a medir */
       const anim = box.getAnimations ? box.getAnimations().filter(a => a.playState === "running" && a.effect && a.effect.getTiming().iterations !== Infinity) : [];
       if (anim.length) Promise.all(anim.map(a => a.finished.catch(() => 0))).then(() => { if (cv.isConnected) { ajusta(cv); pinta(cv); } });

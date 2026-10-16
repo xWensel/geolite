@@ -10,8 +10,9 @@
   background: radial-gradient(ellipse at 50% 45%, #173d2c, #0a140f 70%); }
 .gate-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 40%, rgba(248, 180, 73, .18), transparent 58%); animation: st-fade 1.4s ease both; }
 .gate-logo { position: relative; width: clamp(240px, calc(38 * var(--vw)), 460px); animation: st-fade 1.2s ease both; }
-.gate-logo img, .gate-logo .geo-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, .55)) drop-shadow(0 0 34px rgba(248, 180, 73, .25)); animation: gate-float 5s ease-in-out infinite; }
-@keyframes gate-float { 50% { transform: translateY(-6px); } }
+.gate-logo img { width: 100%; height: auto; display: block; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, .55)) drop-shadow(0 0 34px rgba(248, 180, 73, .25)); }   /* la imagen fija de antes de cargar */
+.gate-logo .geo-logo { width: 100%; height: auto; will-change: transform; animation: gate-float 5s ease-in-out infinite; }   /* el logo vivo no lleva filtro: se mueve solo por la GPU */
+@keyframes gate-float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -8px, 0); } }
 .langgrid button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 14px 8px; border: 1.5px solid rgba(242, 233, 214, .32); font-family: var(--mono); font-weight: 500; font-size: 15.5px; letter-spacing: .05em; text-transform: uppercase; color: rgba(242, 233, 214, .78);
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); transition: background .18s, color .18s, transform .14s var(--spring); }
 .lang-flag { width: 22px; height: auto; flex: none; image-rendering: pixelated; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .35); }

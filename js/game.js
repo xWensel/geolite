@@ -1268,6 +1268,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     let entered = false;
     const enter = () => {
       if (entered) return; entered = true; A.audio.unlock(false); requestFs();
+      if (A.gala && A.gala.cool) A.gala.cool();   // el precalentamiento de la GPU sale antes de fundir la puerta
       if (warned) { S.flashSeen = true; save(); }
       if (gateAt && A.dealer && A.dealer.noteGate) A.dealer.noteGate(performance.now() - gateAt);   // cuanto tardaste en entrar
       finishBoot();   // la entrada se funde con la portada junto con #boot (ocultarla antes dejaba un fogonazo negro hasta que la portada empezaba a aparecer)
