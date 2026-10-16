@@ -11,12 +11,15 @@
   --cg: clamp(10px, calc(1.8 * var(--vw)), 30px); }
 .hh:has(.hh-resume) { --cw: min(calc(20.5 * var(--vw)), calc(26 * var(--vh)) * .7 * 1.36, 300px); --hw: min(calc(24 * var(--vw)), calc(30 * var(--vh)) * .7 * 1.36, 340px); }
 
-/* ---------- abanico en espejo: la Aventura recta en el centro, las otras dos abiertas y un poco mas bajas ---------- */
-.hh-cards .mcard:nth-child(1) { --rot: -4deg; } .hh-cards .mcard.hero { --rot: 0deg; } .hh-cards .mcard:nth-child(3) { --rot: 4deg; }
-.hh-cards .mcard:not(.hero) { transform: translateY(10px) rotate(var(--rot)); }
-.hh-cards .mcard:not(.hero):hover { transform: rotate(0deg) translateY(-24px) scale(1.07); }
+/* ---------- en espejo: la Aventura en el centro y las otras dos un poco mas bajas; las tres rectas y sin ampliar,
+   ni en reposo ni al pasar por encima: su arte va a escala entera (js/hub.js, mcFit) y un giro o un scale lo remuestrearia ---------- */
+.hh-cards .mcard.hero { --rot: 0deg; }
+.hh-cards .mcard:not(.hero) { transform: translateY(10px); }
+.hh-cards .mcard:not(.hero):hover { transform: translateY(-24px); }
+.hh-cards .mcard.hero:hover { transform: translateY(-34px); }
 /* sin indices de carta ya no hace falta reservar la esquina: el nombre usa todo el ancho y no se parte en trozos */
 .mcard .mc-name { padding: 0 2px; hyphens: manual; -webkit-hyphens: manual; overflow-wrap: normal; }
+.hh-cards .mcard .mc-stat { margin-top: auto; }   /* las dos laterales miden lo mismo (js/hub.js, mcFit): lo que sobra a una va encima de su etiqueta */
 .mcard .mc-stat.sq-fit { white-space: nowrap; overflow: hidden; } .mcard .mc-stat.sq-wrap { white-space: normal; text-wrap: balance; line-height: 1.1; }   /* A.squeeze la aprieta antes de partirla */
 
 /* ---------- pie: banner de partida guardada y placas, del mismo ancho que el abanico ---------- */
@@ -138,6 +141,8 @@ html body #dlg > .hh-ver { font-size: 12px; }
 .hh .mcard:focus { outline: none; }
 .hh .mcard:focus-visible::before, html[data-input="pad"] .hh .mcard:focus::before { box-shadow: inset 0 0 0 3px #16241c, inset 0 0 0 8px #ffd06b, inset 0 0 0 10px #16241c, inset 0 0 0 12px #fff; }
 .hh .mc-win { border-radius: 0; clip-path: var(--gx-notch); box-shadow: inset 0 0 0 3px #16241c; } .hh .mc-win .pic { inset: 3px; }
+/* el retrato recortado de la Aventura lleva su marco pintado encima, en pixeles de su escala (2 de margen y 1 de filete, como la carta entera) */
+.hh .mc-win .pic.mc-cut .pic-frame { display: block; border-radius: 0; box-shadow: inset 0 0 0 calc(var(--ak) * 2) #44112a, inset 0 0 0 calc(var(--ak) * 3) #8a2440; }
 
 /* "Continuar expedicion": la placa de laton con tornillos del boton principal, del ancho exacto de las tres placas, con las bombillas de la casa
    (A.bulbs, al mismo paso que las de la carta de la Aventura) y la tecla a la derecha. La sombra va en ::after del contenedor: sin filtros

@@ -34,7 +34,7 @@ window.AIQ = window.AIQ || {};
   const CAT = [
     { k: "bull", ic: "ach_bull_25", d: [3, 5], w: [15, 25], e: [40, 60], pay: 30,
       tx: "Consigue {n} {p:diana/dianas}|Land {n} {p:bullseye/bullseyes}|Mets dans le mille {n} fois|Acerte {n} {p:tiro/tiros} na mosca|Erziele {n} Volltreffer|Fai {n} {p:centro/centri}||正中靶心 {n} 次|{n}번 명중하기|{n}回命中させる|Попади в яблочко {n} {p:раз/раза/раз}|Traf w dziesiątkę {n} {p:raz/razy/razy}" },
-    { k: "hitC", ic: c => "k_" + c, c: true, d: [4, 6], w: [20, 30], e: [50, 70], pay: 30,
+    { k: "hitC", ic: c => "k_" + c + "_48", c: true, d: [4, 6], w: [20, 30], e: [50, 70], pay: 30,
       tx: "Acierta {n} {p:lugar/lugares} de {c}|Get {n} {p:place/places} right in {c}|Trouve {n} {p:lieu/lieux} en {c}|Acerte {n} {p:lugar/lugares} da {c}|Triff {n} {p:Ort/Orte} in {c}|Indovina {n} {p:luogo/luoghi} in {c}||答对 {n} 个{c}的地点|{c}의 장소 {n}곳 맞히기|{c}の場所を{n}か所当てる|Угадай {n} {p:место/места/мест} {cin}|Traf {n} {p:miejsce/miejsca/miejsc} {cin}" },
     { k: "cap", ic: "ach_codex_capitals", d: [3, 4], w: [12, 16], e: [30, 40], pay: 30,
       tx: "Acierta {n} {p:capital/capitales}|Get {n} {p:capital/capitals} right|Trouve {n} {p:capitale/capitales}|Acerte {n} {p:capital/capitais}|Triff {n} {p:Hauptstadt/Hauptstädte}|Indovina {n} {p:capitale/capitali}||答对 {n} 个首都|수도 {n}곳 맞히기|首都を{n}問正解する|Угадай {n} {p:столицу/столицы/столиц}|Traf {n} {p:stolicę/stolice/stolic}" },

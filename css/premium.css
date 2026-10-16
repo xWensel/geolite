@@ -3,7 +3,7 @@
    Se carga la ultima y manda sobre lo anterior. */
 
 /* ---------- imagenes: pixel art nitido, sombra de pegatina ---------- */
-img.ic { display: block; object-fit: contain; image-rendering: auto; filter: drop-shadow(0 2px 0 rgba(8, 20, 14, .55)); user-select: none; -webkit-user-drag: none; }
+img.ic { display: block; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(8, 20, 14, .55)); user-select: none; -webkit-user-drag: none; }
 .ic.sm { width: 22px; height: 22px; display: inline-block; vertical-align: middle; margin-right: 6px; } .ic.cn { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -.28em; margin-right: .25em; }
 .ic.blindchip { position: relative; display: block; } .ic.blindchip .bc-base { position: absolute; inset: 0; width: 100%; height: 100%; } .ic.blindchip .bc-in { position: absolute; left: 22%; top: 22%; width: 56%; height: 56%; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); }
 .ic.badge { position: relative; display: block; width: 100%; height: 100%; } .ic.badge .bd-base { position: absolute; inset: 0; width: 100%; height: 100%; } .ic.badge .bd-in { position: absolute; left: 12.5%; top: 12.5%; width: 75%; height: 75%;}   /* 48 px de ilustracion centrados sobre la ficha de 64 (pixel 8,8): la ficha es un circulo centrado (js/ficha.js) */
@@ -26,7 +26,7 @@ img.ic { display: block; object-fit: contain; image-rendering: auto; filter: dro
   background: #f6efdc; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px var(--rc), inset 0 0 0 7px #16241c, 0 18px 0 3px rgba(0, 0, 0, .45), 0 30px 60px rgba(0, 0, 0, .5);
   transform: rotate(var(--rot)); transition: transform .35s var(--spring), box-shadow .3s; animation: deal .7s var(--spring) both; }
 .mcard:nth-child(1) { --rot: -4deg; animation-delay: .05s; --rc: #4fb6a0; } .mcard:nth-child(2) { --rot: -1.2deg; animation-delay: .12s; } .mcard:nth-child(3) { --rot: 1.4deg; animation-delay: .19s; --rc: #c78bf0; } .mcard:nth-child(4) { --rot: 4deg; animation-delay: .26s; --rc: #f8b449; }
-.mcard.hero { --rc: #ffd06b; width: clamp(210px, calc(24 * var(--vw)), 360px); transform: rotate(var(--rot)) translateY(-8px) scale(1.04); z-index: 2; }
+.mcard.hero { --rc: #ffd06b; width: clamp(210px, calc(24 * var(--vw)), 360px); transform: rotate(var(--rot)) translateY(-8px); z-index: 2; }   /* sin scale: su arte va a escala entera (js/hub.js, mcFit) */
 .hh.nodeal .mcard { animation: none; }
 @keyframes deal { from { opacity: 0; transform: translateY(160px) rotate(24deg); } }
 .mcard:hover { transform: rotate(0deg) translateY(-24px) scale(1.07); z-index: 5; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px #ffd06b, inset 0 0 0 7px #16241c, 0 26px 0 3px rgba(0, 0, 0, .45), 0 0 60px rgba(255, 208, 107, .55); }

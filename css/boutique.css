@@ -10,7 +10,7 @@
 .bq-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
 .bq-h > span:last-child { display: grid; gap: 6px; }
 .bq-h .gx-eyb { font-size: 16px; }
-.bq-hic .ic { display: block; width: 56px; height: 56px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
+.bq-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
 .bq-wal { grid-column: 4; display: inline-flex; align-items: center; gap: 12px; padding: 6px 18px 8px 12px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
 .bq-wal b { font-family: var(--sans); font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; }
 .bq-head .menu-tools { grid-column: 5; }
@@ -58,7 +58,7 @@
 .bq-it:focus { outline: none; }
 .bq-it:focus-visible::after, html[data-input="pad"] .bq-it:focus::after { content: ""; position: absolute; inset: 8px; box-shadow: 0 0 0 2px var(--gx-red); animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
 .bq-th { position: relative; display: block; aspect-ratio: 2.6 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 4px 0 2px rgba(22, 36, 28, .3); }
-.bq-th img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.bq-th img { display: block; width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }   /* la mesa a 1:1: un trozo de verdad, sin encoger ni recortar a escala rara */
 .bq-it.leg .bq-th { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 4px var(--gx-rim), 0 0 0 6px var(--gx-o), 0 6px 0 4px rgba(22, 36, 28, .3); }
 .bq-nm { display: block; font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; min-width: 0; overflow-wrap: anywhere; text-wrap: balance; padding: 0 2px; }
 /* el precio (o tu estado) como una placa de papel abajo a la derecha de la captura */
@@ -84,7 +84,7 @@
 /* la mesa elegida */
 .bq-det { height: 100%; display: grid; gap: 10px; align-content: start; padding: 18px 22px 20px; }
 .bq-dth { position: relative; display: block; aspect-ratio: 2 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); overflow: hidden; }
-.bq-dth img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.bq-dth img { display: block; width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }
 .bq-dth.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
 /* la legendaria tiene su brillo: un reflejo de laton que cruza la captura de vez en cuando (solo transform y opacity) */
 .bq-dth.leg::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 28%; background: linear-gradient(90deg, transparent, rgba(255, 240, 200, .35), transparent); transform: translateX(-120%) skewX(-18deg); animation: bq-shine 3.6s ease-in-out infinite; pointer-events: none; }

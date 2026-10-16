@@ -215,9 +215,11 @@ window.AIQ = window.AIQ || {};
   const reduce = () => document.documentElement.classList.contains("reduce-motion");
   /* el ancho se lee del estilo (decimal), no de offsetWidth (redondeado): con un ancho redondeado la medida bailaba entre dos valores y la carta se redibujaba sin parar (y borraba la inclinacion) */
   function realPerCss(el) { const w = parseFloat(el.style.width) || el.offsetWidth; if (!w) return 0; return (el.getBoundingClientRect().width / w) * (devicePixelRatio || 1); }
-  /* cuantos pixeles reales hace cada pixel de arte: el mayor entero que cabe en el ancho pedido, pero nunca menos de 2 pixeles de DISENO
-     por pixel de arte (por debajo, la letra minima de la Deck ya no cabe en sus bandas) */
-  function scaleFor(host, w) { const r = realPerCss(host) || 1, s = Math.max(2, Math.ceil(2 * r - 0.01), Math.floor((w * r) / 96 + 0.01)); return { s, d: s / r }; }
+  /* cuantos pixeles reales hace cada pixel de arte: el mayor entero que cabe en el ancho pedido, pero nunca menos que el entero mas cercano a
+     2 pixeles de DISENO por pixel de arte (por debajo, la letra minima de la Deck ya no cabe en sus bandas). v0.3.171: el mas cercano, no el de
+     encima: en un portatil de 1366x768 o 1440x900 (1,07-1,12 pixeles reales por pixel de diseno) la carta va a x2, el mismo pixel que en la Deck;
+     a x3 crecia un 50 % y se metia debajo de las cartas de modo de la portada */
+  function scaleFor(host, w) { const r = realPerCss(host) || 1, s = Math.max(2, Math.round(2 * r), Math.floor((w * r) / 96 + 0.01)); return { s, d: s / r }; }
 
   function data(o) {
     const P = prof(), t = o.t != null ? o.t : A.club.tierNow(), c = P.club || {}, L = A.club.levelOf(A.club.xp());

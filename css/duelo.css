@@ -56,8 +56,8 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .lob { grid-template-rows: 64px minmax(0, 1fr) 132px; }
 .du-st .socio { grid-column: 1 / 5; grid-row: 2; min-height: 0; }
 .du-st .socio .gx-paper { height: 100%; display: grid; grid-template-rows: auto auto auto auto 1fr; gap: 12px; padding: 20px 22px 22px; }
-.du-st .socio .who { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: center; }
-.du-st .socio .who .ic { width: 96px; height: 96px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
+.du-st .socio .who { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; }
+.du-st .socio .who .ic { width: 64px; height: 64px; image-rendering: pixelated; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
 .du-st .socio .who b { display: block; font-weight: 400; font-size: 40px; line-height: .95; overflow-wrap: anywhere; } .du-st .socio .who span { font-size: 22px; color: var(--gx-ink-2); }
 .du-st .puertas { grid-column: 5 / 13; grid-row: 2; min-height: 0; }
 .du-st .puertas .gx-pnl { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 12px; padding: 20px 22px 18px; }
@@ -70,6 +70,7 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .doorw:focus { outline: none; } .du-st .doorw:focus-visible, html[data-input="pad"] .du-st .doorw:focus { background: #fff; }
 .du-st .door { display: grid; grid-template-rows: minmax(40px, 96px) auto 1fr auto; gap: 6px; padding: 10px 12px 12px; min-height: 0; }   /* la ilustracion cede alto si el titulo o la descripcion ocupan mas lineas (otros idiomas) */
 .du-st .door .ill { position: relative; min-height: 0; overflow: hidden; box-shadow: inset 0 0 0 2px var(--gx-o); image-rendering: pixelated; background-position: 50% 40%; background-size: 204px 256px; background-repeat: no-repeat; background-color: #2a1a52; }
+.du-st .door .ill[data-cart="card_adv"] { background-size: 240px 300px; background-position: 50% 50%; }   /* el crupier (80x100) a x3 exacto */
 .du-st .door .ill.amigo { background: repeating-radial-gradient(circle at 50% 60%, #1c6e73 0 20px, #185f66 20px 40px); }
 .du-st .door .ill.amigo .ic { position: absolute; top: calc(50% - 34px); left: calc(50% - 58px); width: 64px; height: 64px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .4)); } .du-st .door .ill.amigo .ic + .ic { left: calc(50% - 6px); top: calc(50% - 26px); }
 .du-st .door h3 { font-size: 28px; line-height: 1; } .du-st .door p { font-size: 18px; line-height: 1.12; color: var(--gx-ink-2); }

@@ -39,6 +39,47 @@ window.AIQ = window.AIQ || {};
     for (let k = 0.94; k >= 0.6 && bad(); k -= 0.04) el.style.fontSize = Math.max(18, fs * k).toFixed(1) + "px";
   });
   addEventListener("resize", () => { if (document.querySelector(".hh")) fitNames(); });
+  /* v0.3.171: el arte de las cartas de modo, entero y a escala entera de pixeles reales (antes, object-fit cover: estirado x1,88 / x2,62 y
+     recortado). Por arte: rejilla nativa [ancho, alto] y lo que se ensena [x, y, ancho, alto]. El Clasico y el Duelo, enteros y a la misma escala,
+     la entera mas cercana al hueco que la portada les da; la Aventura, la mayor de sus dos versiones (70x86 de su retrato de 80x100 con su marco
+     pintado encima, .mc-cut, o el retrato entero) que quepa en su hueco sin quedar por debajo de ellas. La ventana abraza el arte y va centrada;
+     la carta nunca es mas estrecha que la de la portada (el texto conserva su sitio) y solo crece si el arte es mayor que el hueco. Si asi la
+     portada no cabe o la carta pisa la de socio, se baja un entero. Se mide al pintar la portada, al cambiar el tamano de la ventana y cada vez
+     que el ajuste de la pantalla (A.fitK) cambia su escala */
+  const MC_SIDE = [102, 128, 0, 0, 102, 128], MC_ADV = [[80, 100, 5, 7, 70, 86], [80, 100, 0, 0, 80, 100]];
+  const mcAdv = (k, o, r) => {
+    const c = []; MC_ADV.forEach(M => { for (let n = 1; n <= 16; n++) if (M[4] * n >= 102 * k && M[5] * n >= 128 * k) c.push([M, n, M[4] * n, M[5] * n]); });
+    return c.filter(v => v[2] <= o.bw * r + 0.5 && v[3] <= o.bh * r + 0.5).sort((a, b) => b[2] - a[2])[0] || c.sort((a, b) => a[2] - b[2])[0];
+  };
+  const mcPut = (o, M, k, r) => {
+    const [W, H, cx, cy, cw, ch] = M, { card, win, pic, im, ins } = o, u = n => n * k / r + "px", ww = cw * k / r + 2 * ins, wh = ch * k / r + 2 * ins;
+    pic.style.cssText = `inset:auto;left:${ins}px;top:${ins}px;width:${u(cw)};height:${u(ch)};--ak:${k / r}px`;
+    im.style.cssText = `inset:auto;left:${u(-cx)};top:${u(-cy)};width:${u(W)};height:${u(H)};object-fit:fill;max-width:none`;
+    win.style.cssText = `flex:none;align-self:center;width:${ww}px;height:${wh}px`;
+    card.style.cssText = `aspect-ratio:auto;height:auto;width:${Math.max(o.w0, ww + o.pad)}px`;
+    pic.classList.toggle("mc-cut", cx > 0 || cy > 0);
+  };
+  const mcFit = () => {
+    const el = document.querySelector("#dlg > .hh"); if (!el) return;
+    const all = [...el.querySelectorAll(".hh-cards .mcard")].map(card => { const win = card.querySelector(".mc-win"), pic = win && win.querySelector(".pic"); return { card, win, pic, im: pic && pic.querySelector(".pic-img"), hero: card.classList.contains("hero") }; }).filter(o => o.im);
+    const sides = all.filter(o => !o.hero), hero = all.find(o => o.hero); if (!sides.length) return;
+    all.forEach(o => [o.card, o.win, o.pic, o.im].forEach(e => e.removeAttribute("style")));   // la medida natural de la portada: el hueco de cada arte
+    all.forEach(o => { const cs = getComputedStyle(o.card), mw = getComputedStyle(o.win); o.ins = o.pic.offsetLeft; o.pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(mw.marginLeft) + parseFloat(mw.marginRight); o.w0 = parseFloat(cs.width); o.bw = o.pic.clientWidth; o.bh = o.pic.clientHeight; });   // .pic va metida 3 px en su ventana
+    const z = sides[0].win.currentCSSZoom || 1, r = z * (window.devicePixelRatio || 1), so = el.querySelector(".hh-socio-w"), c0 = sides[0].card.getBoundingClientRect().left;
+    const ok = () => {
+      if (el.getBoundingClientRect().height > el.parentElement.clientHeight + 1) return false;   // las cartas no caben en su fila: la portada creceria por abajo
+      if (!so) return true;
+      const s = so.getBoundingClientRect(), c = sides[0].card.getBoundingClientRect();
+      return s.bottom <= c.top || c.left >= Math.min(c0, s.right + 4 * z) - 0.5;              // la carta de socio, arriba a la izquierda: no acercarse a menos de 4 px (ni mas de lo que ya estaba)
+    };
+    for (let k = Math.max(1, Math.round(Math.max(...sides.map(o => o.bw)) * r / 102)); k >= 1; k--) {
+      sides.forEach(o => mcPut(o, MC_SIDE, k, r));
+      if (hero) { const [M, n] = mcAdv(k, hero, r); mcPut(hero, M, n, r); }
+      const h = Math.max(...sides.map(o => o.card.offsetHeight)); sides.forEach(o => { o.card.style.minHeight = h + "px"; });   // las dos laterales, en espejo: el mismo alto
+      if (k === 1 || ok()) break;
+    }
+  };
+  addEventListener("resize", () => { if (document.querySelector(".hh")) requestAnimationFrame(mcFit); });
   let homeDealt = false;
   function home() {
     pday = null;                                                     // la practica de otro dia se acaba al volver a la portada
@@ -83,7 +124,7 @@ window.AIQ = window.AIQ || {};
       <span class="hh-ver">Geolite · v${A.VERSION}</span>${A.parche ? A.parche.button() : ""}`, "home");               // fuera de .hh: no cuenta para la composicion ni para A.fitK
     if (A.geoLogo) A.geoLogo.mount(document.querySelector("#dlg .hh-logo"));   // el logo vivo: la Tierra gira bajo la chistera (js/geologo.js)
     wireTools(); A.podio.wire(); if (A.parche) A.parche.wire();                                      // Clasificacion: js/podio.js
-    fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
+    mcFit(); fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
     if (A.salir) A.salir.wire();                                      // salir del juego: js/salir.js
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
@@ -590,5 +631,5 @@ window.AIQ = window.AIQ || {};
   const classicHtml = () => { const S = C().S, camps = A.CAMPAIGNS.filter(x => x.mode === "classic"), id = camps.some(x => x.id === S.campId) ? S.campId : camps[0].id; return clHtml("classic", id, Math.min(S.startLevel || 0, C().prog(id).unlocked - 1)).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
   /* la Aventura tal cual (precalentamiento de la puerta), sin tocar la baraja ni la Ascension elegidas: sin ids, es una copia */
   const adventureHtml = () => { const sv = A.adv.hasSave(); return avHtml(sv && A.adv.summary(), sv).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
-  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, dailyHtml, classicHtml, adventureHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
+  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, mcFit, dailyHtml, classicHtml, adventureHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
 })(window.AIQ);

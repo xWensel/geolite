@@ -295,7 +295,9 @@ window.AIQ = window.AIQ || {};
   const P = s => A.pick6(s);
   const CONTS = ["eu", "as", "af", "na", "sa", "oc", "sea"];
   /* icono del continente en las etiquetas (20 px): su version de 20 px nativos, k_<c>_s (la de 28 es la de los encabezados); el mar no tiene */
-  const kTag = c => A.icon("k_" + c + (c === "sea" ? "" : "_s"), "sm");
+  /* icono del continente a la medida de su hueco (k_<c>_<px>, dibujado a ese tamano: nada se encoge ni se estira); el mar tiene uno solo */
+  const kIc = (c, px, cls = "") => A.icon(c === "sea" ? "k_sea" : "k_" + c + "_" + px, cls);
+  const kTag = c => kIc(c, 20, "sm");
   const RG = (id, cont, names, countries, more) => ({ id, cont, names, countries, ...(more || {}) });
   const REGIONS = [
     RG("uk-irlanda", "eu", "Reino Unido e Irlanda|United Kingdom & Ireland|Royaume-Uni et Irlande|Reino Unido e Irlanda|Vereinigtes Königreich und Irland|Regno Unito e Irlanda||英国与爱尔兰|영국과 아일랜드|イギリスとアイルランド|Великобритания и Ирландия|Wielka Brytania i Irlandia", ["United Kingdom", "Ireland"]),
@@ -682,7 +684,7 @@ window.AIQ = window.AIQ || {};
     const on = x => (cur.k === "home" && x === "home") || (top.k === "cont" && x === "cont:" + top.c) || (cur.k === "refine" && x === "refine");
     const item = (go2, ic, name, s, extra = "", badge = true) => `<button type="button" class="cx-nv${on(go2) ? " on" : ""}${s && s.u >= s.t ? " full" : ""}" data-go="${go2}"><span class="cx-nvi">${A.icon(ic)}${badge && s && s.nw ? `<em data-tt="${esc(P(S.newN).replace("{n}", A.fmt(s.nw)))}">${s.nw > 99 ? "99+" : s.nw}</em>` : ""}</span><b>${esc(name)}</b><i>${extra || (s ? pctOf(s) + " %" : "")}</i>${s ? mbar(s) : ""}</button>`;
     $("cxNav").innerHTML = item("home", "worldmap", P(S.home), all, "", false)
-      + `<hr>` + CONTS.map(c => item("cont:" + c, "k_" + c, contName(c), sumStats(contGroups(c)))).join("")
+      + `<hr>` + CONTS.map(c => item("cont:" + c, c === "sea" ? "k_sea" : "k_" + c + "_32", contName(c), sumStats(contGroups(c)))).join("")
       + `<hr>` + item("refine", "a_target", P(S.refine), null, A.fmt(refineN()));
   }
 
@@ -710,7 +712,7 @@ window.AIQ = window.AIQ || {};
   function pageCont(c) {
     const regs = index().regs.filter(r => r.cont === c && r.groups.length), st = sumStats(regs.flatMap(r => r.groups)), sea = c === "sea";
     const head = `<header class="cx-ch${sea ? " sea" : ""}">
-        <div class="cx-ch-l"><div class="cx-ch-t">${A.icon("k_" + c, "cx-kic")}<div><h2>${esc(contName(c))}</h2><p>${esc(sea ? placesTxt(st) : P(S.nCountries).replace("{n}", regs.reduce((a, r) => a + r.groups.filter(g => g.ne || g.qc).length, 0)) + " · " + placesTxt(st))}</p></div><em class="cx-pct">${pctOf(st)} %</em></div>
+        <div class="cx-ch-l"><div class="cx-ch-t">${kIc(c, 56, "cx-kic")}<div><h2>${esc(contName(c))}</h2><p>${esc(sea ? placesTxt(st) : P(S.nCountries).replace("{n}", regs.reduce((a, r) => a + r.groups.filter(g => g.ne || g.qc).length, 0)) + " · " + placesTxt(st))}</p></div><em class="cx-pct">${pctOf(st)} %</em></div>
           ${medCounts(st, scaleOf(regs.flatMap(r => r.groups)))}${mbar(st)}
           <div class="cx-jumps">${regs.map(r => { const s = sumStats(r.groups); return `<button type="button" class="cx-jump${s.u >= s.t ? " full" : ""}" data-jump="${r.id}"><b>${esc(regName(r))}</b><em>${pctOf(s)} %</em></button>`; }).join("")}</div></div>
       </header>`;
@@ -824,7 +826,7 @@ window.AIQ = window.AIQ || {};
     /* cada medalla, repartida por continentes: se ve donde te falta afinar mas */
     const byCont = ids => CONTS.map(c => [c, ids.filter(id => { const g = gs[E[id].g]; return g && g.reg.cont === c; })]).filter(x => x[1].length);
     const sec = (ic, name, ids, note) => ids.length ? `<section class="cx-sec3"><header class="cx-sh">${A.icon(ic)}<b>${esc(name)}</b><em>${A.fmt(ids.length)}</em></header>${note ? `<p class="cx-note">${esc(note)}</p>` : ""}
-      ${byCont(ids).map(([c, l]) => `<div class="cx-sub2"><h4>${A.icon("k_" + c)}<b>${esc(contName(c))}</b><em>${A.fmt(l.length)}</em></h4>${grid(l, sub)}</div>`).join("")}</section>` : "";
+      ${byCont(ids).map(([c, l]) => `<div class="cx-sub2"><h4>${kIc(c, 28)}<b>${esc(contName(c))}</b><em>${A.fmt(l.length)}</em></h4>${grid(l, sub)}</div>`).join("")}</section>` : "";
     const any = rf.two.length + rf.one.length + rf.ctry.length, known = any || order.some(id => !E[id].parent && tiered(id) && U(id));
     return `<header class="cx-ph-h">${A.icon("a_target", "cx-kic")}<div><h2>${esc(P(S.refine))}</h2><p>${esc(any ? P(S.refineIntro) : known ? P(S.refineEmpty) : A.t("codex.empty"))}</p></div></header>`
       + sec("medal_gold", P(S.two), rf.two) + sec("medal_silver", P(S.one), rf.one) + sec("t_country", P(S.ctry), rf.ctry, P(S.refineCtry));

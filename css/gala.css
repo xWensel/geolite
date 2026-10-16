@@ -572,8 +572,8 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .av-dk { position: relative; grid-row: 1 / span 5; display: grid; grid-template-rows: subgrid; min-width: 0; min-height: 0; padding: 12px 10px 14px; border: 0; cursor: pointer; text-align: left;
   background: var(--gx-card); color: var(--gx-ink); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); font-family: var(--sans);
   transition: transform .18s cubic-bezier(.2, .9, .3, 1); }   /* sin clip-path, como los naipes del Clasico: con su contorno oscuro el escalon no se ve */
-.av-art { justify-self: center; display: block; width: 96px; height: 96px; }
-.av-art > .ic { display: block; width: 96px; height: 96px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .35)); }
+.av-art { justify-self: center; display: block; width: 128px; height: 128px; }   /* retratos de 64 px: x2 (si no caben, .tight los deja a x1) */
+.av-art > .ic { display: block; width: 128px; height: 128px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .35)); }
 .av-lock { position: absolute; right: 8px; top: 8px; }   /* en la esquina del naipe */ .av-lock .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
 .av-dk > b { align-self: start; min-width: 0; font-weight: 400; font-size: 24px; line-height: 1; text-wrap: balance; }
 .av-dd { align-self: stretch; min-height: 0; font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; overflow: hidden; }
