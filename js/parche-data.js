@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.139",
+      name: L("La Tierra, sin halo blanco", "The Earth, without the white halo", "La Terre, sans halo blanc", "A Terra, sem halo branco", "Die Erde ohne weißen Schimmer", "La Terra, senza alone bianco", "", "地球不再有白边", "하얀 테두리 없는 지구", "白いふちのない地球", "Земля без белого ореола", "Ziemia bez białej poświaty"),
+      date: "2026-10-16",
+      summary: L("La Tierra del logo deja de asomar el hielo de los polos por el borde, que se veía como un halo blanco.", "The logo's Earth no longer shows the polar ice along its edge, which looked like a white halo.", "La Terre du logo ne laisse plus dépasser la glace des pôles sur son bord, qui ressemblait à un halo blanc.", "A Terra do logo não mostra mais o gelo dos polos na borda, que parecia um halo branco.", "Die Erde im Logo zeigt am Rand kein Polareis mehr, das wie ein weißer Schimmer wirkte.", "La Terra del logo non mostra più il ghiaccio dei poli sul bordo, che sembrava un alone bianco.", "", "标志里的地球边缘不再露出极地冰盖，那看起来像一圈白边。", "로고 속 지구 가장자리에 하얀 테두리처럼 보이던 극지방 얼음이 더는 보이지 않아요.", "ロゴの地球のふちに、白いふちのように見えていた極地の氷が出なくなりました。", "У Земли в логотипе по краю больше не видно полярного льда, который выглядел как белый ореол.", "Ziemia w logo nie pokazuje już na krawędzi lodu polarnego, który wyglądał jak biała poświata."),
+      chapters: [
+        { id: "logo", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "调整", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Logo", "Logo", "Logo", "Logo", "Logo", "Logo", "", "标志", "로고", "ロゴ", "Логотип", "Logo"),
+          entries: [
+            E(L("Sin hielo en el borde", "No ice on the edge", "Plus de glace sur le bord", "Sem gelo na borda", "Kein Eis am Rand", "Niente ghiaccio sul bordo", "", "边缘不再有冰", "가장자리에 얼음 없음", "ふちに氷なし", "Без льда по краю", "Bez lodu na krawędzi"), "change", "0.3.139", [
+              L("La Tierra que gira en el logo ya no enseña el hielo de los polos en el borde del globo: entre la chistera y la carta, y abajo, se leía como un halo blanco. Ahora es igual que la del escudo, y la imagen que sale al compartir el enlace también se ha puesto al día.",
+                "The spinning Earth in the logo no longer shows the polar ice along the edge of the globe: between the top hat and the card, and at the bottom, it read as a white halo. It now matches the one on the emblem, and the picture shown when you share the link has been updated too.",
+                "La Terre qui tourne dans le logo ne montre plus la glace des pôles sur le bord du globe : entre le haut-de-forme et la carte, et en bas, on aurait dit un halo blanc. Elle est maintenant identique à celle de l'emblème, et l'image affichée quand tu partages le lien a aussi été mise à jour.",
+                "A Terra que gira no logo não mostra mais o gelo dos polos na borda do globo: entre a cartola e a carta, e embaixo, parecia um halo branco. Agora é igual à do emblema, e a imagem que aparece ao compartilhar o link também foi atualizada.",
+                "Die sich drehende Erde im Logo zeigt am Rand des Globus kein Polareis mehr: Zwischen Zylinder und Karte und unten wirkte es wie ein weißer Schimmer. Sie gleicht jetzt der im Emblem, und auch das Bild, das beim Teilen des Links erscheint, ist aktualisiert.",
+                "La Terra che gira nel logo non mostra più il ghiaccio dei poli sul bordo del globo: tra il cilindro e la carta, e in basso, sembrava un alone bianco. Ora è uguale a quella dell'emblema, e anche l'immagine che compare quando condividi il link è stata aggiornata.",
+                "",
+                "标志里旋转的地球不再在球体边缘露出极地冰盖：在礼帽和纸牌之间以及底部，它看起来像一圈白边。现在它和徽标里的地球一模一样，分享链接时显示的图片也已更新。",
+                "로고에서 도는 지구가 더 이상 가장자리에 극지방 얼음을 보이지 않아요. 실크해트와 카드 사이, 그리고 아래쪽에서 하얀 테두리처럼 보였거든요. 이제 엠블럼 속 지구와 똑같고, 링크를 공유할 때 나오는 이미지도 새로 바뀌었어요.",
+                "ロゴで回る地球が、球のふちに極地の氷を見せなくなりました。シルクハットとカードのあいだや下のほうで、白いふちのように見えていたためです。いまはエンブレムの地球と同じで、リンクを共有したときの画像も更新しました。",
+                "Вращающаяся Земля в логотипе больше не показывает полярный лёд по краю шара: между цилиндром и картой и внизу он выглядел как белый ореол. Теперь она такая же, как на эмблеме, а картинка, которая появляется, когда делишься ссылкой, тоже обновлена.",
+                "Obracająca się Ziemia w logo nie pokazuje już lodu polarnego na krawędzi globu: między cylindrem a kartą oraz na dole wyglądał jak biała poświata. Teraz jest taka sama jak w emblemacie, a obrazek, który pojawia się po udostępnieniu linku, też został odświeżony."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.138",
       name: L("El escudo, al día", "The emblem, up to date", "L'emblème à jour", "O emblema atualizado", "Das Emblem, auf dem neuesten Stand", "L'emblema aggiornato", "", "徽标更新", "엠블럼 업데이트", "エンブレムを更新", "Обновлённая эмблема", "Odświeżony emblemat"),
       date: "2026-10-16",
