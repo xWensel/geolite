@@ -7,7 +7,7 @@ window.AIQ = window.AIQ || {};
   A.blind = (kind, inner) => `<span class="ic blindchip">${A.icon("blank_" + kind, "bc-base")}${A.icon(inner, "bc-in")}</span>`;
   /* Los iconos son ilustraciones pixel-art generadas con un unico libro de estilo (tools/gen_art.py) en assets/icons/.
      Si falta alguno, simplemente no se pinta. */
-  const ALIAS = { steadyhand: "steady" };
+  const ALIAS = {};
   A.icon = (id, cls = "") => {
     id = ALIAS[id] || id;
     const fx = A.ficha ? A.ficha.attr(id) : "";   // ficha lisa: se dibuja al pixel real de la pantalla (js/ficha.js)
