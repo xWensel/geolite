@@ -53,6 +53,7 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 - Las fichas lisas (`blank_*`: Ascensiones, intentos del Reto diario, base de las insignias de logro) son un circulo de pixel art centrado en su lienzo, sin canto (el grosor lo da la sombra dura de CSS). No se escalan: `js/ficha.js` las dibuja a la medida exacta de su hueco en pixeles reales, con un pixel de arte entero, y esa misma funcion pinta `assets/icons/blank_*.webp` y `chip_*.webp` a 64 px (los usa `tools/steam_icons.py`). La ilustracion de la insignia va centrada (pixel 8,8 de la ficha de 64).
 
 ## Logros
+- TRUCO DE PRUEBAS (`js/truco.js`, solo previo a Steam): 7 veces 7 en la portada = todo desbloqueado (logros, Enciclopedia via `A.codex._todo`, mesas, vestuario, Club 100 + `A.dealer._sello`, Clasico, Ascension V), con copia de la partida; otra vez 7 x 7 la restaura al arrancar (antes de que perfil, crupier y Enciclopedia lean). Con `P.truco` NINGUN logro va a Steam (`js/profile.js`). APAGARLO (`const ON = false`) ANTES DE PUBLICAR: `tools/steam-pack.mjs` avisa si sigue encendido.
 - Tope de 100 (Steam). Los logros salen sobre todo del juego de geografia (dianas, Enciclopedia por tipo y continente, campanas, Ascensiones, rachas); el casino solo aporta unos pocos guinos. Hay ocultos y contadores de progreso. Cada logro tiene insignia propia (`assets/icons/ach_<id>.webp`).
 - Definicion en `js/profile.js` (`A.ACH`); tras cambiar logros o textos, volver a exportar con `node tools/steam-achievements.mjs` y `python tools/steam_icons.py`.
 

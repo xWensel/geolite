@@ -1637,7 +1637,8 @@ window.AIQ = window.AIQ || {};
     monitor: ["puzzled", "preen"], padOn: ["sly", "preen"], deckOn: ["puzzled", "preen"],
   };
   const D = A.dealer = { on: false, onHome: false, host: null, timers: [], busy: false };
-  D.tier = () => DS.tier || 0;                                              // la categoria que ya te ha sellado (js/club.js: la tarjeta de la portada)
+  D.tier = () => DS.tier || 0;
+  D._sello = n => { DS.tier = Math.max(DS.tier || 0, n | 0); saveStore(); };     // el truco de pruebas (js/truco.js): la categoria ya sellada, sin ceremonia                                              // la categoria que ya te ha sellado (js/club.js: la tarjeta de la portada)
   let el, face, spr, bubble, txt, sofar, rest, typing = false, doneAt = 0, pend = null, dozing = false;   // typing: esta escribiendo una frase; doneAt: cuando acabo la ultima; pend: la que espera su turno
   const rand = a => a[Math.floor(Math.random() * a.length)];
 

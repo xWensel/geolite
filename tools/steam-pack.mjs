@@ -19,6 +19,10 @@ const DEMO = args.has("--demo"), LITE = DEMO || args.has("--lite"), LINUX = args
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
 const OUT = path.join(ROOT, "dist");
 
+/* el truco de pruebas (js/truco.js, 7 x 7 en la portada = todo desbloqueado): solo para las versiones previas a Steam */
+if (/const ON = true;/.test(fs.readFileSync(path.join(ROOT, "js", "truco.js"), "utf8")))
+  console.warn("\n  AVISO: el truco de pruebas sigue ENCENDIDO (js/truco.js, const ON = true). Apagalo antes de publicar en Steam.\n");
+
 /* solo lo que el juego necesita en ejecucion (rutas relativas con "/", empezando por "/") */
 const KEEP_TOP = new Set(["index.html", "credits.html", "main.js", "preload.js", "package.json", "steam-flavor.json", "js", "css", "fonts", "data", "assets", "node_modules"]);
 const DROP_ASSETS = ["/assets/raw"].concat(LITE ? ["/assets/wiki/hd"] : []);

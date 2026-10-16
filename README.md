@@ -55,6 +55,10 @@ La tienda tiene dos secciones, **Mesas** y **Vestuario**. El vestuario (`js/vest
 
 100 logros agrupados por horas de juego (Primeros pasos, Primera sesión, Unas horas, Jugador habitual, Maestría y Secretos). Cuentan preguntas, dianas, rachas, tarjetas de la Enciclopedia por tipo y por continente, campañas del Clásico, medallas, Reto diario (sus logros no se pueden ganar mientras esté retirado), cada Ascensión y el casino. Cada logro tiene su insignia propia y se envía a Steamworks con su nombre interno (`API name` = id de `js/profile.js`). La exportación para el panel de Steam se genera con `node tools/steam-achievements.mjs` y `python tools/steam_icons.py` (`docs/steam/`).
 
+## Truco de pruebas
+
+Mientras Geolite no esté en Steam, escribir 7 veces la tecla 7 en la portada lo desbloquea todo para probarlo: los 100 logros, la Enciclopedia entera, las 22 mesas, todo el vestuario, el Club al nivel 100 con 5.000 fichas de oro, las 12 campañas del Clásico con todos sus niveles y la Ascensión V. Un aviso dice «Todo desbloqueado». Esos logros no se envían nunca a Steam. Otra vez 7 × 7 y la partida vuelve a como estaba antes del truco (`js/truco.js`, apagado con su interruptor antes de publicar).
+
 ## Puntuación
 
 - Solo cuentan precisión y rapidez: las reliquias no multiplican los puntos.

@@ -296,7 +296,7 @@ window.AIQ = window.AIQ || {};
         if (a.ev !== ev || P.ach[a.id]) continue;
         let ok = false; try { ok = a.test(ctx); } catch (e) { ok = false; }
         if (!ok) continue;
-        P.ach[a.id] = Date.now(); n++; queue.push(a); if (A.steam && A.steam.unlock) A.steam.unlock(a.id);
+        P.ach[a.id] = Date.now(); n++; queue.push(a); if (A.steam && A.steam.unlock && !P.truco) A.steam.unlock(a.id);     // P.truco: partida con el truco de pruebas (js/truco.js): nunca a Steam
       }
       if (n) { save(); toast(); }
     },
@@ -323,5 +323,5 @@ window.AIQ = window.AIQ || {};
   };
 
   /* Steam: al arrancar se reenvia lo ya conseguido (activar un logro ya activo no hace nada): si Steam no estaba abierto cuando lo ganaste, no se pierde */
-  if (A.steam && A.steam.unlock) A.ACH.forEach(a => { if (P.ach[a.id]) try { Promise.resolve(A.steam.unlock(a.id)).catch(() => {}); } catch (e) { /* sin Steam */ } });
+  if (A.steam && A.steam.unlock && !P.truco) A.ACH.forEach(a => { if (P.ach[a.id]) try { Promise.resolve(A.steam.unlock(a.id)).catch(() => {}); } catch (e) { /* sin Steam */ } });
 })(window.AIQ);

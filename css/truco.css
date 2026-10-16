@@ -1,0 +1,19 @@
+/* ---------------------------------------------------------------- EL TRUCO DE PRUEBAS (js/truco.js): el aviso de TODO DESBLOQUEADO
+   Una ficha de papel sobre la sala oscurecida, con la placa de laton del titulo; a la escala del juego (--k), por encima de todo. */
+.tr-veil { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; background: radial-gradient(110% 90% at 50% 45%, rgba(4, 12, 9, .5), rgba(2, 6, 4, .86));
+  opacity: 0; transition: opacity .22s ease; pointer-events: auto; }
+.tr-veil.in { opacity: 1; }
+.tr-card { zoom: var(--k); width: 760px; max-width: calc(100vw / var(--k) - 48px); display: grid; justify-items: center; gap: 14px; padding: 26px 34px 24px; text-align: center;
+  transform: translateY(14px) scale(.96); transition: transform .32s var(--gx-ease, ease); }
+.tr-veil.in .tr-card { transform: none; }
+.tr-eyb { font-size: 18px; }
+.tr-plate { display: block; padding: 10px 28px 12px; font-family: var(--sans); font-weight: 400; font-size: 64px; line-height: 1; letter-spacing: .01em; color: var(--gx-ink);
+  background: linear-gradient(180deg, var(--gx-gold-hi) 0, var(--gx-gold) 55%, #e89a32 100%); clip-path: var(--gx-notch);
+  box-shadow: inset 0 0 0 3px var(--gx-o), inset 0 -6px 0 rgba(0, 0, 0, .16); text-wrap: balance; }
+.tr-card.off .tr-plate { color: var(--gx-ttl); background: linear-gradient(180deg, #2f6b4b 0, #1d4a33 100%); }
+.tr-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; font-family: var(--sans); font-size: 26px; line-height: 1.1; color: var(--gx-ink); }
+.tr-list li { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.tr-list li::before { content: ""; width: 10px; height: 10px; flex: none; background: var(--gx-gold); box-shadow: 0 0 0 2px var(--gx-o); }
+.tr-foot { margin: 6px 0 0; max-width: 620px; font-size: 20px; line-height: 1.2; color: var(--gx-ink-2); text-wrap: pretty; }
+.tr-key { font-family: var(--mono); font-size: 16px; text-transform: uppercase; letter-spacing: .06em; color: var(--gx-ink-2); opacity: .8; }
+html.reduce-motion .tr-veil, html.reduce-motion .tr-card { transition: none; }
