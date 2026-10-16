@@ -481,6 +481,20 @@ window.AIQ = window.AIQ || {};
   const ui = { built: false, view: { k: "home" }, stack: [], q: "", cur: null, lockN: 0 };
   const esc = s => A.esc(s);                                           // textos de Wikipedia/Commons dentro de innerHTML
   const photo = u => (/\.svg$/i.test(u) ? "" : "cx-photo");           // fotos de Wikipedia/Commons: se reducen suavizadas (css/codex.css); el arte pixel y las banderas SVG siguen nitidos
+  /* Encuadre de las fotos (v0.3.167): una foto alta (un retrato) en un marco apaisado perdia la frente o la cara con el recorte centrado. Se mide cada foto contra su marco:
+     poco recorte = cubre y sube el encuadre (las caras viven arriba); mucho recorte = entera (fit-all) sobre el fondo del marco. Los marcos se miden con offsetWidth (las polaroids
+     van giradas), y si estan ocultos se supone su proporcion de siempre (4:3; la tarjeta grande, 1:1). */
+  const fitPhoto = im => {
+    const go = () => {
+      const p = im.parentElement, iw = im.naturalWidth, ih = im.naturalHeight; if (!p || !iw || !ih) return;
+      const ca = p.offsetWidth > 20 && p.offsetHeight > 20 ? p.offsetWidth / p.offsetHeight : (p.closest(".cx-big") ? 1 : 4 / 3), ia = iw / ih;
+      const tall = ia < ca, loss = 1 - Math.min(ia / ca, ca / ia);                     // fraccion de la foto que se perderia al cubrir
+      im.classList.toggle("fit-all", loss > (tall ? 0.12 : 0.35)); im.classList.toggle("fit-top", tall);
+    };
+    if (im.complete && im.naturalWidth) go(); else im.addEventListener("load", go, { once: true });
+  };
+  const scanPhotos = n => { if (n.nodeType !== 1) return; if (n.tagName === "IMG") { if (n.classList.contains("cx-photo")) fitPhoto(n); } else if (n.firstElementChild) n.querySelectorAll("img.cx-photo").forEach(fitPhoto); };
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(scanPhotos); }).observe(document.documentElement, { childList: true, subtree: true });
   const fold = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/ł/g, "l").replace(/ø/g, "o").replace(/ß/g, "ss").replace(/æ/g, "ae").replace(/œ/g, "oe").replace(/[đð]/g, "d").replace(/þ/g, "th").replace(/ı/g, "i");   // busqueda sin tildes ni mayusculas (ni ł, ø, ß, æ, œ, đ, ð, þ, ı, que NFD no separa)
   const cap = t => (t ? t.charAt(0).toLocaleUpperCase(A.lang) + t.slice(1) : "");
   const kmTxt = km => (A.core && A.core.S && A.core.S.units === "mi" ? A.fmtDist(km) : A.fmt(km) + " km");
