@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.160",
+      name: L("Continuar, a la medida", "Continue, to size", "Continuer, à la bonne taille", "Continuar, na medida", "Weiter, passend", "Continua, su misura", "", "继续按钮合身", "이어하기, 알맞게", "つづきを、ちょうどよく", "Продолжить по размеру", "Kontynuuj w sam raz"),
+      date: "2026-10-16",
+      summary: L("«Continuar expedición» vuelve a medir lo mismo que las tres cartas de modo de la portada.", "\"Continue expedition\" is once again as wide as the three mode cards on the title screen.", "« Reprendre l'expédition » retrouve la largeur des trois cartes de mode de l'accueil.", "«Continuar expedição» volta a ter a largura das três cartas de modo da capa.", "„Expedition fortsetzen“ ist wieder so breit wie die drei Moduskarten auf dem Titelbild.", "«Riprendi la spedizione» torna largo quanto le tre carte modalità della copertina.", "", "“继续远征”再次与主页上三张模式卡片等宽。", "‘원정 계속하기’가 다시 표지의 모드 카드 세 장과 같은 너비가 되었습니다.", "「遠征を再開」が、表紙の3枚のモードカードと同じ幅に戻りました。", "«Продолжить экспедицию» снова такой же ширины, как три карты режимов на главном экране.", "„Kontynuuj wyprawę” znów ma szerokość trzech kart trybów na ekranie głównym."),
+      chapters: [
+        { id: "portada", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Portada", "Title screen", "Accueil", "Capa", "Titelbild", "Copertina", "", "主页", "표지", "表紙", "Главный экран", "Ekran główny"),
+          entries: [
+            E(L("Continuar, del ancho de las cartas", "Continue, as wide as the cards", "Continuer, de la largeur des cartes", "Continuar, da largura das cartas", "Weiter, so breit wie die Karten", "Continua, largo come le carte", "", "继续按钮与卡片等宽", "이어하기, 카드와 같은 너비", "つづきはカードと同じ幅", "Продолжить — во всю ширину карт", "Kontynuuj — szerokość kart"), "change", "0.3.160", [
+              L("La placa de **Continuar expedición** ya no se estira bajo las cinco placas: mide lo mismo que las tres cartas de arriba y queda centrada.",
+                "The **Continue expedition** plate no longer stretches under all five plates: it is as wide as the three cards above and centred.",
+                "La plaque **Reprendre l'expédition** ne s'étire plus sous les cinq plaques : elle a la largeur des trois cartes du dessus et reste centrée.",
+                "A placa de **Continuar expedição** já não se estica sob as cinco placas: tem a largura das três cartas de cima e fica centrada.",
+                "Die Platte **Expedition fortsetzen** zieht sich nicht mehr unter alle fünf Platten: Sie ist so breit wie die drei Karten darüber und zentriert.",
+                "La placca **Riprendi la spedizione** non si allunga più sotto le cinque placche: è larga come le tre carte sopra ed è centrata.",
+                "",
+                "**继续远征**面板不再拉伸到五个面板的宽度：它与上方三张卡片等宽并居中。",
+                "**원정 계속하기** 판이 더 이상 다섯 개의 판 아래로 늘어나지 않고, 위의 카드 세 장과 같은 너비로 가운데에 놓입니다.",
+                "**遠征を再開**のプレートは5枚のプレートの下いっぱいに広がらず、上の3枚のカードと同じ幅で中央に置かれます。",
+                "Плашка **«Продолжить экспедицию»** больше не растягивается под всеми пятью плашками: она такой же ширины, как три карты сверху, и стоит по центру.",
+                "Płyta **Kontynuuj wyprawę** nie rozciąga się już pod pięcioma płytami: ma szerokość trzech kart powyżej i jest wyśrodkowana.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.159",
       name: L("Continentes a juego", "Matching continents", "Des continents assortis", "Continentes combinando", "Passende Kontinente", "Continenti abbinati", "", "统一的大洲", "어울리는 대륙", "そろった大陸", "Континенты в одном стиле", "Pasujące kontynenty"),
       date: "2026-10-16",

@@ -30,7 +30,7 @@
 .hh-deck.five .plq { gap: 9px; padding: 8px 10px 12px; }                              /* cinco en fila: icono y letra un punto mas pequenos */
 .hh-deck.five .plq-ic .ic { width: 36px; height: 36px; }
 .hh-deck.five .plq-t > b { font-size: 23px; }
-.hh-bottom .hh-resume { flex: none; box-sizing: border-box; width: auto; max-width: none; margin: 0; }   /* en una sola fila, del ancho de las placas */
+.hh-bottom .hh-resume { flex: none; box-sizing: border-box; width: calc(2 * var(--cw) + var(--hw) + 2 * var(--cg)); max-width: 100%; justify-self: center; margin: 0; }   /* del ancho de las tres cartas de arriba, centrado */
 .hh-bottom:has(.hh-cont) { row-gap: 22px; }                                                        /* las bombillas de Continuar no tocan las placas */
 .hh-bottom:has(.hh-cont):has(.plq-rib.on) { row-gap: 40px; }   /* la cinta de tu puesto no toca el banner */
 
