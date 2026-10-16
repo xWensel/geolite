@@ -82,7 +82,7 @@ window.AIQ = window.AIQ || {};
     st.luz = { cones, pools };
     if (A.casa && A.casa.mira) A.casa.mira(false, true);                // la penumbra tiene que estar cuando se encienden las lamparas
   }
-  addEventListener("resize", () => { if (st && st.tel.isConnected) { st.p = px(); st.tel.style.setProperty("--p", st.p + "px"); st.air.style.setProperty("--p", st.p + "px"); coloca(false); } });
+  addEventListener("resize", () => { if (st && st.tel.isConnected) { if (A.fitIntro) A.fitIntro(); st.p = px(); st.tel.style.setProperty("--p", st.p + "px"); st.air.style.setProperty("--p", st.p + "px"); coloca(false); } });
 
   /* ================================================================ la portada: focos de sala y el resplandor del cartel */
   let hs = null, htm = 0, hmo = null, vista = false;
@@ -154,6 +154,7 @@ window.AIQ = window.AIQ || {};
     if (!on) return quitaCaja();
     if (cjT) return; cjT = setTimeout(() => { ponCaja(); cjT = setTimeout(() => { cjT = 0; ponCaja(); }, 950); }, cj ? 80 : 720);                // el ticket termina de imprimirse a los 650 ms
   }
-  A.escena = { caja: laCaja, luzCaja: () => (cj && $("layer") && $("layer").querySelector(":scope > .esc-caja") && luces() ? cj : null), portada, luzPortada: () => { const d = $("dlg"); return hs && d && d.classList.contains("home") && luces() ? hs : null; },
+  A.escena = { recoloca: () => { if (st && st.tel.isConnected) coloca(false); },   // el cartel cambio de alto despues de montarlo (llego su letra: js/game.js)
+    caja: laCaja, luzCaja: () => (cj && $("layer") && $("layer").querySelector(":scope > .esc-caja") && luces() ? cj : null), portada, luzPortada: () => { const d = $("dlg"); return hs && d && d.classList.contains("home") && luces() ? hs : null; },
     monta, desmonta, luz: () => (st && st.luz && st.tel.isConnected && luces() ? st.luz : null) };
 })(window.AIQ);

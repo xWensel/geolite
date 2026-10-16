@@ -146,6 +146,13 @@ canvas.curve { width: 72px; height: 45px; border-radius: 7px; image-rendering: p
 .rb-ov.clash .rb-hint { visibility: hidden; }
 html[data-dev="deck"] .rb-btn { font-size: 16px; }
 
+/* v0.3.172: en la ventana minima (960 x 600) la tabla de teclas se salia por la derecha y ensanchaba todo el panel. Ahora la pestana mide su hueco
+   y no su contenido, la barra de arriba se parte en dos lineas si hace falta y, si el hueco no da para dos columnas, todo va en una (se desplaza, como
+   el resto de Ajustes cuando no cabe) */
+.ctl { container-type: inline-size; } #settings .set-panes { min-width: 0; }
+.ctl-top { flex-wrap: wrap; } .ctl-top .seg { min-width: min(360px, 100%); }
+@container (max-width: 760px) { .kb-list, .pad-list, #ctlMouse, #ctlPad { grid-template-columns: minmax(0, 1fr); } }
+
 /* movil: todo apilado (se desplaza, como el resto de Ajustes en movil) */
 @media (max-width: 900px) {
   #ctlMouse, #ctlPad { grid-template-columns: minmax(0, 1fr); }

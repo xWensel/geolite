@@ -257,7 +257,8 @@
       if (A.dealer && A.dealer.forget) A.dealer.forget(wipe); else wipe();       // el crupier se despide antes (y te olvida de verdad)
     }; }
   /* Ajustes no se escala con --k. Antes, si su panel no cabia, se encogia con zoom; desde la v0.3.22 se queda a tamano real y se desplaza */
-  const fitSet = () => { const b = document.querySelector("#settings .set-body"); if (b) b.style.zoom = ""; };   // si el panel no cabe, .set-panes se desplaza
+  /* v0.3.172: antes de desplazarse, la pestana que no cabe aprieta sus aires (.tight, css/gala.css): Datos a 16:9 se desplazaba 17-25 px por nada */
+  const fitSet = () => { const b = document.querySelector("#settings .set-body"); if (b) b.style.zoom = ""; const p = document.querySelector("#settings .set-panes"); if (p) { p.classList.remove("tight"); if (p.scrollHeight > p.clientHeight + 1) p.classList.add("tight"); } };   // si ni asi cabe, .set-panes se desplaza
   const fitSetSoon = () => requestAnimationFrame(fitSet);
   addEventListener("resize", fitSetSoon);
   let setFocusBack = null;
@@ -603,7 +604,7 @@
   /* una pantalla que se completa poco a poco y ajusta ella misma lo que anade (el Perfil): lo que hay ahora cuenta como ya ajustado */
   A.fitMark = () => queueMicrotask(() => { const d = $("dlg"); if (!d || !d.isConnected) return; fitNew = dlgNew; fitLast = fitSig(d, d.querySelector(":scope > " + FIT.split(", ").join(", :scope > "))); });
   setK(); A.uiK = uiK; A.fitK = fitK;
-  addEventListener("resize", () => { setK(); fitSoon(); });
+  addEventListener("resize", () => { setK(); fitSoon(); fitIntro(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSoon);
   /* pantalla nueva: se ajusta en el mismo fotograma en que se pinta por primera vez (sale ya ajustada, sin salto) y luego dos repasos por si algo llega tarde */
   if (window.MutationObserver && $("dlg")) { const d = $("dlg"); new MutationObserver(m => { if (m.some(x => x.addedNodes.length)) { dlgNew++; clearTimeout(fitT); requestAnimationFrame(fitK); setTimeout(fitK, 260); setTimeout(fitK, 700); } }).observe(d, { childList: true }); }
@@ -664,10 +665,27 @@
     /* la intro no se cierra sola mientras el crupier habla: espera a su ultima frase y a su segundo de mas, aunque vaya con retraso
        (antes un tope de 11 s le cortaba a media frase). Un clic o una tecla la saltan igual. */
     if (S.run && A.adv.introReady) { const need = A.adv.introReady(L, () => { talking = false; if (timeUp) end(); }) || 0; talking = need > 0; ms = Math.max(ms, 1200 + need); }
+    fitIntro();                                                       // v0.3.172: antes del escenario, que mide el cartel para colgar sus lamparas y poner el suelo
     if (A.escena) A.escena.monta({ act: (S.run && A.adv.run && A.adv.run.act) || 0 });   // v0.3.72: el escenario de la ronda, con el crupier ya en su sitio (su lampara se cuelga sobre el)
+    /* la letra de algunos idiomas (japones, coreano, chino) llega despues de pintar el cartel y lo alarga: se vuelve a ajustar y el escenario se recoloca */
+    if (document.fonts && document.fonts.status === "loading") { const en = el.querySelector(".intro-in"), hm = en ? en.offsetHeight : 0; document.fonts.ready.then(() => { if (tok !== S.introTok || done || !en || !en.isConnected) return; fitIntro(); if (en.offsetHeight !== hm && A.escena && A.escena.recoloca) A.escena.recoloca(); }); }
     const end = () => { if (done || tok !== S.introTok) return; done = true; el.onclick = null; if (S.run && A.adv.introEnd) A.adv.introEnd(); el.classList.add("out"); setTimeout(() => { if (tok !== S.introTok) return; el.classList.add("hidden"); cb(); }, 430); };
     S.skipIntro = end; el.onclick = end; setTimeout(() => { timeUp = true; if (!talking) end(); }, ms); setTimeout(end, ms + 15000);   // red de seguridad: nunca se queda colgada
   }
+  /* v0.3.172: el cartel de la intro siempre cabe. Va centrado en la pantalla y el suelo del escenario (js/escena.js) necesita al menos 20 pixeles de
+     arte por debajo (rodapie y aire): si no cabe, se compacta por pasos (css/premium.css) y el titulo baja de 2 en 2 px hasta un 64 % (--h2fit) */
+  function fitIntro() {
+    const el = $("intro"), en = el && el.querySelector(".intro-in"); if (!en || el.classList.contains("hidden")) return;
+    const h2 = en.querySelector(".intro-body h2"), p = Math.max(2, Math.round(2 * Math.min(innerWidth / 1280, innerHeight / 720)));
+    en.classList.remove("fit1", "fit2", "fit3"); en.style.removeProperty("--h2fit");
+    const room = innerHeight - 40 * p, fits = () => en.offsetHeight <= room;
+    if (fits()) return;
+    en.classList.add("fit1");
+    if (!fits() && h2) { const f0 = parseFloat(getComputedStyle(h2).fontSize), f1 = Math.max(30, Math.round(f0 * 0.64)); for (let f = Math.floor(f0 / 2) * 2 - 2; f >= f1 && !fits(); f -= 2) en.style.setProperty("--h2fit", f + "px"); }   // una variable y no font-size: A.squeeze (js/uikit.js) reescribe el font-size en linea sin !important
+    if (!fits()) en.classList.add("fit2");
+    if (!fits()) en.classList.add("fit3");
+  }
+  A.fitIntro = fitIntro;
   function nextQuestion() {
     S.phase = "asking"; S.paused = false; S.tense = false; S.limit = (!S.run && q() && q().tpq) || lv().seconds; S.t0 = performance.now(); S.pausedAcc = 0; S.lastTick = -1; S.lastTimeStr = "";
     map.clearMarks(); map.animateTo(map.home(), 800); map.setPick(true); A.music.mode(1);

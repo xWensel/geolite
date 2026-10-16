@@ -624,6 +624,7 @@ window.AIQ = window.AIQ || {};
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
     ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
+    if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva
   }
   /* el Reto diario de hoy tal cual, sin cerrar nada (precalentamiento de la puerta): sin ids, es una copia */
   const dailyHtml = () => { const DY = A.rank.daily, today = DY.board(); let sv = A.adv.summary(true); if (sv && sv.board !== today) sv = null; return dyHtml(sv, DY.get(today), null, today).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };

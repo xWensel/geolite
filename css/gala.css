@@ -250,6 +250,10 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
   box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 6px var(--gx-rim), inset 0 0 0 8px var(--gx-o), inset 0 40px 56px -40px rgba(255, 214, 140, .14);
   scrollbar-color: var(--gx-rim) transparent; }
 #settings .set-grid { gap: 6px 32px; }
+/* v0.3.172: la pestana que no cabe aprieta primero sus aires (js/game.js, fitSet); la letra no cambia. Lo que aun no quepa se desplaza, como siempre */
+#settings .set-panes.tight .set-grid { row-gap: 0; } #settings .set-panes.tight .set-card { padding-bottom: 8px; }
+:root body #settings .set-panes.tight .set-card > h3 { margin-bottom: 8px; } :root body #settings .set-panes.tight .set-note { margin-top: 4px; } :root body #settings .set-panes.tight .row-btn { margin-bottom: 2px; }
+#settings .set-panes.tight .dl-file .dlf-h { margin-bottom: 4px; } #settings .set-panes.tight .dlf { row-gap: 2px; }
 #settings .set-card { padding: 2px 0 14px; border-radius: 0; background: none; box-shadow: none; border-bottom: 2px solid var(--gx-line); }
 #settings .set-card:last-child, #settings .set-col > .set-card:last-child { border-bottom: 0; }
 :root body #settings .set-card > h3 { font-family: var(--mono); font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); margin: 0 0 12px; }

@@ -710,7 +710,7 @@ window.AIQ = window.AIQ || {};
     return `<div class="intro-in adv${Lv.boss ? " is-boss" : ""}" data-topic="${def.topic}"><div class="intro-left"><div class="intro-num blind">${A.blind(kind, inner)}</div><div class="intro-body">
       <span class="tag">${A.tx(info.n)} · ${actSub(info)}</span><h2>${A.tx(Lv.topicName)}</h2>
       ${Lv.boss && run.chalName ? `<p class="boss-combo">${A.tx(run.chalName)}</p>` : ""}${Lv.boss && run.chalDesc && run.chalDesc.es ? `<p class="boss-d">${A.tx(run.chalDesc)}</p>` : ""}
-      <p class="intro-sub">${Lv.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + (run.round + 1)} · ${A.tx(info.f)}${run._virgin ? ` <b class="intro-new">${NEW}</b>` : ""}</p>
+      <p class="intro-sub">${Lv.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}<span class="intro-flav"> · ${A.tx(info.f)}</span>${run._virgin ? ` <b class="intro-new">${NEW}</b>` : ""}</p>
       <p class="adv-goal">${A.T("Objetivo", "Target")} ${!run.inf && baseTarget() > Lv.advance ? `<s class="of-was">${A.fmt(baseTarget())}</s> ` : ""}<b>${A.fmt(Lv.advance)}</b> · ${run.qn} ${A.T("lugares", "places")}${run.qn > 5 ? " · " + A.tx(BEST5) : ""} · ${Lv.seconds} s</p>
       ${list.length ? `<h4 class="adv-chal-h">${A.T("El crupier toca la mesa", "The dealer touches the table")}</h4>` : ""}${chips}</div></div>
       <div class="intro-art"><i class="intro-hueco"></i><div class="intro-dealer" id="introDealer"></div></div></div>`;   // v0.3.72: sin ilustracion; el crupier, solo bajo la lampara del tema (js/escena.js)

@@ -97,8 +97,9 @@ window.AIQ = window.AIQ || {};
       const anim = box.getAnimations ? box.getAnimations().filter(a => a.playState === "running" && a.effect && a.effect.getTiming().iterations !== Infinity) : [];
       if (anim.length) Promise.all(anim.map(a => a.finished.catch(() => 0))).then(() => { if (cv.isConnected) { ajusta(cv); pinta(cv); } });
       /* la caja puede estar oculta al montar (la entrada sale despues de la intro) o cambiar de tamano: se reajusta al verse o crecer.
-         El lienzo va dentro y no mueve la caja (su medida es la del CSS), asi que esto no se realimenta */
-      if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (!cv.isConnected) { ro.disconnect(); return; } ajusta(cv); pinta(cv); }); ro.observe(box); }
+         v0.3.172: en el fotograma siguiente y no dentro del aviso. Donde la caja toma el alto del lienzo (la puerta, la portada en la Deck), reajustar
+         ahi mismo la volvia a cambiar y el navegador avisaba de un bucle ("ResizeObserver loop") */
+      if (window.ResizeObserver) { let rq = 0; const ro = new ResizeObserver(() => { if (!cv.isConnected) { ro.disconnect(); return; } if (!rq) rq = requestAnimationFrame(() => { rq = 0; if (cv.isConnected) { ajusta(cv); pinta(cv); } }); }); ro.observe(box); }
       /* la portada se escala con zoom (--k, A.fitK): eso no cambia la medida CSS de la caja, asi que se mira el estilo de quien lleva la k */
       const zk = box.closest(".hh"); if (zk) { const mo = new MutationObserver(() => { if (!cv.isConnected) { mo.disconnect(); return; } ajusta(cv); pinta(cv); }); mo.observe(zk, { attributes: true, attributeFilter: ["style"] }); }
     }));

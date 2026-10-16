@@ -188,7 +188,7 @@ window.AIQ = window.AIQ || {};
     ["coffee", Q, "Coffee", "Café", 9.03, 38.74, ["addis-ababa", "c:Colombia", "c:Brazil", "c:Vietnam"]],
     ["tea", Q, "Tea", "Té", 7.2906, 80.6337, ["kandy", "c:Sri Lanka", "shanghai"]],
     ["chocolate", Q, "Chocolate", "Chocolate", 50.8503, 4.3517, ["brussels", "hershey-s-chocolate-world", "bern", "zurich"]],
-    ["swiss-watch", Q, "Watchmaking", "Relojería suiza", 46.948, 7.4474, ["bern", "zurich", "c:Switzerland"]],
+    ["swiss-watch", Q, "Swiss watchmaking industry", "Relojería suiza", 46.948, 7.4474, ["bern", "zurich", "c:Switzerland"]],
     ["northern-lights", Q, "Aurora", "Aurora boreal", 64.1466, -21.9426, ["reykjavik", "yellowknife", "bodo", "iqaluit", "nuuk", "kiruna", "utqiagvik", "north-cape"]],
     ["midnight-sun", Q, "Midnight sun", "Sol de medianoche", 67.28, 14.4049, ["bodo", "oslo", "helsinki", "stockholm", "north-cape", "kiruna"]],
     ["sahara", Q, "Sahara", "Sáhara", 23.4162, 25.6628, ["cairo", "timbuktu", "tunis", "c:Egypt"]],

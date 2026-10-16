@@ -1639,7 +1639,7 @@ window.AIQ = window.AIQ || {};
   const D = A.dealer = { on: false, onHome: false, host: null, timers: [], busy: false };
   D.tier = () => DS.tier || 0;
   D._sello = n => { DS.tier = Math.max(DS.tier || 0, n | 0); saveStore(); };     // el truco de pruebas (js/truco.js): la categoria ya sellada, sin ceremonia                                              // la categoria que ya te ha sellado (js/club.js: la tarjeta de la portada)
-  let el, face, spr, bubble, txt, sofar, rest, typing = false, doneAt = 0, pend = null, dozing = false;   // typing: esta escribiendo una frase; doneAt: cuando acabo la ultima; pend: la que espera su turno
+  let el, face, spr, bubble, txt, sofar, rest, typing = false, doneAt = 0, pend = null, dozing = false, relines = () => {};   // relines: vuelve a medir los renglones de la frase en curso (D.aside)   // typing: esta escribiendo una frase; doneAt: cuando acabo la ultima; pend: la que espera su turno
   const rand = a => a[Math.floor(Math.random() * a.length)];
 
   function ensure() {
@@ -1663,6 +1663,7 @@ window.AIQ = window.AIQ || {};
      pequenos, movil en horizontal). Antes el retrato de 250 px tapaba la placa en pantallas de poca altura. */
   function fitCorner() {
     if (!el || el.classList.contains("camp") || el.classList.contains("lvpos")) return;      // en el Campamento su sitio lo mide campRoom
+    if (el.classList.contains("aside")) return asidePlace();                     // v0.3.172: apartado en otra pantalla del hub (D.aside)
     const bs = bubble.style, fs = face.style;
     const reset = () => { el.style.bottom = el.style.top = ""; fs.width = fs.height = fs.display = ""; bs.marginBottom = bs.maxWidth = ""; };
     const CS = A.core && A.core.S, setP = CS && CS.settingsOpen ? document.querySelector("#settings .set-panes") : null;   // v0.3.40: con Ajustes abierto (su expediente en Datos) no pisa el panel de la derecha
@@ -1696,6 +1697,56 @@ window.AIQ = window.AIQ || {};
     const minM = noFace ? 0 : mob ? 20 : 74, want = Math.max(minM, floor - bFloor), maxM = Math.max(0, floor - top - bh);
     bs.marginBottom = Math.min(want, maxM) + "px";                                    // si no cabe del todo, antes pisa las herramientas que la placa
   }
+  /* v0.3.172: ABRES OTRA PANTALLA DEL HUB (Retos, la tienda, el Perfil...) CON EL A MEDIA FRASE EN LA PORTADA. Antes la terminaba en su esquina de la
+     portada, encima de la columna de Encargos o de la ficha del articulo. No se le corta: se encoge y la acaba en el mayor hueco libre de la pantalla
+     nueva (la cabecera, el fondo vacio de un panel) sin tapar textos, fotos ni botones, y se va como siempre. Sin hueco, la acaba abajo a la izquierda */
+  const ASIDE_G = 8;                                                            // rejilla de busqueda (px)
+  function freeRect(minW, minH) {
+    const W = Math.ceil(innerWidth / ASIDE_G), H = Math.ceil(innerHeight / ASIDE_G), busy = new Uint8Array(W * H), M = 10;
+    const mark = r => { if (!r || r.width < 2 || r.height < 2) return; const x0 = Math.max(0, Math.floor((r.left - M) / ASIDE_G)), x1 = Math.min(W - 1, Math.floor((r.right + M) / ASIDE_G)), y0 = Math.max(0, Math.floor((r.top - M) / ASIDE_G)), y1 = Math.min(H - 1, Math.floor((r.bottom + M) / ASIDE_G)); for (let y = y0; y <= y1; y++) busy.fill(1, y * W + x0, y * W + x1 + 1); };
+    const root = $("dlg"), rg = document.createRange(), seen = n => { const c = getComputedStyle(n); return c.visibility !== "hidden" && c.opacity !== "0"; };
+    for (const host of [root, $("hud"), $("dock")].filter(Boolean)) {
+      host.querySelectorAll("img, canvas, svg, button, input, select, [role=button], [data-tt]").forEach(e => { if (!e.closest(".dealer") && seen(e)) mark(e.getBoundingClientRect()); });
+      host.querySelectorAll("div, section, ul, article").forEach(e => {               // los bordes de los paneles: dentro de uno o fuera, nunca a caballo
+        const r = e.getBoundingClientRect(); if (r.width < 200 || r.height < 120 || r.width > innerWidth - 40) return;
+        const c = getComputedStyle(e); if (c.boxShadow === "none" && c.clipPath === "none" && !parseFloat(c.borderTopWidth) && c.backgroundImage === "none") return;
+        for (const b of [[r.left, r.top, r.right, r.top + 1], [r.left, r.bottom - 1, r.right, r.bottom], [r.left, r.top, r.left + 1, r.bottom], [r.right - 1, r.top, r.right, r.bottom]]) mark({ left: b[0], top: b[1], right: b[2], bottom: b[3], width: b[2] - b[0] + 2, height: b[3] - b[1] + 2 });
+      });
+      const tw = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+      for (let n; (n = tw.nextNode());) if (n.nodeValue.trim() && n.parentElement && !n.parentElement.closest(".dealer") && seen(n.parentElement)) { rg.selectNodeContents(n); for (const r of rg.getClientRects()) mark(r); }
+    }
+    for (let x = 0; x < W; x++) { busy[x] = 1; busy[(H - 1) * W + x] = 1; } for (let y = 0; y < H; y++) { busy[y * W] = 1; busy[y * W + W - 1] = 1; }   // nada pegado al borde
+    /* el mayor rectangulo libre (histograma por filas) que cumpla el minimo; a igualdad, el de mas arriba */
+    const hgt = new Int32Array(W); let best = null;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) hgt[x] = busy[y * W + x] ? 0 : hgt[x] + 1;
+      const st = [];
+      for (let x = 0; x <= W; x++) {
+        const h = x < W ? hgt[x] : 0; let start = x;
+        while (st.length && st[st.length - 1][1] >= h) { const [s0, h0] = st.pop(); const w = (x - s0) * ASIDE_G, hh = h0 * ASIDE_G; if (w >= minW && hh >= minH && (!best || w * hh > best.w * best.h)) best = { x: s0 * ASIDE_G, y: (y - h0 + 1) * ASIDE_G, w, h: hh }; start = s0; }
+        st.push([start, h]);
+      }
+    }
+    return best;
+  }
+  function asidePlace() {
+    const fs = face.style, bs = bubble.style; el.style.bottom = ""; bs.marginBottom = ""; fs.display = ""; txt.style.height = "";   // el globo a su alto final para medir (relines lo vuelve a dejar en lo escrito)
+    const f = A.crupier.snap(112).css, r = freeRect(f + 12 + 260, f + 16);
+    if (r) {
+      const w = Math.min(r.w, f + 12 + 720); fs.width = fs.height = f + "px"; bs.maxWidth = (w - f - 12) + "px";   // globo ancho si el hueco lo es: menos renglones, cabe en franjas bajas como la cabecera
+      const bh = bubble.offsetHeight || 90, h = Math.max(f, bh);
+      if (h <= r.h) { el.style.left = Math.round(r.x + (r.w - w) / 2) + "px"; el.style.top = Math.round(r.y + (r.h - h) / 2) + "px"; el.style.width = w + "px"; el.classList.remove("aside-low"); relines(); return; }
+    }
+    el.classList.add("aside-low"); el.style.left = el.style.top = el.style.width = "";   // sin hueco: abajo a la izquierda, pequeno (css/uikit.css)
+    fs.width = fs.height = f + "px"; bs.maxWidth = ""; relines();
+  }
+  D.aside = () => {
+    const talking = speaking(); if (D.onHome) D.homeTease(false);            // deja de asomar (la pantalla nueva suele haberlo hecho ya: js/game.js, dialog). A media frase: la acaba (release) y se va
+    if (!el || D.host || !talking || !el.classList.contains("home")) return;
+    el.classList.remove("home", ...HOME_CORNERS); el.classList.add("aside");
+    const go = () => { if (el.classList.contains("aside") && speaking()) asidePlace(); };
+    requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 320); setTimeout(go, 760);   // la pantalla nueva se ajusta (A.fitK) en sus primeros fotogramas
+  };
   addEventListener("resize", () => { if (D.busy) fitCorner(); });
   D.refit = () => { if (D.busy) fitCorner(); };                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
   /* v0.32: la cara y el gesto de cada frase. Manda la escena si lo pide (o.face / o.gesture); si no, la tabla XMAP por clave (y por indice,
@@ -1742,22 +1793,29 @@ window.AIQ = window.AIQ || {};
     /* la frase entera ya maquetada desde el principio, con lo que falta por escribir invisible: el globo nace con su tamano final y ninguna palabra
        salta de linea a media escritura (y `text-wrap: pretty` reparte las lineas sin dejar una palabra sola) */
     sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest"; rest.textContent = text + ZW; txt.replaceChildren(sofar, rest);
+    if (!el.classList.contains("aside")) el.style.left = el.style.width = "";   // lo que le dejo el apartado (D.aside)
     fitCorner(); spr.fit(); spr.shown(true); spr.talk(true);
     /* el globo crece renglon a renglon al escribir (la frase ya esta maquetada y oculta, asi que ninguna palabra salta): se mide una sola vez
        a que renglon cae cada letra y luego solo se sube la altura del parrafo cuando empieza uno nuevo (sin leer el layout por letra) */
     txt.style.height = ""; let lineOf = null, lineH = 0, nLines = 1, shown = -1;
-    try {
-      const tn = rest.firstChild, hp = txt.offsetHeight, pr = txt.getBoundingClientRect(), k = hp && pr.height ? pr.height / hp : 0;
-      if (tn && k) {
-        const rg = document.createRange(), tops = [], lo = []; let a0 = 0;
-        for (const ch of text) { rg.setStart(tn, a0); rg.setEnd(tn, a0 + ch.length); const r = rg.getClientRects()[0]; lo.push(r && r.height ? Math.round((r.top - pr.top) / k) : null); a0 += ch.length; }
-        lo.forEach(t => { if (t != null && !tops.some(u => Math.abs(u - t) < 3)) tops.push(t); }); tops.sort((x, y) => x - y);
-        let cur = 0; lineOf = lo.map(t => (t == null ? cur : (cur = tops.findIndex(u => Math.abs(u - t) < 3))));
-        nLines = tops.length || 1; lineH = hp / nLines;
-        if (nLines < 2) lineOf = null;                                       // una sola linea: nada que crecer
-      }
-    } catch (e) { lineOf = null; }
+    /* v0.3.172: lo escrito va en `sofar` y lo que falta en `rest`: se puede volver a medir a media frase (D.aside lo aparta y le cambia el ancho) */
+    const measure = () => {
+      lineOf = null; txt.style.height = "";
+      try {
+        const hp = txt.offsetHeight, pr = txt.getBoundingClientRect(), k = hp && pr.height ? pr.height / hp : 0, n0 = sofar.data.length, tn = rest.firstChild;
+        if (tn && k) {
+          const rg = document.createRange(), tops = [], lo = []; let a0 = 0;
+          for (const ch of text) { const inS = a0 < n0, nd = inS ? sofar : tn, off = inS ? a0 : a0 - n0; rg.setStart(nd, off); rg.setEnd(nd, off + ch.length); const r = rg.getClientRects()[0]; lo.push(r && r.height ? Math.round((r.top - pr.top) / k) : null); a0 += ch.length; }
+          lo.forEach(t => { if (t != null && !tops.some(u => Math.abs(u - t) < 3)) tops.push(t); }); tops.sort((x, y) => x - y);
+          let cur = 0; lineOf = lo.map(t => (t == null ? cur : (cur = tops.findIndex(u => Math.abs(u - t) < 3))));
+          nLines = tops.length || 1; lineH = hp / nLines;
+          if (nLines < 2) lineOf = null;                                       // una sola linea: nada que crecer
+        }
+      } catch (e) { lineOf = null; }
+    };
+    measure();
     const grow = i => { if (!lineOf) return; const l = lineOf[i] || 0; if (l <= shown) return; shown = l; txt.style.height = lineH * (l + 1) + "px"; };
+    relines = () => { if (!typing || lineN !== me) return; measure(); shown = -1; grow(Math.max(0, i - 1)); };
     grow(0);
     if (mood === "laugh") A.sfx.laugh && A.sfx.laugh();
     let i = 0, at = 0; const chars = [...text], step = mood === "laugh" ? 44 : 34;

@@ -202,7 +202,7 @@ window.AIQ = window.AIQ || {};
     //     row = [id, categoria, tipo de pregunta, lat, lon, zona, nombres, sub, tipo de carta, 3 niveles (1/0), carta propia (0 = ya existe curada)]
     (A.DUELO_EXTRA || []).forEach(r => {
       const [id, , , lat, lon, zone, names, , ctype, t3, own] = r; if (own === 0 || E[id]) { if (t3 && E[id]) P3.add(id); return; }
-      add({ id, type: ctype || "curiosity", name: { ...names }, wiki: names.en, lat: zone ? null : lat, lon: zone ? null : lon, country: null, fact: { en: "", es: "" }, rarity: 2, src: "duelo", nogeo: !!zone || lat == null, triggers: [] });
+      add({ id, type: ctype || "curiosity", name: { ...names }, wiki: names.en, lat: zone ? null : lat, lon: zone ? null : lon, country: null, fact: { en: "", es: "" }, rarity: 2, src: "duelo", nogeo: !!zone || lat == null, triggers: [], zone: zone || null });
       if (t3) P3.add(id);
     });
     (A.DUELO_PERSONAS || []).forEach(r => {
@@ -372,6 +372,7 @@ window.AIQ = window.AIQ || {};
       (r.extra || []).forEach(q => r.groups.push(mk("q:" + q, r, { qc: q })));
     });
     const cKey = ne => (ne && byNE[ne] ? "c:" + ne : null);
+    const FAR = { "christmas-island": "Australia", "saint-helena": "United Kingdom" };   // v0.3.172: ningun pais del mapa a mano: antes caian en "Polos y oceanos polares"
     const keyOf = e => {
       if (seaOf[e.id]) return seaOf[e.id];
       const k = cKey(e.country) || cKey(e.home); if (k) return k;
@@ -381,6 +382,8 @@ window.AIQ = window.AIQ || {};
         if (best) return "c:" + best;
       }
       if (e.qc && gs["q:" + e.qc]) return "q:" + e.qc;                // Tuvalu e Islas Cook
+      if (e.zone) for (const z of e.zone) { const k = cKey(z); if (k) return k; }
+      if (FAR[e.id] && cKey(FAR[e.id])) return cKey(FAR[e.id]);        // islas lejos de todo: con el pais al que pertenecen   // v0.3.172: platos, musicas, inventos... de varios paises (data/duelo-extra.js): con su pais de origen, el primero de la lista (antes caian en "Polos y oceanos polares")
       return e.lat != null ? cKey(nearestNE(e.lat, e.lon, byNE)) : null;
     };
     const misc = [];
@@ -1297,24 +1300,32 @@ window.AIQ = window.AIQ || {};
        se estrecha. Los paneles van escalados (css/partida.css): los rectangulos son pixeles de pantalla y --pw, de diseno. Cuenta lo que baja, sube
        o se va de lado la esquina de una tarjeta al girar (gira sobre el 85 % de su alto). Una vez medido se CLAVA (posicion absoluta en la
        columna): si luego llega un aviso de logro y empuja la barra, el monton no baja con ella */
-    el.classList.remove("slim"); for (const k of ["--pw", "margin-top", "position", "left", "top"]) el.style.removeProperty(k);
+    el.classList.remove("slim", "on-note"); for (const k of ["--pw", "margin-top", "position", "left", "top"]) el.style.removeProperty(k);
     if (el.parentNode && el.parentNode.id === "leftCol" && (!A.marcador || A.marcador.docked())) {
       const col = el.parentNode, z = el.currentCSSZoom || 1, reel = el.firstElementChild, cr = col.getBoundingClientRect(), colW = col.clientWidth;
       const rect = id => { const e = $(id); return e && e.getClientRects().length ? e.getBoundingClientRect() : null; }, dr = rect("dock"), nr = rect("note");
-      let floor = dr && dr.left < cr.right && dr.top > cr.top ? dr.top - 8 * z : window.innerHeight - 20 * z;
+      const floor0 = dr && dr.left < cr.right && dr.top > cr.top ? dr.top - 8 * z : window.innerHeight - 20 * z; let floor = floor0;
       if (nr && nr.left < cr.right - 4 && nr.top > cr.top) floor = Math.min(floor, nr.top - 8 * z);   // ventanas de menos de 1200 px: con el ticket abierto la nota va bajo esta columna
       const maxW = Math.round(colW * .9), MINW = 220, tilt = w => 0.052 * w + 6;
       let last = null; const over = w => { el.style.setProperty("--pw", w + "px"); last = reel.getBoundingClientRect(); return (last.bottom - floor) / z + tilt(w); };   // > 0: lo que se sale (px de diseno). Cada medida recalcula el monton entero: las justas
-      const e0 = el.getBoundingClientRect(), r0 = reel.getBoundingClientRect(), free = (floor - r0.top) / z;   // (sin coste: A.restyle acaba de maquetar)
+      const e0 = el.getBoundingClientRect(), r0 = reel.getBoundingClientRect();   // (sin coste: A.restyle acaba de maquetar)
       const pr = rect("plate"), ar = rect("achToast"), achB = ar && ar.bottom < r0.top + 2 ? ar.bottom + 2 * z : 0;
       const can = w => Math.max(0, (r0.top - Math.max((pr ? pr.bottom : cr.top) + (8 + tilt(w)) * z, achB)) / z);   // lo que puede subir sin pisar la pregunta (ni con la esquina que sube al girar) ni el aviso de logro (que va por encima: ahi la esquina no importa)
-      let w = maxW, o;
-      if (free < .75 * (maxW - 20) + 100 + tilt(maxW)) { el.classList.add("slim"); o = over(w); }   // la 4:3 no cabe ni con el texto mas corto: apaisada sin probar
-      else { last = r0; o = (r0.bottom - floor) / z + tilt(w); if (o > 0) { el.classList.add("slim"); o = over(w); } }
-      for (let k = 0; o - can(w) > 0.5 && w > MINW && k < 6; k++) { w = Math.max(MINW, Math.floor(w - (o - can(w)) / (.625 + 0.052) - 2)); o = over(w); }
+      let w, o;
+      const size = () => {
+        el.classList.remove("slim"); el.style.removeProperty("--pw"); w = maxW;
+        if ((floor - r0.top) / z < .75 * (maxW - 20) + 100 + tilt(maxW)) { el.classList.add("slim"); o = over(w); }   // la 4:3 no cabe ni con el texto mas corto: apaisada sin probar
+        else { last = r0; o = (r0.bottom - floor) / z + tilt(w); if (o > 0) { el.classList.add("slim"); o = over(w); } }
+        for (let k = 0; o - can(w) > 0.5 && w > MINW && k < 6; k++) { w = Math.max(MINW, Math.floor(w - (o - can(w)) / (.625 + 0.052) - 2)); o = over(w); }
+      };
+      size();
+      /* v0.3.172: en la ventana minima (960 x 600, con un aviso de logro) ni a lo mas estrecho cabe sobre la nota y la pisaba a medias. Entonces el
+         monton baja hasta los botones de abajo y la nota se aparta mientras dure (css/codex.css, .on-note); vuelve en cuanto el monton se va */
+      const beside = dr && dr.left < cr.right && dr.top > cr.top;     // los botones de abajo, bajo la columna: el monton que baja hasta el borde se pone a su derecha
+      if (o - can(w) > 0.5 && floor < floor0) { floor = beside ? window.innerHeight - 20 * z : floor0; el.classList.add("on-note"); size(); }
       const lift = Math.max(0, Math.min(o, can(w)));
       const side = cr.left / z + (colW - w) / 2, swing = 0.089 * last.height / z + 24, dx = Math.max(0, Math.ceil(swing - side + 4));   // que la esquina de arriba (y la medalla) no asome fuera de la pantalla
-      el.style.setProperty("--pw", w + "px"); el.style.position = "absolute"; el.style.top = Math.round((e0.top - cr.top) / z - lift) + "px"; el.style.left = Math.round((colW - w) / 2 + dx) + "px";
+      el.style.setProperty("--pw", w + "px"); el.style.position = "absolute"; el.style.top = Math.round((e0.top - cr.top) / z - lift) + "px"; el.style.left = Math.round(Math.max((colW - w) / 2 + dx, el.classList.contains("on-note") && beside ? (dr.right - cr.left) / z + 8 : 0)) + "px";
     }
     show(0); reelT = setTimeout(next, hold(0));
   }

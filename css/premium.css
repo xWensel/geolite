@@ -121,9 +121,21 @@ html.reduce-motion .mqb.mq-lit { animation: none; }                             
 .intro-left { display: flex; align-items: center; gap: clamp(16px, calc(2.4 * var(--vw)), 40px); }
 .intro-num.blind { flex: none; width: clamp(120px, calc(15 * var(--vw)), 230px); height: clamp(120px, calc(15 * var(--vw)), 230px); -webkit-text-stroke: 0; }
 .intro-num.blind .ic.blindchip { width: 100%; height: 100%; animation: chip-drop .9s cubic-bezier(.3, 1.3, .5, 1) .2s both; filter: drop-shadow(0 12px 0 rgba(0, 0, 0, .5)); }
-.intro-body h2 { font-size: clamp(34px, calc(5.4 * var(--vw)), 84px) !important; line-height: .95; } .intro-sub { font-size: clamp(14px, calc(1.3 * var(--vw)), 19px) !important; }
+.intro-body h2 { font-size: var(--h2fit, clamp(34px, calc(5.4 * var(--vw)), 84px)) !important; line-height: .95; } .intro-sub { font-size: clamp(14px, calc(1.3 * var(--vw)), 19px) !important; }
 .intro-art { width: 100%; transform: rotate(1.5deg); } .intro-art .pic { width: 100%; aspect-ratio: 16 / 10; }
 @media (max-width: 900px) { .intro-in.adv { grid-template-columns: 1fr; } .intro-left { flex-direction: column; text-align: center; } }
+/* v0.3.172: el cartel de la intro siempre cabe entre el techo y el suelo del escenario (A.fitIntro, js/game.js). Los jefes con tres retos y los
+   titulos largos (ruso, japones, frances) median hasta 850 px y se salian por abajo en la Deck y a 720p. Se compacta por pasos y solo lo justo:
+   fit1, los aires; despues el titulo, a pasos de 2 px; fit2, la coletilla del acto (ya la dice la etiqueta de arriba); fit3, el interlineado de los retos */
+.intro-in.fit1 .intro-body { gap: 6px; }
+.intro-in.fit1 .boss-combo { margin: 0; } .intro-in.fit1 .boss-d { margin: 0; }
+.intro-in.fit1 .adv-chal-h { margin: 6px 0 0; }
+.intro-in.fit1 .adv-debuff { margin-top: 6px; padding: 7px 12px; }
+.intro-in.fit2 .intro-flav { display: none; }
+.intro-in.fit3 .adv-debuff b { line-height: 1.05; } .intro-in.fit3 .adv-debuff i { line-height: 1.1; } .intro-in.fit3 .adv-debuff { padding: 5px 12px; margin-top: 5px; }
+/* el acto, las monedas y los retos de arriba (#topHud, v0.3.103) no pisan la intro: ya los cuenta el cartel. Vuelven cuando se va */
+#intro:not(.hidden):not(.out) ~ #topHud { opacity: 0; visibility: hidden; }
+#topHud { transition: opacity .25s ease, visibility 0s; }
 
 
 /* ==================================================================== premium3.css */

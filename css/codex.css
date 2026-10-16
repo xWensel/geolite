@@ -316,6 +316,8 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 #leftCol .cx-toast.pile.in { animation: none; }   /* entra la primera polaroid cayendo, no el aviso entero */
 #leftCol .cx-toast.pile { width: auto; align-self: flex-start; } .cx-toast.pile .cx-ri { max-width: none; }   /* mide lo que la polaroid: el contador queda en su esquina */
 .cx-toast.pile.slim .cx-tcard { aspect-ratio: 16 / 10; } .cx-toast.pile.slim .cx-tt b { font-size: 24px; } .cx-toast.pile.slim .cx-tt i { -webkit-line-clamp: 3; }   /* ventanas bajas (960 x 600) */
+/* v0.3.172: el monton no cabe sobre la nota (ventana minima): la tapa entera y la nota se aparta mientras dura (js/codex.js) */
+body:has(#cxToast.on-note:not(.hidden):not(.out)) #note { opacity: 0; }   /* con el fundido que ya tiene la nota (css/uikit.css) */
 .cx-reel { position: relative; display: grid; justify-items: center; overflow: visible; }
 .cx-ri { grid-area: 1 / 1; position: relative; width: var(--pw, 90%); max-width: 100%; display: grid; gap: 8px; padding: 10px 10px 12px; text-align: left; color: var(--ink); background: var(--paper); background-image: var(--paper-grain); box-shadow: inset 0 0 0 2px var(--ink), 0 12px 18px rgba(0, 0, 0, .42); visibility: hidden; transform-origin: 50% 85%; }
 .cx-ri.on, .cx-ri.under { visibility: visible; }

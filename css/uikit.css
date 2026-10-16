@@ -312,6 +312,11 @@ body.tk-on .rail-sh { display: none; }
 .dealer.screen { left: 20px; bottom: 14px; top: auto; z-index: 100010; pointer-events: none; }
 .dealer.screen .dl-face { width: 224px; height: 224px; }                  /* v0.32: el busto a x2 exacto */
 .dealer.screen .dl-bubble { max-width: 420px; margin-bottom: 60px; }
+/* v0.3.172: apartado (js/dealer.js, D.aside): abres otra pantalla del hub con el a media frase en la portada; la acaba pequeno en el mayor hueco libre */
+.dealer.aside { right: auto; bottom: auto; justify-content: flex-end; z-index: 100010; pointer-events: none; }
+.dealer.aside .dl-bubble { margin-bottom: 0; } .dealer.aside { align-items: center; }   /* globo a la altura de la cara: cabe en franjas bajas (la cabecera) */
+.dealer.aside.aside-low { align-items: flex-end; } .dealer.aside.aside-low .dl-bubble { margin-bottom: 24px; }
+.dealer.aside.aside-low { left: 20px; top: auto; bottom: 14px; }
 /* v0.20: comentando la Clasificacion, a la izquierda del panel y sin pisarlo (js/dealer.js podSay mide --sbw) */
 .dealer.screen.pod .dl-face { width: 130px; height: 130px; }
 .dealer.screen.pod .dl-bubble { max-width: var(--sbw, 420px); margin-bottom: 36px; }
