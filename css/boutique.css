@@ -137,11 +137,16 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 .bq-cat-t:focus-visible, html[data-input="pad"] .bq-cat-t:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
 
 .bq-cat.vest { grid-template-rows: minmax(0, 1fr); }
+/* seis pestanas (trajes, antifaces, pajaritas, piezas, legendarias, tuyo): mas juntas para que quepan en una fila hasta en ruso */
+.bq-cat.vest .bq-tabs { gap: 6px; }
+.bq-cat.vest .bq-tab { gap: 6px; padding: 5px 8px 6px; font-size: 18px; }
+.bq-cat.vest .bq-tab i { font-size: 14px; }
 .bq-items.vest { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 14px; }
 /* el retrato: sobre tapete, con un foco suave detras (la luz va detras del crupier, nunca encima) */
 .bq-vth { aspect-ratio: 6 / 7; overflow: hidden; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
 .bq-vth img { position: absolute; left: 0; top: 0; max-width: none; object-fit: fill; image-rendering: pixelated; }
-.bq-vit { grid-template-rows: auto auto minmax(0, 1fr); }
+.bq-vit { grid-template-rows: auto auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); }
+.bq-vp .bq-own { max-width: 100%; overflow: hidden; white-space: nowrap; }
 .bq-vit .bq-nm { font-size: 19px; line-height: 1.02; overflow-wrap: break-word; hyphens: manual; }
 .bq-vp { display: flex; align-items: flex-end; min-height: 26px; padding: 0 2px; }
 .bq-vp .bq-pr { font-size: 22px; gap: 5px; }
@@ -149,7 +154,7 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 
 /* el probador */
 .bq-det.vest { gap: 9px; }
-.bq-prob { position: relative; display: block; height: 280px; overflow: hidden; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); }
+.bq-prob { position: relative; display: block; height: 300px; overflow: hidden; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); }
 .bq-prob.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
 .bq-probh { position: absolute; inset: 0; }
 .bq-probh .cr-cv { top: auto; bottom: 0; transform: translateX(-50%); }

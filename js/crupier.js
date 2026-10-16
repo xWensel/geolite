@@ -156,6 +156,7 @@ window.AIQ = window.AIQ || {};
     if (p.m2 && mo) put(c, R("tm_" + p.e), mo[0], mo[1]);
     if (p.tear >= 0 && eo) { const t = d.tear[p.tear]; put(c, R("tear"), eo[0] + t[0], eo[1] + t[1]); }
     if (p.g) { const oc = d.gest[p.g].oc; if (oc && oc[p.f]) put(c, R(oc[p.f])); }   // lo que tapa la cara (cartas, mano) vuelve encima de ella
+    { const ov = cur && cur.ov; if (ov) { const k = p.g ? d.gest[p.g].frames[p.f] : "master"; for (const L of ov) { const r = L.r[k]; if (r) c.drawImage(L.img, r[0], r[1], r[2], r[3], r[4], r[5], r[2], r[3]); } } }   // v0.3.135: capas del vestuario por fotograma (antifaz veneciano, pluma), ya recortadas por lo que tienen delante
     if (E.dark) { darken(c); if (!p.off && eo) put(c, R("glow_" + p.e), eo[0], eo[1]); }
     if (p.z) put(c, R("zz_" + p.z));
     if (p.w) for (const [y0, y1, dx] of p.w) { const band = c.getImageData(0, y0, W, y1 - y0); c.clearRect(0, y0, W, y1 - y0); c.putImageData(band, dx, y0); }
@@ -209,7 +210,7 @@ window.AIQ = window.AIQ || {};
       if (mini !== this.mini) { this.mini = mini; this.cv.classList.toggle("mini", mini); this.host.style.overflow = mini ? "hidden" : ""; }
       if (mini) { s.margin = ""; s.left = (Math.round(cw * z * dpr / 2) - HX * k) * per + "px"; s.top = (Math.round(ch * z * dpr / 2) - HY * k) * per + "px"; }
       else { s.left = s.top = ""; s.marginLeft = -Math.round((CX - W / 2) * k) * per + "px"; s.marginTop = -Math.round((CY - H / 2) * k) * per + "px"; }
-      if (this.o.floor) s.marginBottom = -Math.round((H - FLOOR) * k) * per + "px";       // o.floor: de pie en el borde de abajo del hueco (con bottom: 0 en su CSS)
+      if (this.o.floor) s.marginBottom = -Math.round((H - FLOOR + (this.o.floor === true ? 0 : +this.o.floor || 0)) * k) * per + "px";   // o.floor: de pie en el borde de abajo del hueco (con bottom: 0 en su CSS); un numero: esas filas mas abajo (deja sitio arriba)
       this.draw(true);
     }
     set(expr, o = {}) {

@@ -41,16 +41,23 @@ window.AIQ = window.AIQ || {};
     cVest: "Vestuario|Wardrobe|Garde-robe|Guarda-roupa|Garderobe|Guardaroba||衣橱|의상실|衣装|Гардероб|Garderoba",
     traje: "Trajes|Suits|Costumes|Ternos|Anzüge|Abiti||西装|정장|スーツ|Костюмы|Garnitury",
     pajarita: "Pajaritas|Bow ties|Nœuds papillon|Gravatas|Fliegen|Papillon||领结|나비넥타이|蝶ネクタイ|Бабочки|Muchy",
-    casa: "De la casa|House|Maison|Da casa|Vom Haus|Della casa||本店原装|기본|定番|От заведения|Firmowe",
+    piezas: "Piezas|Pieces|Pièces|Peças|Extras|Pezzi||饰品|소품|小物|Аксессуары|Dodatki",
+    casa: "Básico|House|Maison|Básico|Basis|Base||本店原装|기본|定番|Базовый|Firmowe",                 // la etiqueta de la tarjeta (corta: cabe en la Deck)
+    casaL: "De la casa|House style|De la maison|Da casa|Vom Haus|Della casa||本店原装|하우스 기본|店の定番|От заведения|Firmowe",
     antifaz: "Antifaces|Masks|Loups|Máscaras|Masken|Maschere||面具|가면|仮面|Маски|Maski",
     mine: "Tuyo|Yours|À toi|Seu|Deins|Tuo||已拥有|보유|所持|Твоё|Twoje",
-    on: "Puesto|Wearing|Porté|Vestido|Angezogen|Indossato||穿着|착용 중|着用中|Надето|Założone",
+    on: "Puesto|Wearing|Porté|Vestido|Aktiv|In uso||穿着|착용 중|着用中|Надето|Na nim",
     tierR: "Vestuario|Wardrobe|Garde-robe|Guarda-roupa|Garderobe|Guardaroba||服饰|의상|衣装|Одежда|Garderoba",
     tierL: "Vestuario legendario|Legendary wardrobe|Garde-robe légendaire|Guarda-roupa lendário|Legendäre Garderobe|Guardaroba leggendario||传说服饰|전설 의상|レジェンド衣装|Легендарная одежда|Legendarna garderoba",
     slot: {
       traje: "Traje|Suit|Costume|Terno|Anzug|Abito||西装|정장|スーツ|Костюм|Garnitur",
       pajarita: "Pajarita y cinta|Bow tie and band|Nœud papillon et ruban|Gravata e fita|Fliege und Hutband|Papillon e nastro||领结和帽带|나비넥타이와 띠|蝶ネクタイとリボン|Бабочка и лента|Mucha i wstążka",
       antifaz: "Antifaz|Mask|Loup|Máscara|Maske|Maschera||面具|가면|仮面|Маска|Maska",
+      lunares: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
+      clavel: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
+      cadena: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
+      pluma: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
+      veneciano: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
       chistera: "Chistera|Top hat|Haut-de-forme|Cartola|Zylinder|Cilindro||礼帽|실크해트|シルクハット|Цилиндр|Cylinder",
     },
     wear: "Ponértelo|Put it on|Le mettre|Vestir|Anziehen|Indossalo||穿上|착용하기|着る|Надеть|Załóż",
@@ -128,7 +135,7 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- el vestuario: las 12 piezas (6 x 2) y el probador a la derecha */
   /* las pestanas: un hueco cada una (los 12 colores de la carta, en su orden), las legendarias y lo tuyo; 12 por pagina */
-  const vOf = t => { const all = V().items; return t === "l" ? all.filter(i => i.r === "l") : t === "mine" ? all.filter(i => !i.casa && V().owned(i.id)) : all.filter(i => i.slot === t && i.r !== "l"); };
+  const vOf = t => { const all = V().items; return t === "l" ? all.filter(i => i.r === "l") : t === "pieza" ? all.filter(i => i.r === "p") : t === "mine" ? all.filter(i => !i.casa && V().owned(i.id)) : all.filter(i => i.slot === t && i.r !== "l"); };
   const vList = () => vOf(ST.vtab);
   const vState = id => V().wearing(id) ? "on" : V().owned(id) ? "got" : "";
   const vPrice = id => `<span class="bq-pr">${fi()}<b>${A.fmt(V().price(id))}</b></span>`;               // (en la ficha, el precio va en el boton de comprar)
@@ -143,7 +150,7 @@ window.AIQ = window.AIQ || {};
     const L = vList(), pages = Math.max(1, Math.ceil(L.length / PER)); ST.vpage = Math.min(ST.vpage, pages - 1);
     const items = L.slice(ST.vpage * PER, ST.vpage * PER + PER);
     const tab = (k, tx) => `<button type="button" class="bq-tab bq-vtab${ST.vtab === k ? " on" : ""}" data-vtab="${k}" aria-pressed="${ST.vtab === k}"><span>${esc(P6(tx))}</span><i>${vOf(k).length}</i></button>`;
-    return `<div class="bq-bar"><nav class="bq-tabs">${tab("traje", VX.traje)}${tab("antifaz", VX.antifaz)}${tab("pajarita", VX.pajarita)}${tab("l", TX.leg)}${tab("mine", VX.mine)}</nav>
+    return `<div class="bq-bar"><nav class="bq-tabs">${tab("traje", VX.traje)}${tab("antifaz", VX.antifaz)}${tab("pajarita", VX.pajarita)}${tab("pieza", VX.piezas)}${tab("l", TX.leg)}${tab("mine", VX.mine)}</nav>
       <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqVPrev"${ST.vpage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.vpage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqVNext"${ST.vpage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
       <div class="bq-items vest" id="bqItems">${items.length ? items.map(vItem).join("") : `<p class="bq-empty">${esc(P6(VX.empty))}</p>`}</div>`;
   }
@@ -156,7 +163,7 @@ window.AIQ = window.AIQ || {};
     else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === id ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === id ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
     return `<span class="bq-prob${leg ? " leg" : ""}"><span class="bq-probl">${esc(P6(VX.prob))}</span><span class="bq-probh" id="bqProb"></span></span>
-      <span class="gx-eyb bq-tier">${esc(P6(leg ? VX.tierL : it.casa ? VX.casa : VX.tierR))} · ${esc(P6(VX.slot[it.slot]))}</span>
+      <span class="gx-eyb bq-tier">${esc(P6(leg ? VX.tierL : it.casa ? VX.casaL : VX.tierR))} · ${esc(P6(VX.slot[it.slot]))}</span>
       <h3 class="gx-t-m bq-dn">${esc(V().name(id))}</h3>
       <p class="bq-dd">${esc(V().desc(id))}</p>
       <div class="bq-acts">${act}</div>`;

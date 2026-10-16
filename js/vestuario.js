@@ -1,7 +1,8 @@
 /*
  * Geolite - EL VESTUARIO DEL CRUPIER (v0.3.134, Club de la casa): ropa para Don Crupier que se compra en la boutique con fichas de oro.
  * Solo cambia colores del arte aprobado de Pixel Lab (nunca dibuja): el mapa de partes (js/crupier-partes.js, mismo tamano que el atlas
- * de js/crupier-data.js) dice que es cada pixel (1 traje, 2 chistera, 3 pajarita y cinta de la chistera, 4 antifaz) y aqui
+ * de js/crupier-data.js) dice que es cada pixel (1 traje, 2 chistera, 3 cinta de la chistera, 4 antifaz, 5 pajarita, 6 y 7 sus lunares; y en
+ * otros bits, el clavel de la solapa) y aqui
  * se recolorea el atlas UNA vez al cambiar de ropa; el crupier (js/crupier.js) dibuja con ese atlas, sin coste en cada fotograma.
  * Todo en la paleta Geolite 32; el contorno sigue en tinta. Una CARTA de 12 colores, la misma y en el mismo orden para el traje, el antifaz
  * y la pajarita (con la cinta de la chistera a juego); el de la casa de cada hueco es gratis. La chistera sigue al traje salvo la dorada (legendaria).
@@ -40,13 +41,21 @@ window.AIQ = window.AIQ || {};
       n: ["azul", "Blue", "bleu", "azul", "Blauer|Blaue", "blu", "", "蓝色", "파란", "青の", "Синий|Синяя", "Niebieski|Niebieska"] },
     { k: "morado", traje: ["#4a1d96", "#301252"], antifaz: ["#6e40c4", "#4a1d96", "#9c7ce6", "#4a1d96", "#301252"], pajarita: ["#6e40c4", "#4a1d96"], casa: "traje",
       n: ["morado|morada", "Purple", "violet", "roxo|roxa", "Violetter|Violette", "viola", "", "紫色", "보라", "紫の", "Фиоле­товый|Фиоле­товая", "Fioletowy|Fioletowa"] },
-    { k: "plata", traje: ["#8a8fa8", "#3a2f58"], antifaz: ["#f3f0fa", "#c9cde0", "#f3f0fa", "#8a8fa8", "#3a2f58"], pajarita: ["#c9cde0", "#8a8fa8"],
+    { k: "plata", traje: ["#8a8fa8", "#3a2f58"], antifaz: ["#f3f0fa", "#c9cde0", "#f3f0fa", "#8a8fa8", "#3a2f58"], pajarita: ["#c9cde0", "#8a8fa8"], lunares: ["#3a2f58", "#301252"],
       n: ["de plata", "Silver", "argenté", "prateado|prateada", "Silberner|Silberne", "argentato|argentata", "", "银色", "은빛", "銀の", "Сереб­ряный|Сереб­ряная", "Srebrny|Srebrna"] },
     { k: "negro", traje: ["#3a2f58", "#301252"], antifaz: ["#3a2f58", "#301252", "#8a8fa8", "#301252", "#1d0a3d"], pajarita: ["#3a2f58", "#301252"],
       n: ["negro|negra", "Black", "noir", "preto|preta", "Schwarzer|Schwarze", "nero|nera", "", "黑色", "검은", "黒の", "Чёрный|Чёрная", "Czarny|Czarna"] },
   ];
   const BY = Object.fromEntries(COLORS.map(c => [c.k, c]));
   const CHISTERA = { dorada: ["#f5a623", "#c46a1b"] };
+  /* LAS PIEZAS: se ponen encima de la ropa. Lunares: en la pajarita (no en la cinta), del color que lleve; el mapa de partes marca cada lunar
+     de cada fotograma (6 sobre el tono claro, 7 sobre la sombra: geolite-art-tools/.../vestuario/lunares.py). Blancos; en la de plata, oscuros */
+  const LUNARES = ["#f3f0fa", "#c9cde0"];
+  /* Piezas pintadas encima (no recolorean): el clavel de la solapa y la cadena del reloj, las de la maqueta (Pixel Lab) limpias y colocadas
+     fotograma a fotograma (pieza.py). Bits 3-7 del mapa de partes: 1-5 el clavel (flor, sombra, contorno, hoja, hoja oscura), 6-10 la cadena
+     (oro claro, medio, oscuro, pliegue, tinta). Detras de manos, cartas y chistera; con el cuerpo girado, no se ven */
+  const PX = [null, ["clavel", 0xe8283a], ["clavel", 0xa8142e], ["clavel", 0x1d0a3d], ["clavel", 0x3fb54a], ["clavel", 0x136b3e],
+    ["cadena", 0xfdd742], ["cadena", 0xf5a623], ["cadena", 0xc46a1b], ["cadena", 0x3c240a], ["cadena", 0x1d0a3d]];
   /* el nombre de cada prenda en los 12 idiomas: {m}/{f} = el color en masculino/femenino (el genero del sustantivo en cada idioma) */
   const NAME = {
     traje: ["Traje {m}", "{m} suit", "Costume {m}", "Terno {m}", "{m} Anzug", "Abito {m}", "", "{m}西装", "{m} 정장", "{m}スーツ", "{m} костюм", "{m} garnitur"],
@@ -59,12 +68,31 @@ window.AIQ = window.AIQ || {};
     pajarita: "La pajarita y, a juego, la cinta de la chistera.|The bow tie and, to match, the top hat's band.|Le nœud papillon et, assorti, le ruban du haut-de-forme.|A gravata-borboleta e, combinando, a fita da cartola.|Die Fliege und passend dazu das Hutband des Zylinders.|Il papillon e, abbinato, il nastro del cilindro.||领结，以及与之相配的礼帽帽带。|나비넥타이와, 거기에 맞춘 실크해트의 띠.|蝶ネクタイと、おそろいのシルクハットのリボン。|Бабочка и в тон ей лента цилиндра.|Mucha i do pary wstążka cylindra.",
     casa: "Lo de siempre: así viste la casa.|The usual: how the house dresses.|Comme toujours : la tenue de la maison.|O de sempre: assim a casa se veste.|Wie immer: so kleidet sich das Haus.|Come sempre: così veste la casa.||老样子：本店的标准装扮。|늘 그렇듯: 하우스의 기본 차림.|いつもどおり、店の定番の装い。|Как всегда: так одевается заведение.|Jak zawsze: tak ubiera się kasyno.",
   };
-  const PRICE = { traje: 250, antifaz: 250, pajarita: 150, l: 600 };
-  const SLOTS = ["traje", "antifaz", "pajarita", "chistera"];
+  const PRICE = { traje: 250, antifaz: 250, pajarita: 150, p: 300, l: 600 };
+  const SLOTS = ["traje", "antifaz", "pajarita", "chistera", "lunares", "clavel", "cadena", "pluma", "veneciano"];
+  const PIEZAS = ["lunares", "clavel", "cadena", "pluma", "veneciano"];
+  /* la pluma de pavo real y el antifaz veneciano salen del dibujo (por encima de la copa, sobre sienes y orejas): no se pintan en el atlas
+     sino como capas por fotograma (js/crupier-pluma.js, js/crupier-veneciano.js) que js/crupier.js pone encima si el atlas vestido las
+     lleva (atlas.ov). El oro de las alas del veneciano toma el color del antifaz */
   const BUY = ["traje", "antifaz", "pajarita"];
   const nameOf = (slot, c) => NAME[slot].map((pat, i) => { if (i === 6) return ""; const [m, f] = c.n[i].split("|"); return pat.replace("{m}", m).replace("{f}", f || m); }).join("|");
   /* el catalogo: por hueco, los 12 colores en el orden de la carta; al final, la legendaria. id = <hueco>_<color> */
   const ITEMS = BUY.flatMap(slot => COLORS.map(c => ({ id: slot + "_" + c.k, slot, v: c.k, r: "r", casa: c.casa === slot, n: nameOf(slot, c), d: c.casa === slot ? DESC.casa : DESC[slot] })))
+    .concat([{ id: "pieza_lunares", slot: "lunares", v: "si", r: "p", casa: false,
+      n: "Lunares|Polka dots|Pois|Bolinhas|Punkte|Pois||波点|물방울무늬|水玉|Горошек|Grochy",
+      d: "Lunares en la pajarita, sea del color que sea.|Polka dots on the bow tie, whatever its colour.|Des pois sur le nœud papillon, quelle que soit sa couleur.|Bolinhas na gravata-borboleta, seja qual for a cor.|Punkte auf der Fliege, egal in welcher Farbe.|Pois sul papillon, di qualunque colore sia.||领结上的波点，不论领结是什么颜色。|나비넥타이에 물방울무늬, 어떤 색이든.|蝶ネクタイに水玉。色はどれでも。|Горошек на бабочке, какого бы цвета она ни была.|Grochy na musze, niezależnie od jej koloru." }])
+    .concat([{ id: "pieza_clavel", slot: "clavel", v: "si", r: "p", casa: false,
+      n: "Clavel en la solapa|Carnation buttonhole|Œillet à la boutonnière|Cravo na lapela|Nelke im Knopfloch|Garofano all'occhiello||翻领康乃馨|옷깃의 카네이션|襟のカーネーション|Гвоздика в петлице|Goździk w butonierce",
+      d: "Un clavel rojo en la solapa, de los de antes.|A red carnation in the lapel, the old-school way.|Un œillet rouge à la boutonnière, à l'ancienne.|Um cravo vermelho na lapela, à moda antiga.|Eine rote Nelke im Knopfloch, ganz klassisch.|Un garofano rosso all'occhiello, all'antica.||翻领上别一朵红色康乃馨，老派风格。|옷깃에 꽂은 빨간 카네이션, 옛날 멋.|襟に赤いカーネーション。昔ながらの粋。|Красная гвоздика в петлице, по старинке.|Czerwony goździk w butonierce, po staremu." }])
+    .concat([{ id: "pieza_cadena", slot: "cadena", v: "si", r: "p", casa: false,
+      n: "Cadena de reloj|Watch chain|Chaîne de montre|Corrente de relógio|Uhrkette|Catena dell'orologio||怀表链|시곗줄|懐中時計の鎖|Цепочка для часов|Dewizka",
+      d: "La cadena de oro del reloj de bolsillo, cruzando el frac.|The pocket watch's gold chain, across the tailcoat.|La chaîne en or de la montre à gousset, en travers du frac.|A corrente de ouro do relógio de bolso, atravessando o fraque.|Die goldene Kette der Taschenuhr, quer über den Frack.|La catena d'oro dell'orologio da taschino, di traverso sul frac.||怀表的金链，斜挂在燕尾服上。|회중시계의 금줄이 연미복을 가로질러요.|懐中時計の金の鎖が燕尾服を横切る。|Золотая цепочка карманных часов поперёк фрака.|Złota dewizka kieszonkowego zegarka, w poprzek fraka." }])
+    .concat([{ id: "pieza_pluma", slot: "pluma", v: "si", r: "p", casa: false,
+      n: "Pluma de pavo real|Peacock feather|Plume de paon|Pena de pavão|Pfauenfeder|Piuma di pavone||孔雀羽毛|공작 깃털|孔雀の羽根|Павлинье перо|Pawie pióro",
+      d: "Una pluma de pavo real metida en la cinta de la chistera.|A peacock feather tucked into the top hat's band.|Une plume de paon glissée dans le ruban du haut-de-forme.|Uma pena de pavão presa na fita da cartola.|Eine Pfauenfeder im Hutband des Zylinders.|Una piuma di pavone infilata nel nastro del cilindro.||一根孔雀羽毛插在礼帽的帽带上。|실크해트의 띠에 꽂은 공작 깃털.|シルクハットのリボンに差した孔雀の羽根。|Павлинье перо за лентой цилиндра.|Pawie pióro zatknięte za wstążkę cylindra." }])
+    .concat([{ id: "pieza_veneciano", slot: "veneciano", v: "si", r: "p", casa: false,
+      n: "Antifaz veneciano|Venetian mask|Loup vénitien|Máscara veneziana|Venezianische Maske|Maschera veneziana||威尼斯面具|베네치아 가면|ヴェネツィアの仮面|Венецианская маска|Maska wenecka",
+      d: "Alas de filigrana a cada lado, del color de su antifaz: carnaval de Venecia.|Filigree wings on each side, in his mask's colour: Venice carnival.|Des ailes en filigrane de chaque côté, de la couleur de son loup : le carnaval de Venise.|Asas de filigrana de cada lado, da cor da máscara: carnaval de Veneza.|Filigranflügel auf jeder Seite, in der Farbe seiner Maske: Karneval in Venedig.|Ali in filigrana su ogni lato, del colore della sua maschera: carnevale di Venezia.||两侧是花丝翅膀，颜色随面具而变：威尼斯狂欢节。|양옆에 금세공 날개, 가면과 같은 색: 베네치아 카니발.|両脇に金線細工の翼。色は仮面と同じ。ヴェネツィアのカーニバル。|Филигранные крылья с каждой стороны, в цвет маски: венецианский карнавал.|Filigranowe skrzydła po obu stronach, w kolorze maski: karnawał w Wenecji." }])
     .concat([{ id: "chistera_dorada", slot: "chistera", v: "dorada", r: "l", casa: false,
       n: "Chistera dorada|Golden top hat|Haut-de-forme doré|Cartola dourada|Goldener Zylinder|Cilindro dorato||金色礼帽|황금 실크해트|金のシルクハット|Золотой цилиндр|Złoty cylinder",
       d: "Solo la chistera, en oro, vaya donde vaya: en la cabeza, en la mano o contra el pecho.|Just the top hat, in gold, wherever it goes: on his head, in his hand or against his chest.|Seulement le haut-de-forme, en or, où qu'il soit : sur la tête, à la main ou contre la poitrine.|Só a cartola, em ouro, onde quer que esteja: na cabeça, na mão ou no peito.|Nur der Zylinder, in Gold, wo immer er ist: auf dem Kopf, in der Hand oder an der Brust.|Solo il cilindro, d'oro, ovunque sia: in testa, in mano o sul petto.||只有礼帽是金的，无论在头上、手里还是胸前。|실크해트만 금빛으로. 머리 위든 손이든 가슴이든.|シルクハットだけを金に。頭でも手でも胸でも。|Только цилиндр, золотой, где бы он ни был: на голове, в руке или у груди.|Tylko cylinder, złoty, gdziekolwiek jest: na głowie, w dłoni czy przy piersi." }]);
@@ -78,14 +106,14 @@ window.AIQ = window.AIQ || {};
   const get = id => ITEMS.find(i => i.id === id) || null;
   const owned = id => { const it = get(id); return !!it && (it.casa || !!st().own[id]); };
   /* lo puesto por hueco: el color (o null = el de la casa); un color guardado que ya no existe vuelve al de la casa */
-  const worn = () => { const w = st().wear, o = {}; SLOTS.forEach(s => { const v = w[s] || null; o[s] = v && (s === "chistera" ? CHISTERA[v] : BY[v] && v !== CASA[s]) ? v : null; }); return o; };
+  const worn = () => { const w = st().wear, o = {}; SLOTS.forEach(s => { const v = w[s] || null; o[s] = v && (s === "chistera" ? CHISTERA[v] : PIEZAS.includes(s) ? v === "si" : BY[v] && v !== CASA[s]) ? v : null; }); return o; };
   const wearing = id => { const it = get(id), w = worn(); if (!it) return false; return it.casa ? w[it.slot] === null : w[it.slot] === it.v; };
   const withItem = (id, base) => { const it = get(id), o = { ...(base || worn()) }; if (!it) return o; o[it.slot] = it.casa ? null : it.v; return o; };
-  const price = id => { const it = get(id); return !it || it.casa ? 0 : it.r === "l" ? PRICE.l : PRICE[it.slot] || 250; };
+  const price = id => { const it = get(id); return !it || it.casa ? 0 : it.r === "l" ? PRICE.l : it.r === "p" ? PRICE.p : PRICE[it.slot] || 250; };
   const keyOf = o => SLOTS.map(s => o[s] || "-").join("|");
 
   /* ---------------------------------------------------------------- el recoloreado */
-  let base = null, parts = null, waiting = [];
+  let base = null, parts = null, waiting = [], plumaImg = null, venImg = null;
   function prep(done) {
     if (base) return done && done();
     if (done) waiting.push(done);
@@ -97,13 +125,17 @@ window.AIQ = window.AIQ || {};
         const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", { willReadFrequently: true });
         x.drawImage(atlas, 0, 0); const data = x.getImageData(0, 0, w, h).data;
         x.clearRect(0, 0, w, h); x.drawImage(pim, 0, 0); const pd = x.getImageData(0, 0, w, h).data;
-        const idx = { 1: [], 2: [], 3: [], 4: [] };
-        for (let i = 0, p = 0; i < pd.length; i += 4, p++) { const k = pd[i]; if (k >= 1 && k <= 4 && data[i + 3]) idx[k].push(i); }
+        const idx = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }, cl = [], clc = [];     // 3 cinta, 5 pajarita, 6 y 7 sus lunares; las piezas pintadas aparte
+        for (let i = 0; i < pd.length; i += 4) { if (!data[i + 3]) continue; const v = pd[i], k = v & 7, c = v >> 3; if (k) idx[k].push(i); if (c && PX[c]) { cl.push(i); clc.push(c); } }
         Object.keys(idx).forEach(k => { idx[k] = Int32Array.from(idx[k]); });
-        base = { w, h, data, idx };
+        base = { w, h, data, idx, clav: Int32Array.from(cl), clavC: Uint8Array.from(clc) };
         const m = A.CRUPIER_DATA.master; base.master = m;
-        prep.busy = false; waiting.splice(0).forEach(f => f());
+        const fin = () => { prep.busy = false; waiting.splice(0).forEach(f => f()); };
+        const imgs = [plumaImg, venImg].filter(i => i && !i.complete); let left = imgs.length;     // y las capas, listas antes de las miniaturas
+        if (!left) fin(); else imgs.forEach(i => { i.onload = i.onerror = () => { if (--left === 0) fin(); }; });
       };
+      if (A.CRUPIER_PLUMA && !plumaImg) { plumaImg = new Image(); plumaImg.src = A.CRUPIER_PLUMA.img; }
+      if (A.CRUPIER_VENECIANO && !venImg) { venImg = new Image(); venImg.src = A.CRUPIER_VENECIANO.img; }
       pim.src = A.CRUPIER_PARTES;
     });
   }
@@ -113,7 +145,9 @@ window.AIQ = window.AIQ || {};
     const tr = o.traje && BY[o.traje] && BY[o.traje].traje, ch = o.chistera && CHISTERA[o.chistera], pj = o.pajarita && BY[o.pajarita] && BY[o.pajarita].pajarita, an = o.antifaz && BY[o.antifaz] && BY[o.antifaz].antifaz;
     if (tr) M[1] = { [SRC.main]: hex(tr[0]), [SRC.sh]: hex(tr[1]) };
     if (ch || tr) { const c = ch || tr; M[2] = { [SRC.main]: hex(c[0]), [SRC.sh]: hex(c[1]) }; }
-    if (pj) M[3] = { [SRC.rHi]: hex(pj[0]), [SRC.rLo]: hex(pj[1]) };            // la pajarita y la cinta de la chistera
+    if (pj) M[3] = M[5] = M[6] = M[7] = { [SRC.rHi]: hex(pj[0]), [SRC.rLo]: hex(pj[1]) };     // la pajarita y la cinta de la chistera
+    if (o.lunares) { const c = (o.pajarita && BY[o.pajarita]) || BY[CASA.pajarita], dt = c.lunares || LUNARES;
+      M[6] = { [SRC.rHi]: hex(dt[0]), [SRC.rLo]: hex(dt[0]) }; M[7] = { [SRC.rHi]: hex(dt[1]), [SRC.rLo]: hex(dt[1]) }; }
     if (an) M[4] = { [SRC.gHi]: hex(an[0]), [SRC.gMid]: hex(an[1]), [SRC.gLt]: hex(an[2]), [SRC.gSh]: hex(an[3]), [SRC.gDp]: hex(an[4]) };
     return M;
   }
@@ -127,6 +161,29 @@ window.AIQ = window.AIQ || {};
         if (v != null) { dst[i] = v >> 16; dst[i + 1] = (v >> 8) & 255; dst[i + 2] = v & 255; }
       }
     }
+    if (o.clavel || o.cadena) for (let j = 0; j < base.clav.length; j++) { const px = PX[base.clavC[j]]; if (!o[px[0]]) continue; const i = base.clav[j], v = px[1]; dst[i] = v >> 16; dst[i + 1] = (v >> 8) & 255; dst[i + 2] = v & 255; }
+  }
+  /* las capas que se pintan encima del dibujo (antifaz veneciano, pluma): el veneciano, con su oro del color del antifaz */
+  const venCache = new Map();
+  function venFor(o) {
+    const an = o.antifaz && BY[o.antifaz] && BY[o.antifaz].antifaz, key = an ? o.antifaz : "-";
+    if (venCache.has(key)) return venCache.get(key);
+    let img = venImg;
+    if (an) {
+      const c = document.createElement("canvas"); c.width = venImg.naturalWidth; c.height = venImg.naturalHeight;
+      const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(venImg, 0, 0);
+      const im = x.getImageData(0, 0, c.width, c.height), d = im.data;
+      const M = { [SRC.gHi]: hex(an[0]), [SRC.gMid]: hex(an[1]), [SRC.gLt]: hex(an[2]), [SRC.gSh]: hex(an[3]), [SRC.gDp]: hex(an[4]) };
+      for (let i = 0; i < d.length; i += 4) { if (!d[i + 3]) continue; const v = M[(d[i] << 16) | (d[i + 1] << 8) | d[i + 2]]; if (v != null) { d[i] = v >> 16; d[i + 1] = (v >> 8) & 255; d[i + 2] = v & 255; } }
+      x.putImageData(im, 0, 0); img = c;
+    }
+    venCache.set(key, img); return img;
+  }
+  function layers(o) {
+    const L = [];
+    if (o.veneciano && venImg && venImg.complete) L.push({ img: venFor(o), r: A.CRUPIER_VENECIANO.r });
+    if (o.pluma && plumaImg && plumaImg.complete) L.push({ img: plumaImg, r: A.CRUPIER_PLUMA.r });
+    return L;
   }
   const cache = new Map();
   /* el atlas entero con esa ropa (o null si es la de siempre); se guardan los 4 ultimos */
@@ -135,6 +192,7 @@ window.AIQ = window.AIQ || {};
     const key = keyOf(o); if (cache.has(key)) { const c = cache.get(key); cache.delete(key); cache.set(key, c); return c; }
     const c = document.createElement("canvas"); c.width = base.w; c.height = base.h;
     const x = c.getContext("2d"), im = x.createImageData(base.w, base.h); im.data.set(base.data); paint(im.data, o); x.putImageData(im, 0, 0);
+    const ov = layers(o); if (ov.length) c.ov = ov;
     cache.set(key, c); while (cache.size > 4) cache.delete(cache.keys().next().value);
     return c;
   }
@@ -154,14 +212,20 @@ window.AIQ = window.AIQ || {};
       const part = partAt(i); if (!part || !M[part]) continue;
       const v = M[part][code]; if (v != null) { im.data[j] = v >> 16; im.data[j + 1] = (v >> 8) & 255; im.data[j + 2] = v & 255; }
     }
+    if (o.clavel || o.cadena) for (let j = 0; j < base.clav.length; j++) {
+      const px = PX[base.clavC[j]]; if (!o[px[0]]) continue;
+      const i = base.clav[j] >> 2, ay = Math.floor(i / base.w) - my, ax = (i % base.w) - mx; if (ay < 0 || ay >= mh || ax < 0 || ax >= mw) continue;
+      const t = (ay * mw + ax) * 4, v = px[1]; im.data[t] = v >> 16; im.data[t + 1] = (v >> 8) & 255; im.data[t + 2] = v & 255;
+    }
     x.putImageData(im, ox, oy);
+    for (const L of layers(o)) { const r = L.r.master; if (r) x.drawImage(L.img, r[0], r[1], r[2], r[3], r[4], r[5], r[2], r[3]); }
     const big = document.createElement("canvas"); big.width = W * k; big.height = H * k; const bx = big.getContext("2d"); bx.imageSmoothingEnabled = false; bx.drawImage(c, 0, 0, W * k, H * k);
     const url = big.toDataURL(); thumbs.set(key, url); return url;
   }
   /* parte de un pixel del atlas (para las miniaturas): un mapa inverso pequeno, solo del retrato */
   let partOf = null;
   function partAt(i) {
-    if (!partOf) { partOf = new Map(); for (const k of [1, 2, 3, 4]) { const L = base.idx[k]; const [mx, my, mw, mh] = base.master; const a = (my * base.w + mx) * 4, b = ((my + mh) * base.w) * 4; for (let j = 0; j < L.length; j++) if (L[j] >= a && L[j] < b) partOf.set(L[j], k); } }
+    if (!partOf) { partOf = new Map(); for (const k of [1, 2, 3, 4, 5, 6, 7]) { const L = base.idx[k]; const [mx, my, mw, mh] = base.master; const a = (my * base.w + mx) * 4, b = ((my + mh) * base.w) * 4; for (let j = 0; j < L.length; j++) if (L[j] >= a && L[j] < b) partOf.set(L[j], k); } }
     return partOf.get(i) || 0;
   }
 
