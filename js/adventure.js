@@ -2245,7 +2245,7 @@ window.AIQ = window.AIQ || {};
     pick: L6("¡Elige un cubilete!|Pick a cup!|Choisis un gobelet !|Escolha um copo!|Wähl einen Becher!|Scegli un bussolotto!||选一个杯子！|컵을 골라!|カップを選べ！|Выбирай напёрсток!|Wybierz kubek!"),
     joke: L6("Se lo ha quedado|He kept it|Il l'a gardé|Ficou com ele|Er hat sie behalten|Se l'è tenuto|Se lo quedó|被他私吞了|딜러가 꿀꺽했다|懐に入れた|Он его прикарманил|Zatrzymał go sobie"),
   };
-  const CUPS_CFG = [{ n: 6, dur: 640, rots: 0, feints: 0 }, { n: 9, dur: 440, rots: 2, feints: 1 }, { n: 12, dur: 310, rots: 3, feints: 2 }];   // por ficha: cambios, ms por cambio, rotaciones de tres y falsos pases
+  const CUPS_CFG = [{ n: 12, dur: 440, rots: 3, feints: 2, ramp: 1.25 }, { n: 18, dur: 300, rots: 5, feints: 4, ramp: 1.4 }, { n: 26, dur: 205, rots: 8, feints: 6, ramp: 1.5 }];   // por ficha: cambios, ms por cambio, rotaciones de tres, falsos pases y aceleracion (el primer cambio dura dur*ramp y el ultimo dur/ramp)
   const CUPS_SLOT = [620, 960, 1300], CUPS_GY = 790;
   let cupsStake = 0;
   const cupsPreload = () => { if (cupsPreload.done) return; cupsPreload.done = 1; ["cup", "hand_reach", "hand_half", "hand_grab_sq", "hand_grab", "hand_open0", "hand_open1", "hand_open2", "hand_open3", "hand_open4", "hand_open5", "coin_flat", "ring", "shadow", "felt", "cenefa"].forEach(n => { new Image().src = `assets/trile/${n}.png`; }); };
@@ -2366,8 +2366,11 @@ window.AIQ = window.AIQ || {};
         // 2. baile
         const no = Q(".tr-no"); no.classList.remove("on"); void no.offsetWidth; no.classList.add("on"); A.sfx.rouNoMore(); ov.classList.add("spin");
         hint("dance"); say("trileDance"); await sleep(1100);
-        const dur = CUPS_CFG[o.tier].dur;
-        for (let i = 0; i < o.seq.length; i++) { await doMove(o.seq[i], dur, i); if (dur >= 400 || i === o.seq.length - 1) release(); await sleep(i === o.seq.length - 1 ? 200 : Math.max(40, dur * 0.18)); }
+        const cfg = CUPS_CFG[o.tier], N = o.seq.length;
+        for (let i = 0; i < N; i++) {
+          const d = cfg.dur * Math.pow(cfg.ramp, 1 - 2 * i / Math.max(1, N - 1));                 // el baile se acelera: empieza a dur*ramp y acaba a dur/ramp
+          await doMove(o.seq[i], d, i); if (d >= 400 || i === N - 1) release(); await sleep(i === N - 1 ? 200 : Math.max(10, d * 0.06));
+        }
         release(); ov.classList.remove("spin");
         // 3. elige
         hint("pick"); say("trilePick"); if (A.haptic) A.haptic([8]); sh.waiting(true); const pickId = await choose(); sh.waiting(false);

@@ -34,6 +34,22 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.166",
+      name: L("Cubiletes de verdad", "Cups for real", "Gobelets pour de vrai", "Copos de verdade", "Becher im Ernst", "Bussolotti sul serio", "", "杯子来真的", "진짜 컵 게임", "本気のカップ", "Напёрстки всерьёз", "Kubki na serio"),
+      date: "2026-10-16",
+      summary: L("Los tres cubiletes mezclan mucho más y cada vez más rápido: ya no se pasan sin mirar.", "The three cups now shuffle far more and ever faster: you can't clear them without watching.", "Les trois gobelets mélangent bien plus et de plus en plus vite : impossible de les réussir sans regarder.", "Os três copos embaralham muito mais e cada vez mais rápido: já não dá para passar sem olhar.", "Die drei Becher mischen viel mehr und immer schneller: ohne genau hinzusehen geht es nicht mehr.", "I tre bussolotti mescolano molto di più e sempre più veloci: non si superano più senza guardare.", "", "三个杯子换得更多、越换越快，不盯紧就过不了。", "세 개의 컵을 훨씬 더 많이, 점점 더 빠르게 섞어요. 이제 눈을 떼면 못 이겨요.", "3つのカップは大幅に多く、どんどん速く混ぜるようになった。よく見ないとクリアできない。", "Напёрстки перемешиваются заметно больше и всё быстрее: без внимательного взгляда не пройти.", "Trzy kubki tasują znacznie więcej i coraz szybciej: bez uważnego patrzenia się nie da."),
+      chapters: [
+        { id: "cubiletes", kicker: L("Ajuste", "Tweak", "Ajustement", "Ajuste", "Anpassung", "Ritocco", "", "调整", "조정", "調整", "Правка", "Poprawka"),
+          title: L("Los tres cubiletes", "The three cups", "Les trois gobelets", "Os três copos", "Hütchenspiel", "I tre bussolotti", "", "三个杯子", "세 개의 컵", "3つのカップ", "Напёрстки", "Trzy kubki"),
+          entries: [
+            E(L("Mucho más difícil", "Much harder", "Bien plus difficile", "Muito mais difícil", "Viel schwerer", "Molto più difficile", "", "难度大增", "훨씬 어려워졌어요", "ずっと難しく", "Намного сложнее", "Znacznie trudniej"), "nerf", "0.3.166", [
+              L("Más cambios, falsos pases y rotaciones de tres: de **12 a 26** cambios según la ficha (antes de 6 a 12).", "More swaps, feints and three-way rotations: **12 to 26** swaps depending on the stake (before, 6 to 12).", "Plus d'échanges, de fausses passes et de rotations à trois : de **12 à 26** échanges selon la mise (avant, de 6 à 12).", "Mais trocas, fintas e rotações de três: de **12 a 26** trocas conforme a ficha (antes, de 6 a 12).", "Mehr Wechsel, Finten und Dreierrotationen: **12 bis 26** Wechsel je nach Einsatz (vorher 6 bis 12).", "Più scambi, finte e rotazioni a tre: da **12 a 26** scambi in base alla puntata (prima da 6 a 12).", "", "更多换位、假动作和三杯轮换：按赌注从**12到26**次（原来是6到12次）。", "교환, 속임수, 세 컵 회전이 늘었어요. 판돈에 따라 **12~26회**(전에는 6~12회).", "入れ替え、フェイント、3杯の回転が増えた。賭け金に応じて**12〜26回**（以前は6〜12回）。", "Больше перестановок, ложных ходов и вращений тройкой: от **12 до 26** в зависимости от ставки (раньше от 6 до 12).", "Więcej zamian, zwodów i obrotów trójki: od **12 do 26** zależnie od stawki (wcześniej od 6 do 12)."),
+              L("Además **se acelera** durante el baile y casi no hay pausa entre cambios. El premio sigue siendo ×2.", "It also **speeds up** during the shuffle and there is hardly any pause between swaps. The prize is still ×2.", "En plus, ça **s'accélère** pendant le mélange et il n'y a presque plus de pause entre les échanges. Le gain reste ×2.", "Além disso, **acelera** durante o baile e quase não há pausa entre trocas. O prêmio continua ×2.", "Außerdem wird es beim Mischen **schneller**, und zwischen den Wechseln gibt es kaum Pause. Der Gewinn bleibt ×2.", "Inoltre **accelera** durante il mescolamento e quasi non c'è pausa tra gli scambi. Il premio resta ×2.", "", "而且洗牌过程中会**越来越快**，换位之间几乎没有停顿。奖励仍是×2。", "게다가 섞는 동안 **점점 빨라지고** 교환 사이에 쉬는 틈이 거의 없어요. 보상은 그대로 ×2.", "さらにシャッフル中に**加速**し、入れ替えの間もほとんど間がない。配当は今までどおり×2。", "К тому же во время перемешивания всё **ускоряется**, а пауз между ходами почти нет. Выигрыш по-прежнему ×2.", "Dodatkowo tasowanie **przyspiesza**, a między zamianami prawie nie ma przerwy. Nagroda nadal ×2."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.165",
       name: L("El título del acto, entero", "The act title, in full", "Le titre de l'acte, en entier", "O título do ato, inteiro", "Der Aktitel, vollständig", "Il titolo dell'atto, intero", "", "幕标题完整显示", "막 제목이 끝까지", "幕のタイトルを最後まで", "Название акта целиком", "Tytuł aktu w całości"),
       date: "2026-10-16",
