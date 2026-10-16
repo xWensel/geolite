@@ -37,7 +37,9 @@ window.AIQ = window.AIQ || {};
   };
   A.genFill = (root = document) => A.genReady.then(() => root.querySelectorAll("img[data-gen]:not([src])").forEach(im => {
     if (!A.GEN.has(im.dataset.gen)) return;
-    im.src = "assets/gen/" + im.dataset.gen + ".webp";
+    const def = "assets/gen/" + im.dataset.gen + ".webp";
+    if (im.dataset.gen === "card_adv") { im.dataset.cart = "card_adv"; im.dataset.cdef = def; im.src = A.crupierArt ? A.crupierArt("card_adv", def) : def; }   // el crupier, con su ropa (js/vestuario.js)
+    else im.src = def;
     A.revealImg(im, () => { im.classList.add("on"); if (im.parentElement) im.parentElement.classList.add("has-gen"); });
   }));
   A.pic = (id, cls = "") => { setTimeout(() => A.genFill(), 0); return `<span class="pic ${cls}"><img class="pic-img" alt="" data-gen="${id}" decoding="async"><i class="pic-frame"></i>${A.bulbs()}</span>`; };

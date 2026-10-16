@@ -230,7 +230,77 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ---------------------------------------------------------------- ponerse y comprar */
-  function apply() { if (!base) return prep(apply); A.crupier.dress(atlasFor(worn())); }
+  /* ---------------------------------------------------------------- v0.3.150: el crupier vestido tambien en sus imagenes fijas
+     La carta de la Aventura (assets/gen/card_adv.webp: el retrato a 12x sobre su foco), los retratos del trile y los dados (4x, con sus caras)
+     y su cabeza de los avisos (2x): son el retrato del atlas tal cual, asi que se copian encima los pixeles del crupier vestido donde la imagen
+     coincide con el de siempre (o donde estaba vacia: la pluma y las alas del veneciano). La cabeza pequena (32 px) es otro dibujo: se
+     recolorea por zonas (chistera, cinta y antifaz). Sin redibujar nada. Quien las pinte lleva data-cart (la imagen) y data-cdef (la de siempre)
+     y se cambian solas al cambiar de ropa: A.crupierArt(nombre, la de siempre). */
+  const ART = {
+    card_adv: { path: "assets/gen/card_adv.webp", e: "sly", k: 12, ox: 13, oy: 6 },        // pixel (x, y) de la imagen = (x + ox, y + oy) del lienzo de 96x112
+    dealer_neutral: { path: "assets/icons/dealer_neutral.webp", e: "sly", k: 4, ox: 0, oy: 16 },
+    dealer_laugh: { path: "assets/icons/dealer_laugh.webp", e: "laugh", k: 4, ox: 0, oy: 16 },
+    dealer_angry: { path: "assets/icons/dealer_angry.webp", e: "angry", k: 4, ox: 0, oy: 16 },
+    dealer_shock: { path: "assets/icons/dealer_shock.webp", e: "shock", k: 4, ox: 0, oy: 16 },
+    dealer_mini: { path: "assets/icons/dealer_mini.webp", e: "sly", k: 2, ox: 22, oy: 25 },
+    dealer_mini_s: { path: "assets/icons/dealer_mini_s.webp", k: 2, zonas: true },
+  };
+  const artCache = new Map(), artBusy = new Set();
+  const PURPLE = new Set([SRC.main, SRC.sh]), RED = new Set([SRC.rHi, SRC.rLo]), GOLD = new Set([SRC.gHi, SRC.gMid, SRC.gLt, SRC.gSh, SRC.gDp]);
+  function artGen(name, o, done) {
+    const spec = ART[name], key = keyOf(o) + "|" + name;
+    if (artCache.has(key)) return done(artCache.get(key));
+    if (artBusy.has(key)) return; artBusy.add(key);
+    const im = new Image();
+    im.onload = () => {
+      const k = spec.k, w = Math.round(im.naturalWidth / k), h = Math.round(im.naturalHeight / k);
+      const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingEnabled = false;
+      x.drawImage(im, 0, 0, w, h);
+      const S = x.getImageData(0, 0, w, h), s = S.data;
+      if (spec.zonas) {
+        /* la cabeza pequena: chistera = los morados de arriba, cinta = los rojos de arriba, antifaz = los oros de la cara */
+        const M = maps(o);
+        for (let y = 0; y < h; y++) for (let q = 0; q < w; q++) {
+          const j = (y * w + q) * 4; if (!s[j + 3]) continue;
+          const code = (s[j] << 16) | (s[j + 1] << 8) | s[j + 2];
+          const part = PURPLE.has(code) && y <= 18 ? 2 : RED.has(code) && y <= 16 ? 3 : GOLD.has(code) && y >= 16 && y <= 23 ? 4 : 0;
+          const v = part && M[part] && M[part][code]; if (v != null && part) { s[j] = v >> 16; s[j + 1] = (v >> 8) & 255; s[j + 2] = v & 255; }
+        }
+      } else {
+        const Od = A.crupier.data(spec.e, A.crupier.atlas()), Oa = Od && new Uint8ClampedArray(Od.data), Dd = Oa && A.crupier.data(spec.e, atlasFor(o));
+        if (!Dd) { artBusy.delete(key); return; }
+        const d = Dd.data;
+        for (let y = 0; y < h; y++) for (let q = 0; q < w; q++) {
+          const cy = y + spec.oy, cx = q + spec.ox; if (cy < 0 || cy >= 112 || cx < 0 || cx >= 96) continue;
+          const i = (cy * 96 + cx) * 4, j = (y * w + q) * 4;
+          if (!d[i + 3] || (d[i] === Oa[i] && d[i + 1] === Oa[i + 1] && d[i + 2] === Oa[i + 2] && d[i + 3] === Oa[i + 3])) continue;   // nada cambia ahi
+          const same = Oa[i + 3] && s[j + 3] && Math.abs(s[j] - Oa[i]) + Math.abs(s[j + 1] - Oa[i + 1]) + Math.abs(s[j + 2] - Oa[i + 2]) < 24;
+          if (same || !Oa[i + 3]) { s[j] = d[i]; s[j + 1] = d[i + 1]; s[j + 2] = d[i + 2]; s[j + 3] = 255; }   // retoques propios de la imagen: se respetan
+        }
+      }
+      x.putImageData(S, 0, 0);
+      const big = document.createElement("canvas"); big.width = w * k; big.height = h * k; const bx = big.getContext("2d"); bx.imageSmoothingEnabled = false; bx.drawImage(c, 0, 0, w * k, h * k);
+      const url = big.toDataURL(); artBusy.delete(key); artCache.set(key, url);
+      while (artCache.size > 48) artCache.delete(artCache.keys().next().value);
+      done(url);
+    };
+    im.onerror = () => artBusy.delete(key);
+    im.src = spec.path;
+  }
+  /* la imagen ya vestida (o la de siempre mientras se prepara, y luego se cambia sola) */
+  function art(name, def) {
+    const o = worn(); if (!ART[name] || !base || isDefault(o)) return def;
+    const key = keyOf(o) + "|" + name; if (artCache.has(key)) return artCache.get(key);
+    artGen(name, o, () => refreshArt(name)); return def;
+  }
+  function refreshArt(name) {
+    document.querySelectorAll(name ? `[data-cart="${name}"]` : "[data-cart]").forEach(el => {
+      const u = art(el.dataset.cart, el.dataset.cdef); if (!u) return;
+      if (el.tagName === "IMG") { if (el.getAttribute("src") !== u) el.src = u; } else el.style.backgroundImage = `url("${u}")`;
+    });
+  }
+  A.crupierArt = art;
+  function apply() { if (!base) return prep(apply); A.crupier.dress(atlasFor(worn())); Object.keys(ART).forEach(n => { const o = worn(); if (!isDefault(o)) artGen(n, o, () => refreshArt(n)); }); refreshArt(); }
   function wear(id) {
     const it = get(id); if (!it || !owned(id)) return false;
     st().wear[it.slot] = it.casa ? null : it.v;                                  // el de la casa = nada encima

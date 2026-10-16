@@ -8,11 +8,13 @@ window.AIQ = window.AIQ || {};
   /* Los iconos son ilustraciones pixel-art generadas con un unico libro de estilo (tools/gen_art.py) en assets/icons/.
      Si falta alguno, simplemente no se pinta. */
   const ALIAS = {};
+  const VISTE = { dealer_mini: 1, dealer_mini_s: 1 };   // la cabeza del crupier: con la ropa que lleve (js/vestuario.js)
   A.icon = (id, cls = "") => {
     id = ALIAS[id] || id;
     const fx = A.ficha ? A.ficha.attr(id) : "";   // ficha lisa: se dibuja al pixel real de la pantalla (js/ficha.js)
     if (fx) A.ficha.soon();
-    return `<img class="ic ic-${id} ${fx ? "ic-fx " : ""}${cls}" src="assets/icons/${id}.webp" alt="" draggable="false" decoding="${fx ? "sync" : "async"}" onerror="AIQ._icErr(this)"${fx}>`;
+    const def = `assets/icons/${id}.webp`, viste = VISTE[id] && A.crupierArt;
+    return `<img class="ic ic-${id} ${fx ? "ic-fx " : ""}${cls}" src="${viste ? A.crupierArt(id, def) : def}"${VISTE[id] ? ` data-cart="${id}" data-cdef="${def}"` : ""} alt="" draggable="false" decoding="${fx ? "sync" : "async"}" onerror="AIQ._icErr(this)"${fx}>`;
   };
   A._icErr = im => { im.style.visibility = "hidden"; };
 

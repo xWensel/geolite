@@ -76,7 +76,7 @@ window.AIQ = window.AIQ || {};
 
   function spinDice(o, done) {
     const cx = o.cx, TST = A.adv._dice || {}, ST = (TST.st = { phase: "intro" });                // ST.phase: solo pruebas (intro, dshake, droll, pturn, pshake, proll, cmp, result)
-    const html = `<div class="dd-stage"><div class="dd-bg"></div><img class="dd-dealer" src="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="dd-bubble"><span></span></div>
+    const html = `<div class="dd-stage"><div class="dd-bg"></div><img class="dd-dealer" src="${A.crupierArt ? A.crupierArt("dealer_neutral", "assets/icons/dealer_neutral.webp") : "assets/icons/dealer_neutral.webp"}" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="dd-bubble"><span></span></div>
       <div class="dd-left"><div class="rou-pick"><span class="rp-dot rp-dice"></span><span class="rp-k">${tr(cx.BT.seal)}</span><b>${tr(BET.n)} · ${o.stake}</b></div><div class="dd-hint"></div></div>
       <div class="dd-top"><b class="dd-no"></b><div class="dd-res"><span class="dd-plate"></span><span class="dd-msg"></span></div></div>
       <div class="dd-band"><div class="dd-rail dd-rail-h"></div><div class="dd-rail dd-rail-l"></div><div class="dd-rail dd-rail-r"></div>
@@ -237,7 +237,7 @@ window.AIQ = window.AIQ || {};
 
     /* ---- la voz del crupier: cola (nunca se le corta una frase) y siempre 1 s mas en pantalla ---- */
     const bubble = Q(".dd-bubble"), bTx = bubble.firstChild, dealerImg = Q(".dd-dealer"), hintEl = Q(".dd-hint"), SP = { cur: false, pend: null };
-    const face = f => { dealerImg.src = `assets/icons/dealer_${f}.webp`; };
+    const face = f => { const n = "dealer_" + f, d = `assets/icons/${n}.webp`; dealerImg.dataset.cart = n; dealerImg.dataset.cdef = d; dealerImg.src = A.crupierArt ? A.crupierArt(n, d) : d; };   // con su ropa (js/vestuario.js)
     const gesture = g => { if (!g || g === "none" || reduced) return; dealerImg.classList.remove("hop", "shudder", "drop", "lean"); void dealerImg.offsetWidth; dealerImg.classList.add(g); setTimeout(() => dealerImg.classList.remove(g), 900); };
     const lineOf = key => { const a = LN[key]; let i = Math.floor(rnd() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(rnd() * (a.length - 1))) % a.length; LAST[key] = i; return tr(a[i]) || ""; };
     function speak(p) {

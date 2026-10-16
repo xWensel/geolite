@@ -119,7 +119,7 @@ window.AIQ = window.AIQ || {};
   function pilot(on_) {
     let el = $("vivoEye");
     if (!on_) { if (el) { el.classList.remove("on"); setTimeout(() => { if (!pc && el.isConnected) el.remove(); }, 400); } return; }
-    if (!el) { el = document.createElement("div"); el.id = "vivoEye"; el.innerHTML = `<img src="assets/icons/dealer_mini.webp" alt=""><i></i><b></b>`; document.body.appendChild(el); }
+    if (!el) { el = document.createElement("div"); el.id = "vivoEye"; el.innerHTML = `<img src="${A.crupierArt ? A.crupierArt("dealer_mini", "assets/icons/dealer_mini.webp") : "assets/icons/dealer_mini.webp"}" data-cart="dealer_mini" data-cdef="assets/icons/dealer_mini.webp" alt=""><i></i><b></b>`; document.body.appendChild(el); }
     el.querySelector("b").textContent = A.pick6(EYE); requestAnimationFrame(() => el.classList.add("on"));
     if (A.sfx && A.sfx.spot) A.sfx.spot();
   }

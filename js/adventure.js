@@ -2260,7 +2260,7 @@ window.AIQ = window.AIQ || {};
   }
   function spinCups(o, done) {
     const SL = CUPS_SLOT, GY = CUPS_GY, ANCH = 176, LIFT = 130, ARC = 40, lerp = (a, b, t) => a + (b - a) * t, ease = p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2), easeOut = p => 1 - Math.pow(1 - p, 3);
-    const html = `<div class="tr-stage"><div class="tr-bg"></div><img class="tr-dealer" src="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="tr-bubble"><span></span></div>
+    const html = `<div class="tr-stage"><div class="tr-bg"></div><img class="tr-dealer" src="${A.crupierArt ? A.crupierArt("dealer_neutral", "assets/icons/dealer_neutral.webp") : "assets/icons/dealer_neutral.webp"}" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="tr-bubble"><span></span></div>
       <div class="tr-left"><div class="rou-pick"><span class="rp-dot rp-cups"></span><span class="rp-k">${A.tx(BT.seal)}</span><b>${A.tx(BETS.cups.n)} · ${o.stake}</b></div><div class="tr-hint"></div></div>
       <div class="tr-top"><b class="tr-no">${A.tx(BT2.noMore)}</b><div class="tr-res"><span class="tr-plate"></span><span class="tr-msg"></span></div></div>
       <div class="tr-band"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div></div>`;
@@ -2319,7 +2319,7 @@ window.AIQ = window.AIQ || {};
     const attach = (g, id) => { g.cup = id; g.tv = id == null ? 0 : 1; }, release = () => gloves.forEach(g => { g.tv = 0; });
     /* el crupier: globo (Jersey, siempre 1 s mas en pantalla), cara y pista */
     const bubble = Q(".tr-bubble"), bTx = bubble.firstChild, dealerImg = Q(".tr-dealer"), hintEl = Q(".tr-hint"); let bubbleT = 0;
-    const face = f => { dealerImg.src = `assets/icons/dealer_${f}.webp`; };
+    const face = f => { const n = "dealer_" + f, d = `assets/icons/${n}.webp`; dealerImg.dataset.cart = n; dealerImg.dataset.cdef = d; dealerImg.src = A.crupierArt ? A.crupierArt(n, d) : d; };   // con su ropa (js/vestuario.js)
     const say = (key, f) => { const t = A.tx(A.dealer.line(key)) || ""; bTx.textContent = t; bubble.classList.add("on"); if (f) face(f); clearTimeout(bubbleT); bubbleT = setTimeout(() => bubble.classList.remove("on"), 1800 + t.length * 22 + (A.dealer.LINGER || 1000)); };
     const hint = k => { if (!k) { hintEl.classList.remove("on"); return; } hintEl.textContent = A.tx(TRL[k]); hintEl.classList.add("on"); };
     const plate = (kind, name, extra, msg) => { const p = Q(".tr-plate"); p.className = "tr-plate " + kind; p.innerHTML = `<b>${name}</b>${extra ? `<i>${extra}</i>` : ""}`; Q(".tr-msg").textContent = msg; const r = Q(".tr-res"); r.classList.remove("on"); void r.offsetWidth; r.classList.add("on"); };

@@ -333,6 +333,12 @@ window.AIQ = window.AIQ || {};
       return k < 1 ? { k: 0, css: 0 } : { k, css: FIG * k / dpr };
     },
     /* imagen fija de una expresion (fotos, tutorial): dataURL del lienzo entero (96x112 * k) o, con crop "head", de la cabeza (64x64 * k) */
+    /* v0.3.150: el retrato quieto (96x112) en pixeles, con un atlas concreto (el de siempre: A.crupier.atlas()); js/vestuario.js viste con el sus imagenes fijas */
+    data(expr = "sly", atlas) {
+      if (!loaded) return null;
+      compose({ e: exprId(expr), g: null, f: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, w: null }, atlas || img);
+      return wctx.getImageData(0, 0, W, H);
+    },
     still(expr = "sly", k = 4, crop, atlas) {
       if (!loaded) return null;
       const src = compose({ e: exprId(expr), g: null, f: 0, l: null, shut: 0, open: 0, wink: 0, off: 0, m: null, w: null }, atlas);
