@@ -634,9 +634,9 @@ window.AIQ = window.AIQ || {};
       : o.tie ? Tf("Tope de {n} rondas con las pilas iguales: empate.", "{n}-round cap with equal stacks: a draw.", { n: CFG.rounds }) : Tf("Tope de {n} rondas: gana quien tiene más fichas.", "{n}-round cap: whoever holds more chips wins.", { n: CFG.rounds });
     const sgn = v => (v > 0 ? "+" : v < 0 ? "−" : "") + A.fmt(Math.abs(v)), hpx = v => (v > 0 ? 14 + 7 * Math.round((v / (2 * CFG.stack)) * 26) : 0), me = Math.max(0, st.me), rv = Math.max(0, st.rv);
     const rows = st.log.map(r => `<div class="ln"><i>${pad2(r.k)}</i><span>${(n => (r.q.kind === "flag" ? Tf("Bandera de {n}", "Flag of {n}", { n }) : n))(esc(r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name)))}</span><i>×${fmtM(r.mult)}</i><b class="${r.pay > 0 ? "up" : r.pay < 0 ? "dn" : ""}">${sgn(r.pay)}</b></div>`).join("");
-    /* tarjetas nuevas: una polaroid por lugar con tarjetas ganadas en este duelo (hasta seis), con su foto de la Enciclopedia */
+    /* tarjetas nuevas: una polaroid por lugar con tarjetas ganadas en este duelo (todas, en una tira que se desplaza), con su foto de la Enciclopedia; cada una abre su carta */
     const places = st.log.filter(r => r.cards && r.cards.length).map(r => ({ id: r.q.cid[r.q.cid.length - 1], n: r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name) })), nCards = st.log.reduce((n, r) => n + ((r.cards && r.cards.length) || 0), 0);
-    const pol = places.length ? `<div class="pol"><span class="gx-eyb">${T("Tarjetas nuevas", "New cards")} · ${nCards}</span><div class="rw">${places.slice(0, 6).map((p, i) => `<figure class="drop" style="--d:${(1.3 + i * 0.15).toFixed(2)}s" data-id="${esc(p.id)}"><span class="ph"></span><figcaption>${esc(p.n)}</figcaption></figure>`).join("")}</div></div>` : "";
+    const pol = places.length ? `<div class="pol"><span class="gx-eyb">${T("Tarjetas nuevas", "New cards")} · ${nCards}</span><div class="rw">${places.map((p, i) => `<button type="button" class="pf drop" style="--d:${Math.min(1.3 + i * 0.15, 2.2).toFixed(2)}s" data-id="${esc(p.id)}"><span class="ph"></span><span class="cap">${esc(p.n)}</span></button>`).join("")}</div></div>` : "";
     const pile = (cls, v) => `<div class="pile ${cls}${v ? "" : " zero"}" style="--h:${hpx(v)}px"></div>`;
     c.dialog(stage("du-fin", `<div class="tit"><span class="gx-eyb">${NAME()} · ${A.tx(tb.n)}</span><h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : o.tie ? T("Empate", "Draw") : T("Derrota", "Defeat")}</h2><p class="gx-lead">${lead}</p>
         ${nt ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Marcador de la sala", "Room score")}</b><div class="gx-bar"><i style="--s0:${share(sc.me - (win ? 1 : 0), sc.me + sc.rv - 1)};--s1:${share(sc.me, sc.me + sc.rv)}"></i></div>
@@ -649,7 +649,9 @@ window.AIQ = window.AIQ || {};
       <div class="mesa"><div class="col"><b class="me">${A.fmt(me)}</b><span>${myName() || ME()}</span>${pile("me", me)}</div><div class="col"><b class="rv">${A.fmt(rv)}</b><span>${fo}</span>${pile("rv", rv)}</div><div class="dais"></div></div>
       <div class="seatw" id="duVdSeat"></div>
       <div class="gx-acts"><button type="button" class="gx-btn gho" id="duExit"><span>${nt ? T("Salir de la sala", "Leave the room") : T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${nt ? primary("duRoom", T("Volver a la sala", "Back to the room")) : `<button type="button" class="gx-btn" id="duTables"><span>${T("Otra mesa", "Another table")}</span></button>${primary("duRematch", T("Revancha", "Rematch"))}`}</div>`), "tablewrap");
-    document.querySelectorAll("#dlg .pol figure").forEach(f => { const id = f.dataset.id, k = A.mediaKey(id), im = new Image(); im.alt = ""; im.decoding = "async"; im.onload = () => f.querySelector(".ph").replaceWith(im); im.onerror = () => { if (!im.dataset.b) { im.dataset.b = 1; im.src = A.media(`assets/wiki/card/${k}.webp`); } }; im.src = A.media(`assets/wiki/th/${k}.webp`); });
+    const rw = document.querySelector("#dlg .pol .rw"); if (rw) rw.addEventListener("wheel", e => { if (rw.scrollWidth > rw.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { rw.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+    document.querySelectorAll("#dlg .pol .pf").forEach(f => { f.onclick = () => A.codex.open(f.dataset.id); });
+    document.querySelectorAll("#dlg .pol .pf").forEach(f => { const id = f.dataset.id, k = A.mediaKey(id), im = new Image(); im.alt = ""; im.decoding = "async"; im.onload = () => f.querySelector(".ph").replaceWith(im); im.onerror = () => { if (!im.dataset.b) { im.dataset.b = 1; im.src = A.media(`assets/wiki/card/${k}.webp`); } }; im.src = A.media(`assets/wiki/th/${k}.webp`); });
     $("duExit").onclick = () => c.showHub("home");
     if (nt) $("duRoom").onclick = roomBack;
     else { $("duRematch").onclick = () => D.start(s.liga ? { liga: true, auto: s.auto } : { table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
@@ -820,7 +822,7 @@ window.AIQ = window.AIQ || {};
   }
 
   /* Esc en el veredicto = Salir, y en la sala = Cerrar (asi el crupier se levanta antes de que cambie la pantalla) */
-  addEventListener("keydown", e => { if (e.key !== "Escape" || C().S.settingsOpen || (A.teclado && A.teclado.on)) return; const b = st && st.phase === "end" ? $("duExit") : !st && document.querySelector("#dlg .du-wrap .lob, #dlg .du-wrap .pv") ? $("hubBack") : null; if (!b) return; e.stopImmediatePropagation(); e.preventDefault(); b.click(); }, true);
+  addEventListener("keydown", e => { if (e.key !== "Escape" || C().S.settingsOpen || (A.teclado && A.teclado.on) || (A.codex && A.codex.isOpen())) return; const b = st && st.phase === "end" ? $("duExit") : !st && document.querySelector("#dlg .du-wrap .lob, #dlg .du-wrap .pv") ? $("hubBack") : null; if (!b) return; e.stopImmediatePropagation(); e.preventDefault(); b.click(); }, true);
 
   /* salir del duelo (lo llama js/game.js al volver a la portada, y D.start antes de empezar otro) */
   D.leave = again => {
