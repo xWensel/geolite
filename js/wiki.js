@@ -85,17 +85,25 @@ window.AIQ = window.AIQ || {};
     }
     const rest = t.slice(start).trim(); if (rest) out.push(rest); return out;
   };
+  /* palabras que nunca cierran una frase: si el texto acaba asi ("...destruidas por.", "Joan of.") esta cortado aunque lleve punto */
+  const DANGLE = /\s(?:en|de|del|la|el|los|las|lo|y|e|o|u|a|al|con|por|para|que|un|una|su|sus|se|como|desde|entre|sobre|durante|hasta|según|of|the|and|or|to|in|on|at|with|for|by|from|an|its|his|her|der|die|das|den|dem|des|und|oder|mit|von|zu|im|am|ein|eine|le|les|du|et|ou|au|aux|une|sur|dans|par|pour|di|della|dei|il|gli|ed|na|w|i|z|do|nad|pod|и|в|на|с|по|к|от|из|для)$/i;
+  const undangle = x => { let y; do { y = x; x = x.replace(DANGLE, "").replace(/[,;:\s]+$/, ""); } while (x !== y); return x; };
   A.cleanFact = raw => {
     let s = dewiki(String(raw || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(TPLNUM, "")).replace(/\s+/g, " ").trim(); if (!s) return "";
-    const truncated = !/[.!?…»”)。！？」]$/.test(s) || (SHORTEND.test(s) && !ERA.test(s));
+    /* la descripcion corta de Wikidata ("rascacielos en Taipéi", "poeta portugués") es una frase completa sin punto: no esta cortada, no se le quita la ultima palabra */
+    const frag = s.length <= 170 && !/[.!?…。！？]\s/.test(s) && !/[.!?…»”)。！？」]$/.test(s);
+    const dangling = !frag && DANGLE.test(s.replace(/\.$/, "")) && /\.$/.test(s);
+    if (dangling) s = s.replace(/\.$/, "");
+    const truncated = dangling || (!frag && (!/[.!?…»”)。！？」]$/.test(s) || (SHORTEND.test(s) && !ERA.test(s))));
     s = unbracket(stripParens(s)).replace(/\s*\/[^\/]*[ɐ-˿̀-ͯ]+[^\/]*\//g, "").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").replace(DD, ".");
     s = s.replace(/[,，、;；:：]\s*([)）])/g, "$1").replace(/\s*[(（]\s*[)）]/g, "");   // "（萨摩亚语发音：）" como en cleanText
     let d = 0, first = -1; for (let i = 0; i < s.length; i++) { if (s[i] === "(") { if (!d) first = i; d++; } else if (s[i] === ")" && d) d--; }
     if (d > 0 && first > -1) s = s.slice(0, first);                                                   // parentesis sin cerrar (texto cortado)
     s = s.replace(/\s+([,.;:])/g, "$1").replace(/,\s*\./g, ".").replace(/\s{2,}/g, " ").replace(/[,;:\s]+$/, "").trim();
-    if (truncated || d > 0) { const c = cutLast(s + " ", 12).trim(), tail = s.length - c.length; const cjk = /[぀-ヿ㐀-鿿]/.test(s); s = c !== s && tail < 60 ? c : cjk ? s.replace(/[，、,][^，、,]*$/, "") + "。" : s.replace(/\s+\S*$/, "").replace(/[,;:\s]+$/, "").replace(/([^.!?…])$/, "$1."); }   // nunca puntos suspensivos: si aun aporta se deja, cerrada con punto
+    if (truncated || d > 0) { const c = cutLast(s + " ", 12).trim(), tail = s.length - c.length; const cjk = /[぀-ヿ㐀-鿿]/.test(s); s = c !== s ? c : cjk ? s.replace(/[，、,][^，、,]*$/, "") + "。" : undangle(s.replace(/\s+\S*$/, "").replace(/[,;:\s]+$/, "")).replace(/([^.!?…])$/, "$1."); }   // nunca puntos suspensivos: si aun aporta se deja, cerrada con punto
     if (s.length > 440) { const c = cutLast(s.slice(0, 440) + " ").trim(); s = c.length < s.length && /[.!?…]$/.test(c) ? c : s.slice(0, 438).replace(/\s+\S*$/, "").replace(/[,;:\s]+$/, "") + "."; }
     if (s && !/[.!?…»”)。！？」]$/.test(s)) s += /[぀-ヿ㐀-鿿]/.test(s) ? "。" : ".";
+    if (frag && s) s = s[0].toUpperCase() + s.slice(1);
     return s;
   };
   /* dato curioso corto (descripcion + 1.a frase) para las notas de campo; se usa en la Aventura */

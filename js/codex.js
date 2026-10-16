@@ -1205,6 +1205,13 @@ window.AIQ = window.AIQ || {};
      una diapositiva. Todas van en la misma celda, asi el aviso mide lo que la mas alta y no da saltos. La primera se queda un poco,
      las del medio pasan mas deprisa cuantas mas son y la ultima aguanta hasta ~7 s; con el raton encima se para */
   let toastT = 0, reelT = 0;
+  /* la linea del aviso: Historia y Dato clave cuentan lo suyo (su primera frase entera); la portada, la descripcion con su punto */
+  function tierLine(e, rec) {
+    const T = e.parent ? tiers(rec) : null, txt = T ? (e.tier === 2 ? T.hist : T.key) : "", MAX = 96;
+    /* la primera frase entera que quepa en la tarjeta (3 lineas): si la primera es larga, la siguiente; si ninguna, la descripcion de la portada */
+    const s = txt ? txt.split(/\n/).flatMap(l => A.sentences(l)).find(x => { x = x.trim(); return x.length >= 30 && x.length <= MAX && /[.!?…。！？»”)]$/.test(x); }) : "";
+    return A.cleanFact(s || rec.desc);
+  }
   function toastItem(id) {
     const e = E[id], it = document.createElement("span"); it.className = "cx-ri";
     const lvl = e.parent ? e.tier : tiered(id) ? 1 : 0, what = e.parent ? A.t(e.tier === 2 ? "codex.tierh" : "codex.tierk") : typeLabel(e.type);
@@ -1218,7 +1225,7 @@ window.AIQ = window.AIQ || {};
       im.onload = done; im.onerror = () => { if (!back) return res(); im.onerror = () => res(); im.src = back; };
       im.src = src;
     });
-    const full = loadContent(e, lang).then(rec => { if (rec.none) return null; it.querySelector("b").textContent = nameOf(e, rec); say(rec.desc); return rec; }).catch(() => null);
+    const full = loadContent(e, lang).then(rec => { if (rec.none) return null; it.querySelector("b").textContent = nameOf(e, rec); say(tierLine(e, rec)); return rec; }).catch(() => null);
     /* Historia (id~h) y Dato clave (id~k) ensenan su propia foto, no la de la portada del lugar */
     it._ready = Promise.all([A.wiki.imgOf(id), A.wiki.imgOf(pid), A.wiki.loadShort(lang)]).then(([own, base]) => {
       say(A.cleanFact(A.wiki.factOf(pid, lang)));
