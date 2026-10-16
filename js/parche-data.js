@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.159",
+      name: L("Continentes a juego", "Matching continents", "Des continents assortis", "Continentes combinando", "Passende Kontinente", "Continenti abbinati", "", "统一的大洲", "어울리는 대륙", "そろった大陸", "Континенты в одном стиле", "Pasujące kontynenty"),
+      date: "2026-10-16",
+      summary: L("Los cinco logros de continente del Clásico llevan ahora el mismo continente que su portada, con la chincheta del juego.", "The Classic's five continent achievements now show the same continent as their cover, with the game's pin.", "Les cinq succès de continent du Classique montrent maintenant le même continent que leur couverture, avec l'épingle du jeu.", "As cinco conquistas de continente do Clássico agora mostram o mesmo continente da capa, com o alfinete do jogo.", "Die fünf Kontinent-Erfolge des Klassik-Modus zeigen jetzt denselben Kontinent wie ihr Titelbild, mit dem Pin des Spiels.", "I cinque obiettivi di continente del Classico ora mostrano lo stesso continente della copertina, con la puntina del gioco.", "", "经典模式的五个大洲成就现在与封面上的大洲一致，并配有游戏里的图钉。", "클래식의 대륙 업적 다섯 개가 이제 표지와 같은 대륙에 게임의 핀을 달았어요.", "クラシックの大陸の実績5つが、表紙と同じ大陸とゲームのピンになりました。", "Пять достижений-континентов Классики теперь показывают тот же континент, что и обложка, с булавкой из игры.", "Pięć osiągnięć kontynentów w trybie Klasycznym pokazuje teraz ten sam kontynent co okładka, z pinezką z gry."),
+      chapters: [
+        { id: "logros", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioramento", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("Logros", "Achievements", "Succès", "Conquistas", "Erfolge", "Obiettivi", "", "成就", "업적", "実績", "Достижения", "Osiągnięcia"),
+          entries: [
+            E(L("Cinco insignias nuevas", "Five new badges", "Cinq nouveaux insignes", "Cinco insígnias novas", "Fünf neue Abzeichen", "Cinque nuovi distintivi", "", "五枚新徽章", "새 배지 다섯 개", "新しいバッジ5つ", "Пять новых значков", "Pięć nowych odznak"), "change", "0.3.159", [
+              L("Los logros de terminar **Norteamérica**, **Latinoamérica**, **Europa**, **Asia** y **Oceanía** dibujan su continente con la forma del mapa del juego, igual que las portadas de sus campañas, y con la chincheta de siempre clavada donde no tapa la costa. También en sus iconos de Steam.",
+                "The achievements for finishing **North America**, **Latin America**, **Europe**, **Asia** and **Oceania** draw their continent with the shape from the game's map, just like their campaign covers, with the usual pin stuck where it doesn't hide the coast. Their Steam icons too.",
+                "Les succès pour finir **Amérique du Nord**, **Amérique latine**, **Europe**, **Asie** et **Océanie** dessinent leur continent avec la forme de la carte du jeu, comme les couvertures de leurs campagnes, avec l'épingle habituelle plantée là où elle ne cache pas la côte. Leurs icônes Steam aussi.",
+                "As conquistas de terminar **América do Norte**, **América Latina**, **Europa**, **Ásia** e **Oceania** desenham o continente com a forma do mapa do jogo, igual às capas das campanhas, com o alfinete de sempre cravado onde não tapa a costa. Os ícones da Steam também.",
+                "Die Erfolge für **Nordamerika**, **Lateinamerika**, **Europa**, **Asien** und **Ozeanien** zeigen ihren Kontinent in der Form der Spielkarte, wie die Titelbilder ihrer Kampagnen, mit dem gewohnten Pin dort, wo er die Küste nicht verdeckt. Auch ihre Steam-Symbole.",
+                "Gli obiettivi per finire **Nord America**, **America Latina**, **Europa**, **Asia** e **Oceania** disegnano il loro continente con la forma della mappa del gioco, come le copertine delle campagne, con la solita puntina piantata dove non copre la costa. Anche le loro icone di Steam.",
+                "",
+                "完成**北美洲**、**拉丁美洲**、**欧洲**、**亚洲**和**大洋洲**的成就，现在按游戏地图的形状画出各自的大洲，和战役封面一样，熟悉的图钉插在不挡海岸线的地方。Steam 图标也一并更新。",
+                "**북아메리카**, **라틴 아메리카**, **유럽**, **아시아**, **오세아니아**를 끝내는 업적이 이제 게임 지도의 모양 그대로 대륙을 그려요. 캠페인 표지와 같고, 늘 쓰던 핀은 해안을 가리지 않는 곳에 꽂혀 있어요. 스팀 아이콘도 바뀌었어요.",
+                "**北アメリカ**、**ラテンアメリカ**、**ヨーロッパ**、**アジア**、**オセアニア**を終える実績は、ゲームの地図と同じ形で大陸を描くようになりました。キャンペーンの表紙と同じで、いつものピンは海岸を隠さない場所に刺さっています。Steamのアイコンも同じです。",
+                "Достижения за **Северную Америку**, **Латинскую Америку**, **Европу**, **Азию** и **Океанию** рисуют свой континент по форме карты игры, как обложки их кампаний, а привычная булавка воткнута там, где не закрывает берег. Иконки в Steam тоже.",
+                "Osiągnięcia za ukończenie kampanii **Ameryka Północna**, **Ameryka Łacińska**, **Europa**, **Azja** i **Oceania** rysują swój kontynent w kształcie z mapy gry, tak jak okładki kampanii, ze zwykłą pinezką wbitą tam, gdzie nie zasłania wybrzeża. Ich ikony w Steam też."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.158",
       name: L("Tu carta y tus punteros", "Your card and your pointers", "Ta carte et tes pointeurs", "Sua carta e seus ponteiros", "Deine Karte und deine Zeiger", "La tua carta e i tuoi puntatori", "", "你的会员卡与指针", "내 카드와 포인터", "きみのカードとポインター", "Твоя карта и твои указатели", "Twoja karta i twoje wskaźniki"),
       date: "2026-10-16",
