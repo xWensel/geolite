@@ -10,7 +10,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const W = 679, H = 232;                                    // el logo entero (caja comun de todas las capas)
-  const CAPAS = { rot: ["assets/logo/rotulo.png", 0, 47], tierra: ["assets/logo/tierra.png", 212, 61], carta: ["assets/logo/carta.png", 304, 20], chis: ["assets/logo/chistera.png", 206, 0] };
+  const CAPAS = { rot: ["assets/logo/rotulo.png", 0, 47], tierra: ["assets/logo/tierra.png", 212, 61], somb: ["assets/logo/sombras.png", 0, 0], carta: ["assets/logo/carta.png", 310, 62], chis: ["assets/logo/chistera.png", 215, 26] };
   const N = 56, FS = 144;                                    // fotogramas de la Tierra (tira de 144x144)
   const DUR = i => (i >= 1 && i <= 15 ? 90 : 70);            // el tramo Espana -> Pacifico va un poco mas lento (mismos tiempos que la prueba aprobada)
   const img = {}; let ready = null;
@@ -37,7 +37,7 @@ window.AIQ = window.AIQ || {};
       c.imageSmoothingEnabled = sc < 1; c.imageSmoothingQuality = "high";
       for (const kk of keys) { const im = img[kk]; if (im) c.drawImage(im, Math.round(CAPAS[kk][1] * cv._sc), Math.round(CAPAS[kk][2] * cv._sc), Math.round(im.width * cv._sc), Math.round(im.height * cv._sc)); }
       return o; };
-    cv._back = capa(["rot"]); cv._front = capa(["carta", "chis"]); cv._f = -1;
+    cv._back = capa(["rot"]); cv._front = capa(["somb", "carta", "chis"]); cv._f = -1;
     /* resplandor y sombra: lienzos ESTATICOS detras (la silueta del logo, pintada una vez). Antes eran filter: drop-shadow sobre el lienzo vivo y la GPU
        rehacia los dos desenfoques en cada fotograma de la Tierra; ahora el lienzo vivo va sin filtros y el desenfoque se calcula una sola vez */
     for (const [sh, col] of [[cv._gl, "#f8b449"], [cv._sh, "#050c08"]]) {
