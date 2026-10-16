@@ -34,6 +34,32 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.148",
+      name: L("Corazones simétricos", "Symmetrical hearts", "Des cœurs symétriques", "Corações simétricos", "Symmetrische Herzen", "Cuori simmetrici", "", "对称的红心", "대칭이 된 하트", "左右対称のハート", "Симметричные сердца", "Symetryczne serca"),
+      date: "2026-10-16",
+      summary: L("Los corazones de las provisiones y los que salen de ellos ya son simétricos: la punta no se tuerce.", "The provision hearts, and the ones based on them, are now symmetrical: the tip no longer leans.", "Les cœurs des provisions, et ceux qui en dérivent, sont maintenant symétriques : la pointe ne penche plus.", "Os corações das provisões, e os que vêm deles, agora são simétricos: a ponta não entorta mais.", "Die Proviantherzen und alle, die auf ihnen beruhen, sind jetzt symmetrisch: Die Spitze kippt nicht mehr.", "I cuori delle provviste, e quelli che ne derivano, ora sono simmetrici: la punta non pende più.", "", "补给红心以及由它衍生的红心现在都左右对称了：尖端不再歪斜。", "식량 하트와 그걸 바탕으로 한 하트들이 이제 대칭이에요. 끝이 더는 기울지 않아요.", "食料のハートと、それをもとにしたハートが左右対称になり、先端が傾かなくなりました。", "Сердца запасов и те, что сделаны по их образцу, теперь симметричны: кончик больше не кренится.", "Serca zapasów i te, które z nich powstały, są teraz symetryczne: czubek już się nie przechyla."),
+      chapters: [
+        { id: "corazones", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Provisiones", "Provisions", "Provisions", "Provisões", "Proviant", "Provviste", "", "补给", "식량", "食料", "Запасы", "Zapasy"),
+          entries: [
+            E(L("La punta, en su sitio", "The tip, back in place", "La pointe, à sa place", "A ponta, no lugar", "Die Spitze an ihrem Platz", "La punta, al suo posto", "", "尖端回到中间", "제자리를 찾은 끝", "先端が真ん中に", "Кончик на своём месте", "Czubek na swoim miejscu"), "fix", "0.3.148", [
+              L("El corazón de las provisiones, lleno y vacío, tenía el lado derecho un píxel más ancho que el izquierdo desde la mitad hacia abajo, y la punta se torcía. Ahora es simétrico, igual que los que copian su forma: la reliquia **Corazón**, **Sangre fría** y el logro **Al filo**.",
+                "The provision heart, full and empty, had its right side one pixel wider than the left from the middle down, and the tip leaned. It's now symmetrical, and so are the ones that copy its shape: the **Heart** relic, **Cool head** and the **On the edge** achievement.",
+                "Le cœur des provisions, plein et vide, avait le côté droit plus large d'un pixel que le gauche à partir du milieu, et la pointe penchait. Il est maintenant symétrique, comme ceux qui reprennent sa forme : la relique **Cœur**, **Sang-froid** et le succès **Sur le fil**.",
+                "O coração das provisões, cheio e vazio, tinha o lado direito um pixel mais largo que o esquerdo da metade para baixo, e a ponta entortava. Agora é simétrico, assim como os que copiam sua forma: a relíquia **Coração**, **Sangue-frio** e a conquista **No limite**.",
+                "Das Proviantherz, voll und leer, war ab der Mitte rechts einen Pixel breiter als links, und die Spitze kippte. Jetzt ist es symmetrisch, genau wie die Herzen, die seine Form übernehmen: das Relikt **Herz**, **Kaltblütig** und der Erfolg **Auf Messers Schneide**.",
+                "Il cuore delle provviste, pieno e vuoto, aveva il lato destro più largo di un pixel dalla metà in giù, e la punta pendeva. Ora è simmetrico, come quelli che ne riprendono la forma: la reliquia **Cuore**, **Sangue freddo** e l'obiettivo **Sul filo del rasoio**.",
+                "",
+                "补给红心（满的和空的）从中间往下右侧比左侧宽一个像素，尖端是歪的。现在它左右对称了，照着它的形状画的也一样：遗物**红心**、**冷静**，以及成就**绝境求生**。",
+                "식량 하트(가득 찬 것과 빈 것)는 가운데부터 아래로 오른쪽이 왼쪽보다 한 픽셀 넓어서 끝이 기울어 있었어요. 이제 대칭이 됐고, 그 모양을 따른 하트들도 마찬가지예요. 유물 **하트**, **침착함**, 업적 **벼랑 끝에서**.",
+                "食料のハート（満タンと空）は、真ん中から下で右側が左より1ドット広く、先端が傾いていました。いまは左右対称で、その形をまねたハートも同じです。レリック**ハート**、**冷静沈着**、実績**崖っぷち**。",
+                "Сердце запасов, полное и пустое, от середины вниз было справа на пиксель шире, чем слева, и кончик кренился. Теперь оно симметрично, как и сердца, повторяющие его форму: реликвия **Сердце**, **Хладнокровие** и достижение **На грани**.",
+                "Serce zapasów, pełne i puste, od połowy w dół było po prawej o piksel szersze niż po lewej, a czubek się przechylał. Teraz jest symetryczne, tak jak serca, które powtarzają jego kształt: relikt **Serce**, **Zimna krew** i osiągnięcie **Na krawędzi**."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.147",
       name: L("El escudo, con volumen", "An emblem with depth", "Un emblème en relief", "Um emblema com volume", "Ein Emblem mit Tiefe", "Un emblema con volume", "", "更有立体感的徽标", "입체감이 생긴 엠블럼", "立体感が出たエンブレム", "Объёмная эмблема", "Emblemat z głębią"),
       date: "2026-10-16",
