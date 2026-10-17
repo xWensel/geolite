@@ -650,7 +650,10 @@ window.AIQ = window.AIQ || {};
     const rows = st.log.map(r => `<div class="ln"><i>${pad2(r.k)}</i><span>${(n => (r.q.kind === "flag" ? Tf("Bandera de {n}", "Flag of {n}", { n }) : n))(esc(r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name)))}</span><i>×${fmtM(r.mult)}</i><b class="${r.pay > 0 ? "up" : r.pay < 0 ? "dn" : ""}">${sgn(r.pay)}</b></div>`).join("");
     /* tarjetas nuevas: una polaroid por lugar con tarjetas ganadas en este duelo (todas, en una tira que se desplaza), con su foto de la Enciclopedia; cada una abre su carta */
     const places = st.log.filter(r => r.cards && r.cards.length).map(r => ({ id: r.q.cid[r.q.cid.length - 1], n: r.q.clue ? A.tx(r.q.answer) : A.tx(r.q.name) })), nCards = st.log.reduce((n, r) => n + ((r.cards && r.cards.length) || 0), 0);
-    const pol = places.length ? `<div class="pol"><span class="gx-eyb">${T("Tarjetas nuevas", "New cards")} · ${nCards}</span><div class="rw">${places.map((p, i) => `<button type="button" class="pf drop" style="--d:${Math.min(1.3 + i * 0.15, 2.2).toFixed(2)}s" data-id="${esc(p.id)}"><span class="ph"></span><span class="cap">${esc(p.n)}</span></button>`).join("")}</div></div>` : "";
+    const kh = A.gala.keyHint, many = places.length > 1;
+    const pol = places.length ? `<div class="pol"><span class="gx-eyb">${T("Tarjetas nuevas", "New cards")} · ${nCards}</span>
+        <div class="stage">${many ? `<button type="button" class="nav" id="polPrev" aria-label="${T("Tarjeta anterior", "Previous card")}">‹</button>` : ""}<div class="view" role="group" aria-roledescription="carousel">${places.map((p, i) => `<button type="button" class="pf" style="--r:${[-2, 1.5, -1, 2, -1.5][i % 5]}deg" data-id="${esc(p.id)}"><span class="ph"></span><span class="cap">${esc(p.n)}</span></button>`).join("")}</div>${many ? `<button type="button" class="nav" id="polNext" aria-label="${T("Tarjeta siguiente", "Next card")}">›</button>` : ""}</div>
+        ${many ? `<div class="cnt" aria-live="polite"></div><div class="dots">${places.map((p, i) => `<button type="button" class="dot" data-i="${i}" aria-label="${esc(p.n)}"><span class="ph"></span></button>`).join("")}</div><div class="hint"><span>${kh("←", "lb")}${kh("→", "rb")}</span><span>${kh("Intro", "a")} ${T("abrir carta", "open card")}</span></div>` : ""}</div>` : "";
     const pile = (cls, v) => `<div class="pile ${cls}${v ? "" : " zero"}" style="--h:${hpx(v)}px"></div>`;
     c.dialog(stage("du-fin", `<div class="tit"><span class="gx-eyb">${NAME()} · ${A.tx(tb.n)}</span><h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : o.tie ? T("Empate", "Draw") : T("Derrota", "Defeat")}</h2><p class="gx-lead">${lead}</p>
         ${nt ? `<div class="liga rise" style="--d:.9s"><div class="gx-pnl">${A.icon(ME_CHIP)}<b>${T("Marcador de la sala", "Room score")}</b><div class="gx-bar"><i style="--s0:${share(sc.me - (win ? 1 : 0), sc.me + sc.rv - 1)};--s1:${share(sc.me, sc.me + sc.rv)}"></i></div>
@@ -663,9 +666,7 @@ window.AIQ = window.AIQ || {};
       <div class="mesa"><div class="col"><b class="me">${A.fmt(me)}</b><span>${myName() || ME()}</span>${pile("me", me)}</div><div class="col"><b class="rv">${A.fmt(rv)}</b><span>${fo}</span>${pile("rv", rv)}</div><div class="dais"></div></div>
       <div class="seatw" id="duVdSeat"></div>
       <div class="gx-acts"><button type="button" class="gx-btn gho" id="duExit"><span>${nt ? T("Salir de la sala", "Leave the room") : T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${nt ? primary("duRoom", T("Volver a la sala", "Back to the room")) : `<button type="button" class="gx-btn" id="duTables"><span>${T("Otra mesa", "Another table")}</span></button>${primary("duRematch", T("Revancha", "Rematch"))}`}</div>`), "tablewrap");
-    const rw = document.querySelector("#dlg .pol .rw"); if (rw) rw.addEventListener("wheel", e => { if (rw.scrollWidth > rw.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { rw.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
-    document.querySelectorAll("#dlg .pol .pf").forEach(f => { f.onclick = () => A.codex.open(f.dataset.id); });
-    document.querySelectorAll("#dlg .pol .pf").forEach(f => { const id = f.dataset.id, k = A.mediaKey(id), im = new Image(); im.alt = ""; im.decoding = "async"; im.onload = () => f.querySelector(".ph").replaceWith(im); im.onerror = () => { if (!im.dataset.b) { im.dataset.b = 1; im.src = A.media(`assets/wiki/card/${k}.webp`); } }; im.src = A.media(`assets/wiki/th/${k}.webp`); });
+    polInit();
     $("duExit").onclick = () => c.showHub("home");
     if (nt) $("duRoom").onclick = roomBack;
     else { $("duRematch").onclick = () => D.start(s.liga ? { liga: true, auto: s.auto } : { table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
@@ -675,6 +676,52 @@ window.AIQ = window.AIQ || {};
     else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "laugh" });
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
     if (st.auto && st.auto.done) st.auto.done(sum);
+  }
+  /* visor de las tarjetas nuevas del veredicto: una carta grande, flechas, contador y miniaturas. Sin vuelta de un extremo al otro (la primera apaga ‹, la ultima ›).
+     Teclado: <- -> Inicio Fin; mando: LB / RB (la cruceta sigue siendo moverse: salta a las flechas); la rueda tambien recorre. Mide siempre lo mismo (css/duelo.css) */
+  function polInit() {
+    const root = document.querySelector("#dlg .pol"); if (!root) return;
+    const cards = [...root.querySelectorAll(".view .pf")], dots = [...root.querySelectorAll(".dot")], n = cards.length, prev = $("polPrev"), next = $("polNext"), cnt = root.querySelector(".cnt");
+    let i = 0, wheelAt = 0;
+    const tick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); };
+    const show = k => {
+      i = Math.max(0, Math.min(n - 1, k));
+      cards.forEach((c, j) => { c.classList.toggle("l", j < i); c.classList.toggle("r", j > i); c.classList.toggle("on", j === i); c.tabIndex = j === i ? 0 : -1; c.setAttribute("aria-hidden", j === i ? "false" : "true"); });
+      dots.forEach((d, j) => d.classList.toggle("on", j === i));
+      if (cnt) cnt.textContent = `${i + 1} / ${n}`;
+      if (prev) prev.disabled = i === 0;
+      if (next) next.disabled = i === n - 1;
+    };
+    const to = k => { k = Math.max(0, Math.min(n - 1, k)); if (k === i) return; show(k); tick(); const f = document.activeElement; if (f && f.disabled) (k > i || k === n - 1 ? prev : next).focus(); };
+    show(0);
+    cards.forEach(f => { f.onclick = () => { if (f.classList.contains("on")) A.codex.open(f.dataset.id); }; });
+    root.querySelectorAll(".ph").forEach(ph => {
+      const host = ph.closest(".pf, .dot"), id = host.dataset.id || cards[+host.dataset.i].dataset.id, k = A.mediaKey(id), im = new Image(); im.alt = ""; im.decoding = "async";
+      im.onload = () => ph.replaceWith(im); im.onerror = () => { if (!im.dataset.b) { im.dataset.b = 1; im.src = A.media(`assets/wiki/card/${k}.webp`); } }; im.src = A.media(`assets/wiki/th/${k}.webp`);
+    });
+    if (n < 2) return;
+    prev.onclick = () => to(i - 1); next.onclick = () => to(i + 1);
+    dots.forEach(d => { d.onclick = () => to(+d.dataset.i); });
+    root.querySelector(".stage").addEventListener("wheel", e => { e.preventDefault(); const t = performance.now(); if (t - wheelAt < 140) return; wheelAt = t; to(i + ((e.deltaY || e.deltaX) > 0 ? 1 : -1)); }, { passive: false });
+    const live = () => document.body.contains(root) && !(A.codex && A.codex.isOpen());
+    const onKey = e => {
+      if (!document.body.contains(root)) return removeEventListener("keydown", onKey, true);
+      if (!live() || e.altKey || e.ctrlKey || e.metaKey) return;
+      const k = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : null;
+      if (k == null) return;
+      e.preventDefault(); e.stopPropagation(); to(k);
+    };
+    addEventListener("keydown", onKey, true);
+    /* mando: LB / RB por flanco (un pulso = una carta); el bucle muere con la pantalla */
+    let was = [0, 0];
+    const pad = () => {
+      if (!document.body.contains(root)) return;
+      const gp = (navigator.getGamepads ? [...navigator.getGamepads()] : []).find(g => g && g.connected);
+      const now = [4, 5].map(b => (gp && gp.buttons[b] && gp.buttons[b].pressed ? 1 : 0));
+      if (live()) { if (now[0] && !was[0]) to(i - 1); if (now[1] && !was[1]) to(i + 1); }
+      was = now; requestAnimationFrame(pad);
+    };
+    requestAnimationFrame(pad);
   }
   /* ================================================================== ENTRE JUGADORES · LA SALA PRIVADA (un amigo, con un codigo)
      El servidor (api/duelo.js) solo guarda la sala, el reloj de cada ronda y las dos respuestas. Un unico bucle de sondeo (netLoop) pregunta el

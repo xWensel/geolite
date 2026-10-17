@@ -1258,7 +1258,7 @@ window.AIQ = window.AIQ || {};
     const hold = k => n === 1 ? END : k === 0 ? FIRST : k < n - 1 ? step : Math.max(1600, END - FIRST - (n - 2) * step);
     const calm = document.documentElement.classList.contains("reduce-motion");
     el.classList.add("pile");
-    el.innerHTML = `<span class="cx-reel"></span>${n > 1 ? `<span class="cx-cnt"></span><span class="cx-arr l" role="button" aria-label="‹">‹</span><span class="cx-arr r" role="button" aria-label="›">›</span>` : ""}`;
+    el.innerHTML = `<span class="cx-reel"></span>${n > 1 ? `<span class="cx-cnt"></span>` : ""}`;
     const cnt = el.querySelector(".cx-cnt"), rnd = (a, b) => a + Math.random() * (b - a);
     items.forEach(it => el.firstElementChild.appendChild(it));
     /* donde se queda cada una: giro de -6 a 6 grados (nunca casi igual que la de debajo) y un poco descolocada */
@@ -1273,24 +1273,18 @@ window.AIQ = window.AIQ || {};
     let i = 0;
     const show = k => {
       const it = items[k], d = calm ? 0 : Math.min(560, Math.max(320, step - 40));
-      items.forEach((o, j) => { if (j < k) { o.classList.remove("on"); o.classList.toggle("under", j >= k - 3); } else if (j > k) o.classList.remove("on", "under", "kb"); });   // en el monton se ven las 3 de debajo; las mas viejas ya no
+      items.forEach((o, j) => { if (j < k) { o.classList.remove("on"); o.classList.toggle("under", j >= k - 3); } });   // en el monton se ven las 3 de debajo; las mas viejas ya no
       it.classList.remove("under"); it.classList.add("on", "kb"); if (cnt) cnt.textContent = `${k + 1} / ${n}`;
       if (!d) return;
       it.animate([{ transform: from(), opacity: 0 }, { opacity: 1, offset: .35 }, { transform: rest[k], opacity: 1 }], { duration: d, easing: "cubic-bezier(.2, .9, .3, 1.12)" });
       const p = items[k - 1];
       if (p) setTimeout(() => p.isConnected && p.animate([{ transform: rest[k - 1] }, { transform: `${rest[k - 1]} translate(${rnd(-4, 4).toFixed(1)}px, 3px) rotate(${rnd(-1.2, 1.2).toFixed(2)}deg)` }, { transform: rest[k - 1] }], { duration: 240, easing: "ease-out" }), d * .82);   // el golpecito a la de debajo al caer
     };
-    let manual = false;                                                      // el jugador ha tomado el control con las flechas: el monton ya no se recoge solo
-    const onKey = e => { if ((e.key !== "ArrowLeft" && e.key !== "ArrowRight") || n < 2 || el.classList.contains("hidden") || (A.codex && A.codex.isOpen && A.codex.isOpen())) return;
-      const S = A.core && A.core.S; if (S && S.phase === "asking") return; e.preventDefault(); e.stopPropagation(); go(e.key === "ArrowRight" ? 1 : -1); };
-    const leave = () => { document.removeEventListener("keydown", onKey, true); el.classList.remove("in"); el.classList.add("out"); toastT = setTimeout(() => el.classList.add("hidden"), 340); };
-    const go = d => { manual = true; clearTimeout(reelT); const k = (i + d + n) % n; i = k; show(k); if (A.sfx && A.sfx.ui) A.sfx.ui(); };
-    const next = () => { if (manual) return; if (i < n - 1) { show(++i); reelT = setTimeout(next, hold(i)); } else leave(); };
+    const leave = () => { el.classList.remove("in"); el.classList.add("out"); toastT = setTimeout(() => el.classList.add("hidden"), 340); };
+    const next = () => { if (i < n - 1) { show(++i); reelT = setTimeout(next, hold(i)); } else leave(); };
     el._leave = () => { clearTimeout(reelT); leave(); };
-    el.querySelectorAll(".cx-arr").forEach(b => { b.onclick = e => { e.stopPropagation(); go(b.classList.contains("l") ? -1 : 1); }; });
-    document.removeEventListener("keydown", el._onKey || (() => {}), true); el._onKey = onKey; document.addEventListener("keydown", onKey, true);
     el.onpointerenter = () => clearTimeout(reelT);
-    el.onpointerleave = () => { clearTimeout(reelT); if (!manual) reelT = setTimeout(next, 700); };
+    el.onpointerleave = () => { clearTimeout(reelT); reelT = setTimeout(next, 700); };
     el.onclick = () => { clearTimeout(reelT); if (A.core && A.core.S && A.core.S.phase === "asking") { leave(); return; } el.classList.add("hidden"); open(ids[i]); };   // con el reloj corriendo solo se aparta
     el.classList.remove("hidden", "in", "out"); A.restyle(el); el.classList.add("in");
     /* v0.3.79: el monton, SIEMPRE entero (lo pidio el usuario: puede encoger un poco, nunca cortarse por abajo). Se mide una vez, al abrir. Su hueco
