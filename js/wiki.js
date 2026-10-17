@@ -22,10 +22,12 @@ window.AIQ = window.AIQ || {};
       if (!r) return null;
       /* r[4] = idioma de origen: texto traducido a mano (tools/wiki-tr/) porque esa Wikipedia no tiene articulo; el enlace va al original */
       /* r[5] = dato clave propio (tools/codex-tiers.mjs) y r[6] = {h, k}: idioma de origen de la historia / el dato clave si se tradujeron a mano */
-      const src = r[4] || null, srcTitle = src ? ((await load(src))[id] || [r[0]])[0] : r[0];
+      /* r[7] = titulo real del articulo cuando el que se ensena (r[0]) no enlaza: en chino r[0] va en forma continental y el articulo puede llamarse en tradicional */
+      const tl = x => x && (x[7] || x[0]);
+      const src = r[4] || null, srcTitle = src ? tl((await load(src))[id]) || r[0] : tl(r);
       const wurl = (lg, t) => `https://${lg}.wikipedia.org/wiki/${encodeURIComponent(String(t).replace(/ /g, "_"))}`;
       const im = I[id], rec = { t: Date.now(), lang: l, tr: src, title: r[0], desc: r[1] || "", extract: r[2] || "", history: r[3] || "", key: r[5] || "", more: "", url: wurl(src || l, srcTitle), pack: true };
-      if (r[6]) { rec.tierTr = {}; for (const [k, lg] of Object.entries(r[6])) if (lg) rec.tierTr[k] = { lang: lg, url: wurl(lg, ((await load(lg))[id] || [r[0]])[0]) }; }
+      if (r[6]) { rec.tierTr = {}; for (const [k, lg] of Object.entries(r[6])) if (lg) rec.tierTr[k] = { lang: lg, url: wurl(lg, tl((await load(lg))[id]) || r[0]) }; }
       if (im) { rec.img = { thumb: card(id), card: card(id), hd: hdOf(id), w: im[1], h: im[2], flag: /\/(\d+px-)?(State_)?flag_of_[^\/]*$/i.test(im[0]) }; if (im[3]) rec.credit = { artist: im[3][0], license: im[3][1], page: im[3][2] }; }   // flag: la bandera se ve entera (js/codex.js, .flag)
       else if (/^c:/.test(id) && A.FLAGS && A.FLAGS[id.slice(2)]) {               // pais sin foto propia (Niger): su bandera empaquetada de las rondas de banderas
         const F = A.FLAGS[id.slice(2)], fl = A.media(`assets/flags/${A.mediaKey(id.slice(2))}.svg`);
