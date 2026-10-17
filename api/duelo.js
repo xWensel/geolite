@@ -1,8 +1,8 @@
 /* POST /api/duelo  (cuerpo text/plain con JSON, sin preflight: el juego de escritorio llama desde http://127.0.0.1)
    La sala privada del Duelo de fichas (js/duelo-red.js): un relevo minimo entre DOS jugadores. Cada cliente saca las mismas preguntas de la misma
    semilla y hace las mismas cuentas; aqui solo viven la sala, el reloj de cada ronda y las dos respuestas. Todo caduca a la hora.
-     { a: "new", pid, name, ver, t, c }         abre una sala y devuelve su codigo (5 letras o cifras, sin las que se confunden); c: su estilo
-     { a: "join", pid, code, name, ver, c }     el invitado se sienta (why: "none" no existe, "full" completa, "ver" versiones distintas)
+     { a: "new", pid, name, ver, t, c, k }      abre una sala y devuelve su codigo (5 letras o cifras, sin las que se confunden); c: su estilo; k: su carta (v0.3.174)
+     { a: "join", pid, code, name, ver, c, k }  el invitado se sienta (why: "none" no existe, "full" completa, "ver" versiones distintas)
      { a: "poll", pid, code, n, k }             pregunta el estado (n = duelo, k = la ronda por la que pregunta)
      { a: "set", pid, code, t }                 el anfitrion cambia de mesa (solo en la sala)
      { a: "deal", pid, code }                   el anfitrion reparte: empieza el duelo n + 1 con una semilla nueva (los dos tienen que estar en la sala)
@@ -14,7 +14,7 @@
      { a: "back", pid, code }                   de vuelta a la sala tras el veredicto
      { a: "bye", pid, code }                    se levanta (el invitado deja el asiento libre; si se va el anfitrion, la sala se cierra)
    Responde el estado visto por quien pregunta: { ok, now, code, role, st, n, t, seed, h, g, quit, rd }. now = hora del servidor (los clientes la usan
-   para poner el mismo reloj). h / g = los asientos: n (nombre), on (da senal), ago (ms desde la ultima), in (esta en la sala) y out (se ha ido).
+   para poner el mismo reloj). h / g = los asientos: n (nombre), c (punteros), k (su carta: kv.STYLE), on (da senal), ago (ms desde la ultima), in (esta en la sala) y out (se ha ido).
    quit = quien ha perdido el duelo n por rendirse o por abandono ("me" o "his"; con gone: true, por llevar demasiado sin dar senal). rd = la ronda k: s (empieza), e (acaba), me (mi respuesta),
    his.lk (el otro ya ha fijado) y his.a (su respuesta: solo se ensena cuando la mia ya esta guardada, asi nadie responde viendo la del otro).
    Pasado el final de la ronda, quien no haya respondido se queda sin respuesta ("0"). Sin datos personales: pid es aleatorio en cada arranque del
@@ -39,7 +39,7 @@ const endOf = (R, b) => { const s = +R["s:" + b] || 0; if (!s) return 0; const e
 
 function view(R, code, role, now, n, k) {
   const other = role === "h" ? "g" : "h", ago = r => Math.max(0, now - (+R[r + "s"] || 0));
-  const seat = r => (R[r] ? { n: R[r + "n"] || "", c: R[r + "c"] || "", on: ago(r) < 10000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
+  const seat = r => (R[r] ? { n: R[r + "n"] || "", c: R[r + "c"] || "", k: R[r + "k"] || "", on: ago(r) < 10000, ago: Math.min(ago(r), 999999), in: R[r + "r"] === "1", out: R[r + "x"] === "1" } : null);
   const o = { ok: true, now, code, role, st: R.st || "lobby", n: +R.n || 0, t: R.t || "plata", h: seat("h"), g: seat("g") };
   if (o.st === "play") o.seed = R.seed;
   if (n != null && n === o.n) { const q = R["q:" + n]; if (q) { o.quit = q[0] === role ? "me" : "his"; if (q[1] === "!") o.gone = true; } }
@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
       const t = TABLE.test(String(b.t || "")) ? b.t : "plata";
       for (let i = 0; i < 4; i++) {
         const code = rnd(5), got = await run([["HSETNX", key(code), "h", pid], ["EXPIRE", key(code), TTL]]);
-        if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "hn", clean(b.name), "hc", cos(b.c), "hs", now, "hr", 1, "st", "lobby", "n", 0, "t", t, "ver", ver]]), code, "h", now));
+        if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "hn", clean(b.name), "hc", cos(b.c), "hk", kv.style(b.k), "hs", now, "hr", 1, "st", "lobby", "n", 0, "t", t, "ver", ver]]), code, "h", now));
       }
       return res.status(503).json({ ok: false, why: "busy" });
     }
@@ -79,7 +79,7 @@ module.exports = async (req, res) => {
         if (R.g && R.g !== pid) await run([["HDEL", key(code), "g", "gn", "gs", "gx", "gr"]]);       // el invitado anterior se fue a medio duelo: su asiento queda libre
         const got = await run([["HSETNX", key(code), "g", pid], ["HGET", key(code), "g"]]);          // si entran dos a la vez, se sienta el primero
         if (got[1] !== pid) return send({ ok: false, why: "full" });
-        R = await write(code, [["HSET", key(code), "gn", clean(b.name), "gc", cos(b.c), "gs", now, "gr", 1], ["HDEL", key(code), "gx"]]);
+        R = await write(code, [["HSET", key(code), "gn", clean(b.name), "gc", cos(b.c), "gk", kv.style(b.k), "gs", now, "gr", 1], ["HDEL", key(code), "gx"]]);
       }
       return send(view(R, code, R.h === pid ? "h" : "g", now));
     }

@@ -13,3 +13,6 @@ exports.pipeline = async cmds => {
 /* las clasificaciones del juego: la Aventura de siempre (adv-all), la Aventura de cada dia (advd-, Hoy / Ayer de la Aventura) y el Reto diario
    (daily-, suma de sus 3 intentos). day- (la mejor partida del dia de cualquier modo) solo se acepta de versiones anteriores del juego */
 exports.BOARD = /^(daily-\d{8}|advd-\d{8}|day-\d{8}|adv-all)$/;
+/* v0.3.174: el estilo de la carta del socio (js/socio.js, code): «categoria.marco.icono.titulo.nivel». Solo forma; el juego valida cada pieza al pintarla */
+exports.STYLE = /^\d{1,2}\.[a-z]{1,12}\.[a-z0-9_]{1,32}\.[a-z]{1,12}\.\d{1,4}$/;
+exports.style = v => (exports.STYLE.test(String(v || "")) ? String(v) : "");

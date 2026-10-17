@@ -80,6 +80,7 @@ window.AIQ = window.AIQ || {};
     const host = list.offsetParent;
     if (reduced() || !list.animate || !host || !list.children.length) { list.innerHTML = html; return; }
     const old = list.cloneNode(true); old.removeAttribute("id"); old.setAttribute("aria-hidden", "true"); old.inert = true; old.classList.add("turned");   // sin la entrada de sus filas (la copia no debe reaparecer)
+    { const src = list.querySelectorAll("canvas"); old.querySelectorAll("canvas").forEach((c, i) => { try { if (src[i] && src[i].width) c.getContext("2d").drawImage(src[i], 0, 0); } catch (e) { /* lienzo vacio */ } }); }   // v0.3.174: las chapas de las filas (un lienzo clonado sale en blanco)
     old.style.cssText += `;position:absolute;left:${list.offsetLeft}px;top:${list.offsetTop}px;width:${list.offsetWidth}px;height:${list.offsetHeight}px;margin:0;pointer-events:none;z-index:1`;
     host.appendChild(old); turnOld = old;
     list.innerHTML = html; list.classList.add("turned");

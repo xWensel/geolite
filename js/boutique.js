@@ -301,6 +301,9 @@ window.AIQ = window.AIQ || {};
     tLogro: "Logros|Achievements|Succès|Conquistas|Erfolge|Obiettivi||成就|업적|実績|Достижения|Osiągnięcia",
     tObj: "Objetos|Objects|Objets|Objetos|Objekte|Oggetti||物件|오브제|アイテム|Предметы|Przedmioty",
     tTit: "Títulos|Titles|Titres|Títulos|Titel|Titoli||称号|칭호|称号|Титулы|Tytuły",
+    tMarco: "Marcos|Frames|Cadres|Molduras|Rahmen|Cornici||边框|프레임|額縁|Рамки|Ramki",
+    eMarco: "Marco|Frame|Cadre|Moldura|Rahmen|Cornice||边框|프레임|額縁|Рамка|Ramka",
+    dMarco: "La moldura de tu carta y de tu chapa; el material sigue siendo el de tu categoría.|The moulding of your card and your badge; the material is still your rank's.|La moulure de ta carte et de ton badge ; la matière reste celle de ta catégorie.|A moldura da sua carta e do seu emblema; o material continua sendo o da sua categoria.|Die Zierleiste deiner Karte und deines Abzeichens; das Material bleibt das deiner Kategorie.|La cornice della tua carta e del tuo distintivo; il materiale resta quello della tua categoria.||你的会员卡和徽章的边框；材质仍随你的等级。|카드와 배지의 테두리예요. 재질은 지금 등급 그대로예요.|カードとバッジの額縁。素材はいまのランクのまま。|Рамка твоей карты и значка; материал остаётся от твоей категории.|Ozdobna ramka twojej karty i odznaki; materiał zostaje z twojej kategorii.",
     eIcon: "Icono|Icon|Icône|Ícone|Symbol|Icona||图标|아이콘|アイコン|Значок|Ikona",
     eTit: "Título|Title|Titre|Título|Titel|Titolo||称号|칭호|称号|Титул|Tytuł",
     kLogro: "De un logro|From an achievement|D'un succès|De uma conquista|Aus einem Erfolg|Da un obiettivo||来自成就|업적 보상|実績のごほうび|За достижение|Z osiągnięcia",
@@ -313,13 +316,14 @@ window.AIQ = window.AIQ || {};
   };
   const SO = () => A.socio;
   /* la lista de una pestana: [clave, ...]; clave = "i:<icono>" o "t:<titulo>" */
-  const cOf = t => t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
-  const cFind = k => { const [w, id] = k.split(":"); const L = w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
-  const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
+  const cOf = t => t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
+  const cFind = k => { const [w, id] = k.split(":"); const L = w === "m" ? SO().marcos() : w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
+  const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "m" ? SO().marco() === id : w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
   function cItem(x) {
     const st = cState(x.k), w = x.k[0], tag = st === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : x.kind === "casa" ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : st ? `<em class="bq-own">${esc(P6(VX.mine))}</em>`
       : x.price ? `<span class="bq-pr">${fi()}<b>${A.fmt(x.price)}</b></span>` : `<em class="bq-own lk" aria-label="${esc(P6(CX.locked))}">${A.icon("lock")}</em>`;
     const th = w === "t" ? `<span class="bq-th bq-cth bq-ttl${x.owned || x.kind === "tienda" ? "" : " off"}"><span class="bq-tplate"><span>${esc(x.name)}</span></span></span>`
+      : w === "m" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned || x.kind === "tienda" ? "" : " lk"}" data-cm="${esc(x.id)}"></span></span>`
       : `<span class="bq-th bq-cth"><canvas width="96" height="72" data-ci="${esc(x.id)}"${x.owned || x.kind !== "logro" ? "" : ` data-lk="${x.secret ? 2 : 1}"`}></canvas></span>`;
     const nm = w === "t" ? esc(P6(x.kind === "tienda" ? CX.kTienda : CX.kHito)) : esc(x.name);
     return `<button type="button" class="bq-it bq-cit${x.k === ST.csel ? " sel" : ""}${st ? " " + st : ""}${w === "t" ? " bq-ttl" : ""}" data-ck="${esc(x.k)}" aria-pressed="${x.k === ST.csel}" aria-label="${esc(x.name)}">
@@ -331,7 +335,7 @@ window.AIQ = window.AIQ || {};
     const items = L.slice(ST.cpage * CPER, ST.cpage * CPER + CPER);
     const cnt = k => { const l = cOf(k); return k === "obj" ? l.length : `${l.filter(x => x.owned).length}/${l.length}`; };
     const tab = (k, tx) => `<button type="button" class="bq-tab bq-ctab${ST.ctab === k ? " on" : ""}" data-ctab="${k}" aria-pressed="${ST.ctab === k}"><span>${esc(P6(tx))}</span><i>${cnt(k)}</i></button>`;
-    return `<div class="bq-bar"><nav class="bq-tabs">${tab("logro", CX.tLogro)}${tab("obj", CX.tObj)}${tab("tit", CX.tTit)}</nav>
+    return `<div class="bq-bar"><nav class="bq-tabs">${tab("logro", CX.tLogro)}${tab("obj", CX.tObj)}${tab("tit", CX.tTit)}${tab("marco", CX.tMarco)}</nav>
       <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqCPrev"${ST.cpage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.cpage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqCNext"${ST.cpage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
       <div class="bq-items carta" id="bqItems">${items.map(cItem).join("")}</div>`;
   }
@@ -345,10 +349,10 @@ window.AIQ = window.AIQ || {};
     else if (!x.price) act = `<button type="button" class="gx-btn wide" disabled>${A.icon("lock")}<span>${esc(P6(CX.locked))}</span></button>`;
     else if (have < x.price) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(x.price - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === k ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === k ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(x.price)}</span></button>`;
-    const kind = w === "t" ? (x.kind === "tienda" ? CX.kTienda : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : CX.kTienda;
-    const desc = w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
+    const kind = w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : CX.kTienda;
+    const desc = w === "m" ? CX.dMarco : w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
     return `<span class="bq-dth bq-cprev"><span id="bqCCard"></span></span>
-      <span class="gx-eyb bq-tier">${esc(P6(w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
+      <span class="gx-eyb bq-tier">${esc(P6(w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
       <h3 class="gx-t-m bq-dn">${esc(x.name)}</h3>
       <p class="bq-dd">${esc(P6(desc))}${x.how && !x.owned ? `<br><b class="bq-how">${esc(x.how)}</b>` : ""}</p>
       <div class="bq-acts">${act}</div>`;
@@ -356,7 +360,8 @@ window.AIQ = window.AIQ || {};
   /* la carta de la ficha (tu carta con la pieza puesta) y las miniaturas, a escala entera en pixeles reales */
   function cPaint() {
     const host = $("bqCCard"), k = ST.csel;
-    if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
+    if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
+    document.querySelectorAll("#dlg .bq-cbadge[data-cm]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, marco: el.dataset.cm }); });   // v0.3.174: cada marco, en tu chapa
     const dp = window.devicePixelRatio || 1;
     document.querySelectorAll("#dlg canvas[data-ci]").forEach(cv => { const r = cv.getBoundingClientRect(), W = Math.max(16, Math.round(r.width * dp)), H = Math.max(12, Math.round(r.height * dp)); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; } SO().thumb(cv, cv.dataset.ci, { locked: !!cv.dataset.lk, secret: cv.dataset.lk === "2", base: ST.ctab === "obj" ? 64 : 48 }); });
   }
@@ -368,7 +373,7 @@ window.AIQ = window.AIQ || {};
     if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
-    if (!(w === "t" ? SO().buyTitle(id) : SO().buyIcon(id))) return;
+    if (!(w === "m" ? SO().buyMarco(id) : w === "t" ? SO().buyTitle(id) : SO().buyIcon(id))) return;
     repaint();
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(2);
@@ -438,7 +443,7 @@ window.AIQ = window.AIQ || {};
     const cp = $("bqCPrev"), cn = $("bqCNext");
     if (cp) cp.onclick = () => { if (ST.cpage > 0) { ST.cpage--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCPrev:not([disabled]), #bqCNext"); } };
     if (cn) cn.onclick = () => { ST.cpage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCNext:not([disabled]), #bqCPrev"); };
-    const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
+    const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "m" ? SO().setMarco(id) : w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
     const co = $("bqCOff"); if (co) co.onclick = () => { SO().setTitle(""); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCUse"); };
   }
   /* las pestañas de la cabecera caben siempre: si en un idioma no caben, primero se aprietan y despues las que no estan puestas se quedan en su

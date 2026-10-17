@@ -85,6 +85,7 @@
 .bq-det { height: 100%; display: grid; gap: 10px; align-content: start; padding: 18px 22px 20px; }
 .bq-dth { position: relative; display: block; aspect-ratio: 2 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); overflow: hidden; }
 .bq-dth img { display: block; width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }
+.bq-dth .sc-host img, .bq-th .sc-host img { object-fit: contain; }   /* v0.3.174: la moneda del pie de tu carta no es una mesa: entera, no un trozo a 1:1 */
 .bq-dth.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
 /* la legendaria tiene su brillo: un reflejo de laton que cruza la captura de vez en cuando (solo transform y opacity) */
 .bq-dth.leg::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 28%; background: linear-gradient(90deg, transparent, rgba(255, 240, 200, .35), transparent); transform: translateX(-120%) skewX(-18deg); animation: bq-shine 3.6s ease-in-out infinite; pointer-events: none; }
@@ -184,6 +185,8 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-items.carta { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .bq-th.bq-cth { aspect-ratio: 1 / 1; overflow: hidden; background: #245a41; }
 .bq-cth canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.bq-cth.bq-cmk { display: grid; place-items: center; overflow: visible; }                   /* v0.3.174: un marco = tu chapa con ese marco (lo que asoma, por fuera) */
+.bq-cbadge.lk { filter: grayscale(1) brightness(.62); }
 .bq-cth.bq-ttl { display: grid; place-items: center; padding: 0 8px; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
 .bq-tplate { display: grid; place-items: center; min-height: 34px; max-width: 100%; padding: 4px 8px 5px; font-size: 19px; text-align: center; color: #ffd98a; background: #2a1e14; box-shadow: inset 0 2px 0 #4a3624, 0 0 0 2px #120e1c, 0 4px 0 2px rgba(2, 6, 4, .45); font-family: var(--sans); font-size: 20px; line-height: 1; text-shadow: 0 2px 0 #120e1c; }
 .bq-tplate span { text-wrap: balance; }

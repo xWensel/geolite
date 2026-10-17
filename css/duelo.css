@@ -152,6 +152,10 @@ body.duelo-on .rail-sh { top: 58%; }                                            
 .du-hud .pl { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; min-width: 0; }
 .du-hud .pl.rv { grid-template-columns: minmax(0, 1fr) 64px; text-align: right; }
 .du-hud .pl .av { width: 64px; height: 64px; }
+/* v0.3.174: la chapa de socio (80 de arte a escala entera, js/socio.js badge) y el titulo bajo el nombre */
+.du-hud .pl.bd { grid-template-columns: auto minmax(0, 1fr); } .du-hud .pl.rv.bd { grid-template-columns: minmax(0, 1fr) auto; }
+.du-hud .pl .av.du-bd { width: auto; height: auto; }
+.du-hud .du-tt { display: block; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; color: var(--gx-rim-hi); }
 .du-hud .pl .du-nm { display: flex; gap: 8px; align-items: center; min-width: 0; font-size: 22px; color: var(--gx-txt); white-space: nowrap; } .du-hud .pl.rv .du-nm { justify-content: flex-end; }
 .du-hud .pl .nmt { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .du-hud .num { display: flex; margin-top: 4px; font-size: 44px; line-height: 1; height: 1em; color: var(--me-hi); filter: drop-shadow(0 3px 0 #050b08); } .du-hud .pl.rv .num { color: var(--rv-hi); justify-content: flex-end; }

@@ -6,6 +6,8 @@
    (repetir la que ya tienes, para cambiar de nombre, no lo necesita). x = desglose de la partida { s: puntos de las preguntas, c: rondas superadas,
    w: ganada, a: Ascension, q: preguntas contestadas }: el servidor rehace la cuenta final, pone un tope por pregunta y exige el tiempo minimo de juego.
    Cada boleto vale para UNA puntuacion (la misma puede ir a "Siempre" y a "Hoy"). Quien tenga el id o la IP en ban:id / ban:ip (la mesa, api/mesa.js) no envia nada.
+   v0.3.174: k = el estilo de tu carta de socio (kv.STYLE): se guarda en el hash "sty" (uno por jugador, para todas las tablas) con cada envio, y
+   { op:"sty", id, k } lo cambia sin puntuacion (al abrir la Clasificacion, si vistes la carta de otra forma). api/top.js lo devuelve en cada fila (c).
    OJO: sigue siendo de confianza (la partida se juega en el navegador): esto obliga a jugar de verdad, o a esperar lo que dura una partida,
    para cada puntuacion. Para clasificar en serio hay que reproducir la partida en servidor a partir de la semilla y los clics (ver README, "Antitrampas"). */
 const crypto = require("crypto");
@@ -49,6 +51,16 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, run: rid });
     } catch (e) { return res.status(502).json({ ok: false, reason: "kv" }); }
   }
+  if (b.op === "sty") {                                                // el estilo de tu carta, sin puntuacion: el mismo limite que los envios
+    const k = kv.style(b.k); if (!id || !k) return res.status(400).json({ ok: false, reason: "invalid" });
+    try {
+      const [n, , bi, bd] = await kv.pipeline([["INCR", rl], ["EXPIRE", rl, 120], ["SISMEMBER", "ban:ip", h], ["SISMEMBER", "ban:id", id]]);
+      if (bi || bd) return res.status(403).json({ ok: false, reason: "ban" });
+      if (n > 20) return res.status(429).json({ ok: false, reason: "rate" });
+      await kv.pipeline([["HSET", "sty", id, k]]);
+      return res.status(200).json({ ok: true });
+    } catch (e) { return res.status(502).json({ ok: false, reason: "kv" }); }
+  }
   const board = String(b.board || ""), daily = /^daily-/.test(board), dayB = /^(day|advd)-/.test(board);
   const name = [...String(b.name || "").normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1").trim()].slice(0, 16).join("").trim() || "Anonymous";   // el mismo filtro que A.profile.clean (hasta 16)
   const tries = daily ? (Array.isArray(b.tries) ? b.tries : [b.score]).slice(0, 3).map(v => Math.floor(+v)) : [];
@@ -84,6 +96,7 @@ module.exports = async (req, res) => {
       if (dayB) await kv.pipeline([["ZADD", lb, "GT", score, id], ["HSET", names, id, name], ["EXPIRE", lb, TTL], ["EXPIRE", names, TTL], ...(up ? [["HSET", "lbip", id, h]] : [])]);   // mejor expedicion del dia (advd-; day- de versiones anteriores), caduca como el Reto diario
       else await kv.pipeline([["ZADD", lb, "GT", score, id], ["HSET", names, id, name], ["PERSIST", lb], ["PERSIST", names], ...(up ? [["HSET", "lbip", id, h]] : [])]);   // la Aventura es "de siempre": no caduca
     }
+    const k = kv.style(b.k); if (k) await kv.pipeline([["HSET", "sty", id, k]]);   // v0.3.174: tu carta, para que la vean los demas
     const [rank, count] = await kv.pipeline([["ZREVRANK", lb, id], ["ZCARD", lb]]);
     res.status(200).json({ ok: true, rank: rank == null ? null : rank + 1, total: count, ...(mine ? { score: total, tries: mine } : {}) });
   } catch (e) { res.status(502).json({ ok: false, reason: "kv" }); }

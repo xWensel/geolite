@@ -411,12 +411,17 @@ window.AIQ = window.AIQ || {};
     c.closeDialog(); if (A.coverMap) A.coverMap("duelo", false);
     document.body.classList.remove("title-on"); document.body.classList.add("duelo-on");
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden"); $("factText").textContent = ""; c.chrome(true);
+    /* v0.3.174 (maqueta «Marcos, títulos e iconos», «chapa»): tu chapa de socio (icono + marco) en lugar de tu ficha y tu titulo bajo tu nombre;
+       entre amigos, la suya (la sala guarda su estilo, api/duelo.js k). Contra la banca, la banca lleva su ficha */
+    const SO = A.socio, his = st.net && SO ? SO.parse(st.net.hisK) : null, myT = SO ? SO.titleName(SO.title()) : "", hisT = his && his.title ? SO.titleName(his.title) : "";
+    const tt = t => (t ? `<span class="du-tt">${esc(t)}</span>` : "");
     add("duHud", "du-hud du-st", `<div class="gx-pnl">
-      <div class="pl me">${A.icon(ME_CHIP, "av")}<div data-src="me"><div class="du-nm"><span class="tag me" id="duTagMe"></span>${nm ? `<span class="nmt">${nm}</span>` : ""}</div><div class="num odo" id="duMe"></div></div></div>
+      <div class="pl me${SO ? " bd" : ""}">${SO ? `<span class="av du-bd" id="duBdMe"></span>` : A.icon(ME_CHIP, "av")}<div data-src="me"><div class="du-nm"><span class="tag me" id="duTagMe"></span>${nm ? `<span class="nmt">${nm}</span>` : ""}</div>${tt(myT)}<div class="num odo" id="duMe"></div></div></div>
       <div class="mid"><span class="gx-eyb" id="duRd"></span><span class="brass" id="duMult" ${A.ttAttr(T("Lo que paga la ronda", "What the round pays"), T("La diferencia de puntos se paga por este número.", "The point difference is paid times this number."))}></span><div class="pips" id="duPips"></div></div>
-      <div class="pl rv"><div data-src="rv"><div class="du-nm"><span class="nmt">${st.net ? foe() : T("Banca", "House")}</span><span class="tag line" id="duTagRv"></span></div><div class="num odo" id="duRv"></div></div>${A.icon(RV_CHIP, "av")}</div>
+      <div class="pl rv${his ? " bd" : ""}"><div data-src="rv"><div class="du-nm"><span class="nmt">${st.net ? foe() : T("Banca", "House")}</span><span class="tag line" id="duTagRv"></span></div>${tt(hisT)}<div class="num odo" id="duRv"></div></div>${his ? `<span class="av du-bd" id="duBdRv"></span>` : A.icon(RV_CHIP, "av")}</div>
       <div class="bal"><span><i id="duBal"></i></span></div>
       <div class="cuenta" id="duCuenta"></div></div>`);
+    if (SO) { SO.badge($("duBdMe"), { w: 80 }); if (his) SO.badge($("duBdRv"), { w: 80, other: true, t: his.t, marco: his.marco, icon: his.icon }); }
     add("duSeat", "du-seat", `<div class="own" id="duOwn"></div>`);
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Rendirse", "Give up")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
@@ -691,7 +696,7 @@ window.AIQ = window.AIQ || {};
   /* ---------------- abrir una sala o entrar en la de tu amigo (desde «Retar a un amigo») */
   async function roomNew() {
     if (N.busy) return; N.busy = true; A.sfx.ui(); salaMsg(T("Abriendo la sala…", "Opening the room…"));
-    const v = await Rd().call({ a: "new", name: rawName(), ver: sig(), t: sel.table, c: A.punteros ? A.punteros.code() : "" }); N.busy = false;
+    const v = await Rd().call({ a: "new", name: rawName(), ver: sig(), t: sel.table, c: A.punteros ? A.punteros.code() : "", k: A.socio ? A.socio.code() : "" }); N.busy = false;
     if (!inSala()) { if (v.ok) Rd().call({ a: "bye", code: v.code }); return; }   // se fue mientras se abria
     if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
     roomSet(v);
@@ -700,7 +705,7 @@ window.AIQ = window.AIQ || {};
     code = String(code || "").toUpperCase(); if (N.busy) return;
     if (code.length !== 5) { A.sfx.deny(); return salaMsg(whyTxt("short"), true); }
     N.busy = true; A.sfx.ui(); salaMsg(T("Llamando a la puerta…", "Knocking on the door…"));
-    const v = await Rd().call({ a: "join", code, name: rawName(), ver: sig(), c: A.punteros ? A.punteros.code() : "" }); N.busy = false;
+    const v = await Rd().call({ a: "join", code, name: rawName(), ver: sig(), c: A.punteros ? A.punteros.code() : "", k: A.socio ? A.socio.code() : "" }); N.busy = false;
     if (!inSala()) { if (v.ok) Rd().call({ a: "bye", code }); return; }
     if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
     roomSet(v);
@@ -798,7 +803,7 @@ window.AIQ = window.AIQ || {};
     if (st && st.net) return duelView(v);
     if (!inRoom()) return;
     if (N.setT) { if (v.t === N.setT.t || N.role !== "h" || performance.now() - N.setT.at > 4000) N.setT = null; else v.t = N.setT.t; }   // la mesa recien elegida no parpadea si llega una respuesta de antes del cambio
-    if (v.st === "play" && v.n > N.n && v.seed) { N.n = v.n; const o = hisSeat(v); return void D.start({ table: v.t, seed: v.seed, net: { n: v.n, his: (o && o.n) || "", hisC: (o && o.c) || "", want: 0, s: 0 } }); }   // el anfitrion ha repartido
+    if (v.st === "play" && v.n > N.n && v.seed) { N.n = v.n; const o = hisSeat(v); return void D.start({ table: v.t, seed: v.seed, net: { n: v.n, his: (o && o.n) || "", hisC: (o && o.c) || "", hisK: (o && o.k) || "", want: 0, s: 0 } }); }   // el anfitrion ha repartido
     roomPaint();
   }
 

@@ -37,8 +37,18 @@ window.AIQ = window.AIQ || {};
      (se abandona a los 20 s, mas de lo que puede tardar el servidor: 4 llamadas a Redis de 4 s como mucho; uno abandonado no llega detras del siguiente) */
   let line = Promise.resolve();
   const post = body => (line = line.catch(() => null).then(async () => {
-    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }, 20000); return j && j.ok ? j : null; } catch (e) { return null; }
+    const k = body && !body.op && A.socio && A.socio.code ? A.socio.code() : "";    // v0.3.174: con cada puntuacion, el estilo de tu carta (api/submit.js, "sty")
+    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(k ? { ...body, k } : body) }, 20000); if (j && j.ok && k) styleSent = k; return j && j.ok ? j : null; } catch (e) { return null; }
   }));
+  /* v0.3.174: si vistes la carta de otra forma (icono, titulo, marco, categoria), la Clasificacion la ensena asi: se manda al abrirla, solo si cambio
+     y solo si ya estas en alguna tabla. El servidor la guarda una vez por jugador (api/submit.js, op "sty") */
+  let styleSent = "";
+  R.style = async () => {
+    const P = A.profile.get(), k = A.socio && A.socio.code ? A.socio.code() : "";
+    if (!k || k === styleSent || !Object.values(P.boards || {}).some(l => (l || []).some(r => r.id === P.id)) || !(await R.check())) return false;
+    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ op: "sty", id: P.id, k }) }); if (j && j.ok) { styleSent = k; for (const c in TC) delete TC[c]; return true; } } catch (e) { /* sin red: otra vez sera */ }
+    return false;
+  };
   /* boleto de partida (api/submit.js): el servidor lo da al empezar una expedicion y sin el ninguna puntuacion entra ni sube. pf = { run, x }:
      el boleto y el desglose de la partida con que el servidor rehace la cuenta (se guarda con la fila para poder reenviarla) */
   R.ticket = async () => {

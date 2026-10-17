@@ -5,6 +5,9 @@
  * Los 3 primeros suben al podio (oro, plata y bronce, con la corona del primero), la lista va de 5 en 5 con flechas (4.o-8.o, 9.o-13.o... hasta el
  * ultimo de la tabla) y, si no estas en la pagina, tu puesto al final (pulsarlo te lleva a tu pagina). Sonidos del resto del menu (roce de ficha al pasar, carta al abrir, clic al cambiar de pestana) y una ficha por escalon al subir el podio,
  * de mas grave (bronce) a mas aguda (oro); la tuya suena a moneda y se enciende con luces de marquesina.
+ * v0.3.174 (maqueta «Marcos, títulos e iconos»: «cartas en el podio y chapa y título en cada fila»): en el podio, la CARTA de socio de cada uno sobre su
+ * pila de fichas, y en la lista su CHAPA (icono + marco) y su titulo. El estilo viaja con la puntuacion (js/rank.js, api/top.js: r.c); quien aun no
+ * tiene estilo guardado sale como antes (medalla y nombre). La lista va de 4 en 4: con la chapa, 5 no caben a 720p.
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -16,7 +19,7 @@ window.AIQ = window.AIQ || {};
   const PERS = m => (m === "adv" ? [["all", P6("Histórico|All time|Historique|Histórico|Gesamt|Di sempre||历史|역대|歴代|За всё время|Wszech czasów")], ["today", L_TODAY()], ["yday", L_YDAY()]] : [["today", L_TODAY()], ["yday", L_YDAY()]]);
   /* Aventura: la de siempre y la mejor expedicion de hoy / ayer; Reto diario: la puntuacion global (suma de los 3 intentos) de hoy / ayer */
   const boardOf = (m, p) => (m === "daily" ? (p === "yday" ? A.rank.daily.yesterday() : A.rank.daily.board()) : p === "today" ? A.rank.day.board() : p === "yday" ? A.rank.day.yesterday() : "adv-all");
-  const ROWS = 8, PER = 5;                                            // 3 en el podio + 5 en la lista (la misma peticion que la tabla del Reto diario); despues, paginas de 5
+  const ROWS = 7, PER = 4;                                            // 3 en el podio + 4 en la lista; despues, paginas de 4 (v0.3.174: cada fila lleva su chapa)
   let mode = "adv", per = "all", page = 0, pages = 1, first = null, seq = 0, sfxT = [], back = null, dealerWas = false;
   const tab = () => mode + ":" + per;
   const isOpen = () => !!$("podio");
@@ -74,6 +77,7 @@ window.AIQ = window.AIQ || {};
   function open() {
     const layer = $("layer"); if (!layer || isOpen() || !document.querySelector(".hh")) return;
     mode = "adv"; per = "all"; back = document.activeElement;
+    if (A.rank.style) A.rank.style().then(ch => { if (ch && isOpen()) load(); });   // v0.3.174: tu carta, como la llevas ahora
     const btn = $("rankBtn"); if (btn) btn.setAttribute("aria-expanded", "true");
     layer.insertAdjacentHTML("beforeend", `<div class="pd-wrap" id="pdWrap"><div class="gx-veil"></div>
       <section class="pd-screen gx-stage" id="podio" role="dialog" aria-modal="true" aria-labelledby="pdH" tabindex="-1">
@@ -105,11 +109,24 @@ window.AIQ = window.AIQ || {};
   const RANKS = () => P6("Puestos {a}–{b}|Ranks {a}–{b}|Places {a}–{b}|Posições {a}–{b}|Plätze {a}–{b}|Posizioni {a}–{b}||第 {a}–{b} 名|{a}–{b}위|{a}～{b}位|Места {a}–{b}|Miejsca {a}–{b}");
   const OF = () => P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}");
   const dots = r => (mode === "daily" ? `<span class="lb-tries">${[0, 1, 2].map(i => `<i class="${r.tries && i < r.tries.length ? "on" : ""}"></i>`).join("")}</span>` : "");
-  const li = (r, n, i, my) => `<li class="${r.id === my ? "me" : ""}" style="--i:${i}"><span class="lb-n">${A.fmt(n)}</span><span class="lb-name">${esc(r.name || "—")}</span>${dots(r)}<b>${A.fmt(r.score)}</b></li>`;
+  /* el estilo de la carta de una fila: la tuya, la que guardo el servidor (r.c) o ninguna (quien no ha vuelto a jugar desde la v0.3.174) */
+  const styleOf = r => { if (!r || !A.socio) return null; if (r.id && r.id === A.profile.get().id) return { me: true }; return r.c ? A.socio.parse(r.c) : null; };
+  const subOf = st => !st || !A.socio ? "" : st.me ? A.socio.titleName(A.socio.title()) || A.club.tierName(A.club.tierNow()) : (st.title && A.socio.titleName(st.title)) || A.club.tierName(st.t);
+  const li = (r, n, i, my, nob) => { const st = nob ? null : styleOf(r), sub = subOf(st);
+    return `<li class="${r.id === my ? "me" : ""}" style="--i:${i}"><span class="lb-n">${A.fmt(n)}</span><span class="lb-bd"${st ? ` data-n="${n}"` : ""}></span><span class="lb-who"><span class="lb-name">${esc(r.name || "—")}</span>${sub ? `<em class="lb-tt">${esc(sub)}</em>` : ""}</span>${dots(r)}<b>${A.fmt(r.score)}</b></li>`; };
+  /* las chapas de las filas (a escala entera, js/socio.js): rows = las filas de esa pagina, en el mismo orden */
+  function badges(root, rows) {
+    if (!root || !A.socio) return;
+    /* la columna de la chapa mide lo mismo en todas las filas y en la cabecera (con o sin chapa): los nombres quedan alineados */
+    const board = root.closest(".pd-board"), onsize = w => { if (board) board.style.setProperty("--bdw", w); };
+    root.querySelectorAll(".lb-bd[data-n]").forEach(el => { if (el.firstChild) return; const r = (rows || []).find(x => x && x._n === +el.dataset.n), st = styleOf(r); if (!st) return; A.socio.badge(el, st.me ? { w: 80, onsize } : { w: 80, other: true, t: st.t, marco: st.marco, icon: st.icon, onsize }); });
+  }
+  const num = (rows, from) => (rows || []).map((r, k) => (r ? Object.assign(r, { _n: from + k }) : r));
   /* una pagina de la lista: siempre 5 filas (las que faltan, huecos), asi el panel nunca cambia de alto al pasar paginas */
   function listHtml(rows, from, res) {
     const my = A.profile.get().id; let s = "";
-    for (let k = 0; k < PER; k++) { const n = from + k, r = rows && rows[k]; s += r ? li(r, n, k, my) : `<li class="free"><span class="lb-n">${A.fmt(n)}</span><span class="lb-name">${res ? "—" : "…"}</span></li>`; }
+    num(rows, from);
+    for (let k = 0; k < PER; k++) { const n = from + k, r = rows && rows[k]; s += r ? li(r, n, k, my) : `<li class="free"><span class="lb-n">${A.fmt(n)}</span><span class="lb-bd"></span><span class="lb-who"><span class="lb-name">${res ? "—" : "…"}</span></span></li>`; }
     return s;
   }
   const rk = (a, b) => RANKS().replace("{a}", A.fmt(a)).replace("{b}", A.fmt(b));
@@ -137,14 +154,17 @@ window.AIQ = window.AIQ || {};
     /* cada puesto es una pila de fichas: su alto mide la puntuacion (la del primero, la mas alta); sin nadie, una ficha suelta */
     const top = rows[0] ? Math.max(1, rows[0].score) : 1, MEDAL = ["", "medal_gold", "medal_silver", "medal_bronze"];
     const col = n => {
-      const r = rows[n - 1], me = !!r && r.id === my, h = r ? 28 + Math.round(196 * Math.min(1, r.score / top)) : 14;
-      return `<div class="pd-col p${n}${r ? "" : " empty"}${me ? " me" : ""}" style="--h:${h - (h % 7)}px"><span class="pd-who">${n === 1 ? `<span class="pd-crown">${A.icon("crown")}</span>` : ""}<span class="pd-medal">${A.icon(MEDAL[n])}</span><b class="pd-name">${r ? esc(r.name || "—") : "—"}</b><span class="pd-score">${r ? A.fmt(r.score) : "&nbsp;"}</span>${r ? dots(r) : ""}</span>
+      const r = rows[n - 1], me = !!r && r.id === my, st = styleOf(r), card = !!st;
+      const h = r ? (card ? 28 + Math.round(84 * Math.min(1, r.score / top)) : 28 + Math.round(196 * Math.min(1, r.score / top))) : 14;   // con carta, la pila es mas baja: la carta ya mide lo suyo
+      const who = card ? `<span class="pd-who pd-cw"><span class="pd-card" data-n="${n}"></span><span class="pd-score">${A.fmt(r.score)}</span>${dots(r)}</span>`
+        : `<span class="pd-who">${n === 1 ? `<span class="pd-crown">${A.icon("crown")}</span>` : ""}<span class="pd-medal">${A.icon(MEDAL[n])}</span><b class="pd-name">${r ? esc(r.name || "—") : "—"}</b><span class="pd-score">${r ? A.fmt(r.score) : "&nbsp;"}</span>${r ? dots(r) : ""}</span>`;
+      return `<div class="pd-col p${n}${r ? "" : " empty"}${me ? " me" : ""}${card ? " card" : ""}" style="--h:${h - (h % 7)}px">${who}
         <span class="pd-step"><i class="pd-chips"></i>${me ? A.bulbs() : ""}<em>${n}</em></span></div>`;
     };
     /* pie: fuera de los 8 -> tu fila con tu puesto mundial (pulsarla lleva a tu pagina); dentro -> lo que te falta para el podio (o que ya estas); sin puntuacion -> como entrar */
     let foot = "";
     if (res) {
-      if (meI < 0 && res.me) foot = `<ol class="lb pd-list pd-me${day ? " dy" : ""}" id="pdMe"><li class="lb-gap" aria-hidden="true">···</li>${li({ id: my, name: A.rank.name(), score: res.me.score, tries: day ? A.rank.daily.get(b).tries.filter(t => !t.live) : null }, res.me.rank, 0, my)}</ol>`;
+      if (meI < 0 && res.me) foot = `<ol class="lb pd-list pd-me${day ? " dy" : ""}" id="pdMe"><li class="lb-gap" aria-hidden="true">···</li>${li({ id: my, name: A.rank.name(), score: res.me.score, tries: day ? A.rank.daily.get(b).tries.filter(t => !t.live) : null }, res.me.rank, 0, my, true)}</ol>`;
       else if (meI < 0) foot = `<p class="pd-hint"><span>${per === "yday" ? P6("Ayer no jugaste|You didn't play yesterday|Tu n'as pas joué hier|Você não jogou ontem|Gestern hast du nicht gespielt|Ieri non hai giocato||你昨天没玩|어제는 플레이하지 않았어요|昨日はプレイしていない|Вчера игры не было|Wczoraj cię nie było")
         : P6("Todavía no estás aquí|You're not on the board yet|Tu n'es pas encore au classement|Você ainda não está no placar|Du stehst noch nicht in der Liste|Non sei ancora in classifica||你还没有上榜|아직 순위에 없어요|まだランクインしていない|Тебя пока нет в таблице|Jeszcze cię tu nie ma")}</span>${per === "yday" ? "" : `<button type="button" class="gx-btn pri sm" id="pdPlay"><span>${P6("Jugar|Play|Jouer|Jogar|Spielen|Gioca||开始游戏|플레이|プレイ|Играть|Graj")}</span></button>`}</p>`;
       else if (res.global && meI < 3) foot = `<p class="pd-hint top">${A.icon("u_star", "sm")}<span>${P6("¡Estás en el podio!|You're on the podium!|Tu es sur le podium !|Você está no pódio!|Du stehst auf dem Podest!|Sei sul podio!||你登上了领奖台！|시상대에 올랐어요!|表彰台に乗った！|Ты на пьедестале!|Jesteś na podium!")}</span></p>`;
@@ -153,7 +173,7 @@ window.AIQ = window.AIQ || {};
     const when = per === "all" ? "" : dayOf(b);
     return `<div class="pd-left gx-from-left"><p class="lb-src pd-src">${res ? src(res) : "<span>…</span>"}${when ? `<span class="pd-day">${esc(when)}</span>` : ""}</p>
         <div class="pd-stage">${col(2)}${col(1)}${col(3)}</div></div>
-      <div class="podio pd-board gx-paper"><div class="pd-bh${day ? " dy" : ""}"><span>#</span><span>${P6("Jugador|Player|Joueur|Jogador|Spieler|Giocatore||玩家|플레이어|プレイヤー|Игрок|Gracz")}</span>${day ? `<span>${P6("Intentos|Attempts|Essais|Tentativas|Versuche|Tentativi||尝试|시도|挑戦|Попытки|Podejścia")}</span>` : ""}<span>${P6("Puntos|Points|Points|Pontos|Punkte|Punti||分数|점수|ポイント|Очки|Punkty")}</span></div>
+      <div class="podio pd-board gx-paper"><div class="pd-bh${day ? " dy" : ""}"><span>#</span><span></span><span>${P6("Jugador|Player|Joueur|Jogador|Spieler|Giocatore||玩家|플레이어|プレイヤー|Игрок|Gracz")}</span>${day ? `<span>${P6("Intentos|Attempts|Essais|Tentativas|Versuche|Tentativi||尝试|시도|挑戦|Попытки|Podejścia")}</span>` : ""}<span>${P6("Puntos|Points|Points|Pontos|Punkte|Punti||分数|점수|ポイント|Очки|Punkty")}</span></div>
         <ol class="lb pd-list${day ? " dy" : ""}" id="pdList">${listHtml(rows.slice(3, 3 + PER), 4, res)}</ol>
         <div class="pd-pager${res && pages > 1 ? "" : " solo"}" id="pdPager">${pagerHtml()}</div>
         <div class="pd-foot">${foot}</div></div>`;
@@ -167,11 +187,18 @@ window.AIQ = window.AIQ || {};
     if (n !== seq || t !== tab() || !$("pdBody")) return;
     first = res; pages = Math.max(1, Math.ceil(((res.count || (res.rows || []).length) - 3) / PER));
     el.innerHTML = body(res); el.classList.remove("wait");
+    { const rows = res.rows || []; cards(el, rows); badges($("pdList"), rows.slice(3, 3 + PER)); }
     const play = $("pdPlay"); if (play) play.onclick = () => A.hub.screen(mode === "daily" ? "daily" : "adventure");   // hub.screen quita el podio (reset)
     wirePager(); prefetch();
     /* los escalones aterrizan de bronce a oro: una ficha cada uno, cada vez mas aguda (el tuyo, moneda) */
     const rows = res.rows || [], my = A.profile.get().id;
     [[3, 430], [2, 530], [1, 630]].forEach(([p, ms], k) => { const r = rows[p - 1]; if (r) sfxT.push(setTimeout(() => { if (n === seq) (r.id === my ? A.sfx.coin(k) : A.sfx.chip(k)); }, ms)); });
+  }
+  /* las cartas de socio del podio (js/socio.js): la tuya, con tus fichas; las de los demas, con su nombre y su nivel */
+  function cards(root, rows) {
+    if (!A.socio) return;
+    root.querySelectorAll(".pd-card[data-n]").forEach(el => { const r = rows[+el.dataset.n - 1], st = styleOf(r); if (!st) return;
+      A.socio.mount(el, st.me ? { w: 192, nof: true } : { w: 192, other: true, name: r.name, lvl: st.lvl, t: st.t, marco: st.marco, icon: st.icon, title: st.title }); });
   }
   function wirePager() {
     const pv = $("pdPrev"), nx = $("pdNext"), me = $("pdMe");
@@ -195,7 +222,8 @@ window.AIQ = window.AIQ || {};
     if (n !== seq || t !== tab() || !$("pdList")) return;
     const rowsOf = got => (p === 0 ? (got.rows || []).slice(3, 3 + PER) : got.rows || []);
     A.gala.turn(list, quick ? listHtml(rowsOf(quick), from, quick) : listHtml(null, from, null), dir);
-    if (!quick) { const got = await req; if (n !== seq || t !== tab() || !$("pdList")) return; list.innerHTML = listHtml(rowsOf(got), from, got); }
+    if (quick) badges($("pdList"), rowsOf(quick));
+    if (!quick) { const got = await req; if (n !== seq || t !== tab() || !$("pdList")) return; list.innerHTML = listHtml(rowsOf(got), from, got); badges(list, rowsOf(got)); }
     prefetch();
   }
 
