@@ -61,7 +61,7 @@ window.AIQ = window.AIQ || {};
     if (lat == null) return "sea";
     if (lat < -60) return "an";
     if (lon < -30 && lat > 12) return "na"; if (lon < -30) return "sa";
-    if (lon >= -30 && lon < 60 && lat > 34) return "eu"; if (lon >= -20 && lon < 52 && lat <= 37 && lat > -36 && !(lon > 34 && lat > 12 && lat < 34 && lon < 60)) return lat > 12 && lon > 26 && lat < 33 && lon < 36.5 ? "as" : "af";
+    if (lon >= -30 && lon < 60 && lat > 34) return "eu"; if (lon >= -20 && lon < 52 && lat <= 37 && lat > -36 && !(lat > 12.5 && lat < 34 && lon < 60 && lon > (lat > 29.9 ? 32.6 - (lat - 29.9) * 0.2 : 32.6 + (30 - lat) * 0.615))) return "af";   // Egipto, Sudan y Eritrea con Africa: el limite es el canal de Suez y el mar Rojo (como en isAf)
     if (lon > 110 && lat < -8) return "oc"; if (lon > 112 && lon < 180 && lat < 0 && lat > -50) return "oc"; if (lon > 165 || lon < -150) return "oc";
     if (lon >= 130 && lat > -50 && lat < 23) return "oc";                 // Micronesia, Palau, Guam, Marianas y Marshall (Filipinas, Taiwan y Japon quedan fuera)
     if (lat < -8 && lon > 100) return "oc"; return lon >= 25 ? "as" : "eu";

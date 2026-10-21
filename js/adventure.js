@@ -1678,7 +1678,7 @@ window.AIQ = window.AIQ || {};
   function sideOk(k, r) {
     const b = (run.bets || {})[r]; if (b && b.id === k) return true;                      // la que ya pusiste se queda
     if (run.attempt > 0) return false;
-    if (k === "offer") return 4 - chalFor(r).list.length >= 1 && pickSealed(r, 1, "oferta").length === 1;
+    if (k === "offer") return 4 - chalFor(r).list.length >= 1 && offerRetos(r, 1).length === 1;
     return run.lives > 1 && chalFor(r).list.filter(c => !c.x4).length + (k === "final" ? 2 : 1) <= 5 && (k !== "double" || run.coins >= 1);
   }
   function barOf(r) {                                                     // [izquierda, derecha]; se fija por ronda e intento (la tienda se redibuja a cada compra)
@@ -1704,6 +1704,12 @@ window.AIQ = window.AIQ || {};
     for (const id of rr.shuffle(pool)) { if (fs.has(D[id].fam)) continue; got.push({ id, lv: 3 }); fs.add(D[id].fam); if (got.length === n) break; }
     return got;
   }
+  /* la Oferta de la casa: el sorteo se fija UNA vez por ronda (y por barajada) y no vuelve a mirar los retos de la ronda; si no, sobornar, vender o comprar reliquias y deshacer la oferta cambiaria los retos que salen (se podia repetir hasta que salieran los buenos) */
+  function offerRetos(r, n) {
+    const key = r + ":" + ((run.salt && run.salt[r]) || 0); run.offerRoll = run.offerRoll || {};
+    if (!run.offerRoll[key]) { run.offerRoll[key] = pickSealed(r, 3, "oferta").map(c => ({ id: c.id, lv: c.lv })); persist(); }
+    return run.offerRoll[key].slice(0, n).map(c => ({ ...c }));
+  }
   /* la carta de la apuesta en la Barra (tapete rojo) */
   function betHtml(k) {
     const r = roundNo(); if (run.inf || r > LAST || !betsOpen()) return "";   // el juego de casino del centro sale en TODOS los Campamentos; solo las apuestas laterales esperan a tu primer jefe
@@ -1711,7 +1717,7 @@ window.AIQ = window.AIQ || {};
     if (k === "offer") {
       if (b && b.id === "offer") return `<div class="sup bet on bt-offer" data-bet="offer" role="button" tabindex="0">${head}<em class="sp-on">${A.tx(BT.sold)} · ${b.retos.length} · +${CN()}${b.pay}</em></div>`;
       const room = 4 - cf.list.length; if (room < 1 || run.attempt > 0) return "";
-      const opts = [1, 2, 3].filter(n => n <= room).map(n => { const rs = pickSealed(r, n, "oferta"); return rs.length === n ? `<button class="bt-c bt-n" type="button" data-n="${n}">${n}<span>+${CN()}${rs.reduce((m, c) => m + offerPay(c), 0)}</span></button>` : ""; }).join("");
+      const opts = [1, 2, 3].filter(n => n <= room).map(n => { const rs = offerRetos(r, n); return rs.length === n ? `<button class="bt-c bt-n" type="button" data-n="${n}">${n}<span>+${CN()}${rs.reduce((m, c) => m + offerPay(c), 0)}</span></button>` : ""; }).join("");
       return opts ? `<div class="sup bet bt-offer" data-bet="offer">${head}<span class="bt-pick">${opts}</span></div>` : "";
     }
     if (k === "coin") {
@@ -1747,7 +1753,7 @@ window.AIQ = window.AIQ || {};
     const r = roundNo(), k = el.dataset.bet;
     if (k === "offer") {
       el.querySelectorAll("[data-n]").forEach(btn => (btn.onclick = e => {
-        e.stopPropagation(); const retos = pickSealed(r, +btn.dataset.n, "oferta"), pay = retos.reduce((m, c) => m + offerPay(c), 0);
+        e.stopPropagation(); const retos = offerRetos(r, +btn.dataset.n), pay = retos.reduce((m, c) => m + offerPay(c), 0);
         run.bets = run.bets || {}; run.bets[r] = { id: "offer", retos, pay }; run.coins += pay; persist(); renderShop(false);
         A.casa.premio(1); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "laugh", hold: 2400 });   // lluvia de monedas
       }));
