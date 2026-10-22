@@ -1736,9 +1736,10 @@ window.AIQ = window.AIQ || {};
     const nz = document.querySelector("#dlg [data-dealer-niche]");
     if (nz) {
       const q = nz.getBoundingClientRect();
-      if (q.width >= 200 && q.height >= 140) {
+      const full = nz.parentElement ? nz.parentElement.getBoundingClientRect().bottom - q.top : q.height;   // si el hueco no da, tapa un momento la oferta de debajo (nunca la rejilla)
+      if (q.width >= 200 && full >= 140) {
         el.classList.add("aside-niche"); el.style.left = Math.round(q.left) + "px"; el.style.top = Math.round(q.top) + "px"; el.style.width = Math.round(q.width) + "px"; bs.maxWidth = Math.round(q.width) + "px";
-        for (const f of [72, 56, 40]) { fs.width = fs.height = f + "px"; if (f + 6 + (bubble.offsetHeight || 90) <= q.height) { relines(); return; } }
+        for (const room of [q.height, full]) for (const f of [72, 56, 40]) { fs.width = fs.height = f + "px"; if (f + 6 + (bubble.offsetHeight || 90) <= room) { relines(); return; } }
         el.classList.remove("aside-niche"); el.style.left = el.style.top = el.style.width = "";
       }
     }
