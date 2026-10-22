@@ -317,6 +317,7 @@ body.tk-on .rail-sh { display: none; }
 .dealer.aside .dl-bubble { margin-bottom: 0; } .dealer.aside { align-items: center; }   /* globo a la altura de la cara: cabe en franjas bajas (la cabecera) */
 .dealer.aside.aside-low { align-items: flex-end; } .dealer.aside.aside-low .dl-bubble { margin-bottom: 24px; }
 .dealer.aside.aside-low { left: 20px; top: auto; bottom: 14px; }
+.dealer.aside.aside-niche { flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; } .dealer.aside.aside-niche .dl-bubble { margin: 0; }   /* el nicho de la tienda (Bloque J) */
 /* v0.20: comentando la Clasificacion, a la izquierda del panel y sin pisarlo (js/dealer.js podSay mide --sbw) */
 .dealer.screen.pod .dl-face { width: 130px; height: 130px; }
 .dealer.screen.pod .dl-bubble { max-width: var(--sbw, 420px); margin-bottom: 36px; }

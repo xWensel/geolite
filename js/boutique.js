@@ -141,7 +141,7 @@ window.AIQ = window.AIQ || {};
   }
   const sections = () => [["mesas", "chip_g", VX.cMesas]].concat(V() ? [["vest", "boss_hat", RX.crup]] : [], A.punteros ? [["punt", "crosshair", PX.cPunt]] : [], A.socio ? [["carta", "m_prof", CX.cCarta]] : []);
   const railHtml = () => `<nav class="bq-rail" id="bqRail" aria-label="${esc(P6(TX.title))}">${sections().map(([k, ic, t]) => { const [n, tot, w] = stat(k);
-    return `<button type="button" class="bq-rx${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}"><span class="bq-rxi">${A.icon(ic)}</span><b>${esc(P6(t))}</b><em>${n} / ${tot}</em><i>${esc(P6(RX.worn).replace("{x}", w))}</i></button>`; }).join("")}<span class="bq-rsp"></span>${offerHtml()}</nav>`;
+    return `<button type="button" class="bq-rx${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}"><span class="bq-rxi">${A.icon(ic)}</span><b>${esc(P6(t))}</b><em>${n} / ${tot}</em><i>${esc(P6(RX.worn).replace("{x}", w))}</i></button>`; }).join("")}<span class="bq-rsp" data-dealer-niche></span>${offerHtml()}</nav>`;
   const catBody = () => ST.cat === "vest" ? `<div id="bqGrid" class="bq-gw">${vGridHtml()}</div>` : ST.cat === "punt" ? `<div id="bqGrid" class="bq-gw">${pGridHtml()}</div>` : ST.cat === "carta" ? `<div id="bqGrid" class="bq-gw">${cGridHtml()}</div>` : `<div id="bqGrid" class="bq-gw">${gridHtml()}</div>`;
   const catCls = () => (ST.cat === "vest" ? " vest" : ST.cat === "punt" ? " punt" : ST.cat === "carta" ? " carta" : "");
   const detBody = () => (ST.cat === "vest" ? vDetHtml() : ST.cat === "punt" ? pDetHtml() : ST.cat === "carta" ? cDetHtml() : detHtml());

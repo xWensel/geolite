@@ -1730,7 +1730,18 @@ window.AIQ = window.AIQ || {};
     return best;
   }
   function asidePlace() {
-    const fs = face.style, bs = bubble.style; el.style.bottom = ""; bs.marginBottom = ""; fs.display = ""; txt.style.height = "";   // el globo a su alto final para medir (relines lo vuelve a dejar en lo escrito)
+    const fs = face.style, bs = bubble.style; el.style.bottom = ""; bs.marginBottom = ""; fs.display = ""; txt.style.height = ""; el.classList.remove("aside-niche");   // el globo a su alto final para medir (relines lo vuelve a dejar en lo escrito)
+    /* Bloque J: una pantalla con su nicho para el crupier ([data-dealer-niche]: el hueco vacio del indice de la tienda) lo acaba ahi, la cara arriba y el
+       globo debajo, sin tapar nunca la rejilla ni sus textos. Si el nicho no da para la frase entera, la busqueda de siempre */
+    const nz = document.querySelector("#dlg [data-dealer-niche]");
+    if (nz) {
+      const q = nz.getBoundingClientRect();
+      if (q.width >= 200 && q.height >= 140) {
+        el.classList.add("aside-niche"); el.style.left = Math.round(q.left) + "px"; el.style.top = Math.round(q.top) + "px"; el.style.width = Math.round(q.width) + "px"; bs.maxWidth = Math.round(q.width) + "px";
+        for (const f of [72, 56, 40]) { fs.width = fs.height = f + "px"; if (f + 6 + (bubble.offsetHeight || 90) <= q.height) { relines(); return; } }
+        el.classList.remove("aside-niche"); el.style.left = el.style.top = el.style.width = "";
+      }
+    }
     const f = A.crupier.snap(112).css, r = freeRect(f + 12 + 260, f + 16);
     if (r) {
       const w = Math.min(r.w, f + 12 + 720); fs.width = fs.height = f + "px"; bs.maxWidth = (w - f - 12) + "px";   // globo ancho si el hueco lo es: menos renglones, cabe en franjas bajas como la cabecera

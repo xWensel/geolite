@@ -45,7 +45,7 @@ window.AIQ = window.AIQ || {};
     let el = $("tour"); if (el) return el;
     el = document.createElement("div"); el.id = "tour"; el.className = "tour hidden";
     el.innerHTML = `<i class="tour-hole"></i><div class="tour-card"><div class="tour-paper gx-paper"><div class="tour-face"></div><div class="tour-body"><span class="tour-eb gx-eyb"></span><p class="tour-txt"></p></div>
-      <div class="tour-nav gx-acts"><button type="button" class="tour-skip gx-btn gho"></button><button type="button" class="tour-next gx-btn pri" data-primary></button></div></div></div>`;
+      <div class="tour-nav gx-acts"><button type="button" class="tour-skip gx-btn sm gho"></button><button type="button" class="tour-next gx-btn sm pri" data-primary></button></div></div></div>`;
     $("app").appendChild(el);
     if (A.crupier) face = A.crupier.mount(el.querySelector(".tour-face"), { mini: true, fidget: false });   // v0.32: el crupier de sus frases, la cabeza a escala entera
     return el;

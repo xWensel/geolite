@@ -347,8 +347,11 @@ window.AIQ = window.AIQ || {};
     A.haptic(p);
   };
 
+  /* Bloque J: los sonidos de raton (pasar, pulsar placa, pulsar boton) nunca suenan igual dos veces seguidas: 6 tonos por familia, ±3 % */
+  const bag = () => { let last = -1; return () => { let i; do { i = Math.floor(Math.random() * 6); } while (i === last); last = i; return (i - 2.5) * 0.2; }; };
+  const uiVar = bag(), cardVar = bag();
   A.sfx = {
-    ui: go(t => pluck(84, t, { vol: 0.05, dur: 0.12, bright: 3, rev: 0.1 })),
+    ui: go(t => pluck(84 + uiVar(), t, { vol: 0.05, dur: 0.12, bright: 3, rev: 0.1 })),
     /* hover de cualquier control: ficha que roza el fieltro + nota de kalimba flojita. Barrer varios controles seguidos sube por la
        pentatonica (peldano a peldano, rebota arriba y baja: nunca chilla) y al parar un instante vuelve al principio; cada vez se sortean el
        timbre, la afinacion fina y el brillo. Comparte hovT con menuHover: si dos oyentes saltan a la vez (Enciclopedia, parche), suena uno */
@@ -527,7 +530,7 @@ window.AIQ = window.AIQ || {};
       noise(t + 1.85, 1.1, { hp: 3000, vol: 0.03, sweepTo: 9000, type: "highpass" }); bell(93, t + 2.0, { vol: 0.06, dur: 1.4, rev: 0.7 }); bell(100, t + 2.12, { vol: 0.04, dur: 1.2, rev: 0.7 });
     }),
     /* carta que se desliza (UI) y ficha que cae */
-    card: go(t => { noise(t, 0.05, { lp: 2600, vol: 0.08, type: "bandpass", q: 0.8 }); noise(t + 0.04, 0.03, { hp: 3000, vol: 0.04 }); }),
+    card: go(t => { const v = 1 + cardVar() * 0.06; noise(t, 0.05, { lp: 2600 * v, vol: 0.08, type: "bandpass", q: 0.8 }); noise(t + 0.04, 0.03, { hp: 3000 * v, vol: 0.04 }); }),
     /* v0.3.50: la Enciclopedia es un aparato. Al encenderlo: el clic del interruptor, el zumbido que sube de la pantalla al calentarse y un pitido
        corto de "listo"; al apagarlo, el clic y el zumbido que cae. Flojito y nunca igual (tono y volumen al azar dentro de un margen) */
     devOn: go(t => {

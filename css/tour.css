@@ -12,6 +12,6 @@
 .tour-face { position: relative; width: 64px; height: 64px; flex: none; align-self: start; overflow: hidden; background: #2a1d4a; box-shadow: 0 0 0 2px var(--gx-o); }   /* la cabeza del crupier animado (js/crupier.js, mini) */
 .tour-body { display: grid; gap: 6px; min-width: 0; align-content: start; }
 .tour-paper .tour-txt { margin: 0; font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--gx-ink); }
-.tour-nav { grid-column: 1 / -1; justify-content: space-between; margin-top: 4px; }
+.tour-nav { grid-column: 1 / -1; justify-content: space-between; flex-wrap: wrap; margin-top: 4px; }
 @media (max-width: 700px) { .tour-face { width: 48px; height: 48px; } .tour-paper { grid-template-columns: 48px minmax(0, 1fr); } }
 html.reduce-motion .tour-hole, html.reduce-motion .tour-card { transition: none; animation: none; }
