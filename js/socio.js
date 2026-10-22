@@ -92,7 +92,6 @@ window.AIQ = window.AIQ || {};
     secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|숨겨진 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
     byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Conquistado com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就「{a}」后获得|업적 「{a}」 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
     byDuel: "Se gana con 25 duelos ganados a la banca (llevas {n})|Earned by winning 25 duels against the house ({n} so far)|S'obtient en gagnant 25 duels contre la banque ({n} pour l'instant)|Conquistado vencendo 25 duelos contra a banca ({n} até agora)|Freigeschaltet mit 25 gewonnenen Duellen gegen die Bank (bisher {n})|Si ottiene vincendo 25 duelli contro il banco (finora {n})||战胜庄家 25 次后获得（目前 {n} 次）|하우스와의 대결 25승 시 획득(현재 {n}승)|胴元との勝負に25回勝つと手に入る（いま{n}勝）|Даётся за 25 побед в дуэлях с казино (пока {n})|Zdobywasz za 25 wygranych pojedynków z kasynem (na razie {n})",
-    dress: "Vestir tu carta|Dress up your card|Habiller ta carte|Vestir sua carta|Karte gestalten|Vesti la tua carta||装扮你的会员卡|카드 꾸미기|カードを着せ替える|Оформить карту|Udekoruj kartę",
   };
 
   const prof = () => A.profile.get();
@@ -395,16 +394,9 @@ window.AIQ = window.AIQ || {};
   /* la letra baja de 1 en 1 hasta caber (sin pasar de 18 px de diseno); si aun no cabe, puntos suspensivos */
   function fit(el, base, d) { if (!el) return; let fs = Math.max(18, base * d); el.style.fontSize = fs + "px"; while (el.scrollWidth > el.clientWidth + 1 && fs > 18) { fs = Math.max(18, fs - 1); el.style.fontSize = fs + "px"; } }
 
-  /* ---------------------------------------------------------------- el Perfil: lo que llevas y el boton que abre la tienda en «Tu carta» */
-  function picker(host) {
-    if (!host) return;                                                      // el icono y el titulo ya se ven en la carta: aqui, solo el boton
-    host.innerHTML = `<button type="button" class="gx-btn sm pri sc-dress" id="pfDress">${A.icon("m_prof")}<span>${esc(P6(TX.dress))}</span></button>`;
-    host.querySelector("#pfDress").onclick = () => { if (A.sfx && A.sfx.card) A.sfx.card(); if (A.boutique) A.boutique.cat("carta"); A.hub.screen("boutique"); };
-  }
-
   /* el truco de pruebas (js/truco.js): todo lo de la tienda, tuyo (los logros ya los da el truco) */
   const _todo = () => { const c = club(); Object.keys(SHOP_IC).forEach(id => { c.ic[id] = c.ic[id] || Date.now(); }); TITLES.forEach(t => { if (t.p) c.tt[t.id] = c.tt[t.id] || Date.now(); }); c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; MARCOS.forEach(m => { if (m.p) c.mc[m.id] = c.mc[m.id] || Date.now(); }); A.profile.save(); };
 
-  A.socio = { mount, picker, thumb, icons, icon, setIcon, buyIcon, iconName, iconHow, iconKind, iconOwned, titles, title, setTitle, buyTitle, titleName, titleHow, titleOwned,
+  A.socio = { mount, thumb, icons, icon, setIcon, buyIcon, iconName, iconHow, iconKind, iconOwned, titles, title, setTitle, buyTitle, titleName, titleHow, titleOwned,
     marcos, marco, setMarco, buyMarco, marcoName, marcoHow, marcoOwned, badge, code, parse, _todo, ART, ED, _draw: draw, _badge: badgeArt };
 })(window.AIQ);

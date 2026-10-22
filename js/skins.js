@@ -161,7 +161,7 @@ window.AIQ = window.AIQ || {};
     style: () => A.MAPSTYLES[A.mesas.current()] || A.MAPSTYLES.casino,
     use(id) { if (!A.MAPSTYLES[id] || !A.mesas.owned(id)) return false; mem().use = id; A.profile.save(); const map = A.core && A.core.map; if (map && map.setStyle && !(A.codex && A.codex.isOpen && A.codex.isOpen())) map.setStyle(A.mesas.style()); return true; },
     /* ganadas y aun sin estrenar (js/mesas.js) */
-    fresh: () => A.MESAS.filter(m => m.id !== "casino" && A.mesas.owned(m.id) && !mem().seen[m.id]).map(m => m.id),
+    fresh: () => A.MESAS.filter(m => m.id !== "casino" && !m.shop && A.mesas.owned(m.id) && !mem().seen[m.id]).map(m => m.id),   // el estreno con cartel es solo de las que se ganan jugando: las que compras ya quedan puestas en la tienda
     seen(ids) { const s = mem().seen, t = Date.now(); ids.forEach(id => { s[id] = t; }); A.profile.save(); },
     name: id => A.pick6(A.mesas.get(id).n),
     desc: id => A.pick6(A.mesas.get(id).d),

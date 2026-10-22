@@ -234,33 +234,44 @@ window.AIQ = window.AIQ || {};
      Si cambia la pantalla con el aviso a la vista (del veredicto al Campamento, a la partida...), se recoloca. Saber la zona no mide nada (solo clases y
      nodos): solo se mide al cambiar de zona */
   let zoneSig = "", zoneT = 0;
+  const HEAD = ".scr-head, .pf-head, .bq-head";                                  // las cabeceras con titulo (menus del hub y pantallas del Naipe de gala)
   function zoneOf() {
     const pl = document.getElementById("plate"), lay = document.getElementById("layer"), d = document.getElementById("dlg");
     if (pl && !pl.classList.contains("hidden")) return "run";
     if (!d || !lay || lay.classList.contains("hidden")) return "free";
     if (d.querySelector(".tb-head .tb-title")) return "camp";
-    const h = d.querySelector(".scr-head h2"); if (h) return "scr|" + h.textContent;
+    const h = d.querySelector(HEAD.split(", ").map(x => x + " h2").join(", ")); if (h) return "scr|" + h.textContent;
     return d.classList.contains("home") && document.getElementById("quitBtn") ? (document.getElementById("pdWrap") ? "home|pd" : "home") : "free";
+  }
+  /* Bloque J: UN SOLO PAPEL Y UNAS MISMAS ZONAS para los avisos de logro y de cancion. La caja de cada zona en px de pantalla {x, w} y, o bien su
+     arriba (y), o bien el centro vertical (cy: el aviso se centra con su alto ya medido). Partida: bajo la placa; Campamento: el sitio del titulo;
+     pantallas con cabecera: su centro (entre el titulo y lo que haya a la derecha); portada: sobre el lema */
+  function zoneBox(sig, W) {
+    const d = document.getElementById("dlg"), col = document.getElementById("leftCol"), R = e => e.getBoundingClientRect(), C0 = col ? R(col) : { left: 0, top: 0, width: 0 };
+    let x = C0.left, y = C0.top, w = W, cy = null;
+    if (sig === "camp") { const t = R(d.querySelector(".tb-head .tb-title")); x = t.left; y = t.top; w = Math.min(W, t.width); }
+    else if (sig.startsWith("scr|")) {
+      const hd = d.querySelector(HEAD), h2 = hd.querySelector("h2"), H = R(hd), rg = document.createRange(); rg.selectNodeContents(h2);
+      const right = [...hd.children].filter(c => c !== h2 && c.getBoundingClientRect().left > R(h2).right).map(c => R(c).left);   // lo que hay a su derecha: monedero, cifras, engranaje
+      const a = R(rg).right + 24, b = (right.length ? Math.min(...right) : H.right) - 24; w = Math.max(200, Math.min(W, b - a));
+      x = Math.min(Math.max(a, H.left + (H.width - w) / 2), b - w); cy = H.top + H.height / 2;
+    } else if (sig.startsWith("home")) {
+      const tg = d.querySelector(".hh-tag"), T = tg ? R(tg) : null, wd = Math.min(W, innerWidth - 32);
+      if (T) { w = wd; x = T.left + (T.width - w) / 2; y = T.top - 8; } else { const q = R(document.getElementById("quitBtn")); x = q.left; y = q.bottom + 12; }
+    }
+    return { x, y, w, cy, run: sig === "run" };
   }
   function place(el) {
     const sig = zoneOf(); if (sig === zoneSig && el.isConnected) return; zoneSig = sig;
-    const st = el.style, col = el.parentElement, d = document.getElementById("dlg"), R = e => e.getBoundingClientRect();
+    const st = el.style, col = el.parentElement, R = e => e.getBoundingClientRect();
     document.body.classList.toggle("ach-title", sig === "camp");
     el.classList.toggle("free", sig !== "run");
     st.left = st.top = st.width = "";
     if (sig === "run" || !col) return;
-    const C0 = R(col), z = C0.width / (col.offsetWidth || C0.width) || 1, W = Math.min(420, innerWidth - 32);   // z: por si #leftCol llevara zoom
-    let x = C0.left, y = C0.top, w = W;                                                                       // en px de pantalla
-    if (sig === "camp") { const t = R(d.querySelector(".tb-head .tb-title")); x = t.left; y = t.top; w = Math.min(W, t.width); }
-    else if (sig.startsWith("scr|")) {
-      const hd = d.querySelector(".scr-head"), h2 = hd.querySelector("h2"), tl = hd.querySelector(".menu-tools"), H = R(hd), rg = document.createRange(); rg.selectNodeContents(h2);
-      const a = R(rg).right + 24, b = (tl ? R(tl).left : H.right) - 24; w = Math.max(200, Math.min(W, b - a));
-      x = Math.min(Math.max(a, H.left + (H.width - w) / 2), b - w); st.width = Math.round(w / z) + "px"; y = H.top + (H.height - el.offsetHeight * z) / 2;   // el alto, ya con su ancho
-    } else if (sig.startsWith("home")) {
-      const q = R(document.getElementById("quitBtn")), lg = d.querySelector(".hh-logo"), pd = document.getElementById("podio"); x = q.left; y = q.bottom + 12;
-      const edge = Math.min(lg ? R(lg).left : Infinity, pd ? R(pd).left : Infinity); if (edge < Infinity) w = Math.max(200, Math.min(W, edge - 16 - x));
-    }
-    st.width = Math.round(w / z) + "px"; st.left = Math.round((x - C0.left) / z) + "px"; st.top = Math.round((y - C0.top) / z) + "px";
+    const C0 = R(col), z = C0.width / (col.offsetWidth || C0.width) || 1, b = zoneBox(sig, Math.min(420, innerWidth - 32));   // z: por si #leftCol llevara zoom
+    st.width = Math.round(b.w / z) + "px";
+    const y = b.cy != null ? b.cy - el.offsetHeight * z / 2 : b.y;                                          // el alto, ya con su ancho
+    st.left = Math.round((b.x - C0.left) / z) + "px"; st.top = Math.round((y - C0.top) / z) + "px";
   }
   function toast() {
     if (showing || !queue.length) return; showing = true;
@@ -287,6 +298,7 @@ window.AIQ = window.AIQ || {};
     setTimeout(() => { el.className = "ach-toast ach-fake hidden"; showing = false; setTimeout(toast, 250); }, 5200);
   }
   A.ach = {
+    zone: () => { const sig = zoneOf(), b = zoneBox(sig, Math.min(420, innerWidth - 32)); return Object.assign({ sig: sig.split("|")[0] }, b); },   // la zona de avisos de ahora mismo (js/jukebox.js: la cancion usa la misma)
     fake(o) { if (showing || queue.length) return false; queue.push(Object.assign({ fake: true }, o)); toast(); return true; },
     busy: () => showing || queue.length > 0,
     emit(ev, ctx) {

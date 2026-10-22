@@ -5,39 +5,56 @@
 .bq-screen { z-index: 1; }
 .bq-veil { background: radial-gradient(120% 90% at 50% 40%, rgba(4, 12, 9, .55), rgba(2, 6, 4, .86)); }
 .bq-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
-.bq-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 24px; min-width: 0; }
+.bq-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 24px; min-width: 0; }
 .bq-head #hubBack .ic { width: 22px; height: 22px; }
 .bq-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
 .bq-h > span:last-child { display: grid; gap: 6px; }
 .bq-h .gx-eyb { font-size: 16px; }
 .bq-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
-.bq-wal { grid-column: 4; display: inline-flex; align-items: center; gap: 12px; padding: 6px 18px 8px 12px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.bq-wal { display: inline-flex; align-items: center; gap: 12px; padding: 6px 18px 8px 12px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
 .bq-wal b { font-family: var(--sans); font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; }
-.bq-head .menu-tools { grid-column: 5; }
+.bq-head .menu-tools { grid-column: auto; }
 .bq-fi { width: 32px; height: 32px; image-rendering: pixelated; flex: none; display: inline-block; }
 .bq-wal .bq-fi { width: 40px; height: 40px; }
 .bq-fi.sm { width: 24px; height: 24px; }
 
-.bq-left { grid-column: 1 / 9; grid-row: 2; min-width: 0; min-height: 0; }
+.bq-left { grid-column: 4 / 10; grid-row: 2; min-width: 0; min-height: 0; }
 .bq-cat { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; padding: 16px 20px 18px; }
 .bq-gw { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; min-height: 0; }
 .bq-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
-.bq-right { grid-column: 9 / 13; grid-row: 2; min-width: 0; min-height: 0; }
+.bq-right { grid-column: 10 / 13; grid-row: 2; min-width: 0; min-height: 0; }
 
+/* el indice del vestidor (columnas 1-3): las cuatro secciones con su nombre siempre a la vista, lo que tienes (n / total) y lo que llevas puesto; la oferta de la casa, al pie */
+.bq-railw { grid-column: 1 / 4; grid-row: 2; min-width: 0; min-height: 0; }
+.bq-rail { height: 100%; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.bq-rsp { flex: 1 1 0; min-height: 0; }
+.bq-rx { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 12px; row-gap: 3px; margin: 0; padding: 10px 14px 10px 12px; border: 0; cursor: pointer; text-align: left;
+  font: inherit; color: var(--gx-txt); clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
+.bq-rxi { grid-row: 1 / 3; display: grid; place-items: center; }
+.bq-rxi .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
+.bq-rx b { font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; min-width: 0; overflow-wrap: anywhere; }
+.bq-rx em { font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-txt-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bq-rx i { grid-column: 2 / 4; font-style: normal; font-size: 18px; line-height: 1.05; color: var(--gx-txt-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bq-rx:hover:not(.on) { background: #143326; }
+.bq-rx.on { cursor: default; color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 8px 0 0 var(--gx-rim), inset 0 0 0 2px var(--gx-o); }
+.bq-rx.on em, .bq-rx.on i { color: var(--gx-ink-2); }
+.bq-rx:focus { outline: none; }
+.bq-rx:focus-visible::after, html[data-input="pad"] .bq-rx:focus::after { content: ""; position: absolute; inset: 4px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
 /* la oferta de la casa: terciopelo granate con filete de laton, como el cupon */
-.bq-offer { display: grid; grid-template-columns: 128px minmax(0, 1fr) auto; gap: 16px; align-items: center; margin: 0; padding: 10px 18px 10px 12px; border: 0; text-align: left; font: inherit; cursor: pointer;
+.bq-offer { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 0; padding: 10px 12px 10px 10px; border: 0; text-align: left; font: inherit; cursor: pointer;
   color: #fff3d6; background: linear-gradient(90deg, #5a1420 0, #7a1c2c 60%, #6a1826 100%); clip-path: var(--gx-notch); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim), inset 0 0 0 6px var(--gx-o); }
 .bq-offer:hover, .bq-offer.pad-hov { filter: brightness(1.08); }
 .bq-offer.sel { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-rim-hi), inset 0 0 0 7px var(--gx-o); }
 .bq-offer:focus { outline: none; }
 .bq-offer:focus-visible, html[data-input="pad"] .bq-offer:focus { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-gold-hi), inset 0 0 0 7px var(--gx-o); }
-.bq-oth { display: block; width: 128px; aspect-ratio: 2.4 / 1; object-fit: cover; box-shadow: 0 0 0 2px var(--gx-o); }
-.bq-otx { display: grid; gap: 4px; min-width: 0; }
-.bq-otx .gx-eyb { color: var(--gx-gold-hi); font-size: 16px; }
-.bq-otx b { font-family: var(--sans); font-weight: 400; font-size: 28px; line-height: 1; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.bq-otx b i { font-style: normal; font-family: var(--mono); font-size: 18px; padding: 3px 7px 2px; color: var(--gx-ink); background: var(--gx-gold); box-shadow: 0 0 0 2px var(--gx-o); }
-.bq-offer .bq-pr { color: #fff3d6; }
-.bq-offer .bq-pr s { color: #e6b8a8; }
+.bq-offer > .gx-eyb { grid-column: 1 / -1; color: var(--gx-gold-hi); font-size: 16px; line-height: 1.15; letter-spacing: .06em; }
+.bq-oth { display: block; width: 96px; aspect-ratio: 16 / 9; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; box-shadow: 0 0 0 2px var(--gx-o); }
+.bq-otx { display: grid; gap: 3px; min-width: 0; }
+.bq-otx b { font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bq-otx b i { font-style: normal; font-family: var(--mono); font-size: 16px; padding: 2px 5px 1px; color: #fff; background: #c1272d; box-shadow: 0 0 0 2px var(--gx-o); }
+.bq-offer .bq-pr { color: #fff3d6; font-size: 22px; }
+.bq-offer .bq-pr .bq-fi { width: 22px; height: 22px; }
+.bq-offer .bq-pr s { color: #e6b8a8; font-size: 18px; }
 
 /* los filtros */
 .bq-tabs { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; }
@@ -51,22 +68,20 @@
 .bq-tab:focus-visible, html[data-input="pad"] .bq-tab:focus { box-shadow: inset 0 0 0 2px var(--gx-o), 0 0 0 2px var(--gx-red); }
 
 /* las mesas: 4 x 3 */
-.bq-items { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: max-content; gap: 12px 14px; align-content: start; min-height: 0; }
+.bq-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: max-content; gap: 12px 12px; align-content: start; min-height: 0; }
 .bq-it { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 7px; margin: 0; padding: 8px 8px 9px; align-content: start; border: 0; text-align: left; font: inherit; color: var(--gx-ink); background: none; cursor: pointer; box-shadow: inset 0 0 0 2px var(--gx-line); min-width: 0; }
 .bq-it:hover, .bq-it.pad-hov { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o); }
 .bq-it.sel { background: #fffaf0; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 5px var(--gx-rim), inset 0 0 0 7px var(--gx-o); }
 .bq-it:focus { outline: none; }
 .bq-it:focus-visible::after, html[data-input="pad"] .bq-it:focus::after { content: ""; position: absolute; inset: 8px; box-shadow: 0 0 0 2px var(--gx-red); animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
 .bq-th { position: relative; display: block; aspect-ratio: 2.6 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 4px 0 2px rgba(22, 36, 28, .3); }
-.bq-th img { display: block; width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }   /* la mesa a 1:1: un trozo de verdad, sin encoger ni recortar a escala rara */
+.bq-th > img { display: block; width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }   /* la mesa a 1:1: un trozo de verdad, sin encoger ni recortar a escala rara */
 .bq-it.leg .bq-th { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 4px var(--gx-rim), 0 0 0 6px var(--gx-o), 0 6px 0 4px rgba(22, 36, 28, .3); }
 .bq-nm { display: block; font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; min-width: 0; overflow-wrap: anywhere; text-wrap: balance; padding: 0 2px; }
-/* el precio (o tu estado) como una placa de papel abajo a la derecha de la captura */
-.bq-pb { position: absolute; right: 5px; bottom: 5px; padding: 2px 6px 2px 3px; background: var(--gx-paper); box-shadow: 0 0 0 2px var(--gx-o); }
 .bq-th .bq-own { position: absolute; right: 6px; bottom: 6px; }
-.bq-pb .bq-pr { font-size: 20px; gap: 4px; }
-.bq-pb .bq-fi { width: 18px; height: 18px; }
-.bq-pb .bq-pr s { font-size: 16px; }
+.bq-th .bq-own.lkt { right: auto; left: 6px; display: inline-flex; align-items: center; gap: 5px; color: var(--gx-txt); background: #0b1d14; padding: 3px 6px 2px 4px; }
+.bq-own.lkt .ic { width: 16px; height: 16px; image-rendering: pixelated; }
+.bq-it.lk .bq-th > img, .bq-dth.lk img { filter: grayscale(1) brightness(.6); }
 .bq-pr { display: inline-flex; align-items: center; gap: 6px; flex: none; font-family: var(--sans); font-size: 24px; line-height: 1; color: var(--gx-ink); font-variant-numeric: tabular-nums; }
 .bq-pr .bq-fi { width: 26px; height: 26px; }
 .bq-pr s { font-size: 18px; color: var(--gx-ink-2); margin-right: 2px; }
@@ -118,30 +133,17 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 .bq-tryl b { font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1; color: var(--gx-ink); white-space: nowrap; }
 
 
-/* ---------------------------------------------------------------- v0.3.134: las dos secciones (Mesas y Vestuario) y el vestuario del crupier
-   Las secciones van en la cabecera, entre el titulo y el monedero, como un selector de laton sobre la sala.
-   Vestuario: las 12 piezas de 6 en 6 (retratos del crupier con esa pieza, a pixel entero: js/boutique.js fitThumbs) y, a la derecha,
+/* ---------------------------------------------------------------- el vestuario del crupier (js/vestuario.js) y el probador a la derecha
+   Vestuario: las piezas de 4 en 4 (retratos del crupier con esa pieza, a pixel entero: js/boutique.js fitThumbs) y, a la derecha,
    el probador: el crupier animado con lo que llevas mas la pieza elegida (A.crupier.mount con su propio atlas). */
-.bq-cats { justify-self: center; display: flex; max-width: 100%; min-width: 0; overflow: hidden; padding: 4px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
-.bq-cat-t { display: inline-flex; align-items: center; gap: 10px; margin: 0; padding: 8px 18px 9px 12px; border: 0; font: inherit; font-family: var(--sans); font-size: 26px; line-height: 1; white-space: nowrap; cursor: pointer; color: var(--gx-txt); background: none; }
-.bq-cat-t .ic { width: 36px; height: 36px; image-rendering: pixelated; flex: none; }
-.bq-cat-t:hover, .bq-cat-t.pad-hov { background: rgba(255, 243, 214, .08); }
-.bq-cat-t.on { color: var(--gx-ink); background: linear-gradient(180deg, var(--gx-gold-hi) 0, var(--gx-gold) 55%, #e89a32 100%); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 rgba(0, 0, 0, .16); }
-.bq-cat-t:focus { outline: none; }
-.bq-cats.t1 .bq-cat-t { gap: 7px; padding: 7px 12px 8px 8px; font-size: 23px; }
-.bq-cats.t1 .bq-cat-t .ic { width: 30px; height: 30px; }
-.bq-cats.t2 .bq-cat-t:not(.on) { padding: 7px 9px 8px; }
-.bq-cats.t2 .bq-cat-t:not(.on) span { display: none; }
-.bq-cat-t:focus-visible, html[data-input="pad"] .bq-cat-t:focus { box-shadow: inset 0 0 0 3px var(--gx-red), inset 0 -4px 0 rgba(0, 0, 0, .16); }
-
 .bq-cat.vest { grid-template-rows: minmax(0, 1fr); }
 /* seis pestanas (trajes, antifaces, pajaritas, piezas, legendarias, tuyo): mas juntas para que quepan en una fila hasta en ruso */
 .bq-cat.vest .bq-tabs { gap: 6px; }
 .bq-cat.vest .bq-tab { gap: 6px; padding: 5px 8px 6px; font-size: 18px; }
 .bq-cat.vest .bq-tab i { font-size: 14px; }
-.bq-items.vest { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 14px; }
+.bq-items.vest { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 10px; }
 /* el retrato: sobre tapete, con un foco suave detras (la luz va detras del crupier, nunca encima) */
-.bq-vth { aspect-ratio: 6 / 7; overflow: hidden; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
+.bq-vth { aspect-ratio: 5 / 4; overflow: hidden; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
 .bq-vth img { position: absolute; left: 0; top: 0; max-width: none; object-fit: fill; image-rendering: pixelated; }
 .bq-vit { grid-template-rows: auto auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); }
 .bq-vp .bq-own { max-width: 100%; overflow: hidden; white-space: nowrap; }
@@ -152,7 +154,7 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 
 /* el probador */
 .bq-det.vest { gap: 9px; }
-.bq-prob { position: relative; display: block; height: 300px; overflow: hidden; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); }
+.bq-prob { position: relative; display: block; height: 260px; overflow: hidden; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); }
 .bq-prob.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
 .bq-probh { position: absolute; inset: 0; }
 .bq-probh .cr-cv { top: auto; bottom: 0; transform: translateX(-50%); }
@@ -164,7 +166,7 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 
 /* ---------------------------------------------------------------- los punteros (js/punteros.js): miniaturas animadas en lienzo, al pixel */
-.bq-items.punt { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bq-items.punt { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .bq-th.bq-pth { aspect-ratio: 4 / 3; overflow: hidden; }   /* alto para que todos los reticulos quepan a x2 en la Deck y a x3 a 1080p */
 .bq-pth canvas, .bq-pprev canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 /* el precio y el estado van en la fila del nombre: nada tapa el dibujo */
@@ -182,7 +184,7 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-tryt i { font-style: normal; font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--gx-ink-2); }
 
 /* ---------------------------------------------------------------- «Tu carta» (js/socio.js): iconos y titulos */
-.bq-items.carta { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.bq-items.carta { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .bq-th.bq-cth { aspect-ratio: 1 / 1; overflow: hidden; background: #245a41; }
 .bq-cth canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 .bq-cth.bq-cmk { display: grid; place-items: center; overflow: visible; }                   /* v0.3.174: un marco = tu chapa con ese marco (lo que asoma, por fuera) */
@@ -200,5 +202,4 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-acts .gx-btn .ic { width: 22px; height: 22px; image-rendering: pixelated; }
 .bq-cit .bq-nm { font-size: 18px; line-height: 1; }
 .bq-cit .bq-prow { align-items: flex-start; }
-.bq-cat.carta .bq-tabs { flex-wrap: nowrap; min-width: 0; }
 .bq-cat.carta .bq-tab { padding-left: 10px; padding-right: 10px; white-space: nowrap; }

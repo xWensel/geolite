@@ -46,10 +46,13 @@ html.no-shake .hh-socio.sc-v2.gain .sc-f, html.no-shake .hh-socio.sc-v2.gain .sc
 .pf-carta .pf-cc { display: block; }
 .pf-carta .pf-cs { display: grid; gap: 5px; min-width: 0; }
 .pf-carta .pf-since { font-size: 18px; }
-/* el boton que abre «Tu carta» en la tienda */
-#pfPick { margin-top: 8px; }
-.sc-dress { justify-self: start; }
-.sc-dress .ic { width: 26px; height: 26px; flex: none; image-rendering: pixelated; }
+/* tu carta, pulsable: abre la tienda en «Tu carta» (Bloque J) */
+.pf-cardbtn { display: block; margin: 0; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; align-self: start; transition: transform .12s steps(2, end); }
+.pf-cardbtn:hover, .pf-cardbtn.pad-hov { transform: translateY(-2px); }
+.pf-cardbtn:active { transform: translateY(2px); }
+.pf-cardbtn:focus { outline: none; }
+.pf-cardbtn:focus-visible, html[data-input="pad"] .pf-cardbtn:focus { box-shadow: 0 0 0 3px var(--gx-red); }
+.pf-hint { margin-top: auto; font-size: 18px; line-height: 1.1; color: var(--gx-gold-lo); }
 /* la columna izquierda se ensancha (5 de 12): carta y cifras lado a lado, y el indice de logros en dos columnas */
 .pf-left.carta { grid-column: 1 / 6; }
 .pf-grid12:has(.pf-left.carta) .pf-right { grid-column: 6 / 13; }

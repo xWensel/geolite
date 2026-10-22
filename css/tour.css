@@ -1,18 +1,17 @@
-/* Geolite - tutorial guiado (v0.14): un foco ilumina la parte de la pantalla y una tarjeta del crupier la explica */
+/* Geolite - tutorial guiado (v0.14): un foco ilumina la parte de la pantalla y una tarjeta del crupier la explica.
+   J9 (Bloque J): la tarjeta es de papel del sistema "Naipe de gala" (esquinas de escalon), con el paso en la cabecera ("Tutorial · 2 de 6"),
+   la cabeza del crupier (dealer_mini) y los botones de laton Saltar (Esc) / Siguiente (Intro). El foco que ilumina cada parte se queda. */
 .tour { position: fixed; inset: 0; z-index: 9000; opacity: 0; transition: opacity .2s ease; pointer-events: auto; cursor: default; }
 .tour.on { opacity: 1; }
 .tour.hidden { display: none; }
 .tour-hole { position: fixed; border-radius: 14px; pointer-events: none; box-shadow: 0 0 0 200vmax rgba(6, 12, 8, .74), 0 0 0 3px #ffd06b, 0 0 26px 4px rgba(255, 208, 107, .55); transition: left .28s ease, top .28s ease, width .28s ease, height .28s ease; animation: tour-pulse 1.6s ease-in-out infinite; }
 @keyframes tour-pulse { 50% { box-shadow: 0 0 0 200vmax rgba(6, 12, 8, .74), 0 0 0 3px #ffe9a8, 0 0 38px 8px rgba(255, 208, 107, .75); } }
-.tour-card { position: fixed; z-index: 1; display: flex; gap: 12px; width: min(440px, calc(calc(100 * var(--vw)) - 20px)); padding: 14px 16px 12px; background: #f6efdc; color: #16241c; border-radius: 14px; box-shadow: 0 0 0 3px #16241c, inset 0 0 0 3px #ffd06b, 0 12px 0 rgba(0, 0, 0, .4); transition: left .28s ease, top .28s ease; }
-.tour-face { position: relative; width: 64px; height: 64px; flex: none; align-self: flex-start; overflow: hidden; border-radius: 10px; background: #231b3f; }   /* v0.32: la cabeza del crupier animado (js/crupier.js, mini) */
-.tour-body { display: grid; gap: 10px; min-width: 0; }
-.tour-txt { margin: 0; font-family: var(--serif, Georgia, serif); font-weight: 700; font-size: 17px; line-height: 1.35; }
-.tour-nav { display: flex; align-items: center; gap: 10px; }
-.tour-skip { border: 0; background: none; padding: 4px 2px; font-family: var(--mono, monospace); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: #5f7566; cursor: pointer; text-decoration: underline; }
-.tour-skip:hover { color: #16241c; }
-.tour-dots { display: flex; gap: 5px; margin-left: auto; }
-.tour-dots i { width: 7px; height: 7px; border-radius: 50%; background: #cfc9b0; } .tour-dots i.on { background: #fe5f55; }
-.tour-next { padding: 8px 16px; font-size: 15.5px; }
-@media (max-width: 700px) { .tour-face { width: 48px; height: 48px; } .tour-txt { font-size: 16px; } }
+/* la tarjeta: crece con la pantalla (zoom --k) y lleva la penumbra dura del sistema DETRAS */
+.tour-card { position: fixed; z-index: 1; width: min(480px, calc(100 * var(--vw, 1vw) - 20px)); zoom: var(--k, 1); filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); transition: left .28s ease, top .28s ease; }
+.tour-paper { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px 14px; padding: 16px 18px 18px; }
+.tour-face { position: relative; width: 64px; height: 64px; flex: none; align-self: start; overflow: hidden; background: #2a1d4a; box-shadow: 0 0 0 2px var(--gx-o); }   /* la cabeza del crupier animado (js/crupier.js, mini) */
+.tour-body { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.tour-paper .tour-txt { margin: 0; font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--gx-ink); }
+.tour-nav { grid-column: 1 / -1; justify-content: space-between; margin-top: 4px; }
+@media (max-width: 700px) { .tour-face { width: 48px; height: 48px; } .tour-paper { grid-template-columns: 48px minmax(0, 1fr); } }
 html.reduce-motion .tour-hole, html.reduce-motion .tour-card { transition: none; animation: none; }

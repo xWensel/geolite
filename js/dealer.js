@@ -2408,7 +2408,7 @@ window.AIQ = window.AIQ || {};
   const BOOK = {
     clock: ["Relojes perdidos|Timeouts|Chronos perdus|Tempos esgotados|Abgelaufene Uhren|Tempi scaduti||超时次数|시간 초과|時間切れ|Время вышло|Koniec czasu", "a_flame", "pfBookClock"],
     door: ["Te has ido|Times you left|Départs|Saídas|Abgänge|Uscite||离场次数|나간 횟수|退場回数|Уходы|Wyjścia", "a_target", "pfBookDoor"],
-    coins: ["Doblones ganados|Doubloons won|Doublons gagnés|Dobrões ganhos|Gewonnene Dublonen|Dobloni vinti||赢得的金币|획득한 도블론|獲得ダブロン|Выиграно дублонов|Wygrane dublony", "crown", "pfBookCoins"],
+    coins: ["Doblones ganados|Doubloons won|Doublons gagnés|Dobrões ganhos|Gewonnene Dublonen|Dobloni vinti||赢得的金币|획득한 도블론|獲得ダブロン|Выиграно дублонов|Wygrane dublony", "a_pin", "pfBookCoins"],
     km: ["Km fallados|Km missed|Km ratés|Km errados|Verfehlte km|Km sbagliati||偏差总距离|빗나간 거리|外した距離|Мимо, км|Chybione km", "a_lens", "pfBookKm"],
   };
   let pfAt = -1e9;

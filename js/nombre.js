@@ -49,34 +49,60 @@ window.AIQ = window.AIQ || {};
         <div class="nm-stage" id="nmStage"><i class="nm-beam">${motes}</i><i class="nm-pool"></i></div>
         <form class="nm-card" id="nmCard" autocomplete="off" novalidate>
           ${A.bulbs()}
-          <header class="nm-top"><span class="nm-ic">${A.icon("chip_r")}</span><b id="nmTitle"></b><em id="nmNo"></em></header>
-          <div class="nm-field" id="nmField"><input id="nmIn" type="text" maxlength="${MAX}" spellcheck="false" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-describedby="nmHint"><i class="nm-shine"></i><b class="nm-stamp" id="nmStamp"></b></div>
-          <div class="nm-meter" aria-hidden="true"><span class="nm-dots" id="nmDots">${"<i></i>".repeat(MAX)}</span><output id="nmN"></output></div>
-          <p class="nm-hint" id="nmHint"></p>
-          <div class="nm-acts"><button type="submit" class="btn-ink" id="nmOk"><span id="nmOkT"></span><span class="ar">${A.icon("u_next", "sm")}</span></button><button type="button" class="nm-skip" id="nmSkip"></button></div>
-          <button type="button" class="nm-next" id="nmNext" tabindex="-1"><span id="nmNextT"></span><kbd class="k-kb">${A.icon("u_enter", "sm")}</kbd><i class="gl" data-gl="a"></i></button>
+          <div class="nm-paper gx-paper">
+            <div class="nm-txt">
+              <div class="nm-eyr"><span class="gx-eyb" id="nmTitle"></span><em class="gx-eyb" id="nmNo"></em></div>
+              <p class="nm-q gx-t-m" id="nmQt" aria-hidden="true"></p>
+              <p class="nm-hint gx-note" id="nmHint"></p>
+              <output class="nm-n gx-eyb" id="nmN" aria-hidden="true"></output>
+            </div>
+            <div class="nm-acts gx-acts" id="nmActs">
+              <button type="button" class="gx-btn gho nm-skip" id="nmSkip"><span id="nmSkipT"></span>${A.gala.keyHint("Esc", "b")}</button>
+              <button type="submit" class="gx-btn pri nm-ok" id="nmOk" data-primary><span id="nmOkT"></span>${A.gala.keyHint("Enter", "a")}</button>
+            </div>
+            <button type="button" class="gx-btn pri nm-next" id="nmNext" tabindex="-1"><span id="nmNextT"></span>${A.gala.keyHint("Enter", "a")}</button>
+          </div>
+          <div class="nm-sc" id="nmSc"><div class="nm-scard" id="nmScard"></div>
+            <div class="nm-field" id="nmField"><input id="nmIn" type="text" maxlength="${MAX}" spellcheck="false" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-label="" aria-describedby="nmHint"><b class="nm-stamp" id="nmStamp"></b></div>
+          </div>
         </form>
       </div>`;
     $("app").appendChild(root);
     const inp = $("nmIn");
-    inp.addEventListener("input", e => typed(e.isComposing));              // en movil (Gboard) se escribe "componiendo" la palabra entera: las bombillas se encienden igual
+    inp.addEventListener("input", e => typed(e.isComposing));              // en movil (Gboard) se escribe "componiendo" la palabra entera: el contador sigue igual
     inp.addEventListener("compositionend", () => typed(false));
     $("nmCard").addEventListener("submit", e => { e.preventDefault(); confirm(); });
     $("nmSkip").onclick = skip; $("nmNext").onclick = early;
     /* fuera de la tarjeta: mientras pregunta, vuelve a la casilla; cuando ya ha contestado, cierra antes */
-    root.addEventListener("pointerdown", e => { if (!st) return; if (st.phase === "done") { e.preventDefault(); early(); } else if (!e.target.closest(".nm-card")) { e.preventDefault(); focusIn(); } });
+    root.addEventListener("pointerdown", e => { if (!st) return; if (st.phase === "done") { e.preventDefault(); early(); } else if (!e.target.closest(".nm-card button, #nmIn")) { e.preventDefault(); focusIn(); } });
     return root;
   }
   const focusIn = () => { const i = $("nmIn"); if (i && st && st.phase === "ask") try { i.focus({ preventScroll: true }); } catch (e) { i.focus(); } };
   /* ya contestado: un clic o Intro cierran antes de tiempo, pero no en el primer segundo (un doble clic no se come su respuesta) */
   const early = () => { if (st && st.phase === "done" && Date.now() - st.doneAt > 900) close(); };
 
-  /* las bombillas de la tarjeta cuentan los caracteres (rojas al llegar a 16) */
-  function meter(n) {
-    const dots = $("nmDots"); if (!dots) return;
-    [...dots.children].forEach((d, i) => d.classList.toggle("on", i < n));
-    dots.classList.toggle("full", n >= MAX); $("nmN").textContent = n + "/" + MAX; $("nmCard").classList.toggle("empty", !n);
+  /* TU carta del socio (la de la portada: js/socio.js) con el hueco del nombre vacio: la casilla se escribe encima de su placa */
+  function mountCard() {
+    const host = $("nmScard"), sc = $("nmSc"), inp = $("nmIn"); if (!host || !A.socio) return;
+    host._sig = ""; A.socio.mount(host, { w: 192 });
+    host.onpointermove = null; host.onpointerleave = null;                  // sin inclinacion: la casilla va fija sobre la placa
+    const place = () => {
+      const n = host.querySelector(".sc-name"); if (!n || !n.isConnected) return;
+      n.textContent = "";                                                    // el hueco queda vacio: lo que escribes lo pone la casilla
+      let x = 0, y = 0, e = n; while (e && e !== sc) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; }
+      const f = $("nmField"), cs = getComputedStyle(n); f.style.cssText = `left:${x}px;top:${y}px;width:${n.offsetWidth}px;height:${n.offsetHeight}px`;
+      st && (st.fs = parseFloat(cs.fontSize) || 18); inp.style.fontSize = (st && st.fs || 18) + "px"; inp.style.lineHeight = n.offsetHeight + "px"; fitIn();
+    };
+    if (!host._nmWrapped) { const b = host._build; host._build = () => { b(); place(); }; host._nmWrapped = true; }
+    place();
   }
+  /* la letra baja de 1 en 1 hasta que el nombre cabe en la placa (nunca bajo 18 px) */
+  function fitIn() {
+    const inp = $("nmIn"); if (!inp) return; let fs = (st && st.fs) || 18; inp.style.fontSize = fs + "px";
+    while (inp.scrollWidth > inp.clientWidth + 1 && fs > 18) { fs -= 1; inp.style.fontSize = fs + "px"; }
+  }
+  /* el contador de caracteres (rojo al llegar a 16) */
+  function meter(n) { const o = $("nmN"); if (!o) return; o.textContent = n + "/" + MAX; o.classList.toggle("full", n >= MAX); $("nmCard").classList.toggle("empty", !n); }
   function typed(composing) {
     if (!st || st.phase !== "ask") return;
     const inp = $("nmIn"), raw = inp.value, v = clean(raw);
@@ -85,19 +111,19 @@ window.AIQ = window.AIQ || {};
     if (n !== st.len) {
       A.sfx.key(grew ? n : -1);
       const f = $("nmField"); f.classList.remove("bump"); A.restyle(f); f.classList.add("bump");
-      if (grew) { const d = $("nmDots").children[n - 1]; if (d) { d.classList.remove("pop"); A.restyle(d); d.classList.add("pop"); } }
     } else if (v !== raw && !composing) nope();                                            // un caracter que no vale (emoji, simbolo): no entra
-    st.len = n; meter(n);
+    st.len = n; meter(n); fitIn();
   }
-  function nope() { const d = $("nmDots"); d.classList.remove("nope"); A.restyle(d); d.classList.add("nope"); A.sfx.key(-1); }
+  function nope() { const d = $("nmField"); d.classList.remove("shake"); A.restyle(d); d.classList.add("shake"); A.sfx.key(-1); }
 
   function open(ctx) {
     build(); clearAll(); asked = true;
     st = { ctx, phase: "in", len: 0 };
-    $("nmQ").textContent = t6(TX.q); $("nmTitle").textContent = t6(TX.card); $("nmNo").textContent = memberNo();
-    $("nmHint").textContent = t6(TX.hint); $("nmOkT").textContent = t6(TX.ok); $("nmSkip").textContent = t6(TX.skip); $("nmStamp").textContent = t6(TX.stamp); $("nmNextT").textContent = t6(TX.next);
-    const inp = $("nmIn"); inp.value = ""; inp.readOnly = false; inp.placeholder = t6(TX.ph); meter(0);
+    $("nmQ").textContent = $("nmQt").textContent = t6(TX.q); $("nmTitle").textContent = t6(TX.card); $("nmNo").textContent = memberNo();
+    $("nmHint").textContent = t6(TX.hint); $("nmOkT").textContent = t6(TX.ok); $("nmSkipT").textContent = t6(TX.skip); $("nmStamp").textContent = t6(TX.stamp); $("nmNextT").textContent = t6(TX.next);
+    const inp = $("nmIn"); inp.value = ""; inp.readOnly = false; inp.placeholder = t6(TX.ph); inp.setAttribute("aria-label", t6(TX.ph)); meter(0);
     root.className = "nm"; A.restyle(root); root.classList.add("on");  // la sala se apaga
+    A.bulbFit($("nmCard")); mountCard();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // que un Espacio no pulse el boton del veredicto que queda detras
     A.dealer.hold(true); if (A.tt && A.tt.hide) A.tt.hide();
     A.music.muffle(true); A.sfx.spot();
@@ -159,7 +185,7 @@ window.AIQ = window.AIQ || {};
   /* fichas de pixel que saltan del sello */
   function burst() {
     if (C() && C().S.reduce) return;
-    const card = $("nmCard"), s = $("nmStamp"), cr = card.getBoundingClientRect(), sr = s.getBoundingClientRect(), k = cr.width / card.offsetWidth || 1;
+    const card = $("nmSc"), s = $("nmStamp"), cr = card.getBoundingClientRect(), sr = s.getBoundingClientRect(), k = cr.width / card.offsetWidth || 1;
     const b = document.createElement("i"); b.className = "nm-burst"; b.style.left = (sr.left + sr.width / 2 - cr.left) / k + "px"; b.style.top = (sr.top + sr.height / 2 - cr.top) / k + "px";
     b.innerHTML = Array.from({ length: 18 }, (_, i) => { const a = (i / 18) * Math.PI * 2 + Math.random() * 0.35, d = 50 + Math.random() * 70; return `<i class="${["", "r", "w"][i % 3]}" style="--dx:${(Math.cos(a) * d).toFixed(0)}px;--dy:${(Math.sin(a) * d - 20).toFixed(0)}px;--r:${Math.round(Math.random() * 360)}deg"></i>`; }).join("");
     card.appendChild(b); setTimeout(() => b.remove(), 900);

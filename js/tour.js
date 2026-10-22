@@ -25,6 +25,10 @@ window.AIQ = window.AIQ || {};
     ],
   };
 
+  /* textos del paso y del boton de saltar: es | en | fr | pt | de | it | es-419 | zh | ko | ja | ru | pl */
+  const EB = "Tutorial · {n} de {m}|Tutorial · {n} of {m}|Tutoriel · {n} sur {m}|Tutorial · {n} de {m}|Tutorial · {n} von {m}|Tutorial · {n} di {m}||教程 · 第 {n}/{m} 步|튜토리얼 · {n}/{m}|チュートリアル · {n}/{m}|Обучение · {n} из {m}|Samouczek · {n} z {m}";
+  const SKIP = "Saltar|Skip|Passer|Pular|Überspringen|Salta||跳过|건너뛰기|スキップ|Пропустить|Pomiń";
+
   let cur = null, froze = false;
   const P = () => A.profile.get();
   const dev = /skipboot/.test(location.search) && !/[?&]tour/.test(location.search);        // las pruebas automaticas no lo activan
@@ -40,7 +44,8 @@ window.AIQ = window.AIQ || {};
   function ensure() {
     let el = $("tour"); if (el) return el;
     el = document.createElement("div"); el.id = "tour"; el.className = "tour hidden";
-    el.innerHTML = `<i class="tour-hole"></i><div class="tour-card"><div class="tour-face"></div><div class="tour-body"><p class="tour-txt"></p><div class="tour-nav"><button type="button" class="tour-skip"></button><span class="tour-dots"></span><button type="button" class="tour-next btn-ink"></button></div></div></div>`;
+    el.innerHTML = `<i class="tour-hole"></i><div class="tour-card"><div class="tour-paper gx-paper"><div class="tour-face"></div><div class="tour-body"><span class="tour-eb gx-eyb"></span><p class="tour-txt"></p></div>
+      <div class="tour-nav gx-acts"><button type="button" class="tour-skip gx-btn gho"></button><button type="button" class="tour-next gx-btn pri" data-primary></button></div></div></div>`;
     $("app").appendChild(el);
     if (A.crupier) face = A.crupier.mount(el.querySelector(".tour-face"), { mini: true, fidget: false });   // v0.32: el crupier de sus frases, la cabeza a escala entera
     return el;
@@ -60,11 +65,12 @@ window.AIQ = window.AIQ || {};
       r = { left: l - p, top: t - p, width: rr - l + 2 * p, height: bb - t + 2 * p };
     }
     hole.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
-    const cw = card.offsetWidth, ch = card.offsetHeight, gap = 14;
+    const k = parseFloat(document.documentElement.style.getPropertyValue("--k")) || 1;          // la tarjeta crece con la pantalla como los menus (zoom): se mide en pixeles reales
+    const cb = card.getBoundingClientRect(), cw = cb.width, ch = cb.height, gap = 14;
     let top = r.top + r.height + gap; if (top + ch > vh - 10) top = r.top - ch - gap; if (top < 10) top = Math.max(10, vh - ch - 12);
     let left = r.left + r.width / 2 - cw / 2; left = Math.max(10, Math.min(vw - cw - 10, left));
     if (vw <= 700) { left = 10; top = Math.min(top, vh - ch - 10); }
-    card.style.cssText = `left:${left}px;top:${top}px`;
+    card.style.cssText = `left:${left / k}px;top:${top / k}px`;
   }
 
   function show(quiet) {
@@ -74,10 +80,10 @@ window.AIQ = window.AIQ || {};
     const step = tour.steps[tour.i], el = ensure();
     el.classList.remove("hidden"); requestAnimationFrame(() => el.classList.add("on"));
     el.querySelector(".tour-txt").textContent = t6(step.txt);
-    el.querySelector(".tour-skip").textContent = t6("Saltar tutorial|Skip tutorial|Passer le tutoriel|Pular tutorial|Tutorial überspringen|Salta tutorial||跳过教程|튜토리얼 건너뛰기|チュートリアルをスキップ|Пропустить обучение|Pomiń samouczek");
+    el.querySelector(".tour-eb").textContent = t6(EB).replace("{n}", tour.i + 1).replace("{m}", tour.steps.length);        // "Tutorial · 2 de 6"
+    el.querySelector(".tour-skip").innerHTML = `<span>${t6(SKIP)}</span>${A.gala.keyHint("Esc", "b")}`;
     const last = tour.i >= tour.steps.length - 1, nx = el.querySelector(".tour-next");
-    nx.innerHTML = `<span>${last ? t6("¡Entendido!|Got it!|Compris !|Entendi!|Verstanden!|Capito!||明白了！|알겠어요!|わかった！|Понятно!|Jasne!") : t6("Siguiente|Next|Suivant|Próximo|Weiter|Avanti||下一步|다음|次へ|Далее|Dalej")}</span>`;
-    el.querySelector(".tour-dots").innerHTML = tour.steps.map((_, k) => `<i class="${k === tour.i ? "on" : ""}"></i>`).join("");
+    nx.innerHTML = `<span>${last ? t6("¡Entendido!|Got it!|Compris !|Entendi!|Verstanden!|Capito!||明白了！|알겠어요!|わかった！|Понятно!|Jasne!") : t6("Siguiente|Next|Suivant|Próximo|Weiter|Avanti||下一步|다음|次へ|Далее|Dalej")}</span>${A.gala.keyHint("Enter", "a")}`;
     place(step); if (!quiet && A.sfx.card) A.sfx.card();
     if (!quiet) mouth(Math.min(28, Math.round(t6(step.txt).length / 3)));
     nx.onclick = () => { tour.i++; show(); }; el.querySelector(".tour-skip").onclick = () => finish(false, true);

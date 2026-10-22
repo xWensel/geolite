@@ -112,14 +112,16 @@ window.AIQ = window.AIQ || {};
         <div class="qx-stage" id="qxStage"><i class="qx-beam">${motes}</i><i class="qx-pool"></i></div>
         <div class="qx-card" id="qxCard">
           ${A.bulbs()}
-          <header class="qx-top"><span class="qx-ic">${A.icon("u_quit")}</span><b id="qxHead"></b><em id="qxTime"></em></header>
-          <h2 class="qx-q" id="qxQ"></h2>
-          <p class="qx-sub" id="qxSub"></p>
-          <div class="qx-acts" id="qxActs">
-            <button type="button" class="btn-ink qx-stay" id="qxStay"><span id="qxStayT"></span></button>
-            <button type="button" class="qx-go" id="qxGo"><span id="qxGoT"></span></button>
+          <div class="qx-face gx-pnl" id="qxFace">
+            <header class="qx-top"><span class="qx-ic">${A.icon("u_quit")}</span><b class="gx-eyb" id="qxHead"></b><em id="qxTime"></em></header>
+            <h2 class="qx-q gx-t-m" id="qxQ"></h2>
+            <p class="qx-sub gx-lead" id="qxSub"></p>
+            <div class="qx-acts gx-acts" id="qxActs">
+              <button type="button" class="gx-btn gho qx-go" id="qxGo"><span id="qxGoT"></span></button>
+              <button type="button" class="gx-btn pri qx-stay" id="qxStay" data-primary><span id="qxStayT"></span>${A.gala.keyHint("Enter", "a")}</button>
+            </div>
+            <b class="qx-stamp" id="qxStamp"></b>
           </div>
-          <b class="qx-stamp" id="qxStamp"></b>
         </div>
       </div>
       <i class="qx-rain" id="qxRain"></i>`;
@@ -383,7 +385,7 @@ window.AIQ = window.AIQ || {};
   function closedScreen() {
     const c = document.createElement("div"); c.id = "qxc"; c.className = "qxc"; c.setAttribute("role", "dialog"); c.setAttribute("aria-modal", "true");
     c.innerHTML = `<div class="qxc-in"><div class="qxc-sign"><b class="qxc-neon">${esc(t6(TX.closed))}</b></div><div class="qxc-stage" id="qxcStage"></div>
-      <p class="qxc-hint">${esc(t6(TX.tab))}</p><button type="button" class="btn-ink qxc-back" id="qxcBack">${esc(t6(TX.back))}</button></div>`;
+      <p class="qxc-hint">${esc(t6(TX.tab))}</p><button type="button" class="gx-btn pri qxc-back" id="qxcBack"><span>${esc(t6(TX.back))}</span>${A.gala.keyHint("Enter", "a")}</button></div>`;
     document.body.appendChild(c); A.restyle(c); c.classList.add("on");
     st.phase = "closed"; st.talking = false; st.pend = null;
     later(() => { A.sfx.buzz(0); c.classList.add("lit"); }, 500); later(() => A.sfx.buzz(1), 640); later(() => A.sfx.buzz(3), 900);   // el neon arranca a trompicones

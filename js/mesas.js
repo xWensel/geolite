@@ -1,5 +1,5 @@
 /*
- * Geolite - EL ESTRENO DE UNA MESA (v0.3.62). El catalogo y lo que es tuyo viven en js/skins.js (A.mesas); se eligen en Perfil > Mesas (js/hub.js).
+ * Geolite - EL ESTRENO DE UNA MESA (v0.3.62). El catalogo y lo que es tuyo viven en js/skins.js (A.mesas); se eligen en La tienda (js/boutique.js).
  * Cuando has ganado una mesa y vuelves a la portada, la casa la estrena: la portada se aparta, la sala baja la luz, un haz cruza la mesa de lado
  * a lado y el pano nuevo aparece debajo; el crupier la presenta y tu decides si te la quedas puesta. Quien ya habia ganado antes de esta version
  * recibe las suyas al entrar: se estrena la mejor y las demas se nombran en el cartel.
@@ -21,7 +21,7 @@ window.AIQ = window.AIQ || {};
     mas: "También tienes ya: {l}.|You also now have: {l}.|Tu as aussi : {l}.|Você também já tem: {l}.|Außerdem hast du jetzt: {l}.|Hai anche: {l}.||你还拥有：{l}。|함께 얻은 테이블: {l}.|ほかにも手に入りました：{l}。|Ещё у тебя теперь есть: {l}.|Masz też już: {l}.",
     keep: "Quedármela|Keep it|La garder|Ficar com ela|Behalten|Tenerlo||就用它|이걸로 하기|これにする|Оставить|Zostawiam",
     back: "Seguir con la de antes|Stay with the old one|Garder l'ancienne|Continuar com a de antes|Beim alten bleiben|Restare con quello di prima||还是用原来的|원래 테이블 유지|前のテーブルのまま|Вернуть прежний|Zostaję przy starym",
-    note: "Se cambian en Perfil › Mesas.|Change them in Profile › Tables.|Elles se changent dans Profil › Tables.|Troque em Perfil › Mesas.|Wechseln unter Profil › Tische.|Si cambiano in Profilo › Tavoli.||可在“个人资料 › 牌桌”中更换。|프로필 › 테이블에서 바꿀 수 있습니다.|プロフィール › テーブルで変更できます。|Меняются в разделе «Профиль › Столы».|Zmienisz je w Profil › Stoły.",
+    note: "Se cambian en La tienda › Mesas.|Change them in The boutique › Tables.|Elles se changent à la boutique › Tables.|Troque na boutique › Mesas.|Wechseln in der Boutique › Tische.|Si cambiano alla boutique › Tavoli.||可在“精品店 › 牌桌”中更换。|부티크 › 테이블에서 바꿀 수 있습니다.|ブティック › テーブルで変更できます。|Меняются в разделе «Бутик › Столы».|Zmienisz je w Butik › Stoły.",
   };
   const t = k => A.pick6(TX[k]);
   let live = null, tm = 0, tries = 0, due = false;                       // due: hay un estreno esperando su momento en la portada (el crupier no empieza otra frase: js/dealer.js, homeTick)
