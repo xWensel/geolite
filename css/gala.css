@@ -1073,3 +1073,8 @@ html body #np .np-b:active:not(:disabled) { transform: translateY(2px); }
 html body #np .np-tri { border-left-color: var(--gx-ink); } html body #np .np-tri.l { border-left-color: transparent; border-right-color: var(--gx-ink); }
 html body #np .np-b:hover:not(:disabled) .np-tri.r { border-left-color: var(--gx-ink); } html body #np .np-b:hover:not(:disabled) .np-tri.l { border-right-color: var(--gx-ink); }
 html.reduce-motion body #np { transition: opacity .2s; transform: none; }
+
+/* Bloque J: entrada de las pantallas del hub desde el lado de la placa pulsada (--hub-from: -1 izquierda, 0 centro, 1 derecha) */
+.bq-screen > .gx-grid, .pf-screen > .gx-grid { animation: gx-from .32s var(--gx-ease) both; }
+@keyframes gx-from { from { transform: translateX(calc(var(--hub-from, 0) * 56px)); opacity: 0; } }
+html.reduce-motion .bq-screen > .gx-grid, html.reduce-motion .pf-screen > .gx-grid { animation: none; }

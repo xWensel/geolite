@@ -98,7 +98,7 @@
 
 /* la mesa elegida */
 .bq-det { height: 100%; display: grid; gap: 10px; align-content: start; padding: 18px 22px 20px; }
-.bq-dth { position: relative; display: block; aspect-ratio: 2 / 1; box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); overflow: hidden; }
+.bq-dth { position: relative; display: block; aspect-ratio: 5 / 2; box-shadow: 0 0 0 2px var(--gx-o), 0 6px 0 2px rgba(22, 36, 28, .3); overflow: hidden; }
 .bq-dth img { display: block; width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }
 .bq-dth .sc-host img, .bq-th .sc-host img { object-fit: contain; }   /* v0.3.174: la moneda del pie de tu carta no es una mesa: entera, no un trozo a 1:1 */
 .bq-dth.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
@@ -203,3 +203,4 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-cit .bq-nm { font-size: 18px; line-height: 1; }
 .bq-cit .bq-prow { align-items: flex-start; }
 .bq-cat.carta .bq-tab { padding-left: 10px; padding-right: 10px; white-space: nowrap; }
+.bq-dth.leg { margin-bottom: 10px; }   /* el marco de laton de la legendaria no pisa la etiqueta de debajo */
