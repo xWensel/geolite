@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.186",
+      name: L("Fotos revisadas", "Reviewed photos", "Photos revues", "Fotos revisadas", "Überprüfte Fotos", "Foto riviste", "", "精选照片", "다시 고른 사진", "見直した写真", "Пересмотренные фото", "Sprawdzone zdjęcia"),
+      date: "2026-10-23",
+      summary: L("Cerca de 150 fotos de la Enciclopedia se han revisado a ojo y cambiado por otras más claras y de libre uso.", "Close to 150 Encyclopedia photos have been checked by eye and swapped for clearer, freely licensed ones.", "Près de 150 photos de l'Encyclopédie ont été vérifiées à l'œil et remplacées par d'autres plus claires, sous licence libre.", "Cerca de 150 fotos da Enciclopédia foram revistas a olho e trocadas por outras mais claras e de uso livre.", "Rund 150 Fotos der Enzyklopädie wurden von Hand geprüft und durch klarere, frei lizenzierte ersetzt.", "Circa 150 foto dell'Enciclopedia sono state controllate a occhio e sostituite con altre più chiare e di libero utilizzo.", "", "百科全书中近150张照片经过逐一检查，已替换为更清晰、可自由使用的照片。", "도감 사진 약 150장을 눈으로 확인해 더 선명하고 자유롭게 쓸 수 있는 사진으로 바꿨습니다.", "百科の写真約150枚を目で確認し、より鮮明で自由に使える写真に差し替えました。", "Около 150 фотографий Энциклопедии проверены вручную и заменены более четкими, со свободной лицензией.", "Około 150 zdjęć z Encyklopedii sprawdzono ręcznie i zastąpiono wyraźniejszymi, na wolnej licencji."),
+      chapters: [
+        { id: "fotos", kicker: L("Arreglo","Fix","Correctif","Correção","Fehlerbehebung","Correzione","","修复","수정","修正","Исправление","Poprawka"),
+          title: L("Fotos","Photos","Photos","Fotos","Fotos","Foto","","照片","사진","写真","Фото","Zdjęcia"),
+          entries: [
+            E(L("Fotos más claras","Clearer photos","Des photos plus nettes","Fotos mais nítidas","Klarere Fotos","Foto più nitide","","更清晰的照片","더 선명한 사진","より鮮明な写真","Более четкие фото","Wyraźniejsze zdjęcia"), "fix", "0.3.186", [
+              L("Cerca de **150 fotos** de la Enciclopedia se han revisado a ojo y sustituido por otras más claras y de libre uso, con su autor y licencia.","Close to **150 Encyclopedia photos** have been checked by eye and swapped for clearer, freely licensed ones, with their author and license.","Près de **150 photos** de l’Encyclopédie ont été vérifiées à l’œil et remplacées par d’autres plus claires, sous licence libre, avec leur auteur et leur licence.","Cerca de **150 fotos** da Enciclopédia foram revistas a olho e trocadas por outras mais claras e de uso livre, com autor e licença.","Rund **150 Fotos** der Enzyklopädie wurden von Hand geprüft und durch klarere, frei lizenzierte ersetzt, mit Urheber und Lizenz.","Circa **150 foto** dell’Enciclopedia sono state controllate a occhio e sostituite con altre più chiare e di libero utilizzo, con autore e licenza.","","百科全书中约**150张**照片经过逐一检查，已替换为更清晰、可自由使用的照片，并标明作者和许可。","도감의 **사진 150장**을 눈으로 확인해 더 선명하고 자유롭게 쓸 수 있는 사진으로 바꿨습니다. 저작자와 라이선스도 표시했습니다.","百科の**写真約150枚**を目で確認し、より鮮明で自由に使える写真に差し替えました。作者とライセンスも表示しています。","Около **150 фотографий** Энциклопедии проверены вручную и заменены более четкими, со свободной лицензией, с указанием автора и лицензии.","Około **150 zdjęć** z Encyklopedii sprawdzono ręcznie i zastąpiono wyraźniejszymi, na wolnej licencji, z autorem i licencją.")
+            ], [])
+          ] }
+      ]
+    },
+    {
       id: "0.3.185",
       name: L("El Periódico, solo sobre el mar", "The Newspaper, on the sea only", "Le Journal, seulement sur la mer", "O Jornal, só sobre o mar", "Die Zeitung, nur auf dem Meer", "Il Giornale, solo sul mare", "", "报纸牌桌，文字只在海上", "신문 테이블, 글은 바다에만", "新聞のテーブル、文字は海だけ", "Газета: текст только на море", "Gazeta, tekst tylko na morzu"),
       date: "2026-10-22",
