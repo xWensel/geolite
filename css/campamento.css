@@ -49,7 +49,7 @@
 @keyframes rd-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
 /* ---------------------------------------------------------------- RUTA: plano (pantallas de Aventura y Reto diario) */
-.rd.plan { --s: 46px; --sb: 54px; --gap: 10px; --mid: calc(var(--s) / 2); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 12px; align-items: stretch; margin-top: 4px; }
+.rd.plan { --s: 56px; --sb: 60px; --gap: 10px; --mid: calc(var(--s) / 2); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 12px; align-items: stretch; margin-top: 4px; }
 .rd.plan .rd-act { display: grid; align-content: space-between; gap: 10px; padding: 10px 14px 9px; border-radius: 14px; background: rgba(10, 26, 18, .84);
   box-shadow: 0 0 0 2px #0a140f, inset 0 0 0 2px rgba(255, 217, 138, .26), 0 6px 0 rgba(0, 0, 0, .35); }
 .rd.plan .rd-h { display: grid; gap: 1px; min-width: 0; }
@@ -57,7 +57,7 @@
 .rd.plan .rd-h i { font-style: normal; font-family: var(--serif); font-size: 18px; line-height: 1.05; color: #f3eddc; text-wrap: balance; }
 .rd.plan .rd-row { justify-content: space-between; align-items: flex-start; gap: 0; }
 .rd.plan .rd-ic { width: var(--s); height: var(--s); border-radius: 11px; transition: transform .2s var(--spring); }
-.rd.plan .rd-ic .ic { width: 36px; height: 36px; }
+.rd.plan .rd-ic .ic { width: 48px; height: 48px; }
 .rd.plan .rd-n.boss .rd-ic { width: var(--sb); height: var(--sb); margin-top: calc((var(--s) - var(--sb)) / 2); }
 .rd.plan .rd-n.boss .rd-ic .ic { width: 48px; height: 48px; }
 .rd.plan .rd-n:hover .rd-ic { transform: translateY(-3px); }
