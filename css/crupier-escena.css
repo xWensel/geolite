@@ -1,0 +1,30 @@
+/* Geolite - el crupier en escena (bloque D): Comodin, el gato de la casa (js/comodin.js) y las trastadas (js/trastadas.js).
+   Todo a escala entera de pixel real; ninguna luz por delante del crupier (el halo va detras, como su sombra). */
+
+/* UN SOLO TAMANO (revision del 22-oct): su hueco mide lo mismo en todas las pantallas (--crk, js/crupier.js: la figura a escala entera, el de la
+   portada). Donde no cabe, js/dealer.js no le hace salir; nunca se encoge */
+.dealer .dl-face { width: var(--crk, 243px) !important; height: var(--crk, 243px) !important; }
+
+/* EL CRUPIER EN LA PORTADA (js/dealer.js, pres): de visita, de pie a la derecha; el globo sale encima de el sin moverle */
+.dealer.home.stay .dl-bubble { position: absolute; right: 0; bottom: 100%; margin: 0 0 4px; width: max-content; }   /* su ancho, no el del retrato */
+.dealer.home.stay .dl-face { pointer-events: auto; cursor: pointer; }
+.dealer.home.home-tr.stay { right: 8px; }   /* de pie, pegado al borde: su figura (no el hueco cuadrado) deja aire con las cartas de la portada */
+
+/* Comodin: su lienzo lo coloca js/comodin.js al pixel real, con las patas en el suelo de su pantalla */
+.cm-cv { position: absolute; image-rendering: pixelated; pointer-events: auto; cursor: pointer; z-index: 3; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
+.cm-host { position: absolute; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 100005; }   /* por encima de la portada y del apagon, por debajo de las trastadas y del crupier */
+
+/* la capa de las trastadas: por encima del juego y por debajo del crupier (.dealer, 100010) */
+#trFx { position: fixed; left: 0; top: 0; z-index: 100006; pointer-events: none; image-rendering: pixelated; }
+
+/* el apagon: la sala a oscuras; el crupier y Comodin quedan por delante en silueta con los ojos encendidos */
+#trDark { position: fixed; inset: 0; z-index: 100004; pointer-events: none; background: rgb(4 2 10 / .92); opacity: 0; transition: opacity .28s steps(4, end); }
+#trDark.on { opacity: 1; }
+html.reduce-motion #trDark, html.soft-flash #trDark { transition: opacity .45s linear; }
+
+/* la ventana de mentira: la de las ventanas falsas de los retos (.chx-win), por encima de todo salvo el crupier en directo */
+.tr-win { position: fixed; inset: 0; z-index: 100012; pointer-events: none; }
+.tr-win .chx-win { pointer-events: auto; }
+
+/* el halo del desfile: detras de su figura, como el de la siesta (nunca delante) */
+.dealer.tr-halo .dl-face { filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .4)) drop-shadow(0 0 18px rgba(253, 215, 66, .55)); transition: filter .4s; }

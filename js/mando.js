@@ -80,12 +80,15 @@ window.AIQ = window.AIQ || {};
 
   /* ---------- modo de entrada ---------- */
   const setMode = m => {
-    if (root.dataset.input === m) return; root.dataset.input = m; M.on = m === "pad";
+    if (root.dataset.input === m) return; const wasPad = M.on; root.dataset.input = m; M.on = m === "pad";
     console.log("[mando] entrada:", m);
     try { setGlyph(); } catch (e) { /* un icono que falla no puede dejar al mando sin cursor */ }
     watchDom(M.on);
     if (!M.on && leg) { legOn = false; leg.classList.remove("on"); }
-    if (!M.on) { setHover(null); if (cur) cur.hidden = true; }
+    if (!M.on) {
+      setHover(null); if (cur) cur.hidden = true;
+      if (wasPad && m === "mouse" && !DECK) try { if (A.dealer && A.dealer.noteDevice) A.dealer.noteDevice("off"); } catch (e) { /* bloque D: sueltas el mando y vuelves al raton: el crupier lo comenta (una vez por sesion) */ }
+    }
     else {                                                              // el cursor sale de donde estaba el raton; si no lo habias usado, del centro (o de donde lo dejo el mando)
       if (lastMouse) { M.x = Math.max(0, Math.min(innerWidth - 1, lastMouse[0])); M.y = Math.max(0, Math.min(innerHeight - 1, lastMouse[1])); lastMouse = null; M.used = true; }
       else if (!M.used) { M.used = true; M.x = innerWidth / 2; M.y = innerHeight / 2; }

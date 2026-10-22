@@ -58,6 +58,8 @@ window.AIQ = window.AIQ || {};
       cadena: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
       pluma: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
       veneciano: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
+      gafas: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
+      cristal: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
       chistera: "Chistera|Top hat|Haut-de-forme|Cartola|Zylinder|Cilindro||礼帽|실크해트|シルクハット|Цилиндр|Cylinder",
     },
     wear: "Ponértelo|Put it on|Le mettre|Vestir|Anziehen|Indossalo||穿上|착용하기|着る|Надеть|Załóż",
@@ -212,8 +214,133 @@ window.AIQ = window.AIQ || {};
     dropProb();
     const host = $("bqProb"); if (!host || !A.crupier || !V()) return;
     try { ST.spr = A.crupier.mount(host, { atlas: V().atlasFor(V().with(ST.vsel)), floor: true }); } catch (e) { ST.spr = null; }
+    if (ST.spr) { if (SV.face) ST.spr.set(SV.face, { quiet: true }); if (SV.talking) ST.spr.talk(true); }   // bloque D: el probador se rehace al elegir; si hablaba, sigue
+    if (SV.halo) { const pb = document.querySelector("#dlg .bq-prob"); if (pb) pb.classList.add("halo"); }
   }
   const vPaint = () => { fitThumbs(); mountProb(); };
+
+  /* ---------------------------------------------------------------- bloque D: EL CRUPIER ES EL MANIQUI DEL PROBADOR
+     Se cambia delante de ti y comenta lo que te pruebas, lo que compras y lo que te quitas (sus frases shop*, js/dealer.js); al comprar, el
+     desfile (js/trastadas.js) con su halo detras. Habla con su propia boca en su propio globo, encima del panel del probador (en la cabecera:
+     sin tapar la rejilla, el probador ni los textos): nunca dos crupieres en pantalla. Una frase cada pocos segundos como mucho */
+  const WARM = ["rojo", "granate", "rosa", "cobre"], COLD = ["verde", "esmeralda", "turquesa", "azul"], DARKC = ["negro", "granate", "esmeralda"];
+  const SV = { at: 0, busy: false, pend: null, face: null, talking: false, halo: false, tries: [], nTry: 0, bought: false, said: {}, visits: 0, vest: false, last: 0, el: null, t1: 0, t2: 0, browse: 0 };
+  const DL = () => A.dealer;
+  const rnd = a => a[Math.floor(Math.random() * a.length)];
+  function sayEl() {
+    if (SV.el && SV.el.isConnected) return SV.el;
+    const b = document.createElement("div"); b.className = "bq-say"; b.setAttribute("role", "status"); b.innerHTML = `<p><span class="v"></span><span class="r"></span></p>`;
+    document.body.appendChild(b); return (SV.el = b);
+  }
+  /* el globo, en el hueco de la cabecera entre el titulo y el monedero, pegado encima del panel del probador y con la cola hacia el */
+  function sayPlace(b) {
+    const det = $("bqDet"), prob = $("bqProb"), h = document.querySelector("#dlg .bq-h"), wal = document.querySelector("#dlg .bq-wal"); if (!det || !prob) return false;
+    const D0 = det.getBoundingClientRect(), Pr = prob.getBoundingClientRect(), Wl = wal ? wal.getBoundingClientRect() : null;
+    let ink = 0; if (h) { const rg = document.createRange(), tw = document.createTreeWalker(h, NodeFilter.SHOW_TEXT); for (let n; (n = tw.nextNode());) if (n.nodeValue.trim()) { rg.selectNodeContents(n); ink = Math.max(ink, rg.getBoundingClientRect().right); } }   // donde acaba la tinta del titulo (la caja ocupa toda la cabecera)
+    const right = Math.round(Math.min(Pr.left + Pr.width * 0.6, Wl ? Wl.left - 12 : innerWidth - 16)), left = Math.round(ink ? ink + 18 : D0.left - 320);
+    const w = Math.max(170, Math.min(440, right - left));
+    b.style.maxWidth = w + "px"; b.style.left = "0px"; b.style.top = "0px";
+    const bw = Math.min(w, b.offsetWidth), bh = b.offsetHeight;
+    b.style.left = right - bw + "px"; b.style.top = Math.max(6, Math.round(D0.top - 16 - bh)) + "px";
+    return true;
+  }
+  function sayHide() {
+    const b = SV.el; if (b) b.classList.remove("on");
+    clearTimeout(SV.t1); clearTimeout(SV.t2); SV.busy = false; SV.talking = false; if (ST.spr) ST.spr.talk(false);
+    if (SV.face && ST.spr) ST.spr.set("sly", { quiet: true }); SV.face = null;
+    if (SV.pend) { const p = SV.pend; SV.pend = null; setTimeout(() => vSay(p[0], p[1]), 250); }
+  }
+  /* dice una de sus frases (una o varias claves: una al azar de las que existan) con su cara y su gesto en el maniquí */
+  function vSay(keys, o = {}) {
+    const D = DL(); if (!D || !D.pick || ST.cat !== "vest" || !$("bqProb")) return false;
+    const ks = (Array.isArray(keys) ? keys : [keys]).filter(k => k && D.has(k)); if (!ks.length) return false;
+    if (SV.busy || Date.now() - SV.at < 3200) { if (o.prio) SV.pend = [ks, o]; return false; }
+    const t = D.pick(rnd(ks), o.data); if (!t) return false;
+    SV.busy = true; SV.at = Date.now(); SV.face = o.face || null;
+    if (ST.spr) { if (o.face) ST.spr.set(o.face, { quiet: !!o.gest }); if (o.gest) ST.spr.play(o.gest); }
+    const b = sayEl(), vis = b.querySelector(".v"), rest = b.querySelector(".r"), chars = [...t];
+    vis.textContent = ""; rest.textContent = t + "​"; if (!sayPlace(b)) { SV.busy = false; return false; }
+    void b.offsetWidth; b.classList.add("on"); SV.talking = true; if (ST.spr) ST.spr.talk(true);
+    let i = 0;
+    const step = () => {
+      if (!b.isConnected || ST.cat !== "vest" || !$("bqProb")) return sayHide();
+      if (i >= chars.length) { SV.talking = false; if (ST.spr) ST.spr.talk(false); SV.t2 = setTimeout(sayHide, 1700 + t.length * 26); return; }
+      vis.textContent += chars[i]; rest.textContent = chars.slice(i + 1).join("") + "​";
+      if (/\S/.test(chars[i])) { if (ST.spr) ST.spr.syl(); if (i % 2 === 0 && A.sfx && A.sfx.voice) A.sfx.voice("sly", i); }
+      i++; SV.t1 = setTimeout(step, 34 + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
+    };
+    step(); return true;
+  }
+  /* el desfile (trastada, js/trastadas.js): el pase de modelo con su halo detras y su frase de compra */
+  function desfile(ctx) {
+    if (!ST.spr || ST.cat !== "vest") return false;
+    ST.spr.play("e_desfile"); SV.halo = true; const pb = document.querySelector("#dlg .bq-prob"); if (pb) pb.classList.add("halo");
+    setTimeout(() => { SV.halo = false; const p2 = document.querySelector("#dlg .bq-prob"); if (p2) p2.classList.remove("halo"); }, 3200);
+    if (ctx && ctx.key) setTimeout(() => vSay(ctx.key, { prio: true, face: "orgulloso" }), 500);
+    return true;
+  }
+  const reg = () => { if (A.trastadas && A.trastadas.registra && !SV.reg) { A.trastadas.registra("desfile", desfile); SV.reg = 1; } };
+  /* abres el vestuario: te recibe (la primera vez de la sesion siempre; luego, a veces) y, si te quedas mirando sin probar nada, te lo dice */
+  function vOpen() {
+    reg(); SV.vest = true; SV.visits++; SV.nTry = 0; SV.tries = []; SV.bought = false; SV.said = {}; SV.last = Date.now();
+    clearTimeout(SV.browse); SV.browse = setTimeout(function br() { if (ST.cat !== "vest" || !$("bqProb")) return; if (Date.now() - SV.last >= 44000) { if (!SV.said.browse && vSay("shopBrowse", { face: "bored", gest: "e_reloj" })) SV.said.browse = 1; } else SV.browse = setTimeout(br, 5000); }, 45000);
+    if (SV.visits > 1 && Math.random() < 0.5) { if (ST.spr) setTimeout(() => ST.spr && ST.spr.play("r_tienda"), 400); return; }
+    const gold = V().worn().chistera === "dorada";
+    setTimeout(() => vSay(gold && Math.random() < 0.6 ? "shopWearGoldHat" : "shopOpen", { gest: "r_tienda", face: "sly" }), 450);
+  }
+  /* te pruebas algo (lo eliges en la rejilla: el maniquí se lo pone; si ya era tuyo, te lo pones de verdad) */
+  function vTried(id, put) {
+    const it = V().get(id); if (!it) return; const now = Date.now(); SV.last = now; SV.nTry++;
+    SV.tries = SV.tries.filter(t => now - t < 12000); SV.tries.push(now);
+    if (ST.spr) ST.spr.play("r_prueba_ropa");
+    const o = { face: rnd(["smug", "sly", "laugh", "tramando", "admirado"]) };
+    if (SV.nTry === 6 && !SV.bought && !SV.said.noBuy && vSay("shopTryNoBuy", { face: "bored" })) { SV.said.noBuy = 1; return; }
+    if (SV.tries.length >= 3 && !SV.said.many && vSay("shopTryMany", { face: "laugh" })) { SV.said.many = 1; return; }
+    if (put) {                                                                     // te lo pones: lo que hace con lo demas
+      const w = V().worn(), P = A.profile.get();
+      if (w.traje === "oro" && !w.antifaz && w.pajarita === "oro" && vSay("shopAllGold", { face: "admirado" })) return;
+      if (w.traje === "negro" && w.antifaz === "negro" && w.pajarita === "negro" && vSay("shopAllBlack", { face: "tramando" })) return;
+      if (!w.traje && !w.antifaz && !w.pajarita && it.casa && vSay("shopHouse", { face: "aliviado" })) return;
+      const tr = w.traje || "morado", pj = w.pajarita || "rojo", an = w.antifaz || "oro";
+      const clash = (WARM.includes(tr) && COLD.includes(pj)) || (COLD.includes(tr) && WARM.includes(pj)) || (w.traje && w.antifaz && w.pajarita && new Set([tr, pj, an]).size === 3);
+      const mix = [w.traje, w.antifaz, w.pajarita].filter(Boolean).length >= 2 && new Set([tr, pj, an]).size >= 2;
+      if (mix && P.vest && !P.vest.mixSaid && vSay("shopFirstMix", { face: "smug" })) { P.vest.mixSaid = 1; A.profile.save(); return; }
+      if (clash && Math.random() < 0.5 && vSay("shopClash", { face: "puzzled" })) return;
+    }
+    let keys;
+    if (id === "chistera_dorada") keys = V().owned(id) ? ["shopTry_chistera_dorada"] : ["shopTry_chistera_dorada", "shopTryGoldHat"];
+    else {
+      const own = { antifaz_esmeralda: "shopTry_antifaz_verde", pajarita_azul: "shopTry_pajarita_turquesa" }[id] || "shopTry_" + id;
+      if (DL() && DL().has(own)) keys = [own];
+      else if (it.slot === "traje") keys = [...(WARM.includes(it.v) ? ["shopTryWarm"] : []), ...(COLD.includes(it.v) ? ["shopTryCold"] : []), ...(DARKC.includes(it.v) ? ["shopTryDark"] : [])];
+      else if (it.slot === "antifaz") keys = ["shopTryMask"];
+      else if (it.slot === "pajarita") keys = ["shopTryBow"];
+      if (!keys || !keys.length) keys = ["shopTry"];
+    }
+    vSay(keys, o);
+  }
+  function vTookOff() {
+    SV.last = Date.now(); const w = V().worn();
+    if (!Object.values(w).some(Boolean) && vSay("shopHouse", { face: "aliviado" })) return;
+    vSay(Math.random() < 0.5 ? "shopTakeOff" : "shopStore", { face: rnd(["sad", "innocent", "sly"]) });
+  }
+  function vBought(id) {
+    SV.bought = true; SV.last = Date.now(); reg();
+    const key = id === "chistera_dorada" ? "shopBuyGoldHat" : V().count() === 1 ? "shopFirstBuy" : "shopBuy";
+    if (!(A.trastadas && A.trastadas.lanza && A.trastadas.lanza("desfile", { id, key }))) {   // el desfile, si toca (una vez cada poco); si no, la reaccion de compra
+      if (ST.spr) ST.spr.play("r_compra"); vSay(key, { prio: true, face: "orgulloso" });
+    }
+  }
+  function vBroke(id) {
+    const have = A.club ? A.club.fichas() : 0, n = Math.max(1, V().price(id) - have);
+    vSay(Math.random() < 0.5 ? "shopNoFundsN" : "shopNoFunds", { data: { n: A.fmt(n) }, face: "innocent", gest: "shrug" });
+  }
+  /* sales de la tienda sin comprar: te lo dice desde la portada */
+  function vLeave() {
+    clearTimeout(SV.browse); if (SV.el) { SV.el.remove(); SV.el = null; } clearTimeout(SV.t1); clearTimeout(SV.t2); SV.busy = false; SV.talking = false; SV.pend = null; SV.face = null; SV.halo = false;
+    if (SV.vest && !SV.bought && Math.random() < 0.5) setTimeout(() => { const D = DL(); if (D && D.onHome && D.homeSay) { const t = D.pick("shopLeave"); if (t) D.homeSay(t, "sly"); } }, 1100);
+    SV.vest = false;
+  }
 
   /* ---------------------------------------------------------------- los punteros (js/punteros.js): reticulo, chincheta, linea y diana, por
      separado y combinables. Miniaturas animadas (un solo bucle, a ~16 fps, solo con la seccion abierta) y «Probar en el mapa» sobre el mapa de verdad */
@@ -461,13 +588,13 @@ window.AIQ = window.AIQ || {};
     if (pn) pn.onclick = () => { ST.ppage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqPNext:not([disabled]), #bqPPrev"); };
     const pu = $("bqPUse"); if (pu) pu.onclick = () => { const [s, id] = ST.psel.split(":"); if (!PU().wear(s, id)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqPTry"); };
     const ptb = $("bqPTry"); if (ptb) ptb.onclick = pTryOn;
-    sc.querySelectorAll(".bq-vit").forEach(b => { b.onclick = () => { const id = b.dataset.vid; if (ST.busy) return; if (id !== ST.vsel) { ST.vsel = id; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const put = V().owned(id) && !V().wearing(id) && V().wear(id); repaint(`#dlg .bq-vit[data-vid="${id}"]`); if (put) { stampOn(); if (ST.spr) ST.spr.play("preen"); } }; });
-    sc.querySelectorAll(".bq-vtab").forEach(b => { b.onclick = () => { if (ST.vtab === b.dataset.vtab) return; ST.vtab = b.dataset.vtab; ST.vpage = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-vtab[data-vtab="${ST.vtab}"]`); }; });
+    sc.querySelectorAll(".bq-vit").forEach(b => { b.onclick = () => { const id = b.dataset.vid; if (ST.busy) return; if (id !== ST.vsel) { ST.vsel = id; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const put = V().owned(id) && !V().wearing(id) && V().wear(id); repaint(`#dlg .bq-vit[data-vid="${id}"]`); if (put) stampOn(); vTried(id, put); }; });
+    sc.querySelectorAll(".bq-vtab").forEach(b => { b.onclick = () => { if (ST.vtab === b.dataset.vtab) return; ST.vtab = b.dataset.vtab; ST.vpage = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-vtab[data-vtab="${ST.vtab}"]`); if (ST.vtab === "mine" && !SV.said.mine && vSay("shopMine", { face: "smug" })) SV.said.mine = 1; }; });
     const vp = $("bqVPrev"), vn = $("bqVNext");
     if (vp) vp.onclick = () => { if (ST.vpage > 0) { ST.vpage--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqVPrev:not([disabled]), #bqVNext"); } };
     if (vn) vn.onclick = () => { ST.vpage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqVNext:not([disabled]), #bqVPrev"); };
-    const we = $("bqWear"); if (we) we.onclick = () => { if (!V().wear(ST.vsel)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqOff"); if (ST.spr) ST.spr.play("preen"); };
-    const ofb = $("bqOff"); if (ofb) ofb.onclick = () => { V().takeOff(ST.vsel); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqWear"); };
+    const we = $("bqWear"); if (we) we.onclick = () => { if (!V().wear(ST.vsel)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqOff"); vTried(ST.vsel, true); };
+    const ofb = $("bqOff"); if (ofb) ofb.onclick = () => { V().takeOff(ST.vsel); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqWear"); vTookOff(); };
     /* «Tu carta» */
     sc.querySelectorAll(".bq-cit").forEach(b => { b.onclick = () => { const k = b.dataset.ck; if (ST.busy) return; if (k !== ST.csel) { ST.csel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const [cw, cid] = k.split(":"), cx = cFind(k), put = cx && cx.owned && cState(k) !== "on" && (cw === "m" ? SO().setMarco(cid) : cw === "t" ? SO().setTitle(cid) : SO().setIcon(cid)); repaint(`#dlg .bq-cit[data-ck="${k}"]`); if (put) stampOn(); }; });
     sc.querySelectorAll(".bq-ctab").forEach(b => { b.onclick = () => { if (ST.ctab === b.dataset.ctab) return; ST.ctab = b.dataset.ctab; ST.cpage = 0; const L = cOf(ST.ctab); if (L.length && !L.some(x => x.k === ST.csel)) ST.csel = L[0].k; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-ctab[data-ctab="${ST.ctab}"]`); }; });
@@ -492,6 +619,7 @@ window.AIQ = window.AIQ || {};
       ca.innerHTML = catBody(); d.innerHTML = detBody();
       const rl = $("bqRail"); if (rl) rl.outerHTML = railHtml();
       wireInner(); if (k === "vest") vPaint(); if (k === "punt") pStart(); if (k === "carta") cPaint();
+      if (k === "vest") vOpen(); else { clearTimeout(SV.browse); if (SV.busy) sayHide(); }   // bloque D: el maniqui te recibe; fuera del vestuario, calla
       const f = document.querySelector(`#dlg .bq-rx[data-cat="${k}"]`); if (f) f.focus({ preventScroll: true });
     };
     if (k === "vest") { if (!ST.vsel) ST.vsel = (vOf(ST.vtab).find(i => !V().owned(i.id)) || vOf(ST.vtab)[0]).id; V().ready(go); } else go();
@@ -500,7 +628,7 @@ window.AIQ = window.AIQ || {};
   function vBuy(id) {
     if (ST.busy || !id || V().owned(id)) return;
     const have = A.club ? A.club.fichas() : 0, p = V().price(id);
-    if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
+    if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } vBroke(id); return; }
     if (ST.armed !== id) { ST.armed = id; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === id && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
     if (!V().buy(id)) return;
@@ -514,7 +642,7 @@ window.AIQ = window.AIQ || {};
     for (let i = 1; i <= n; i++) setTimeout(() => { if (w && w.isConnected) w.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
     const card = document.querySelector(`#dlg .bq-vit[data-vid="${id}"]`), det = $("bqDet");
     if (card) card.classList.add("bq-sold"); if (det) det.classList.add("bq-sold");
-    setTimeout(() => { if (ST.spr) ST.spr.play("preen"); }, 260);
+    setTimeout(() => vBought(id), 260);                                  // bloque D: el desfile (o su reaccion de compra) y su frase
   }
 
   /* comprar: primero se arma (rojo, «¿Seguro?»); la segunda pulsacion paga. Si te faltan fichas, nada (zumbido) */
@@ -587,13 +715,13 @@ window.AIQ = window.AIQ || {};
     const draw = () => {
       c.dialog(html(), "tablewrap");
       A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
-      wireInner(); if (ST.cat === "vest") vPaint(); if (ST.cat === "punt") pStart(); if (ST.cat === "carta") cPaint();
+      wireInner(); if (ST.cat === "vest") { vPaint(); vOpen(); } if (ST.cat === "punt") pStart(); if (ST.cat === "carta") cPaint();
       setTimeout(() => { const f = ST.cat === "vest" ? document.querySelector(`#dlg .bq-vit[data-vid="${ST.vsel}"]`) : ST.cat === "punt" ? document.querySelector(`#dlg .bq-pit[data-pid="${ST.psel}"]`) : ST.cat === "carta" ? document.querySelector(`#dlg .bq-cit[data-ck="${ST.csel}"]`) : document.querySelector(`#dlg .bq-it[data-id="${ST.sel}"]`) || document.querySelector("#dlg .bq-offer") || $("bqTry"); if (f) f.focus({ preventScroll: true }); }, 80);
     };
     if (ST.cat === "vest") V().ready(draw); else draw();
   }
   /* si se sale de la boutique a mitad de una prueba, el mapa vuelve a tu mesa */
-  const leave = () => { if (ST.trying) tryOff(true); if (ST.ptry) pTryOff(true); ST.armed = null; dropProb(); };
+  const leave = () => { if (ST.trying) tryOff(true); if (ST.ptry) pTryOff(true); ST.armed = null; vLeave(); dropProb(); };
 
   A.boutique = { open, leave, tally: () => { let n = 0, t = 0; ["mesas", "vest", "punt", "carta"].forEach(k => { if ((k === "vest" && !V()) || (k === "punt" && !PU()) || (k === "carta" && !SO())) return; const r = stat(k); n += r[0]; t += r[1]; }); return [n, t]; }, want: id => { ST.next = id; }, cat: k => { ST.cat = k; }, get trying() { return ST.trying; } };
 })(window.AIQ);

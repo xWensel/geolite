@@ -729,8 +729,77 @@ window.AIQ = window.AIQ || {};
       rn: roundNo() + 1, bossName: Lv.boss && run.chalName ? A.tx(run.chalName) : "", bossKey: Lv.boss ? run.chalKey : null, virgin: !!run._virgin,
     });
     resumedIntro = false;
-    D.sequence(seq, talked); return seq.reduce((n, it) => n + A.tx(it.line).length * 40 + 900 + D.LINGER, 0);   // cada frase, con su segundo de mas
+    const lines = seq.reduce((n, it) => n + A.tx(it.line).length * 40 + 900 + D.LINGER, 0);   // cada frase, con su segundo de mas
+    /* bloque D: el crupier entra en escena antes de hablar. En un jefe, EL TELON: se cierra, y al abrirse esta el en primer plano con su gesto de
+       entrada (e_jefe) y cara de desafio; en las demas rondas, REPARTE LA CARTA de la ronda (e_reparte): sale de su mano y vuela hasta la ficha
+       del cartel. Con Movimiento en Minimo, sin vuelo ni gesto (el telon, un fundido) */
+    const tok = ++introTok, alive = () => tok === introTok && host.isConnected && C().S.phase === "intro";
+    const talk = () => { if (alive()) D.sequence(seq, talked); else if (talked) talked(); };
+    const quiet = reduceMotion(), boss = !!Lv.boss && !run.inf;
+    if (boss) {
+      const gm = quiet ? 300 : gestMs("e_jefe");
+      if (telon(host, () => { if (!alive()) return; host.style.visibility = ""; if (D.face) D.face("dare", quiet ? null : "e_jefe"); setTimeout(talk, gm); })) return lines + 950 + gm;
+    } else if (!quiet && D.face && gestMs("e_reparte")) {
+      D.face("sly", "e_reparte"); dealCard(host, tok); setTimeout(talk, gestMs("e_reparte")); return lines + gestMs("e_reparte");
+    }
+    talk(); return lines;
   };
+  let introTok = 0;
+  const reduceMotion = () => document.documentElement.classList.contains("reduce-motion");
+  const gestMs = id => { const g = A.CRUPIER_DATA && A.CRUPIER_DATA.gest[id]; return g ? g.frames.length * 100 : 0; };   // los gestos nuevos van a 100 ms por fotograma (js/crupier.js)
+  /* EL TELON DEL JEFE (js/trastadas.js, "telon"): se cierra (0,35 s), a los 0,95 s llama a after (la escena cambia detras) y se abre. Con Minimo, el
+     terciopelo aparece y se va en un fundido. Cuenta como la trastada de la ronda (y respeta el tutorial y la mesa en directo) */
+  let telonReg = false;
+  function telonHook() {
+    if (telonReg || !A.trastadas) return; telonReg = true;
+    A.trastadas.registra("telon", ctx => { const after = ctx && ctx.after; if (reduceMotion()) telonFade(after); else A.trastadas.fx.telon(after); return true; });
+  }
+  function telon(host, after) {
+    if (!A.trastadas || !A.trastadas.lanza) return false; telonHook();
+    host.style.visibility = "hidden";                                                    // detras del telon: aun no se le ve
+    const ok = A.trastadas.lanza("telon", { after });
+    if (!ok) host.style.visibility = "";
+    return ok;
+  }
+  function telonFade(after) {
+    const k = (A.dealer.k && A.dealer.k()) || 3, u = k / (window.devicePixelRatio || 1), v = document.createElement("div");
+    v.className = "adv-telon"; v.setAttribute("aria-hidden", "true");
+    v.style.background = `linear-gradient(#3c240a 0 ${10 * u}px, #6e3414 ${10 * u}px ${12 * u}px, transparent ${12 * u}px), repeating-linear-gradient(90deg, #6b0d1f 0 ${9 * u}px, #8f1328 ${9 * u}px ${14 * u}px)`;
+    document.body.appendChild(v); if (A.sfx.bossRise) A.sfx.bossRise();
+    requestAnimationFrame(() => v.classList.add("on"));
+    setTimeout(() => { if (A.sfx.spot) A.sfx.spot(); if (after) after(); }, 450);
+    setTimeout(() => v.classList.remove("on"), 950); setTimeout(() => v.remove(), 1400);
+  }
+  /* LA CARTA DE LA RONDA: en el gesto de repartir, la carta deja su mano hacia el fotograma 11 (1,1 s); desde ahi vuela en arco hasta la ficha del
+     cartel (nunca encima del texto), dandose la vuelta (de frente, de canto, de espaldas), y se posa con su sonido. Pixel art a la escala del crupier */
+  const CARD_PX = { f: ["ooooooooo", "owwwwwwwo", "owrwwwwwo", "owwwwwwwo", "owwwrwwwo", "owwrrrwwo", "owrrrrrwo", "owwrrrwwo", "owwwrwwwo", "owwwwwrwo", "owwwwwwwo", "ooooooooo"],
+    b: ["ooooooooo", "okkkkkkko", "okrkrkrko", "okkkkkkko", "okrkrkrko", "okkkkkkko", "okrkrkrko", "okkkkkkko", "okrkrkrko", "okkkkkkko", "okrkrkrko", "ooooooooo"],
+    e: ["oo", "ow", "ow", "ow", "ow", "ow", "ow", "ow", "ow", "ow", "ow", "oo"] };
+  const CARD_C = { o: "#1d0a3d", w: "#f3f0fa", r: "#e8283a", k: "#a8142e" };
+  function dealCard(host, tok) {
+    setTimeout(() => {
+      if (tok !== introTok || !host.isConnected) return;
+      const cv0 = host.querySelector(".cr-cv"), tgt = document.querySelector("#intro .intro-num"); if (!cv0 || !tgt) return;
+      const fr = cv0.getBoundingClientRect(), tr = tgt.getBoundingClientRect(); if (!fr.width || !tr.width) return;
+      const dpr = window.devicePixelRatio || 1, k = Math.max(1, Math.round(fr.width * dpr / 96)), u = k / dpr;   // el grano del crupier de la intro
+      const c = document.createElement("canvas"); c.className = "adv-card"; c.width = 9 * k; c.height = 12 * k; c.style.width = 9 * u + "px"; c.style.height = 12 * u + "px";
+      const g = c.getContext("2d"); document.body.appendChild(c);
+      const paint = side => { g.clearRect(0, 0, c.width, c.height); const P = CARD_PX[side], x0 = side === "e" ? 4 : 0; P.forEach((row, y) => [...row].forEach((ch, x) => { g.fillStyle = CARD_C[ch]; g.fillRect((x0 + x) * k, y * k, k, k); })); };
+      const x0 = fr.left + fr.width * 22 / 96, y0 = fr.top + fr.height * 102 / 112, x1 = tr.left + tr.width / 2, y1 = tr.top + tr.height / 2;
+      const body = document.querySelector("#intro .intro-body"), br = body ? body.getBoundingClientRect() : null;   // pasa por debajo del texto del cartel, nunca por encima
+      const cx = br ? (br.left + x0) / 2 : (x0 + x1) / 2, cy = Math.min(innerHeight - 20, Math.max(y0, br ? br.bottom : y0) + 60);
+      const t0 = performance.now(), dur = 620; let side = "";
+      const step = now => {
+        if (!c.isConnected) return; const t = Math.min(1, (now - t0) / dur), e = 1 - (1 - t) * (1 - t), m = 1 - e;
+        const x = m * m * x0 + 2 * m * e * cx + e * e * x1, y = m * m * y0 + 2 * m * e * cy + e * e * y1, cs = Math.cos(t * 13), s = Math.abs(cs) < 0.32 ? "e" : cs > 0 ? "f" : "b";
+        if (s !== side) { side = s; paint(s); }
+        c.style.transform = `translate(${Math.round((x - 4.5 * u) / u) * u}px, ${Math.round((y - 6 * u) / u) * u}px)`;
+        if (t < 1) requestAnimationFrame(step);
+        else { paint("f"); if (A.sfx.card) A.sfx.card(); const a = c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 120, fill: "forwards" }); a.onfinish = () => c.remove(); setTimeout(() => c.remove(), 600); }
+      };
+      requestAnimationFrame(step);
+    }, 1080);
+  }
   A.adv.introEnd = () => { A.dealer.dock(null); A.dealer.release(); };   // si saltas la intro a media frase, la termina en la esquina y se va (sin decir el resto)
 
   /* ---------------- puntuacion de una pregunta ---------------- */
@@ -800,9 +869,12 @@ window.AIQ = window.AIQ || {};
     /* en que pais cayo tu pin y cual se buscaba; y si picaste en una chincheta trampa (solo para lo que dice el crupier) */
     const g = res.guess, P0 = A.pointer;
     if (g && res.km != null && P0 && P0.countryAt) { info.pinC = P0.countryAt(g.lon, g.lat); info.tgtC = oq && oq.t === "c" ? A.tx(oq.clue ? oq.answer : oq.name) : oq ? P0.countryAt(oq.lon, oq.lat) : ""; }
+    info.left = res.left; info.sea = !!(g && res.km != null && P0 && P0.featureAt && !P0.featureAt(g.lon, g.lat));   // bloque D: el ultimo segundo y la chincheta en el agua
+    if (res.km == null && A.dealer.idleMs) { const S1 = C().S; info.idle = A.dealer.idleMs() >= Math.max(3000, ((S1 && S1.limit) || 10) * 1000 - 600); }   // se acabo el tiempo sin tocar nada
     const dcs = C().map && C().map.decoys; if (g && dcs && dcs.length && res.dist < 750) info.decoy = dcs.some(d => A.geo.haversine(g.lat, g.lon, d.lat, d.lon) < 90);   // v0.52: las chinchetas caen en cualquier sitio, tambien junto al bueno: solo si fallaste
     if (A.dealer.noteAnswer) A.dealer.noteAnswer(info);
     clearTimeout(reactT); reactT = setTimeout(() => { if (still()) A.dealer.react(kind || "quiet", info); }, 1300);
+    if (A.trastadas && A.trastadas.respuesta) A.trastadas.respuesta(res, info);   // bloque D: el sello gigante, la lluvia de cartas o el gato y tu ticket
   };
 
   /* ---------------- pistas gratis de reliquias ---------------- */
@@ -1238,7 +1310,7 @@ window.AIQ = window.AIQ || {};
       });
       relicPay(lines.filter(l => l[2] && !l[3]).map(l => l[2]));
       const wb = { big: lt.margin >= 3, c: got, p: pctOf(S.levelScore - Lv.advance, Lv.advance), rn: roundNo() + 1, close: S.levelScore - Lv.advance < Lv.advance * 0.05 ? S.levelScore - Lv.advance : null };   // close: por los pelos   // aplastar la meta (+50 %) tiene sus propias frases
-      setTimeout(() => A.dealer.react("roundWin", wb), 700);                // el crupier protesta (antes estas frases nunca se decian)
+      setTimeout(() => { if (!(boss && bossSay(true))) A.dealer.react("roundWin", wb); }, 700);   // el crupier protesta (antes estas frases nunca se decian); en un jefe, la del jefe
     } else {
       const insured = !!(run.sup && run.sup.seguro), shielded = insured || (has("shieldAct") && run.shieldAct !== run.act);
       if (shielded && !insured) run.shieldAct = run.act; else if (!shielded) { run.lives--; run.livesLostAct++; }
@@ -1260,12 +1332,21 @@ window.AIQ = window.AIQ || {};
         buttons: [{ id: "rtBtn", cls: "btn-ink", label: A.T("Reintentar con lugares nuevos", "Retry with new places"), arrow: true, primary: true, onclick: () => openShop(false) }, { id: "abBtn", cls: "btn-line", ghost: true, label: A.T("Abandonar", "Abandon"), onclick: () => endRun(false) }],
       });
       if (shielded && !insured) relicPay(["shield"], 2);
-      const lives = run.lives; setTimeout(() => A.dealer.react("roundFail", { lives, conso }), 700);
+      const lives = run.lives, close95 = Lv.advance > 0 && S.levelScore >= Lv.advance * 0.95; setTimeout(() => { if (!(boss && bossSay(false))) A.dealer.react("roundFail", { lives, conso, close95 }); }, 700);   // en un jefe, la del jefe
       A.dealer.hover($("abBtn"), "hoverAbandon");                            // si el cursor va hacia Abandonar, el crupier lo ve
       { const ab = $("abBtn"); if (ab && !abSwapped) ab.addEventListener("pointerenter", () => { if (abSwapped || !ab.isConnected) return; abSwapped = true; const sp = ab.querySelector("span"); if (sp) sp.textContent = A.pick6("Abandonar (y dejarle ganar)|Give up (and let him win)|Abandonner (et le laisser gagner)|Abandonar (e deixar ele ganhar)|Aufgeben (und ihn gewinnen lassen)|Abbandona (e lascialo vincere)|Abandonar (y dejarlo ganar)|放弃（让他赢）|포기 (딜러에게 져 주기)|降参する（勝ちを譲る）|Сдаться (и дать ему выиграть)|Poddaj się (i daj mu wygrać)"); if (A.sfx.buzz) A.sfx.buzz(1); }); }   // el boton dice la verdad (una vez por sesion)
     }
     run.sup = {}; persist();                                                // los suministros solo valen para una ronda
   };
+  /* bloque D: LA FRASE DEL JEFE al acabar su ronda, en lugar de la de una ronda normal: la de ese jefe (bossBeat_<id> / bossWins_<id>) o, alternando,
+     la general. Le ganas: cara de admirado y su gesto de jefe vencido, y se queda picado; te gana: orgulloso, y contento. Devuelve si la dijo */
+  function bossSay(won) {
+    const D = A.dealer; if (!D || !D.sayKey || !D.has) return false;
+    const id = run && run.chalKey, k1 = (won ? "bossBeat_" : "bossWins_") + id, k0 = won ? "bossBeat" : "bossWins";
+    const k = id && D.has(k1) && (!D.has(k0) || Math.random() < 0.6) ? k1 : k0;
+    if (D.mood) D.mood(won ? "picado" : "contento");
+    return D.sayKey(k, { mood: won ? "angry" : "laugh", face: won ? "admirado" : "orgulloso", gesture: won ? "r_jefe_vencido" : undefined });
+  }
   const H_HEART = L6("+1 provisión|+1 provision|+1 provision|+1 provisão|+1 Proviant|+1 provvista||+1 补给|식량 +1|+1 食料|+1 запас|+1 zapas"), H_IN = L6("dentro: {n}|inside: {n}|dedans : {n}|dentro: {n}|drin: {n}|dentro: {n}||里面：{n}|안에: {n}|中身：{n}|внутри: {n}|w środku: {n}"), H_FREE = L6("gratis|free|gratuit|grátis|gratis|gratis||免费|무료|無料|бесплатно|za darmo");
   const SAVED_PERK = "¡La red te salva (una vez por acto): no pierdes provisión! |The safety net catches you (once per act): no provision lost! |Le filet te rattrape (une fois par acte) : aucune provision perdue ! |A rede te segura (uma vez por ato): nenhuma provisão perdida! |Das Sicherheitsnetz fängt dich auf (einmal pro Akt): kein Proviant verloren! |La rete ti salva (una volta per atto): nessuna provvista persa! ||安全网接住了你（每幕一次）：补给不减！|안전망이 받아 줬어요 (막마다 한 번): 식량을 잃지 않았어요! |ネットが受け止めた（各幕に1回）：食料は失わない！|Сетка тебя поймала (раз за акт): запас не потерян! |Siatka cię łapie (raz na akt): nie tracisz zapasu! ";   // tanda 9: la Red de seguridad (antes, el Seguro)
   const SAVED_SUP = "¡El Seguro de ronda te cubre: no pierdes provisión! |Round insurance covers you: no provision lost! |L'Assurance de manche te couvre : aucune provision perdue ! |O Seguro de rodada te cobre: nenhuma provisão perdida! |Die Rundenversicherung springt ein: kein Proviant verloren! |L'Assicurazione del round ti copre: nessuna provvista persa! ||回合保险为你兜底：补给不减！ |라운드 보험이 지켜 줬습니다: 식량 손실 없음! |ラウンド保険でカバー：食料は失われなかった！ |Страховка раунда покрыла провал: ни один запас не потерян! |Ubezpieczenie rundy cię kryje: żaden zapas nie przepada! ";
@@ -1959,8 +2040,8 @@ window.AIQ = window.AIQ || {};
         A.dealer.enable(true);
         if (zero && win) { A.casa.premio(2, { fuerza: 3 }); A.dealer.say(A.dealer.line(o.last ? "betGreenFinal" : "betGreenWin"), { table: true, mood: "angry", face: "furious", gesture: o.last ? "tremble_body" : "stamp", fx: "shake", hold: 3400 }); }
         else if (zero) { A.sfx.rouZero(); A.casa.perdida({ fuerza: 2 }); A.dealer.say(A.dealer.line("betGreenLose"), { table: true, mood: "laugh", face: "laugh", gesture: "fan_self", hold: 2600 }); }
-        else if (win) { A.casa.premio(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
-        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2200 }); }
+        else if (win) { A.casa.premio(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", gesture: "r_gana_casino", hold: 2200 }); }
+        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", gesture: "r_pierde_casino", hold: 2200 }); }
       }, 150);
       setTimeout(() => { ov.addEventListener("click", close); ov.classList.add("skippable"); }, 600);
       setTimeout(close, zero ? 2900 : 2300);                                                      // el cero se queda mas: hay que verlo
@@ -2135,8 +2216,8 @@ window.AIQ = window.AIQ || {};
       setTimeout(() => {
         A.dealer.enable(true);
         if (edge) { A.casa.premio(3); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", face: "furious", gesture: "stamp", fx: "shake", hold: 3000 }); }
-        else if (win) { A.casa.premio(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2200 }); }
-        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2200 }); }
+        else if (win) { A.casa.premio(1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", gesture: "r_gana_casino", hold: 2200 }); }
+        else { A.sfx.lose(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", gesture: "r_pierde_casino", hold: 2200 }); }
       }, 150);
       sh.hold(edge ? 3000 : 2300);
     };
@@ -2199,8 +2280,8 @@ window.AIQ = window.AIQ || {};
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
-        if (info.tone === "good") { A.casa.premio(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", hold: 2400 }); }
-        else if (info.tone === "bad") { A.casa.perdida(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", hold: 2400 }); }
+        if (info.tone === "good") { A.casa.premio(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", gesture: "r_gana_casino", hold: 2400 }); }
+        else if (info.tone === "bad") { A.casa.perdida(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", gesture: "r_pierde_casino", hold: 2400 }); }
         else { A.sfx.deny(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "sly", hold: 2200 }); }
       }, 150);
       sh.hold(info.jp === 3 ? 3200 : 2800);
@@ -2268,7 +2349,7 @@ window.AIQ = window.AIQ || {};
   }
   function spinCups(o, done) {
     const SL = CUPS_SLOT, GY = CUPS_GY, ANCH = 176, LIFT = 130, ARC = 40, lerp = (a, b, t) => a + (b - a) * t, ease = p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2), easeOut = p => 1 - Math.pow(1 - p, 3);
-    const html = `<div class="tr-stage"><div class="tr-bg"></div><img class="tr-dealer" src="${A.crupierArt ? A.crupierArt("dealer_neutral", "assets/icons/dealer_neutral.webp") : "assets/icons/dealer_neutral.webp"}" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="tr-bubble"><span></span></div>
+    const html = `<div class="tr-stage"><div class="tr-bg"></div><div class="tr-dealer"><div class="tr-dl"></div></div><div class="tr-bubble"><span></span></div>
       <div class="tr-left"><div class="rou-pick"><span class="rp-dot rp-cups"></span><span class="rp-k">${A.tx(BT.seal)}</span><b>${A.tx(BETS.cups.n)} · ${o.stake}</b></div><div class="tr-hint"></div></div>
       <div class="tr-top"><b class="tr-no">${A.tx(BT2.noMore)}</b><div class="tr-res"><span class="tr-plate"></span><span class="tr-msg"></span></div></div>
       <div class="tr-band"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div></div>`;
@@ -2326,9 +2407,19 @@ window.AIQ = window.AIQ || {};
     requestAnimationFrame(render);
     const attach = (g, id) => { g.cup = id; g.tv = id == null ? 0 : 1; }, release = () => gloves.forEach(g => { g.tv = 0; });
     /* el crupier: globo (Jersey, siempre 1 s mas en pantalla), cara y pista */
-    const bubble = Q(".tr-bubble"), bTx = bubble.firstChild, dealerImg = Q(".tr-dealer"), hintEl = Q(".tr-hint"); let bubbleT = 0;
-    const face = f => { const n = "dealer_" + f, d = `assets/icons/${n}.webp`; dealerImg.dataset.cart = n; dealerImg.dataset.cdef = d; dealerImg.src = A.crupierArt ? A.crupierArt(n, d) : d; };   // con su ropa (js/vestuario.js)
-    const say = (key, f) => { const t = A.tx(A.dealer.line(key)) || ""; bTx.textContent = t; bubble.classList.add("on"); if (f) face(f); clearTimeout(bubbleT); bubbleT = setTimeout(() => bubble.classList.remove("on"), 1800 + t.length * 22 + (A.dealer.LINGER || 1000)); };
+    const bubble = Q(".tr-bubble"), bTx = bubble.firstChild, hintEl = Q(".tr-hint"); let bubbleT = 0, talkIv = 0;
+    /* bloque D: el crupier animado (js/crupier.js), el mismo en los 8 juegos de la Barra: a x4 del escenario, que ya escala a pixel entero (como el
+       del Rasca); se viste solo con tu ropa */
+    let spr = null; try { spr = A.crupier.mount(Q(".tr-dl"), { fixed: 4, fidget: !reduced }); spr.set("sly", { quiet: true }); } catch (e) { spr = null; }
+    { const bye = setInterval(() => { if (ov.isConnected) return; clearInterval(bye); clearInterval(talkIv); try { if (spr) spr.destroy(); } catch (e) { /* nada */ } }, 1000); }
+    const FACES = { neutral: "sly", laugh: "laugh", angry: "angry", shock: "shock" };
+    const face = f => { if (spr) { try { spr.set(FACES[f] || f, { quiet: true }); } catch (e) { /* nada */ } } };
+    const body = g => { if (spr && !reduced) { try { spr.play(g); } catch (e) { /* nada */ } } };
+    const sayText = (t, f) => {
+      bTx.textContent = t; bubble.classList.add("on"); if (f) face(f); clearTimeout(bubbleT); bubbleT = setTimeout(() => bubble.classList.remove("on"), 1800 + t.length * 22 + (A.dealer.LINGER || 1000));
+      if (spr) { clearInterval(talkIv); try { spr.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, t.length)) { clearInterval(talkIv); try { spr.talk(false); } catch (e) { /* nada */ } return; } try { spr.syl(); } catch (e) { /* nada */ } }, 55); }
+    };
+    const say = (key, f) => sayText(A.tx(A.dealer.line(key)) || "", f);
     const hint = k => { if (!k) { hintEl.classList.remove("on"); return; } hintEl.textContent = A.tx(TRL[k]); hintEl.classList.add("on"); };
     const plate = (kind, name, extra, msg) => { const p = Q(".tr-plate"); p.className = "tr-plate " + kind; p.innerHTML = `<b>${name}</b>${extra ? `<i>${extra}</i>` : ""}`; Q(".tr-msg").textContent = msg; const r = Q(".tr-res"); r.classList.remove("on"); void r.offsetWidth; r.classList.add("on"); };
     /* el baile */
@@ -2385,7 +2476,7 @@ window.AIQ = window.AIQ || {};
         hint(null); ov.classList.add("hush"); bubble.classList.remove("on"); A.sfx.cupDrum(900); await sleep(950);
         attach(gloves[0], pickId); await sleep(180); A.sfx.cupLift(); await lift(pickId, 1, 420); A.sfx.rouStop();
         if (win) {
-          coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); A.casa.premio(1); ov.classList.add("win", "flash");
+          coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); body("r_gana_casino"); A.casa.premio(1); ov.classList.add("win", "flash");
           const c = cups[pickId], x = c.x - 96, y0 = GY - 150; spinEl.style.display = "block"; let f = 0;                      // la doblon del juego (24 fotogramas) sale hacia el espectador y cae
           await run(reduced ? 300 : 900, p => { const h = Math.sin(Math.PI * p) * 150; spinEl.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y0 - h)}px,0)`; const nf = Math.floor(p * 36) % 24; if (nf !== f) { f = nf; spinEl.style.backgroundPositionX = -nf * 192 + "px"; } });
           spinEl.style.display = "none"; sh.outcome(); plate("win", A.tx(BT.won), "×2", "+" + rec.pay); say("betWin");
@@ -2397,7 +2488,8 @@ window.AIQ = window.AIQ || {};
           for (const oc of cups) if (oc.id !== pickId) { attach(gloves[1], oc.id); await sleep(150); A.sfx.cupLift(); await lift(oc.id, 1, 360); await sleep(joke ? 330 : 240); }
           release(); ov.classList.add("lose");
           if (joke) {                                                                          // el chiste del trilero: los tres vacios; suelta el doblon de entre los dedos, guina y se lo guarda
-            ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh"); await sleep(800);
+            ov.classList.add("joke"); ov.classList.remove("hush"); face("laugh");
+            await sleep(800);
             openGlove.x = 560; openGlove.y = 232; openGlove.f = 0; openGlove.tv = 1; await sleep(reduced ? 0 : 280);   // la mano sube cerrada...
             for (let f = 1; f <= 5; f++) { openGlove.f = f; if (!reduced) await sleep(60); }                       // ...y se abre: el doblon, en la palma
             jokeCoin.style.display = "block"; jokeCoin.style.transform = `translate3d(${openGlove.x + 132}px,${openGlove.y + 208}px,0)`;
@@ -2405,7 +2497,7 @@ window.AIQ = window.AIQ || {};
             sh.hold(5200); await sleep(2600);
             await run(reduced ? 200 : 520, p => { const e = easeOut(p); jokeCoin.style.transform = `translate3d(${Math.round(lerp(openGlove.x + 132, 860, e))}px,${Math.round(lerp(openGlove.y + 208, 360, e) - Math.sin(Math.PI * p) * 70)}px,0)`; jokeCoin.style.opacity = 1 - p * 0.9; });
             jokeCoin.style.display = "none"; A.sfx.stamp();
-          } else { sh.outcome(); face("laugh"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
+          } else { sh.outcome(); face("laugh"); body("r_pierde_casino"); A.sfx.lose(); say("betLose"); plate("lose", A.tx(BT.lost), "", "−" + o.stake); ov.classList.add("flash"); sh.hold(3000); }
         }
       } catch (e) {
         if (e === CANCEL) { if (!sh.closed && !ov.isConnected) sh.bail("capa retirada"); return; }   // otra pantalla se llevo la capa: que el Campamento no se quede bloqueado

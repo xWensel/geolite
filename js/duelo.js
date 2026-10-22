@@ -261,7 +261,7 @@ window.AIQ = window.AIQ || {};
   /* escala del duelo: el diseno es a 1280 x 720 y se escala entero (como las pantallas de gala), sin pasar de la escala de la interfaz.
      La variable solo se escribe si cambia (una variable en el cuerpo recalcula los estilos de toda la pagina) */
   function fitDk() { const k = Math.max(0.5, Math.min(innerWidth / 1280, innerHeight / 720, (A.uiK && A.uiK()) || 1)).toFixed(3), b = document.body.style; if (b.getPropertyValue("--dk") !== k) b.setProperty("--dk", k); return +k; }
-  addEventListener("resize", () => { if (!st && !document.querySelector(".du-wrap")) return; fitDk(); if (st && st.pins) { st.pins.rect = null; st.pins.sig = ""; } if (st) factFit(); });
+  addEventListener("resize", () => { if (!st && !document.querySelector(".du-wrap")) return; fitDk(); if (st && st.pins) { st.pins.rect = null; st.pins.sig = ""; } if (st) factFit(); if (st && st.phase === "end" && catOn) setTimeout(catFin, 200); });   // el gato del veredicto, a su sitio
 
   /* ---------------- el crupier: habla al sentarte y en el veredicto (el de las frases, js/dealer.js, sentado en un hueco de la pantalla);
      durante la partida solo pone caras (un sprite propio, js/crupier.js). Las frases siguen su guion: nunca se le corta */
@@ -300,6 +300,48 @@ window.AIQ = window.AIQ || {};
   const unseat = () => { if (DL().dock) { DL().dock(null); DL().release(); } };       // si esta a media frase, la acaba en su esquina y se va
   const speak = (text, o = {}) => { if (DL().say) DL().say(text, { force: true, mood: o.mood || "sly", face: o.face, gesture: o.gesture, done: o.done, valid: o.valid }); else if (o.done) o.done(); };
   const face = (e, g) => { if (!st || !st.spr) return; st.spr.set(e); if (g) st.spr.play(g); };
+  /* ---------------- BLOQUE D: contra la banca, el crupier habla con sus frases nuevas (js/dealer.js, claves duel*, en los 12 idiomas; las de LN se
+     quedan para la sala y entre amigos) y reacciona con el cuerpo: en las rondas, el gesto siempre y la frase 1 de cada 3 (como en la partida),
+     una frase por ronda como mucho salvo cuando se da la vuelta el marcador. Entre amigos, lo de siempre */
+  const bank = () => !!st && !st.net;
+  const pk = (k, d) => (DL().pick ? DL().pick(k, d) : null);
+  const named = k => (myName() && DL().has && DL().has(k + "Name") && Math.random() < 0.4 ? k + "Name" : k);   // con tu nombre, a veces
+  const gest = g => { if (st && st.spr && g && !live()) st.spr.play(g); };
+  /* revision del 22-oct: LA PARTIDA ES SAGRADA. Mientras se contesta o se revela una ronda, el crupier ni habla ni sale: solo en el cara a cara
+     (la moneda) y en el veredicto (con Comodin en la mesa) */
+  const live = () => !!st && (st.phase === "ask" || st.phase === "reveal");
+  /* una frase en plena partida: el crupier de las frases se sienta en su rincon (el propio se esconde mientras habla: tick) */
+  const talk = (k, o = {}) => { if (!bank() || live() || (st.cur && st.cur.said && !o.force)) return false; const t = pk(k, o.data); if (!t) return false; if (st.cur) st.cur.said = true; seat($("duSeat")); speak(t, { mood: o.mood, face: o.face, gesture: o.gesture, valid: o.valid }); return true; };
+  /* LA MONEDA DEL DUELO (trastada de js/trastadas.js): lanza su doblon al aire desde la mano, suena al caer. Con el crupier de las frases a la
+     vista, el; si no, el de su rincon */
+  function coin() {
+    if (!st || !A.trastadas || !A.trastadas.fx) return false;
+    const vis = DL().faceRect && DL().faceRect(), own = st.spr && st.spr.cv && !st.ownOff && st.spr.cv.isConnected ? st.spr.cv.getBoundingClientRect() : null, r = vis || own;
+    if (vis && DL().gesture) DL().gesture("e_moneda"); else gest("e_moneda");
+    if (r && r.width) later(() => { if (st) A.trastadas.fx.moneda(r.left + r.width * 0.62, r.top + r.height * 0.5); }, 650);
+    return true;
+  }
+  if (A.trastadas && A.trastadas.registra) A.trastadas.registra("moneda", () => (st && !st.net && st.phase !== "end" ? coin() : false));
+  /* COMODIN SUBE A LA MESA A MIRAR: en el veredicto, sentado en la tarima entre las dos pilas (al grano del crupier, fuera del escenario escalado
+     para que su pixel sea entero). Si entre las pilas y sus rotulos no cabe, no sale. Durante las rondas no: el mapa es para jugar */
+  let catIv = 0, catOn = false, catHost = null;
+  const catOff = () => { clearInterval(catIv); if (!catOn) return; catOn = false; const e = A.comodin && A.comodin.el(); if (e && e.parentElement === catHost) A.comodin.hide(); };   // solo si el gato sigue siendo el de la mesa del duelo
+  function catFin() {
+    clearInterval(catIv); if (!A.comodin || !A.COMODIN_DATA || !bank()) return;
+    const wrap = document.querySelector("#dlg .du-wrap"), dais = document.querySelector("#dlg .du-fin .mesa .dais"), cols = [...document.querySelectorAll("#dlg .du-fin .mesa .col")];
+    if (!wrap || !dais || cols.length < 2) return;
+    const W = wrap.getBoundingClientRect(), d = dais.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, k = Math.max(1, (DL().k && DL().k()) || 2);
+    const B = A.COMODIN_DATA.box, cw = (B[2] - B[0]) * k / dpr, ch = (B[3] - B[1]) * k / dpr;
+    const piles = cols.map(c => c.querySelector(".pile").getBoundingClientRect()), lab = cols.map(c => [...c.querySelectorAll("b, span")].map(e => e.getBoundingClientRect()));
+    const x0 = piles[0].right + 6, x1 = piles[1].left - 6, top = d.top - ch, mx = (x0 + x1) / 2, cl = mx - cw / 2 - 4, cr = mx + cw / 2 + 4;
+    const hit = r => r.right > cl && r.left < cr && r.bottom > top;                 // un rotulo que caeria encima del gato
+    if (x1 - x0 < cw || lab.flat().some(hit)) { catOff(); return; }
+    let host = wrap.querySelector(".cm-host.du-cat"); if (!host) { host = document.createElement("div"); host.className = "cm-host du-cat"; wrap.appendChild(host); } catHost = host;
+    host.style.top = "0"; host.style.left = "0"; host.style.right = "0"; host.style.height = Math.round(d.top - W.top) + "px";
+    const cx = Math.round((x0 + x1) / 2 - W.left);
+    A.comodin.show({ host, k: () => Math.max(1, (DL().k && DL().k()) || k), floor: 0, x: cx, min: cx, max: cx, mode: "still", dir: -1 }); catOn = true;
+    catIv = setInterval(() => { if (!host.isConnected) catOff(); }, 500);
+  }
 
   /* pantalla de gala del duelo: tapete a toda la ventana y el lienzo de 1280 x 720 centrado y escalado */
   const stage = (cls, inner, extra = "") => `<div class="du-wrap"><div class="gx-veil"></div><div class="du-spot"></div><div class="du-stage du-st gx-layer gx-in"><div class="g12 ${cls}">${inner}</div>${extra}</div></div>`;
@@ -376,7 +418,7 @@ window.AIQ = window.AIQ || {};
     const c = C(), S = c.S; if (S.duel) D.leave(true); else seat(null);
     c.openSettings(false); A.audio.unlock(); pool(); fitDk();
     if (o.liga) { const r = rankOf(stats().lp); o = { ...o, table: CFG.tables[r.league].id, level: o.level == null ? rankLevel(r) : o.level }; }   // duelo de liga: la mesa y la banca salen de tu division
-    st = S.duel = mkState(o);
+    st = S.duel = mkState(o); st.rematch = !!o.rematch;
     S.run = null; S.tool = null; S.ranked = null; S.level = 0; S.qs = []; S.qi = 0; S.levelScore = 0; S.runTotal = 0; S.streak = 0; S.hits = 0; S.log = null;
     S.camp = { id: "duelo", mode: "duel", title: A.L6(NAME6), home: { lat: 0, lon: 0, zoom: 1 }, levels: [{ kind: "city", seconds: secsOf(1), advance: 0, maxPerQ: 1000, name: st.table.n }] };
     c.map.setHome(S.camp.home); c.map.clearMarks(); c.map.setDecoys([]); A.music.mode(1);
@@ -401,7 +443,13 @@ window.AIQ = window.AIQ || {};
     let done = false, talking = !!DL().say, timeUp = false, left = Math.ceil(CFG.introSecs);
     const end = () => { if (done || st !== sT || st.phase === "end") return; done = true; clearInterval(iv); cb(); };   // (phase "end": el otro se fue durante el cara a cara y ya esta el veredicto)
     const cnt = $("duCnt"), iv = setInterval(() => { if (st !== sT || done || st.phase === "end") return clearInterval(iv); left--; cnt.textContent = left > 0 && left <= 3 ? Tf("Empieza en {n}", "Starts in {n}", { n: left }) : ""; if (left <= 0) { timeUp = true; if (!talking) end(); } }, 1000);
-    seat($("duVsSeat")); speak(line(nt ? "vs2" : "vs"), { done: () => { talking = false; if (timeUp) end(); } });
+    /* contra la banca: su frase de bienvenida al duelo (o la de la revancha) y la moneda al aire; entre amigos, la de siempre */
+    const k0 = nt ? null : sT.rematch ? "duelRematch" : named("duelStart"), t0 = k0 && pk(k0);
+    seat($("duVsSeat")); speak(t0 || line(nt ? "vs2" : "vs"), { gesture: t0 ? (sT.rematch ? "e_invita" : "e_moneda") : undefined, done: () => { talking = false; if (timeUp) end(); } });
+    if (t0 && A.trastadas && A.trastadas.fx) {
+      if (sT.rematch) later(coin, 2500);                                    // la revancha: primero te invita y luego la moneda
+      else later(() => { const r = DL().faceRect && DL().faceRect(); if (r && r.width && st === sT && st.phase !== "end") A.trastadas.fx.moneda(r.left + r.width * 0.62, r.top + r.height * 0.5); }, 650);
+    }
     S.skipIntro = end; document.querySelector("#dlg .du-wrap").onclick = end; later(end, CFG.introSecs * 1000 + 15000);   // red de seguridad
   }
 
@@ -422,12 +470,10 @@ window.AIQ = window.AIQ || {};
       <div class="bal"><span><i id="duBal"></i></span></div>
       <div class="cuenta" id="duCuenta"></div></div>`);
     if (SO) { SO.badge($("duBdMe"), { w: 80 }); if (his) SO.badge($("duBdRv"), { w: 80, other: true, t: his.t, marco: his.marco, icon: his.icon }); }
-    add("duSeat", "du-seat", `<div class="own" id="duOwn"></div>`);
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Rendirse", "Give up")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
     add("duPins", "du-pins du-st", `<svg aria-hidden="true"><line class="me"></line><line class="rv"></line></svg>`);
-    if (A.crupier) st.spr = A.crupier.mount($("duOwn"), { round: true });
-    if (DL().busy) { seat($("duSeat")); DL().release(); } else unseat();     // si aun hablaba (saltaste el cara a cara), acaba la frase en su sitio de la mesa
+    st.spr = null; unseat(); if (DL().hide) DL().hide();                    // a la mesa sin el: la partida es sagrada (si aun hablaba en el cara a cara, ahi se queda)
     /* rendirse: dos pulsaciones, como todo lo que no tiene vuelta atras */
     { const b = $("duQuit"); let armed = 0;
       b.onclick = () => { if (!st || st.phase === "end") return; if (!armed) { armed = setTimeout(() => { armed = 0; b.classList.remove("armed"); }, 4000); b.classList.add("armed"); A.sfx.deny(); return; }   // armado ensena «¿Seguro?» en el mismo hueco
@@ -489,7 +535,7 @@ window.AIQ = window.AIQ || {};
   function obstacles() {
     const cv = C().map.cv.getBoundingClientRect(), dk = parseFloat(document.body.style.getPropertyValue("--dk")) || 1, out = [];
     const add = (e, p = 12, grow = 0) => { if (!e || !e.getClientRects().length) return; const r = e.getBoundingClientRect(); if (r.width > 1 && r.height > 1) out.push([r.left - cv.left - p, r.top - cv.top - p, r.right - cv.left + p, r.bottom - cv.top + p + grow]); };
-    add($("plate")); add($("duHud"), 12, $("duHud").classList.contains("rev") ? 0 : 90 * dk); add($("duSeat"), 0); add($("duTools")); add($("dock")); add($("rail"));
+    add($("plate")); add($("duHud"), 12, $("duHud").classList.contains("rev") ? 0 : 90 * dk); add($("duTools")); add($("dock")); add($("rail"));
     const w = 592 * dk, h = 132 * dk; out.push([(cv.width - w) / 2 - 12, cv.height - 32 * dk - h - 12, (cv.width + w) / 2 + 12, cv.height]);   // la tira del dato, que aun no ha salido
     return out;
   }
@@ -500,6 +546,7 @@ window.AIQ = window.AIQ || {};
     if (!st.t0) st.t0 = performance.now();
     S.qs.push(cur.q); S.qi = st.k - 1; S.camp.levels[0].seconds = cur.secs; S.camp.levels[0].kind = cur.q.kind || "city";
     pinsSet([]); $("duHud").classList.remove("rev"); $("duCuenta").innerHTML = ""; $("duFact").classList.add("hidden"); face("sly");
+    if (bank() && st.k === CFG.rounds - 2 && !st.lateSaid) { st.lateSaid = true; later(() => talk("duelLate", { gesture: "e_reloj", face: "dare", force: true, valid: () => !!st && st.phase === "ask" }), 400); }   // empiezan las ultimas rondas: aqui se paga caro
     c.nextQuestion();                                                     // placa, reloj, mapa listo para el clic y D.hud()
     cur.t0 = performance.now(); cur.rvAt = Math.min(cur.bot.t, cur.secs - 0.4);
     if (st.net) { const nt = st.net; cur.t0 = S.t0 = Rd().perfAt(nt.s); cur.rvAt = Infinity; nt.want = st.k; nt.ack = nt.rdy = false; nt.s = 0; netLoop(); }   // entre jugadores, el reloj es el del servidor: empieza para los dos a la vez
@@ -511,7 +558,8 @@ window.AIQ = window.AIQ || {};
     const cur = st.cur; cur.rvLocked = true; cur.rvT = elapsed(); A.sfx.knock();
     if (cur.meAns) return resolve();
     rush(); if (cur.auto) cur.autoAt = Math.min(cur.autoAt, cur.rvT + CFG.lockRush - 0.3);
-    D.hud(); face("shock");                                               // su etiqueta en rojo, el reloj a 5 s y el crupier con cara de susto; sin bocadillo
+    D.hud(); face("shock", bank() ? "snap" : null);                        // su etiqueta en rojo, el reloj a 5 s y el crupier con cara de susto (y un chasquido: ya esta)
+    if (bank() && Math.random() < 1 / 3) talk("duelHeFirst", { gesture: "snap", valid: () => !!st && st.cur === cur && st.phase === "ask" });   // 1 de cada 3, con frase
   }
   /* tu respuesta (js/game.js, reveal): guess = { lon, lat }, o null si se acabo el tiempo. Se queda fijada (tu ficha, clavada en el mapa) y el revelado espera al rival */
   D.answer = guess => {
@@ -526,13 +574,13 @@ window.AIQ = window.AIQ || {};
     cur.meAns = { lon: guess.lon, lat: guess.lat, t: elapsed() };
     C().map.setPick(false); pinsSet([{ who: "me", lon: guess.lon, lat: guess.lat, ct: C().map.pickCt, drop: true }]);
     if (cur.rvLocked) return resolve();
+    if (bank()) { gest("e_reloj"); if (Math.random() < 1 / 3) talk("duelYouFirst", { gesture: "e_reloj", valid: () => !!st && st.cur === cur && st.phase === "ask" }); }   // fijas tu antes: mira el reloj
     cur.rvAt = Math.min(cur.rvAt, cur.meAns.t + CFG.lockRush - 0.3); rush(); D.hud();
   };
   function tick() {
     raf = st ? requestAnimationFrame(tick) : 0; if (!st) return;
-    const c = C(), S = c.S, cur = st.cur, own = $("duOwn");
+    const c = C(), S = c.S, cur = st.cur;
     if (st.pins) pinsTick();
-    if (own) { const hide = !!DL().busy; if (hide !== st.ownOff) { st.ownOff = hide; own.classList.toggle("hidden", hide); if (st.spr) st.spr.shown(!hide); } }   // nunca dos crupieres: el de las frases, mientras hable, ocupa el sitio
     if (st.phase !== "ask" || !cur || !cur.t0 || S.phase !== "asking" || S.paused) return;
     const el = elapsed();
     if (cur.meAns && c.map.pickEnabled) c.map.setPick(false);              // volver de la pausa no reabre una respuesta ya fijada
@@ -588,7 +636,7 @@ window.AIQ = window.AIQ || {};
     later(show(["duBm"], 0), R.pm); later(show(["duBr"], 1), R.pr); later(show(["duBd"], 2), R.diff); later(show(["duO1", "duBx"], 3), R.mult);
     later(() => { show(["duO2", "duBp"])(); if (!live()) return; if (rd.pay) A.sfx.countEnd();
       if (st.net) face(!rd.pay ? "puzzled" : Math.abs(rd.pay) >= 900 ? "shock" : win ? "wink" : "smug");   // entre jugadores el crupier no cobra ni paga: solo mira
-      else face(lose ? (-rd.pay >= 900 ? "laugh" : "smug") : win ? (rd.pay >= 900 ? "angry" : "suspicious") : "puzzled"); }, R.pay);
+      else roundReact(rd, g, win, lose); }, R.pay);
     later(() => { if (live() && rd.pay) fly(win ? "rv" : "me", win ? "me" : "rv"); }, R.fly);
     later(() => { if (!live()) return; st.shown = { me: st.me, rv: st.rv }; st.rolled = true; D.hud(); c.odoSet($("duMe"), st.me, { ms: R.rollMs, tick: !!rd.pay && win }); c.odoSet($("duRv"), st.rv, { ms: R.rollMs, tick: !!rd.pay && lose }); }, R.roll);
     /* avanza sola: los tres ultimos segundos se cuentan en la tira del dato; con el menu o Ajustes delante, espera */
@@ -597,6 +645,23 @@ window.AIQ = window.AIQ || {};
     if (st.net && !st.over) { netReady(st.k + 1, total); later(() => { const e = $("duNext"); if (live() && e && e.classList.contains("hidden")) { e.textContent = T("Esperando…", "Waiting…"); e.classList.remove("hidden"); } }, total + 700); return; }
     for (let n = 3; n >= 1; n--) if (total - n * 1000 > R.row) later(() => { const e = $("duNext"); if (live() && e) { e.textContent = Tf("Sigue en {n}", "Next in {n}", { n }); e.classList.remove("hidden"); } }, total - n * 1000);
     later(go, total);
+  }
+  /* BLOQUE D: la banca reacciona a la ronda: la cara de siempre y, con ella, el gesto (aciertas tu, r_acierto; acierta el, fan_open; casi igual o
+     empate, pinch; sin respuesta, r_tiempo). Frase: siempre si el marcador se da la vuelta, a mitad de duelo, sin respuesta o empate a puntos;
+     si no, 1 de cada 3 (cerca los dos, aciertas tu, acierta el) */
+  function roundReact(rd, g, win, lose) {
+    const me = rd.me, rv = rd.rv, close = !!g && me.km != null && rv.km != null && Math.abs(me.km - rv.km) < 150;
+    face(lose ? (-rd.pay >= 900 ? "laugh" : "smug") : win ? (rd.pay >= 900 ? "angry" : "suspicious") : "puzzled", !g ? "r_tiempo" : !win && !lose || close ? "pinch" : win ? "r_acierto" : "fan_open");
+    const lead = Math.sign(st.me - st.rv), was = st.leadWas || 0, valid = () => !!st && st.phase === "reveal"; st.leadWas = lead;
+    if (was < 0 && lead > 0 && talk("duelYouBack", { gesture: "crumple", face: "angry", force: true, valid })) return;
+    if (was > 0 && lead < 0 && talk("duelHeBack", { gesture: "preen", face: "smug", force: true, valid })) return;
+    if (st.k === Math.round(CFG.rounds / 2) && lead && !st.midSaid) { st.midSaid = true; if (talk(lead > 0 ? "duelYouLead" : "duelHeLead", { gesture: lead > 0 ? "fan_self" : "twirl_moustache", face: lead > 0 ? "nervous" : "smug", force: true, valid })) return; }
+    if (!g) { talk("duelNoAnswer", { gesture: "r_tiempo", face: "laugh", valid }); return; }
+    if (!rd.pay && rv.km != null && me.pts === rv.pts) { talk("duelTieRound", { gesture: "pinch", face: "puzzled", valid }); return; }
+    if (Math.random() >= 1 / 3) return;
+    if (close) talk("duelClose", { gesture: "pinch", face: "suspicious", valid });
+    else if (win) talk("duelYouHit", { gesture: "r_acierto", face: rd.pay >= 900 ? "angry" : "suspicious", valid });
+    else if (lose) talk("duelHeHit", { gesture: "fan_open", face: "smug", valid });
   }
   /* el dato de la tira: las primeras frases del dato del lugar hasta unas 130 letras, sin cortar ninguna a medias (ni en una abreviatura: «a. C.», «EE. UU.») */
   const shortFact = t => { const parts = String(t || "").split(/(?<=[a-záéíóúñ)\]»”"]{3}[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡«“"(])/); let out = ""; for (const p of parts) { if (out && out.length + p.length > 130) break; out += (out ? " " : "") + p; } return out.trim(); };
@@ -669,11 +734,19 @@ window.AIQ = window.AIQ || {};
     polInit();
     $("duExit").onclick = () => c.showHub("home");
     if (nt) $("duRoom").onclick = roomBack;
-    else { $("duRematch").onclick = () => D.start(s.liga ? { liga: true, auto: s.auto } : { table: tb.id, level: s.level, auto: s.auto }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
+    else { $("duRematch").onclick = () => D.start(s.liga ? { liga: true, auto: s.auto, rematch: true } : { table: tb.id, level: s.level, auto: s.auto, rematch: true }); $("duTables").onclick = () => { c.showHub("home"); D.open(); }; }
     seat($("duVdSeat"));
     if (club) A.club.play(club, document.querySelector("#dlg .du-club"), 1900);
     if (nt) speak(line(o.lost ? "lost2" : o.left ? "left2" : o.quit === "rv" ? "quit2" : o.quit ? "quit" : win ? "win2" : "lose2"), win ? { gesture: "hat_tip" } : { face: "sly" });
-    else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "laugh" });
+    else {                                                                   // bloque D: contra la banca, sus frases nuevas, su gesto y su humor
+      const key = o.quit ? null : o.tie ? "duelTie" : win ? "duelYouWin" : named("duelHeWins"), t = key && pk(key);
+      const up = lg && r1.idx > r0.idx && pk("duelLeague", { l: rankName(r1) });          // subes de liga: lo sella
+      if (DL().mood && !o.tie && !o.quit) DL().mood(win ? "picado" : "contento");
+      const next = up ? () => later(() => speak(up, { gesture: "e_sella", face: "orgulloso" }), 500) : undefined;
+      if (t) speak(t, { gesture: o.tie ? "pinch" : win ? "r_jefe_vencido" : "e_paga", face: win ? "admirado" : o.tie ? "puzzled" : "laugh", done: next });
+      else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip", done: next } : { face: "laugh", done: next });
+      later(catFin, 1600);                                                  // y Comodin sube a la mesa a mirar las pilas
+    }
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
     if (st.auto && st.auto.done) st.auto.done(sum);
   }
@@ -889,6 +962,7 @@ window.AIQ = window.AIQ || {};
   D.leave = again => {
     const c = C(); timers.forEach(clearTimeout); timers = []; document.querySelectorAll(".du-fly").forEach(e => e.remove());
     if (st && st.spr) st.spr.destroy();
+    catOff();                                                               // Comodin baja de la mesa
     if (!again) unseat(); else seat(null);
     for (const id of ["duHud", "duSeat", "duTools", "duFact", "duPins"]) { const e = $(id); if (e) e.remove(); }
     document.body.classList.remove("duelo-on", "duelo-lock"); if (A.codex && A.codex.toastAside) A.codex.toastAside();

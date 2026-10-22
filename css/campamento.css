@@ -245,6 +245,7 @@ html.reduce-motion .rou-no { display: none; }
 .rou.cups .tr-stage img { image-rendering: pixelated; display: block; }
 .rou.cups .tr-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 38%, #3d1024 0%, #14050e 58%, #05010a 100%); }
 .rou.cups .tr-dealer { position: absolute; left: 751px; top: 44px; width: 384px; height: 384px; z-index: 2; image-rendering: pixelated; }   /* 96 px de arte a x4 (el pixel de la mesa) */
+.rou.cups .tr-dl { position: absolute; left: 0; top: -64px; width: 384px; height: 448px; }   /* bloque D: el crupier animado, 96x112 a x4 (16 filas arriba para la chistera que salta), como el del Rasca */
 .rou.cups .tr-bubble { position: absolute; left: 1160px; top: 150px; max-width: 560px; z-index: 6; padding: 14px 20px 12px; background: #fff; color: #120a2a; border: 4px solid #0a0048; box-shadow: 0 6px 0 #0a0048;
   font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; pointer-events: none; }
 .rou.cups .tr-bubble.on { opacity: 1; transform: none; }

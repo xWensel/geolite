@@ -1,15 +1,19 @@
 /*
- * Geolite - DON CRUPIER, el sprite animado. Todo el arte es de Pixel Lab: 18 caras, 40 gestos y el aplauso de palco dibujados enteros a 96 px (lienzo de 96x112:
- * 16 filas arriba para la chistera que salta) y piezas de vida que se ponen encima (tres bocas para hablar, parpadeo y mirada). El codigo
- * solo elige el dibujo y pone las piezas; nunca dibuja. Los 8 gestos sencillos (asentir, mecerse, temblar, acercarse, helarse, guinar...)
- * mueven el dibujo entero a pixel completo.
+ * Geolite - DON CRUPIER, el sprite animado. Todo el arte es de Pixel Lab: 24 caras, 91 gestos (los 40 de siempre, 10 de ellos rehechos, mas
+ * 24 reacciones, 11 de escena y 6 bucles de espera), 57 variantes de gesto con la cara de la frase y el aplauso de palco, dibujados enteros
+ * a 96 px (lienzo de 96x112: 16 filas arriba para la chistera que salta) y piezas de vida que se ponen encima (bocas para hablar, parpadeo y
+ * mirada en 4 posiciones). El codigo solo elige el dibujo y pone las piezas; nunca dibuja. Los 8 gestos sencillos (asentir, mecerse, temblar,
+ * acercarse, helarse, guinar...) mueven el dibujo entero a pixel completo.
  *
  *   const s = A.crupier.mount(host, o)    pinta el crupier dentro de `host` (un <canvas> nitido: escala ENTERA de pixel de pantalla)
  *   s.set("laugh")                        expresion (A.crupier.list()); cada una con su reposo, su parpadeo y su forma de hablar
  *   s.talk(true) / s.syl() / s.talk(false)  boca al ritmo de la frase (dealer.js llama a syl() en cada letra que suena)
  *   s.play("hat_off_bow", fin, alToque)   gesto de un solo disparo (A.crupier.gestures()) y vuelve a su cara; los "hold" se
  *   s.release()                           quedan en su pose hasta release() (p. ej. al acabar la frase)
- *   s.look(-1|0|1|2|null)                 hacia donde mira (solo con los ojos de su cara normal: -1 izquierda, 1 derecha)
+ *   s.look(-1|0|1|2|"duda"|null)          hacia donde mira (solo con los ojos de su cara normal: -1 izquierda, 1 derecha, 2 abajo, "duda")
+ *   s.follow(true)                        te sigue con los ojos (puntero o mira del mando); s.doubt(true): si te quedas quieto 2 s, duda contigo
+ *   s.loops([...]) / s.loops(null)        bucles de espera que rotan cuando no habla (cada 7-12 s); null = los de su cara
+ *   s.rest("bored")                       la cara a la que vuelve al callar (el humor: A.crupier.HUMOR)
  *   s.fit()                               recalcula la escala (se llama sola al cambiar de tamano o de pantalla)
  * o: { fidget: false } sin gestos sueltos, { still: true } quieto (sin respirar, parpadear ni gestos sueltos: capturas y movimiento
  *    reducido), { mini: true } solo la cabeza (tutorial), { floor: true } de pie en el borde de abajo (con bottom: 0 en su CSS),
@@ -60,7 +64,23 @@ window.AIQ = window.AIQ || {};
     bow: { blink: 0, breath: 0, enter: "hat_off_bow" },
     dark: { dark: 1, talk: 0, blink: 0, idle: [[{}, 5000], [{ off: 1 }, 100]] },
     dark_vexed: { dark: 1, talk: 0, blink: 0, idle: [[{}, 3300], [{ off: 1 }, 100]] },
+    /* bloque D: seis caras nuevas, cada una con su propia boca para hablar (tm_<cara>, Pixel Lab) */
+    admirado: { talk: 0, fidget: ["hand_heart", "fan_open"] },
+    tramando: { talk: 0, fidget: ["twirl_moustache", "b_ficha"] },
+    orgulloso: { talk: 0, fidget: ["preen", "fan_self"] },
+    aliviado: { talk: 0, breath: 1800 },
+    cansado: { talk: 0, breath: 2200, talkMs: 110, fidget: ["yawn", "b_estira"] },
+    ofendido: { talk: 0, fidget: ["cards_tap", "finger_wag"] },
   };
+  /* EL HUMOR (bloque D): segun tu partida, la cara a la que vuelve al callar y sus bucles de espera. contento = el de siempre */
+  const HUMOR = {
+    contento: { face: "sly", loops: ["shuffle", "b_carta", "b_ficha", "b_corta"] },
+    tenso: { face: "nervous", loops: ["fan_self", "e_reloj", "cards_tap"] },
+    picado: { face: "ofendido", loops: ["cards_tap", "b_guante", "finger_wag"] },
+    aburrido: { face: "bored", loops: ["b_estira", "b_peso", "e_reloj"] },
+    admirado: { face: "admirado", loops: ["fan_open", "hand_heart", "shuffle"] },
+  };
+  const ESPERA = ["b_guante", "b_peso", "b_estira", "b_carta", "b_ficha", "shuffle", "b_corta"];   // los bucles de espera de siempre
   const ALIAS = {
     expr: { boss: "dare", deadpan: "bored", doze: "sleep", neutral: "sly", dark_innocent: "dark" },
     gest: { hat_hop: "hat_pop", hat_jump: "hat_pop", flinch: "hat_pop", bow: "hat_off_bow", mourn: "hat_chest", fan: "fan_self", wag: "finger_wag", twirl: "twirl_moustache", bowtie: "preen", toss: "coin_toss", slam: "crumple" },
@@ -75,6 +95,11 @@ window.AIQ = window.AIQ || {};
     jot: [1157], glass_knock: [923], snap: [830], magic_pass: [963], turn_away: [1162, "lock"], head_tilt: [749], hand_heart: [1314], cards_tap: [706],
     pocket_coin: [896], blow: [745, "lock"], yawn: [759, "lock"],
   };
+  /* bloque D: los 10 rehechos (16 fotogramas) y los nuevos van a 100 ms por fotograma, como en la maqueta aprobada: 24 reacciones (r_, 8),
+     11 de escena (e_, 16-24) y 6 bucles de espera (b_, 16). La duracion sale de sus fotogramas */
+  ["shuffle", "card_reveal", "hand_heart", "fan_open", "cards_tap", "fan_self", "pocket_coin", "finger_wag", "snap", "pinch"].forEach(g => { GT[g] = [0]; });
+  const NUEVO = /^[reb]_/;
+  const tOf = (id, n) => { const t = GT[id.split("@")[0]] || (NUEVO.test(id) ? [0] : null); return t && (t[0] ? t : [n * 100, ...t.slice(1)]); };
   /* gestos por codigo: el dibujo entero se mueve a pixel completo (x, y), cierra los ojos (shut), guina (wink) o falla la senal (w: bandas de
      filas desplazadas [fila0, fila1, dx]) */
   const shake = (n, a, b, ms) => Array.from({ length: n }, (_, i) => [{ x: i % 2 ? b : a }, ms]);
@@ -102,7 +127,7 @@ window.AIQ = window.AIQ || {};
   function gx(id) {
     if (gfx[id] || GC[id]) return gfx[id] || GC[id];
     if (GQ[id]) { const g = D().gest[id], q = GQ[id]; return g ? (gfx[id] = { pm: g, frames: q.frames, peak: -1, hold: false, lock: false, keep: !!q.keep, hit: q.hit }) : null; }
-    const g = D().gest[id], t = GT[id.split("@")[0]]; if (!g || !t) return null;   // "jot@suspicious": la variante con esa cara, al tiempo del gesto
+    const g = D().gest[id]; if (!g) return null; const t = tOf(id, g.frames.length); if (!t) return null;   // "jot@suspicious": la variante con esa cara, al tiempo del gesto
     const n = g.frames.length, cut = t.includes("cut"), ida = g.ida && !cut;
     const seq = []; for (let i = 0; i < n; i++) seq.push(i); if (ida) for (let i = n - 2; i >= 0; i--) seq.push(i);
     const per = Math.max(60, Math.min(150, Math.round(t[0] / seq.length))), extra = Math.max(0, t[0] - per * seq.length);
@@ -110,7 +135,7 @@ window.AIQ = window.AIQ || {};
     return (gfx[id] = { pm: g, frames: seq.map((f, i) => [f, per + (i === peak ? extra : 0)]), peak, hold: t.includes("hold"), lock: t.includes("lock") });
   }
   const exprId = id => EX[id] ? id : ALIAS.expr[id] || "sly";
-  const gestId = id => { const g = GC[id] || GT[id] || GQ[id] ? id : ALIAS.gest[id]; return g && (GC[g] || (D().gest[g] && (GT[g] || GQ[g]))) ? g : null; };
+  const gestId = id => { if (!id) return null; const g = GC[id] || GT[id] || GQ[id] || NUEVO.test(id) ? id : ALIAS.gest[id]; return g && (GC[g] || (D().gest[g] && (GT[g] || GQ[g] || NUEVO.test(g)))) ? g : null; };
 
   /* ------------------------------------------------------------ composicion: un lienzo de trabajo de 96x112 compartido */
   let work, wctx;
@@ -133,7 +158,8 @@ window.AIQ = window.AIQ || {};
     }
     c.putImageData(im, 0, 0);
   }
-  /* p: { e: cara, g: gesto de Pixel Lab (o null), f: su fotograma, l: "l"|"r", shut, open, wink, off, m: boca "eh"|"ah"|"oh", m2: segunda
+  const LOOK = { l: "look_l", r: "look_r", d: "look_d", q: "doubt", qm: "doubt_m" };   // la mirada: izquierda, derecha, abajo y la duda (un ojo entornado; y su espejo)
+  /* p: { e: cara, g: gesto de Pixel Lab (o null), f: su fotograma, l: "l"|"r"|"d"|"q"|"qm", shut, open, wink, off, m: boca "eh"|"ah"|"oh", m2: segunda
      boca de su cara, tear: paso de la lagrima (-1 sin), z: fotograma de las zetas (0 sin), w: bandas } */
   function compose(p, atlas) {
     ctxs(); cur = atlas || dressed || img;
@@ -149,7 +175,7 @@ window.AIQ = window.AIQ || {};
     if (eo) {
       if (p.e === "wink" && p.open && !p.g) put(c, R("wink_open"));
       if (p.wink) put(c, R("wink_shut"), eo[0], eo[1]);
-      if (p.l && cap.look && !p.g) put(c, R(p.l === "l" ? "look_l" : "look_r"));
+      if (p.l && cap.look && !p.g) put(c, R(LOOK[p.l]));
       if (p.shut) put(c, R("blink"), eo[0], eo[1]);
     }
     if (p.m && mo) put(c, R("mouth_" + p.m), mo[0], mo[1]);
@@ -166,6 +192,23 @@ window.AIQ = window.AIQ || {};
   const rnd = (a, b) => a + Math.random() * (b - a);
   const MOUTHS = ["eh", "ah", null, "oh", "eh", null];   // boca al ritmo de las silabas (null = su boca, cerrada entre silabas)
   const live = new Set();
+  /* EL PUNTERO (bloque D, para que te siga con los ojos): el raton y, con mando, la mira (A.pointer, en coordenadas del mapa a pantalla
+     completa). at = cuando se movio por ultima vez (para la duda: quieto 2 s) */
+  const PT = { x: -1e4, y: -1e4, at: 0, in: false, px: null, py: null };
+  addEventListener("pointermove", e => { if (Math.abs(e.clientX - PT.x) + Math.abs(e.clientY - PT.y) > 2) PT.at = performance.now(); PT.x = e.clientX; PT.y = e.clientY; PT.in = true; }, { passive: true });
+  document.addEventListener("pointerleave", () => { PT.in = false; });
+  /* UN SOLO TAMANO (bloque D, revision del 22-oct): el crupier mide lo mismo en todas las pantallas del juego, el de la portada (la figura de
+     81 filas a x3 a 1280x720; crece con la ventana, siempre a escala entera de pixel real). Donde no cabe a ese tamano, no sale: nunca se encoge.
+     Comodin va a la misma escala. --crk (CSS) es el lado del hueco de su figura, para las hojas de estilo */
+  const K = () => { const dpr = window.devicePixelRatio || 1; return Math.max(1, Math.floor(3 * Math.min(innerWidth / 1280, innerHeight / 720) * dpr + 0.05)); };
+  const kCss = () => FIG * K() / (window.devicePixelRatio || 1);
+  const crk = () => document.documentElement.style.setProperty("--crk", kCss() + "px");
+  crk(); addEventListener("resize", crk);
+  const ptrNow = () => {
+    const P = A.pointer, pad = document.documentElement.dataset.glyph;
+    if (P && P.on && pad && pad !== "kb" && (P.x !== PT.px || P.y !== PT.py)) { PT.px = P.x; PT.py = P.y; PT.x = P.x; PT.y = P.y; PT.at = performance.now(); PT.in = true; }
+    return PT;
+  };
 
   class Sprite {
     constructor(host, o = {}) {
@@ -176,6 +219,7 @@ window.AIQ = window.AIQ || {};
       this.expr = exprId(o.expr || "sly"); this.t0 = performance.now(); this.gest = null;
       this.talking = false; this.mi = 0; this.lastSyl = 0; this.lastMouth = 0; this.blinkAt = 0; this.lookO = null;
       this.fidgetAt = 0; this.lastFidget = ""; this.key = ""; this.k = 0; this.timer = 0; this.dead = false; this.visible = o.visible !== false;
+      this.loopL = null; this.restE = null; this.fol = !!o.follow; this.dbt = false; this.rect = null; this.rectAt = 0; this.qSide = "q";
       if (window.ResizeObserver) {                                                // tamano en pixeles reales: cambia tambien con el zoom de la pantalla o al pasar a otro monitor
         this.ro = new ResizeObserver(() => this.fit());
         try { this.ro.observe(host, { box: "device-pixel-content-box" }); } catch (e) { this.ro.observe(host); }
@@ -203,9 +247,10 @@ window.AIQ = window.AIQ || {};
       const dw = cw * z * dpr, dh = ch * z * dpr;
       const slot = Math.min(dw, dh || dw); if (slot < 4 || !cw) return;
       const mini = !!this.o.mini || slot < 66;
-      const k = mini ? Math.max(1, Math.floor(slot / 64 + 0.02)) : Math.max(1, Math.floor(slot / FIG + 0.2));   // la figura puede pasarse un poco del hueco (lo absorbe el margen del lienzo)
+      const k = this.o.casa ? K() : mini ? Math.max(1, Math.floor(slot / 64 + 0.02)) : Math.max(1, Math.floor(slot / FIG + 0.2));   // la figura puede pasarse un poco del hueco (lo absorbe el margen del lienzo); o.casa: el tamano unico
       if (k !== this.k) { this.k = k; this.cv.width = W * k; this.cv.height = H * k; this.ctx = this.cv.getContext("2d"); this.ctx.imageSmoothingEnabled = false; this.key = ""; }
       const per = 1 / (z * dpr);                                                     // px de CSS (del hueco) por pixel real de pantalla
+      if (this.o.casa) { const hs = this.host.style, side = FIG * k * per + "px"; if (hs.getPropertyValue("width") !== side) requestAnimationFrame(() => { if (this.dead) return; hs.setProperty("width", side, "important"); hs.setProperty("height", side, "important"); }); }   // el tamano unico: su hueco, el de la figura (tambien dentro de una pantalla con zoom); al fotograma siguiente: cambiarlo dentro del ResizeObserver daba «ResizeObserver loop»
       const s = this.cv.style; s.width = W * k * per + "px"; s.height = H * k * per + "px";
       if (mini !== this.mini) { this.mini = mini; this.cv.classList.toggle("mini", mini); this.host.style.overflow = mini ? "hidden" : ""; }
       if (mini) { s.margin = ""; s.left = (Math.round(cw * z * dpr / 2) - HX * k) * per + "px"; s.top = (Math.round(ch * z * dpr / 2) - HY * k) * per + "px"; }
@@ -230,7 +275,23 @@ window.AIQ = window.AIQ || {};
       if (now - this.lastMouth >= (this.E.talkMs || 70)) { this.mi++; this.lastMouth = now; }
       this.poke(); return this;
     }
-    look(d) { this.lookO = d; this.poke(); return this; }
+    look(d) { this.lookO = d; if (d === "duda") this.qSide = Math.random() < 0.5 ? "q" : "qm"; this.poke(); return this; }
+    /* te sigue con los ojos (s.look manda si se le da una direccion); doubt: si te quedas quieto 2 s dentro de la ventana, duda contigo */
+    follow(on) { this.fol = !!on; this.poke(); return this; }
+    doubt(on) { this.dbt = !!on; this.poke(); return this; }
+    /* bucles de espera (ids de gesto) que rotan al callar; null = los gestos sueltos de su cara */
+    loops(list) { this.loopL = list && list.length ? list.slice() : null; this.fidgetAt = 0; return this; }
+    /* la cara a la que vuelve al callar (el humor); si esta callado y sin gesto, ya */
+    rest(e) { this.restE = e ? exprId(e) : null; if (this.restE && !this.talking && !this.gest && this.restE !== this.expr) this.set(this.restE, { quiet: true }); return this; }
+    restFace() { return this.restE || "sly"; }
+    gaze(now) {                                                                     // la mirada que toca ahora siguiendo el puntero
+      const T = ptrNow(); if (!T.in) return null;
+      if (!this.rect || now - this.rectAt > 600) { this.rect = this.cv.getBoundingClientRect(); this.rectAt = now; }
+      const r = this.rect; if (!r.width) return null;
+      if (this.dbt && now - T.at > 2000) return this.qSide;
+      const ex = r.left + r.width * 0.5, ey = r.top + r.height * 0.52, dx = T.x - ex, dy = T.y - ey, th = r.width * 0.28;
+      return dx < -th ? "l" : dx > th ? "r" : dy > r.height * 0.3 ? "d" : null;
+    }
     play(id, done, hit) {
       id = gestId(id); if (id && !GC[id] && D().gest[id + "@" + this.expr]) id += "@" + this.expr;   // si hay variante con la cara de ahora, esa
       const x = id && gx(id);
@@ -271,7 +332,8 @@ window.AIQ = window.AIQ || {};
       }
       const br = E.breath === undefined ? 1300 : E.breath;
       if (br && !this.quiet && !frz && (!G || held)) { if (Math.floor((now - this.t0) / br) % 2) p.y += 1; }   // respira: el dibujo entero baja 1 px
-      if (this.lookO != null && !p.g) p.l = this.lookO === -1 ? "l" : this.lookO === 1 ? "r" : null;
+      if (this.lookO != null && !p.g) p.l = this.lookO === -1 ? "l" : this.lookO === 1 ? "r" : this.lookO === 2 ? "d" : this.lookO === "duda" ? this.qSide : null;
+      else if (this.fol && !p.g && !this.talking && !this.o.still) p.l = this.gaze(now) || p.l;   // los ojos no son movimiento: tambien con Movimiento en Minimo
       if (this.talking && E.talk !== 0 && cap.talk && !(G && (G.x.lock || frz))) {   // habla: la boca sigue las letras; si se calla un rato, cierra
         if (now - this.lastSyl < 190) p.m = MOUTHS[this.mi % MOUTHS.length];
       }
@@ -288,11 +350,13 @@ window.AIQ = window.AIQ || {};
       return p;
     }
     fidget(now) {
-      const L = this.E.fidget; if (!L || !L.length || this.o.fidget === false || this.quiet || this.talking || this.gest || !this.visible) return;
-      if (!this.fidgetAt) { this.fidgetAt = now + rnd(7000, 14000); return; }
+      const L = (this.loopL && this.expr === this.restFace() ? this.loopL : null) || this.E.fidget;   // bucles de espera del humor (solo con su cara de reposo)
+      if (!L || !L.length || this.o.fidget === false || this.quiet || this.talking || this.gest || !this.visible) return;
+      const gap = () => (this.loopL ? rnd(7000, 12000) : rnd(7000, 14000));
+      if (!this.fidgetAt) { this.fidgetAt = now + gap(); return; }
       if (now < this.fidgetAt) return;
       const pool = L.length > 1 ? L.filter(g => g !== this.lastFidget) : L, g = pool[Math.floor(Math.random() * pool.length)];
-      this.lastFidget = g; this.fidgetAt = now + rnd(7000, 14000); this.play(g); if (this.gest) this.gest.fid = true;
+      this.lastFidget = g; this.fidgetAt = now + gap(); this.play(g); if (this.gest) this.gest.fid = true;
     }
     draw(force) {
       if (this.dead || !loaded || !this.k) return;
@@ -309,7 +373,7 @@ window.AIQ = window.AIQ || {};
       if (!this.host.isConnected) { this.timer = setTimeout(() => this.tick(), 400); return; }
       this.draw();
       const busy = this.gest || this.talking || (this.blinkAt && performance.now() >= this.blinkAt - 40);
-      this.timer = setTimeout(() => this.tick(), busy ? 33 : this.visible ? 90 : 400);
+      this.timer = setTimeout(() => this.tick(), busy ? 33 : this.visible ? (this.fol ? 60 : 90) : 400);
     }
     poke() { if (loaded && !this.dead) { clearTimeout(this.timer); this.timer = setTimeout(() => this.tick(), 0); } }
     dress(atlas) { this.o.atlas = atlas || null; this.key = ""; this.poke(); }
@@ -324,7 +388,16 @@ window.AIQ = window.AIQ || {};
     dress(atlas) { dressed = atlas || null; live.forEach(s => { s.key = ""; s.poke(); }); },
     atlas: () => img, isReady: () => loaded,
     list: () => Object.keys(EX),
-    gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)],
+    gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(D().gest).filter(g => NUEVO.test(g)), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)],
+    /* bloque D: los gestos por grupo (la mesa del crupier) y el humor */
+    groups: () => {
+      const all = Object.keys(D().gest);
+      return { reacciones: all.filter(g => /^r_/.test(g)), escena: all.filter(g => /^e_/.test(g)), espera: ESPERA.filter(g => D().gest[g]),
+        clasicos: [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)], parejas: all.filter(g => g.includes("@")) };
+    },
+    HUMOR, ESPERA,
+    K, kCss,                                                                      // el tamano unico (escala entera) y el lado de su hueco en px de CSS
+    lastMove: () => { ptrNow(); return PT.at; },                                 // cuando se movio por ultima vez el puntero o la mira del mando (performance.now)
     expr: exprId, gest: gestId,
     ready: whenReady, load,
     /* tamano de CSS exacto para un hueco de `css` px como mucho: la figura (81 filas) a k pixeles reales por pixel (k <= kMax si se da) */

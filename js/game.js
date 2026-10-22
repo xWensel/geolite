@@ -1047,6 +1047,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (iq != null) { const el = $("iqNum"); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, iq, { ms: 1400, delay: 1000 })); }
     buttons.forEach(b => ($(b.id).onclick = b.onclick));
     if (A.dealer && A.dealer.on) A.dealer.anchor($("vdDealer"));                // el crupier habla dentro del veredicto, sin tapar botones
+    if (A.trastadas && A.trastadas.veredicto) A.trastadas.veredicto();          // bloque D: si cerraste la ronda con racha, la lluvia de cartas (nunca a media pregunta)
     if (club) A.club.play(club, document.querySelector("#dlg .gx-vd-club"), 1700);
   }
 

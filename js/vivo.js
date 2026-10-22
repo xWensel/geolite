@@ -44,7 +44,7 @@ window.AIQ = window.AIQ || {};
   let fast = false, last = "", sentAt = 0, timer = 0, dead = 0, fails = 0;
   /* lo que la mesa tenga puesto se va con ella: si deja de mirar, si el jugador apaga el directo o si se cae la conexion (ahora tapa toda la pantalla:
      nada puede quedarse pegado) */
-  const fxOff = () => { if (A.chfx && A.chfx.liveOn && A.chfx.liveOn()) A.chfx.liveReset(); if (A.adv && A.adv.mesaOn && A.adv.mesaOn()) A.adv.mesaCh("*", 0); };
+  const fxOff = () => { if (A.chfx && A.chfx.liveOn && A.chfx.liveOn()) A.chfx.liveReset(); if (A.adv && A.adv.mesaOn && A.adv.mesaOn()) A.adv.mesaCh("*", 0); actOff(); };
   const sched = ms => { clearTimeout(timer); timer = setTimeout(beat, ms); };
   async function beat() {
     if (!URL_ || !on()) return sched(30000);
@@ -56,7 +56,7 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { const was = fast; fast = !!j.w; fails = 0; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (!fast) fxOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "ch" ? chal(m.ch, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
+      if (j && j.ok) { const was = fast; fast = !!j.w; fails = 0; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (!fast) fxOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "ch" ? chal(m.ch, m.v) : m.k === "act" ? act(m.a, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
     } catch (e) { fast = false; if (++fails >= 2) fxOff(); }                  // dos latidos seguidos sin respuesta: sin conexion, fuera los efectos
     sched(fast ? 2000 : fails === 1 ? 5000 : document.hidden ? 60000 : 25000);
   }
@@ -78,6 +78,31 @@ window.AIQ = window.AIQ || {};
   function fx(k, v) { if (A.chfx && A.chfx.live) A.chfx.live(k, v); }
   /* los retos de la Aventura, a mano: A.adv.mesaCh (js/adventure.js) los monta en la pregunta en marcha y se quedan hasta quitarlos; "*" = todos */
   function chal(id, v) { if (A.adv && A.adv.mesaCh) A.adv.mesaCh(String(id || ""), +v || 0); }   // rayo, interruptores (v true/false) y contadores (v = cuantos deben quedar)
+  /* BLOQUE D: el crupier y Comodin a mano desde la mesa, al momento (api/mesa.js op "act"): gesto, cara, mirada, humor, Comodin, ropa en directo
+     (sin comprar nada: A.vestuario.preview) y las trastadas. Cada funcion se comprueba antes de llamarla (una version vieja del juego no la tiene).
+     Lo que la mesa deja puesto (ropa, mirada, humor) se va con ella, como las fichas: actOff */
+  const mesaSet = { vest: false, gaze: false, humor: false };
+  function act(a, v) {
+    const D = A.dealer;
+    try {
+      if (a === "gest") { if (D && D.gesture) D.gesture(String(v || ""), true); }   // la mesa del autor manda: puede incluso en plena pregunta
+      else if (a === "face") { if (D && D.faceSet) D.faceSet(String(v || "")); }
+      else if (a === "gaze") { if (D && D.gaze) { D.gaze(v === "duda" ? "duda" : v == null ? null : +v); mesaSet.gaze = v != null; } }
+      else if (a === "humor") { if (D && D.humor) { D.humor(v || null); mesaSet.humor = !!v; } }
+      else if (a === "cat") { if (!A.comodin || !A.comodin.act) return; if (!A.comodin.on() && D && D.catVisit && D.catVisit(40000)) setTimeout(() => A.comodin.act(String(v || "")), 2600); else A.comodin.act(String(v || "")); }   // bloque D: el gato ya no esta siempre: si no esta (en la portada), primero viene
+      else if (a === "vest") { if (A.vestuario && A.vestuario.preview) { const o = v && typeof v === "object" ? v : null; A.vestuario.preview(o); mesaSet.vest = !!o; } }
+      else if (a === "tras") { if (A.trastadas && A.trastadas.run) A.trastadas.run(String(v || "")); }
+    } catch (e) { /* una accion que no sale no rompe el latido */ }
+  }
+  function actOff() {
+    const D = A.dealer;
+    try {
+      if (mesaSet.vest && A.vestuario && A.vestuario.preview) A.vestuario.preview(null);
+      if (mesaSet.gaze && D && D.gaze) D.gaze(null);
+      if (mesaSet.humor && D && D.humor) D.humor(null);
+    } catch (e) { /* nada */ }
+    mesaSet.vest = mesaSet.gaze = mesaSet.humor = false;
+  }
   /* LA CAMARA DEL CRUPIER (solo escritorio): la mesa pide ver la partida y el juego le manda el video de SU ventana (captura de pestana de
      Electron: nada del escritorio ni de otras ventanas) de punto a punto (WebRTC; api/vivo.js y api/mesa.js solo cruzan la oferta y la respuesta).
      Mientras dura, arriba sale el piloto "TE ESTA MIRANDO" con el crupier. Por el mismo canal llega el guante: la mesa senala y da toquecitos en tu pantalla */

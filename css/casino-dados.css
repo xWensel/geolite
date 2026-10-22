@@ -10,6 +10,7 @@
 .rou.dice .dd-stage img { display: block; }
 .rou.dice .dd-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 38%, #0d3b3d 0%, #051a1d 58%, #010708 100%); }
 .rou.dice .dd-dealer { position: absolute; left: 751px; top: 44px; width: 384px; height: 384px; z-index: 2; will-change: transform; image-rendering: pixelated; }   /* 96 px de arte a x4 */
+.rou.dice .dd-dl { position: absolute; left: 0; top: -64px; width: 384px; height: 448px; }   /* bloque D: el crupier animado, 96x112 a x4 (16 filas arriba para la chistera que salta), como el del Rasca */
 .rou.dice .dd-dealer.hop { animation: dd-hop .5s ease-out; } @keyframes dd-hop { 0% { transform: translateY(0); } 35% { transform: translateY(-30px); } 70% { transform: translateY(0); } 85% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
 .rou.dice .dd-dealer.shudder { animation: dd-shd .5s linear; } @keyframes dd-shd { 0%, 100% { transform: translateX(0); } 12% { transform: translateX(-12px); } 25% { transform: translateX(12px); } 40% { transform: translateX(-9px); } 55% { transform: translateX(9px); } 70% { transform: translateX(-5px); } 85% { transform: translateX(4px); } }
 .rou.dice .dd-dealer.drop { animation: dd-drop .7s ease-out; } @keyframes dd-drop { 0% { transform: translateY(0); } 30% { transform: translateY(26px); } 55% { transform: translateY(10px); } 100% { transform: translateY(0); } }

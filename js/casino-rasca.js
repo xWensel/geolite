@@ -155,6 +155,7 @@ window.AIQ = window.AIQ || {};
     /* el crupier, animado (js/crupier.js): sus 18 caras, habla, parpadea y sus gestos; a x4 del escenario, que ya escala a pixel entero */
     let spr = null; try { spr = A.crupier.mount(dealerImg, { fixed: 4, fidget: !reduced }); spr.set("sly", { quiet: true }); } catch (e) { spr = null; }
     const FACE = { neutral: "sly", laugh: "laugh", angry: "angry", shock: "shock" }, rig = f => { if (spr) { try { spr.set(FACE[f] || f, { quiet: true }); } catch (e) { /* nada */ } } };
+    const body = g => { if (spr && !reduced) { try { spr.play(g); } catch (e) { /* nada */ } } };   // bloque D: sus reacciones de casino con el cuerpo
     let scale = 1, ox = 0, oy = 0, shakeX = 0, shakeY = 0, ovL = 0, ovT = 0;
     const applyTf = () => { stage.style.transform = `translate(${Math.round(ox + shakeX * scale)}px,${Math.round(oy + shakeY * scale)}px) scale(${scale})`; };
     const fit = () => {
@@ -317,14 +318,14 @@ window.AIQ = window.AIQ || {};
       const c = card, tier = TIERS.find(t => t.id === out.cls); sh.outcome(); rec.done = true; cx.persist(); tensionOff(); c.paid = true; purse = run.coins; hud();
       out.cells.forEach(i => { hlsEl.children[i].classList.add("win"); symsEl.children[i].classList.add("win"); }); later(() => c.rev.forEach((r, i) => { if (r && !out.cells.includes(i)) symsEl.children[i].classList.add("dim"); }), 700);
       const row = Q(`.ra-row[data-tier="${tier.id}"]`); row && row.classList.add("hit");
-      showPlate(tier.level >= 3 ? "big" : "", tr(U.win), "×" + tier.m, "+" + o.pay); hint(null); reward(tier.level, tier); say(tier.sit, 4);
+      showPlate(tier.level >= 3 ? "big" : "", tr(U.win), "×" + tier.m, "+" + o.pay); hint(null); reward(tier.level, tier); body("r_gana_casino"); say(tier.sit, 4);   // bloque D: el cuerpo primero (el aplauso de palco de los premios gordos lo sustituye)
       later(() => { if (!c.finished) swallow(autoReveal(false)); }, reduced ? 600 : 1500);
     }
     function finish() {
       const c = card; if (c.finished) return; c.finished = true; sh.outcome(); rec.done = true; cx.persist(); tensionOff();
       if (!c.paid) {
-        if (out.cls === "casi") { sfx.casi(); showPlate("casi", tr(U.casi), "", "−" + o.stake); say("rcCasi", 4); shake(4, 300); }
-        else { A.sfx.lose(); showPlate("lose", tr(U.lose), "", "−" + o.stake); say("rcNada", 4); }
+        if (out.cls === "casi") { sfx.casi(); showPlate("casi", tr(U.casi), "", "−" + o.stake); body("r_pierde_casino"); say("rcCasi", 4); shake(4, 300); }
+        else { A.sfx.lose(); showPlate("lose", tr(U.lose), "", "−" + o.stake); body("r_pierde_casino"); say("rcNada", 4); }
       }
       later(() => { ST.phase = "done"; stage.classList.remove("scratching"); coinEl.style.display = coinH.style.display = "none"; setBtns(); hint(null); finishRes(); }, c.paid ? 1900 : 900);
     }
@@ -437,7 +438,8 @@ window.AIQ = window.AIQ || {};
         const base = await foilData(th); if (!alive()) throw CANCEL; if (!base) throw new Error("rasca: lamina ilegible");
         card = { rev: new Array(9).fill(false), last: null, auto: false, autoHold: false, won: false, paid: false, finished: false, tense: false, pairSeen: {} };
         buildCard(); foilInit(base); setCard(0, 0, 1, 1, 0); sfx.buy(); setBtns();
-        say("rcIntro", 1); cardEl.classList.remove("off");
+        say("rcIntro", 1);
+        cardEl.classList.remove("off");
         if (reduced) setCard(0, 0); else await ENTRY[R.entry].call(ENTRY);
         ST.phase = "scratch"; stage.classList.add("scratching"); cur.x = 960; cur.y = 860; setBtns(); hint("hScratch");
         if (TST.auto) later(() => { if (TST.auto.all !== false) scratchAll(); }, TST.auto.delay || 600);                      // _rasca.auto ({ all, delay }): solo pruebas

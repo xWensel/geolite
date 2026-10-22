@@ -6,6 +6,9 @@
      POST { op: "say", sid, t, e, g, s, p }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
      POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto/humo (v true/false), cristal/huellas/ventana (v 0-5)
      POST { op: "ch", sid, ch, v }        ->  un reto de la Aventura (los de A.CHAL, js/challenges.js) a nivel v 0-3 (0 lo quita); ch "*" los quita todos
+     POST { op: "act", sid, a, v }        ->  el crupier y Comodin al momento (bloque D): a = gest (id de gesto, "<gesto>@<cara>" incluido), face (cara),
+                                              gaze (-1 | 1 | 2 | "duda" | null = sigue al raton), humor (contento/tenso/picado/aburrido/admirado | null = segun
+                                              su partida), cat (accion de Comodin), vest (ropa en directo { hueco: valor | null } o null = la suya) o tras (trastada)
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
                                           ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas
@@ -16,12 +19,33 @@
      POST { op: "unban", id?, ip? }       ->  levanta el veto */
 const crypto = require("crypto");
 const kv = require("./_kv");
-const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/;
+const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/, GEST = /^[a-z_]{1,24}(@[a-z_]{1,16})?$/;
 const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "humo", "cristal", "huellas", "ventana"];
 const CH = ["shaky", "missing", "mirror", "memory", "runes", "anagram", "riddle", "babel", "nocountry", "fakepass", "ticker", "ctrlz", "stormnight", "trap", "giants", "blur", "dark", "flicker", "wrongborders", "noborders", "spread", "tilt", "flip", "spin", "clouds", "rain", "myopia", "mosaic", "quake", "decoys", "lightning", "tremble", "ghost", "lag", "cmirror", "wind", "storm", "silence", "crack", "hang", "battery", "flaghue", "flagblur", "flagdark", "flaggray", "flagback", "flagpuzzle", "flagwind"];   // los retos que se pueden poner a mano (A.CHAL sin los absorbidos ni los de jefe)
 const KEY = process.env.MESA_KEY || "";
 const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // estilos del bocadillo (css/challenges.css, .dl-bubble.st-*)
-const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier en la pantalla del jugador: esquinas o centro grande
+const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier (la mesa nueva ya no lo manda: tiene su sitio fijo en cada pantalla; se acepta por las mesas viejas)
+const HUMOR = ["contento", "tenso", "picado", "aburrido", "admirado"];
+const CAT = ["espera", "levanta", "anda", "salta", "zarpa", "caricia", "regana", "duerme", "despierta"];   // A.comodin.act
+const TRAS = ["mapa", "apagon", "ventana", "guante", "sello", "ticket", "cartas", "telon", "moneda", "ficha", "siesta", "desfile"];   // A.trastadas.run
+const SLOT = /^[a-z_]{1,16}$/;
+/* lo que llega en una accion, ya validado (o undefined si no vale) */
+function actVal(a, v) {
+  if (a === "gest") return typeof v === "string" && GEST.test(v) ? v : undefined;
+  if (a === "face") return typeof v === "string" && WORD.test(v) && v ? v : undefined;
+  if (a === "gaze") return v === null || v === "duda" || v === -1 || v === 1 || v === 2 ? v : undefined;
+  if (a === "humor") return v === null || HUMOR.includes(v) ? v : undefined;
+  if (a === "cat") return CAT.includes(v) ? v : undefined;
+  if (a === "tras") return TRAS.includes(v) ? v : undefined;
+  if (a === "vest") {
+    if (v === null) return null;
+    if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
+    const ks = Object.keys(v); if (ks.length > 20) return undefined;
+    const o = {}; for (const k of ks) { const x = v[k]; if (!SLOT.test(k) || !(x === null || (typeof x === "string" && SLOT.test(x)))) return undefined; o[k] = x; }
+    return o;
+  }
+  return undefined;
+}
 const UID = /^[a-z0-9]{1,24}$/i, TAG = /^[a-f0-9]{16}$/;
 const same = (a, b) => { const h = x => crypto.createHash("sha256").update(String(x)).digest(); return crypto.timingSafeEqual(h(a), h(b)); };
 module.exports = async (req, res) => {
@@ -97,9 +121,15 @@ module.exports = async (req, res) => {
       await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "ch", ch, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
       return res.status(200).json({ ok: true, live: !!st });
     }
+    if (b.op === "act") {                                            // el crupier y Comodin, al momento: gesto, cara, mirada, humor, Comodin, ropa o trastada
+      const a = String(b.a || ""), v = actVal(a, b.v === undefined ? undefined : b.v); if (v === undefined) return res.status(400).json({ ok: false });
+      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
+      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "act", a, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
+      return res.status(200).json({ ok: true, live: !!st });
+    }
     if (b.op === "say") {
       const t = [...String(b.t || "").normalize("NFC").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim()].slice(0, 160).join("");
-      const e = WORD.test(b.e || "") ? b.e || "" : "", g = WORD.test(b.g || "") ? b.g || "" : "", s = STY.includes(b.s) ? b.s : "", p = POS.includes(b.p) ? b.p : "";
+      const e = WORD.test(b.e || "") ? b.e || "" : "", g = GEST.test(b.g || "") ? b.g : "", s = STY.includes(b.s) ? b.s : "", p = POS.includes(b.p) ? b.p : "";
       if (!t) return res.status(400).json({ ok: false });
       const msg = JSON.stringify({ t, e, g, s, p, at: now }), ik = "vivo:in:" + sid;
       const [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);

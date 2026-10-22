@@ -47,7 +47,10 @@ window.AIQ = window.AIQ || {};
     el.innerHTML = `<i class="tour-hole"></i><div class="tour-card"><div class="tour-paper gx-paper"><div class="tour-face"></div><div class="tour-body"><span class="tour-eb gx-eyb"></span><p class="tour-txt"></p></div>
       <div class="tour-nav gx-acts"><button type="button" class="tour-skip gx-btn sm gho"></button><button type="button" class="tour-next gx-btn sm pri" data-primary></button></div></div></div>`;
     $("app").appendChild(el);
-    if (A.crupier) face = A.crupier.mount(el.querySelector(".tour-face"), { mini: true, fidget: false });   // v0.32: el crupier de sus frases, la cabeza a escala entera
+    /* bloque D: el crupier entero, a su tamano (el mismo en todas las pantallas), junto al borde: abajo a la izquierda, o a la derecha si ahi esta
+       lo que explica; señala lo que explica (antes, su cabeza dentro de la tarjeta) */
+    const cr = document.createElement("div"); cr.className = "tour-cr"; cr.innerHTML = '<div class="tour-crf"></div>'; el.appendChild(cr);
+    if (A.crupier) { face = A.crupier.mount(cr.firstElementChild, { fidget: false, casa: true }); face.follow(true); }
     return el;
   }
   let face = null, faceT = 0;
@@ -71,6 +74,15 @@ window.AIQ = window.AIQ || {};
     let left = r.left + r.width / 2 - cw / 2; left = Math.max(10, Math.min(vw - cw - 10, left));
     if (vw <= 700) { left = 10; top = Math.min(top, vh - ch - 10); }
     card.style.cssText = `left:${left / k}px;top:${top / k}px`;
+    /* el crupier: abajo a la izquierda; si ahi pisa lo que se explica o la tarjeta, al otro lado */
+    const cr = el.querySelector(".tour-cr"); if (cr) {
+      const f = A.crupier && A.crupier.kCss ? A.crupier.kCss() : 243, b = Math.max(84, vh * 0.13), y0 = vh - b - f, y1 = vh - b;
+      const hits = (q, x0, x1) => q.left < x1 && q.left + q.width > x0 && q.top < y1 && q.top + q.height > y0;
+      const cardR = { left, top, width: cw, height: ch }, L = [16, 16 + f], R = [vw - 16 - f, vw - 16];
+      const leftBad = hits(r, L[0], L[1]) || hits(cardR, L[0], L[1]), rightBad = hits(r, R[0], R[1]) || hits(cardR, R[0], R[1]);
+      cr.classList.toggle("dcha", leftBad && !rightBad);
+      cr.classList.toggle("fuera", leftBad && rightBad);                                   // ni a un lado ni al otro: ese paso no sale (no se encoge)
+    }
   }
 
   function show(quiet) {
@@ -85,7 +97,7 @@ window.AIQ = window.AIQ || {};
     const last = tour.i >= tour.steps.length - 1, nx = el.querySelector(".tour-next");
     nx.innerHTML = `<span>${last ? t6("¡Entendido!|Got it!|Compris !|Entendi!|Verstanden!|Capito!||明白了！|알겠어요!|わかった！|Понятно!|Jasne!") : t6("Siguiente|Next|Suivant|Próximo|Weiter|Avanti||下一步|다음|次へ|Далее|Dalej")}</span>${A.gala.keyHint("Enter", "a")}`;
     place(step); if (!quiet && A.sfx.card) A.sfx.card();
-    if (!quiet) mouth(Math.min(28, Math.round(t6(step.txt).length / 3)));
+    if (!quiet) { mouth(Math.min(28, Math.round(t6(step.txt).length / 3))); if (face) face.play(tour.i === 0 ? "e_invita" : "point"); }   // señala lo que explica
     nx.onclick = () => { tour.i++; show(); }; el.querySelector(".tour-skip").onclick = () => finish(false, true);
   }
   function finish(done, skipAll) {

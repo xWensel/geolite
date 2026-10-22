@@ -181,3 +181,9 @@ html.qx-crt, html.qx-crt body { background: #000 !important; }
 }
 html.reduce-motion .qx-beam u, html.reduce-motion .qx-rain { display: none; }
 html.reduce-motion .qx.shout .dealer .dl-bubble { animation: none; }
+
+/* ------------------------------------------------ bloque D: Comodin, el gato de la casa, dormido junto a Salir (js/salir.js + js/comodin.js).
+   Capa sin zoom por encima de la tarjeta; el gato va al grano del crupier y aparece con un fundido corto cuando la tarjeta ya esta en su sitio */
+.qx-cat { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .35s; }
+.qx.cat-in .qx-cat { opacity: 1; }
+.qx.out .qx-cat { opacity: 0; transition: opacity .3s; }

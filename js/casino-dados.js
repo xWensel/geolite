@@ -76,7 +76,7 @@ window.AIQ = window.AIQ || {};
 
   function spinDice(o, done) {
     const cx = o.cx, TST = A.adv._dice || {}, ST = (TST.st = { phase: "intro" });                // ST.phase: solo pruebas (intro, dshake, droll, pturn, pshake, proll, cmp, result)
-    const html = `<div class="dd-stage"><div class="dd-bg"></div><img class="dd-dealer" src="${A.crupierArt ? A.crupierArt("dealer_neutral", "assets/icons/dealer_neutral.webp") : "assets/icons/dealer_neutral.webp"}" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp" alt="" draggable="false"><div class="dd-bubble"><span></span></div>
+    const html = `<div class="dd-stage"><div class="dd-bg"></div><div class="dd-dealer"><div class="dd-dl"></div></div><div class="dd-bubble"><span></span></div>
       <div class="dd-left"><div class="rou-pick"><span class="rp-dot rp-dice"></span><span class="rp-k">${tr(cx.BT.seal)}</span><b>${tr(BET.n)} · ${o.stake}</b></div><div class="dd-hint"></div></div>
       <div class="dd-top"><b class="dd-no"></b><div class="dd-res"><span class="dd-plate"></span><span class="dd-msg"></span></div></div>
       <div class="dd-band"><div class="dd-rail dd-rail-h"></div><div class="dd-rail dd-rail-l"></div><div class="dd-rail dd-rail-r"></div>
@@ -237,11 +237,18 @@ window.AIQ = window.AIQ || {};
 
     /* ---- la voz del crupier: cola (nunca se le corta una frase) y siempre 1 s mas en pantalla ---- */
     const bubble = Q(".dd-bubble"), bTx = bubble.firstChild, dealerImg = Q(".dd-dealer"), hintEl = Q(".dd-hint"), SP = { cur: false, pend: null };
-    const face = f => { const n = "dealer_" + f, d = `assets/icons/${n}.webp`; dealerImg.dataset.cart = n; dealerImg.dataset.cdef = d; dealerImg.src = A.crupierArt ? A.crupierArt(n, d) : d; };   // con su ropa (js/vestuario.js)
+    /* bloque D: el crupier animado (js/crupier.js), el mismo en los 8 juegos de la Barra: a x4 del escenario, que ya escala a pixel entero (como el del
+       Rasca); se viste solo con tu ropa. Los gestos de siempre (salto, temblor...) mueven su caja; mientras habla, mueve la boca */
+    let spr = null, talkIv = 0; try { spr = A.crupier.mount(Q(".dd-dl"), { fixed: 4, fidget: !reduced }); spr.set("sly", { quiet: true }); } catch (e) { spr = null; }
+    { const bye = setInterval(() => { if (ov.isConnected) return; clearInterval(bye); clearInterval(talkIv); try { if (spr) spr.destroy(); } catch (e) { /* nada */ } }, 1000); }
+    const FACES = { neutral: "sly", laugh: "laugh", angry: "angry", shock: "shock" };
+    const face = f => { if (spr) { try { spr.set(FACES[f] || f, { quiet: true }); } catch (e) { /* nada */ } } };
+    const body = g => { if (spr && !reduced) { try { spr.play(g); } catch (e) { /* nada */ } } };
+    const talk = t => { if (!spr) return; clearInterval(talkIv); try { spr.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, t.length)) { clearInterval(talkIv); try { spr.talk(false); } catch (e) { /* nada */ } return; } try { spr.syl(); } catch (e) { /* nada */ } }, 55); };
     const gesture = g => { if (!g || g === "none" || reduced) return; dealerImg.classList.remove("hop", "shudder", "drop", "lean"); void dealerImg.offsetWidth; dealerImg.classList.add(g); setTimeout(() => dealerImg.classList.remove(g), 900); };
     const lineOf = key => { const a = LN[key]; let i = Math.floor(rnd() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(rnd() * (a.length - 1))) % a.length; LAST[key] = i; return tr(a[i]) || ""; };
     function speak(p) {
-      SP.cur = true; bTx.textContent = p.text; bubble.classList.add("on"); face(p.face); gesture(p.g);
+      SP.cur = true; bTx.textContent = p.text; bubble.classList.add("on"); face(p.face); gesture(p.g); talk(p.text);
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); face("neutral"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }
     function say(key, prio = 1, skipIfBusy) {
@@ -308,13 +315,13 @@ window.AIQ = window.AIQ || {};
         }
         const th = res.throws[res.throws.length - 1], lv = res.level; ov.classList.remove("hush"); sh.outcome();
         if (res.win) {
-          tot("D", th.dt, "lose"); tot("P", th.pt, "win"); face("shock");
+          tot("D", th.dt, "lose"); tot("P", th.pt, "win"); face("shock"); body("r_gana_casino");
           if (lv >= 2) ov.classList.add("lv" + lv); ov.classList.add("win"); flash(); A.casa.premio(lv);
           if (lv === 3) setTimeout(() => { if (alive()) { flash(); A.sfx.jackpot(2); } }, 520);   // el eco del doble seis: el temblor ya crece con los golpes del premio
           plate("win" + (lv >= 2 ? " l" + lv : ""), tr(U.win), "×2", "+" + pay + " · " + tr(U["lv" + lv])); if (lv >= 2) fireCoins(lv === 3 ? 3 : 1);
           say(lv === 1 ? "diceWinSmall" : lv === 3 ? "diceWinBig" : (th.pt - th.dt <= 3 ? "diceWinSmall" : "diceWinBig"), 4);
         } else {
-          A.sfx.lose(); ov.classList.add("lose"); tot("P", th.pt, "lose"); tot("D", th.dt, "win"); flash();
+          A.sfx.lose(); ov.classList.add("lose"); tot("P", th.pt, "lose"); tot("D", th.dt, "win"); flash(); body("r_pierde_casino");
           if (res.tie2) plate("lose", tr(U.tie2), "", tr(cx.BT2.house) + " · −" + o.stake); else plate("lose", tr(U.lose), "", "−" + o.stake);
           say(res.tie2 ? "diceTie2" : "diceLose", 4);
         }
