@@ -1,6 +1,6 @@
 /*
  * Geolite - EL TRUCO DE PRUEBAS (solo en las versiones previas a Steam): en la portada, 7 veces la tecla 7 seguidas = TODO DESBLOQUEADO.
- *   Los 100 logros, la Enciclopedia entera (las tres medallas de cada lugar, vista), las 49 mesas (sin estreno), todo el vestuario, el Club al
+ *   Los 100 logros, la Enciclopedia entera (las tres medallas de cada lugar, vista), las 56 mesas (sin estreno), todo el vestuario, el Club al
  *   nivel 100 con fichas de oro de sobra (sin la ceremonia de la categoria), las 12 campanas del Clasico con todos sus niveles y la Ascension V.
  *   Otra vez 7 x 7 y todo vuelve a como estaba antes del truco (se guarda una copia de la partida al activarlo).
  * Nada sale del ordenador: los logros NO se envian a Steam (P.truco: js/profile.js no los manda ni al ganarlos ni al arrancar) y no se toca

@@ -140,6 +140,24 @@ window.AIQ = window.AIQ || {};
   A.MAPSTYLES.vhs = MS({ animated: true, crt: true, oceanTop: "#1d34d8", oceanBot: "#101c8e", shallow: "#2a44e8", fx2: [5, 0.05, 1, 0], vignette: 0.55, postGrain: 0.02, felt: [0, 0, 0, 0],
     land: ["#f2f2f2", "#e8e0a0", "#f0b8d8", "#a8e8e8", "#f0f0b0", "#e8c8a0", "#ffffff"], line: [0.05, 0.05, 0.1, 0.95], shadow: null, gridA: 0 });
 
+  /* ---------------------------------------------------------------- v0.3.179: la tanda 4 de la tienda (mesas de videojuegos; 4 raras + 3 legendarias), votada el 22-oct
+     mat 43 mundo de cubos, 44 mazmorra, 45 reverso de baraja, 47 campo de minas, 49 edicion policroma (se inclina con el puntero), 52 hiperespacio.
+     Plataformas usa el humo azul del casino (style 1) con los paises de ladrillo (mat 54 solo en tierra). */
+  A.MAPSTYLES.cubos = MS({ mat: 43, oceanTop: "#3a62d0", oceanBot: "#2c4fb4", shallow: "#3a62d0", mc1: "#7fa0ff", mp: [16, 0, 0, 2], felt: [0, 0.1, 0, 0],
+    land: ["#5ea83c", "#7c9a40", "#8a6a44", "#9a9a94", "#d8c880", "#4f9232", "#c8b878"], line: [0.1, 0.12, 0.06, 0.95], shadow: { off: [3, -4], col: [0, 0.05, 0.12, 0.5] }, gridA: 0 });
+  A.MAPSTYLES.mazmorra = MS({ mat: 44, oceanTop: "#4a4562", oceanBot: "#3c384e", shallow: "#4a4562", mc1: "#15121c", mc2: "#4f7a3a", mp: [14, 0, 0, 2], felt: [0, 0.2, 0, 0],
+    land: ["#d8cfae", "#cfc4a0", "#e0d4b4", "#c4bc9c", "#dcd2b6", "#d4c8a0", "#e8dfc4"], line: [0.1, 0.08, 0.1, 0.95], shadow: { off: [3, -4], col: [0.04, 0.02, 0.08, 0.6] }, gridA: 0 });
+  A.MAPSTYLES.reverso = MS({ mat: 45, oceanTop: "#a82030", oceanBot: "#8e1826", shallow: "#a82030", mc2: "#f4ecd8", mp: [10, 0, 0, 2], felt: [0, 0.2, 0, 0],
+    land: ["#fbf6e6", "#f6efd8", "#fff8ee", "#f2ead4", "#fdf4e2", "#f8f0dc", "#fffaf0"], line: [0.45, 0.05, 0.1, 0.95], shadow: { off: [3, -4], col: [0.12, 0, 0.02, 0.55] }, gridA: 0 });
+  A.MAPSTYLES.minas = MS({ mat: 47, oceanTop: "#a9a9a9", oceanBot: "#a0a0a0", shallow: "#a9a9a9", mp: [8, 0, 0, 2], felt: [0, 0, 0, 0],
+    land: ["#fff3c0", "#c8f0c8", "#ffd0d0", "#c8d8ff", "#f0d0ff", "#ffe0b0", "#e0f4f4"], line: [0.15, 0.15, 0.15, 0.95], shadow: null, gridA: 0 });
+  A.MAPSTYLES.policroma = MS({ mat: 49, animated: true, oceanTop: "#1a1030", oceanBot: "#1a1030", shallow: "#1a1030", mp: [1, 0.6, 0, 2], felt: [0, 0, 0, 0],
+    land: ["#f6f2ff", "#f2eeff", "#faf4ff", "#eef2ff", "#f4f0ff", "#f8f4ff", "#ffffff"], line: [0.1, 0.05, 0.2, 0.95], shadow: { off: [3, -4], col: [0.05, 0, 0.1, 0.5] }, gridA: 0 });
+  A.MAPSTYLES.hiperespacio = MS({ mat: 52, animated: true, oceanTop: "#050a22", oceanBot: "#02051a", shallow: "#050a22", mc1: "#6a3aa8", mc2: "#cfe0ff", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
+    land: ["#2a3a5a", "#324468", "#26364e", "#3a4c74", "#2c3e5e", "#34486c", "#243248"], line: [0.6, 0.8, 1, 0.9], shadow: null, gridA: 0 });
+  A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, mat: 54, animated: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
+    land: ["#c84c0c", "#d8641c", "#b84410", "#e07a2a", "#c05818", "#d06a20", "#e8a050"], line: [0.25, 0.08, 0.02, 0.95], grid: "#8fb8ff", gridA: 0.08, tropic: "#ffd98a" };
+
   /* el catalogo, en orden. own(P): cuando es tuya (del perfil: los logros y, por si el perfil es anterior a algun logro, lo que guardan las
      Ascensiones). Los textos, en los 12 idiomas: es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl */
   const ASC_HOW = "Gana la Aventura en Ascensión {n}.|Win the Adventure at Ascension {n}.|Gagne l'Aventure en Ascension {n}.|Vença a Aventura na Ascensão {n}.|Gewinne das Abenteuer auf Aufstieg {n}.|Vinci l'Avventura all'Ascensione {n}.||在进阶 {n} 赢下冒险。|어센션 {n}에서 모험을 승리하세요.|アセンション{n}でアドベンチャーに勝利する。|Выиграй Приключение на Восхождении {n}.|Wygraj Przygodę na Wniebowstąpieniu {n}.";
@@ -257,6 +275,20 @@ window.AIQ = window.AIQ || {};
         "Reflejos de agua que ondulan al clicar.|Water reflections that ripple on click.|Reflets d'eau qui ondulent au clic.|Reflexos de água que ondulam ao clicar.|Wasserspiegelungen, die beim Klick wellen.|Riflessi d'acqua che ondeggiano al clic.||点击时泛起涟漪的水光。|클릭하면 일렁이는 물빛.|クリックで波打つ水の反射。|Отражения воды с рябью от клика.|Refleksy wody falujące po kliknięciu."],
       ["vhs", "l", "Cinta VHS|VHS tape|Cassette VHS|Fita VHS|VHS-Kassette|Videocassetta VHS||VHS 录像带|VHS 테이프|VHSテープ|Кассета VHS|Kaseta VHS",
         "Pantalla azul de vídeo de los noventa.|A nineties blue video screen.|Un écran vidéo bleu des années 90.|Uma tela de vídeo azul dos anos 90.|Ein blauer Videobildschirm der Neunziger.|Uno schermo video blu anni Novanta.||九十年代的蓝色录像画面。|90년대 파란 비디오 화면.|90年代の青いビデオ画面。|Синий видеоэкран девяностых.|Niebieski ekran wideo z lat 90."],
+      ["cubos", "r", "Mundo de cubos|Block world|Monde de cubes|Mundo de cubos|Blockwelt|Mondo a cubi||方块世界|블록 세계|ブロックの世界|Мир кубов|Świat klocków",
+        "El mar y la tierra en bloques de píxeles.|Sea and land in pixel blocks.|La mer et la terre en blocs de pixels.|Mar e terra em blocos de pixels.|Meer und Land in Pixelblöcken.|Mare e terra in blocchi di pixel.||像素方块构成的海与陆。|픽셀 블록으로 된 바다와 땅.|ピクセルブロックの海と大地。|Море и земля из пиксельных блоков.|Morze i ląd z pikselowych bloków."],
+      ["mazmorra", "r", "Mazmorra|Dungeon|Donjon|Masmorra|Verlies|Dungeon||地下城|던전|ダンジョン|Подземелье|Loch",
+        "Muros de piedra con musgo.|Stone walls with moss.|Murs de pierre moussus.|Muros de pedra com musgo.|Steinmauern mit Moos.|Mura di pietra con muschio.||长着苔藓的石墙。|이끼 낀 돌벽.|苔むした石の壁。|Каменные стены с мхом.|Kamienne mury z mchem."],
+      ["reverso", "r", "Reverso|Card back|Dos de carte|Verso|Kartenrücken|Dorso||牌背|카드 뒷면|カードの裏|Рубашка|Rewers",
+        "El dorso de una baraja.|The back of a card deck.|Le dos d'un jeu de cartes.|O verso de um baralho.|Die Rückseite eines Kartenspiels.|Il dorso di un mazzo di carte.||一副扑克牌的牌背。|카드 덱의 뒷면.|トランプの裏面。|Рубашка колоды карт.|Rewers talii kart."],
+      ["minas", "r", "Campo de minas|Minefield|Champ de mines|Campo minado|Minenfeld|Campo minato||扫雷|지뢰밭|地雷原|Сапёр|Pole minowe",
+        "Casillas con relieve y números.|Raised tiles with numbers.|Cases en relief avec chiffres.|Casas em relevo com números.|Erhabene Felder mit Zahlen.|Caselle in rilievo con numeri.||带数字的凸起方格。|숫자가 있는 입체 칸.|数字つきの立体マス。|Выпуклые клетки с цифрами.|Wypukłe pola z cyframi."],
+      ["policroma", "l", "Policroma|Polychrome|Polychrome|Policroma|Polychrom|Policroma||多彩|폴리크롬|ポリクローム|Полихром|Polichrom",
+        "Degradado vivo que se inclina con el puntero.|Vivid gradient that tilts with the pointer.|Dégradé vif qui s'incline avec le pointeur.|Degradê vivo que se inclina com o ponteiro.|Lebendiger Verlauf, der dem Zeiger folgt.|Sfumatura viva che segue il puntatore.||随指针倾斜的鲜艳渐变。|포인터에 따라 기우는 선명한 그라데이션.|ポインターで傾く鮮やかなグラデーション。|Яркий градиент, наклоняющийся за курсором.|Żywy gradient pochylający się za kursorem."],
+      ["hiperespacio", "l", "Hiperespacio|Hyperspace|Hyperespace|Hiperespaço|Hyperraum|Iperspazio||超空间|하이퍼스페이스|ハイパースペース|Космос|Kosmos",
+        "Estrellas que se mueven con el mapa.|Stars that move with the map.|Étoiles qui bougent avec la carte.|Estrelas que se movem com o mapa.|Sterne, die mit der Karte wandern.|Stelle che si muovono con la mappa.||随地图移动的星星。|지도와 함께 움직이는 별.|マップと一緒に動く星々。|Звёзды, плывущие вместе с картой.|Gwiazdy poruszające się z mapą."],
+      ["plataformas", "l", "Plataformas|Platformer|Plateformes|Plataformas|Plattformen|Piattaforme||平台跳跃|플랫포머|プラットフォーマー|Платформы|Platformówka",
+        "Humo azul de fondo y países de ladrillo.|Blue smoke and brick countries.|Fumée bleue et pays en briques.|Fumaça azul e países de tijolo.|Blauer Rauch und Ziegel-Länder.|Fumo blu e paesi di mattoni.||蓝色烟雾与砖块国家。|푸른 연기와 벽돌 나라들.|青い煙とレンガの国々。|Синий дым и страны из кирпича.|Niebieski dym i kraje z cegieł."],
     ].map(([id, r, n, d]) => ({ id, shop: r, n, d, own: P => !!(P.mesas && P.mesas.own && P.mesas.own[id]) })),
   ];
   const prof = () => A.profile.get();

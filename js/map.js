@@ -107,6 +107,8 @@ void main(){
     else if(u_mat==30){ vec2 t=mod(P,4.0); float x=1.0-step(1.0,min(abs(t.x-t.y),abs(t.x+t.y-3.0))); c=mix(c*0.78,c*1.07,x); }
     else if(u_mat==32){ vec2 t=mod(P,6.0)-2.5; float r=length(t), stud=1.0-step(2.0,r), lit=step(0.0,-(t.x+t.y)); c=mix(c,c*mix(0.8,1.14,lit),stud); }
     else if(u_mat==33){ float dt=1.0-step(0.95,length(mod(P,2.0)-1.0)); c=mix(vec3(0.95,0.92,0.84),c,0.6+0.4*dt); }
+    else if(u_mat==43){ c*=0.78+0.12*floor(hash(P)*4.0); }
+    else if(u_mat==54){ vec2 t=vec2(mod(P.x+mod(floor(P.y/3.0),2.0)*3.0,6.0),mod(P.y,3.0)); c*=1.0-0.28*(1.0-step(1.0,min(t.x,t.y))); }
     else if(u_mat==22){ float rim=1.0-smoothstep(0.5,0.78,n); c*=(1.0-0.14*floor(rim*3.0)/3.0)*(0.97+0.05*floor(fbm(P*0.01)*3.0)/2.0); }
   }
   c+=(hash(f)-0.5)*u_fx.y;
@@ -484,6 +486,64 @@ vec3 mesa(vec3 b, vec2 q, vec2 frag, vec2 wp, float n, float w, float x){
     for(int k=0;k<4;k++){ float tt=t*(1.0-(3.5/float(k+1))); i=p+vec2(cos(tt-i.x)+sin(tt+i.y),sin(tt-i.y)+cos(tt+i.x)); c+=1.0/length(vec2(p.x/(sin(i.x+tt)/0.005),p.y/(cos(i.y+tt)/0.005))); }
     c/=4.0; c=1.17-pow(c,1.4); float v=floor(clamp(pow(abs(c),5.0)+lit*0.25,0.0,1.0)*4.0)/4.0;
     return mix(b,u_mc1,v*0.55);
+  }
+  if(u_mat==43){                                                 // mundo de cubos: texeles de cuatro tonos como en un juego de cubos (u_mp.x = lado de la baldosa)
+    float S=u_mp.x; vec2 bi=floor(q/S);
+    float lv=floor(hash(q)*4.0)/3.0, cl=floor(hash(floor(q/2.0)+bi*7.0)*3.0)/2.0;
+    vec3 c=b*(0.76+0.16*lv)*(0.93+0.1*cl);
+    c=mix(c,u_mc1,step(0.88,hash(q*0.5+bi))*0.4);
+    return c;
+  }
+  if(u_mat==44){                                                 // mazmorra: sillares con su argamasa y musgo (u_mp.x = ancho del sillar)
+    float W2=u_mp.x, Hh=u_mp.x*0.5, row=floor(q.y/Hh), xo=q.x+mod(row,2.0)*W2*0.5, col=floor(xo/W2);
+    vec2 t=vec2(xo-col*W2,q.y-row*Hh); float h=hash(vec2(col,row));
+    vec3 c=b*(0.72+0.5*h);
+    float mortar=1.0-step(1.0,min(t.x,t.y)); c=mix(c,u_mc1,mortar*0.9);
+    c=mix(c,u_mc2,step(0.93,hash(vec2(col,row)+3.3))*step(t.y,Hh*0.5)*0.55);
+    c*=0.96+0.06*hash(q);
+    return c;
+  }
+  if(u_mat==45){                                                 // reverso de baraja: celosia de rombos y puntos (u_mp.x = lado del rombo)
+    float S=u_mp.x; float d1=abs(mod(q.x+q.y,S)-S*0.5), d2=abs(mod(q.x-q.y,S)-S*0.5);
+    float ln=1.0-step(0.7,min(d1,d2));
+    vec2 t=mod(q,S)-S*0.5; float ctr=1.0-step(1.2,length(t));
+    vec3 c=b; c=mix(c,u_mc2,ln*0.6); c=mix(c,u_mc2,ctr*0.85);
+    return c*(0.97+0.04*hash(q));
+  }
+  if(u_mat==47){                                                 // campo de minas: casillas con relieve y numeros (u_mp.x = lado)
+    float S=u_mp.x; vec2 ci=floor(q/S), t=mod(q,S); float h=hash(ci), open=step(0.62,h);
+    vec3 c=b;
+    vec3 cover=mix(c,vec3(1.0),(1.0-step(1.0,min(t.x,t.y)))*0.7);
+    cover=mix(cover,c*0.45,step(S-1.0,max(t.x,t.y))*0.8);
+    vec3 flat0=c*0.9; flat0=mix(flat0,c*0.7,(1.0-step(1.0,min(t.x,t.y)))*0.8);
+    float num=1.0+floor(hash(ci+2.2)*3.0); vec2 g=floor(t-vec2(floor(S*0.5)-1.0,floor(S*0.5)-2.0));
+    float on=0.0;
+    if(g.x>=0.0&&g.x<3.0&&g.y>=0.0&&g.y<5.0){ float bit=(4.0-g.y)*3.0+g.x; float pat=num<1.5?(1.0):(num<2.5?(2.0):(3.0));
+      float n1[15]=float[15](0.,1.,0., 1.,1.,0., 0.,1.,0., 0.,1.,0., 1.,1.,1.);
+      float n2[15]=float[15](1.,1.,0., 0.,0.,1., 0.,1.,0., 1.,0.,0., 1.,1.,1.);
+      float n3[15]=float[15](1.,1.,0., 0.,0.,1., 0.,1.,0., 0.,0.,1., 1.,1.,0.);
+      int ii=int(bit); on=pat<1.5?n1[ii]:(pat<2.5?n2[ii]:n3[ii]); }
+    vec3 nc=num<1.5?vec3(0.1,0.1,0.85):(num<2.5?vec3(0.1,0.5,0.1):vec3(0.85,0.1,0.1));
+    vec3 opened=mix(flat0,nc,on);
+    return mix(cover,opened,open);
+  }
+  if(u_mat==49){                                                 // edicion policroma: degradado de colores que cambia con el tiempo y se inclina con el puntero
+    vec2 uv=frag/u_res; float tilt=u_hv.x>-1000.0?(u_hv.x/u_res.x-0.5)*0.8:0.0;
+    float ph=dot(uv,vec2(0.8,0.55))*1.2+u_time*u_mp.x*0.06+tilt;
+    float hq=floor(fract(ph)*12.0)/12.0;
+    vec3 rb=0.55+0.4*cos(6.2832*(hq+vec3(0.0,0.33,0.67)));
+    float sh=exp(-pow((fract(ph*0.7-u_time*0.04)-0.5)*7.0,2.0));
+    vec3 c=mix(b,rb,u_mp.y); c+=vec3(0.3)*floor(sh*3.0)/3.0*0.25;
+    return c;
+  }
+  if(u_mat==52){                                                 // hiperespacio: estrellas en tres capas que se desplazan con el mapa
+    vec3 c=b; vec2 uv=frag/u_res;
+    float neb=vn(q*0.012+vec2(u_time*0.02,0.0))*vn(q*0.02-u_time*0.01); c+=u_mc1*0.18*floor(neb*4.0)/4.0;
+    for(int L=0;L<3;L++){ float fl=float(L), k=0.15+0.25*fl; vec2 pq=q+u_center*u_scale*k/(u_dpr*2.0)*vec2(1.0,-1.0)+vec2(u_time*(0.8+fl),0.0);
+      float sz=4.0+fl*2.0; vec2 ci=floor(pq/sz), t=mod(pq,sz); float h=hash(ci+fl*13.0);
+      float st=step(0.985-0.003*fl,h)*(1.0-step(1.0,max(abs(t.x-sz*0.5),abs(t.y-sz*0.5))));
+      float tw=0.5+0.5*sin(u_time*(1.0+3.0*hash(ci))+h*40.0); c+=u_mc2*st*(0.35+0.4*tw)*(0.6+0.2*fl); }
+    return c;
   }
   return b;
 }
@@ -1655,8 +1715,8 @@ void main(){
       for (const v of this.tv ? [this.view, this.tv] : [this.view]) { v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); }
       this.dirty = this.fxDirty = true;
     }
-    /* las mesas que responden al puntero: Lampara de lava (mat 38) y Piscina (mat 39) */
-    _livingMat() { const m = this.ms && this.ms.mat; return m === 38 || m === 39; }
+    /* las mesas que responden al puntero: Lampara de lava (mat 38), Piscina (mat 39) y Edicion policroma (mat 49) */
+    _livingMat() { const m = this.ms && this.ms.mat; return m === 38 || m === 39 || m === 49; }
     tapAt(px, py) { this._tap(px, py); }
     _pinchState() { const [a, b] = [...this.pointers.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
     _tap(px, py) {
