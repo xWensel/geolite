@@ -75,7 +75,18 @@ window.AIQ = window.AIQ || {};
     setHighlight(name) { this.marks = { ...this.marks, highlight: name || null }; this.fxDirty = this.hlDirty = true; }
     setPick(on) { this.pickEnabled = on; this.fxDirty = true; for (const c of [this.cv, this.fx]) c.classList.toggle("aiming", on); }
     setQuality(q) { this.quality = q; this.resize(true); }
-    setStyle() {} stopDrift() {} snap() { return null; }
+    /* v0.3.177: la mesa elegida tambien se ve sin WebGL: sus colores de mar, costa y paises (el material, los reflejos y los efectos son del shader) */
+    setStyle(st) {
+      if (!st || !this.world) return;
+      const hex = h => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h || ""); return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : null; };
+      const casino = st === (window.AIQ.MAPSTYLES || {}).casino, sh = hex(st.shallow);
+      this.ocT = casino ? OCEAN_TOP : st.oceanTop || OCEAN_TOP; this.ocB = casino ? OCEAN_BOT : st.oceanBot || OCEAN_BOT; this.shore = casino || !sh ? SHORE : sh.join(",");
+      const app = document.getElementById("app"); if (app) app.style.background = casino ? "" : `linear-gradient(${this.ocT}, ${this.ocB})`;
+      for (const f of this.world.features) { if (f.c0 === undefined) f.c0 = f.color; f.color = (!casino && st.land && st.land[f.ci]) || f.c0; }
+      if (this.texW) this._buildTextures(this.texW);
+      this.sharp = null; this.dirty = this.fxDirty = true;
+    }
+    stopDrift() {} snap() { return null; }
     setAnchor() {}
     static supported() { return true; }
 
@@ -132,7 +143,7 @@ window.AIQ = window.AIQ || {};
         const glow = mk(texW, texH), gc = glow.getContext("2d");
         if ("filter" in gc) {
           for (const [blur, a] of [[30, 0.5], [14, 0.6], [5, 0.7]]) { gc.filter = `blur(${blur}px)`; gc.globalAlpha = a; gc.drawImage(half, 0, 0, texW, texH); }
-          gc.filter = "none"; gc.globalAlpha = 1; gc.globalCompositeOperation = "source-in"; gc.fillStyle = `rgb(${SHORE})`; gc.fillRect(0, 0, texW, texH);
+          gc.filter = "none"; gc.globalAlpha = 1; gc.globalCompositeOperation = "source-in"; gc.fillStyle = `rgb(${this.shore || SHORE})`; gc.fillRect(0, 0, texW, texH);
           gc.globalCompositeOperation = "source-over"; gc.globalAlpha = 0.9; gc.drawImage(land, 0, 0);
           combo = glow;
         }
@@ -362,7 +373,7 @@ window.AIQ = window.AIQ || {};
       c.lineJoin = "round"; c.lineCap = "round";
       const hw = cw / dpr / (2 * s), hh = ch / dpr / (2 * s), x0 = v.cx - hw, x1 = v.cx + hw, y0 = v.cy - hh, y1 = v.cy + hh;
       const vis = this.world.features.filter(f => f.wrap || (f.px1 >= x0 && f.px0 <= x1 && f.py1 >= y0 && f.py0 <= y1));
-      for (const [w, a] of [[18, 0.06], [8, 0.10], [3.5, 0.16]]) { c.strokeStyle = `rgba(${SHORE},${a})`; c.lineWidth = w / s; for (const f of vis) c.stroke(f.path); }
+      for (const [w, a] of [[18, 0.06], [8, 0.10], [3.5, 0.16]]) { c.strokeStyle = `rgba(${this.shore || SHORE},${a})`; c.lineWidth = w / s; for (const f of vis) c.stroke(f.path); }
       for (const f of vis) { c.fillStyle = f.color; c.fill(f.path); }
       c.strokeStyle = "rgba(38,52,58,.5)"; c.lineWidth = clamp(s / 300, 0.6, 1.5) / s; for (const f of vis) c.stroke(f.path);
       this.sharp = { cv: this._sharpCv, v, w: cw / dpr, h: ch / dpr };
@@ -487,7 +498,7 @@ window.AIQ = window.AIQ || {};
       const dpr = Math.min(2, window.devicePixelRatio || 1), w = cv.clientWidth || 120, h = cv.clientHeight || 76;
       cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
       const c = cv.getContext("2d"), sc = this.texSc;
-      const g = c.createLinearGradient(0, 0, 0, cv.height); g.addColorStop(0, OCEAN_TOP); g.addColorStop(1, OCEAN_BOT); c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
+      const g = c.createLinearGradient(0, 0, 0, cv.height); g.addColorStop(0, this.ocT || OCEAN_TOP); g.addColorStop(1, this.ocB || OCEAN_BOT); c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
       const [x, y] = project(spec.lon, spec.lat), z = Math.max(1, spec.zoom * 0.85);
       const uw = (BX1 - BX0) / z, uh = (uw * h) / w;
       const sw = uw * sc, sh = uh * sc, texH = this.landTex.height;
