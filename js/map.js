@@ -104,6 +104,9 @@ void main(){
     else if(u_mat==5){ float st=fbm(P*0.012); c*=0.98+0.03*floor(st*3.0)/2.0; }
     else if(u_mat==8){ float h=step(0.75,fract((P.x-P.y)/4.0)); c=mix(c,u_mc1,h*0.18); }
     else if(u_mat==16){ float h=step(0.5,fract((P.x+P.y)/3.0)); c=mix(vec3(1.0),c,0.72+0.2*h); }
+    else if(u_mat==30){ vec2 t=mod(P,4.0); float x=1.0-step(1.0,min(abs(t.x-t.y),abs(t.x+t.y-3.0))); c=mix(c*0.78,c*1.07,x); }
+    else if(u_mat==32){ vec2 t=mod(P,6.0)-2.5; float r=length(t), stud=1.0-step(2.0,r), lit=step(0.0,-(t.x+t.y)); c=mix(c,c*mix(0.8,1.14,lit),stud); }
+    else if(u_mat==33){ float dt=1.0-step(0.95,length(mod(P,2.0)-1.0)); c=mix(vec3(0.95,0.92,0.84),c,0.6+0.4*dt); }
     else if(u_mat==22){ float rim=1.0-smoothstep(0.5,0.78,n); c*=(1.0-0.14*floor(rim*3.0)/3.0)*(0.97+0.05*floor(fbm(P*0.01)*3.0)/2.0); }
   }
   c+=(hash(f)-0.5)*u_fx.y;
@@ -165,7 +168,7 @@ uniform sampler2D u_blurN; uniform sampler2D u_blurW; uniform sampler2D u_swirl;
 uniform vec3 u_oTop; uniform vec3 u_oBot; uniform vec3 u_shallow; uniform vec3 u_grid; uniform vec3 u_tropic;
 uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3; uniform float u_calm; uniform vec4 u_felt;
 uniform vec4 u_gp; // stepA, stepB, tB, gridAlpha
-uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform sampler2D u_blurX;
+uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform sampler2D u_blurX; uniform vec4 u_it; uniform vec2 u_hv;
 out vec4 o;
 const float D2R=0.017453292519943295;
 ${NOISE}
@@ -370,6 +373,118 @@ vec3 mesa(vec3 b, vec2 q, vec2 frag, vec2 wp, float n, float w, float x){
     float h=floor(fract(s)*12.0)/12.0;
     return mix(b,0.5+0.5*cos(6.2832*(h+vec3(0.0,0.33,0.67))),u_mp.z);
   }
+  if(u_mat==28){                                                 // corcho: granulos y motas (u_mp.x = tamano del granulo)
+    vec2 gi=floor(q/u_mp.x); float h=hash(gi), h2=hash(gi+7.7);
+    vec3 c=b*(0.84+0.3*h);
+    c=mix(c,u_mc1,step(0.9,h2)*0.7); c=mix(c,u_mc2,step(h2,0.07)*0.65);
+    float big=vn(q*0.045); return c*(0.94+0.1*floor(big*3.0)/2.0);
+  }
+  if(u_mat==29){                                                 // jardin zen: arena rastrillada en surcos alrededor de las costas (u_mp.x = surcos)
+    float k=w*u_mp.x, f=fract(k), near=smoothstep(0.015,0.07,w)*(1.0-smoothstep(0.5,0.78,w));
+    vec3 c=b*(0.975+0.05*hash(q));
+    c*=mix(1.0,0.76+0.34*floor(f*4.0)/3.0,near);
+    return mix(c,u_mc1,step(f,0.1)*near*0.7);
+  }
+  if(u_mat==30){                                                 // punto de cruz: tela aida y cruces de hilo (u_mp.x = lado de la cruz)
+    float S=u_mp.x; vec2 ci=floor(q/S), t=mod(q,S); float h=hash(ci);
+    float x=1.0-step(1.0,min(abs(t.x-t.y),abs(t.x+t.y-(S-1.0))));
+    vec3 th=mix(b,u_mc1,h*0.8)*(0.92+0.16*step(0.5,fract((q.x+q.y)*0.5)));
+    vec3 cloth=u_mc2*(0.93+0.07*step(0.5,fract((q.x+q.y)*0.5)));
+    return mix(cloth,th,x);
+  }
+  if(u_mat==31){                                                 // mosaico romano: teselas irregulares con su lechada (u_mp.x = tamano)
+    vec2 p=q/u_mp.x, ip=floor(p), fp=fract(p); float d1=9.0, d2=9.0; vec2 id=vec2(0.0);
+    for(int j=-1;j<=1;j++){ for(int i=-1;i<=1;i++){ vec2 g=vec2(float(i),float(j)); vec2 o=vec2(hash(ip+g),hash(ip+g+31.7)); float d=length(g+o*0.8+0.1-fp); if(d<d1){ d2=d1; d1=d; id=ip+g; } else if(d<d2){ d2=d; } } }
+    float h=hash(id+3.1);
+    vec3 c=b*(0.8+0.4*h); c=mix(c,u_mc1,step(0.955,hash(id+9.3))*0.6);
+    return mix(u_mc2,c,smoothstep(0.02,0.06,d2-d1));
+  }
+  if(u_mat==32){                                                 // bloques: placa de construccion con sus tetones (u_mp.x = lado)
+    float S=u_mp.x; vec2 t=mod(q,S)-S*0.5+0.5; float r=length(t);
+    vec3 c=b*(0.94+0.06*hash(floor(q/S)));
+    float stud=1.0-step(S*0.34,r), lit=step(0.0,-(t.x+t.y)), rim=step(S*0.34,r)*(1.0-step(S*0.34+1.0,r));
+    c=mix(c,b*mix(0.8,1.18,lit),stud); c=mix(c,u_mc1,rim*0.6);
+    return c;
+  }
+  if(u_mat==33){                                                 // periodico: columnas de texto gris, titulares y fotos de trama (u_mp.x = ancho de columna)
+    float Wc=u_mp.x, col=floor(q.x/Wc), lx=q.x-col*Wc, r=floor(q.y/3.0), ly=q.y-r*3.0;
+    float seg=floor((lx+hash(vec2(r,col))*5.0)/3.0);
+    float ink=step(0.2,hash(vec2(seg,r*3.1+col*17.0)))*(1.0-step(1.0,ly))*step(2.0,lx)*step(lx,Wc-2.0)*step(hash(vec2(r,col+40.0)),0.93);
+    float blk=floor(r/9.0), ph=step(0.9,hash(vec2(blk,col+3.0)))*step(2.0,lx)*step(lx,Wc-2.0);
+    float dots=1.0-step(0.9,length(mod(q,2.0)-1.0));
+    float hd=step(0.84,hash(vec2(blk,col+60.0)))*step(2.0,lx)*step(lx,Wc-2.0)*step(mod(r,9.0),1.0);
+    vec3 c=b*(0.98+0.04*hash(q*0.5));
+    c=mix(c,u_mc1,ink*0.5); c=mix(c,u_mc1,ph*dots*0.45); c=mix(c,u_mc1,hd*(1.0-step(1.0,ly))*0.8);
+    return c;
+  }
+  if(u_mat==34){                                                 // tartan: dos bandas anchas y una fina cruzadas, con su sarga (u_mp.x = periodo)
+    float P=u_mp.x; float tx=mod(q.x,P)/P, ty=mod(q.y,P)/P;
+    float wx=step(0.28,tx)*(1.0-step(0.56,tx)), wy=step(0.28,ty)*(1.0-step(0.56,ty));
+    float fx=step(0.70,tx)*(1.0-step(0.74,tx)), fy=step(0.70,ty)*(1.0-step(0.74,ty));
+    vec3 c=b; float wide=max(wx,wy); c=mix(c,u_mc1,wide*0.85); c*=1.0-0.28*wx*wy;
+    c=mix(c,u_mc2,max(fx,fy)*0.9);
+    return c*(0.92+0.08*step(0.5,fract((q.x+q.y)*0.25)));
+  }
+  if(u_mat==35){                                                 // vitral: cristales de colores con su plomo (u_mp.x = tamano del cristal)
+    vec2 p=q/u_mp.x, ip=floor(p), fp=fract(p); float d1=9.0, d2=9.0; vec2 id=vec2(0.0);
+    for(int j=-1;j<=1;j++){ for(int i=-1;i<=1;i++){ vec2 g=vec2(float(i),float(j)); vec2 o=vec2(hash(ip+g),hash(ip+g+31.7)); float d=length(g+o*0.8+0.1-fp); if(d<d1){ d2=d1; d1=d; id=ip+g; } else if(d<d2){ d2=d; } } }
+    float h=hash(id+5.5);
+    float k=floor(h*4.0);
+    vec3 jw=k<0.5?b*1.35:(k<1.5?vec3(0.12,0.52,0.58):(k<2.5?vec3(0.42,0.24,0.66):vec3(0.78,0.5,0.14)));
+    vec3 c=jw*(1.2-0.34*floor(d1*3.0)/2.0);
+    return mix(u_mc1,c,smoothstep(0.07,0.13,d2-d1));
+  }
+  if(u_mat==36){                                                 // radar: barrido que enciende las costas (u_mp.x = radianes por segundo)
+    vec2 cc=frag-0.5*u_res; float rr=length(cc)/u_res.y, a=atan(cc.y,cc.x);
+    float d=mod(u_time*u_mp.x-a,6.2831853)/6.2831853;
+    float trail=floor(pow(1.0-d,3.0)*6.0)/5.0;
+    vec3 c=b+u_mc1*trail*0.1;
+    float ring=1.0-step(0.0035,mod(rr,0.2)); c=mix(c,u_mc1,ring*0.2);
+    float xh=max(1.0-step(1.0*u_dpr,abs(cc.x)),1.0-step(1.0*u_dpr,abs(cc.y))); c=mix(c,u_mc1,xh*0.12);
+    float coast=smoothstep(0.06,0.3,n)*(1.0-smoothstep(0.5,0.85,n));
+    c+=u_mc1*coast*(0.07+0.85*trail);
+    return mix(c,u_mc2,(1.0-step(0.0025,d))*0.9);
+  }
+  if(u_mat==37){                                                 // lluvia de codigo: pocas columnas de glifos que caen, finas y tenues (u_mp.x = velocidad)
+    vec2 cs=vec2(3.0,4.0), ce=floor(q/cs), sub=floor(mod(q,cs));
+    float on=step(0.55,hash(vec2(ce.x,11.0)))*step(0.5,hash(vec2(ce.x,12.0)));                   // una columna de cada cuatro o cinco dibuja lluvia
+    float H=floor(u_res.y/(u_dpr*2.0*cs.y)), sp=(0.35+0.9*hash(vec2(ce.x,1.0)))*u_mp.x, off=hash(vec2(ce.x,2.0));
+    float head=H*(1.0-fract(u_time*sp*0.14+off)), dist=ce.y-head; if(dist<0.0) dist+=H;
+    float L=H*(0.18+0.3*hash(vec2(ce.x,3.0))), inten=clamp(1.0-dist/L,0.0,1.0);
+    inten=floor(inten*4.0)/4.0*on;
+    float bit=step(0.45,hash(ce*7.0+sub+floor(u_time*(2.0+4.0*sp))))*step(sub.x,1.5)*step(sub.y,2.5);
+    vec3 c=b+u_mc1*inten*bit*0.6;
+    c=mix(c,u_mc2,(1.0-step(1.2,dist))*bit*on*0.7);
+    c+=u_mc1*0.05*smoothstep(0.1,0.4,n)*(1.0-smoothstep(0.5,0.85,n));
+    return c;
+  }
+  if(u_mat==38){                                                 // lampara de lava: gotas que se funden, huyen del puntero, se llevan con el mapa y salpican al clicar (u_mp.x = velocidad)
+    vec2 uv=(frag-0.5*u_res)/u_res.y; float t=u_time*u_mp.x, f=0.0;
+    vec2 pan=0.3*vec2(sin(u_center.x*u_scale/u_res.y*0.6),sin(u_center.y*u_scale/u_res.y*0.6));
+    vec2 hp=(u_hv-0.5*u_res)/u_res.y; float hov=step(-1000.0,u_hv.x);
+    for(int i=0;i<9;i++){ float fi=float(i);
+      vec2 c0=vec2((fi/8.0*2.0-1.0)*0.85+0.1*sin(t*(0.4+0.05*fi)+fi), sin(t*(0.21+0.045*fi)+fi*4.3)*0.52)+pan;
+      vec2 dh=c0-hp; c0+=hov*dh/(length(dh)+0.02)*0.24*exp(-dot(dh,dh)*6.0);
+      float rd=0.07+0.03*sin(fi*1.7); vec2 dv=uv-c0; f+=rd*rd/dot(dv,dv); }
+    float age=u_it.z;
+    if(age>=0.0){ vec2 cp=(u_it.xy-0.5*u_res)/u_res.y; float fade=exp(-age*0.45);
+      vec2 dv=uv-(cp+vec2(0.0,age*0.06)); float rr=0.17*fade*(1.0+0.5*sin(age*8.0)*exp(-age*1.5)); f+=rr*rr/dot(dv,dv);
+      for(int j=0;j<3;j++){ float a=1.0+float(j)*2.094+age*0.3; vec2 sp=cp+vec2(cos(a),sin(a))*0.28*(1.0-exp(-age*1.5)); vec2 dw=uv-sp; float r2=0.08*fade; f+=r2*r2/dot(dw,dw); } }
+    vec3 c=b+u_mc1*0.12*floor(smoothstep(0.3,0.95,f)*2.0)/2.0;
+    c=mix(c,u_mc1,step(1.0,f)*0.92); c=mix(c,u_mc2,step(2.4,f)*0.7);
+    return c;
+  }
+  if(u_mat==39){                                                 // piscina: reflejos del agua; el clic y el puntero la ondulan y el mapa la arrastra a medias (u_mp.x = escala, u_mp.y = fuerza de la onda)
+    vec2 uvp=(frag-0.5*u_res)/u_res.y; vec2 disp=vec2(0.0); float lit=0.0;
+    float age=u_it.z;
+    if(age>=0.0){ vec2 d=uvp-(u_it.xy-0.5*u_res)/u_res.y; float r=length(d), fr=r-age*0.45; float wv=sin(fr*38.0)*exp(-fr*fr*12.0)*exp(-age*0.7); disp+=d/(r+0.001)*wv; lit+=abs(wv)*2.0; }
+    if(u_hv.x>-1000.0){ vec2 d=uvp-(u_hv-0.5*u_res)/u_res.y; float r=length(d); float wv=sin(r*40.0-u_time*5.0)*exp(-r*r*40.0); disp+=d/(r+0.001)*0.5*wv; lit+=abs(wv)*0.5; }
+    vec2 p=(q+0.35*u_center*u_scale/(u_dpr*2.0))*u_mp.x-250.0+disp*u_mp.y;
+    float t=u_time*0.5+23.0; vec2 i=p; float c=1.0;
+    for(int k=0;k<4;k++){ float tt=t*(1.0-(3.5/float(k+1))); i=p+vec2(cos(tt-i.x)+sin(tt+i.y),sin(tt-i.y)+cos(tt+i.x)); c+=1.0/length(vec2(p.x/(sin(i.x+tt)/0.005),p.y/(cos(i.y+tt)/0.005))); }
+    c/=4.0; c=1.17-pow(c,1.4); float v=floor(clamp(pow(abs(c),5.0)+lit*0.25,0.0,1.0)*4.0)/4.0;
+    return mix(b,u_mc1,v*0.55);
+  }
   return b;
 }
 float gridLevel(float stp, vec2 wp, float lonDeg, float latDeg, float pxPerDeg){
@@ -506,9 +621,20 @@ void main(){
     vec2 bp=mod(bi,2.0); float th=(bp.y*2.0+bp.x==0.0?0.0:(bp.y*2.0+bp.x==1.0?2.0:(bp.y*2.0+bp.x==2.0?3.0:1.0)))/4.0+0.125;
     float lev=clamp(floor(dot(s,vec3(0.299,0.587,0.114))*3.0+th),0.0,3.0);
     col=lev<0.5?vec3(0.06,0.22,0.06):lev<1.5?vec3(0.19,0.38,0.19):lev<2.5?vec3(0.55,0.67,0.06):vec3(0.61,0.74,0.06);
-  } else if(u_fx2.x>3.5){                                        // tormenta: relampagos de vez en cuando (doble golpe) y luz fria
+  } else if(u_fx2.x>3.5&&u_fx2.x<4.5){                           // tormenta: relampagos de vez en cuando (doble golpe) y luz fria
     float ft=floor(u_time*10.0); float f=max(step(0.975,hash(vec2(ft,3.3))),step(0.975,hash(vec2(ft-1.0,3.3)))*0.55);
     col=mix(col,col*1.7+vec3(0.12,0.14,0.2),f*u_fx2.y); col*=vec3(0.93,0.97,1.06);
+  } else if(u_fx2.x>4.5){                                        // cinta VHS: banda de seguimiento que sube, color corrido y nieve (fx2.y = nieve, fx2.z = seguimiento)
+    float bt=fract(u_time/9.0)*3.2, tb0=bt<1.0?1.0-bt:2.0, tb=smoothstep(0.0,0.02,tb0)*(1.0-smoothstep(0.02,0.05,tb0))*step(tb0,1.0);   // una banda fina cada nueve segundos, uno de viaje
+    float lj=hash(vec2(floor(fr.y/(2.0*u_dpr)),floor(u_time*12.0)))-0.5;
+    float hs=smoothstep(0.06,0.0,uv.y);
+    float sh=tb*0.012*u_fx2.z+step(0.995,hash(vec2(floor(u_time*8.0),7.0)))*0.004*lj+hs*(0.012+0.01*lj);
+    vec2 u2=suv+vec2(sh,0.0); float cs=2.0*u_dpr/u_res.x;
+    col=vec3(texture(u_scene,u2+vec2(cs,0.0)).r,texture(u_scene,u2).g,texture(u_scene,u2-vec2(cs,0.0)).b);
+    col=mix(col,vec3(dot(col,vec3(0.299,0.587,0.114))),0.12);
+    col+=(tb+hs)*0.08*hash(floor(frag/u_dpr)+fract(u_time*9.7)*53.0);
+    col+=(hash(floor(frag/u_dpr)+fract(u_time*9.7)*37.0)-0.5)*u_fx2.y;
+    col*=0.93+0.07*sin(fr.y*3.14159265/(1.5*u_dpr));
   }
   vec2 q2=uv-0.5; float v=1.0-u_vig*smoothstep(0.30,0.95,length(q2*vec2(1.05,1.0))+min(abs(zvA)*0.01,0.04));
   col*=v*u_tint;
@@ -1471,13 +1597,14 @@ void main(){
         if (this.zzUntil && performance.now() < this.zzUntil) return;               // Ctrl+Z: durante el rebobinado no se aceptan clics
         const mk = A.keys ? A.keys.mouse : { pick: 0, drag: 0 }, mb = e.pointerType === "mouse" && e.isTrusted ? e.button : -1;   // v0.3.2: el boton de marcar y el de arrastrar salen de Ajustes > Controles (antes, solo el izquierdo)
         if (mb >= 0 && mb !== mk.pick && mb !== mk.drag) return;
+        if (this._livingMat()) { const r = cv.getBoundingClientRect(); this._it = { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }; this.dirty = true; }   // v0.3.177: lava y piscina reaccionan al clic
         try { cv.setPointerCapture(e.pointerId); } catch (err) { return; }   // un pointerdown del mando (js/mando.js) no tiene puntero real que capturar
         clearTimeout(this._dT); this.drift = null; this.inertia = null; this.tv = null; this.samples = [];
         this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: mb, drag: mb < 0 || mb === mk.drag, pick: mb < 0 || mb === mk.pick });
         if (this.pointers.size === 2) this._pinch = this._pinchState();
       });
       cv.addEventListener("pointermove", e => {
-        if (e.pointerType === "mouse") { const r = cv.getBoundingClientRect(); this.mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; this.fxDirty = true; }
+        if (e.pointerType === "mouse") { const r = cv.getBoundingClientRect(); this.mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; this.fxDirty = true; if (this._livingMat()) this.dirty = true; }
         const p = this.pointers.get(e.pointerId); if (!p) return; if (e.pointerType === "mouse" && !(e.buttons & (p.btn >= 0 && A.keys ? A.keys.bit(p.btn) : 1))) { up({ pointerId: e.pointerId, type: "pointercancel" }); return; }   // el boton ya no esta pulsado: el arrastre acabo fuera
         let dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
         if (this._orient().on) { const [a0, b0] = this._orientOut(0, 0), [a1, b1] = this._orientOut(dx, dy); dx = a1 - a0; dy = b1 - b0; }   // arrastrar: solo el giro (la curva CRT no cambia el sentido)
@@ -1528,6 +1655,8 @@ void main(){
       for (const v of this.tv ? [this.view, this.tv] : [this.view]) { v.cx += (dx * A.mapSens.pan) / v.s; v.cy -= (dy * A.mapSens.pan) / v.s; this._clamp(v); }
       this.dirty = this.fxDirty = true;
     }
+    /* las mesas que responden al puntero: Lampara de lava (mat 38) y Piscina (mat 39) */
+    _livingMat() { const m = this.ms && this.ms.mat; return m === 38 || m === 39; }
     tapAt(px, py) { this._tap(px, py); }
     _pinchState() { const [a, b] = [...this.pointers.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
     _tap(px, py) {
@@ -1611,6 +1740,7 @@ void main(){
       const m = this.marks;
       if (m.guess || m.answer || (this.pickEnabled && this.mouse && !this.hideReticle)) this.fxDirty = true;
       if (m.highlight && now - m.t0 < 700) this.dirty = true;
+      if (this._it && this._livingMat() && now - this._it.t < 6000) this.dirty = true;                       // la salpicadura dura seis segundos
       if (this.sk.animated && this.fxOn !== false && !this.pointers.size && now - this._lastDraw >= this.idleMs) this.dirty = true;   // fondo animado: ~25 fps en reposo
       if (this.dirty) { this.dirty = false; this._drawGL(now); if (this.onView) this.onView(this.view); }
       if (this.fxDirty) { this.fxDirty = false; this._drawFx(now); }
@@ -1699,6 +1829,9 @@ void main(){
       this._u(P.ocean, "u_oTop", ...ms.oTop); this._u(P.ocean, "u_oBot", ...ms.oBot); this._u(P.ocean, "u_shallow", ...ms.shallow); this._u(P.ocean, "u_grid", ...ms.grid); this._u(P.ocean, "u_tropic", ...ms.tropic);
       this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(P.ocean, "u_felt", f[0], f[1], f[2], f[3]); }
       this._u(P.ocean, "u_time", this.fxOn === false ? 0 : now / 1000); gl.uniform1i(P.ocean.u.u_style, st.style || 0);
+      { const it = this._it, hv = this.mouse, live = this._livingMat(), age = it && live ? (now - it.t) / 1000 : -1;
+        this._u(P.ocean, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
+        this._u(P.ocean, "u_hv", hv && live ? hv.x * sw / this.W : -9999, hv && live ? (this.H - hv.y) * sh / this.H : -9999); }
       this._u(P.ocean, "u_sw1", ...ms.sw[0]); this._u(P.ocean, "u_sw2", ...ms.sw[1]); this._u(P.ocean, "u_sw3", ...ms.sw[2]);
       { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", this._calm); }   // la calma entra poco a poco (~0,7 s)
       gl.drawArrays(gl.TRIANGLES, 0, 3);

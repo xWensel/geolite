@@ -26,13 +26,76 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ancho y alto reales de cada imagen de assets/parche/ */
-  const SZ = { "mesas-tienda-t2": [1100, 619], "mesas-estreno-t2": [1100, 619], "tienda-marcos": [1100, 619], "clasificacion-cartas": [1100, 619], "duelo-chapa": [1100, 619], "pausa-gala": [1100, 619], "ticket-caja": [1100, 619], "ajustes-gala": [1100, 619], "clasificacion-gala": [1100, 619], "naipe-liso": [1100, 619], "perfil-libro": [1100, 619], "reto-mesa": [1100, 619], "clasico-carta": [1100, 619], "aventura-mesa": [1100, 619], "campamento-boleto": [1100, 619], "barra-tapetes": [1100, 619], "enciclopedia-localizador": [1100, 619], "parche-boletin": [1100, 619], "sala-portada": [1100, 619], "sala-caja": [1100, 619], "golpes-cuenta": [1100, 619], "golpes-jefe": [1100, 619], "mesas-la-mesa": [1100, 619], "mesas-cuatro": [1100, 619], "mesas-perfil": [1100, 619], "portada-sistema": [1100, 619], "luz-portada": [1100, 619], "luz-escenario": [1100, 619], "luz-rondas": [1100, 464], "luz-ola": [1100, 396], "duelo-sala": [1100, 619], "duelo-revelado": [1100, 619], "luz-caja": [1100, 619], "partida-gala": [1100, 619], "club-vestuario": [1100, 619], "crupier-antifaz-oro": [1100, 280], "vestuario-lunares": [1100, 619], "vestuario-clavel": [1100, 619], "vestuario-pluma": [1100, 619], "truco-todo": [1100, 619], "vestuario-combina": [1100, 619], "viste-portada": [1100, 619], "retos-pantalla": [1100, 619], "retos-recibo": [1100, 619], "carta-portada": [1100, 619], "carta-quince": [1100, 619], "carta-perfil": [1100, 619], "punteros-tienda": [1100, 619], "punteros-mapa": [1100, 619], "punteros-diana": [1100, 619], "carta-logros": [1100, 619], "carta-titulo": [1100, 619] };
+  const SZ = { "mesas-tienda-t3": [1100, 619], "mesas-estreno-t3": [1100, 619], "mesas-tienda-t2": [1100, 619], "mesas-estreno-t2": [1100, 619], "tienda-marcos": [1100, 619], "clasificacion-cartas": [1100, 619], "duelo-chapa": [1100, 619], "pausa-gala": [1100, 619], "ticket-caja": [1100, 619], "ajustes-gala": [1100, 619], "clasificacion-gala": [1100, 619], "naipe-liso": [1100, 619], "perfil-libro": [1100, 619], "reto-mesa": [1100, 619], "clasico-carta": [1100, 619], "aventura-mesa": [1100, 619], "campamento-boleto": [1100, 619], "barra-tapetes": [1100, 619], "enciclopedia-localizador": [1100, 619], "parche-boletin": [1100, 619], "sala-portada": [1100, 619], "sala-caja": [1100, 619], "golpes-cuenta": [1100, 619], "golpes-jefe": [1100, 619], "mesas-la-mesa": [1100, 619], "mesas-cuatro": [1100, 619], "mesas-perfil": [1100, 619], "portada-sistema": [1100, 619], "luz-portada": [1100, 619], "luz-escenario": [1100, 619], "luz-rondas": [1100, 464], "luz-ola": [1100, 396], "duelo-sala": [1100, 619], "duelo-revelado": [1100, 619], "luz-caja": [1100, 619], "partida-gala": [1100, 619], "club-vestuario": [1100, 619], "crupier-antifaz-oro": [1100, 280], "vestuario-lunares": [1100, 619], "vestuario-clavel": [1100, 619], "vestuario-pluma": [1100, 619], "truco-todo": [1100, 619], "vestuario-combina": [1100, 619], "viste-portada": [1100, 619], "retos-pantalla": [1100, 619], "retos-recibo": [1100, 619], "carta-portada": [1100, 619], "carta-quince": [1100, 619], "carta-perfil": [1100, 619], "punteros-tienda": [1100, 619], "punteros-mapa": [1100, 619], "punteros-diana": [1100, 619], "carta-logros": [1100, 619], "carta-titulo": [1100, 619] };
   const I = (src, cap, size) => ({ src, cap, size: size || "wide", w: (SZ[src] || [1100, 618])[0], h: (SZ[src] || [1100, 618])[1] });
   const E = (name, tag, ver, items, imgs) => ({ name, tag, ver, items, imgs: imgs || [] });
   /* un texto en los 12 idiomas, en el orden de siempre (es-419 vacio = el espanol) */
   const L = (es, en, fr, pt, de, it, es419, zh, ko, ja, ru, pl) => ({ es, en, fr, pt, de, it, "es-419": es419 || es, zh, ko, ja, ru, pl });
 
   A.PATCHES = [
+    {
+      id: "0.3.182",
+      name: L("Trece mesas más", "Thirteen more tables", "Treize tables de plus", "Mais treze mesas", "Dreizehn weitere Tische", "Altri tredici tavoli", "", "再添十三张牌桌", "테이블 13개 추가", "テーブルがさらに13種", "Ещё тринадцать столов", "Kolejne trzynaście stołów"),
+      date: "2026-10-22",
+      summary: L("La tienda suma otras trece mesas: ocho raras (corcho, jardín zen, punto de cruz, mosaico romano, bloques, periódico, tartán y vitral) y cinco legendarias (radar, lluvia de código, lámpara de lava, piscina y cinta VHS). La lava y la piscina responden al puntero y a los clics.",
+        "The boutique adds thirteen more tables: eight rare ones (cork board, zen garden, cross-stitch, Roman mosaic, building blocks, newspaper, tartan and stained glass) and five legendary ones (radar, code rain, lava lamp, swimming pool and VHS tape). The lava and the pool react to your pointer and clicks.",
+        "La boutique ajoute treize tables : huit rares (liège, jardin zen, point de croix, mosaïque romaine, briques, journal, tartan et vitrail) et cinq légendaires (radar, pluie de code, lampe à lave, piscine et cassette VHS). La lave et la piscine réagissent au pointeur et aux clics.",
+        "A boutique ganha mais treze mesas: oito raras (cortiça, jardim zen, ponto cruz, mosaico romano, blocos, jornal, tartan e vitral) e cinco lendárias (radar, chuva de código, lâmpada de lava, piscina e fita VHS). A lava e a piscina reagem ao ponteiro e aos cliques.",
+        "Die Boutique bekommt dreizehn weitere Tische: acht seltene (Korkbrett, Zen-Garten, Kreuzstich, römisches Mosaik, Bausteine, Zeitung, Tartan und Buntglas) und fünf legendäre (Radar, Code-Regen, Lavalampe, Schwimmbad und VHS-Kassette). Lava und Pool reagieren auf Zeiger und Klicks.",
+        "La boutique aggiunge altri tredici tavoli: otto rari (sughero, giardino zen, punto croce, mosaico romano, mattoncini, giornale, tartan e vetrata) e cinque leggendari (radar, pioggia di codice, lampada di lava, piscina e videocassetta VHS). Lava e piscina reagiscono al puntatore e ai clic.",
+        "",
+        "精品店再添十三张牌桌：八张稀有（软木板、枯山水、十字绣、罗马马赛克、积木、报纸、格子呢和彩色玻璃）和五张传说（雷达、代码雨、熔岩灯、游泳池和VHS录像带）。熔岩和泳池会对指针和点击作出反应。",
+        "부티크에 테이블 13개가 더 들어왔습니다. 레어 8개(코르크판, 젠 정원, 십자수, 로마 모자이크, 블록, 신문, 타탄, 스테인드글라스)와 전설 5개(레이더, 코드 비, 라바 램프, 수영장, VHS 테이프)입니다. 용암과 수영장은 포인터와 클릭에 반응합니다.",
+        "ブティックにテーブルが13種加わりました。レアが8種（コルクボード、枯山水、クロスステッチ、ローマ式モザイク、ブロック、新聞、タータン、ステンドグラス）、レジェンダリーが5種（レーダー、コードの雨、ラバランプ、プール、VHSテープ）です。溶岩とプールはポインターとクリックに反応します。",
+        "В бутике появилось ещё тринадцать столов: восемь редких (пробковая доска, сад дзен, вышивка крестом, римская мозаика, кубики, газета, тартан и витраж) и пять легендарных (радар, дождь из кода, лава-лампа, бассейн и кассета VHS). Лава и бассейн реагируют на курсор и клики.",
+        "Butik dostaje kolejne trzynaście stołów: osiem rzadkich (tablica korkowa, ogród zen, haft krzyżykowy, rzymska mozaika, klocki, gazeta, tartan i witraż) oraz pięć legendarnych (radar, deszcz kodu, lampa lava, basen i kaseta VHS). Lawa i basen reagują na kursor i kliknięcia."),
+      chapters: [
+        { id: "tienda", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新内容", "신규", "新要素", "Новое", "Nowość"),
+          title: L("La tienda", "The boutique", "La boutique", "A boutique", "Die Boutique", "La boutique", "", "精品店", "부티크", "ブティック", "Бутик", "Butik"),
+          entries: [
+            E(L("Ocho mesas raras", "Eight rare tables", "Huit tables rares", "Oito mesas raras", "Acht seltene Tische", "Otto tavoli rari", "", "八张稀有牌桌", "레어 테이블 8개", "レアなテーブル8種", "Восемь редких столов", "Osiem rzadkich stołów"), "new", "0.3.182", [
+              L("**Corcho**, **jardín zen**, **punto de cruz**, **mosaico romano**, **bloques**, **periódico**, **tartán** y **vitral**. Cuestan **150 fichas de oro** cada una.",
+                "**Cork board**, **zen garden**, **cross-stitch**, **Roman mosaic**, **building blocks**, **newspaper**, **tartan** and **stained glass**. They cost **150 gold chips** each.",
+                "**Liège**, **jardin zen**, **point de croix**, **mosaïque romaine**, **briques**, **journal**, **tartan** et **vitrail**. Elles coûtent **150 jetons d'or** chacune.",
+                "**Cortiça**, **jardim zen**, **ponto cruz**, **mosaico romano**, **blocos**, **jornal**, **tartan** e **vitral**. Custam **150 fichas de ouro** cada uma.",
+                "**Korkbrett**, **Zen-Garten**, **Kreuzstich**, **römisches Mosaik**, **Bausteine**, **Zeitung**, **Tartan** und **Buntglas**. Sie kosten je **150 Goldchips**.",
+                "**Sughero**, **giardino zen**, **punto croce**, **mosaico romano**, **mattoncini**, **giornale**, **tartan** e **vetrata**. Costano **150 fiche d'oro** ciascuno.",
+                "",
+                "**软木板**、**枯山水**、**十字绣**、**罗马马赛克**、**积木**、**报纸**、**格子呢**和**彩色玻璃**。每张 **150 金筹码**。",
+                "**코르크판**, **젠 정원**, **십자수**, **로마 모자이크**, **블록**, **신문**, **타탄**, **스테인드글라스**. 각각 **골드 칩 150개**입니다.",
+                "**コルクボード**、**枯山水**、**クロスステッチ**、**ローマ式モザイク**、**ブロック**、**新聞**、**タータン**、**ステンドグラス**。それぞれ**金のチップ150枚**です。",
+                "**Пробковая доска**, **сад дзен**, **вышивка крестом**, **римская мозаика**, **кубики**, **газета**, **тартан** и **витраж**. Каждый стоит **150 золотых фишек**.",
+                "**Tablica korkowa**, **ogród zen**, **haft krzyżykowy**, **rzymska mozaika**, **klocki**, **gazeta**, **tartan** i **witraż**. Każdy kosztuje **150 złotych żetonów**.")
+            ], [I("mesas-tienda-t3", L("La tienda, con las nuevas mesas.", "The boutique, with the new tables.", "La boutique, avec les nouvelles tables.", "A boutique, com as novas mesas.", "Die Boutique mit den neuen Tischen.", "La boutique, con i nuovi tavoli.", "", "精品店里新增的牌桌。", "새로 들어온 테이블이 있는 부티크.", "新しいテーブルが並ぶブティック。", "Бутик с новыми столами.", "Butik z nowymi stołami."), "wide")]),
+            E(L("Cinco mesas legendarias", "Five legendary tables", "Cinq tables légendaires", "Cinco mesas lendárias", "Fünf legendäre Tische", "Cinque tavoli leggendari", "", "五张传说牌桌", "전설 테이블 5개", "レジェンダリーのテーブル5種", "Пять легендарных столов", "Pięć legendarnych stołów"), "new", "0.3.182", [
+              L("**Radar** ámbar con su barrido, **lluvia de código**, **lámpara de lava**, **piscina** y **cinta VHS**. Cuestan **400 fichas de oro** cada una.",
+                "Amber **radar** with its sweep, **code rain**, **lava lamp**, **swimming pool** and **VHS tape**. They cost **400 gold chips** each.",
+                "**Radar** ambré et son balayage, **pluie de code**, **lampe à lave**, **piscine** et **cassette VHS**. Elles coûtent **400 jetons d'or** chacune.",
+                "**Radar** âmbar com sua varredura, **chuva de código**, **lâmpada de lava**, **piscina** e **fita VHS**. Custam **400 fichas de ouro** cada uma.",
+                "Bernsteinfarbenes **Radar** mit Strahl, **Code-Regen**, **Lavalampe**, **Schwimmbad** und **VHS-Kassette**. Sie kosten je **400 Goldchips**.",
+                "**Radar** ambra con il suo sweep, **pioggia di codice**, **lampada di lava**, **piscina** e **videocassetta VHS**. Costano **400 fiche d'oro** ciascuno.",
+                "",
+                "琥珀色**雷达**与扫描线、**代码雨**、**熔岩灯**、**游泳池**和 **VHS 录像带**。每张 **400 金筹码**。",
+                "호박색 **레이더**와 스윕, **코드 비**, **라바 램프**, **수영장**, **VHS 테이프**. 각각 **골드 칩 400개**입니다.",
+                "琥珀色の**レーダー**と走査線、**コードの雨**、**ラバランプ**、**プール**、**VHSテープ**。それぞれ**金のチップ400枚**です。",
+                "Янтарный **радар** с лучом, **дождь из кода**, **лава-лампа**, **бассейн** и **кассета VHS**. Каждый стоит **400 золотых фишек**.",
+                "Bursztynowy **radar** z promieniem, **deszcz kodu**, **lampa lava**, **basen** i **kaseta VHS**. Każdy kosztuje **400 złotych żetonów**."),
+              L("La lava huye del puntero, se lleva con el mapa y salpica al hacer clic. La piscina ondula con el puntero y con los clics. La lluvia de código y la banda del VHS son discretas para no estorbar al jugar.",
+                "The lava shies from the pointer, drifts with the map and splashes when you click. The pool ripples with the pointer and your clicks. The code rain and the VHS band are kept subtle so they never get in the way.",
+                "La lave fuit le pointeur, suit la carte et éclabousse au clic. La piscine ondule avec le pointeur et les clics. La pluie de code et la bande du VHS restent discrètes pour ne pas gêner le jeu.",
+                "A lava foge do ponteiro, acompanha o mapa e espirra ao clicar. A piscina ondula com o ponteiro e os cliques. A chuva de código e a faixa do VHS são discretas para não atrapalhar o jogo.",
+                "Die Lava weicht dem Zeiger aus, treibt mit der Karte und spritzt beim Klick. Der Pool wellt sich mit Zeiger und Klicks. Code-Regen und VHS-Streifen sind dezent, damit sie das Spiel nie stören.",
+                "La lava scappa dal puntatore, segue la mappa e schizza al clic. La piscina ondeggia con il puntatore e i clic. La pioggia di codice e la banda del VHS sono discrete per non disturbare il gioco.",
+                "",
+                "熔岩会躲开指针、随地图漂移，点击时溅开；泳池会随指针和点击泛起涟漪。代码雨和 VHS 的条带都很克制，不会妨碍游戏。",
+                "용암은 포인터를 피하고 지도를 따라 움직이며 클릭하면 튑니다. 수영장은 포인터와 클릭에 일렁입니다. 코드 비와 VHS 띠는 게임을 방해하지 않도록 은은합니다.",
+                "溶岩はポインターを避け、マップに合わせて流れ、クリックで飛び散ります。プールはポインターとクリックで波打ちます。コードの雨とVHSの帯は、プレイの邪魔にならないよう控えめです。",
+                "Лава уходит от курсора, плывёт за картой и брызжет при клике. Бассейн идёт рябью от курсора и кликов. Дождь из кода и полоса VHS сделаны сдержанными, чтобы не мешать игре.",
+                "Lawa unika kursora, dryfuje z mapą i pryska po kliknięciu. Basen faluje od kursora i kliknięć. Deszcz kodu i pas VHS są dyskretne, żeby nie przeszkadzały w grze.")
+            ], [I("mesas-estreno-t3", L("Recién comprada: la casa estrena los bloques en la portada.", "Just bought: the house unveils the building blocks on the main screen.", "Tout juste achetée : la maison dévoile les briques sur l'écran d'accueil.", "Recém-comprada: a casa estreia os blocos na tela inicial.", "Frisch gekauft: Das Haus enthüllt die Bausteine auf dem Startbildschirm.", "Appena comprato: la casa inaugura i mattoncini sulla schermata iniziale.", "", "刚买下：赌场在主界面揭晓积木牌桌。", "방금 구입: 하우스가 메인 화면에서 블록을 공개합니다.", "購入直後：ハウスがホーム画面でブロックをお披露目。", "Только что куплены: заведение открывает кубики на главном экране.", "Świeżo kupione: kasyno odsłania klocki na ekranie głównym."), "wide")])
+          ] },
+      ],
+    },
     {
       id: "0.3.181",
       name: L("Catorce mesas más", "Fourteen more tables", "Quatorze tables de plus", "Mais catorze mesas", "Vierzehn weitere Tische", "Altri quattordici tavoli", "", "再添十四张牌桌", "테이블 14개 추가", "テーブルが14種増えました", "Ещё четырнадцать столов", "Czternaście kolejnych stołów"),
