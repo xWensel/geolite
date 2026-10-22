@@ -34,6 +34,43 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.185",
+      name: L("El Periódico, solo sobre el mar", "The Newspaper, on the sea only", "Le Journal, seulement sur la mer", "O Jornal, só sobre o mar", "Die Zeitung, nur auf dem Meer", "Il Giornale, solo sul mare", "", "报纸牌桌，文字只在海上", "신문 테이블, 글은 바다에만", "新聞のテーブル、文字は海だけ", "Газета: текст только на море", "Gazeta, tekst tylko na morzu"),
+      date: "2026-10-22",
+      summary: L("Las noticias de la mesa Periódico ya solo salen sobre el mar. Los países se quedan con su trama de puntos de imprenta, sin letras.",
+        "The news on the Newspaper table now shows on the sea only. The countries keep their printing-dot pattern, with no letters.",
+        "Les nouvelles de la table Journal n'apparaissent plus que sur la mer. Les pays gardent leur trame de points d'imprimerie, sans lettres.",
+        "As notícias da mesa Jornal agora só aparecem sobre o mar. Os países ficam com a trama de pontos de impressão, sem letras.",
+        "Die Nachrichten auf dem Tisch Zeitung erscheinen jetzt nur noch auf dem Meer. Die Länder behalten ihr Druckpunktraster, ohne Buchstaben.",
+        "Le notizie del tavolo Giornale ora compaiono solo sul mare. I paesi mantengono il retino di stampa, senza lettere.",
+        "",
+        "报纸牌桌上的新闻现在只出现在海面上，国家保留印刷网点，不再有文字。",
+        "신문 테이블의 기사는 이제 바다 위에만 나옵니다. 나라들은 글자 없이 인쇄 점무늬를 유지합니다.",
+        "新聞のテーブルの記事は、海の上だけに出るようになりました。国々は文字なしで網点のままです。",
+        "Новости на столе «Газета» теперь появляются только на море. Страны сохраняют типографский растр, без букв.",
+        "Wiadomości na stole Gazeta pojawiają się teraz tylko na morzu. Kraje zachowują raster drukarski, bez liter."),
+      chapters: [
+        { id: "mesas", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Cambio", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("La tienda", "The boutique", "La boutique", "A boutique", "Die Boutique", "La boutique", "", "精品店", "부티크", "ブティック", "Бутик", "Butik"),
+          entries: [
+            E(L("Letras solo en el agua", "Letters on the water only", "Des lettres seulement sur l'eau", "Letras só na água", "Buchstaben nur auf dem Wasser", "Lettere solo sull'acqua", "", "文字只在水面上", "글자는 물 위에만", "文字は水の上だけ", "Буквы только на воде", "Litery tylko na wodzie"), "change", "0.3.185", [
+              L("Con mucho zoom, las noticias de la mesa **Periódico** salían también sobre los países y estorbaban. Ahora solo se imprimen sobre el mar, y la tierra lleva su trama de puntos, sin letras.",
+                "With a lot of zoom, the news on the **Newspaper** table also showed over the countries and got in the way. Now it is printed on the sea only, and the land keeps its dot pattern, with no letters.",
+                "Avec beaucoup de zoom, les nouvelles de la table **Journal** apparaissaient aussi sur les pays et gênaient. Elles ne sont plus imprimées que sur la mer, et la terre garde sa trame de points, sans lettres.",
+                "Com muito zoom, as notícias da mesa **Jornal** também apareciam sobre os países e atrapalhavam. Agora só são impressas sobre o mar, e a terra mantém a trama de pontos, sem letras.",
+                "Bei starkem Zoom erschienen die Nachrichten auf dem Tisch **Zeitung** auch über den Ländern und störten. Jetzt werden sie nur noch auf das Meer gedruckt, und das Land behält sein Punktraster, ohne Buchstaben.",
+                "Con molto zoom, le notizie del tavolo **Giornale** comparivano anche sui paesi e disturbavano. Ora sono stampate solo sul mare, e la terra mantiene il retino, senza lettere.",
+                "",
+                "放得很大时，**报纸**牌桌上的新闻也会出现在国家上面，很碍事。现在只印在海面上，陆地保留网点图案，不再有文字。",
+                "크게 확대하면 **신문** 테이블의 기사가 나라 위에도 나와 거슬렸습니다. 이제 바다에만 찍히고, 땅은 글자 없이 점무늬를 유지합니다.",
+                "大きく拡大すると、**新聞**のテーブルの記事が国々の上にも出て邪魔でした。今は海の上だけに印刷され、陸地は文字のない網点のままです。",
+                "При сильном приближении новости на столе **Газета** выходили и поверх стран, мешая. Теперь они печатаются только на море, а суша сохраняет растр, без букв.",
+                "Przy dużym zbliżeniu wiadomości na stole **Gazeta** pojawiały się też na krajach i przeszkadzały. Teraz drukują się tylko na morzu, a ląd zachowuje raster, bez liter.")
+            ])
+          ] },
+      ],
+    },
+    {
       id: "0.3.184",
       name: L("Noticias en el Periódico", "News on the Newspaper", "Des nouvelles dans le Journal", "Notícias no Jornal", "Nachrichten in der Zeitung", "Notizie sul Giornale", "", "报纸上的新闻", "신문 속 기사", "新聞に記事", "Новости в Газете", "Wiadomości w Gazecie"),
       date: "2026-10-22",
