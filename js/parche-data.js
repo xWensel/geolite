@@ -36,7 +36,7 @@ window.AIQ = window.AIQ || {};
     {
       id: "0.3.187",
       name: L("Don Crupier, de visita", "Don Crupier drops by", "Don Crupier passe te voir", "Don Crupier faz uma visita", "Don Crupier schaut vorbei", "Don Crupier passa a trovarti", "", "庄家来串门", "돈 크루피에가 들렀어요", "ドン・クルピエ、顔を出す", "Дон Крупье заглядывает", "Don Crupier wpada z wizytą"),
-      date: "2026-10-22",
+      date: "2026-10-23",
       summary: L("El crupier ya no está siempre en pantalla: viene de visita, con motivo o si sabes llamarlo, y mide lo mismo en todas las pantallas. La partida es sagrada: mientras juegas, ni él ni Comodín, el gato de la casa, aparecen. Estrena 51 gestos, 6 caras, más de 300 frases, seis trastadas y seis piezas de vestuario.",
         "The dealer is no longer on screen all the time: he drops by, with a reason or when you know how to call him, and he's the same size on every screen. Your game is sacred: while you play, neither he nor Joker, the house cat, shows up. He debuts 51 gestures, 6 faces, over 300 lines, six pranks and six wardrobe pieces.",
         "Le croupier n'est plus tout le temps à l'écran : il passe te voir, avec une raison ou si tu sais l'appeler, et il a la même taille sur tous les écrans. Ta partie est sacrée : pendant que tu joues, ni lui ni Joker, le chat de la maison, n'apparaissent. Au programme : 51 gestes, 6 visages, plus de 300 répliques, six tours pendables et six pièces de garde-robe.",
@@ -183,6 +183,21 @@ window.AIQ = window.AIQ || {};
                 "Każdy boss wychodzi zza aksamitnej kurtyny, z własną kwestią, gdy go pokonasz albo przegrasz. Pojedynek z kasynem zaczyna się od jego monety; w trakcie rund stół należy do ciebie. W samouczku stoi cały, w swoim rozmiarze, obok tego, co objaśnia.")]),
           ] },
       ],
+    },
+    {
+      id: "0.3.186",
+      name: L("Fotos revisadas", "Reviewed photos", "Photos revues", "Fotos revisadas", "Überprüfte Fotos", "Foto riviste", "", "精选照片", "다시 고른 사진", "見直した写真", "Пересмотренные фото", "Sprawdzone zdjęcia"),
+      date: "2026-10-23",
+      summary: L("Cerca de 150 fotos de la Enciclopedia se han revisado a ojo y cambiado por otras más claras y de libre uso.", "Close to 150 Encyclopedia photos have been checked by eye and swapped for clearer, freely licensed ones.", "Près de 150 photos de l'Encyclopédie ont été vérifiées à l'œil et remplacées par d'autres plus claires, sous licence libre.", "Cerca de 150 fotos da Enciclopédia foram revistas a olho e trocadas por outras mais claras e de uso livre.", "Rund 150 Fotos der Enzyklopädie wurden von Hand geprüft und durch klarere, frei lizenzierte ersetzt.", "Circa 150 foto dell'Enciclopedia sono state controllate a occhio e sostituite con altre più chiare e di libero utilizzo.", "", "百科全书中近150张照片经过逐一检查，已替换为更清晰、可自由使用的照片。", "도감 사진 약 150장을 눈으로 확인해 더 선명하고 자유롭게 쓸 수 있는 사진으로 바꿨습니다.", "百科の写真約150枚を目で確認し、より鮮明で自由に使える写真に差し替えました。", "Около 150 фотографий Энциклопедии проверены вручную и заменены более четкими, со свободной лицензией.", "Około 150 zdjęć z Encyklopedii sprawdzono ręcznie i zastąpiono wyraźniejszymi, na wolnej licencji."),
+      chapters: [
+        { id: "fotos", kicker: L("Arreglo","Fix","Correctif","Correção","Fehlerbehebung","Correzione","","修复","수정","修正","Исправление","Poprawka"),
+          title: L("Fotos","Photos","Photos","Fotos","Fotos","Foto","","照片","사진","写真","Фото","Zdjęcia"),
+          entries: [
+            E(L("Fotos más claras","Clearer photos","Des photos plus nettes","Fotos mais nítidas","Klarere Fotos","Foto più nitide","","更清晰的照片","더 선명한 사진","より鮮明な写真","Более четкие фото","Wyraźniejsze zdjęcia"), "fix", "0.3.186", [
+              L("Cerca de **150 fotos** de la Enciclopedia se han revisado a ojo y sustituido por otras más claras y de libre uso, con su autor y licencia.","Close to **150 Encyclopedia photos** have been checked by eye and swapped for clearer, freely licensed ones, with their author and license.","Près de **150 photos** de l’Encyclopédie ont été vérifiées à l’œil et remplacées par d’autres plus claires, sous licence libre, avec leur auteur et leur licence.","Cerca de **150 fotos** da Enciclopédia foram revistas a olho e trocadas por outras mais claras e de uso livre, com autor e licença.","Rund **150 Fotos** der Enzyklopädie wurden von Hand geprüft und durch klarere, frei lizenzierte ersetzt, mit Urheber und Lizenz.","Circa **150 foto** dell’Enciclopedia sono state controllate a occhio e sostituite con altre più chiare e di libero utilizzo, con autore e licenza.","","百科全书中约**150张**照片经过逐一检查，已替换为更清晰、可自由使用的照片，并标明作者和许可。","도감의 **사진 150장**을 눈으로 확인해 더 선명하고 자유롭게 쓸 수 있는 사진으로 바꿨습니다. 저작자와 라이선스도 표시했습니다.","百科の**写真約150枚**を目で確認し、より鮮明で自由に使える写真に差し替えました。作者とライセンスも表示しています。","Около **150 фотографий** Энциклопедии проверены вручную и заменены более четкими, со свободной лицензией, с указанием автора и лицензии.","Około **150 zdjęć** z Encyklopedii sprawdzono ręcznie i zastąpiono wyraźniejszymi, na wolnej licencji, z autorem i licencją.")
+            ], [])
+          ] }
+      ]
     },
     {
       id: "0.3.185",
