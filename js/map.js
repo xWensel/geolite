@@ -82,6 +82,7 @@ float fbm(vec2 p){ float s=0.0, a=0.5; for(int i=0;i<4;i++){ s+=a*vn(p); p=p*2.0
 precision highp float;
 flat in float v_ci;
 uniform vec3 u_pal[8]; uniform vec2 u_res; uniform sampler2D u_blurN; uniform vec4 u_fx; uniform int u_style; uniform float u_dpr;
+uniform sampler2D u_news; uniform vec4 u_nw;
 uniform float u_flat; uniform vec3 u_flatc; uniform vec3 u_lens;   // mapa mudo: todos los paises del mismo color (salvo dentro de la lupa)
 in vec2 v_w; uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform float u_scale;
 out vec4 o;
@@ -106,7 +107,9 @@ void main(){
     else if(u_mat==16){ float h=step(0.5,fract((P.x+P.y)/3.0)); c=mix(vec3(1.0),c,0.72+0.2*h); }
     else if(u_mat==30){ vec2 t=mod(P,4.0); float x=1.0-step(1.0,min(abs(t.x-t.y),abs(t.x+t.y-3.0))); c=mix(c*0.78,c*1.07,x); }
     else if(u_mat==32){ vec2 t=mod(P,6.0)-2.5; float r=length(t), stud=1.0-step(2.0,r), lit=step(0.0,-(t.x+t.y)); c=mix(c,c*mix(0.8,1.14,lit),stud); }
-    else if(u_mat==33){ float dt=1.0-step(0.95,length(mod(P,2.0)-1.0)); c=mix(vec3(0.95,0.92,0.84),c,0.6+0.4*dt); }
+    else if(u_mat==33){ float dt=1.0-step(0.95,length(mod(P,2.0)-1.0)); c=mix(vec3(0.95,0.92,0.84),c,0.6+0.4*dt);
+      if(u_nw.x>0.001){ vec2 cp=floor(f/u_dpr); vec2 tp=mod(cp,u_nw.yz)/u_nw.yz; float inkT=step(0.45,texture(u_news,vec2((floor(tp.x*u_nw.y)+0.5)/u_nw.y,1.0-(floor(tp.y*u_nw.z)+0.5)/u_nw.z)).a);   // mucho zoom: el pais es tinta clara y la pagina se lee encima
+        c=mix(c,mix(c,vec3(0.95,0.92,0.84),0.5),u_nw.x); c=mix(c,c*0.14,inkT*u_nw.x); } }
     else if(u_mat==43){ c*=0.78+0.12*floor(hash(P)*4.0); }
     else if(u_mat==54){ vec2 t=vec2(mod(P.x+mod(floor(P.y/3.0),2.0)*3.0,6.0),mod(P.y,3.0)); c*=1.0-0.28*(1.0-step(1.0,min(t.x,t.y))); }
     else if(u_mat==22){ float rim=1.0-smoothstep(0.5,0.78,n); c*=(1.0-0.14*floor(rim*3.0)/3.0)*(0.97+0.05*floor(fbm(P*0.01)*3.0)/2.0); }
@@ -170,7 +173,7 @@ uniform sampler2D u_blurN; uniform sampler2D u_blurW; uniform sampler2D u_swirl;
 uniform vec3 u_oTop; uniform vec3 u_oBot; uniform vec3 u_shallow; uniform vec3 u_grid; uniform vec3 u_tropic;
 uniform vec3 u_sw1; uniform vec3 u_sw2; uniform vec3 u_sw3; uniform float u_calm; uniform vec4 u_felt;
 uniform vec4 u_gp; // stepA, stepB, tB, gridAlpha
-uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform sampler2D u_blurX; uniform vec4 u_it; uniform vec2 u_hv;
+uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform sampler2D u_blurX; uniform vec4 u_it; uniform vec2 u_hv; uniform sampler2D u_news; uniform vec4 u_nw;
 out vec4 o;
 const float D2R=0.017453292519943295;
 ${NOISE}
@@ -417,6 +420,9 @@ vec3 mesa(vec3 b, vec2 q, vec2 frag, vec2 wp, float n, float w, float x){
     float hd=step(0.84,hash(vec2(blk,col+60.0)))*step(2.0,lx)*step(lx,Wc-2.0)*step(mod(r,9.0),1.0);
     vec3 c=b*(0.98+0.04*hash(q*0.5));
     c=mix(c,u_mc1,ink*0.5); c=mix(c,u_mc1,ph*dots*0.45); c=mix(c,u_mc1,hd*(1.0-step(1.0,ly))*0.8);
+    if(u_nw.x>0.001){                                            // con mucho zoom: la pagina de verdad, con las notas de los lugares de alrededor (js/periodico.js)
+      vec2 cp=floor(frag/u_dpr); vec2 tp=mod(cp,u_nw.yz)/u_nw.yz; float inkT=step(0.45,texture(u_news,vec2((floor(tp.x*u_nw.y)+0.5)/u_nw.y,1.0-(floor(tp.y*u_nw.z)+0.5)/u_nw.z)).a);
+      vec3 cn=b*(0.98+0.04*hash(q*0.5)); cn=mix(cn,u_mc1,inkT*0.92); c=mix(c,cn,u_nw.x); }
     return c;
   }
   if(u_mat==34){                                                 // tartan: dos bandas anchas y una fina cruzadas, con su sarga (u_mp.x = periodo)
@@ -1892,6 +1898,15 @@ void main(){
       { const it = this._it, hv = this.mouse, live = this._livingMat(), age = it && live ? (now - it.t) / 1000 : -1;
         this._u(P.ocean, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
         this._u(P.ocean, "u_hv", hv && live ? hv.x * sw / this.W : -9999, hv && live ? (this.H - hv.y) * sh / this.H : -9999); }
+      { let nb = 0;                                                                                      // Periodico: la pagina con notas de la Enciclopedia entra entre 30x y 60x de zoom
+        if (ms.mat === 33 && A.periodico) { nb = Math.min(1, Math.max(0, (v.s / this.minS - 30) / 30));
+          if (nb > 0) { const c0 = this.screenToLonLat(this.W / 2, this.H / 2), pg = A.periodico.page(c0[0], c0[1]);
+            gl.activeTexture(gl.TEXTURE4);
+            if (!this._newsTex) { this._newsTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, this._newsTex); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); this._newsVer = -1; }
+            gl.bindTexture(gl.TEXTURE_2D, this._newsTex);
+            if (this._newsVer !== pg.ver) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pg.canvas); this._newsVer = pg.ver; }
+            gl.uniform1i(P.ocean.u.u_news, 4); this._u(P.ocean, "u_nw", nb, pg.W, pg.H, 0); gl.activeTexture(gl.TEXTURE0); this._nw = [nb, pg.W, pg.H]; } }
+        if (!(nb > 0)) { this._u(P.ocean, "u_nw", 0, 1024, 640, 0); this._nw = null; } }
       this._u(P.ocean, "u_sw1", ...ms.sw[0]); this._u(P.ocean, "u_sw2", ...ms.sw[1]); this._u(P.ocean, "u_sw3", ...ms.sw[2]);
       { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", this._calm); }   // la calma entra poco a poco (~0,7 s)
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -1906,7 +1921,7 @@ void main(){
       gl.useProgram(P.land); this._setDist(P.land); this._u(P.land, "u_off", 0, 0);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.land.u.u_blurN, 0);
       gl.uniform1i(P.land.u.u_style, st.style || 0); this._u(P.land, "u_dpr", dpr * RS);
-      gl.uniform1i(P.land.u.u_mat, ms.mat); this._u(P.land, "u_mc1", ...ms.mc1); this._u(P.land, "u_mc2", ...ms.mc2); this._u(P.land, "u_mp", ...ms.mp);
+      gl.uniform1i(P.land.u.u_mat, ms.mat); { const nw = this._nw || [0, 1024, 640]; gl.uniform1i(P.land.u.u_news, 4); this._u(P.land, "u_nw", nw[0], nw[1], nw[2], 0); } this._u(P.land, "u_mc1", ...ms.mc1); this._u(P.land, "u_mc2", ...ms.mc2); this._u(P.land, "u_mp", ...ms.mp);
       { const ef = this._eff(), fl = ef.flat != null ? ef.flat : Math.max(0, 1 - ef.lineA), lu = this._lensU(dpr * RS, H, ef); this._u(P.land, "u_flat", fl); this._u(P.land, "u_flatc", ...ms.pal[0]); this._u(P.land, "u_lens", lu[0], lu[1], lu[2]); }
       this._u(P.land, "u_scale", sc); this._u(P.land, "u_res", sw, sh); this._u(P.land, "u_fx", st.ao, st.grain, 0, 0);
       if (this._palFor !== ms) { this._palFor = ms; this._pal = new Float32Array(24); ms.pal.forEach((c, i) => this._pal.set(c, i * 3)); } gl.uniform3fv(P.land.u.u_pal, this._pal);
