@@ -52,6 +52,14 @@ window.AIQ = window.AIQ || {};
   /* todas las cartas del camino a la MISMA escala entera: la mayor que quepa en la caja mas pequena */
   function fitAll(root) { const cvs = [...root.querySelectorAll("canvas[data-n]")]; if (!cvs.length) return; const k = Math.min(...cvs.map(cv => kOf(cv, cv.parentElement).k)); cvs.forEach(cv => fitCv(cv, cv.parentElement, k)); }
 
+  /* la insignia de una categoria (pieza aprobada de assets/icons, a su rejilla nativa) en un lienzo, a escala entera en su caja */
+  function insFill(root) {
+    (root || document).querySelectorAll("[data-ins]").forEach(box => {
+      if (box.firstChild) return; const id = box.dataset.ins, im = new Image(), cv = document.createElement("canvas"); box.appendChild(cv);
+      im.onload = () => { const n = Math.round(im.naturalWidth / 8); cv.width = n; cv.height = n; const x = cv.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight, 0, 0, n, n); const km = +box.dataset.kmax || 0; fitCv(cv, box, km ? Math.min(km, kOf(cv, box).k) : 0); };   // data-kmax: en las listas, todas a la misma escala
+      im.src = "assets/icons/" + id + ".webp";
+    });
+  }
   /* ---------------------------------------------------------------- la pantalla */
   const UI = { page: 0 };
   function node(L, lv) {
@@ -75,7 +83,7 @@ window.AIQ = window.AIQ || {};
     const now = C().now(), lv = now.lvl, t = C().tierNow(), [who, sitio, trato] = C().rankX(t), nr = C().RANKS[t + 1];
     const left = now.max ? P6(C().tx.max) : P6(C().tx.left).replace("{n}", A.fmt(now.need - now.into)).replace("{m}", lv + 1);
     return `<span class="cm-card" id="cmCard"></span>
-      <div class="cm-who"><span class="gx-eyb">${esc(P6(TX.you))}</span><h3 class="gx-t-m">${esc(C().tierName(t))}</h3><p class="cm-wp">${esc(who)}</p></div>
+      <div class="cm-who"><span class="gx-eyb">${esc(P6(TX.you))}</span><div class="cm-rk"><span class="cm-ins" data-ins="${C().insignia(t)}"></span><h3 class="gx-t-m">${esc(C().tierName(t))}</h3></div><p class="cm-wp">${esc(who)}</p></div>
       <dl class="cm-dl"><dt>${esc(P6(TX.sitio))}</dt><dd>${esc(sitio)}</dd><dt>${esc(P6(TX.trato))}</dt><dd>«${esc(trato)}»</dd></dl>
       <p class="cm-nr">${esc(nr ? P6(TX.nextRank).replace("{x}", P6(nr[0])).replace("{n}", nr[1]) : P6(TX.top))}</p>
       <div class="cm-prog"><div class="cm-pl"><b>${esc(P6(C().tx.lvS).replace("{n}", lv))}</b><span>${esc(left)}</span></div><span class="ck-bar"><i style="width:${Math.round((100 * now.into) / Math.max(1, now.need))}%"></i></span></div>
@@ -108,7 +116,7 @@ window.AIQ = window.AIQ || {};
     const lv = C().level(); UI.page = Math.min(9, Math.floor(Math.min(99, lv) / 10));   // la serie de tu siguiente nivel
     c.dialog(html(), "tablewrap");
     A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
-    S().mount($("cmCard"), { w: 192 });
+    S().mount($("cmCard"), { w: 192 }); insFill($("dlg"));
     $("cmDress").onclick = () => { if (A.sfx && A.sfx.card) A.sfx.card(); if (A.boutique) A.boutique.cat("carta"); A.hub.screen("boutique"); };
     paintRoad();
     if (window.ResizeObserver) { const ro = new ResizeObserver(() => { const r = $("cmRoad"); if (!r) { ro.disconnect(); return; } fitAll(r); }); ro.observe($("cmRoad")); }
@@ -122,15 +130,15 @@ window.AIQ = window.AIQ || {};
     const old = $("cmRv"); if (old) old.remove();
     const r = document.createElement("div"); r.id = "cmRv"; r.className = "cm-rv"; r.setAttribute("role", "status");
     const prev = levels.slice(-3, -1).map(() => `<canvas class="cm-rv-pv"></canvas>`).join("");
-    const all = []; levels.forEach(l => bits(l).forEach(b => { if (b[0] !== "f" && b[0] !== "") all.push(b); }));
+    const all = []; levels.forEach(l => bits(l).forEach(b => { if (b[0] !== "f" && b[0] !== "") all.push(b[0] === "r" ? [b[0], b[1], C().insignia(C().rewardOf(l).rank)] : b); }));   // la categoria nueva, con su insignia
     const fsum = levels.reduce((a, l) => a + C().payOf(l), 0);
     const chips = [["f", P6(TX.fichas).replace("{n}", A.fmt(fsum))]].concat(all);
     r.innerHTML = `<i class="cm-rv-dim"></i><div class="cm-rv-in">
       <span class="gx-eyb cm-rv-ey">${esc(P6(TX.newCard))}${levels.length > 1 ? " · " + esc(P6(TX.more).replace("{n}", levels.length)) : ""}</span>
       <div class="cm-rv-st">${prev}<div class="cm-rv-flip"><span class="cm-rv-f fr"><span id="cmRvCard"></span></span><span class="cm-rv-f bk"><canvas id="cmRvBack"></canvas></span></div>
         <b class="cm-rv-sl">${esc(P6(C().tx.lvS).replace("{n}", L))}</b></div>
-      <div class="cm-rv-loot">${chips.map(([kk, t]) => `<span class="cm-b ${kk}">${kk === "f" ? fi("sm") : ""}${esc(t)}</span>`).join("")}</div></div>`;
-    app.appendChild(r);
+      <div class="cm-rv-loot">${chips.map(([kk, t, ins]) => `<span class="cm-b ${kk}">${kk === "f" ? fi("sm") : ""}${ins ? `<span class="cm-ri" data-ins="${ins}"></span>` : ""}${esc(t)}</span>`).join("")}</div></div>`;
+    app.appendChild(r); insFill(r);
     S().mount($("cmRvCard"), { w: 288, carta: L, mat: S().sOf(L), nobar: true });
     const host = $("cmRvCard"), bk = $("cmRvBack"); S().back(bk);
     const sizeBack = () => { bk.style.width = host.style.width; bk.style.height = parseFloat(host.style.width) * 128 / 96 + "px"; };
@@ -155,5 +163,5 @@ window.AIQ = window.AIQ || {};
     T(close, 3400 + chips.length * 220 + 400 * (k - 1));
   }
 
-  A.camino = { open, reveal, bits, tx: TX };
+  A.camino = { open, reveal, bits, insFill, tx: TX };
 })(window.AIQ);

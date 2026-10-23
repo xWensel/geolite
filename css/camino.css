@@ -87,3 +87,17 @@
 .cm-rv-loot .cm-b.f { color: #ffd98a; }
 .cm-rv-loot .cm-b.on { opacity: 1; transform: none; }
 html.reduce-motion .cm-rv-flip, html.reduce-motion .cm-rv-sl, html.reduce-motion .cm-rv-loot .cm-b, html.reduce-motion .cm-rv-pv { transition: none; }
+
+/* v2 (insignias de la casa): la insignia de tu categoria junto a su nombre y en la carta del mazo; siempre a escala entera (js/camino.js insFill) */
+.cm-rk { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cm-ins { flex: none; display: grid; place-items: center; width: 64px; height: 64px; }
+.cm-ins canvas, .cm-ri canvas { display: block; image-rendering: pixelated; }
+.cm-ri { display: inline-grid; place-items: center; width: 48px; height: 48px; margin: -12px 6px -12px -4px; vertical-align: middle; }
+.cm-rv-loot .cm-b.r { padding-left: 4px; }
+/* el Perfil: la entrada «Insignias» del indice abre la escalera en el libro */
+.pf-chip.pf-ins, .pf-bic.pf-ins { display: grid; place-items: center; filter: none; }
+.pf-ins canvas { display: block; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(22, 36, 28, .35)); }
+.pf-row.pf-lk .pf-ins canvas { filter: brightness(0) opacity(.28); }
+.pf-row.pf-lk .pf-tx b { color: var(--gx-ink-2); }
+.cm-rk { flex-direction: column; align-items: flex-start; gap: 4px; }
+.cm-who .gx-t-m { overflow-wrap: normal; hyphens: auto; }

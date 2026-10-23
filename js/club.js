@@ -92,6 +92,9 @@ window.AIQ = window.AIQ || {};
       "El despacho del dueño|The owner's office|Le bureau du patron|O escritório do dono|Das Büro des Besitzers|L'ufficio del padrone||老板办公室|주인의 집무실|オーナーの書斎|Кабинет владельца|Gabinet właściciela",
       "Maestro|Maestro|Maître|Mestre|Meister|Maestro||大师|마에스트로|マエストロ|Маэстро|Mistrzu"],
   ];
+  /* la insignia de cada categoria (maqueta «Insignias de la casa», 23-oct-2026): todas son piezas ya aprobadas de assets/icons. Se ganan al llegar
+     a la categoria y se ven en la chapa (vestidor), el camino, el Perfil y la carta del mazo al subir */
+  const INSIG = ["glass", "iq_0", "coupon", "minbet", "journal", "iq_1", "dice", "cards", "chips", "purse", "masterkey", "pact", "hoard", "boss_hat", "crown"];
   const need = L => 50 + 20 * (L - 1);
   const need1 = L => Math.min(400 + 20 * (L - 1), 1200);                  // la curva de antes (v1): solo para pasar los perfiles viejos
   const TOT = (() => { let s = 0; for (let L = 1; L < CFG.max; L++) s += need(L); return s; })();   // experiencia para el nivel 100
@@ -316,6 +319,7 @@ window.AIQ = window.AIQ || {};
     payOf, chestOf, rewardOf, nextText, TOT, TITLE_AT,
     level: () => levelOf(st().xp).lvl, xp: () => st().xp, fichas: () => st().f, now: () => levelOf(st().xp),
     rankX: i => (RANKX[i] || RANKX[0]).map(P6),
+    INSIG, insignia: i => INSIG[Math.max(0, Math.min(INSIG.length - 1, i | 0))], insigOf: id => INSIG.indexOf(id),
     /* v0.3.132: gastar fichas de oro (la boutique). La tarjeta no las cuenta hacia arriba: lo gastado ya se ha visto irse */
     give(n) { const c = st(); n = Math.max(0, Math.round(n)); c.f += n; save(); return c.f; },   // entrega 3: lo que pagan los retos (la tarjeta lo cuenta al volver: fSeen no se toca)
     spend(n) { const c = st(); n = Math.max(0, Math.round(n)); if (!(c.f >= n)) return false; c.f -= n; c.fSeen = Math.min(c.fSeen == null ? c.f : c.fSeen, c.f); save(); return true; },

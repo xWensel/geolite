@@ -458,6 +458,7 @@ window.AIQ = window.AIQ || {};
     eTit: "Título|Title|Titre|Título|Titel|Titolo||称号|칭호|称号|Титул|Tytuł",
     kLogro: "De un logro|From an achievement|D'un succès|De uma conquista|Aus einem Erfolg|Da un obiettivo||来自成就|업적 보상|実績のごほうび|За достижение|Z osiągnięcia",
     kTienda: "De la tienda|From the boutique|De la boutique|Da boutique|Aus der Boutique|Dalla boutique||来自精品店|부티크|ブティック|Из бутика|Z butiku",
+    kCat: "De tu categoría|From your rank|De ta catégorie|Da sua categoria|Von deinem Rang|Dalla tua categoria||来自你的身份|등급 보상|格のごほうび|За ступень|Z twojej rangi",
     kHito: "Se gana jugando|Earned by playing|S'obtient en jouant|Conquistado jogando|Wird erspielt|Si ottiene giocando||通过游戏获得|플레이로 획득|プレイで手に入る|Даётся за игру|Zdobywasz grając",
     dIcon: "El dibujo del centro de tu carta de socio.|The picture in the middle of your member card.|Le dessin au centre de ta carte de membre.|O desenho no centro da sua carta de sócio.|Das Bild in der Mitte deiner Mitgliedskarte.|Il disegno al centro della tua tessera socio.||你会员卡中央的图案。|회원 카드 가운데 그림이에요.|会員カードの真ん中の絵。|Рисунок в центре твоей клубной карты.|Rysunek na środku twojej karty członkowskiej.",
     dObj: "Un objeto de la casa para el centro de tu carta.|A house object for the middle of your card.|Un objet de la maison pour le centre de ta carte.|Um objeto da casa para o centro da sua carta.|Ein Objekt des Hauses für die Mitte deiner Karte.|Un oggetto della casa per il centro della tua carta.||本店的一件物品，放在你会员卡的中央。|카드 가운데에 놓을 하우스의 오브제예요.|カードの真ん中に飾るハウスのアイテム。|Предмет заведения для центра твоей карты.|Przedmiot kasyna na środek twojej karty.",
@@ -481,7 +482,7 @@ window.AIQ = window.AIQ || {};
   const lvTag = L => P6(A.club.tx.lvS).replace("{n}", L);
   const cCards = pre => SO().cartas().map(x => ({ k: pre + ":" + x.L, id: x.L, kind: "nivel", owned: x.owned, price: 0, name: x.owned ? x.name : P6(CX.surprise), how: P6(SO().tx.lockedCard).replace("{n}", x.L) }));
   const cMats = () => SO().mats().map(x => ({ k: "b:" + x.id, id: x.id, kind: "nivel", owned: x.owned, price: 0, name: x.name, how: P6(SO().tx.byLv).replace("{n}", x.lv) }));
-  const cOf = t => t === "carta" ? cCards("c") : t === "fondo" ? cCards("f") : t === "mat" ? cMats() : t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
+  const cOf = t => t === "carta" ? cCards("c") : t === "fondo" ? cCards("f") : t === "mat" ? cMats() : t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("cat"), SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
   const cFind = k => { const [w, id] = k.split(":"); if (w === "c" || w === "f") return cCards(w).find(x => x.id === +id) || null; if (w === "b") return cMats().find(x => x.id === +id) || null; const L = w === "m" ? SO().marcos() : w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
   const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "c" ? SO().carta() === +id : w === "f" ? SO().fondo() === +id : w === "b" ? SO().mat() === +id : w === "m" ? SO().marco() === id : w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
   function cItem(x) {
@@ -492,7 +493,7 @@ window.AIQ = window.AIQ || {};
       : w === "b" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned ? "" : " lk"}" data-cb="${x.id}"></span></span>`
       : w === "t" ? `<span class="bq-th bq-cth bq-ttl${x.owned || x.kind === "tienda" ? "" : " off"}"><span class="bq-tplate"><span>${esc(x.name)}</span></span></span>`
       : w === "m" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned || x.kind === "tienda" ? "" : " lk"}" data-cm="${esc(x.id)}"></span></span>`
-      : `<span class="bq-th bq-cth"><canvas width="96" height="72" data-ci="${esc(x.id)}"${x.owned || x.kind !== "logro" ? "" : ` data-lk="${x.secret ? 2 : 1}"`}></canvas></span>`;
+      : `<span class="bq-th bq-cth"><canvas width="96" height="72" data-ci="${esc(x.id)}"${x.owned || (x.kind !== "logro" && x.kind !== "cat") ? "" : ` data-lk="${x.secret ? 2 : 1}"`}></canvas></span>`;
     const nm = w === "c" || w === "f" ? esc(lvTag(x.id)) : w === "t" ? esc(P6(x.kind === "tienda" ? CX.kTienda : CX.kHito)) : esc(x.name);
     return `<button type="button" class="bq-it bq-cit${x.k === ST.csel ? " sel" : ""}${st ? " " + st : ""}${w === "t" ? " bq-ttl" : ""}" data-ck="${esc(x.k)}" aria-pressed="${x.k === ST.csel}" aria-label="${esc(x.name)}">
       ${th}<span class="bq-prow"><b class="bq-nm">${nm}</b>${tag}</span></button>`;
@@ -518,7 +519,7 @@ window.AIQ = window.AIQ || {};
     else if (!x.price) act = `<button type="button" class="gx-btn wide" disabled>${A.icon("lock")}<span>${esc(P6(CX.locked))}</span></button>`;
     else if (have < x.price) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(x.price - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === k ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === k ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(x.price)}</span></button>`;
-    const kind = w === "c" || w === "f" || w === "b" ? CX.kNivel : w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : CX.kTienda;
+    const kind = w === "c" || w === "f" || w === "b" ? CX.kNivel : w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : x.kind === "cat" ? CX.kCat : CX.kTienda;
     const desc = w === "c" ? CX.dCarta : w === "f" ? CX.dFondo : w === "b" ? CX.dMat : w === "m" ? CX.dMarco : w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
     return `<span class="bq-dth bq-cprev"><span id="bqCCard"></span></span>
       <span class="gx-eyb bq-tier">${esc(P6(w === "c" ? CX.eCarta : w === "f" ? CX.eFondo : w === "b" ? CX.eMat : w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>

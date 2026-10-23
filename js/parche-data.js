@@ -34,6 +34,42 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "__VER__",
+      name: L("Insignias de la casa", "House badges", "Insignes de la maison", "Insígnias da casa", "Abzeichen des Hauses", "Insegne della casa", "", "赌场徽记", "하우스 휘장", "ハウスの記章", "Знаки заведения", "Insygnia kasyna"),
+      date: "2026-10-23",
+      summary: L("Cada categoría del Club tiene ahora su insignia, de la puerta al despacho: el catalejo del Mirón, la llave del Socio, la hucha del Accionista o la corona de la Leyenda.",
+                "Every Club rank now has its own badge, from the door to the office: the Railbird's spyglass, the Member's key, the Shareholder's piggy bank or the Legend's crown.",
+                "Chaque catégorie du Club a désormais son insigne, de la porte au bureau : la longue-vue du Badaud, la clé du Membre, la tirelire de l'Actionnaire ou la couronne de la Légende.",
+                "Cada categoria do Clube agora tem sua insígnia, da porta ao escritório: a luneta do Curioso, a chave do Sócio, o cofrinho do Acionista ou a coroa da Lenda.",
+                "Jeder Club-Rang hat jetzt sein Abzeichen, von der Tür ins Büro: das Fernrohr des Kiebitz, der Schlüssel des Mitglieds, das Sparschwein des Teilhabers oder die Krone der Legende.",
+                "Ogni categoria del Club ora ha la sua insegna, dalla porta all'ufficio: il cannocchiale del Curioso, la chiave del Socio, il salvadanaio dell'Azionista o la corona della Leggenda.",
+                "",
+                "俱乐部的每个身份现在都有自己的徽记，从门口到办公室：看客的单筒望远镜、会员的钥匙、股东的存钱罐，还有传奇的王冠。",
+                "클럽의 모든 등급에 이제 고유한 휘장이 있어요. 문 앞에서 집무실까지: 구경꾼의 망원경, 회원의 열쇠, 주주의 돼지 저금통, 전설의 왕관.",
+                "クラブのどの格にも記章ができた。入口から書斎まで：見物人の遠眼鏡、会員の鍵、株主の貯金箱、伝説の王冠。",
+                "У каждой ступени клуба теперь свой знак, от двери до кабинета: подзорная труба Зеваки, ключ Члена клуба, копилка Совладельца и корона Легенды.",
+                "Każda ranga klubu ma teraz swoje insygnium, od drzwi do gabinetu: lunetę Gapia, klucz Wspólnika, skarbonkę Udziałowca i koronę Legendy."),
+      chapters: [
+        { id: "insignias", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新内容", "새 기능", "新要素", "Новое", "Nowość"),
+          title: L("El Club de la casa", "The House Club", "Le Club de la maison", "O Clube da casa", "Der Club des Hauses", "Il Club della casa", "", "赌场俱乐部", "하우스 클럽", "ハウスクラブ", "Клуб заведения", "Klub kasyna"),
+          entries: [
+            E(L("Quince insignias", "Fifteen badges", "Quinze insignes", "Quinze insígnias", "Fünfzehn Abzeichen", "Quindici insegne", "", "十五个徽记", "휘장 15개", "15の記章", "Пятнадцать знаков", "Piętnaście insygniów"), "new", "__VER__", [
+              L("Al llegar a cada categoría ganas su insignia. Se pone como icono de tu chapa (Tu carta › Objetos, «De tu categoría»), sale junto a tu categoría en el camino y en la carta del mazo cuando subes, y el Perfil tiene la escalera entera en «Insignias».",
+                "Reaching each rank earns its badge. Use it as your badge icon (Your card › Objects, “From your rank”); it also shows next to your rank on the path and on the deck card when you rank up, and the Profile has the full ladder under “Badges”.",
+                "Chaque catégorie atteinte te donne son insigne. Mets-le comme icône de ton badge (Ta carte › Objets, « De ta catégorie ») ; il s'affiche aussi à côté de ta catégorie sur le parcours et sur la carte du paquet quand tu montes, et le Profil a l'échelle complète dans « Insignes ».",
+                "Ao chegar a cada categoria, você ganha a insígnia dela. Use como ícone do emblema (Sua carta › Objetos, “Da sua categoria”); ela também aparece ao lado da categoria no caminho e na carta do baralho quando você sobe, e o Perfil tem a escada inteira em “Insígnias”.",
+                "Mit jedem Rang bekommst du sein Abzeichen. Setze es als Symbol deines Abzeichens ein (Deine Karte › Objekte, „Von deinem Rang“); es erscheint auch neben deinem Rang auf dem Weg und auf der Karte aus dem Stapel beim Aufstieg, und im Profil steht die ganze Leiter unter „Abzeichen“.",
+                "Raggiunta ogni categoria ottieni la sua insegna. Usala come icona della spilla (La tua carta › Oggetti, «Dalla tua categoria»); compare anche accanto alla categoria nel cammino e sulla carta del mazzo quando sali, e nel Profilo c'è la scala completa in «Insegne».",
+                "",
+                "每达到一个身份就会获得它的徽记。可以设为徽章图标（你的会员卡 › 物件，“来自你的身份”）；它也会显示在会员之路的身份旁、升级时牌堆滑出的卡上，个人资料里的“徽记”有完整的阶梯。",
+                "등급에 오를 때마다 그 휘장을 얻어요. 배지 아이콘으로 쓸 수 있고(내 카드 › 오브제, ‘등급 보상’), 회원의 길의 등급 옆과 레벨업 때 덱에서 나오는 카드에도 보여요. 프로필의 ‘휘장’에서 전체 사다리를 볼 수 있어요.",
+                "格に届くたびにその記章が手に入る。バッジのアイコンに使える（きみのカード › アイテム、「格のごほうび」）。会員の道の格の横や、レベルアップで山札から出るカードにも出て、プロフィールの「記章」ではしご全体が見られる。",
+                "За каждую новую ступень даётся её знак. Его можно поставить иконкой значка (Твоя карта › Предметы, «За ступень»); он виден рядом со ступенью на пути и на карте из колоды при повышении, а в профиле в разделе «Знаки» — вся лестница.",
+                "Za każdą rangę dostajesz jej insygnium. Ustaw je jako ikonę odznaki (Twoja karta › Przedmioty, „Z twojej rangi”); widać je też obok rangi na ścieżce i na karcie z talii przy awansie, a w profilu w „Insygniach” jest cała drabina.")]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.194",
       name: L("El camino del socio", "The member's path", "Le parcours du membre", "O caminho do sócio", "Der Weg des Mitglieds", "Il cammino del socio", "", "会员之路", "회원의 길", "会員の道", "Путь члена клуба", "Ścieżka członka"),
       date: "2026-10-23",

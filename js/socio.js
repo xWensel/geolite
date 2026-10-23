@@ -84,6 +84,18 @@ window.AIQ = window.AIQ || {};
     sail: "La vela|The sail|La voile|A vela|Das Segel|La vela||船帆|돛|帆|Парус|Żagiel",
     worldmap: "El mapamundi|The world map|La mappemonde|O mapa-múndi|Die Weltkarte|Il mappamondo||世界地图|세계 지도|世界地図|Карта мира|Mapa świata",
     columbus: "La carabela|The caravel|La caravelle|A caravela|Die Karavelle|La caravella||卡拉维尔帆船|카라벨선|キャラベル船|Каравелла|Karawela",
+    glass: "El catalejo|The spyglass|La longue-vue|A luneta|Das Fernrohr|Il cannocchiale||单筒望远镜|망원경|遠眼鏡|Подзорная труба|Luneta",
+    iq_0: "La chincheta|The pin|La punaise|O alfinete|Die Pinnnadel|La puntina||图钉|핀|ピン|Метка|Pinezka",
+    coupon: "La entrada|The ticket|Le billet d'entrée|O ingresso|Die Eintrittskarte|Il biglietto d'ingresso||入场券|입장권|入場券|Входной билет|Bilet wstępu",
+    minbet: "La ficha mínima|The minimum chip|Le jeton minimum|A ficha mínima|Der Mindestchip|La fiche minima||最低注筹码|최소 칩|最低チップ|Минимальная фишка|Żeton minimalny",
+    journal: "La libreta del crupier|The dealer's notebook|Le carnet du croupier|A caderneta do crupiê|Das Notizbuch des Croupiers|Il taccuino del croupier||荷官的小本子|딜러의 수첩|ディーラーの手帳|Блокнот крупье|Notes krupiera",
+    iq_1: "La maleta|The suitcase|La valise|A mala|Der Koffer|La valigia||行李箱|여행 가방|スーツケース|Чемодан|Walizka",
+    cards: "Los naipes|The cards|Les cartes|As cartas|Die Spielkarten|Le carte||扑克牌|카드|トランプ|Карты|Karty",
+    chips: "El fajo de fichas|The chip stack|La pile de jetons|A pilha de fichas|Der Chipstapel|La pila di fiche||筹码堆|칩 더미|チップの山|Стопка фишек|Stos żetonów",
+    purse: "El regalo de la casa|The house gift|Le cadeau de la maison|O presente da casa|Das Geschenk des Hauses|Il regalo della casa||本店的礼物|하우스의 선물|ハウスの贈り物|Подарок заведения|Prezent od kasyna",
+    masterkey: "La llave del club|The club key|La clé du club|A chave do clube|Der Clubschlüssel|La chiave del club||俱乐部钥匙|클럽 열쇠|クラブの鍵|Ключ от клуба|Klucz do klubu",
+    pact: "El pergamino de socio|The member's scroll|Le parchemin de membre|O pergaminho de sócio|Die Mitgliedsurkunde|La pergamena del socio||会员卷轴|회원 두루마리|会員の巻物|Свиток члена клуба|Zwój członkowski",
+    hoard: "La hucha|The piggy bank|La tirelire|O cofrinho|Das Sparschwein|Il salvadanaio||存钱罐|돼지 저금통|ブタの貯金箱|Копилка|Skarbonka",
     talisman: "La herradura|The horseshoe|Le fer à cheval|A ferradura|Das Hufeisen|Il ferro di cavallo||马蹄铁|말굽|蹄鉄|Подкова|Podkowa",
   };
   /* los titulos: ach = se gana con ese logro; duel = duelos ganados a la banca; p = precio en la tienda */
@@ -120,6 +132,7 @@ window.AIQ = window.AIQ || {};
   const TX = {
     secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|숨겨진 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
     byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Conquistado com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就「{a}」后获得|업적 「{a}」 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
+    byCat: "Insignia de {x}: se gana en el nivel {n}|Badge of the {x} rank: earned at level {n}|Insigne de la catégorie {x} : s'obtient au niveau {n}|Insígnia de {x}: conquistada no nível {n}|Abzeichen des Rangs {x}: auf Stufe {n}|Insegna di {x}: si ottiene al livello {n}||{x}的徽记：{n} 级获得|{x} 등급 휘장: 레벨 {n}에서 획득|{x}の記章：レベル{n}で手に入る|Знак ступени «{x}»: на уровне {n}|Insygnia rangi {x}: na poziomie {n}",
     byLv: "Se gana en el nivel {n} del Club|Earned at Club level {n}|S'obtient au niveau {n} du Club|Conquistado no nível {n} do Clube|Freigeschaltet mit Club-Stufe {n}|Si ottiene al livello {n} del Club||俱乐部 {n} 级时获得|클럽 레벨 {n}에서 획득|クラブのレベル{n}で手に入る|Даётся на уровне клуба {n}|Zdobywasz na poziomie klubu {n}",
     lockedCard: "Se descubre en el nivel {n}|Revealed at level {n}|Se dévoile au niveau {n}|Revelada no nível {n}|Wird auf Stufe {n} aufgedeckt|Si scopre al livello {n}||{n} 级时揭晓|레벨 {n}에서 공개|レベル{n}で明かされる|Откроется на уровне {n}|Odkryjesz na poziomie {n}",
     byDuel: "Se gana con 25 duelos ganados a la banca (llevas {n})|Earned by winning 25 duels against the house ({n} so far)|S'obtient en gagnant 25 duels contre la banque ({n} pour l'instant)|Conquistado vencendo 25 duelos contra a banca ({n} até agora)|Freigeschaltet mit 25 gewonnenen Duellen gegen die Bank (bisher {n})|Si ottiene vincendo 25 duelli contro il banco (finora {n})||战胜庄家 25 次后获得（目前 {n} 次）|하우스와의 대결 25승 시 획득(현재 {n}승)|胴元との勝負に25回勝つと手に入る（いま{n}勝）|Даётся за 25 побед в дуэлях с казино (пока {n})|Zdobywasz za 25 wygranych pojedynków z kasynem (na razie {n})",
@@ -130,16 +143,20 @@ window.AIQ = window.AIQ || {};
   const achs = () => A.ACH || [];
   const achOf = id => achs().find(a => a.id === id);
   const achGot = id => !!(prof().ach || {})[id];
-  const iconKind = id => CASA_IC.includes(id) ? "casa" : SHOP_IC[id] ? "tienda" : /^ach_/.test(id) && achOf(id.slice(4)) ? "logro" : null;
-  const iconOwned = id => { const k = iconKind(id); return k === "casa" || (k === "logro" && achGot(id.slice(4))) || (k === "tienda" && !!(prof().club || {}).ic && !!prof().club.ic[id]); };
+  /* v2: las insignias de categoria (A.club.INSIG). Las que tambien vende la tienda (la corona, los dados) se pueden comprar o ganar */
+  const catIdx = id => (A.club && A.club.insigOf ? A.club.insigOf(id) : -1);
+  const catOwned = id => { const i = catIdx(id); return i >= 0 && A.club.tierNow() >= i; };
+  const iconKind = id => CASA_IC.includes(id) ? "casa" : SHOP_IC[id] ? "tienda" : catIdx(id) >= 0 ? "cat" : /^ach_/.test(id) && achOf(id.slice(4)) ? "logro" : null;
+  const iconOwned = id => { const k = iconKind(id); return k === "casa" || catOwned(id) || (k === "logro" && achGot(id.slice(4))) || (k === "tienda" && !!(prof().club || {}).ic && !!prof().club.ic[id]); };
   const icon = () => { const c = prof().club || {}; return c.icon && iconOwned(c.icon) ? c.icon : "globe"; };   // el de antes (ficha de oro o crupier) ya no esta: vuelve el globo
   const setIcon = id => { if (!iconOwned(id)) return false; club().icon = id; A.profile.save(); return true; };
   const iconName = id => { const k = iconKind(id); if (k !== "logro") return P6(IC_N[id] || ""); const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? "???" : A.tx(a.name); };
   const iconPrice = id => SHOP_IC[id] || 0;
-  const iconHow = id => { const k = iconKind(id); if (k !== "logro") return ""; const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? P6(TX.secret) : P6(TX.byAch).replace("{a}", A.tx(a.name)); };
+  const iconHow = id => { const k = iconKind(id), ci = catIdx(id); if (ci >= 0 && k !== "casa" && !catOwned(id)) return P6(TX.byCat).replace("{x}", A.club.tierName(ci)).replace("{n}", A.club.RANKS[ci][1]); if (k !== "logro") return ""; const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? P6(TX.secret) : P6(TX.byAch).replace("{a}", A.tx(a.name)); };
   /* el catalogo: casa | logro (lo que tienes primero, en el orden de los logros) | tienda */
   function icons(kind) {
-    const L = kind === "casa" ? CASA_IC.slice() : kind === "tienda" ? Object.keys(SHOP_IC) : kind === "logro" ? achs().map(a => "ach_" + a.id) : CASA_IC.concat(Object.keys(SHOP_IC), achs().map(a => "ach_" + a.id));
+    const CAT = (A.club && A.club.INSIG ? A.club.INSIG : []).filter(id => !CASA_IC.includes(id) && !SHOP_IC[id]);
+    const L = kind === "casa" ? CASA_IC.slice() : kind === "tienda" ? Object.keys(SHOP_IC) : kind === "cat" ? CAT.slice() : kind === "logro" ? achs().map(a => "ach_" + a.id) : CASA_IC.concat(CAT, Object.keys(SHOP_IC), achs().map(a => "ach_" + a.id));
     const out = L.map(id => ({ id, kind: iconKind(id), owned: iconOwned(id), price: iconPrice(id), name: iconName(id), how: iconHow(id), secret: iconKind(id) === "logro" && achOf(id.slice(4)).secret }));
     return kind === "logro" ? out.filter(i => i.owned).concat(out.filter(i => !i.owned)) : out;
   }
