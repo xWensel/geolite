@@ -78,8 +78,8 @@ window.AIQ = window.AIQ || {};
     let hidPlay = [];
     document.addEventListener("visibilitychange", () => {
       if (!ctx) return;
-      if (document.hidden) { hidPlay = decks.filter(d => d && !d.el.paused); hidPlay.forEach(d => d.el.pause()); ctx.suspend(); }
-      else { ctx.resume(); if (A.audio.musicOn) hidPlay.forEach(d => d.el.play().catch(() => {})); hidPlay = []; }
+      if (document.hidden) { hidPlay = decks.filter(d => d && !d.el.paused); hidPlay.forEach(pauseAll); ctx.suspend(); }
+      else { ctx.resume(); if (A.audio.musicOn) hidPlay.forEach(playAll); hidPlay = []; }
     });
     return true;
   }
@@ -172,7 +172,7 @@ window.AIQ = window.AIQ || {};
     s.start(t, st, len + 0.02);
   }
   /* la nota i de la escala de la cancion que suena, a partir de la altura "desde" (MIDI) */
-  const curT = () => TONOS[A.audio.musicOn && cur >= 0 ? cur : 0] || TONOS[0];
+  const curT = () => { const T = isCl() ? TONOS_CL : TONOS_BA; return T[A.audio.musicOn && cur >= 0 ? cur : 0] || T[0]; };
   function deg(i, desde = 60) {
     const T = curT(), s = T.set.map(p => ((p - T.home) % 12 + 12) % 12).sort((a, b) => a - b);   // grados desde la casa
     const base = desde - ((desde - T.home) % 12 + 12) % 12;                                          // la casa por debajo de "desde"
@@ -291,15 +291,25 @@ window.AIQ = window.AIQ || {};
     ["Apuesta máxima", "Max Bet", "Mise maximale", "Aposta máxima", "Höchsteinsatz", "Puntata massima", "Apuesta máxima", "最大注", "최대 베팅", "マックスベット", "Максимальная ставка", "Maksymalna stawka"],
     ["Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters"],
   ];
-  const FILES = [
-    "assets/music/01-lounge-nocturno.mp3", "assets/music/02-ragtime-roulette.mp3", "assets/music/03-bossa-de-medianoche.mp3",
-    "assets/music/04-samba-del-crupier.mp3", "assets/music/05-blues-del-tapete.mp3", "assets/music/06-vals-real.mp3",
-    "assets/music/07-funk-jackpot.mp3", "assets/music/08-big-band-all-in.mp3", "assets/music/09-mambo-royale.mp3",
-    "assets/music/10-cash-out.mp3", "assets/music/11-banca-al-dia.mp3", "assets/music/12-apuesta-en-vivo.mp3",
-    "assets/music/13-pleno-al-quince.mp3", "assets/music/14-handicap-asiatico.mp3", "assets/music/15-funk-da-sorte.mp3",
-    "assets/music/16-house-del-crupier.mp3", "assets/music/17-tecno-del-bote.mp3", "assets/music/18-merengue-del-premio.mp3",
-    "assets/music/19-cha-cha-del-casino.mp3", "assets/music/20-ranchera-de-la-suerte.mp3", "assets/music/21-corrido-del-apostador.mp3", "assets/music/22-tipsters.mp3",
+  /* BSO v2 (v0.3.198): cada cancion son TRES capas que suenan a la vez y se suben o bajan segun el momento (como en Balatro):
+     .c0 = la portada en calma (melodia, acordes, bajo a dos; casi sin base), .c1 = lo que entra en la partida (el bajo entero, el bombo y la palmada,
+     la percusion), .c2 = la tension de los ultimos segundos (madera, aro, toms: nunca ruido). Partida = c0 + c1; ultimos segundos = c0 + c1 + c2. */
+  const SONGS = [
+    "01-apuesta-segura", "02-doble-o-nada", "03-ambos-marcan", "04-mas-de-2-5-goles", "05-todo-al-rojo", "06-huerfanos", "07-all-in", "08-combinada",
+    "09-sube-la-apuesta", "10-retirar-ganancias", "11-banca-al-dia", "12-apuesta-en-vivo", "13-pleno-al-quince", "14-handicap-asiatico", "15-gran-apostador",
+    "16-bote-acumulado", "17-ventaja-de-la-casa", "18-mano-caliente", "19-ganador-y-colocado", "20-empate-no-vale", "21-apuesta-maxima", "22-tipsters",
   ];
+  /* las de antes, tal cual (un archivo cada una, sin capas): el estilo «Clasicos» de Ajustes > Sonido > Estilo de musica */
+  const OLD = [
+    "01-lounge-nocturno", "02-ragtime-roulette", "03-bossa-de-medianoche", "04-samba-del-crupier", "05-blues-del-tapete", "06-vals-real", "07-funk-jackpot",
+    "08-big-band-all-in", "09-mambo-royale", "10-cash-out", "11-banca-al-dia", "12-apuesta-en-vivo", "13-pleno-al-quince", "14-handicap-asiatico",
+    "15-funk-da-sorte", "16-house-del-crupier", "17-tecno-del-bote", "18-merengue-del-premio", "19-cha-cha-del-casino", "20-ranchera-de-la-suerte",
+    "21-corrido-del-apostador", "22-tipsters",
+  ];
+  const FILES = SONGS, LAYERS = 3;
+  let MS = "banda";                                                    // estilo de musica: "banda" (la BSO por capas) | "clasica" (las de antes)
+  const isCl = () => MS === "clasica";
+  const stem = (i, c, cl = isCl()) => (cl ? (c === 0 ? "assets/music/" + OLD[i] + ".mp3" : "") : "assets/music/" + SONGS[i] + ".c" + c + ".mp3");
   /* v0.3.55 (el sonido de la casa, 3a): cada cancion tiene su momento y su volumen. Los archivos no se tocan: todo se decide aqui.
      - GROUPS: el reparto. La portada y los menus, las mas tranquilas (la 1.a, "Apuesta segura", es SIEMPRE la del arranque); cada acto de la
        Aventura, con mas empuje que el anterior; el jefe y la victoria, su tema; los creditos, el vals (js/final.js). Clasico = portada + acto I;
@@ -316,9 +326,13 @@ window.AIQ = window.AIQ || {};
   const GROUPS = { home: [0, 4, 10, 9], a1: [1, 3, 11, 12, 20], a2: [2, 6, 8, 13, 18, 21], a3: [7, 14, 15, 19], boss: [16], win: [17], credits: [5] };
   GROUPS.classic = GROUPS.home.concat(GROUPS.a1); GROUPS.inf = GROUPS.a2.concat(GROUPS.a3);
   const NOW = { boss: 1, win: 1 };                                      // momentos que no esperan a que acabe la cancion
-  const LUFS = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4, -35.1];
-  const TRIM = LUFS.map(l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20));
-  const BPM = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92, 92];
+  /* cada estilo con sus medidas: LUFS = sonoridad de la cancion (en «banda», la de la partida: capas 0 + 1), TRIM las lleva a -34 LUFS;
+     BPM = el pulso (la 20 de la banda va en 12/8: su pulso es la negra con puntillo) */
+  const LUFS_CL = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4, -35.1];
+  const BPM_CL = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92, 92];
+  const LUFS_BA = [-34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34];
+  const BPM_BA = [86, 116, 100, 104, 94, 120, 100, 152, 118, 74, 76, 88, 108, 100, 138, 122, 120, 132, 120, 108, 96, 80];
+  const trimOf = l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20), TRIM_CL = LUFS_CL.map(trimOf), TRIM_BA = LUFS_BA.map(trimOf);
   const BEAT0 = 60;
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
   let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
@@ -326,15 +340,41 @@ window.AIQ = window.AIQ || {};
 
   function deck(k) {
     if (decks[k]) return decks[k];
-    const el = new Audio(); el.crossOrigin = "anonymous"; el.preload = "auto"; el.loop = false;   // si algun dia sale de otro dominio: sin CORS, WebAudio la silenciaria
-    const trim = ctx.createGain(), fade = ctx.createGain(); fade.gain.value = 0;
-    ctx.createMediaElementSource(el).connect(trim).connect(fade).connect(musBus);
-    const d = (decks[k] = { el, trim, fade, idx: -1, leaving: false, tm: 0 });
-    /* la cancion se acaba: la siguiente entra fundida un poco antes del final (o, si no se pudo, al terminar) */
-    el.addEventListener("timeupdate", () => { if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.25) change(pick(), "fade"); });
+    const trim = ctx.createGain(), fade = ctx.createGain(); fade.gain.value = 0; trim.connect(fade).connect(musBus);
+    const els = [], lg = [];
+    for (let c = 0; c < LAYERS; c++) {
+      const e = new Audio(); e.crossOrigin = "anonymous"; e.preload = "auto"; e.loop = false;   // si algun dia sale de otro dominio: sin CORS, WebAudio la silenciaria
+      const g = ctx.createGain(); g.gain.value = c === 0 ? 1 : 0.0001; ctx.createMediaElementSource(e).connect(g).connect(trim); els.push(e); lg.push(g);
+    }
+    const el = els[0], d = (decks[k] = { el, els, lg, trim, fade, idx: -1, leaving: false, tm: 0, sync: 0 });   // la capa 0 lleva el reloj
+    /* la cancion se acaba: la siguiente entra fundida un poco antes del final (o, si no se pudo, al terminar). De paso, cada 2 s, las capas al reloj */
+    el.addEventListener("timeupdate", () => {
+      if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.25) change(pick(), "fade");
+      const now = performance.now(); if (now - d.sync > 2000) { d.sync = now; align(d); }
+    });
     el.addEventListener("ended", () => { if (decks[di] === d && !d.leaving) change(pick(), "soft"); });
     ["playing", "pause", "seeked", "waiting"].forEach(ev => el.addEventListener(ev, () => { if (decks[di] === d && A.music.onBeat) A.music.onBeat(); }));
+    els.slice(1).forEach(e => e.addEventListener("playing", () => align(d)));
     return d;
+  }
+  /* las capas 1 y 2 siguen a la 0: si alguna se ha separado mas de 30 ms (arranque, salto, pestana oculta), se recoloca */
+  function align(d) {
+    if (d.el.paused || d.el.readyState < 2) return; const t0 = d.el.currentTime;
+    d.els.slice(1).forEach(e => { if (e.getAttribute("src") && !e.paused && e.readyState >= 2 && Math.abs(e.currentTime - t0) > 0.03) { try { e.currentTime = t0 + 0.012; } catch (er) { /* aun sin datos */ } } });
+  }
+  const playAll = d => d.els.forEach(e => { if (e.getAttribute("src")) e.play().catch(() => {}); });
+  const pauseAll = d => d.els.forEach(e => e.pause());
+  /* que capas suenan: portada [0], partida [0, 1], ultimos segundos [0, 1, 2] */
+  const want = () => (isCl() ? [1, 0, 0] : mode === 2 ? [1, 1, 1] : mode === 1 ? [1, 1, 0] : [1, 0, 0]);   // las de antes: una sola pista
+  /* sube o baja las capas. at = "pulso": la capa que entra lo hace justo en el siguiente pulso de la cancion (el bombo cae a tiempo);
+     la que sale se va en un tercio de segundo. Sin musica sonando, de inmediato */
+  function layers(how) {
+    if (!ctx) return; const t = ctx.currentTime, w = want(); let t0 = t;
+    if (how === "pulso") { const b = A.music.beat(); if (b) { const ph = ((b.at % b.ms) + b.ms) % b.ms; t0 = t + (b.ms - ph) / 1000; if (t0 - t > 0.8) t0 = t; } }
+    decks.forEach(d => d && d.lg.forEach((g, c) => {
+      const to = w[c] ? 1 : 0.0001, gp = g.gain; gp.cancelScheduledValues(t); gp.setValueAtTime(Math.max(0.0001, gp.value), t);
+      if (how === "ya") gp.setValueAtTime(to, t); else { gp.setValueAtTime(Math.max(0.0001, gp.value), t0); gp.linearRampToValueAtTime(to, t0 + (w[c] ? 0.05 : 0.33)); }
+    }));
   }
   const group = () => GROUPS[moment] || GROUPS.home;
   /* otra del grupo: nunca la que suena ni las ultimas (cuantas, segun lo grande que sea el grupo) */
@@ -347,28 +387,29 @@ window.AIQ = window.AIQ || {};
   function useTrack(i, how = "soft", at = 0) {
     const t = ctx.currentTime, old = di >= 0 ? decks[di] : null, k = di === 0 ? 1 : 0, d = deck(k), f = how === "fade" ? XF : how === "soft" ? 0.25 : 0.03;
     clearTimeout(d.tm); d.leaving = false; d.idx = i; cur = i; recent.push(i); if (recent.length > 6) recent.shift();
-    d.el.src = A.media(FILES[i]); try { d.el.currentTime = at; } catch (e) { /* aun sin datos: empieza desde el principio */ }
-    d.trim.gain.value = TRIM[i]; d.el.play().catch(() => {});
+    d.els.forEach((e, c) => { const f = stem(i, c); if (!f) { e.pause(); e.removeAttribute("src"); return; } e.src = A.media(f); try { e.currentTime = at; } catch (er) { /* aun sin datos: empieza desde el principio */ } });
+    d.trim.gain.value = (isCl() ? TRIM_CL : TRIM_BA)[i]; { const w = want(); d.lg.forEach((g, c) => { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(w[c] ? 1 : 0.0001, t); }); }
+    playAll(d);
     d.fade.gain.cancelScheduledValues(t); d.fade.gain.setValueAtTime(0.0001, t); d.fade.gain.linearRampToValueAtTime(1, t + f);
     if (old) {
       old.leaving = true; old.fade.gain.cancelScheduledValues(t); old.fade.gain.setValueAtTime(old.fade.gain.value, t); old.fade.gain.linearRampToValueAtTime(0.0001, t + f);
-      old.tm = setTimeout(() => { if (decks[di] !== old) old.el.pause(); }, f * 1000 + 150);
+      old.tm = setTimeout(() => { if (decks[di] !== old) pauseAll(old); }, f * 1000 + 150);
     }
     di = k;
   }
   /* cambio de cancion con su aviso (js/jukebox.js) */
   function change(i, how, at) { useTrack(i, how, at); if (A.music.onChange) A.music.onChange(i); }
   const musLevel = () => MUS_BASE * A.audio.vol.music * (bar && !muf ? 0.7 : 1);
-  /* el timbre de la musica segun donde estes: amortiguada del todo (pausa, tu nombre, salir), "desde la barra" (Campamento) o abierta en los ultimos segundos */
+  /* el timbre de la musica segun donde estes: amortiguada del todo (pausa, tu nombre, salir) o "desde la barra" (Campamento) */
   function tone() {
     if (!ctx) return; const t = ctx.currentTime;
-    musFilter.frequency.setTargetAtTime(muf ? 320 : bar ? 1250 : mode === 2 ? 12500 : 8600, t, muf ? 0.08 : 0.15);
+    musFilter.frequency.setTargetAtTime(muf ? 320 : bar ? 1250 : isCl() && mode === 2 ? 12500 : 8600, t, muf ? 0.08 : 0.15);   // las de antes: la tension abre el filtro
     musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel(), t, 0.15);
   }
   A.music = {
     start() {
       if (!A.audio.musicOn || !init()) return;
-      if (cur < 0) useTrack(0, "cut"); else decks[di].el.play().catch(() => {});   // la primera es siempre la del arranque
+      if (cur < 0) useTrack(0, "cut"); else playAll(decks[di]);   // la primera es siempre la del arranque
     },
     /* las flechas del reproductor: la anterior y la siguiente de la LISTA entera, en orden (1, 2, 3... y vuelta a la 1); el grupo del momento
        solo manda cuando la cancion acaba sola */
@@ -380,8 +421,9 @@ window.AIQ = window.AIQ || {};
     title(i = cur) { const n = NAMES[i]; if (!n) return ""; const k = A.LANGS.findIndex(l => l.code === A.lang); return n[k] || n[1]; },
     go(i, quiet) { if (FILES[i] == null || !A.audio.musicOn || !init()) return; if (quiet) useTrack(i, "soft"); else change(i, "soft"); },   // salta a una cancion (quiet: sin aviso; los creditos finales ponen el vals)
     now() { return A.music.title(); },
-    stop() { decks.forEach(d => d && d.el.pause()); },
-    mode(m) { mode = m; tone(); },
+    stop() { decks.forEach(d => d && pauseAll(d)); },
+    /* 0 portada (en calma), 1 partida (entra la banda), 2 ultimos segundos (entra la tension): las capas entran en el siguiente pulso */
+    mode(m) { if (m === mode) return; mode = m; tone(); layers("pulso"); },
     duck(level = 0.3, ms = 1400) {
       if (!ctx || cur < 0) return;
       const base = musLevel(), t = ctx.currentTime; musBus.gain.cancelScheduledValues(t);
@@ -410,8 +452,14 @@ window.AIQ = window.AIQ || {};
        medido de cada pista y del reloj del reproductor: no hace falta analizar la musica mientras suena */
     beat() {
       const d = di >= 0 ? decks[di] : null; if (!d || cur < 0 || d.el.paused || d.el.readyState < 2 || !A.audio.musicOn || !(A.audio.vol.music * A.audio.vol.master > 0)) return null;   // con la musica a cero no hay compas que seguir
-      return { ms: 60000 / BPM[cur], at: d.el.currentTime * 1000 - BEAT0 - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
+      return { ms: 60000 / (isCl() ? BPM_CL : BPM_BA)[cur], at: d.el.currentTime * 1000 - BEAT0 - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
     },
+  };
+  /* Ajustes > Sonido > Estilo de musica: al cambiarlo, la misma cancion en el otro estilo entra fundida (nunca un corte) */
+  A.audio.musica = "banda";
+  A.audio.setMusica = v => {
+    const nv = v === "clasica" ? "clasica" : "banda"; if (nv === MS) return; MS = A.audio.musica = nv;
+    if (ctx && cur >= 0 && A.audio.musicOn && di >= 0 && !decks[di].el.paused) change(cur, "fade"); if (ctx) tone();
   };
   A.audio.setSkin = () => {};   // las 22 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
   A.audio.state = () => (ctx ? ctx.state : 'none');
@@ -449,12 +497,20 @@ window.AIQ = window.AIQ || {};
   /* el tono de cada cancion (por su numero, como `cur`): la pentatonica que encaja (5 notas) y su nota "casa", de la ficha del motor de la BSO
      (tonica, escala y acordes). Fuera de la musica (apagada o aun sin sonar), Do */
   const MAJ = r => [0, 2, 4, 7, 9].map(x => (x + r) % 12);
-  const TONOS = [
+  const TONOS_CL = [
     { home: 0, set: MAJ(0) }, { home: 0, set: MAJ(0) }, { home: 7, set: MAJ(7) }, { home: 2, set: MAJ(2) }, { home: 8, set: MAJ(8) },
     { home: 0, set: [0, 2, 4, 9, 11] }, { home: 7, set: MAJ(7) }, { home: 10, set: MAJ(10) }, { home: 3, set: MAJ(3) }, { home: 5, set: MAJ(5) },
     { home: 0, set: MAJ(0) }, { home: 0, set: MAJ(0) }, { home: 9, set: [9, 1, 2, 4, 7] }, { home: 5, set: MAJ(5) }, { home: 5, set: MAJ(5) },
     { home: 5, set: MAJ(5) }, { home: 3, set: MAJ(3) }, { home: 9, set: MAJ(9) }, { home: 7, set: MAJ(7) }, { home: 2, set: MAJ(2) },
     { home: 0, set: MAJ(0) }, { home: 5, set: MAJ(5) },
+  ];
+  /* la banda (v0.3.198): la pentatonica mayor de la relativa mayor de cada cancion nueva o rehecha (casa = su tonica); la 1 y la 10, las de siempre */
+  const TONOS_BA = [
+    { home: 0, set: MAJ(0) }, { home: 3, set: MAJ(3) }, { home: 7, set: MAJ(7) }, { home: 2, set: MAJ(2) }, { home: 5, set: MAJ(5) },
+    { home: 0, set: MAJ(0) }, { home: 7, set: MAJ(7) }, { home: 10, set: MAJ(10) }, { home: 3, set: MAJ(3) }, { home: 5, set: MAJ(5) },
+    { home: 0, set: MAJ(0) }, { home: 8, set: MAJ(8) }, { home: 9, set: [9, 1, 2, 4, 7] }, { home: 5, set: MAJ(5) }, { home: 10, set: MAJ(10) },
+    { home: 5, set: MAJ(5) }, { home: 3, set: MAJ(3) }, { home: 0, set: MAJ(0) }, { home: 5, set: MAJ(5) }, { home: 8, set: MAJ(8) },
+    { home: 7, set: MAJ(7) }, { home: 5, set: MAJ(5) },
   ];
   /* escalon de cada efecto en dB sobre la musica (maqueta del Bloque F, version 2, con los votos del 23-oct ya dentro: raton -2, premios +3):
      raton -13, pulsar -4, jugada +3 a +10, diana +13, jackpots +13/+16/+19. Medidos con la sonoridad de pico en 50 ms frente a la mediana de la musica */
