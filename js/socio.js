@@ -151,7 +151,10 @@ window.AIQ = window.AIQ || {};
   const icon = () => { const c = prof().club || {}; return c.icon && iconOwned(c.icon) ? c.icon : "globe"; };   // el de antes (ficha de oro o crupier) ya no esta: vuelve el globo
   const setIcon = id => { if (!iconOwned(id)) return false; club().icon = id; A.profile.save(); return true; };
   const iconName = id => { const k = iconKind(id); if (k !== "logro") return P6(IC_N[id] || ""); const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? "???" : A.tx(a.name); };
-  const iconPrice = id => SHOP_IC[id] || 0;
+  /* v2: con la ganga del escaparate de hoy (js/escaparate.js) */
+  const deal = (k, f) => { const o = A.escaparate && A.escaparate.off ? A.escaparate.off(k) : 0; return o && f ? Math.round(f * (1 - o) / 10) * 10 : f; };
+  const iconFull = id => SHOP_IC[id] || 0;
+  const iconPrice = id => deal("i:" + id, iconFull(id));
   const iconHow = id => { const k = iconKind(id), ci = catIdx(id); if (ci >= 0 && k !== "casa" && !catOwned(id)) return P6(TX.byCat).replace("{x}", A.club.tierName(ci)).replace("{n}", A.club.RANKS[ci][1]); if (k !== "logro") return ""; const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? P6(TX.secret) : P6(TX.byAch).replace("{a}", A.tx(a.name)); };
   /* el catalogo: casa | logro (lo que tienes primero, en el orden de los logros) | tienda */
   function icons(kind) {
@@ -168,8 +171,9 @@ window.AIQ = window.AIQ || {};
   const setTitle = id => { if (id && !titleOwned(id)) return false; club().tit = id || ""; A.profile.save(); return true; };
   const titleName = id => (TIT[id] ? P6(TIT[id].n) : "");
   const titleHow = id => { const t = TIT[id]; if (!t) return ""; if (t.lv) return P6(TX.byLv).replace("{n}", t.lv); if (t.ach) { const a = achOf(t.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; } return t.duel ? P6(TX.byDuel).replace("{n}", A.fmt(Math.min(duelWins(), t.duel))) : ""; };
-  const titles = () => TITLES.map(t => ({ id: t.id, kind: t.p ? "tienda" : "hito", owned: titleOwned(t.id), price: t.p || 0, name: titleName(t.id), how: titleHow(t.id) }));
-  function buyTitle(id) { const t = TIT[id]; if (!t || !t.p || titleOwned(id) || !A.club || !A.club.spend || !A.club.spend(t.p)) return false; const c = club(); c.tt[id] = Date.now(); c.tit = id; A.profile.save(); return true; }
+  const titleFull = id => (TIT[id] && TIT[id].p) || 0, titlePrice = id => deal("t:" + id, titleFull(id));
+  const titles = () => TITLES.map(t => ({ id: t.id, kind: t.p ? "tienda" : "hito", owned: titleOwned(t.id), price: titlePrice(t.id), name: titleName(t.id), how: titleHow(t.id) }));
+  function buyTitle(id) { const t = TIT[id]; if (!t || !t.p || titleOwned(id) || !A.club || !A.club.spend || !A.club.spend(titlePrice(id))) return false; const c = club(); c.tt[id] = Date.now(); c.tit = id; A.profile.save(); return true; }
 
   /* ---------------------------------------------------------------- dibujo al pixel: rejilla de colores con contorno automatico */
   /* v0.3.174: con margen m alrededor para lo que asoma del canto (laureles, gemas, la N de la rosa, el terciopelo). Las coordenadas son las de la
@@ -297,8 +301,9 @@ window.AIQ = window.AIQ || {};
   const setMarco = id => { if (!marcoOwned(id)) return false; club().marco = id; A.profile.save(); return true; };
   const marcoName = id => (MAR[id] ? P6(MAR[id].n) : "");
   const marcoHow = id => { const m = MAR[id]; if (!m || !m.ach) return ""; const a = achOf(m.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; };
-  const marcos = () => MARCOS.map(m => ({ id: m.id, kind: m.casa ? "casa" : m.p ? "tienda" : "hito", owned: marcoOwned(m.id), price: m.p || 0, name: marcoName(m.id), how: marcoHow(m.id) }));
-  function buyMarco(id) { const m = MAR[id]; if (!m || !m.p || marcoOwned(id) || !A.club || !A.club.spend || !A.club.spend(m.p)) return false; const c = club(); c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; c.mc[id] = Date.now(); c.marco = id; A.profile.save(); return true; }
+  const marcoFull = id => (MAR[id] && MAR[id].p) || 0, marcoPrice = id => deal("k:" + id, marcoFull(id));
+  const marcos = () => MARCOS.map(m => ({ id: m.id, kind: m.casa ? "casa" : m.p ? "tienda" : "hito", owned: marcoOwned(m.id), price: marcoPrice(m.id), name: marcoName(m.id), how: marcoHow(m.id) }));
+  function buyMarco(id) { const m = MAR[id]; if (!m || !m.p || marcoOwned(id) || !A.club || !A.club.spend || !A.club.spend(marcoPrice(id))) return false; const c = club(); c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; c.mc[id] = Date.now(); c.marco = id; A.profile.save(); return true; }
 
   /* la carta entera, a su rejilla nativa (96 x H). Lc = la carta (su nivel: 1-100); mt = el material del borde (serie 0-9; -1 = el de su serie);
      t = el momento de las vivas; pr = la barra de tu nivel en la placa del nombre (0-1; -1 sin barra). Devuelve donde va cada texto y redraw(t),
@@ -539,7 +544,9 @@ window.AIQ = window.AIQ || {};
   const _todo = () => { const c = club(); Object.keys(SHOP_IC).forEach(id => { c.ic[id] = c.ic[id] || Date.now(); }); TITLES.forEach(t => { if (t.p) c.tt[t.id] = c.tt[t.id] || Date.now(); }); c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; MARCOS.forEach(m => { if (m.p) c.mc[m.id] = c.mc[m.id] || Date.now(); }); A.profile.save(); };
 
   A.socio = { mount, thumb, icons, icon, setIcon, buyIcon, iconName, iconHow, iconKind, iconOwned, titles, title, setTitle, buyTitle, titleName, titleHow, titleOwned,
-    marcos, marco, setMarco, buyMarco, marcoName, marcoHow, marcoOwned, badge, code, parse, _todo,
+    marcos, marco, setMarco, buyMarco, marcoName, marcoHow, marcoOwned, badge, code, parse, _todo, iconFull, titleFull, marcoFull,
+    /* el lote del escaparate: darla sin cobrar ni ponerla (w = i icono, t titulo, k marco) */
+    give: (w, id) => { const c = club(); if (w === "i" && SHOP_IC[id] && !iconOwned(id)) c.ic[id] = Date.now(); else if (w === "t" && TIT[id] && TIT[id].p && !titleOwned(id)) c.tt[id] = Date.now(); else if (w === "k" && MAR[id] && MAR[id].p && !marcoOwned(id)) { c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; c.mc[id] = Date.now(); } else return false; A.profile.save(); return true; },
     carta, fondo, mat, setCarta, setFondo, setMat, matOwned, cartas, mats, cardName, edName, cardNo: L => P6(CARD_N).replace("{n}", L), matName, edOf, vivaOf, sOf, SERIES, NCARD, tx: TX,
     mini, art: (cv, L, o = {}) => draw(cv, L, false, false, o.marco || "filete", o.mat != null ? o.mat : -1, o.t || 0, -1), back, winArt, _badge: badgeArt };
 })(window.AIQ);

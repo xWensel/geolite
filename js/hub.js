@@ -130,7 +130,11 @@ window.AIQ = window.AIQ || {};
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     if (A.club) A.club.wire(() => { if (A.camino) screen("camino"); else { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); } });   // tu carta: abre el camino del socio (js/camino.js) y cuenta las fichas de oro nuevas
-    if ($("bqBtn")) $("bqBtn").onclick = () => { A.sfx.card(); screen("boutique"); };   // la tienda: placa de la derecha (v0.3.157)
+    if ($("bqBtn")) {
+      $("bqBtn").onclick = () => { A.sfx.card(); if (A.escaparate && A.boutique.cat) A.boutique.cat("hoy"); screen("boutique"); };   // v2: la tienda se abre en el escaparate de hoy
+      /* el punto de la placa: algo de tu lista de deseos esta hoy delante, o te espera el regalo de la casa (js/escaparate.js) */
+      if (A.escaparate && (A.escaparate.alerts().length || A.escaparate.giftWaiting())) $("bqBtn").insertAdjacentHTML("beforeend", `<i class="plq-dot" aria-hidden="true"></i>`);
+    }   // la tienda: placa de la derecha (v0.3.157)
     if ($("clubRtBtn")) $("clubRtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // los retos del Club: placa de la izquierda (js/club-retos.js)
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura

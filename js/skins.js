@@ -320,7 +320,8 @@ window.AIQ = window.AIQ || {};
     shop: () => A.MESAS.filter(m => m.shop),
     tier: id => A.mesas.get(id).shop || "",
     full: id => PRICE[A.mesas.get(id).shop] || 0,
-    price: id => { const f = A.mesas.full(id), o = A.mesas.offer(); return o && o.id === id && !A.mesas.owned(id) ? Math.round(f * (1 - OFF) / 10) * 10 : f; },
+    /* el precio de hoy: la oferta de la semana (-30 %) o la ganga del escaparate (-40 %, js/escaparate.js), la mayor */
+    price: id => { const f = A.mesas.full(id), o = A.mesas.offer(), w = o && o.id === id && !A.mesas.owned(id) ? OFF : 0, e = A.escaparate && A.escaparate.off ? A.escaparate.off("m:" + id) : 0, d = Math.max(w, e); return d ? Math.round(f * (1 - d) / 10) * 10 : f; },
     /* la oferta de la semana: se elige el lunes entre las que aun no tienes y se queda toda la semana (si la compras, la semana sigue con ella) */
     offer() {
       const s = mem(), w = weekNo();
@@ -338,6 +339,8 @@ window.AIQ = window.AIQ || {};
       if (!A.club.spend(A.mesas.price(id))) return false;
       mem().own[id] = Date.now(); A.profile.save(); return true;
     },
+    /* darla sin cobrar (el lote del escaparate) */
+    give(id) { const m = A.mesas.get(id); if (!m.shop || A.mesas.owned(id)) return false; mem().own[id] = Date.now(); A.profile.save(); return true; },
   };
 
   const N = (es, en, fr, pt, de, it) => ({ es, en, fr, pt, de, it });
