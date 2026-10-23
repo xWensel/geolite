@@ -339,7 +339,9 @@ window.AIQ = window.AIQ || {};
     let host = wrap.querySelector(".cm-host.du-cat"); if (!host) { host = document.createElement("div"); host.className = "cm-host du-cat"; wrap.appendChild(host); } catHost = host;
     host.style.top = "0"; host.style.left = "0"; host.style.right = "0"; host.style.height = Math.round(d.top - W.top) + "px";
     const cx = Math.round((x0 + x1) / 2 - W.left);
-    A.comodin.show({ host, k: () => Math.max(1, (DL().k && DL().k()) || k), floor: 0, x: cx, min: cx, max: cx, mode: "still", dir: -1 }); catOn = true;
+    const px = k / dpr;                                                     // sube de un salto desde detras del estrado (nada de aparecer de la nada)
+    A.comodin.show({ host, k: () => Math.max(1, (DL().k && DL().k()) || k), floor: -70 * px, x: cx + 14 * px, min: cx, max: cx, mode: "still", dir: -1 }); catOn = true;
+    A.comodin.hopTo(cx, 0, { lift: 10 * px, clipY: d.top });
     catIv = setInterval(() => { if (!host.isConnected) catOff(); }, 500);
   }
 
@@ -745,7 +747,7 @@ window.AIQ = window.AIQ || {};
       const next = up ? () => later(() => speak(up, { gesture: "e_sella", face: "orgulloso" }), 500) : undefined;
       if (t) speak(t, { gesture: o.tie ? "pinch" : win ? "r_jefe_vencido" : "e_paga", face: win ? "admirado" : o.tie ? "puzzled" : "laugh", done: next });
       else speak(line(o.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip", done: next } : { face: "laugh", done: next });
-      later(catFin, 1600);                                                  // y Comodin sube a la mesa a mirar las pilas
+      if (win || Math.random() < 1 / 3) later(catFin, 1600);               // y Comodin sube a la mesa a mirar las pilas (votado 23-oct: si le ganas, o 1 de cada 3)
     }
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
     if (st.auto && st.auto.done) st.auto.done(sum);

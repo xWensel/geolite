@@ -29,6 +29,9 @@ window.AIQ = window.AIQ || {};
     go: "Salir|Quit|Quitter|Sair|Beenden|Esci||退出|나가기|やめる|Выйти|Wyjdź",
     goSeason: "Salir (sin trucos)|Quit (no tricks)|Quitter (sans tours)|Sair (sem truques)|Beenden (ohne Tricks)|Esci (senza trucchi)||退出（不耍花招）|나가기 (속임수 없음)|やめる（トリックなし）|Выйти (без фокусов)|Wyjdź (bez sztuczek)",
     guilt: "Salir y dejarle solo|Quit and leave him all alone|Partir et le laisser seul|Sair e deixá-lo sozinho|Gehen und ihn allein lassen|Esci e lascialo solo|Salir y dejarlo solo|退出，丢下他一个人|혼자 두고 나가기|彼を独り残してやめる|Уйти и бросить его|Wyjdź i zostaw go samego",
+    winQ: "¿De verdad quieres salir?|Do you really want to quit?|Tu veux vraiment partir ?|Você quer mesmo sair?|Willst du wirklich gehen?|Vuoi davvero uscire?||你真的要退出吗？|정말 나갈 거야?|本当にやめるの？|Ты правда хочешь выйти?|Naprawdę chcesz wyjść?",
+    si: "Sí|Yes|Oui|Sim|Ja|Sì||是|응|はい|Да|Tak",
+    siSeguro: "Sí, seguro|Yes, sure|Oui, sûr|Sim, tenho certeza|Ja, sicher|Sì, sicuro||是，确定|응, 확실해|はい、確かです|Да, уверен|Tak, na pewno",
     stamp: "Denegado|Denied|Refusé|Negado|Abgelehnt|Respinto||驳回|거부|却下|Отказано|Odrzucono",
     closed: "Cerrado|Closed|Fermé|Fechado|Geschlossen|Chiuso||打烊|영업 종료|閉店|Закрыто|Zamknięte",
     tab: "Ya puedes cerrar esta pestaña.|You can close this tab now.|Tu peux fermer cet onglet.|Você já pode fechar esta aba.|Du kannst diesen Tab jetzt schließen.|Ora puoi chiudere questa scheda.||现在可以关闭这个标签页了。|이제 이 탭을 닫아도 돼.|このタブはもう閉じていいよ。|Теперь можно закрыть вкладку.|Możesz już zamknąć tę kartę.",
@@ -51,8 +54,13 @@ window.AIQ = window.AIQ || {};
   const reduced = () => { const S = C() && C().S; return !!(S && S.reduce); };
   const shakeOk = () => { const S = C() && C().S; return !(S && S.shake === false) && !reduced(); };
 
-  /* las trastadas salen de una bolsa (guardada: tampoco se repiten entre sesiones) hasta agotarlas todas */
-  const TROLLS = ["dark", "shout", "shell", "denied", "plead", "bribe", "fake", "cat"];
+  /* las trastadas salen de una bolsa (guardada: tampoco se repiten entre sesiones) hasta agotarlas todas. Votado 23-oct: la TEMPORADA DOS ya no
+     repite las mismas: trae tres nuevas (el guante que se lleva Salir, la ventana de mentira y Comodin que tira la tarjeta); las temporadas se turnan
+     (store.ss) y entre una y otra, una salida sin trucos */
+  const TROLLS = ["dark", "shout", "shell", "denied", "plead", "bribe", "fake", "cat"], TROLLS2 = ["glove", "window", "drop"];
+  const lista = () => (store && store.ss === 2 ? TROLLS2 : TROLLS);
+  const NEGRAS = ["dark", "fake"];                                        // las dos dejan la pantalla en negro: nunca seguidas (votado 23-oct)
+  const seguidas = (b, last) => NEGRAS.includes(b[0]) && NEGRAS.includes(last) || b.some((k, i) => i && NEGRAS.includes(k) && NEGRAS.includes(b[i - 1]));
   const SK = "atlasiq.quit.v1";
   let store = null; try { store = JSON.parse(localStorage.getItem(SK) || "null"); } catch (e) { /* sin almacenamiento */ }
   store = Object.assign({ bag: [], pos: 0, quits: 0, stays: 0, opens: 0, last: "" }, store || {});   // stays/opens: la saga de la puerta; last: la trastada con la que te fuiste
@@ -60,13 +68,16 @@ window.AIQ = window.AIQ || {};
   let forced = null;                                                    // solo para pruebas de desarrollo (A.salir._troll)
   function nextTroll() {
     if (forced) { const k = forced; forced = null; return k; }
-    if (!Array.isArray(store.bag) || store.bag.length !== TROLLS.length || store.pos >= store.bag.length) {
-      const last = Array.isArray(store.bag) ? store.bag[store.bag.length - 1] : null, b = TROLLS.slice();
-      for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
-      if (b[0] === last) b.push(b.shift());
+    const L = lista();
+    if (!Array.isArray(store.bag) || store.bag.length !== L.length || store.pos >= store.bag.length) {
+      const last = Array.isArray(store.bag) ? store.bag[store.bag.length - 1] : null, b = L.slice();
+      for (let n = 0; n < 40; n++) {
+        for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+        if (b[0] !== last && !seguidas(b, last)) break;
+      }
       store.bag = b; store.pos = 0;
     }
-    const k = store.bag[store.pos++]; saveStore(); return TROLLS.includes(k) ? k : "dark";
+    const k = store.bag[store.pos++]; saveStore(); return L.includes(k) ? k : L[0];
   }
 
   /* ------------------------------------------------------------------ el boton (portada) */
@@ -178,22 +189,24 @@ window.AIQ = window.AIQ || {};
     if (st || !free() || !D()) return;
     build(); clearAll(); opens++; store.opens = (store.opens || 0) + 1; saveStore();
     st = { phase: "in", talking: false, pend: null, trolled: null, lock: false, undo: null, home: !!D().onHome, cat: !!CM() };
-    /* TEMPORADA DOS: ya te ha hecho las 7 trastadas; esta vez el boton lo dice y te deja ir a la primera */
-    st.season = !forced && Array.isArray(store.bag) && store.bag.length === TROLLS.length && store.pos >= store.bag.length;
+    /* FIN DE TEMPORADA: ya te ha hecho todas las de la bolsa (8 en la primera, 3 en la dos); esta vez el boton lo dice y te deja ir a la primera */
+    st.season = !forced && Array.isArray(store.bag) && store.bag.length === lista().length && store.pos >= store.bag.length;
     $("qxHead").textContent = t6(TX.head); $("qxTime").textContent = t6(TX.table).replace("{t}", dur(played()));
     $("qxQ").textContent = t6(TX.q); $("qxSub").textContent = subLine();
     $("qxStayT").textContent = t6(TX.stay); $("qxGoT").textContent = t6(st.season ? TX.goSeason : TX.go); $("qxStamp").textContent = t6(TX.stamp);
     $("qxActs").classList.remove("swap");
     root.className = "qx"; A.restyle(root); root.classList.add("on");   // la sala se apaga
     A.bulbFit($("qxCard"));                                              // ya a la vista: se reparten las bombillas
+    if (st.cat && !catSpot()) st.cat = false;                           // a su tamano el gato no cabe junto a la tarjeta: hoy no esta (ni se habla de el)
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (A.tt && A.tt.hide) A.tt.hide();
+    if (A.jukebox && A.jukebox.hide) A.jukebox.hide();                  // el aviso de la cancion, fuera: la sala se apaga
     if (st.home) D().homeTease(false);
     D().hold(true); A.music.muffle(true); A.sfx.spot();
     addEventListener("keydown", onKey, true);
     later(() => { root.classList.add("spot"); D().dock($("qxStage")); talk(askLine(), rand(["sly", "shock"])); }, 560);   // el foco se enciende y el crupier se asoma
     later(() => { root.classList.add("card-in"); A.sfx.card(); st.phase = "ask"; focusStay(); }, 1150);          // y te tiende la tarjeta
-    if (st.cat) later(catIn, 1800);                                                                               // Comodin, dormido junto a Salir (con la tarjeta ya en su sitio)
+    if (st.cat) later(catIn, 1800);                                                                               // Comodin sube de un salto al tablon (con la tarjeta ya en su sitio)
   }
 
   /* bloqueo mientras dura la trastada: Salir no responde (un "no" seco), Me quedo si */
@@ -203,6 +216,7 @@ window.AIQ = window.AIQ || {};
 
   function go() {
     if (!st || st.phase !== "ask") return;
+    if (st.catBlock) return catBlocked();                                                                   // el gato tumbado encima: no se hunde
     if (st.lock) return nope();
     if (!st.trolled && st.season) { st.trolled = "season"; return season(); }                              // temporada dos: sin trucos
     if (!st.trolled) { const k = nextTroll(); st.trolled = k; store.trolls = (store.trolls || 0) + 1; saveStore(); lock(); TROLL[k](pick(KEY[k])); return; }   // la primera vez: trastada
@@ -210,18 +224,20 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ las trastadas */
-  const KEY = { dark: "quitDark", shout: "quitShout", shell: "quitShell", denied: "quitDenied", plead: "quitPlead", bribe: "quitBribe", fake: "quitFake" };
+  const KEY = { dark: "quitDark", shout: "quitShout", shell: "quitShell", denied: "quitDenied", plead: "quitPlead", bribe: "quitBribe", fake: "quitFake", glove: "quitGlove", window: "quitWindow", drop: "quitDrop" };
   const both = n => { let k = n; return () => { if (--k === 0) unlock(); }; };   // la trastada acaba cuando acaban su frase Y su efecto
   const TROLL = {
     /* apagon: se va la luz de golpe y solo brilla "Me quedo"; vuelve a parpadeos */
     dark(line) {
-      const ok = both(2); A.sfx.powerdown(); root.classList.add("dark"); A.haptic([40]); if (D().face) D().face("dark");   // se va la luz: solo sus ojos (v0.32)
-      catDark(true);                                                                                          // y los del gato (bloque D)
-      st.undo = () => { root.classList.remove("dark", "flick"); if (D().face) D().face("laugh"); catDark(false); };
+      const ok = both(2); A.sfx.powerdown(); root.classList.add("dark"); A.haptic([40]);
+      if (A.crupier && A.crupier.ojos) A.crupier.ojos(true); if (D().face) D().face("dark");                // se va la luz: de el, solo los ojos
+      const cm = CM(); catDark(true); if (cm && cm.on() && !st.catBlock) wake();                              // y los del gato, que abre los ojos en la oscuridad
+      const luz = () => { root.classList.remove("dark", "flick"); if (A.crupier && A.crupier.ojos) A.crupier.ojos(false); if (D().face) D().face("laugh"); catDark(false); if (cm && cm.on() && st && !st.catBlock) later(() => { if (st && cm.on() && cm.state() === "sit") cm.act("duerme"); }, 1600); };
+      st.undo = luz;
       talk(line, "laugh", ok, { start: () => {
         later(() => { A.sfx.buzz(0); root.classList.add("flick"); }, 2300);
         later(() => A.sfx.buzz(2), 2480);
-        later(() => { root.classList.remove("dark", "flick"); A.sfx.restore(); if (D().face) D().face("laugh"); catDark(false); ok(); }, 2760);   // vuelve la luz: se le ve la cara (v0.32)
+        later(() => { luz(); A.sfx.restore(); ok(); }, 2760);   // vuelve la luz: se le ve la cara (v0.32)
       } });
     },
     /* rabieta: grita en mayusculas, retumba la sala, tiembla la pantalla (flojo, fuerte, mas fuerte) y la marquesina se pone roja */
@@ -253,26 +269,123 @@ window.AIQ = window.AIQ || {};
     bribe(line) {
       talk(line, "sly", unlock, { start: rain });
     },
-    /* bloque D, EL GATO: Comodin se despierta y tira el boton de Salir de un zarpazo (el crupier lo vuelve a poner al acabar su frase) o va y se tumba
-       encima (pulsalo y se aparta; con teclado o mando, Salir sigue a su alcance). Sin gato a la vista, la del apagon */
+    /* bloque D, EL GATO, fisico: Comodin baja de un salto del tablon y aterriza ENCIMA de Salir. O le da un zarpazo y, al impulsarse de vuelta
+       al tablon, el boton se suelta y cae (el crupier lo vuelve a poner), o se tumba encima: su peso lo hunde y no hay quien lo pulse (tocale y
+       se aparta; si insistes con Salir, a la segunda se baja). Sin gato a la vista, la del apagon */
     cat() {
       const cm = CM(); if (!cm || !cm.on() || !cat) { st.trolled = "dark"; return TROLL.dark(pick(KEY.dark)); }
+      const s = catSpot(); if (s) cat = s;
       if (Math.random() < 0.5) {
         const ok = both(2), g = $("qxGo");
         st.undo = () => { btnBack(g, true); catHome(); };
-        wake(() => cm.walkTo(Math.max(cat.cw / 2, cat.btn - cat.bw / 2 - cat.cw * 0.28), () => {           // se despierta y se acerca, sin decir nada...
+        wake(() => cm.hopTo(cat.bx, cat.bfloor, { after: () => {                                           // baja de un salto y aterriza sobre Salir...
           if (!st || st.phase !== "ask") return;
-          cm.play("zarpa", { after: () => { catHome(); } });
-          later(() => {                                                                                       // ...y el zarpazo: el boton sale volando y el crupier lo cuenta
+          cm.play("zarpa", { after: () => {                                                                  // ...zarpazo...
             if (!st || st.phase !== "ask") return;
-            btnOff(g); talk(pick("quitCatSwipe"), "laugh", ok);
-            later(() => { if (st && st.phase === "ask") btnBack(g, false, ok); }, 3600);                      // y lo vuelve a dejar en su sitio
-          }, 440);
-        }));
+            cm.hopTo(cat.x, cat.floor, { after: () => { if (st && cm.on()) cm.act("duerme"); } });          // ...y se impulsa de vuelta al tablon:
+            later(() => {                                                                                    // al despegar, el boton se suelta y cae
+              if (!st || st.phase !== "ask") return;
+              btnOff(g); talk(pick("quitCatSwipe"), "laugh", ok);
+              later(() => { if (st && st.phase === "ask") btnBack(g, false, ok); }, 3600);                  // y el crupier lo vuelve a poner
+            }, reduced() ? 0 : 230);
+          } });
+        } }));
       } else {
-        st.undo = () => { st.catBlock = false; };
-        talk(pick("quitCatBlock"), "sly", unlock, { start: () => wake(() => cm.walkTo(cat.btn, () => { cm.act("duerme"); st.catBlock = true; })) });
+        st.undo = () => { st.catBlock = false; catHome(); };
+        talk(pick("quitCatBlock"), "sly", unlock, { start: () => wake(() => cm.hopTo(cat.bx, cat.bfloor, { after: () => {
+          if (!st || st.phase !== "ask") return;
+          cm.act("duerme"); st.catBlock = true; st.catPress = 0; weigh();                                      // se tumba encima: el boton, hundido
+        } })) });
       }
+    },
+    /* TEMPORADA DOS (votada 23-oct). EL GUANTE: su mano baja desde el, coge Salir y te lo aparta cada vez que le acercas el raton; al acabar su frase
+       lo devuelve a su sitio y se va. Mientras, Salir no responde (como en todas) y «Me quedo» si */
+    glove(line) {
+      const im = A.trastadas && A.trastadas.glove && A.trastadas.glove(), g = $("qxGo"), acts = $("qxActs");
+      if (!im || !g || reduced()) { st.trolled = "shell"; return TROLL.shell(pick(KEY.shell)); }
+      const ok = both(2), k = Math.max(1, (D().k && D().k()) || 3), dpr = window.devicePixelRatio || 1, px = k / dpr, R = root.getBoundingClientRect();
+      const cv = document.createElement("canvas"); cv.className = "qx-glove"; cv.width = im.width * k; cv.height = im.height * k;
+      const x = cv.getContext("2d"); x.imageSmoothingEnabled = false; x.translate(cv.width, 0); x.scale(-1, 1); x.drawImage(im, 0, 0, cv.width, cv.height);   // mirando a la izquierda (viene de el)
+      cv.style.width = im.width * px + "px"; cv.style.height = im.height * px + "px"; root.appendChild(cv);
+      const gw = im.width * px, gh = im.height * px, rg0 = g.getBoundingClientRect(), sa = $("qxStay").getBoundingClientRect();
+      const room = Math.max(0, sa.left - rg0.right - 24);                                 // hasta donde puede llevarse Salir sin pisar «Me quedo»
+      const spots = [0, Math.round(room * 0.55), Math.round(room)];
+      let at = 0, dx = 0, alive = true, raf = 0;
+      const put = (gx, gy) => { cv.style.transform = `translate(${Math.round((gx - R.left) * dpr) / dpr}px, ${Math.round((gy - R.top) * dpr) / dpr}px)`; };
+      const grip = () => { const r = g.getBoundingClientRect(); return [r.left + r.width / 2 - gw * 0.3, r.top - gh * 0.55]; };   // los dedos sobre el borde de arriba del boton
+      const dl = D().el && D().el(), rf = dl && dl.querySelector(".dl-face") && dl.querySelector(".dl-face").getBoundingClientRect();
+      const from = rf ? [rf.left + rf.width * 0.55, rf.top + rf.height * 0.7] : [R.left + R.width / 2, R.top + R.height * 0.3];
+      const fly = (a, b, ms, fin) => { const t0 = performance.now(); const go = now => { if (!alive) return; const p = Math.min(1, (now - t0) / ms), e = p * p * (3 - 2 * p); put(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e); if (p < 1) raf = requestAnimationFrame(go); else if (fin) fin(); }; raf = requestAnimationFrame(go); };
+      const slide = to => {                                                                // se lleva el boton (y el guante con el) a otro sitio de la fila
+        const d0 = dx, d1 = spots[to], t0 = performance.now(); at = to; A.sfx.card && A.sfx.card();
+        const go = now => { if (!alive) return; const p = Math.min(1, (now - t0) / 220), e = p * p * (3 - 2 * p); dx = Math.round(d0 + (d1 - d0) * e); g.style.transform = `translate(${dx}px, -4px)`; const [gx, gy] = grip(); put(gx, gy); if (p < 1) raf = requestAnimationFrame(go); };
+        raf = requestAnimationFrame(go);
+      };
+      const huye = e => {                                                                  // le acercas el raton: se lo lleva al otro lado
+        if (!alive || !holding) return; const r = g.getBoundingClientRect();
+        if (Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) > Math.max(70, r.width * 0.75)) return;
+        const opts = [0, 1, 2].filter(i => i !== at).sort((a, b) => Math.abs(spots[b] - dx) - Math.abs(spots[a] - dx)); slide(opts[0]);
+      };
+      let holding = false;
+      const fin = () => {
+        alive = false; cancelAnimationFrame(raf); removeEventListener("pointermove", huye, true); g.style.transform = ""; cv.remove();
+      };
+      st.undo = fin;
+      talk(line, "sly", ok, { start: () => {
+        put(...from); A.sfx.swish && A.sfx.swish();
+        fly(from, grip(), 420, () => { holding = true; g.style.transform = "translate(0, -4px)"; A.sfx.chip && A.sfx.chip(1); addEventListener("pointermove", huye, true); });
+        later(() => {                                                                      // lo devuelve y se va
+          holding = false; removeEventListener("pointermove", huye, true);
+          slide(0); later(() => { if (!alive) return; g.style.transform = ""; const [gx, gy] = grip(); fly([gx, gy], from, 380, () => { fin(); ok(); }); }, 260);
+        }, 4600);
+      } });
+    },
+    /* LA VENTANA DE MENTIRA: «¿De verdad quieres salir?» con dos botones que dicen Si. Pulses el que pulses, se rie (y Salir vuelve a responder) */
+    window(line) {
+      const box = document.createElement("div"); box.className = "qx-win";
+      const el = document.createElement("div"); el.className = "chx-win"; el.setAttribute("role", "alertdialog");
+      el.innerHTML = `<div class="cw-bar"><i class="cw-app" aria-hidden="true"></i><b>Geolite</b><button type="button" class="cw-x" data-a="1" aria-label="${esc(t6(TX.si))}">✕</button></div>
+        <div class="cw-body"><i class="cw-sign" aria-hidden="true">?</i><p>${esc(t6(TX.winQ))}</p></div>
+        <div class="cw-foot"><button type="button" class="cw-b" data-a="1">${esc(t6(TX.si))}</button><button type="button" class="cw-b cw-def" data-a="2">${esc(t6(TX.siSeguro))}</button></div>`;
+      let gone = false;
+      const close = () => { if (gone) return; gone = true; st.win = null; el.classList.add("bye"); A.sfx.flip && A.sfx.flip(false); later(() => box.remove(), 160); };
+      st.undo = () => { gone = true; st.win = null; box.remove(); };
+      talk(line, "sly", null, { start: () => later(() => {
+        if (!st || st.phase !== "ask") return;
+        box.appendChild(el); root.appendChild(box); st.win = el; A.sfx.ding && A.sfx.ding();
+        const w = Math.min(340, innerWidth - 24), rc = $("qxCard").getBoundingClientRect(), R = root.getBoundingClientRect();
+        Object.assign(el.style, { left: Math.round(rc.left - R.left + rc.width / 2 - w / 2) + "px", top: Math.round(rc.top - R.top + rc.height * 0.3) + "px", width: w + "px" });
+        const def = el.querySelector(".cw-def"); if (def) later(() => { try { def.focus({ preventScroll: true }); } catch (e) { def.focus(); } }, 30);
+        el.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (!b || gone) return; e.stopPropagation(); close(); talk(pick("quitWindowLaugh"), "laugh", unlock); });
+        later(() => { if (!gone && st && st.win === el) { close(); talk(pick("quitWindowLaugh"), "laugh", unlock); } }, 7000);   // si no la tocas, se cierra sola
+      }, 500) });
+    },
+    /* COMODIN TIRA LA TARJETA: da un salto encima del tablon y al caer, la tarjeta se le escapa al crupier de las manos: cae con el gato montado
+       y el la vuelve a subir (con el gato encima, tan tranquilo). Sin gato a la vista, la del guante */
+    drop(line) {
+      const cm = CM(), card = $("qxCard"), host = $("qxCat");
+      if (!cm || !cm.on() || !cat || !card || !host || st.catBlock || reduced()) { st.trolled = "glove"; return TROLL.glove(pick(KEY.glove)); }
+      const ok = both(2), rc = card.getBoundingClientRect(), dy = Math.round(innerHeight - rc.top + 30);
+      const kf = (a, b, c) => [{ transform: a }, { transform: b, offset: 0.16 }, { transform: c }];
+      let mias = [];                                                                     // solo las nuestras: la tarjeta tiene su propia animacion (la que la deja en su sitio)
+      const quita = () => { mias.forEach(a => a.cancel()); mias = []; };
+      const fall = () => {
+        const o = { duration: 640, easing: "cubic-bezier(.55, 0, .9, .55)", fill: "forwards" };
+        mias.push(card.animate(kf("translateY(0)", "translateY(10px)", `translateY(${dy}px)`), Object.assign({ composite: "add" }, o)));
+        mias.push(host.animate(kf("translateY(0)", "translateY(10px)", `translateY(${dy}px)`), o));
+        A.sfx.swish && A.sfx.swish(); later(() => { A.sfx.thud ? A.sfx.thud() : A.sfx.stamp && A.sfx.stamp(); shake(1); }, 600);
+        later(() => {                                                                    // la recoge y la vuelve a subir, con el gato encima
+          if (!st || st.phase !== "ask") return;
+          quita();                                                                       // la caida ya no cuenta: la subida empieza abajo del todo
+          const u = { duration: 620, easing: "cubic-bezier(.2, .8, .3, 1.15)" };
+          const a1 = card.animate(kf(`translateY(${dy}px)`, `translateY(${Math.round(dy * 0.6)}px)`, "translateY(0)"), Object.assign({ composite: "add" }, u));
+          mias.push(a1, host.animate(kf(`translateY(${dy}px)`, `translateY(${Math.round(dy * 0.6)}px)`, "translateY(0)"), u));
+          A.sfx.card && A.sfx.card();
+          once(a1, 680, () => { quita(); if (st && cm.on()) cm.act("duerme"); ok(); });
+        }, 1500);
+      };
+      st.undo = quita;
+      talk(line, "angry", ok, { start: () => wake(() => cm.play("salta", { after: () => { if (st && st.phase === "ask") fall(); } })) });
     },
     /* falso apagado: la pantalla se apaga como una tele vieja… y vuelve, y se rie */
     fake(line) {
@@ -363,52 +476,82 @@ window.AIQ = window.AIQ || {};
     once(na, 620, () => { document.documentElement.classList.remove("qx-crt"); done && done(); });
   }
 
-  /* ------------------------------------------------------------------ COMODIN (bloque D): el gato de la casa, dormido junto a Salir
-     Va al MISMO grano de pixel que el crupier de la escena (D().k()), en una capa sin zoom por encima de la tarjeta, con el suelo a la altura del
-     pie de los botones: su sitio es justo a la izquierda de la tarjeta, junto a Salir (montado un poco sobre su borde si no cabe) */
+  /* ------------------------------------------------------------------ COMODIN (bloque D): el gato de la casa, ENCIMA de la tarjeta
+     Es fisico: siempre sobre algo. Duerme tumbado en el borde de arriba de la tarjeta (el tablon), a la izquierda del crupier y encima de Salir;
+     llega subiendo de un salto desde detras de la tarjeta, y para todo lo demas salta (hopTo): sobre Salir, de vuelta al tablon. Va al MISMO
+     grano de pixel que el crupier de la escena (D().k()), en una capa sin zoom por encima de la tarjeta. Si a su tamano no cabe, no sale */
   const CM = () => (A.comodin && A.COMODIN_DATA ? A.comodin : null);
   let cat = null;
+  const ART = { l: 26, r: 35 };                                                      // lo que ocupa dormido a cada lado de su centro (pixeles de arte, mirando a la derecha)
   function catSpot() {
     const g = $("qxGo"), card = $("qxCard"); if (!g || !card || !root) return null;
-    const rg = g.getBoundingClientRect(), rc = card.getBoundingClientRect(), R = root.getBoundingClientRect(), d = A.COMODIN_DATA;
-    const k = Math.max(1, (D().k && D().k()) || 3), dpr = window.devicePixelRatio || 1, cw = (d.box[2] - d.box[0]) * k / dpr;
-    return { k, cw, bw: rg.width, floor: Math.round(R.bottom - rg.bottom - 2), home: Math.round(Math.max(cw / 2 + 8, rc.left - R.left - cw * 0.3)), btn: Math.round((rg.left + rg.right) / 2 - R.left) };
+    const rg = g.getBoundingClientRect(), rc = card.getBoundingClientRect(), R = root.getBoundingClientRect();
+    const k = Math.max(1, (D().k && D().k()) || 3), dpr = window.devicePixelRatio || 1, px = k / dpr;
+    const dl = D().el && D().el(), df = dl && dl.querySelector(".dl-face"), rf = df && df.getBoundingClientRect();
+    const crL = rf && rf.width && dl.closest("#qxStage") ? rf.left : rc.left + rc.width * 0.35;   // donde empieza el crupier (antes de asomarse: lo que suele ocupar)
+    const lo = rc.left + 6 * px + ART.l * px, hi = crL - 4 * px - ART.r * px;           // el trozo libre del tablon, entre su borde y el crupier
+    if (hi < lo) return null;                                                          // a su tamano no cabe: ese rato no sale
+    const btn = (rg.left + rg.right) / 2, at = Math.max(lo, Math.min(hi, btn));          // encima de Salir si puede
+    const fl = y => Math.round(R.bottom - y);                                            // del alto de pantalla al suelo de la capa (px desde abajo)
+    return { k, px, x: Math.round(at - R.left), floor: fl(rc.top + px), top: rc.top, bx: Math.round(btn - R.left), bfloor: fl(rg.top + px), bw: rg.width };
   }
   function catIn() {
     const cm = CM(); if (!cm || !st || st.phase === "out") return;
-    const s = catSpot(); if (!s) return; cat = s;
+    const s = catSpot(); if (!s) { st.cat = false; return; } cat = s;
     let host = $("qxCat"); if (!host) { host = document.createElement("i"); host.id = "qxCat"; host.className = "qx-cat"; root.appendChild(host); }
-    cm.show({ host, k: () => (D().k && D().k()) || s.k, floor: s.floor, x: s.home, min: s.cw / 2, max: (root.clientWidth || innerWidth) - s.cw / 2, mode: "sleep", dir: 1, onPet: catPet });
+    /* sube desde DETRAS de la tarjeta: empieza escondido bajo el borde de arriba y de un salto se planta encima */
+    cm.show({ host, k: () => (D().k && D().k()) || s.k, floor: s.floor - 70 * s.px, x: s.x, mode: "still", dir: 1, onPet: catPet });
+    cm.clip(s.top + s.px);
     root.classList.add("cat-in");
-    if (st.catNext) { const n = st.catNext; st.catNext = null; catAnim(n); }
+    cm.hopTo(s.x, s.floor, { lift: 12 * s.px, after: () => {
+      if (!st || !cat) return;
+      if (st.catNext) { const n = st.catNext; st.catNext = null; catAnim(n); } else cm.act("duerme");
+    } });
   }
   /* despierto (si duerme) y luego lo que sea */
   function wake(then) { const cm = CM(); if (!cm || !cm.on()) return then && then(); if (cm.state() === "sleep") cm.play("duerme", { rev: true, after: then }); else then && then(); }
-  /* una animacion suelta (regana, caricia, espera, salta) y vuelve a dormirse */
+  /* una animacion suelta (regana, caricia, espera, salta) donde este y vuelve a dormirse */
   function catAnim(n) {
     const cm = CM(); if (!cm || !st || !st.cat) return;
-    if (!cm.on() || !cat) { st.catNext = n; return; }                                                // aun no ha llegado: la hace al llegar
-    wake(() => cm.play(n, { after: () => { if (st && !st.catBlock) cm.act("duerme"); } }));
+    if (!cm.on() || !cat || cm.busy()) { st.catNext = n; return; }                                   // aun no ha llegado (o va saltando): la hace al llegar
+    wake(() => cm.play(n, { after: () => { if (st && cm.on()) cm.act("duerme"); } }));
   }
   const catLater = n => { if (st) st.catNext = n; };
-  /* vuelve a su sitio junto a Salir y se duerme */
-  function catHome() { const cm = CM(); if (!cm || !cm.on() || !cat) return; if (st) st.catBlock = false; cm.walkTo(cat.home, () => cm.act("duerme")); }
-  /* le tocas: si estaba tumbado encima de Salir, se aparta; si no, a los 6 s se vuelve a dormir */
+  /* de vuelta a su sitio en el tablon, de un salto, y a dormir */
+  function catHome(after) {
+    const cm = CM(); if (!cm || !cm.on() || !cat) return after && after();
+    if (st) st.catBlock = false; unweigh();
+    const s = catSpot(); if (s) cat = s;
+    const p = cm.pos(); if (p && Math.abs(p.x - cat.x) < 2 && Math.abs(p.floor - cat.floor) < 2) { cm.act("duerme"); return after && after(); }
+    wake(() => cm.hopTo(cat.x, cat.floor, { after: () => { if (st && cm.on()) cm.act("duerme"); if (after) after(); } }));
+  }
+  /* le tocas: si estaba tumbado encima de Salir, se aparta (vuelve al tablon); si no, a los 6 s se vuelve a dormir */
   function catPet(kind) {
     if (!st || !cat) return; const cm = CM();
-    if (kind === "despierta" && st.catBlock) { st.catBlock = false; later(catHome, 900); return; }
+    if (st.catBlock) { st.catBlock = false; later(() => catHome(), 500); return; }
     later(() => { if (st && cm && cm.on() && cm.state() === "sit" && !cm.busy()) cm.act("duerme"); }, 6000);
   }
-  function catDark(on) { const cm = CM(); if (cm && cm.dark) cm.dark(on); }
-  function catOut() { const cm = CM(); catDark(false); if (cm && cat) cm.hide(); cat = null; if (root) root.classList.remove("cat-in"); }
-  /* el boton de Salir sale volando del zarpazo (sube, gira por pasos y cae fuera de la pantalla) y luego vuelve a caer en su sitio */
+  /* tumbado encima de Salir: su peso lo hunde y no hay quien lo pulse */
+  const weigh = () => { const g = $("qxGo"); if (g) g.classList.add("qx-weighed"); };
+  const unweigh = () => { const g = $("qxGo"); if (g) g.classList.remove("qx-weighed"); };
+  /* pulsas Salir con el gato encima: no se hunde mas (un "no" seco) y el gato te rine; a la segunda, se baja de mala gana (nunca te encierra) */
+  function catBlocked() {
+    const cm = CM(); nope(); st.catPress = (st.catPress || 0) + 1;
+    if (st.catPress >= 2 || !cm || !cm.on()) { st.catBlock = false; return catHome(); }
+    if (cm.state() === "sleep") cm.play("duerme", { rev: true, after: () => cm.play("regana", { after: () => { if (st && st.catBlock) cm.act("duerme"); } }) });
+  }
+  function catDark(on) { const cm = CM(); if (cm && cm.dark) cm.dark(on, "ojos"); }
+  function catOut() { const cm = CM(); catDark(false); unweigh(); if (cm && cat) cm.hide(); cat = null; if (root) root.classList.remove("cat-in"); }
+  /* el boton de Salir se suelta y CAE hacia abajo (el gato se impulsa en el para volver al tablon): gira por pasos y sale por abajo; luego el
+     crupier lo vuelve a poner en su sitio */
   function btnOff(g) {
     if (!g) return; if (A.sfx.chip) A.sfx.chip(3); if (A.haptic) A.haptic([30]); g.style.pointerEvents = "none";
+    const y = Math.round(innerHeight - g.getBoundingClientRect().top + 40);
     g.animate(reduced() ? [{ opacity: 1 }, { opacity: 0 }] : [
-      { transform: "none", offset: 0 }, { transform: "translate(-40px, -70px) rotate(-30deg)", offset: 0.25 },
-      { transform: "translate(-110px, 40px) rotate(-120deg)", offset: 0.55 }, { transform: "translate(-170px, 900px) rotate(-260deg)", offset: 1 },
-    ], { duration: reduced() ? 220 : 1200, easing: "steps(16, end)", fill: "forwards" });
-    later(() => { if (A.sfx.coinTink) A.sfx.coinTink(); }, reduced() ? 0 : 1000);
+      { transform: "none", offset: 0 }, { transform: "translate(-6px, 18px) rotate(-12deg)", offset: 0.18 },
+      { transform: `translate(-24px, ${Math.round(y * 0.4)}px) rotate(-70deg)`, offset: 0.55 }, { transform: `translate(-40px, ${y}px) rotate(-150deg)`, offset: 1 },
+    ], { duration: reduced() ? 220 : 900, easing: "steps(14, end)", fill: "forwards" });
+    later(() => { if (A.sfx.coinTink) A.sfx.coinTink(); }, reduced() ? 0 : 760);
   }
   function btnBack(g, now, done) {
     if (!g) return done && done(); g.getAnimations().forEach(a => a.cancel()); g.style.pointerEvents = "";
@@ -424,9 +567,11 @@ window.AIQ = window.AIQ || {};
     const trolled = !!st.trolled; st.phase = "stay"; clearAll(); store.stays = (store.stays || 0) + 1; saveStore();
     if (st.undo) st.undo(); root.classList.remove("busy", "rain", "flick"); $("qxRain").innerHTML = "";
     root.classList.add("stayed"); A.sfx.goal(); A.haptic([24, 40, 36]);             // la firma sol-do-re: quedarse suena a premio
-    const ct = st.cat && Math.random() < 0.4 && pick("quitCatStay");                                                      // el gato ronronea: dos contra uno
+    const hoy = new Date().toDateString(), paga = st.trolled === "bribe" && A.club && A.club.give && store.bribeDay !== hoy;
+    if (paga) { A.club.give(25); store.bribeDay = hoy; saveStore(); A.sfx.coin && A.sfx.coin(); }
+    const ct = !paga && st.cat && Math.random() < 0.4 && pick("quitCatStay");                                             // el gato ronronea: dos contra uno
     if (ct) catAnim("caricia");
-    talk(ct || pick(trolled ? "quitStayTroll" : "quitStay"), ct ? "smug" : trolled ? "laugh" : "sly", () => later(close, 250));
+    talk(paga ? pick("quitBribePaid") : ct || pick(trolled ? "quitStayTroll" : "quitStay"), paga ? "smug" : ct ? "smug" : trolled ? "laugh" : "sly", () => later(close, 250));
     later(close, 14000);                                                                   // red de seguridad
   }
   /* se le han acabado las trastadas: lo confiesa y te abre la puerta (a partir de 20 salidas, la salida expres) */
@@ -434,7 +579,8 @@ window.AIQ = window.AIQ || {};
     st.phase = "bye"; lock(); root.classList.add("leaving"); A.sfx.card();
     const out = () => { A.music.stop(); crtOff(quitNow); };
     if ((store.quits || 0) >= 20) return talk(pick("quitSeasonExpress"), "sly", out);
-    talk(D().line("quitSeason", 0), "shock", () => talk(D().line("quitSeason", 1), "sly", out));
+    const k = store.ss === 2 ? "quitSeason2" : "quitSeason";                                // al acabar la temporada dos, su propia confesion
+    talk(D().line(k, 0), "shock", () => talk(D().line(k, 1), "sly", out));
   }
   function bye() {
     st.phase = "bye"; lock(); root.classList.add("leaving"); A.sfx.card();
@@ -459,7 +605,7 @@ window.AIQ = window.AIQ || {};
   function quitNow() {
     if (!st) return;
     st.phase = "gone"; store.quits = (store.quits || 0) + 1; store.last = st.trolled || "";
-    if (st.trolled === "season") { store.bag = []; store.pos = 0; }                           // empieza otra temporada
+    if (st.trolled === "season") { store.bag = []; store.pos = 0; store.ss = store.ss === 2 ? 1 : 2; }   // empieza la otra temporada
     saveStore();
     if (D().noteQuit) D().noteQuit(true);                                                  // la proxima vez que abras el juego, te lo recuerda
     const h = window.geoliteHost;
@@ -510,6 +656,7 @@ window.AIQ = window.AIQ || {};
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (st.phase === "closed") { if (!e.repeat && (e.key === "Enter" || e.key === " " || e.key === "Escape")) { e.preventDefault(); back(); } return; }
     if (e.key === "Escape") { e.preventDefault(); if (!e.repeat) stay(); return; }
+    if (st.win && st.win.contains(document.activeElement) && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); if (!e.repeat) document.activeElement.click(); return; }   // la ventana de mentira
     if (st.phase !== "ask") { if (e.key === "Enter" || e.key === " " || e.key === "Tab") e.preventDefault(); return; }
     const btns = [...$("qxActs").querySelectorAll("button")].sort((x, y) => x.getBoundingClientRect().left - y.getBoundingClientRect().left), at = btns.indexOf(document.activeElement);
     if (e.key === "Tab" || e.key === "ArrowLeft" || e.key === "ArrowRight") {                 // el foco solo va de un boton al otro (en el orden en que se ven, tras el trile tambien)
@@ -521,5 +668,5 @@ window.AIQ = window.AIQ || {};
   }
 
   A.salir = { tv: { off: crtOff, on: crtOn },                                            // la tele que se apaga, tambien para la jubilacion del crupier (js/dealer.js)
-    button, wire, open, isOpen: () => !!st, stats: () => ({ quits: store.quits || 0, stays: store.stays || 0, opens: store.opens || 0, trolls: store.trolls || 0, last: store.last || "" }), _troll: k => { forced = TROLLS.includes(k) ? k : null; } };   // _troll: la proxima trastada (pruebas)
+    button, wire, open, isOpen: () => !!st, stats: () => ({ quits: store.quits || 0, stays: store.stays || 0, opens: store.opens || 0, trolls: store.trolls || 0, last: store.last || "" }), _troll: k => { forced = TROLLS.includes(k) || TROLLS2.includes(k) ? k : null; } };   // _troll: la proxima trastada (pruebas)
 })(window.AIQ);

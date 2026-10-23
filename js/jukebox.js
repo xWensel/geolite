@@ -43,6 +43,7 @@
   }
   function show() {
     if (!musicOn() || S().songToast === false || S().settingsOpen || A.music.index() < 0) return;
+    if (A.salir && A.salir.isOpen && A.salir.isOpen()) return;                     // en la salida (y en su apagon) no: taparia al crupier
     if (A.ach && A.ach.busy && A.ach.busy()) { clearTimeout(wait); if (++waits < 30) wait = setTimeout(show, 500); return; }       // un logro a la vista: la cancion espera a que se recoja
     waits = 0; clearTimeout(wait);
     if (!el) build(); fill(el); el.classList.remove("show"); A.restyle(el); slot(); el.classList.add("show"); arm(4600);
@@ -54,7 +55,7 @@
     if (musicOn() && A.music.index() < 0) { const t = box.querySelector("[data-np-t]"); if (t) t.textContent = "—"; }
   }
   A.jukebox = { show, sync, hide };
-  A.music.onChange = () => { if (el && !musicOn()) hide(); waits = 0; show(); sync(); };
+  A.music.onChange = i => { if (el && !musicOn()) hide(); waits = 0; show(); sync(); if (A.dealer && A.dealer.songNow) A.dealer.songNow(i); };   // su cancion favorita (js/dealer.js)
 
   document.addEventListener("click", e => { const b = e.target.closest("#setSong .np-b"); if (b && !b.disabled) step(+b.dataset.d); });
   document.addEventListener("keydown", e => {

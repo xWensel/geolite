@@ -42,7 +42,8 @@
 .qx.spot .qx-stage .dealer { animation: qx-pop .6s cubic-bezier(.3, 1.6, .4, 1) both; }
 @keyframes qx-pop { from { opacity: 0; transform: translateY(46px); } }   /* v0.32: sin escalar (el sprite hace su propio bote) */
 .qx-stage .dealer.big .dl-face { width: var(--face); height: var(--face); transition: filter .25s; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .45)) drop-shadow(0 0 22px rgba(255, 214, 140, .25)); }
-.qx-stage .dealer.big .dl-bubble, .qxc-stage .dealer.big .dl-bubble { position: absolute; left: calc(100% - 8px); bottom: 56%; width: max-content; max-width: min(420px, calc(50 * var(--vw) - var(--face) / 2 - 12px)); margin: 0;
+/* el bocadillo empieza donde acaba su figura (--crk, a escala entera): su mano con las cartas ya no se come la primera letra (23-oct) */
+.qx-stage .dealer.big .dl-bubble, .qxc-stage .dealer.big .dl-bubble { position: absolute; left: max(calc(100% - 8px), calc(var(--crk, 0px) + 6px)); bottom: 56%; width: max-content; max-width: min(420px, calc(50 * var(--vw) - var(--face) / 2 - 12px)); margin: 0;
   padding: 11px 18px 13px 16px; font-family: var(--sans); font-weight: 400; font-size: calc(27px * var(--dll, 1)); line-height: 1.12; transform-origin: 0 100%; clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); }
 
 /* J9 (Bloque J): la tarjeta es del sistema "Naipe de gala": panel de fieltro con filete de laton (.gx-pnl) y la penumbra dura DETRAS (sombra del sistema).
@@ -182,8 +183,14 @@ html.qx-crt, html.qx-crt body { background: #000 !important; }
 html.reduce-motion .qx-beam u, html.reduce-motion .qx-rain { display: none; }
 html.reduce-motion .qx.shout .dealer .dl-bubble { animation: none; }
 
-/* ------------------------------------------------ bloque D: Comodin, el gato de la casa, dormido junto a Salir (js/salir.js + js/comodin.js).
-   Capa sin zoom por encima de la tarjeta; el gato va al grano del crupier y aparece con un fundido corto cuando la tarjeta ya esta en su sitio */
-.qx-cat { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .35s; }
+/* ------------------------------------------------ bloque D: Comodin, el gato de la casa, ENCIMA de la tarjeta (js/salir.js + js/comodin.js).
+   Capa sin zoom por encima de la tarjeta; el gato va al grano del crupier y llega subiendo de un salto desde detras del tablon (recortado
+   por su borde de arriba mientras sube: nada de fundidos) */
+.qx-cat { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; }
 .qx.cat-in .qx-cat { opacity: 1; }
+/* la temporada dos (votada 23-oct): su guante (a escala entera, en la capa sin zoom) y la ventana de mentira, por encima de la tarjeta */
+.qx-glove { position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; image-rendering: pixelated; }
+.qx-win { position: absolute; inset: 0; z-index: 6; pointer-events: none; } .qx-win .chx-win { pointer-events: auto; }
+/* tumbado encima de Salir: su peso hunde el boton (y asi se queda hasta que se baja) */
+.qx-acts .qx-go.qx-weighed { transform: translateY(3px); filter: brightness(.8); box-shadow: none; transition: transform .12s steps(3, end); }
 .qx.out .qx-cat { opacity: 0; transition: opacity .3s; }

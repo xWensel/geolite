@@ -11,6 +11,12 @@
  *       a lo suyo); onPet(tipo): "caricia" | "bufido" | "despierta" (para que el crupier lo comente)
  *   A.comodin.hide()  .act(nombre)  (la mesa: espera, levanta, anda, salta, zarpa, caricia, regana, duerme, despierta)  .busy()  .el()
  *   A.comodin.walkTo(x, fin) .play(anim, { rev, hold, after })  .rect()  (la caja del gato en pantalla, para las trastadas)
+ *   A.comodin.hopTo(x, floor, { after, clipY, lift })  SALTA de verdad a otra superficie: se agacha donde esta, vuela en arco durante los
+ *       fotogramas en el aire de «salta» y aterriza con las patas justo en el nuevo suelo (floor: px de CSS desde abajo del host). clipY: una linea
+ *       de pantalla por debajo de la cual no se le ve (sube desde DETRAS de algo, p. ej. de detras de la tarjeta de salir)
+ *   A.comodin.dark(on, "ojos")  el apagon de la salida: todo negro y solo sus ojos (parpadean); sin "ojos", la silueta de tinta con los ojos
+ * EL GATO ES FISICO: siempre de pie o tumbado SOBRE algo (una placa, el borde de una tarjeta, un boton, el estrado). Nunca anda ni se para en el aire:
+ * para cambiar de altura salta (hopTo). Cada pantalla le da su suelo de verdad.
  * Con Movimiento en Minimo no anda ni salta: se queda sentado (o dormido) y solo responde a las caricias.
  */
 window.AIQ = window.AIQ || {};
@@ -55,9 +61,13 @@ window.AIQ = window.AIQ || {};
       this.o = o; this.host = o.host;
       this.cv = document.createElement("canvas"); this.cv.className = "cm-cv"; this.cv.setAttribute("aria-hidden", "true");
       this.ctx = this.cv.getContext("2d"); this.host.appendChild(this.cv);
+      /* lo que se puede tocar es SU CUERPO (la caja del dibujo), no el lienzo entero: el lienzo lleva margen transparente y, a su tamano, tapaba
+         botones de debajo (el «Salir» de la salida en la v0.3.187: el clic iba al gato y no te dejaba irte) */
+      this.hit = document.createElement("i"); this.hit.className = "cm-hit"; this.hit.setAttribute("aria-hidden", "true"); this.host.appendChild(this.hit);
       this.x = o.x != null ? o.x : 0; this.dir = o.dir || 1; this.st = o.mode === "sleep" || o.mode === "bar" ? "sleep" : "sit";
       this.anim = null; this.k = 0; this.key = ""; this.clicks = []; this.espT = performance.now() + rnd(5000, 9000); this.dead = false; this.born = performance.now();
-      this.cv.addEventListener("pointerdown", e => { e.stopPropagation(); this.pet(); });
+      this.hop = null; this.clipY = null; this.blink = false; this.blinkT = 0;
+      this.hit.addEventListener("pointerdown", e => { e.stopPropagation(); this.pet(); });
       if (this.st === "sleep") this.play("duerme", { hold: true, at: 1e9 });
       load(() => { this.fit(); this.tick(); });
     }
@@ -76,6 +86,30 @@ window.AIQ = window.AIQ || {};
       s.width = d.W * k * per + "px"; s.height = d.H * k * per + "px";
       const lx = Math.round(this.x * dpr - (this.dir < 0 ? (d.W - cx) : cx) * k), by = Math.round((this.o.floor || 0) * dpr - (d.H - d.floor) * k);
       s.left = lx * per + "px"; s.bottom = by * per + "px"; s.transform = this.dir < 0 ? "scaleX(-1)" : "";
+      const b = d.box, hs = this.hit.style, bx = this.dir < 0 ? d.W - b[2] : b[0];   // la caja del cuerpo, en espejo si mira a la izquierda
+      hs.left = (lx + bx * k) * per + "px"; hs.width = (b[2] - b[0]) * k * per + "px"; hs.bottom = (by + (d.H - b[3]) * k) * per + "px"; hs.height = (b[3] - b[1]) * k * per + "px";
+      if (this.clipY != null) {                                                        // sube desde detras de algo: lo que queda por debajo de esa linea no se ve
+        const hb = this.host.getBoundingClientRect().bottom, cut = Math.max(0, Math.round((hb - by * per - this.clipY) * dpr) / dpr);
+        s.clipPath = cut > 0 ? `inset(0 0 ${cut}px 0)` : ""; hs.visibility = cut > (d.H - b[1]) * k * per * 0.6 ? "hidden" : "";
+      } else if (s.clipPath) { s.clipPath = ""; hs.visibility = ""; }
+    }
+    /* el salto a otra superficie: agachado en el origen (fotogramas 0-1), en el aire (2-4) y aterrizando en el destino (5-7) */
+    hopPlace(now) {
+      const h = this.hop, a = this.anim; if (!h || !a || a.name !== "salta") return;
+      const sub = Math.max(0, Math.min(1, (now - a.t) / FMS)), p = a.i < 2 ? 0 : a.i >= 5 ? 1 : Math.min(1, (a.i - 2 + sub) / 3);
+      const e = p * p * (3 - 2 * p);                                                   // sale despacio, va rapido, llega despacio
+      this.x = h.x0 + (h.x1 - h.x0) * e; this.o.floor = h.f0 + (h.f1 - h.f0) * e + h.lift * 4 * p * (1 - p);
+      this.place();
+    }
+    hopTo(x, floor, o = {}) {
+      const dpr = window.devicePixelRatio || 1, f0 = this.o.floor || 0;
+      const done = () => { this.hop = null; this.x = x; this.o.floor = floor; if (!o.keepClip) this.clipY = null; this.place(); this.st = "sit"; this.anim = null; this.key = ""; this.poke(); if (o.after) o.after(); };
+      this.target = null; this.walkDone = null;
+      if (o.clipY != null) this.clipY = o.clipY;
+      if (reduced()) { done(); return; }                                                // Movimiento en Minimo: aparece ya en su sitio
+      this.st = "busy"; if (Math.abs(x - this.x) > 1) this.dir = x > this.x ? 1 : -1;
+      this.hop = { x0: this.x, f0, x1: x, f1: floor, lift: o.lift != null ? o.lift : Math.max(0, floor - f0) * 0.18 + 8 * this.k / dpr };
+      this.play("salta", { after: done });
     }
     frameName(now) {
       const a = this.anim; if (!a) return "base";
@@ -106,6 +140,7 @@ window.AIQ = window.AIQ || {};
     }
     /* lo que hace solo, segun su modo */
     think(now, dt) {
+      if (this.hop) { this.hopPlace(now); return; }
       if (reduced() || this.st === "busy") return;
       const idle = now - Math.max(PT.at, this.born), r = this.host.getBoundingClientRect(), px = PT.x - r.left, near = PT.in && Math.abs(px - this.x) < 70 * (this.k / (devicePixelRatio || 1)) && PT.y > r.bottom - (this.o.floor || 0) - 150;
       if (this.st === "walk") {
@@ -142,10 +177,14 @@ window.AIQ = window.AIQ || {};
     }
     draw(force) {
       if (this.dead || !ready || !this.k) return;
-      const name = this.frameName(), key = name + "|" + this.k + "|" + (DARK ? 1 : 0);
+      const name = this.frameName(), key = name + "|" + this.k + "|" + (DARK ? DARK : 0) + "|" + (this.blink ? 1 : 0);
       if (!force && key === this.key) return; this.key = key;
       const d = DATA(), r = d.r[name], k = this.k, c = this.ctx; if (!r) return;
       c.clearRect(0, 0, this.cv.width, this.cv.height);
+      if (DARK === "ojos") {                                                          // apagon total: solo sus ojos (y parpadea)
+        if (!this.blink) { c.fillStyle = "#fdd742"; for (const [x, y] of eyes(name)) c.fillRect((r[4] + x) * k, (r[5] + y) * k, k, k); }
+        return;
+      }
       c.drawImage(img, r[0], r[1], r[2], r[3], r[4] * k, r[5] * k, r[2] * k, r[3] * k);
       if (DARK) {                                                                      // el apagon: silueta de tinta y solo los ojos encendidos
         c.globalCompositeOperation = "source-atop"; c.fillStyle = "#01003f"; c.fillRect(0, 0, this.cv.width, this.cv.height); c.globalCompositeOperation = "source-over";
@@ -155,12 +194,13 @@ window.AIQ = window.AIQ || {};
     tick() {
       if (this.dead) return; clearTimeout(this.timer);
       const now = performance.now(), dt = Math.min(0.1, (now - (this.last || now)) / 1000); this.last = now;
-      if (this.host.isConnected) { this.think(now, dt); this.step(now); this.draw(); }
-      const fast = this.st === "walk" || this.anim;
-      this.timer = setTimeout(() => this.tick(), fast ? (this.st === "walk" ? 33 : 55) : 120);
+      if (DARK === "ojos" && now > this.blinkT) { this.blink = !this.blink; this.blinkT = now + (this.blink ? 140 : rnd(1500, 2600)); }
+      if (this.host.isConnected) { this.think(now, dt); this.step(now); if (this.hop) this.hopPlace(now); this.draw(); }
+      const fast = this.st === "walk" || this.anim || DARK === "ojos";
+      this.timer = setTimeout(() => this.tick(), this.hop ? 16 : fast ? (this.st === "walk" ? 33 : 55) : 120);
     }
     poke() { if (!this.dead) { clearTimeout(this.timer); this.timer = setTimeout(() => this.tick(), 0); } }
-    destroy() { this.dead = true; clearTimeout(this.timer); this.cv.remove(); }
+    destroy() { this.dead = true; clearTimeout(this.timer); this.cv.remove(); this.hit.remove(); }
   }
   addEventListener("resize", () => { if (C) C.fit(); });
 
@@ -176,11 +216,15 @@ window.AIQ = window.AIQ || {};
     el: () => (C ? C.cv : null),
     busy: () => !!C && (C.st === "busy" || C.st === "walk"),
     rect: () => (C ? C.cv.getBoundingClientRect() : null),
+    body: () => (C ? C.hit.getBoundingClientRect() : null),               // su cuerpo (lo que se toca), sin el margen del lienzo
     play: (n, o) => { if (C) C.play(n, o); },
     walkTo: (x, fin) => { if (C) C.walkTo(x, fin); else if (fin) fin(); },
+    hopTo: (x, floor, o) => { if (C) C.hopTo(x, floor, o); else if (o && o.after) o.after(); },
+    clip: y => { if (C) { C.clipY = y == null ? null : y; C.place(); } },
+    pos: () => (C ? { x: C.x, floor: C.o.floor || 0, dir: C.dir } : null),
     pet: () => { if (C) C.pet(); },
     state: () => (C ? C.st : null),
-    dark: on => { DARK = !!on; if (C) { C.key = ""; C.poke(); } },
+    dark: (on, modo) => { DARK = on ? (modo === "ojos" ? "ojos" : true) : false; if (C) { C.blink = false; C.blinkT = performance.now() + 900; C.key = ""; C.poke(); } },
     /* la mesa del crupier: lo que haga el gato ahora */
     act(n) {
       if (!C) return false;

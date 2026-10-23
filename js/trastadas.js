@@ -14,7 +14,7 @@
  * REGLAS: como mucho una por ronda (A.trastadas.ronda()), nunca con el tutorial ni con la mesa del autor en directo; con Movimiento en Minimo,
  * sin temblor ni cartas que vuelan (lo mismo, quieto).
  *   A.trastadas.puede(id, ctx)  .lanza(id, ctx)  (con reglas)   .run(id, ctx) (sin reglas: la mesa del crupier)   .ronda(n)   .veredicto()
- *   A.trastadas.fx.{sello, cartas, apagon, guante, ventana, telon, moneda, ficha, zetas, halo, tiembla}
+ *   A.trastadas.fx.{sello, cartas, apagon, guante, ventana, telon, moneda, zetas, halo, tiembla}
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -61,8 +61,6 @@ window.AIQ = window.AIQ || {};
   const CARD = () => sprite("card", 10, 14, x => { x.fillStyle = "#1d0a3d"; x.fillRect(0, 0, 10, 14); x.fillStyle = "#f3f0fa"; x.fillRect(1, 1, 8, 12); x.fillStyle = "#c9cde0"; x.fillRect(1, 12, 8, 1); x.fillStyle = "#e8283a"; x.fillRect(4, 5, 2, 2); x.fillRect(3, 6, 4, 1); x.fillRect(2, 2, 1, 2); x.fillRect(7, 10, 1, 2); });
   const CARD_EDGE = () => sprite("cardE", 2, 14, x => { x.fillStyle = "#1d0a3d"; x.fillRect(0, 0, 2, 14); x.fillStyle = "#c9cde0"; x.fillRect(1, 1, 1, 12); });
   const CARD_BACK = () => sprite("cardB", 10, 14, x => { x.fillStyle = "#1d0a3d"; x.fillRect(0, 0, 10, 14); x.fillStyle = "#a8142e"; x.fillRect(1, 1, 8, 12); x.fillStyle = "#e8283a"; for (let yy = 2; yy < 12; yy += 2) for (let xx = 2 + (yy / 2) % 2; xx < 8; xx += 2) x.fillRect(xx, yy, 1, 1); });
-  const CHIP = () => sprite("chip", 12, 12, x => { const P = ["....oooo....", "..oorrrroo..", ".orrwrrwrro.", ".orrrrrrrro.", "orwrrkkrrwro", "orrrkrrkrrro", "orrrkrrkrrro", "orwrrkkrrwro", ".orrrrrrrro.", ".orrwrrwrro.", "..oorrrroo..", "....oooo...."], C = { o: "#1d0a3d", r: "#e8283a", w: "#f3f0fa", k: "#a8142e" };
-    P.forEach((row, yy) => [...row].forEach((ch, xx) => { if (C[ch]) { x.fillStyle = C[ch]; x.fillRect(xx, yy, 1, 1); } })); });
 
   /* texto de pixel: la letra de la casa a su tamano de diseno, sin suavizado (alfa a 0 o 255), y luego girado al pixel */
   function pixText(text, size, col, ink) {
@@ -193,14 +191,6 @@ window.AIQ = window.AIQ || {};
       R(X - wv - 1, Y - 8, wv * 2 + 2, 16, "#3c240a"); R(X - wv, Y - 7, wv * 2, 14, "#f5a623"); R(X - wv, Y - 7, wv * 2, 3, "#fdd742"); if (wv > 3) R(X - wv + 2, Y - 4, 2, 6, "#fff3b0");
     }, up(f) { if (!f.b && f.t > 1.2) { f.b = 1; sfx("coinLand"); } }, end() { if (done) done(); } });
   };
-  /* LA FICHA AL SUELO: una ficha cae dando vueltas desde (x, y) */
-  FX.ficha = (x, y) => {
-    layer(); const [sx, sy] = toArt(x, y), im = CHIP();
-    add({ d: 1.5, draw(f) {
-      const yy = sy + f.t * f.t * 260, c = Math.cos(f.t * 9);
-      const w = Math.max(2, Math.round(Math.abs(c) * 12)); g.drawImage(im, 0, 0, 12, 12, Math.round(sx - f.t * 30 - w / 2), Math.round(yy - 6), w, 12);
-    }, up(f) { if (!f.b && f.t > 0.95) { f.b = 1; sfx("chip", 1); sfx("coinTink"); } } });
-  };
   /* ZETAS de la siesta, que suben desde (x, y) */
   FX.zetas = (x, y, s = 4) => {
     layer(); const [sx, sy] = toArt(x, y), zs = [pixText("z", 16, "#f3f0fa"), pixText("z", 22, "#f3f0fa"), pixText("Z", 26, "#f3f0fa")];
@@ -244,9 +234,10 @@ window.AIQ = window.AIQ || {};
     ids: ["cartas", "telon", "moneda", "siesta", "desfile", "sello", "mapa", "apagon", "ventana", "guante", "ticket"],
     solas: ["cartas", "telon", "moneda", "siesta", "desfile"],          // las que salen solas; el resto, solo desde la mesa
   };
+  A.trastadas.glove = () => glove();                                     // su guante (lienzo de 30x28): la temporada dos de la salida (js/salir.js)
 
   /* ================================================================ EL DIRECTOR DE LA PARTIDA (la pregunta y el revelado)
-     Mira el estado del juego (A.core.S) y, con las reglas de arriba, decide si toca una sorpresa. Las de pantallas propias (telon, moneda, ficha,
+     Mira el estado del juego (A.core.S) y, con las reglas de arriba, decide si toca una sorpresa. Las de pantallas propias (telon, moneda,
      desfile) las registran sus pantallas. Una por ronda (las 5 preguntas de una ronda), nunca en los ultimos 5 s */
   const PTR = { x: innerWidth / 2, y: innerHeight / 2 };
   addEventListener("pointermove", e => { PTR.x = e.clientX; PTR.y = e.clientY; }, { passive: true });

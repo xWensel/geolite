@@ -147,6 +147,7 @@ window.AIQ = window.AIQ || {};
     c.drawImage(cur || img, r[0], r[1], r[2], r[3], x, y, r[2], r[3]);
   }
   const INK = [1, 0, 63], RIM = [35, 3, 97], DIM = [70, 10, 40], OUTLINE = [29, 10, 61];
+  let OJOS = false;                                     // a oscuras del todo (la salida): de la cara oscura solo quedan los ojos encendidos
   const REDS = new Set(["232,40,58", "168,20,46"]);
   function darken(c) {                                  // a oscuras: silueta con un filo de luz a la izquierda y los rojos apagados
     const im = c.getImageData(0, 0, W, H), a = im.data, src = new Uint8ClampedArray(a);
@@ -183,7 +184,7 @@ window.AIQ = window.AIQ || {};
     if (p.tear >= 0 && eo) { const t = d.tear[p.tear]; put(c, R("tear"), eo[0] + t[0], eo[1] + t[1]); }
     if (p.g) { const oc = d.gest[p.g].oc; if (oc && oc[p.f]) put(c, R(oc[p.f])); }   // lo que tapa la cara (cartas, mano) vuelve encima de ella
     { const ov = cur && cur.ov; if (ov) { const k = p.g ? d.gest[p.g].frames[p.f] : "master"; for (const L of ov) { const r = L.r[k]; if (r) c.drawImage(L.img, r[0], r[1], r[2], r[3], r[4], r[5], r[2], r[3]); } } }   // v0.3.135: capas del vestuario por fotograma (antifaz veneciano, pluma), ya recortadas por lo que tienen delante
-    if (E.dark) { darken(c); if (!p.off && eo) put(c, R("glow_" + p.e), eo[0], eo[1]); }
+    if (E.dark) { if (OJOS) c.clearRect(0, 0, W, H); else darken(c); if (!p.off && eo) put(c, R("glow_" + p.e), eo[0], eo[1]); }   // OJOS: el apagon total de la salida, solo sus ojos
     if (p.z) put(c, R("zz_" + p.z));
     if (p.w) for (const [y0, y1, dx] of p.w) { const band = c.getImageData(0, y0, W, y1 - y0); c.clearRect(0, y0, W, y1 - y0); c.putImageData(band, dx, y0); }
     return work;
@@ -359,12 +360,14 @@ window.AIQ = window.AIQ || {};
       this.lastFidget = g; this.fidgetAt = now + gap(); this.play(g); if (this.gest) this.gest.fid = true;
     }
     draw(force) {
-      if (this.dead || !loaded || !this.k) return;
+      if (this.dead || !loaded || !this.k || this.frozen) return;                     // congelado (la pausa): se queda el ultimo fotograma pintado
       const now = performance.now(); this.fidget(now);
       const p = this.pose(now), key = JSON.stringify(p);
       if (!force && key === this.key) return;
       this.key = key; compose(p, this.o.atlas);
       const c = this.ctx, k = this.k; c.clearRect(0, 0, this.cv.width, this.cv.height); c.drawImage(work, 0, 0, W, H, p.x * k, p.y * k, W * k, H * k);
+      const G = this.gest, fm = this.freezeMid;                                       // la pausa congelada: se para en la mitad del gesto (su pose mas exagerada)
+      if (fm && (!G || G.i >= Math.floor(G.x.frames.length * 0.45))) { this.freezeMid = null; this.frozen = true; if (fm.cb) fm.cb(); }
     }
     /* reloj propio: solo repinta cuando cambia algo (nada de 60 fps): ~30 ms con gesto o habla, si no a su ritmo */
     tick() {
@@ -376,6 +379,7 @@ window.AIQ = window.AIQ || {};
       this.timer = setTimeout(() => this.tick(), busy ? 33 : this.visible ? (this.fol ? 60 : 90) : 400);
     }
     poke() { if (loaded && !this.dead) { clearTimeout(this.timer); this.timer = setTimeout(() => this.tick(), 0); } }
+    freeze(on, cb) { if (on === "mid") { this.freezeMid = { cb }; this.poke(); return this; } this.freezeMid = null; this.frozen = !!on; if (!on) { this.key = ""; this.poke(); } return this; }   // la pausa congelada (js/dealer.js): como un video en pausa ("mid": a mitad del gesto que va a hacer)
     dress(atlas) { this.o.atlas = atlas || null; this.key = ""; this.poke(); }
     destroy() { this.dead = true; clearTimeout(this.timer); if (this.ro) this.ro.disconnect(); live.delete(this); this.cv.remove(); }
   }
@@ -386,6 +390,7 @@ window.AIQ = window.AIQ || {};
     /* v0.3.134: la ropa (js/vestuario.js): el atlas recoloreado (o null = la de siempre); todos los crupieres vivos se repintan al momento.
        Un sprite puede llevar la suya con mount(host, { atlas }) (el probador de la boutique) y cambiarla con s.dress(atlas) */
     dress(atlas) { dressed = atlas || null; live.forEach(s => { s.key = ""; s.poke(); }); },
+    ojos(on) { OJOS = !!on; live.forEach(s => { s.key = ""; s.poke(); }); },        // con la cara "dark": solo los ojos (el apagon de la salida)
     atlas: () => img, isReady: () => loaded,
     list: () => Object.keys(EX),
     gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(D().gest).filter(g => NUEVO.test(g)), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)],

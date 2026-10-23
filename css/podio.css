@@ -111,3 +111,13 @@ html body .pd-src { margin: 0; display: flex; align-items: center; gap: 8px; fle
 .pd-board .pd-list li.me .lb-tt { color: var(--gx-ink); }
 /* en el podio con cartas, el puesto va sobre su pila (sin la medalla, que ya no sale) */
 .pd-col.card .pd-step em { display: block; position: absolute; left: 0; right: 0; bottom: calc(var(--h) / 2 - 18px); margin: 0; text-align: center; font-family: var(--sans); font-size: 40px; line-height: 1; color: #fff8e6; text-shadow: 0 3px 0 rgba(2, 6, 4, .75); pointer-events: none; }
+
+/* SE CUELA EN LA CLASIFICACION (js/podio.js, votado 23-oct): el oro de «Don Crupier» se puede pulsar; al hacerlo le cae el sello de Descalificado
+   (el mismo de «Denegado» de la salida, en pequeno) y la tabla de verdad vuelve a su sitio */
+.pd-col.pd-fake { position: relative; cursor: pointer; }
+.pd-col.pd-fake:focus-visible { outline: 3px solid var(--gx-rim-hi); outline-offset: 4px; }
+.pd-dq { position: absolute; z-index: 3; left: 50%; top: 34%; padding: 6px 12px 3px; border: 4px solid #e2483d; border-radius: 10px; color: #e2483d; background: rgba(246, 239, 220, .9);
+  font-family: var(--serif); font-size: 26px; line-height: 1; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; box-shadow: 0 3px 0 rgba(0, 0, 0, .35); pointer-events: none; transform: translate(-50%, -50%) rotate(-11deg) scale(1.6); opacity: 0;
+  animation: pd-dq .28s cubic-bezier(.3, 1.5, .5, 1) forwards; }
+@keyframes pd-dq { to { opacity: 1; transform: translate(-50%, -50%) rotate(-11deg) scale(1); } }
+html.reduce-motion .pd-dq { animation: none; opacity: 1; transform: translate(-50%, -50%) rotate(-11deg); }
