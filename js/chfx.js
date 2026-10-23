@@ -524,7 +524,7 @@ void main(){
       <div class="cw-foot"><button type="button" class="cw-b" data-a="w">${tx(WT.wait)}</button><button type="button" class="cw-b cw-def" data-a="c">${tx(WT.close)}</button></div><i class="cw-prog"><i></i></i>`;
     const w = Math.min(340, W - 24), x = clamp(W * 0.5 - w / 2 + (i - (n - 1) / 2) * 70 + (R("wins")() - 0.5) * W * 0.22, 12, W - w - 12), y = clamp(H * 0.4 - 70 + i * 38 + (R("wins")() - 0.5) * H * 0.16, 70, H - 190);
     Object.assign(el.style, { left: x + "px", top: y + "px", width: w + "px" }); box.appendChild(el);
-    const close = () => { if (!el.isConnected || el.classList.contains("bye")) return; el.classList.add("bye"); say("flip", false); setTimeout(() => el.remove(), 140); };
+    const close = () => { if (!el.isConnected || el.classList.contains("bye")) return; el.classList.add("bye"); say("cartel"); setTimeout(() => el.remove(), 140); };
     el.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (!b) return; e.stopPropagation(); if (b.dataset.a === "w") { el.classList.add("waiting"); later(close, 900); } else close(); });
     const bar = el.querySelector(".cw-bar"); let drag = null;
     bar.addEventListener("pointerdown", e => { if (e.target.closest("button")) return; drag = [e.clientX - el.offsetLeft, e.clientY - el.offsetTop]; bar.setPointerCapture(e.pointerId); box.appendChild(el); });
@@ -808,7 +808,7 @@ void main(){
   }
   function winDel() {
     const box = part("chx-wins"), ws = [...box.querySelectorAll(".chx-win:not(.bye)")], w = ws[ws.length - 1];
-    if (w) { w.classList.add("bye"); say("flip", false); setTimeout(() => w.remove(), 140); }
+    if (w) { w.classList.add("bye"); say("cartel"); setTimeout(() => w.remove(), 140); }
   }
   function rainSet(on) {
     SH.rain = on;

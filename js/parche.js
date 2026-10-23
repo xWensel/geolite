@@ -147,7 +147,7 @@ window.AIQ = window.AIQ || {};
     const ps = parts(p); u.inner.innerHTML = ps[0]; u.pending = ps.slice(1); u.gen = (u.gen || 0) + 1;
     u.scroll.scrollTo({ top: 0, behavior: "instant" });
     u.act = ""; observe(); register(); measure(); sync(); pump(u.gen);
-    if (!first) A.sfx.flip(true);
+    if (!first) A.sfx.toggle(true);
   }
 
   /* ------------------------------------------------------------------ desplazamiento: barra propia, indice vivo, volver arriba */

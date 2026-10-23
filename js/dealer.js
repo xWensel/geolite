@@ -3626,7 +3626,7 @@ window.AIQ = window.AIQ || {};
     const G = (A.CRUPIER_DATA && A.CRUPIER_DATA.gest) || {}, pool = FREEZE.filter(g => G[g]); if (!pool.length) return;
     const g = rand(pool); once.freeze = 1;
     if (D.host) spr.play(g); else if (!D.gesture(g, true)) return;                   // en la pausa esta acoplado a su foco (D.host): el gesto, ahi mismo
-    frozen = true; spr.freeze("mid", () => { if (!pauseAt0 || !el || !frozen) { spr.freeze(false); frozen = false; return; } el.classList.add("vhs"); A.sfx.flip && A.sfx.flip(false); });   // se queda congelado en lo mas exagerado del gesto
+    frozen = true; spr.freeze("mid", () => { if (!pauseAt0 || !el || !frozen) { spr.freeze(false); frozen = false; return; } el.classList.add("vhs"); A.sfx.cartel && A.sfx.cartel(); });   // se queda congelado en lo mas exagerado del gesto
   }
   function freezeOut() { if (!frozen) return; frozen = false; if (el) el.classList.remove("vhs"); if (spr) spr.freeze(false); }
   D.notePause = p => {
@@ -3867,7 +3867,7 @@ window.AIQ = window.AIQ || {};
     };
     return spotScene(items, fin => {                                     // le da la vuelta al cartel: ABIERTO
       if (!sign) return fin();
-      if (A.sfx.flip) A.sfx.flip(); sign.classList.remove("swing", "knock");
+      if (A.sfx.cartel) A.sfx.cartel(); sign.classList.remove("swing", "knock");
       const half = [{ transform: "translateX(-50%) scaleX(1)" }, { transform: "translateX(-50%) scaleX(0)" }];
       const a = sign.animate(half, { duration: 160, easing: "steps(4)", fill: "forwards" });
       setTimeout(() => {

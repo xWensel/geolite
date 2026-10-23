@@ -301,8 +301,8 @@
     inp.addEventListener("change", save);
   }
   function toggleSwitch(k) {
-    if (k === "music") { A.audio.setMusic(!A.audio.musicOn); if (A.audio.musicOn) A.audio.unlock(); else if (A.jukebox) A.jukebox.hide(); A.sfx.flip(A.audio.musicOn); }
-    else { const willOn = !A.audio.sfxOn; if (!willOn) A.sfx.flip(false); A.audio.sfxOn = willOn; if (willOn) A.sfx.flip(true); A.amb.refresh(); }   // sin efectos tampoco hay ambiente
+    if (k === "music") { A.audio.setMusic(!A.audio.musicOn); if (A.audio.musicOn) A.audio.unlock(); else if (A.jukebox) A.jukebox.hide(); A.sfx.toggle(A.audio.musicOn); }
+    else { const willOn = !A.audio.sfxOn; if (!willOn) A.sfx.toggle(false); A.audio.sfxOn = willOn; if (willOn) A.sfx.toggle(true); A.amb.refresh(); }   // sin efectos tampoco hay ambiente
     save(); syncSettings();
   }
   /* ---- idioma: cuadricula en ajustes, popover en el menu y chips en la entrada ---- */
@@ -363,7 +363,7 @@
     contrast: () => { S.contrast = !S.contrast; applyVisualFX(); },
     shake: () => { S.shake = !S.shake; applyShake(); if (S.shake) { jpShake(1); A.haptic([40]); } },   // al encenderla, un temblor flojo de muestra
   };
-  for (const sw of document.querySelectorAll(".sw[data-sw]")) if (TOG[sw.dataset.sw]) sw.addEventListener("click", () => { if (TOG[sw.dataset.sw]() === false) return; A.sfx.flip(true); save(); syncSettings(); });
+  for (const sw of document.querySelectorAll(".sw[data-sw]")) if (TOG[sw.dataset.sw]) sw.addEventListener("click", () => { if (TOG[sw.dataset.sw]() === false) return; A.sfx.toggle(true); save(); syncSettings(); });
   /* pestanas de Ajustes */
   function setTab(t, silent) {
     S.setTab = t; segSet(document.querySelector('[data-seg="settab"]'), t);
@@ -488,7 +488,7 @@
   document.addEventListener("mouseover", e => {
     const t = e.target, el = t.closest && (t.closest(MENU6 + ", .go, .camp, .btn-ink, .btn-line, .lv:not(:disabled), #dock button, #rail button, .seg button, .menu-gear, .cx-strip, .mode-card, .deck:not(:disabled), .asc:not(:disabled), .tool, .buy:not(:disabled), .hub-back, .inv-perk, .go2, .sup, .nr-buy, .pd-tabs button, .pd-x")
       || t.closest("button:not(:disabled), a[href], [role=button]:not([aria-disabled=true]), summary, label[for], input[type=checkbox], input[type=range], select, [data-hov]") || (hoverable(t)));   // cualquier control: los listados arriba y, por defecto, todo lo que es un boton de verdad o muestra la manita
-    if (el && el !== lastHover) { if (!el.matches(MENU6)) A.sfx.hover(); else if (ptr === "mouse") A.sfx.menuHover(menuK(el)); }
+    if (el && el !== lastHover) { const x = A.audio.side(e.clientX); if (!el.matches(MENU6)) A.sfx.hover(x); else if (ptr === "mouse") A.sfx.menuHover(menuK(el), x); }   // suena en su lado (estereo)
     lastHover = el;
   });
 
@@ -745,7 +745,7 @@
     if (S.run && S.tool) { pingFx(at.x, at.y, "probe"); A.adv.probe(lon, lat); return; }
     if (S.run && !ef) ({ lon, lat } = A.adv.adjust(lon, lat));   // con puntero propio, el viento ya lo ha movido
     if (S.run && A.adv.reBall && A.adv.reBall(lon, lat)) { pingFx(at.x, at.y, "probe"); return; }   // Segunda bola: este clic no cuenta
-    pingFx(at.x, at.y); A.sfx.tap(); A.sfx.pin(S.streak);
+    pingFx(at.x, at.y); A.sfx.pin(S.streak, A.audio.side(at.x));   // la chincheta es una ficha que se planta, en su lado de la pantalla
     reveal({ lon, lat }, Math.max(0, S.limit - (performance.now() - S.t0 - S.pausedAcc) / 1000));
   }
   /* pista de la Enciclopedia en el ticket: los umbrales de ESTA pregunta (x2 en mares, naturaleza y estrechos) y en millas si toca;
@@ -1207,9 +1207,9 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
 
   document.addEventListener("pointerdown", e => {
     A.audio.unlock(!S.booting);
-    if (e.target.closest && e.target.closest(".go, .camp, .btn-ink, .btn-line, .lv, #dock button, #rail button, .seg button, .menu-gear, .hub-back, .asc, .tool")) A.sfx.ui();
+    if (e.target.closest && e.target.closest(".go, .camp, .btn-ink, .btn-line, .lv, #dock button, #rail button, .seg button, .menu-gear, .hub-back, .asc, .tool")) A.sfx.ui(A.audio.side(e.clientX));
     /* menu principal: pulsar el fondo (nada activable) tambien suena, para que cada toque se sienta reconocido */
-    else if (S.phase === "title" && !(e.target.closest && e.target.closest("button, a, input, select, textarea, label, [role=button], .dl-face"))) A.sfx.felt();   // su cara suena a ficha (js/dealer.js)
+    else if (S.phase === "title" && !(e.target.closest && e.target.closest("button, a, input, select, textarea, label, [role=button], .dl-face"))) A.sfx.felt(A.audio.side(e.clientX));   // su cara suena a ficha (js/dealer.js)
   }, true);
 
   /* atajos (v0.3.2: las teclas salen de Ajustes > Controles, js/teclas.js; Esc es fija y siempre abre la pausa) */
@@ -1283,7 +1283,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (A.iconize) A.iconize(w);
     if (!w.dataset.on) { w.dataset.on = "1";
       w.addEventListener("pointerdown", e => e.stopPropagation());               // leer o tocar el aviso no entra
-      sw.addEventListener("click", e => { e.stopPropagation(); if (flashForced()) { A.sfx.deny(); return; } S.motion = S.motion === "full" ? "soft" : "full"; applyMotion(); save(); sync(); A.sfx.flip(S.softFlash); }); }   // v0.3.2: es el nivel Suave de Movimiento
+      sw.addEventListener("click", e => { e.stopPropagation(); if (flashForced()) { A.sfx.deny(); return; } S.motion = S.motion === "full" ? "soft" : "full"; applyMotion(); save(); sync(); A.sfx.toggle(S.softFlash); }); }   // v0.3.2: es el nivel Suave de Movimiento
     sync(); w.classList.remove("hidden"); $("gate").classList.add("warn");
     return true;
   }

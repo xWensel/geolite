@@ -165,7 +165,7 @@ window.AIQ = window.AIQ || {};
       <div class="cw-foot"><button type="button" class="cw-b" data-a="1">${T6(VT.si)}</button><button type="button" class="cw-b cw-def" data-a="2">${T6(VT.seguro)}</button></div>`;
     box.appendChild(el); document.body.appendChild(box); sfx("ding");
     const w = Math.min(340, innerWidth - 24); Object.assign(el.style, { left: Math.round(innerWidth / 2 - w / 2) + "px", top: Math.round(innerHeight * 0.36) + "px", width: w + "px" });
-    let gone = false; const close = how => { if (gone) return; gone = true; el.classList.add("bye"); sfx("flip", false); setTimeout(() => box.remove(), 160); if (done) done(how); };
+    let gone = false; const close = how => { if (gone) return; gone = true; el.classList.add("bye"); sfx("cartel"); setTimeout(() => box.remove(), 160); if (done) done(how); };
     el.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (b) { e.stopPropagation(); close(b.dataset.a); } });
     setTimeout(() => close("auto"), 5000);
     const def = el.querySelector(".cw-def"); if (def) setTimeout(() => def.focus({ preventScroll: true }), 30);
@@ -302,7 +302,7 @@ window.AIQ = window.AIQ || {};
     A.comodin.play("salta", { after: () => A.comodin.play("zarpa", { after: () => A.comodin.play("regana", { after: () => setTimeout(() => A.comodin.walkTo(-140, () => A.comodin.hide()), 600) }) }) });
     setTimeout(() => {                                                                 // el zarpazo: el ticket sale volando
       if (tk.animate) tk.animate([{ transform: "none" }, { transform: `translate(${Math.round(innerWidth * 0.08)}px, ${Math.round(innerHeight * 0.9)}px) rotate(38deg)` }], { duration: 520, easing: "cubic-bezier(.4,0,.8,.6)", fill: "forwards" });
-      sfx("swish"); sfx("flip", true);
+      sfx("swish"); sfx("cartel");
       const d = D(); if (d.say) say("catScold", { mood: "angry", gesture: "finger_wag" });
     }, 1000);
     setTimeout(() => {                                                                 // el truco: vuelve a su sitio

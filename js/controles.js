@@ -183,7 +183,7 @@ window.AIQ = window.AIQ || {};
   /* raton: interruptores y segmentado */
   document.querySelectorAll("[data-msw]").forEach(s => s.addEventListener("click", () => {
     const m = K.mouse; if (s.dataset.msw === "left") { const on = !(m.pick === 2 && m.drag === 2); m.pick = m.drag = on ? 2 : 0; } else m.invWheel = !m.invWheel;
-    K.changed(); if (A.sfx && A.sfx.flip) A.sfx.flip(true);
+    K.changed(); if (A.sfx && A.sfx.toggle) A.sfx.toggle(true);
   }));
   document.querySelector('[data-mseg="zoomMid"]').addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const v = b.dataset.v === "1"; if (v === K.mouse.zoomMid) return; K.mouse.zoomMid = v; K.changed(); ui(); });
 

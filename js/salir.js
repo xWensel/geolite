@@ -348,7 +348,7 @@ window.AIQ = window.AIQ || {};
         <div class="cw-body"><i class="cw-sign" aria-hidden="true">?</i><p>${esc(t6(TX.winQ))}</p></div>
         <div class="cw-foot"><button type="button" class="cw-b" data-a="1">${esc(t6(TX.si))}</button><button type="button" class="cw-b cw-def" data-a="2">${esc(t6(TX.siSeguro))}</button></div>`;
       let gone = false;
-      const close = () => { if (gone) return; gone = true; st.win = null; el.classList.add("bye"); A.sfx.flip && A.sfx.flip(false); later(() => box.remove(), 160); };
+      const close = () => { if (gone) return; gone = true; st.win = null; el.classList.add("bye"); A.sfx.cartel && A.sfx.cartel(); later(() => box.remove(), 160); };
       st.undo = () => { gone = true; st.win = null; box.remove(); };
       talk(line, "sly", null, { start: () => later(() => {
         if (!st || st.phase !== "ask") return;

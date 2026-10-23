@@ -220,7 +220,7 @@ window.AIQ = window.AIQ || {};
     const cloud = $("cloudCard"); grid.insertBefore(c, cloud ? cloud.nextSibling : null);
     c.querySelector(".sw").addEventListener("click", () => {
       const v = !on(); try { localStorage.setItem(KEY, v ? "1" : "0"); } catch (e) { /* sin almacenamiento */ }
-      if (A.sfx && A.sfx.flip) A.sfx.flip(true); if (v) sched(300); else { clearTimeout(timer); fast = false; camOff(); fxOff(); bye(); sched(30000); }
+      if (A.sfx && A.sfx.toggle) A.sfx.toggle(true); if (v) sched(300); else { clearTimeout(timer); fast = false; camOff(); fxOff(); bye(); sched(30000); }
       sync();
     });
     sync();

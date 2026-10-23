@@ -53,7 +53,7 @@ th{position:sticky;top:0;background:#12231a;color:var(--brass)} td:nth-child(2){
 
 <h2>Sound effects</h2>
 <ul>
-<li><b>Background chips and cards</b> (room ambience): <a href="https://kenney.nl/" target="_blank" rel="noopener noreferrer">Casino Audio</a> by Kenney — Creative Commons Zero, CC0 (<a href="assets/sfx/LICENSE-kenney-casino-audio.txt">text</a>). Every other sound effect is synthesized by the game.</li>
+<li><b>Chips and cards</b> (room ambience and sound effects): <a href="https://kenney.nl/" target="_blank" rel="noopener noreferrer">Casino Audio</a> by Kenney — Creative Commons Zero, CC0 (<a href="assets/sfx/LICENSE-kenney-casino-audio.txt">text</a>). Everything else in the sound effects is synthesized by the game.</li>
 </ul>
 
 <h2>Soundtrack</h2>

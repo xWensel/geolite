@@ -1022,7 +1022,7 @@ window.AIQ = window.AIQ || {};
     if ((run.boss || []).includes("silence")) { A.sfx.deny(); const w = A.T("El Silencio anula tus herramientas.", "Silence cancels your tools."); if (hints[hints.length - 1] !== w) noteH(w); return; }   // el aviso, una vez (antes se repetia en cada pulsacion)
     if (t.left <= 0) { A.sfx.deny(); return; }
     if (def.kind === "probe") {                                      // la pista ("Toca el mapa...") sale encima de la carta: en la nota, esta crecia y la carta saltaba 63 px bajo el raton
-      S.tool = S.tool === id ? null : id; A.sfx.flip(!!S.tool); C().map.setPick(true);
+      S.tool = S.tool === id ? null : id; A.sfx.toggle(!!S.tool); C().map.setPick(true);
       renderBars(); return;
     }
     t.left--; run.qTools++; run.rTools++; A.sfx.buy();
