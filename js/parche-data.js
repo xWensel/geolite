@@ -186,6 +186,21 @@ window.AIQ = window.AIQ || {};
       ],
     },
     {
+      id: "0.3.188",
+      name: L("El mapa vuelve a responder", "The map responds again", "La carte répond de nouveau", "O mapa volta a responder", "Die Karte reagiert wieder", "La mappa torna a rispondere", "", "地图恢复响应", "지도가 다시 반응해요", "地図が再び反応", "Карта снова отвечает", "Mapa znów reaguje"),
+      date: "2026-10-23",
+      summary: L("Arreglado Controles invertidos: en algunas rondas el ratón no hacía nada en el mapa y no se podía jugar.", "Fixed Inverted controls: in some rounds the mouse did nothing on the map and the round was unplayable.", "Correction de Commandes inversées : dans certaines manches, la souris ne faisait rien sur la carte et on ne pouvait pas jouer.", "Corrigidos os Controles invertidos: em algumas rondas o rato não fazia nada no mapa e não dava para jogar.", "Umgekehrte Steuerung repariert: In manchen Runden tat die Maus auf der Karte nichts und man konnte nicht spielen.", "Corretti i Controlli invertiti: in certi round il mouse non faceva nulla sulla mappa e non si poteva giocare.", "", "修复了反向操作：某些回合里鼠标在地图上毫无反应，无法游玩。", "반전된 조작 수정: 일부 라운드에서 마우스가 지도에서 아무 반응이 없어 플레이할 수 없었어요.", "反転操作を修正：一部のラウンドで地図上のマウスが反応せず、プレイできませんでした。", "Исправлено обратное управление: в некоторых раундах мышь ничего не делала на карте, и играть было нельзя.", "Naprawiono odwrócone sterowanie: w niektórych rundach mysz nic nie robiła na mapie i nie dało się grać."),
+      chapters: [
+        { id: "invertidos2", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Retos", "Challenges", "Défis", "Desafios", "Herausforderungen", "Sfide", "", "挑战", "도전", "チャレンジ", "Испытания", "Wyzwania"),
+          entries: [
+            E(L("Un ratón sordo", "A deaf mouse", "Une souris sourde", "Um rato surdo", "Eine taube Maus", "Un mouse sordo", "", "没反应的鼠标", "반응 없는 마우스", "反応しないマウス", "Глухая мышь", "Głucha mysz"), "fix", "0.3.188", [
+              L("Con **Controles invertidos**, el mapa dejaba de recibir el ratón: no salía el retículo ni se podía clicar. Ahora el mapa siempre lo recibe, con cualquier reto, y los paneles siguen dejándolo pasar.", "With **Inverted controls**, the map stopped receiving the mouse: no reticle showed up and you couldn't click. Now the map always receives it, with any challenge, and the panels still let it through.", "Avec **Commandes inversées**, la carte ne recevait plus la souris : pas de réticule et impossible de cliquer. Désormais la carte la reçoit toujours, avec n'importe quel défi, et les panneaux la laissent toujours passer.", "Com **Controles invertidos**, o mapa deixava de receber o rato: não aparecia a mira e não dava para clicar. Agora o mapa recebe-o sempre, com qualquer desafio, e os painéis continuam a deixá-lo passar.", "Bei **Umgekehrter Steuerung** bekam die Karte die Maus nicht mehr: kein Fadenkreuz, kein Klick. Jetzt bekommt die Karte sie immer, bei jeder Herausforderung, und die Panels lassen sie weiter durch.", "Con **Controlli invertiti** la mappa non riceveva più il mouse: niente mirino e niente clic. Ora la mappa lo riceve sempre, con qualsiasi sfida, e i pannelli continuano a lasciarlo passare.", "", "在 **反向操作** 下，地图收不到鼠标：没有准星，也无法点击。现在无论哪个挑战，地图都能收到鼠标，面板也依旧让鼠标穿过。", "**반전된 조작**에서 지도가 마우스를 받지 못해 조준점도 안 보이고 클릭도 안 됐어요. 이제 어떤 도전에서도 지도가 항상 마우스를 받고, 패널은 계속 마우스를 통과시켜요.", "**反転操作**で地図がマウスを受け取れず、照準も出ずクリックもできませんでした。今はどのチャレンジでも地図が必ず受け取り、パネルも引き続き通します。", "При **обратном управлении** карта переставала получать мышь: ни прицела, ни кликов. Теперь карта получает её всегда, при любом испытании, а панели по-прежнему пропускают её.", "Przy **odwróconym sterowaniu** mapa nie dostawała myszy: brak celownika i nie dało się kliknąć. Teraz mapa zawsze ją dostaje, przy każdym wyzwaniu, a panele nadal ją przepuszczają.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.187",
       name: L("Don Crupier, de visita", "Don Crupier drops by", "Don Crupier passe te voir", "Don Crupier faz uma visita", "Don Crupier schaut vorbei", "Don Crupier passa a trovarti", "", "庄家来串门", "돈 크루피에가 들렀어요", "ドン・クルピエ、顔を出す", "Дон Крупье заглядывает", "Don Crupier wpada z wizytą"),
       date: "2026-10-23",

@@ -43,6 +43,7 @@
 body.ptr-on #map { cursor: none; }
 /* cursor invertido: el raton de verdad puede caer sobre cualquier panel (perks, pista, pregunta, puntuacion...) mientras el reticulo esta en el mapa: TODO deja pasar el raton al mapa y las cartas de la mano se pulsan con el reticulo (pointer.js uiAt) */
 body.ptr-thru *:not(canvas) { pointer-events: none !important; }
+body.ptr-thru #map { pointer-events: auto !important; }   /* el lienzo no entra en la regla de arriba pero hereda el none de #app: sin esto el mapa tampoco recibia el raton (reto Controles invertidos injugable) */
 
 /* ---------------------------------------------------------------- fichas de reto */
 .ch-chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 6px; border-radius: 999px; background: rgba(22, 36, 28, .92); color: #fdf5fd; font-family: var(--mono); font-weight: 700; font-size: 15.5px; letter-spacing: .04em; box-shadow: inset 0 0 0 2px var(--cc, #b58cff), 0 3px 0 rgba(0, 0, 0, .35); white-space: nowrap; }
