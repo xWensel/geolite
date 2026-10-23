@@ -34,6 +34,42 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.190",
+      name: L("La música la pone él", "He brings his own music", "C'est lui qui met la musique", "A música fica por conta dele", "Die Musik macht er selbst", "La musica la mette lui", "", "音乐他自己来", "음악은 그가 직접", "音楽は彼が自前で", "Музыка — за ним", "Muzykę zapewnia sam"),
+      date: "2026-10-23",
+      summary: L("Si le quitas la música, el crupier no se queda sin ella: viene a la portada, te lo echa en cara y se pone a tararear, con sus notas subiendo desde la chistera.",
+                "Turn off the music and the dealer won't go without: he comes to the title screen, calls you out on it and starts humming, his notes rising from his top hat.",
+                "Coupe la musique et le croupier ne s'en passe pas pour autant : il vient sur l'écran titre, te le reproche et se met à fredonner, ses notes s'élevant de son haut-de-forme.",
+                "Se você desligar a música, o crupiê não fica sem ela: ele vem à tela inicial, joga isso na sua cara e começa a cantarolar, com as notas subindo da cartola.",
+                "Dreh die Musik ab, und der Croupier kommt trotzdem nicht ohne aus: Er erscheint auf dem Startbildschirm, hält es dir vor und fängt an zu summen – seine Noten steigen aus dem Zylinder auf.",
+                "Togli la musica e il croupier non ci rinuncia: arriva nella schermata iniziale, te lo rinfaccia e si mette a canticchiare, con le note che salgono dal cilindro.",
+                "Si le quitas la música, el crupier no se queda sin ella: viene a la portada, te lo echa en cara y se pone a tararear, con sus notas subiendo desde el sombrero de copa.",
+                "关掉音乐，荷官也不会就此安静：他会来到主界面数落你一句，然后自己哼起歌来，音符从他的礼帽上飘起。",
+                "음악을 꺼도 딜러는 음악 없이 지내지 않습니다. 타이틀 화면에 와서 한마디 하고는 콧노래를 부르죠. 음표가 그의 실크해트 위로 떠오릅니다.",
+                "音楽を止めても、ディーラーは黙っていません。タイトル画面にやって来てひとこと文句を言い、鼻歌を歌い始めます。音符がシルクハットから立ちのぼります。",
+                "Выключишь музыку — крупье без неё не останется: он придёт на главный экран, упрекнёт тебя и начнёт напевать, а ноты поднимутся над его цилиндром.",
+                "Wyłącz muzykę, a krupier i tak się bez niej nie obejdzie: przyjdzie na ekran tytułowy, wytknie ci to i zacznie nucić, a nuty uniosą się znad jego cylindra."),
+      chapters: [
+        { id: "portada", kicker: L("Novedad", "New", "Nouveauté", "Novidade", "Neu", "Novità", "", "新内容", "새 소식", "新要素", "Новое", "Nowość"),
+          title: L("La portada", "Title screen", "L'écran titre", "A tela inicial", "Startbildschirm", "La schermata iniziale", "", "主界面", "타이틀 화면", "タイトル画面", "Главный экран", "Ekran tytułowy"),
+          entries: [
+            E(L("Le quitas la música", "You turn off his music", "Tu lui coupes la musique", "Você desliga a música dele", "Du drehst ihm die Musik ab", "Gli togli la musica", "", "你关掉了他的音乐", "음악을 끄면", "音楽を止めると", "Ты выключаешь ему музыку", "Wyłączasz mu muzykę"), "new", "0.3.190", [
+              L("Si la música sonaba y la bajas a cero (o la quitas), la próxima vez que vuelvas a la portada viene a decírtelo y, en cuanto acaba la frase, se pone a tararear: tres notas de píxel suben desde lo alto de su chistera. Una vez por sesión, y si empiezas ya sin música, no te lo echa en cara.",
+                "If the music was playing and you turn it down to zero (or switch it off), the next time you come back to the title screen he comes over to tell you, and as soon as he's done talking he starts humming: three pixel notes rise from the top of his hat. Once per session, and if you start without music, he won't hold it against you.",
+                "Si la musique jouait et que tu la baisses à zéro (ou la coupes), la prochaine fois que tu reviens sur l'écran titre, il vient te le dire et, sa phrase finie, se met à fredonner : trois notes en pixels s'élèvent du sommet de son chapeau. Une fois par session, et si tu commences déjà sans musique, il ne te le reproche pas.",
+                "Se a música estava tocando e você abaixa para zero (ou desliga), na próxima vez que voltar à tela inicial ele vem te dizer e, assim que termina a frase, começa a cantarolar: três notas de pixel sobem do alto da cartola. Uma vez por sessão, e se você já começar sem música, ele não joga na sua cara.",
+                "Lief die Musik und du drehst sie auf null (oder schaltest sie ab), kommt er beim nächsten Besuch des Startbildschirms vorbei, um es dir zu sagen, und sobald er fertig ist, fängt er an zu summen: Drei Pixelnoten steigen oben aus seinem Zylinder. Einmal pro Sitzung, und wenn du schon ohne Musik anfängst, hält er es dir nicht vor.",
+                "Se la musica suonava e la abbassi a zero (o la togli), la prossima volta che torni alla schermata iniziale viene a dirtelo e, finita la frase, si mette a canticchiare: tre note in pixel salgono dalla cima del cilindro. Una volta per sessione, e se inizi già senza musica non te lo rinfaccia.",
+                "Si la música estaba sonando y la bajas a cero (o la quitas), la próxima vez que vuelvas a la portada viene a decírtelo y, en cuanto termina la frase, se pone a tararear: tres notas de píxel suben desde lo alto de su sombrero de copa. Una vez por sesión, y si empiezas ya sin música, no te lo reprocha.",
+                "如果音乐本来在放，而你把它调到零（或关掉），下次回到主界面时他会过来说你一句，话一说完就哼起歌来：三个像素音符从他的礼帽顶上升起。每次登录只有一次；如果你一开始就没开音乐，他不会怪你。",
+                "음악이 나오던 중에 볼륨을 0으로 내리거나 끄면, 다음에 타이틀 화면으로 돌아올 때 딜러가 와서 한마디 하고, 말이 끝나자마자 콧노래를 부릅니다. 픽셀 음표 세 개가 실크해트 꼭대기에서 떠오르죠. 세션당 한 번이며, 처음부터 음악 없이 시작했다면 탓하지 않습니다.",
+                "音楽が流れていたのに音量をゼロにする（または止める）と、次にタイトル画面へ戻ったとき彼がそれを言いに来て、話し終えるとすぐ鼻歌を歌い始めます。ピクセルの音符が三つ、シルクハットのてっぺんから立ちのぼります。セッションごとに一度だけで、最初から音楽なしで始めたなら責めません。",
+                "Если музыка играла, а ты убавил её до нуля (или выключил), в следующий раз, когда вернёшься на главный экран, он придёт сказать тебе об этом, а договорив, начнёт напевать: три пиксельные ноты поднимутся над его цилиндром. Раз за сессию, а если ты с самого начала играешь без музыки, упрекать не станет.",
+                "Jeśli muzyka grała, a ty ściszysz ją do zera (albo wyłączysz), następnym razem, gdy wrócisz na ekran tytułowy, przyjdzie ci to powiedzieć, a gdy skończy, zacznie nucić: trzy pikselowe nuty uniosą się znad jego cylindra. Raz na sesję, a jeśli od początku grasz bez muzyki, nie będzie ci tego wypominał.")]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.189",
       name: L("Las trastadas, revisadas", "The pranks, revisited", "Les tours, revus", "As travessuras, revisadas", "Die Streiche, überarbeitet", "Gli scherzi, rivisti", "", "恶作剧大修", "장난 전면 점검", "いたずら総点検", "Проделки, пересмотренные", "Psikusy po przeglądzie"),
       date: "2026-10-23",

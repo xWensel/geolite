@@ -867,6 +867,10 @@ window.AIQ = window.AIQ || {};
     quitRetDrop: [
       "La última vez Comodín te tiró la tarjeta. Hoy la he atornillado. A Comodín no.|Last time Joker knocked your card down. Today I've screwed it in place. Not Joker, though.|La dernière fois, Joker a fait tomber ta carte. Aujourd'hui, je l'ai vissée. Pas Joker.|Da última vez o Coringa derrubou seu cartão. Hoje eu parafusei o cartão. O Coringa, não.|Letztes Mal hat Joker dir die Karte runtergeworfen. Heute hab ich sie festgeschraubt. Joker nicht.|L'ultima volta Jolly ti ha fatto cadere la scheda. Oggi l'ho avvitata. Jolly no.|La última vez Comodín te tiró la tarjeta. Hoy la atornillé. A Comodín no.|上次小丑把你的卡片弄掉了。今天我把卡片拧紧了。小丑没拧。|지난번엔 조커가 네 카드를 떨어뜨렸지. 오늘은 카드를 나사로 고정했어. 조커는 아니고.|前回はジョーカーが君のカードを落とした。今日はカードをネジで留めた。ジョーカーは留めてない。|В прошлый раз Джокер уронил твою карточку. Сегодня я её привинтил. Джокера — нет.|Ostatnio Joker zrzucił ci kartę. Dziś ją przykręciłem. Jokera nie.",
     ],
+    homeHum: [
+      "¿Sin música? Pues la pongo yo. Ta-ra-rá…|No music? Then I'll provide it. Da-da-dum…|Pas de musique ? Je m'en charge. Ta-ra-ra…|Sem música? Então eu canto. Tã-rã-rã…|Keine Musik? Dann sorge ich dafür. Da-da-dum…|Niente musica? Allora la faccio io. Ta-ra-rà…||没音乐？那我来哼。嗒啦啦……|음악이 없다고? 그럼 내가 부르지. 따라라…|音楽なし？なら私が歌おう。タラララ……|Без музыки? Тогда я сам. Та-ра-рам…|Bez muzyki? To ja zanucę. Ta-ra-ram…",
+      "Me has quitado la música. Error de principiante: la llevo dentro.|You turned off my music. Rookie mistake: I carry it inside.|Tu m'as coupé la musique. Erreur de débutant : je l'ai dans la peau.|Você tirou minha música. Erro de principiante: eu levo ela comigo.|Du hast mir die Musik abgedreht. Anfängerfehler: Ich hab sie im Blut.|Mi hai tolto la musica. Errore da principiante: ce l'ho dentro.|Me quitaste la música. Error de principiante: la llevo dentro.|你把我的音乐关了。新手才犯这种错：音乐在我心里。|내 음악을 껐구나. 초보의 실수지. 음악은 내 안에 있거든.|音楽を止めたな。初心者のミスだ。音楽は私の中にある。|Ты выключил мою музыку. Ошибка новичка: она у меня внутри.|Wyłączyłeś mi muzykę. Błąd nowicjusza: noszę ją w sobie.",
+    ],
     songFav: [
       "¡Esa es mi canción! Un momento, que esta no me la pierdo.|That's my song! One moment, I'm not missing this one.|C'est ma chanson ! Une seconde, celle-là je ne la rate pas.|Essa é a minha música! Um momento, essa eu não perco.|Das ist mein Lied! Moment, das lass ich mir nicht entgehen.|Questa è la mia canzone! Un attimo, questa non me la perdo.||这是我的歌！等一下，这首我可不能错过。|내 노래다! 잠깐, 이건 놓칠 수 없지.|私の曲だ！ちょっと待て、これは聴き逃せない。|Это моя песня! Секунду, эту я не пропущу.|To moja piosenka! Chwileczkę, tej nie przepuszczę.",
       "Mi canción de hoy. Mañana, otra: no soy de fidelidades.|My song of the day. Tomorrow, another: I'm not the faithful type.|Ma chanson du jour. Demain, une autre : je ne suis pas du genre fidèle.|Minha música do dia. Amanhã, outra: não sou do tipo fiel.|Mein Lied des Tages. Morgen ein anderes: Treue ist nicht so mein Ding.|La mia canzone del giorno. Domani un'altra: non sono il tipo fedele.||这是我今天的歌。明天换一首：我可不是专一的人。|오늘의 내 노래야. 내일은 다른 곡이고. 난 한 곡만 듣는 타입이 아니거든.|今日の私の曲だ。明日はまた別のやつ。一途なタイプじゃないんでね。|Моя песня дня. Завтра будет другая: я не из верных.|Moja piosenka dnia. Jutro inna: wierność to nie moja mocna strona.",
@@ -2225,7 +2229,7 @@ window.AIQ = window.AIQ || {};
     nameHome: ["sly"], "nameHome#0": ["sly", "beckon"], "nameHome#1": ["sly", "point"], "nameHome#3": ["sly", "glass_knock"],
     "nameHome#4": ["wink", "jot"], nameRun: ["suspicious"], "nameRun#1": ["wink"], "nameRun#2": ["sly"], "nameRun#4": ["sly", "finger_up"],
     "nameRun#5": ["wink", "shh"], "nameRun#6": ["sly", "jot"], nameAgain: ["sly", "deal_card"], "nameAgain#2": ["wink", "deal_card"],
-    quitHover: ["sly", "finger_wag"], quitGlove: ["sly", "point"], quitWindow: ["innocent", "jot"], "quitWindow#1": ["innocent", "glass_knock"], quitWindowLaugh: ["laugh", "slow_clap"], quitDrop: ["shock", "facepalm"], "quitDrop#1": ["innocent", "shrug"], quitBribePaid: ["smug", "e_paga"], quitSeason2: ["shock"], "quitSeason2#1": ["sly", "hat_tip"], quitRetCat: ["sly", "hat_tip"], quitRetGlove: ["sly", "point"], quitRetWindow: ["laugh"], quitRetDrop: ["smug", "shrug"], songFav: ["laugh", "snap"], "quitHover#1": ["nervous", "fan_self"], "quitHover#3": ["sly"], "quitHover#4": ["nervous"], quitAsk: ["shock"],
+    quitHover: ["sly", "finger_wag"], quitGlove: ["sly", "point"], quitWindow: ["innocent", "jot"], "quitWindow#1": ["innocent", "glass_knock"], quitWindowLaugh: ["laugh", "slow_clap"], quitDrop: ["shock", "facepalm"], "quitDrop#1": ["innocent", "shrug"], quitBribePaid: ["smug", "e_paga"], quitSeason2: ["shock"], "quitSeason2#1": ["sly", "hat_tip"], quitRetCat: ["sly", "hat_tip"], quitRetGlove: ["sly", "point"], quitRetWindow: ["laugh"], quitRetDrop: ["smug", "shrug"], songFav: ["laugh", "snap"], homeHum: ["sly", "twirl_moustache"], "homeHum#1": ["smug", "snap"], "quitHover#1": ["nervous", "fan_self"], "quitHover#3": ["sly"], "quitHover#4": ["nervous"], quitAsk: ["shock"],
     "quitAsk#3": ["sly", "shuffle"], "quitAsk#4": ["sad", "shuffle"], "quitAsk#5": ["sly", "finger_up"], "quitAsk#6": ["suspicious"],
     "quitAsk#7": ["dare", "hat_low"], quitAskSave: ["sly"], "quitAskSave#1": ["nervous"], "quitAskSave#2": ["wink", "cards_hide"],
     quitAskLate: ["sly", "pocket_watch"], quitAskQuick: ["shock"], "quitAskQuick#0": ["shock", "shuffle"], "quitAskQuick#1": ["sly", "hat_tip"],
@@ -3185,8 +3189,19 @@ window.AIQ = window.AIQ || {};
     if (!firstVisit) return { t: say1("homeTempt") };                                // ha recargado hace nada: sin repetir el saludo
     greeted = true; return { t: say1(isWeekend() && Math.random() < 0.4 ? "homeTimeWeekend" : timeBucket()) };
   }
+  /* LE QUITAS LA MUSICA (votada 23-oct): si la musica sonaba y la bajas a cero (o la quitas), al volver a la portada viene tarareando con notas de
+     pixel que suben como sus zetas (A.trastadas.fx.notas). Una vez por sesion; si empiezas ya sin musica, no te lo echa en cara */
+  const musicOn = () => !!(A.audio && A.audio.musicOn && A.audio.vol && A.audio.vol.music > 0.001);
+  let musicSeen = false;
+  function humNotes() {
+    const r = D.faceRect && D.faceRect(); if (!r || !A.trastadas || !A.trastadas.fx || !A.trastadas.fx.notas) return;
+    if (bubble) bubble.classList.remove("on");                                       // ya lo ha dicho: fuera el bocadillo, que las notas suben por ahi
+    visit(); A.trastadas.fx.notas(r.left + r.width * 0.46, r.top - r.height * 0.015, 6);   // nacen justo encima de la chistera (su borde de arriba es el del rectangulo) y suben; nunca pisan la copa ni la mano
+  }
+  D._hum = humNotes;                                                                 // para pruebas
   function homeBeat() {
-    if (DS.retireBack) return { scene: "comeback" };                               // se jubilo: lo primero, su vuelta con el cartel (la frase de siempre si la escena no puede)
+    if (DS.retireBack) return { scene: "comeback" };
+    if (!once.hum && musicSeen && !musicOn() && LINES.homeHum) { once.hum = 1; return { t: say1("homeHum"), mood: "sly", hum: true }; }                               // se jubilo: lo primero, su vuelta con el cartel (la frase de siempre si la escena no puede)
     if (babelPend) { const b = babelPend; babelPend = null; if (Date.now() - b.at < 600000) { const o = babelBeat(b); if (o) return o; } }   // cambiaste de idioma: eso va primero
     if (entry) { const k = entry, stale = k !== "open" && Date.now() - entryAt > 10 * 60 * 1000; entry = ""; const o = !stale && opener(k); if (o && (o.t || o.chain)) return o; }
     if (verNote && homeN >= 1) { verNote = false; return { t: say1("newVersion", { v: A.VERSION }), mood: "laugh" }; }
@@ -3228,6 +3243,7 @@ window.AIQ = window.AIQ || {};
   }
   function homeTick() {
     if (!D.onHome) return;
+    if (musicOn()) musicSeen = true;
     if (dozing) { if (lastInput > afkAt) wakeUp(); homeT = setTimeout(homeTick, dozing ? 1000 : 16000 + Math.random() * 10000); return; }   // traspuesto: al volver se despierta de golpe
     const S = A.core && A.core.S;
     if (!document.querySelector(".hh") || phase() !== "title" || (S && (S.booting || S.settingsOpen)) || D.busy || tourOn() || (A.mesas && A.mesas.busy)) { homeT = setTimeout(homeTick, 2500); return; }   // solo en el inicio, sin pisar a nadie (ni al estreno de una mesa: ahi presenta la mesa, D.mesa)
@@ -3248,7 +3264,7 @@ window.AIQ = window.AIQ || {};
     if (b.tag && !tagFix()) { homeT = setTimeout(homeTick, 5000); return; }
     if (b.card) tierStamp();
     if (b.afk) D.say(b.t, { mood: b.mood, hold: 0, done: startDoze });
-    else if (b.chain) chain(b.chain); else if (b.t) D.say(b.t, { mood: b.mood || "sly", hold: holdFor(b.t) });
+    else if (b.chain) chain(b.chain); else if (b.t) D.say(b.t, { mood: b.mood || "sly", hold: b.hum ? 0 : holdFor(b.t), done: b.hum ? () => setTimeout(humNotes, 150) : undefined });   // b.hum: dicha la frase (sin bocadillo ya), tararea
     homeT = setTimeout(homeTick, (b.wait || 0) + (homeN <= 2 ? 14000 + Math.random() * 10000 : 35000 + Math.random() * 25000));   // al llegar, seguido; luego, espaciado
   }
   /* activa/desactiva las apariciones de inicio (independiente de D.on, que es solo para dentro de una partida) */

@@ -196,6 +196,21 @@ window.AIQ = window.AIQ || {};
     layer(); const [sx, sy] = toArt(x, y), zs = [pixText("z", 16, "#f3f0fa"), pixText("z", 22, "#f3f0fa"), pixText("Z", 26, "#f3f0fa")];
     add({ d: s, draw(f) { for (let i = 0; i < 3; i++) { const tt = (f.t + i * 0.6) % 1.8; g.globalAlpha = Math.max(0, 1 - tt / 1.8); g.drawImage(zs[i], Math.round(sx + tt * 12 + i * 4), Math.round(sy - tt * 22)); } } });
   };
+  /* NOTAS (votado 23-oct: «Le quitas la musica»): su nota de Pixel Lab (assets/icons/fx_nota.webp: una corchea de 11x15 en el blanco de la casa,
+     con el trazo de 2 px de sus zetas) sube desde (x, y) meciendose, tres a la vez, y se apaga, al grano del crupier. s: segundos */
+  const NOTAS = [(() => { const im = new Image(); im.decoding = "async"; im.src = "assets/icons/fx_nota.webp"; return im; })()];
+  FX.notas = (x, y, s = 5) => {
+    layer(); const [sx, sy] = toArt(x, y);
+    add({ d: s, draw(f) {                                                             // opacas, como sus zetas: nada de semitransparencias
+      const im = NOTAS[0]; if (!im.complete || !im.naturalWidth) return;
+      for (let i = 0; i < 3; i++) {
+        const t0 = i * 0.75; if (f.t < t0) continue;
+        const tt = (f.t - t0) % 2.25, k = tt / 2.25; if (f.t - tt + 2.25 > s + 0.4) continue;   // no empieza otra que no le de tiempo a acabar
+        if (k > 0.8 && Math.floor(tt * 10) % 2) continue;                              // al final de su subida parpadea y se va (como las zetas)
+        g.drawImage(im, Math.round(sx - im.naturalWidth / 2 - k * 10 + (i - 1) * 6 + Math.round(Math.sin(tt * 4 + i) * 2)), Math.round(sy - k * 40 - im.naturalHeight));
+      }
+    } });
+  };
   /* HALO detras del crupier (el foco del desfile): nunca delante de el */
   FX.halo = (ms = 3000) => { const el = A.dealer && A.dealer.el && A.dealer.el(); if (!el) return; el.classList.add("tr-halo"); setTimeout(() => el.classList.remove("tr-halo"), ms); };
 
