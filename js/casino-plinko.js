@@ -313,7 +313,7 @@ window.AIQ = window.AIQ || {};
       if (lv === 0) { if (res.coins < res.stake) A.sfx.lose(); ov.classList.add("lose"); }
       else { if (lv >= 2) ov.classList.add("lv" + lv); A.casa.premio(lv); bump(8 * lv); if (lv >= 2) rainChips(lv === 3 ? 26 : 9, true); }
       flash(); s.classList.add("flash"); hint(null);
-      say(sit, 4, false, sit === "plkMax" ? { face: "shock", g: "tantrum" } : null);
+      say(sit, 4, false, sit === "plkMax" ? { face: "shock", g: "tantrum" } : net > 0 ? { g: "r_gana_casino" } : net < 0 ? { g: "r_pierde_casino" } : null);   // bloque D: su reaccion de casino con el cuerpo
       await sleep(600); await speechIdle(); sh.hold(2600);                                                                                       // la ultima frase se oye entera antes de cerrar (tocar la pantalla tambien cierra)
     }
 

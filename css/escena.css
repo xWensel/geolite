@@ -100,3 +100,9 @@ html.reduce-motion .esc-caja .cj-luz, html.soft-flash .esc-caja .cj-luz { animat
 .esc-caja.ya .cj-luz { animation: none; opacity: 1; } .esc-caja.ya .esc-lamp { animation: none; }                      /* recolocada: ya estaba encendida */
 .esc-caja.baja .cj-halo { display: none; } .esc-caja.baja .cj-charco { animation: none; opacity: .25; } .esc-caja.baja .esc-lamp { animation: none; filter: brightness(.42) saturate(.55); }
 #layer.hidden > .esc-caja { display: none; }
+
+/* bloque D: el telon del jefe con Movimiento en Minimo (un fundido del terciopelo, sin panos que se muevan; js/adventure.js telonFade) y la carta de
+   la ronda que reparte el crupier (vuela de su mano a la ficha del cartel, pixel art a su escala). Por encima del cartel, nunca encima del crupier */
+.adv-telon { position: fixed; inset: 0; z-index: 100006; pointer-events: none; opacity: 0; transition: opacity .3s linear; }
+.adv-telon.on { opacity: 1; }
+.adv-card { position: fixed; left: 0; top: 0; z-index: 100007; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .4)); }

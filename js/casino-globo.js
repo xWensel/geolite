@@ -430,7 +430,8 @@ window.AIQ = window.AIQ || {};
         nextAlarm: 1.3 + rnd() * 1.5, alarms: [], events: [{ at: .8 + rnd() * 4, kind: EVENT_IDS[NEXT.event] }, { at: 8 + rnd() * 8, kind: EVENT_IDS[(NEXT.event + 1 + ((rnd() * 5) | 0)) % EVENT_IDS.length] }], tickAcc: 0, blastAt: 1, burstTier: 0 };
       if (F.X <= 1000) F.lead = Math.min(F.lead, F.tB);
       ST.phase = "count"; frameEl.classList.add("fast"); setBtn(); Q(".gb-back").hidden = true; Q(".gb-ghostlbl").classList.remove("on"); mult.classList.remove("ghost");
-      react("gbIntro", 1); BC.mode = "ok"; BC.oy = OY0; BC.blast = 1; sfx.go();
+      react("gbIntro", 1);
+      BC.mode = "ok"; BC.oy = OY0; BC.blast = 1; sfx.go();
       const cnt = Q(".gb-count");
       for (let i = 0; i < 3; i++) { cnt.textContent = tr(U["c" + i]); cnt.classList.remove("on"); void cnt.offsetWidth; cnt.classList.add("on"); sfx.count(i); BC.blast = 1; await sleep(800); }
       cnt.textContent = tr(U.c3); cnt.classList.remove("on"); void cnt.offsetWidth; cnt.classList.add("on"); sfx.go(); BC.blast = 1; BC.mode = "launch"; BC.t = 0;
@@ -458,7 +459,7 @@ window.AIQ = window.AIQ || {};
       const l = tier(m); F.lvl = l; sfx.cash(l); const amp = [3, 6, 12, 22][l]; kick(amp, [250, 450, 700, 1100][l]); wash(["rgba(255,217,90,.25)", "rgba(255,217,90,.4)", "rgba(255,217,90,.6)", "rgba(255,240,170,.85)"][l]); coinRain([4, 14, 34, 80][l]);
       if (l >= 1) A.casa.premio(l);
       if (l >= 2) frameEl.classList.add("fast"), setTimeout(() => frameEl.classList.remove("fast"), 900 + l * 500);
-      react(how === "auto" ? "gbAuto" : how === "ceiling" ? "gbCeiling" : "gbCash" + l);
+      react(how === "auto" ? "gbAuto" : how === "ceiling" ? "gbCeiling" : "gbCash" + l); rigPlay("r_gana_casino");   // bloque D: cobras: su reaccion de casino con el cuerpo
       Q(".gb-ghostlbl").textContent = tr(U.ghost); Q(".gb-ghostlbl").classList.add("on"); mult.classList.add("ghost");
       showPlate(F.pay >= F.stake ? "" : "lose", how === "ceiling" ? tr(U.pCeil) : tr(U.pCash), fmtX(m), "+" + F.pay + "  (" + (F.pay - F.stake >= 0 ? "+" : "−") + Math.abs(F.pay - F.stake) + ")");
       setBtn(); if (!reduced) setTimeout(() => { if (alive() && ST.phase !== "done") { ov.classList.add("skippable"); ov.addEventListener("click", sh.close, { once: true }); } }, 2600);   // despues de cobrar, tocar la pantalla se salta el resto del vuelo
@@ -469,7 +470,7 @@ window.AIQ = window.AIQ || {};
     }
     function burst() {
       sh.outcome(); rec.done = true; cx.persist(); F.t = F.tB; F.m = F.X; ST.phase = "burst"; const g = F.cashed; sfx.engine.stop(); BURST[F.kind].contact(g); pushHist(F.X);
-      if (!g) { showPlate("lose", tr(U.pLose), fmtX(F.X), "−" + F.stake); react(F.X <= 1000 ? "gbBurst100" : F.X >= 10000 ? "gbBurstHigh" : "gbBurst"); }
+      if (!g) { showPlate("lose", tr(U.pLose), fmtX(F.X), "−" + F.stake); react(F.X <= 1000 ? "gbBurst100" : F.X >= 10000 ? "gbBurstHigh" : "gbBurst"); rigPlay("r_pierde_casino"); }   // bloque D: pierdes: su reaccion con el cuerpo
       else { const dt = F.t - F.cashT; setTimeout(() => { if (!alive()) return; if (dt < .6) react("gbCloseCall"); else if (F.X >= 3 * F.cashM && F.X >= 5000) react("gbRegret"); else if (F.X <= 1.25 * F.cashM) react("gbRelief"); }, 1300); }
       setBtn(); finishSoon();
     }

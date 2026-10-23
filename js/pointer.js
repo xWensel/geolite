@@ -148,6 +148,8 @@ window.AIQ = window.AIQ || {};
   function frame(now) {
     raf = requestAnimationFrame(frame);
     /* con el cursor invertido el raton de verdad puede quedar sobre la pregunta o la puntuacion mientras el reticulo esta en el mapa: esos paneles dejan pasar el raton al mapa */
+    /* seguro de vida: el lienzo del mapa SIEMPRE recibe el raton (pointer-events es heredable: una regla de CSS sobre #app, #layer... lo dejaria sordo, como paso en v0.3.170 con Controles invertidos) */
+    if (map && map.cv && map.cv.style.pointerEvents !== "auto") map.cv.style.setProperty("pointer-events", "auto", "important");
     const thru = !!(map && map.pickEnabled && P.m && P.m.cmirror); if (thru !== thruOn) { thruOn = thru; document.body.classList.toggle("ptr-thru", thru); }
     if (!P.on) return;
     if (P.press > 0) P.press = Math.max(0, P.press - 16);

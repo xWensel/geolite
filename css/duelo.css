@@ -113,7 +113,7 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .vs .pc > .ic { width: 128px; height: 128px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
 .du-st .vs .pc h3 { font-size: 40px; line-height: .95; overflow-wrap: anywhere; } .du-st .vs .pc .rows { width: 100%; text-align: left; }
 .du-st .vs .mid { grid-column: 6 / 8; grid-row: 2; align-self: center; display: grid; justify-items: center; gap: 8px; text-align: center; }
-.du-st .vs .mid .seatw { position: static; width: 128px; height: 128px; }
+.du-st .vs .mid .seatw { position: static; width: auto; height: auto; }   /* bloque D: el crupier a su tamano unico; el bote baja bajo el */
 .du-st .vs .mid b { font-weight: 400; font-size: 60px; line-height: .9; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08; }
 /* aqui el retrato va en el centro y su frase abajo, en la fila de la escalera hacia abajo (sin tapar los naipes) */
 .du-st .vs .mid .dealer.big { position: static; display: block; }
@@ -177,14 +177,6 @@ body.duelo-on .rail-sh { top: 58%; }                                            
 .du-st .box.w, .du-st .op.w { visibility: hidden; }
 .du-st .box:not(.w), .du-st .op:not(.w) { animation: du-pop .2s steps(2, end) both; }
 
-/* el crupier, en su esquina de la mesa: sin bocadillo, solo caras (js/crupier.js lo pinta a escala entera). Si aun acababa una frase, la termina aqui */
-.du-seat { position: absolute; z-index: 5; left: 40px; bottom: calc(80px / var(--dk, 1)); width: 224px; height: 224px; zoom: var(--dk, 1); pointer-events: none; }   /* 80 px reales: justo encima de los botones del juego, que no se escalan */
-.du-seat .own { position: absolute; inset: 0; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .4)); }
-.du-seat .own .cr-cv { position: absolute; left: 50%; top: auto; bottom: 0; transform: translateX(-50%); }
-.du-seat .dealer.big { position: absolute; left: 0; bottom: 0; flex-direction: row; align-items: flex-end; gap: 8px; }
-.du-seat .dealer:not(.in) { display: none; }
-.du-seat .dealer.big .dl-face { width: 224px; height: 224px; order: 0; }
-.du-seat .dealer.big .dl-bubble { order: 1; margin: 0 0 96px; width: max-content; max-width: 420px; clip-path: none; padding-bottom: 13px; }
 .du-tools { position: absolute; z-index: 6; left: calc(172px / var(--dk, 1)); bottom: calc(16px / var(--dk, 1)); zoom: var(--dk, 1); }
 .du-tools #duQuit { display: inline-grid; white-space: nowrap; } .du-tools #duQuit > span { grid-area: 1 / 1; }          /* «Rendirse» y «¿Seguro?» en el mismo hueco: el boton no cambia de ancho */
 .du-tools #duQuit .b, .du-tools #duQuit.armed .a { visibility: hidden; } .du-tools #duQuit.armed .b { visibility: visible; }

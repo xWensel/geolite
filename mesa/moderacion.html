@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0f0a1a">
+<title>Clasificación y moderación</title>
+<link rel="icon" href="../favicon.ico">
+<link rel="stylesheet" href="mesa.css">
+<!-- Clasificacion y moderacion de las tablas (api/submit.js): quitar puntuaciones falsas y vetar a quien las mete. Salio de la mesa del crupier
+     (mesa/index.html) en el bloque D. Misma API (api/mesa.js ?lb= / ?bans= / lbdel / unban) y la misma clave MESA_KEY, guardada en este navegador. -->
+<style>
+#app { max-width: 980px; margin: 0 auto; padding: 16px 16px 40px; display: grid; gap: 14px; }
+.lbList { display: grid; gap: 4px; }
+.lbr { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; padding: 6px 8px; background: var(--panel2); font-size: 22px; }
+.lbr i { font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--gold2); }
+.lbr b { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lbr span { font-family: var(--mono); font-size: 8px; color: var(--ink); }
+.lbr em { grid-column: 2 / -1; font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--muted); overflow-wrap: anywhere; }
+.lbr.ban { box-shadow: inset 3px 0 0 var(--red); } .lbr.ban b { color: #ff9a9a; }
+.lbFoot { display: flex; gap: 6px; align-items: center; } .lbFoot span { flex: 1; font-family: var(--mono); font-size: 8px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="door" class="hidden">
+  <div class="pl">
+    <h1>Clasificación</h1>
+    <p>Moderación de las tablas. ¿La contraseña de la mesa?</p>
+    <form id="doorForm" autocomplete="off"><input id="key" type="password" placeholder="CLAVE" aria-label="Clave" autocomplete="current-password"><button class="btn" type="submit">Entrar</button></form>
+    <div id="doorErr"></div>
+  </div>
+</div>
+
+<div class="hidden" id="appWrap">
+  <header class="bar">
+    <span class="brand">GEOLITE · CLASIFICACIÓN Y MODERACIÓN</span>
+    <span class="sp"></span>
+    <a class="lnk" href="./">Volver a la mesa del crupier</a>
+    <button id="logout" type="button">Salir</button>
+  </header>
+  <main id="app">
+    <section class="pl">
+      <h2>Tablas <small>Borrar quita al jugador de TODAS las tablas; Vetar, además, bloquea su id y su red</small></h2>
+      <div class="row" id="lbTabs"></div>
+      <div class="lbList" id="lbList"></div>
+      <div class="lbFoot"><span id="lbCount"></span><button class="chipb" id="lbPrev" type="button">◀</button><button class="chipb" id="lbNext" type="button">▶</button><button class="chipb" id="lbReload" type="button">Recargar</button></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const KEYS = "geolite.mesa.key", API = "../api/mesa";
+  let key = ""; try { key = localStorage.getItem(KEYS) || ""; } catch (e) { /* sin almacenamiento */ }
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const fmt = n => n == null ? "—" : Math.round(n).toLocaleString("es-ES");
+  const toast = (t, ms = 2400) => { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), ms); };
+  async function call(method, body, q = "") {
+    const r = await fetch(API + q, { method, headers: { "x-mesa": key, ...(body ? { "content-type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 401) { logout("Esa no es la clave."); throw new Error("key"); }
+    if (r.status === 429) { logout("Demasiados intentos. Espera 10 minutos."); throw new Error("rate"); }
+    if (r.status === 503) { logout("La mesa está apagada: falta MESA_KEY en Vercel."); throw new Error("off"); }
+    return r.json();
+  }
+  function logout(msg) {
+    key = ""; try { localStorage.removeItem(KEYS); } catch (e) { /* nada */ }
+    $("appWrap").classList.add("hidden"); $("door").classList.remove("hidden"); $("doorErr").textContent = msg || "";
+    setTimeout(() => $("key").focus(), 50);
+  }
+  $("doorForm").addEventListener("submit", async e => {
+    e.preventDefault(); key = $("key").value.trim(); if (!key) return;
+    try { const j = await call("GET", null, "?bans=1"); if (j.ok) { try { localStorage.setItem(KEYS, key); } catch (x) { /* nada */ } $("key").value = ""; enter(); } } catch (x) { /* logout ya avisa */ }
+  });
+  $("logout").onclick = () => logout("");
+  function enter() { $("door").classList.add("hidden"); $("appWrap").classList.remove("hidden"); lbLoad(); }
+
+  /* las tablas: "Hoy" y "Ayer" con la fecha local, como el juego */
+  const dk = d => "advd-" + (d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate());
+  const LBT = [["adv-all", "Siempre"], ["today", "Hoy"], ["yday", "Ayer"], ["bans", "Vetados"]];
+  let lbTab = "adv-all", lbO = 0, lbN = 0;
+  const lbBoard = () => lbTab === "today" ? dk(new Date()) : lbTab === "yday" ? dk(new Date(Date.now() - 864e5)) : lbTab;
+  function lbTabs() {
+    $("lbTabs").innerHTML = LBT.map(([k, n]) => `<button class="chipb${k === lbTab ? " on" : ""}" type="button" data-k="${k}">${n}</button>`).join("");
+    $("lbTabs").querySelectorAll(".chipb").forEach(b => b.onclick = () => { lbTab = b.dataset.k; lbO = 0; lbLoad(); });
+  }
+  async function lbLoad() {
+    lbTabs(); const L = $("lbList"), bans = lbTab === "bans";
+    $("lbPrev").disabled = bans || lbO === 0; $("lbNext").disabled = true;
+    try {
+      if (bans) {
+        const j = await call("GET", null, "?bans=1"); if (!j.ok) throw 0;
+        const all = j.ids.map(v => ["id", v]).concat(j.ips.map(v => ["ip", v]));
+        $("lbCount").textContent = j.ids.length + " ids · " + j.ips.length + " redes";
+        L.innerHTML = all.length ? all.map(([k, v]) => `<div class="lbr ban"><i>${k === "id" ? "ID" : "RED"}</i><b>${esc(v)}</b><span></span><span></span><button class="chipb" type="button" data-un="${k}" data-v="${esc(v)}">Quitar veto</button></div>`).join("") : `<p class="none">Nadie vetado.</p>`;
+        L.querySelectorAll("[data-un]").forEach(b => b.onclick = async () => { b.disabled = true; try { const r = await call("POST", { op: "unban", [b.dataset.un]: b.dataset.v }); toast(r.ok ? "Veto levantado." : "No se pudo."); } catch (e) { toast("Sin conexión."); } lbLoad(); });
+        return;
+      }
+      const j = await call("GET", null, "?lb=" + encodeURIComponent(lbBoard()) + "&o=" + lbO); if (!j.ok) throw 0;
+      lbN = j.count; $("lbNext").disabled = lbO + 50 >= lbN;
+      $("lbCount").textContent = lbN ? `${lbO + 1}-${Math.min(lbN, lbO + 50)} de ${lbN}` : "";
+      L.innerHTML = j.rows.length ? j.rows.map((r, i) => `<div class="lbr${r.ban ? " ban" : ""}"><i>${lbO + i + 1}</i><b title="${esc(r.name)}">${esc(r.name)}</b><span>${fmt(r.score)}</span>
+        <button class="chipb" type="button" data-del="${esc(r.id)}" data-n="${esc(r.name)}" data-s="${r.score}">Borrar</button><button class="chipb red" type="button" data-ban="${esc(r.id)}" data-n="${esc(r.name)}" data-s="${r.score}"${r.ban ? " disabled" : ""}>${r.ban ? "Vetado" : "Vetar"}</button>
+        <em>id ${esc(r.id)}${r.ip ? " · red " + esc(r.ip) : ""}</em></div>`).join("") : `<p class="none">Tabla vacía.</p>`;
+      L.querySelectorAll("[data-del],[data-ban]").forEach(b => b.onclick = async () => {
+        const ban = !!b.dataset.ban, id = b.dataset.ban || b.dataset.del;
+        if (!confirm(`${ban ? "¿Vetar" : "¿Borrar"} a «${b.dataset.n}» (${fmt(+b.dataset.s)} puntos)?\n\nSale de TODAS las tablas${ban ? " y su id y su red ya no podrán enviar puntuaciones" : ""}.`)) return;
+        b.disabled = true;
+        try { const r = await call("POST", { op: "lbdel", id, ban }); toast(r.ok ? `Quitado de ${r.removed} ${r.removed === 1 ? "tabla" : "tablas"}${ban ? (r.ip ? " · id y red vetados" : " · id vetado") : ""}.` : "No se pudo."); }
+        catch (e) { toast("Sin conexión."); }
+        lbLoad();
+      });
+    } catch (e) { if (key) L.innerHTML = `<p class="none">No se pudo leer la tabla.</p>`; }
+  }
+  $("lbPrev").onclick = () => { lbO = Math.max(0, lbO - 50); lbLoad(); };
+  $("lbNext").onclick = () => { if (lbO + 50 < lbN) { lbO += 50; lbLoad(); } };
+  $("lbReload").onclick = () => lbLoad();
+
+  if (key) call("GET", null, "?bans=1").then(j => j.ok ? enter() : logout("")).catch(() => logout("")); else logout("");
+})();
+</script>
+</body>
+</html>

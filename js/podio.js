@@ -178,6 +178,16 @@ window.AIQ = window.AIQ || {};
         <div class="pd-pager${res && pages > 1 ? "" : " solo"}" id="pdPager">${pagerHtml()}</div>
         <div class="pd-foot">${foot}</div></div>`;
   }
+  /* SE CUELA EN LA CLASIFICACION (votada 23-oct): 1 de cada 3 sesiones, la primera vez que abres el historico de la Aventura, el oro es suyo
+     («Don Crupier · 999.999»). Tocalo (o Intro) y le cae el sello de Descalificado: la tabla de verdad vuelve a su sitio */
+  const DQ = { roll: Math.random() < 1 / 3, done: false };
+  const DQ_T = "Descalificado|Disqualified|Disqualifié|Desclassificado|Disqualifiziert|Squalificato||取消资格|실격|失格|Дисквалифицирован|Zdyskwalifikowany";
+  function paint(el, res) {
+    el.innerHTML = body(res); el.classList.remove("wait");
+    { const rows = res.rows || []; cards(el, rows); badges($("pdList"), rows.slice(3, 3 + PER)); }
+    const play = $("pdPlay"); if (play) play.onclick = () => A.hub.screen(mode === "daily" ? "daily" : "adventure");   // hub.screen quita el podio (reset)
+    wirePager();
+  }
   async function load() {
     const el = $("pdBody"); if (!el) return;
     const n = ++seq, t = tab(); sfxT.forEach(clearTimeout); sfxT = [];
@@ -186,10 +196,22 @@ window.AIQ = window.AIQ || {};
     const res = await A.rank.topC(boardOf(mode, per), ROWS);
     if (n !== seq || t !== tab() || !$("pdBody")) return;
     first = res; pages = Math.max(1, Math.ceil(((res.count || (res.rows || []).length) - 3) / PER));
-    el.innerHTML = body(res); el.classList.remove("wait");
-    { const rows = res.rows || []; cards(el, rows); badges($("pdList"), rows.slice(3, 3 + PER)); }
-    const play = $("pdPlay"); if (play) play.onclick = () => A.hub.screen(mode === "daily" ? "daily" : "adventure");   // hub.screen quita el podio (reset)
-    wirePager(); prefetch();
+    const cuela = DQ.roll && !DQ.done && mode === "adv" && per === "all" && (res.rows || []).length > 0; if (cuela) DQ.done = true;
+    paint(el, cuela ? Object.assign({}, res, { rows: [{ id: "~crupier", name: "Don Crupier", score: 999999 }].concat(res.rows || []).slice(0, ROWS) }) : res);
+    if (cuela) {
+      const c = el.querySelector(".pd-col.p1");
+      if (c) {
+        c.classList.add("pd-fake"); c.tabIndex = 0; c.setAttribute("role", "button");
+        let hit = false;
+        const dq = () => {
+          if (hit || n !== seq) return; hit = true; A.sfx.stamp && A.sfx.stamp();
+          c.insertAdjacentHTML("beforeend", `<b class="pd-dq">${esc(P6(DQ_T))}</b>`);
+          sfxT.push(setTimeout(() => { if (n === seq && $("pdBody") === el) { paint(el, res); prefetch(); } }, 1100));
+        };
+        c.addEventListener("click", dq); c.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); dq(); } });
+      }
+    }
+    prefetch();
     /* los escalones aterrizan de bronce a oro: una ficha cada uno, cada vez mas aguda (el tuyo, moneda) */
     const rows = res.rows || [], my = A.profile.get().id;
     [[3, 430], [2, 530], [1, 630]].forEach(([p, ms], k) => { const r = rows[p - 1]; if (r) sfxT.push(setTimeout(() => { if (n === seq) (r.id === my ? A.sfx.coin(k) : A.sfx.chip(k)); }, ms)); });

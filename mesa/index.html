@@ -4,325 +4,259 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0a0d0b">
+<meta name="theme-color" content="#0f0a1a">
 <title>La mesa del crupier</title>
 <link rel="icon" href="../favicon.ico">
-<!-- La mesa del autor: una mesa de casino de verdad. Don Crupier preside, cada partida abierta de Geolite es un asiento, los efectos son fichas que
-     se lanzan al asiento y las frases rapidas son cartas que se reparten (traducidas al idioma del jugador; lo que escribes a mano llega tal cual).
-     api/mesa.js + js/vivo.js del juego. Privada: pide la clave MESA_KEY (variable de entorno de Vercel) y la recuerda en este navegador. -->
+<link rel="stylesheet" href="mesa.css">
+<!-- La mesa del autor (bloque D): ve las partidas abiertas de Geolite y actua por Don Crupier y por Comodin en directo. A la izquierda, las partidas, su
+     pantalla, las fichas de efectos, los retos y lo que le has dicho; a la derecha, los mandos: hablar (9 estilos y cartas traducidas), gestos por grupo,
+     las 24 caras, mirada y humor, Comodin, su ropa en directo (sin comprar nada en la cuenta del jugador) y las 12 trastadas. Todo se ensaya antes en el
+     crupier de la mesa (el mismo sprite del juego). api/mesa.js + js/vivo.js. Privada: pide la clave MESA_KEY y la recuerda en este navegador.
+     La clasificacion y la moderacion estan en mesa/moderacion.html. -->
 <style>
-@font-face { font-family: "Jersey 15"; src: url("../fonts/jersey-15-latin-400-normal.woff2") format("woff2"); font-display: swap; }
-@font-face { font-family: "Jersey 15"; src: url("../fonts/jersey-15-latin-ext-400-normal.woff2") format("woff2"); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
-@font-face { font-family: "Silkscreen"; src: url("../fonts/silkscreen-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Silkscreen"; src: url("../fonts/silkscreen-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Pixelify Sans"; src: url("../fonts/pixelify-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
-@font-face { font-family: "Pixelify Sans"; src: url("../fonts/pixelify-sans-cyrillic-wght-normal.woff2") format("woff2"); font-weight: 400 700; font-display: swap; unicode-range: U+0400-045F; }
-@font-face { font-family: "Fusion Pixel ZH"; src: url("../fonts/fusion-pixel-12px-zh_hans.woff2") format("woff2"); font-display: swap; unicode-range: U+3000-303F, U+4E00-9FFF, U+FF00-FFEF; }
-@font-face { font-family: "Fusion Pixel JA"; src: url("../fonts/fusion-pixel-12px-ja.woff2") format("woff2"); font-display: swap; unicode-range: U+3040-30FF; }
-@font-face { font-family: "Fusion Pixel KO"; src: url("../fonts/fusion-pixel-12px-ko.woff2") format("woff2"); font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF; }
-:root {
-  --room: #0a0d0b; --felt: #13502f; --felt-lt: #1d6b40; --felt-dk: #0b331e; --wood: #5b2e17; --wood-lt: #8a4a24; --wood-dk: #2e160a;
-  --ink: #16241c; --paper: #fdf5fd; --cream: #f2e9d6; --card: #f6eedb;
-  --brass: #c8963e; --brass-lt: #f1d79a; --red: #e8283a; --red-deep: #9b1422; --dim: rgba(242, 233, 214, .58); --print: rgba(241, 215, 154, .34);
-  --sans: "Jersey 15", "Pixelify Sans", "Fusion Pixel ZH", "Fusion Pixel JA", "Fusion Pixel KO", system-ui, sans-serif;
-  --mono: "Silkscreen", "Pixelify Sans", "Fusion Pixel ZH", "Fusion Pixel JA", "Fusion Pixel KO", monospace;
-  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  color-scheme: dark;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
-body { background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255, 214, 140, .13), transparent 70%), var(--room); color: var(--cream); font-family: var(--sans); font-size: 22px; line-height: 1.15; -webkit-font-smoothing: none; overflow-x: hidden; }
-button, input, textarea, select { font: inherit; color: inherit; }
-button { cursor: pointer; border: 0; background: none; padding: 0; }
-button:disabled { cursor: default; }
-.hidden { display: none !important; }
-img, canvas { image-rendering: pixelated; }
-.lbl { font-family: var(--mono); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
-.lbl.m { font-size: 16px; letter-spacing: .03em; }
-.dot { width: 8px; height: 8px; background: var(--red); box-shadow: 0 0 0 2px rgba(232, 40, 58, .25); flex: none; animation: blink 1.2s steps(1) infinite; }
-.dot.off { background: #556; box-shadow: none; animation: none; }
-@keyframes blink { 0%, 64% { opacity: 1; } 65%, 100% { opacity: .18; } }
-
-/* ------------------------------------------------ la mesa: madera, filo de laton y tapete (esquinas en escalera de pixel, ver stair()) */
-.table { position: relative; background: linear-gradient(180deg, var(--wood-lt), var(--wood) 35%, var(--wood-dk)); clip-path: var(--clipT); padding: 16px; filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .55)); }
-.table > .brass { background: linear-gradient(180deg, var(--brass-lt), var(--brass) 50%, #7a5520); clip-path: var(--clipB); padding: 3px; }
-.felt { position: relative; clip-path: var(--clipF); background: var(--noise), radial-gradient(ellipse 80% 60% at 50% 18%, var(--felt-lt), var(--felt) 55%, var(--felt-dk)); background-blend-mode: soft-light, normal; overflow: hidden; }
-.felt::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22; background: var(--noise); mix-blend-mode: overlay; }
-.felt::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 90px rgba(0, 0, 0, .55); }
-
-/* ------------------------------------------------ puerta */
-#door { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
-#door .table { width: min(460px, 100%); }
-#door .felt { padding: 26px 22px 28px; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 12px; text-align: center; }
-#door .cam { width: 224px; height: 224px; }
-#door h1 { margin: 0; font-weight: 400; font-size: 45px; line-height: .9; color: var(--brass-lt); text-shadow: 0 3px 0 rgba(0, 0, 0, .45); }
-#door p { margin: 0; color: var(--dim); font-size: 24px; }
-#door form { display: flex; gap: 8px; width: 100%; } #door form .btn { flex: none; }
-#door input { flex: 1; min-width: 0; padding: 10px 12px; background: rgba(5, 20, 12, .7); border: 0; box-shadow: inset 0 0 0 2px rgba(241, 215, 154, .45); outline: 0; font-family: var(--mono); font-size: 16px; color: var(--brass-lt); }
-#door input:focus { box-shadow: inset 0 0 0 2px var(--brass-lt); }
-#doorErr { color: #ff9a9a; font-family: var(--mono); font-size: 8px; min-height: 10px; }
-.btn { font-family: var(--mono); font-size: 16px; text-transform: uppercase; padding: 10px 16px; color: var(--ink); background: linear-gradient(var(--brass-lt), var(--brass)); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25), 0 3px 0 rgba(0, 0, 0, .45); transition: transform .08s, filter .15s; white-space: nowrap; }
-.btn:hover { filter: brightness(1.08); } .btn:active { transform: translateY(2px); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25), 0 1px 0 rgba(0, 0, 0, .45); }
-.btn:disabled { filter: grayscale(1) brightness(.6); }
-.btn.red { color: #fff; background: linear-gradient(#ff4a5a, var(--red-deep)); }
-
-/* ------------------------------------------------ la sala */
-#app { max-width: 1440px; margin: 0 auto; padding: 12px 16px 40px; }
-.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-.bar .brand { font-family: var(--mono); font-size: 16px; color: var(--brass-lt); letter-spacing: .04em; }
-.onair { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(0, 0, 0, .45); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .45); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: #ff8a93; }
-.bar .sp { flex: 1; }
-#net { font-family: var(--mono); font-size: 8px; color: var(--dim); }
-#logout { font-family: var(--mono); font-size: 8px; color: var(--dim); text-decoration: underline; text-transform: uppercase; }
-.room { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 20px; align-items: start; }
+.room { max-width: 1480px; margin: 0 auto; padding: 14px 16px 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 14px; align-items: start; }
 @media (max-width: 1180px) { .room { grid-template-columns: 1fr; } }
+.col { display: grid; gap: 14px; min-width: 0; }
 
-/* el crupier preside desde la cabecera de la mesa */
-.felt.main { padding: 18px 22px 30px; min-height: 640px; display: grid; grid-template-rows: auto auto auto 1fr; justify-items: center; }
-.dealer { position: relative; z-index: 1; display: grid; grid-template-columns: 224px minmax(0, 470px); align-items: end; gap: 12px; }
-@media (max-width: 640px) { .dealer { grid-template-columns: 1fr; justify-items: center; } }
-.cam { position: relative; width: 224px; height: 224px; }
-.cam::before { content: ""; position: absolute; left: 6%; right: 6%; bottom: 4px; height: 26px; background: radial-gradient(ellipse at center, rgba(0, 0, 0, .45), transparent 70%); }
-.cam .dface { position: absolute; inset: 0; }
-.play { position: absolute; right: 2px; bottom: 6px; z-index: 2; display: flex; align-items: center; gap: 7px; padding: 7px 10px 7px 8px; background: rgba(8, 24, 15, .9); box-shadow: inset 0 0 0 2px rgba(241, 215, 154, .7), 0 3px 0 rgba(0, 0, 0, .45); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--brass-lt); transition: transform .08s, background .15s; }
-.play:hover { background: rgba(36, 80, 58, .95); } .play:active { transform: translateY(2px); }
-.play i { width: 0; height: 0; border-left: 10px solid var(--brass-lt); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
-.play.on i { width: 10px; height: 12px; border: 0; background: linear-gradient(90deg, var(--brass-lt) 0 3px, transparent 3px 7px, var(--brass-lt) 7px 10px); }
-.talk { display: grid; gap: 10px; align-content: end; padding-bottom: 8px; }
+/* las partidas: lista compacta */
+.plist { display: grid; gap: 4px; }
+.seat { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 8px 10px; text-align: left; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line); }
+.seat:hover { background: #2e2350; }
+.seat.sel { box-shadow: inset 0 0 0 2px var(--gold); background: #2b2147; }
+.seat .flag { width: 30px; height: 20px; background: #000 center / cover no-repeat; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
+.seat .nm { font-size: 26px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seat .nm.anon { color: var(--muted); }
+.seat .nm small { font-family: var(--mono); font-size: 8px; color: var(--gold2); margin-left: 8px; text-transform: uppercase; }
+.seat .wh { grid-column: 2 / -1; font-size: 20px; line-height: 1.05; color: var(--sub); }
+.seat .tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.tag { font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 3px 5px; background: rgba(0, 0, 0, .35); color: var(--muted); white-space: nowrap; }
+.tag.live { color: #ff8a93; box-shadow: inset 0 0 0 1px rgba(232, 40, 58, .6); }
+.tag.camtag { color: var(--gold); }
+.empty { text-align: center; color: var(--muted); padding: 22px 10px; }
+.empty b { display: block; font-weight: 400; font-size: 30px; color: var(--sub); margin-bottom: 6px; }
+
+/* el jugador elegido */
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 640px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fact { padding: 6px 8px 7px; background: var(--panel2); min-width: 0; }
+.fact b { display: block; font-weight: 400; font-size: 22px; line-height: 1.05; overflow-wrap: anywhere; }
+.fact.q { grid-column: 1 / -1; } .fact.q b { color: var(--gold); font-size: 26px; }
+.camBtn { justify-self: start; }
+
+/* su pantalla: lo que ve el jugador, en vivo. Clic = dos toquecitos del guante; arrastrar = el guante le sigue */
+.tvf { position: relative; aspect-ratio: 16 / 10; background: #040705; box-shadow: inset 0 0 0 2px var(--line2); overflow: hidden; }
+.tvf video { position: absolute; inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); object-fit: contain; background: #000; cursor: url("/assets/icons/vivo_hand.webp") 8 0, crosshair; touch-action: none; }
+.tvhud { position: absolute; left: 12px; top: 10px; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(0, 0, 0, .6); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: #ff8a93; pointer-events: none; }
+.tvx { position: absolute; right: 10px; top: 8px; z-index: 2; }
+.tvmsg { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; padding: 20px; text-align: center; font-size: 27px; color: var(--muted); pointer-events: none; }
+.tvmsg i { display: block; margin: 0 auto 10px; width: 8px; height: 8px; background: var(--gold); animation: blink .7s steps(1) infinite; }
+
+/* las fichas de efectos */
+.tray { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { position: relative; width: 64px; display: grid; justify-items: center; gap: 3px; transition: transform .12s, filter .15s; }
+.chip img { width: 64px; height: 64px; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .55)); }
+.chip span { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--sub); white-space: nowrap; }
+.chip:hover:not(:disabled) { transform: translateY(-4px); }
+.chip:disabled { filter: grayscale(.85) brightness(.55); }
+.chip.lit img { transform: translateY(-4px); }
+.chip b { position: absolute; top: -4px; right: -6px; min-width: 22px; padding: 3px 4px; font-family: var(--mono); font-weight: 400; font-size: 8px; line-height: 1; text-align: center; color: var(--inkd); background: var(--gold); box-shadow: 0 2px 0 rgba(0, 0, 0, .5); opacity: 0; pointer-events: none; }
+.chip.lit b { opacity: 1; }
+.chip.on b { color: #fff; background: var(--green); }
+.deny { animation: deny .3s steps(2); }
+@keyframes deny { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+.hint { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
+.hint em { font-style: normal; color: var(--gold); }
+.flyer { position: fixed; z-index: 50; width: 64px; height: 64px; pointer-events: none; image-rendering: pixelated; }
+
+/* los retos de la Aventura */
+.rgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+.rc { position: relative; width: 104px; min-height: 92px; padding: 8px 6px 6px; display: grid; justify-items: center; align-content: start; gap: 4px; text-align: center; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line); }
+.rc img { width: 48px; height: 48px; }
+.rc span { font-family: var(--mono); font-size: 8px; line-height: 1.25; text-transform: uppercase; color: var(--sub); }
+.rc b { font-family: var(--mono); font-weight: 400; font-size: 8px; letter-spacing: .12em; color: var(--muted); }
+.rc:hover:not(:disabled) { background: #2e2350; }
+.rc:disabled { filter: grayscale(.85) brightness(.55); }
+.rc.lit { box-shadow: inset 0 0 0 2px var(--gold); } .rc.lit b { color: #ff8a93; }
+
+/* lo que le has dicho */
+.log { display: grid; gap: 6px; max-height: 260px; overflow: auto; }
+.lg { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; font-size: 20px; }
+.lg i { font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--muted); }
+.lg.ko b { color: #ff9a9a; font-weight: 400; }
+.lg b { font-weight: 400; }
+.lg em { display: block; font-style: normal; font-size: 17px; color: var(--muted); }
+
+/* el crupier de la mesa: ensayo de cara, gesto, mirada, humor y ropa antes de mandarlos */
+.stagep { grid-template-columns: 224px minmax(0, 1fr); align-items: end; gap: 12px; }
+@media (max-width: 640px) { .stagep { grid-template-columns: 1fr; justify-items: center; } }
+.stagep .cam { background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(253, 215, 66, .08), transparent 70%); }
+.play { position: absolute; right: 2px; bottom: 6px; z-index: 2; }
+.talk { display: grid; gap: 10px; align-content: end; padding-bottom: 6px; min-width: 0; }
+.whoL { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.whoL .flag { width: 36px; height: 24px; background: #000 center / cover no-repeat; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
+.whoL b { font-weight: 400; font-size: 30px; line-height: 1; color: var(--gold); overflow-wrap: anywhere; }
+.langTag { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--inkd); background: var(--gold); padding: 4px 6px; }
+.now { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
+.now b { font-weight: 400; color: var(--sub); }
 /* el bocadillo, tal cual sale en el juego */
-.bub { position: relative; justify-self: start; max-width: 470px; min-width: 230px; padding: 11px 18px 13px 16px; background: var(--paper); color: var(--ink); font-size: 27px; line-height: 1.12; box-shadow: inset 0 0 0 3px var(--ink), 0 6px 0 rgba(0, 0, 0, .4);
+.bub { position: relative; justify-self: start; max-width: 100%; min-width: 200px; padding: 11px 18px 13px 16px; background: var(--paper); color: var(--inkd); font-size: 27px; line-height: 1.12; box-shadow: inset 0 0 0 3px var(--inkd), 0 6px 0 rgba(0, 0, 0, .4);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); margin-bottom: 12px; }
 .bub .lv { display: flex; align-items: center; gap: 7px; margin: 1px 0 6px; font-family: var(--mono); font-size: 16px; line-height: 1; color: #c4152a; text-transform: uppercase; }
 .bub p { margin: 0; min-height: 1.12em; word-break: break-word; text-wrap: balance; }
-.bub p.ph { color: rgba(22, 36, 28, .38); }
+.bub p.ph { color: rgba(29, 10, 61, .38); }
 .bub .rest { visibility: hidden; }
 .bub.pop { animation: bubIn .3s cubic-bezier(.2, 1.6, .4, 1); transform-origin: 0 100%; }
 @keyframes bubIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
-/* estilos del bocadillo: maqueta (la mesa los ensaya; el juego aun no los pinta) */
 .bub.st-shout { font-size: 38px; color: #c4152a; text-transform: uppercase; padding: 16px 22px 18px; background: #fff3c4; animation: shout .09s steps(2) infinite;
   clip-path: polygon(0 6%, 4% 0, 10% 6%, 17% 0, 24% 6%, 31% 0, 38% 6%, 45% 0, 52% 6%, 59% 0, 66% 6%, 73% 0, 80% 6%, 87% 0, 94% 6%, 100% 0, 98% 30%, 100% 50%, 98% 70%, 100% 100%, 12px 100%, 0 calc(100% + 12px), 2% 70%, 0 50%, 2% 30%); }
 @keyframes shout { 0% { transform: translate(2px, -1px) rotate(-.6deg); } 50% { transform: translate(-2px, 1px) rotate(.6deg); } }
-.bub.st-tremble { font-size: 24px; } .bub.st-tremble p { animation: tremble .12s steps(2) infinite; }
+.bub.st-tremble p { animation: tremble .12s steps(2) infinite; }
 @keyframes tremble { 0% { transform: translate(1px, 0); } 50% { transform: translate(-1px, 1px); } }
-.bub.st-whisper { font-size: 20px; font-style: italic; letter-spacing: .06em; color: rgba(22, 36, 28, .62); background: #e9e2cc; box-shadow: inset 0 0 0 3px rgba(22, 36, 28, .45), 0 6px 0 rgba(0, 0, 0, .3); min-width: 160px; }
+.bub.st-whisper { font-size: 20px; font-style: italic; letter-spacing: .06em; color: rgba(29, 10, 61, .62); background: #e9e2cc; }
 .bub.st-think { font-style: italic; border-radius: 30px; clip-path: none; padding: 13px 22px 15px; }
-.bub.st-think::after { content: ""; position: absolute; left: 14px; bottom: -22px; width: 12px; height: 12px; border-radius: 50%; background: var(--paper); box-shadow: -8px 12px 0 -2px var(--paper), 0 0 0 3px var(--ink); }
-.bub.st-dark { background: #1a0a10; color: #ff4a5a; text-shadow: 0 0 8px rgba(255, 40, 60, .7); box-shadow: inset 0 0 0 3px #7a0c1a, 0 6px 0 rgba(0, 0, 0, .55); letter-spacing: .04em; }
+.bub.st-dark { background: #1a0a10; color: #ff4a5a; box-shadow: inset 0 0 0 3px #7a0c1a, 0 6px 0 rgba(0, 0, 0, .55); letter-spacing: .04em; }
 .bub.st-dark .lv { color: #ff8a93; }
 .bub.st-sing { background: #fff1b0; color: #7a4b00; animation: sway 1.1s ease-in-out infinite; transform-origin: 0 100%; }
 @keyframes sway { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg) translateY(-3px); } }
 .bub.st-glitch { background: #0c1a1a; color: #aef; text-shadow: 2px 0 #ff2e63, -2px 0 #08f9ff; animation: glitch 1.3s steps(1) infinite; box-shadow: inset 0 0 0 3px #08f9ff, 0 6px 0 rgba(0, 0, 0, .5); }
 @keyframes glitch { 0%, 88%, 100% { transform: none; } 90% { transform: translateX(5px) skewX(-6deg); } 94% { transform: translateX(-4px); } }
-.bub.st-gold { font-size: 32px; background: linear-gradient(100deg, #f1d79a 0 40%, #fff6d0 50%, #f1d79a 60% 100%) 0 0 / 250% 100%; animation: shine 2.2s linear infinite; padding: 14px 22px 16px; }
-@keyframes shine { to { background-position: -150% 0; } }
-.styles { display: flex; flex-wrap: wrap; gap: 6px; }
-.st { padding: 7px 9px; font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--brass-lt); background: rgba(0, 0, 0, .35); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .25); }
-.st:hover { background: rgba(36, 80, 58, .6); } .st.on { box-shadow: inset 0 0 0 2px var(--brass-lt); background: rgba(241, 215, 154, .16); }
-.whoL { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.whoL .flag { width: 36px; height: 24px; background: #000 center / cover no-repeat; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
-.whoL b { font-weight: 400; font-size: 32px; line-height: 1; color: var(--brass-lt); text-shadow: 0 2px 0 rgba(0, 0, 0, .45); overflow-wrap: anywhere; }
-.langTag { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--ink); background: var(--brass-lt); padding: 4px 6px; box-shadow: 0 2px 0 rgba(0, 0, 0, .4); }
+.bub.st-gold { font-size: 32px; background: #f1d79a; padding: 14px 22px 16px; }
 
-/* la tele: lo que ve el jugador, en vivo, con marco de laton. Clic = dos toquecitos del guante; arrastrar = el guante le sigue */
-.tv { position: relative; z-index: 1; width: min(100%, 900px); margin: 8px 0 18px; }
-.tvf { position: relative; aspect-ratio: 16 / 10; background: #040705; box-shadow: inset 0 0 0 3px var(--brass-lt), 0 0 0 5px #2a1608, 0 0 0 8px var(--brass), 0 12px 0 rgba(0, 0, 0, .45); overflow: hidden; }
-.tvf video { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); object-fit: contain; background: #000; cursor: url("/assets/icons/vivo_hand.webp") 8 0, crosshair; touch-action: none; }
-.tvf::after { content: ""; position: absolute; inset: 3px; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px); }
-.tvhud { position: absolute; left: 12px; top: 10px; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(0, 0, 0, .6); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: #ff8a93; pointer-events: none; }
-.tvx { position: absolute; right: 10px; top: 8px; z-index: 2; font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 6px 8px; background: rgba(0, 0, 0, .65); color: var(--brass-lt); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .5); }
-.tvmsg { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; padding: 20px; text-align: center; font-size: 27px; color: var(--dim); pointer-events: none; }
-.tvmsg i { display: block; margin: 0 auto 10px; width: 8px; height: 8px; background: var(--brass-lt); animation: blink .7s steps(1) infinite; }
-.tvtip { margin-top: 10px; text-align: center; font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: rgba(241, 215, 154, .5); }
-.felt.main.watching .print { display: none; }
-.camBtn { margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.camBtn i { width: 8px; height: 8px; background: currentColor; }
-.tag.cam { color: var(--brass-lt); }
-
-/* lo impreso en el tapete, como "BLACKJACK PAYS 3 TO 2" */
-.print { text-align: center; margin: 4px 0 14px; pointer-events: none; }
-.print h1 { margin: 0; font-weight: 400; font-size: 54px; line-height: .9; color: var(--print); letter-spacing: .01em; }
-.print p { margin: 6px 0 0; font-family: var(--mono); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; color: rgba(241, 215, 154, .26); }
-.print .line { display: block; width: min(520px, 80%); height: 2px; margin: 10px auto 0; background: linear-gradient(90deg, transparent, var(--print), transparent); }
-
-/* la bandeja de fichas del crupier */
-.rack { display: grid; justify-items: center; gap: 8px; margin-bottom: 18px; }
-.tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px 10px 10px; background: linear-gradient(180deg, var(--wood-dk), #1e0e06); box-shadow: inset 0 3px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px rgba(241, 215, 154, .25), 0 3px 0 rgba(255, 255, 255, .06); }
-.chip { position: relative; width: 64px; display: grid; justify-items: center; gap: 3px; transition: transform .12s, filter .15s; }
-.chip img { width: 64px; height: 64px; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .55)); }
-.chip span { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--brass-lt); white-space: nowrap; }
-.chip:hover:not(:disabled) { transform: translateY(-4px); }
-.chip:active:not(:disabled) { transform: translateY(1px); }
-.chip:disabled { filter: grayscale(.85) brightness(.55); }
-/* encendida (interruptor) o con su cuenta (contador): la ficha se levanta y brilla, con su placa */
-.chip.lit img { filter: drop-shadow(0 0 0 transparent) drop-shadow(0 3px 0 rgba(0, 0, 0, .55)) drop-shadow(0 0 10px rgba(241, 215, 154, .75)); transform: translateY(-4px); }
-.chip b { position: absolute; top: -4px; right: -6px; min-width: 22px; padding: 3px 4px; font-family: var(--mono); font-weight: 400; font-size: 8px; line-height: 1; text-align: center; color: var(--ink); background: var(--brass-lt); box-shadow: 0 2px 0 rgba(0, 0, 0, .5); opacity: 0; transform: scale(.6); transition: opacity .15s, transform .2s cubic-bezier(.2, 1.6, .4, 1); pointer-events: none; }
-.chip.lit b { opacity: 1; transform: none; }
-.chip.on b { color: #fff; background: #2f9a55; }
-.chip.deny { animation: deny .3s steps(2); }
-@keyframes deny { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
-.trayHint { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: rgba(241, 215, 154, .45); }
-.trayHint em { font-style: normal; color: var(--brass-lt); }
-/* los retos de la Aventura: pestanas por tipo y una placa por reto con su nivel en puntos */
-.rack.retos { gap: 10px; }
-.rtabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-.rtab { font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 7px 10px; color: var(--brass-lt); background: rgba(0, 0, 0, .35); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .35); }
-.rtab:hover { background: rgba(241, 215, 154, .12); } .rtab.on { color: var(--ink); background: var(--brass-lt); box-shadow: 0 2px 0 rgba(0, 0, 0, .5); }
-.rtab i { font-style: normal; margin-left: 5px; opacity: .8; }
-.rgrid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(100%, 980px); padding: 10px; background: linear-gradient(180deg, var(--wood-dk), #1e0e06); box-shadow: inset 0 3px 0 rgba(0, 0, 0, .5), inset 0 0 0 2px rgba(241, 215, 154, .25), 0 3px 0 rgba(255, 255, 255, .06); }
-.rc { position: relative; width: 112px; min-height: 96px; padding: 8px 6px 6px; display: grid; justify-items: center; align-content: start; gap: 4px; text-align: center; background: rgba(0, 0, 0, .3); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .25); transition: transform .12s, background .15s; }
-.rc img { width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .55)); }
-.rc span { font-family: var(--mono); font-size: 8px; line-height: 1.25; text-transform: uppercase; color: var(--brass-lt); }
-.rc b { font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: .12em; color: rgba(241, 215, 154, .3); }
-.rc:hover:not(:disabled) { transform: translateY(-3px); background: rgba(241, 215, 154, .1); }
-.rc:disabled { filter: grayscale(.85) brightness(.55); }
-.rc.lit { background: rgba(241, 215, 154, .16); box-shadow: inset 0 0 0 2px var(--brass-lt), 0 0 14px rgba(241, 215, 154, .35); }
-.rc.lit b { color: #ff8a93; }
-.rc.deny { animation: deny .3s steps(2); }
-.rclear { font-family: var(--mono); font-size: 8px; text-transform: uppercase; margin-left: 8px; padding: 5px 8px; color: var(--brass-lt); background: rgba(0, 0, 0, .45); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .5); }
-.rclear:hover:not(:disabled) { background: rgba(255, 80, 80, .25); } .rclear:disabled { opacity: .4; }
-.flyer { position: fixed; z-index: 50; width: 64px; height: 64px; pointer-events: none; image-rendering: pixelated; }
-
-/* los asientos: cajas de apuesta impresas en el tapete, en arco */
-.seats { display: flex; flex-wrap: wrap; justify-content: center; align-content: start; gap: 18px 16px; width: 100%; padding-top: 6px; }
-.seat { position: relative; width: 210px; min-height: 128px; padding: 12px 12px 12px; display: grid; grid-template-rows: auto auto 1fr; gap: 6px; text-align: left; transform: translateY(var(--dy, 0));
-  box-shadow: inset 0 0 0 2px rgba(241, 215, 154, .42), inset 0 0 0 5px rgba(0, 0, 0, .12); border-radius: 18px; background: rgba(0, 0, 0, .12); transition: box-shadow .2s, background .2s, transform .25s; }
-.seat:hover { background: rgba(255, 255, 255, .05); }
-.seat.sel { box-shadow: inset 0 0 0 3px var(--brass-lt), 0 0 0 4px rgba(241, 215, 154, .18), 0 0 26px rgba(241, 215, 154, .35); background: rgba(241, 215, 154, .08); }
-.seat.gone { opacity: .4; }
-.seat .no { position: absolute; right: 10px; top: 8px; font-family: var(--mono); font-size: 8px; color: rgba(241, 215, 154, .4); }
-.seat .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.seat .flag { width: 30px; height: 20px; flex: none; background: #000 center / cover no-repeat; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
-.seat .nm { font-size: 27px; line-height: 1; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.seat .nm.anon { color: var(--dim); }
-.seat .lg2 { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--brass-lt); }
-.seat .wh { font-size: 20px; line-height: 1.05; color: rgba(242, 233, 214, .85); }
-.seat .tags { display: flex; gap: 5px; flex-wrap: wrap; align-self: end; }
-.tag { font-family: var(--mono); font-size: 8px; text-transform: uppercase; padding: 3px 5px; background: rgba(0, 0, 0, .35); color: var(--dim); white-space: nowrap; }
-.tag.live { color: #ff8a93; box-shadow: inset 0 0 0 1px rgba(232, 40, 58, .6); }
-.seat .stack { position: absolute; right: -10px; bottom: -12px; width: 40px; height: 40px; }
-.seat .stack img { position: absolute; left: 0; width: 40px; height: 40px; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .5)); }
-.empty { align-self: center; text-align: center; color: var(--dim); padding: 30px 10px; }
-.empty b { display: block; font-weight: 400; font-size: 32px; color: var(--print); margin-bottom: 6px; }
-
-/* ------------------------------------------------ el atril del crupier (panel lateral) */
-.side { display: grid; gap: 14px; }
-.plaque { position: relative; padding: 14px 16px 16px; background: linear-gradient(#2a1608, #1b0e05); box-shadow: inset 0 0 0 2px rgba(241, 215, 154, .45), inset 0 0 0 5px rgba(0, 0, 0, .4), 0 8px 0 rgba(0, 0, 0, .45);
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
-.plaque > .lbl.m { display: block; margin-bottom: 10px; }
-.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.fact { padding: 6px 8px 7px; background: rgba(0, 0, 0, .3); box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .12); min-width: 0; }
-.fact b { display: block; font-weight: 400; font-size: 22px; line-height: 1.05; color: var(--cream); overflow-wrap: anywhere; }
-.fact.q { grid-column: 1 / -1; } .fact.q b { color: var(--brass-lt); font-size: 26px; }
-.none { color: var(--dim); font-size: 22px; }
-textarea { width: 100%; resize: none; height: 78px; padding: 10px 12px; background: rgba(5, 20, 12, .8); border: 0; outline: 0; box-shadow: inset 0 0 0 2px rgba(241, 215, 154, .4); font-family: var(--sans); font-size: 24px; line-height: 1.1; color: var(--cream); }
-textarea:focus { box-shadow: inset 0 0 0 2px var(--brass-lt); }
-.say { display: grid; gap: 8px; }
-.say .row { display: flex; gap: 8px; align-items: center; }
-.say .row .btn { flex: none; }
-.say .row .btn:not(.red) { margin-left: auto; margin-right: 0; }
-.say .row #count { margin-left: 0; }
-.tool { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid rgba(241, 215, 154, .15); }
-#mode { font-size: 20px; line-height: 1.1; color: var(--dim); min-height: 1.1em; }
-#mode b { font-weight: 400; color: var(--brass-lt); }
-#mode.quick { color: var(--cream); }
-#count { font-family: var(--mono); font-size: 8px; color: var(--dim); margin-left: auto; }
+/* hablar */
+textarea { width: 100%; resize: none; height: 72px; padding: 10px 12px; background: var(--bg); border: 0; outline: 0; box-shadow: inset 0 0 0 2px var(--line2); font-family: var(--sans); font-size: 24px; line-height: 1.1; color: var(--ink); }
+textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
+#mode { font-size: 20px; line-height: 1.1; color: var(--muted); min-height: 1.1em; margin: 0; }
+#mode b { font-weight: 400; color: var(--gold); }
+#count { font-family: var(--mono); font-size: 8px; color: var(--muted); margin-right: auto; }
 #count.max { color: #ff9a9a; }
-.faces { display: flex; flex-wrap: wrap; gap: 5px; }
-.fc { width: 44px; height: 44px; background: rgba(0, 0, 0, .35) center / 44px 44px no-repeat; box-shadow: inset 0 0 0 1px rgba(241, 215, 154, .14); transition: transform .1s; }
-.fc:hover { transform: translateY(-2px); }
-.fc.on { box-shadow: inset 0 0 0 2px var(--brass-lt); background-color: rgba(241, 215, 154, .16); }
-select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shadow: inset 0 0 0 2px rgba(241, 215, 154, .35); font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--brass-lt); }
-/* las frases rapidas son cartas del mazo del crupier */
-.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.card { position: relative; padding: 9px 10px 10px 12px; text-align: left; font-size: 20px; line-height: 1.05; color: var(--ink); background: var(--card); box-shadow: inset 0 0 0 2px #c9b98f, inset 0 0 0 4px var(--card), inset 0 0 0 5px rgba(155, 20, 34, .35), 0 4px 0 rgba(0, 0, 0, .45);
-  border-radius: 6px; transition: transform .12s, box-shadow .12s; }
-.card:hover { transform: translateY(-3px) rotate(-.6deg); }
-.card.on { box-shadow: inset 0 0 0 2px var(--brass), inset 0 0 0 4px var(--card), inset 0 0 0 5px var(--red-deep), 0 0 0 3px var(--brass-lt), 0 4px 0 rgba(0, 0, 0, .45); }
-.card small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--red-deep); }
-.log { display: grid; gap: 6px; max-height: 220px; overflow: auto; }
-.lg { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; font-size: 20px; }
-.lg i { font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--dim); }
-.lg.ko b { color: #ff9a9a; font-weight: 400; }
-.lg b { font-weight: 400; }
-.lg em { display: block; font-style: normal; font-size: 17px; color: var(--dim); }
-/* clasificacion: borrar trampas y vetar */
-.lbList { display: grid; gap: 4px; max-height: 360px; overflow: auto; margin-top: 10px; }
-.lbr { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; padding: 5px 6px; background: rgba(0, 0, 0, .28); font-size: 20px; }
-.lbr i { font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--brass); }
-.lbr b { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lbr span { font-family: var(--mono); font-size: 8px; color: var(--cream); }
-.lbr em { grid-column: 2 / -1; font-style: normal; font-family: var(--mono); font-size: 8px; color: var(--dim); overflow-wrap: anywhere; }
-.lbr.ban { box-shadow: inset 3px 0 0 var(--red); } .lbr.ban b { color: #ff9a9a; }
-.st.red { color: #ffb3b3; box-shadow: inset 0 0 0 1px rgba(232, 40, 58, .6); } .st.red:hover { background: rgba(155, 20, 34, .5); }
-.st:disabled { opacity: .4; }
-.lbFoot { display: flex; gap: 6px; align-items: center; margin-top: 8px; } .lbFoot span { flex: 1; font-family: var(--mono); font-size: 8px; color: var(--dim); }
-.toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 120px); padding: 10px 16px; background: #120a04; box-shadow: inset 0 0 0 2px var(--brass); font-family: var(--mono); font-size: 16px; color: var(--brass-lt); transition: transform .3s cubic-bezier(.2, 1.4, .4, 1); z-index: 60; max-width: calc(100vw - 32px); text-align: center; }
-.toast.on { transform: translate(-50%, 0); }
-@media (max-width: 640px) { .print h1 { font-size: 40px; } .seat { width: 100%; } .felt.main { padding: 14px 12px 24px; } .table { padding: 10px; } }
-@media (prefers-reduced-motion: reduce) { .dot { animation: none; } * { transition: none !important; } }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.card { padding: 7px 9px 8px; text-align: left; font-size: 20px; line-height: 1.05; color: var(--inkd); background: #f6eedb; box-shadow: inset 0 0 0 2px #c9b98f, 0 3px 0 rgba(0, 0, 0, .45); }
+.card:hover { background: #fff8e6; }
+.card.on { box-shadow: inset 0 0 0 3px var(--gold2), 0 3px 0 rgba(0, 0, 0, .45); }
+.card small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--red2); }
+.sub { display: grid; gap: 6px; padding-top: 8px; box-shadow: inset 0 1px 0 var(--line); }
+
+/* rejillas de mandos */
+.grid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 220px; overflow: auto; padding: 1px; }
+.faces { display: grid; grid-template-columns: repeat(auto-fill, 64px); gap: 4px; }
+.fc { position: relative; width: 64px; height: 64px; background: var(--panel2) center / 64px 64px no-repeat; box-shadow: inset 0 0 0 1px var(--line); image-rendering: pixelated; }
+.fc:hover { box-shadow: inset 0 0 0 1px var(--sub); }
+.fc.on { box-shadow: inset 0 0 0 2px var(--gold); }
+.fc span { position: absolute; left: 0; right: 0; bottom: 0; font-family: var(--mono); font-size: 8px; line-height: 10px; text-transform: uppercase; background: rgba(15, 10, 26, .85); color: var(--sub); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 2px; }
+.sw { display: flex; flex-wrap: wrap; gap: 4px; }
+.swc { width: 36px; height: 36px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5); position: relative; }
+.swc:hover { transform: translateY(-2px); }
+.swc.on { box-shadow: inset 0 0 0 2px var(--ink), 0 0 0 2px var(--gold); }
+.swc i { position: absolute; left: 2px; bottom: 2px; font-family: var(--mono); font-style: normal; font-size: 8px; color: #fff; text-shadow: 0 1px 0 #000; }
+.tras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.tr { display: grid; gap: 3px; padding: 7px 9px 8px; text-align: left; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line); }
+.tr:hover:not(:disabled) { background: #2e2350; box-shadow: inset 0 0 0 1px var(--gold2); }
+.tr:disabled { opacity: .45; }
+.tr b { font-weight: 400; font-size: 22px; line-height: 1; }
+.tr small { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
+.off .needsel { opacity: .5; }
 </style>
 </head>
 <body>
 <div id="door" class="hidden">
-  <div class="table"><div class="brass"><div class="felt">
+  <div class="pl">
     <div class="cam"><div class="dface" id="doorFace"></div></div>
     <h1>La mesa del crupier</h1>
     <p>Solo para la casa. ¿La contraseña?</p>
     <form id="doorForm" autocomplete="off"><input id="key" type="password" placeholder="CLAVE" aria-label="Clave" autocomplete="current-password"><button class="btn" type="submit">Entrar</button></form>
     <div id="doorErr"></div>
-  </div></div></div>
+  </div>
 </div>
 
-<div id="app" class="hidden">
-  <div class="bar">
-    <span class="brand">GEOLITE · SALA PRIVADA</span>
+<div id="appWrap" class="hidden">
+  <header class="bar">
+    <span class="brand">GEOLITE · LA MESA DEL CRUPIER</span>
     <span class="onair"><i class="dot" id="netDot"></i><span id="nLive">0 en antena</span></span>
     <span class="sp"></span>
     <span id="net"></span>
+    <a class="lnk" href="moderacion.html">Clasificación y moderación</a>
     <button id="logout" type="button">Salir</button>
-  </div>
-  <div class="room">
-    <div class="table"><div class="brass"><div class="felt main">
-      <div class="dealer">
-        <div class="cam"><div class="dface" id="face"></div><button class="play" id="play" type="button" title="Ensayar (Ctrl+Intro): cara, gesto y frase tal como le saldrán"><i></i><span>Ensayar</span></button></div>
-        <div class="talk">
-          <div class="bub"><div class="lv"><i class="dot"></i><span id="lvTag">EN DIRECTO</span></div><p id="prev" class="ph">Elige un asiento y hablamos.</p></div>
-          <div class="whoL" id="whoL"></div>
-        </div>
-      </div>
-      <div class="tv hidden" id="tv">
-        <div class="tvf"><video id="vid" autoplay muted playsinline></video><span class="tvhud"><i class="dot"></i><span id="tvName">Cámara</span></span><button class="tvx" id="tvx" type="button">Colgar</button><div class="tvmsg" id="tvmsg"></div></div>
-        <div class="tvtip">Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</div>
-      </div>
-      <div class="print"><h1>La mesa del crupier</h1><p>La casa siempre gana · en directo desde Geolite</p><i class="line"></i></div>
-      <div class="rack"><span class="lbl">Fichas · caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</span><div class="tray" id="tray"></div><span class="trayHint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></div>
-      <div class="rack retos"><span class="lbl">Retos del juego · los mismos de la Aventura. Lo visual (desenfoque, miopía, píxeles, batería, apagón…) cae sobre TODA su pantalla; el resto, en su pregunta</span><div class="rtabs" id="rtabs"></div><div class="rgrid" id="rgrid"></div><span class="trayHint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo<button class="rclear" id="rclear" type="button" disabled>Quitar todos</button></span></div>
-      <div class="seats" id="list"></div>
-    </div></div></div>
-
-    <aside class="side" id="stage">
-      <section class="plaque say">
-        <span class="lbl m">Habla por el crupier</span>
-        <div id="mode"></div>
-        <textarea id="txt" maxlength="160" placeholder="Escribe y pulsa Intro… (vacío: solo ensayas el gesto)" enterkeyhint="send" disabled></textarea>
-        <div class="row"><span id="count">0 / 160</span><button class="btn" id="rehBtn" type="button" title="Ensayar (Ctrl+Intro)">Ensayar</button><button class="btn red" id="send" type="button" disabled>Decir</button></div>
-        <div class="tool"><span class="lbl">Gesto</span><select id="gest" aria-label="Gesto"></select></div>
-        <div class="tool"><span class="lbl">Cara</span><div class="faces" id="faces"></div></div>
-        <div class="tool"><span class="lbl">Estilo del bocadillo</span><div class="styles" id="styles"></div></div>
-        <div class="tool"><span class="lbl">Dónde sale en su pantalla</span><div class="styles" id="poss"></div></div>
+  </header>
+  <main class="room" id="room">
+    <div class="col">
+      <section class="pl"><h2>Partidas en directo <small id="nList"></small></h2><div class="plist" id="list"></div></section>
+      <section class="pl" id="who"><h2>El jugador</h2><div id="facts"><p class="none">Elige una partida de la lista.</p></div></section>
+      <section class="pl hidden" id="tv">
+        <h2>Su pantalla <small>Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</small></h2>
+        <div class="tvf"><video id="vid" autoplay muted playsinline></video><span class="tvhud"><i class="dot"></i><span id="tvName">Cámara</span></span><button class="chipb tvx" id="tvx" type="button">Colgar</button><div class="tvmsg" id="tvmsg"></div></div>
       </section>
-      <section class="plaque"><span class="lbl m">Cartas · frases rápidas</span><div class="cards" id="quick"></div></section>
-      <section class="plaque"><span class="lbl m">El jugador</span><div id="facts"><p class="none" style="margin:0">Elige un asiento de la mesa.</p></div></section>
-      <section class="plaque"><span class="lbl m">Lo que le has dicho</span><div class="log" id="log"></div></section>
-      <section class="plaque"><span class="lbl m">Clasificación · moderación</span><div class="styles" id="lbTabs"></div><div class="lbList" id="lbList"></div>
-        <div class="lbFoot"><span id="lbCount"></span><button class="st" id="lbPrev" type="button">◀</button><button class="st" id="lbNext" type="button">▶</button><button class="st" id="lbReload" type="button">Recargar</button></div></section>
-    </aside>
-  </div>
+      <section class="pl"><h2>Fichas <small>Caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</small></h2><div class="tray" id="tray"></div><span class="hint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></section>
+      <section class="pl"><h2>Retos del juego <small>Los de la Aventura: lo visual cae sobre toda su pantalla; el resto, en su pregunta</small></h2><div class="row" id="rtabs"></div><div class="rgrid" id="rgrid"></div>
+        <div class="row"><span class="hint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo</span><button class="chipb" id="rclear" type="button" disabled>Quitar todos</button></div></section>
+      <section class="pl"><h2>Lo que le has dicho</h2><div class="log" id="log"></div></section>
+    </div>
+
+    <div class="col">
+      <section class="pl stagep">
+        <div class="cam"><div class="dface" id="face"></div><button class="chipb play" id="play" type="button" title="Ensayar (Ctrl+Intro): cara, gesto y frase tal como le saldrán">Ensayar</button></div>
+        <div class="talk">
+          <div class="bub"><div class="lv"><i class="dot"></i><span id="lvTag">EN DIRECTO</span></div><p id="prev" class="ph">Elige una partida y hablamos.</p></div>
+          <div class="whoL" id="whoL"></div>
+          <div class="now" id="nowSet"></div>
+        </div>
+      </section>
+
+      <section class="pl">
+        <h2>Habla por el crupier</h2>
+        <p id="mode"></p>
+        <textarea id="txt" maxlength="160" placeholder="Escribe y pulsa Intro… (vacío: solo ensayas)" enterkeyhint="send" disabled></textarea>
+        <div class="row"><span id="count">0 / 160</span><button class="btn ghost" id="rehBtn" type="button" title="Ensayar (Ctrl+Intro)">Ensayar</button><button class="btn red" id="send" type="button" disabled>Decir</button></div>
+        <div class="sub"><span class="lbl">Estilo del bocadillo</span><div class="row" id="styles"></div></div>
+        <div class="sub"><span class="lbl">Cartas · frases rápidas que le llegan en su idioma</span><div class="cards" id="quick"></div></div>
+      </section>
+
+      <section class="pl">
+        <h2>Gesto <small id="gestSel"></small></h2>
+        <div class="row" id="gmode"></div>
+        <div class="row" id="gtabs"></div>
+        <div class="grid" id="ggrid"></div>
+      </section>
+
+      <section class="pl">
+        <h2>Cara <small>va con la frase; o ponérsela ya</small></h2>
+        <div class="faces" id="faces"></div>
+        <div class="row"><button class="chipb needsel" id="faceNow" type="button">Ponérsela ya</button><button class="chipb" id="faceOff" type="button">Sin cara (la suya)</button></div>
+      </section>
+
+      <section class="pl">
+        <h2>Mirada y humor <small>al momento</small></h2>
+        <div class="sub"><span class="lbl">Hacia dónde mira</span><div class="row" id="gaze"></div></div>
+        <div class="sub"><span class="lbl">Su humor: cara de reposo y bucles de espera</span><div class="row" id="humor"></div></div>
+      </section>
+
+      <section class="pl">
+        <h2>Comodín <small>el gato de la casa, al momento</small></h2>
+        <div class="row" id="cat"></div>
+      </section>
+
+      <section class="pl">
+        <h2>Vestuario en directo <small>se lo pones sin comprar nada; al irte, vuelve a lo suyo</small></h2>
+        <div class="row" id="vtabs"></div>
+        <div class="sw" id="vcolors"></div>
+        <div class="sub"><span class="lbl">Piezas</span><div class="row" id="vpieces"></div></div>
+        <div class="row"><button class="chipb" id="vReset" type="button">Lo suyo (lo que lleva el jugador)</button><button class="chipb" id="vHouse" type="button">Lo de la casa</button></div>
+      </section>
+
+      <section class="pl">
+        <h2>Trastadas <small>salen ya en su partida (si la pantalla no es la suya, el juego decide)</small></h2>
+        <div class="tras" id="tras"></div>
+      </section>
+    </div>
+  </main>
 </div>
 <div class="toast" id="toast"></div>
 
 <script src="../js/crupier-data.js"></script>
 <script src="../js/crupier.js"></script>
+<script src="../js/crupier-partes.js"></script>
+<script src="../js/crupier-pluma.js"></script>
+<script src="../js/crupier-veneciano.js"></script>
+<script src="../js/vestuario.js"></script>
 <script>
 (function () {
   const A = window.AIQ, $ = id => document.getElementById(id);
@@ -331,23 +265,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const fmt = n => n == null ? "—" : Math.round(n).toLocaleString("es-ES");
   const toast = (t, ms = 2400) => { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), ms); };
-
-  /* esquinas en escalera de pixel: la mesa tiene la cabecera redondeada (el lado del crupier) y los pies casi rectos */
-  function stair(R, r, s) {
-    /* cada esquina: puntos del cuarto de circulo en la rejilla de s px y, entre dos seguidos, el escalon (el punto de fuera del arco) */
-    const corner = (cx, cy, sx, sy, rad, rev) => {
-      const p = [], n = Math.max(1, Math.round(rad / s));
-      for (let i = 0; i <= n; i++) { const a = (i / n) * Math.PI / 2; p.push([Math.round((1 - Math.sin(a)) * rad / s) * s, Math.round((1 - Math.cos(a)) * rad / s) * s]); }
-      if (rev) p.reverse();
-      const out = [p[0]];
-      for (let i = 1; i < p.length; i++) { const [x0, y0] = p[i - 1], [x1, y1] = p[i], A1 = [x0, y1], B1 = [x1, y0], d = q => Math.hypot(q[0] - rad, q[1] - rad); if (x0 !== x1 && y0 !== y1) out.push(d(A1) > d(B1) ? A1 : B1); out.push(p[i]); }
-      return out.map(([x, y]) => `calc(${cx} + ${sx * x}px) calc(${cy} + ${sy * y}px)`);
-    };
-    return `polygon(${[].concat(corner("0%", "0%", 1, 1, R, true), corner("100%", "0%", -1, 1, R), corner("100%", "100%", -1, -1, r, true), corner("0%", "100%", 1, -1, r)).join(",")})`;
-  }
-  const big = innerWidth > 640, R = big ? 132 : 72, s = big ? 12 : 8;
-  const root = document.documentElement.style;
-  root.setProperty("--clipT", stair(R, 24, s)); root.setProperty("--clipB", stair(R - 16, 12, s)); root.setProperty("--clipF", stair(R - 19, 10, s));
+  const anyOf = a => a[Math.floor(Math.random() * a.length)];
 
   /* ------------------------------------------------ los nombres de lo que manda el juego (js/vivo.js) */
   const LANG = { es: "español", en: "inglés", fr: "francés", pt: "portugués", de: "alemán", it: "italiano", "es-419": "español de Latinoamérica", zh: "chino", ko: "coreano", ja: "japonés", ru: "ruso", pl: "polaco" };
@@ -383,12 +301,12 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   const lang = () => (selSt && selSt.l) || "es";
   const same = l => l === "es" || l === "es-419";
 
-  /* ------------------------------------------------ fichas: los efectos de los retos del juego y el humo, por encima de toda su pantalla (js/chfx.js, js/humo.js) */
-  /* rayo: uno por clic · interruptores: se quedan hasta quitarlos · contadores: x1 a x5, uno a uno */
+  /* ------------------------------------------------ fichas: los efectos de los retos del juego y el humo, por encima de toda su pantalla (js/chfx.js, js/humo.js)
+     rayo: uno por clic · interruptores: se quedan hasta quitarlos · contadores: x1 a x5, uno a uno */
   const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["humo", "Humo", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
   const KIND_ = Object.fromEntries(CHIPS.map(c => [c[0], c[2]])), NAME_ = Object.fromEntries(CHIPS.map(c => [c[0], c[1]]));
-  $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
-  /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores + el humo, que las partidas de antes de la 0.3.65 no mandan) y la mesa lo adelanta al pulsar */
+  $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
+  /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores + el humo) y la mesa lo adelanta al pulsar */
   const fxs = {}, fxAt = {};
   const parseFx = f => !f || f.length < 7 ? null : { lluvia: f[0] === "1", tormenta: f[1] === "1", apagon: f[2] === "1", terremoto: f[3] === "1", cristal: +f[4], huellas: +f[5], ventana: +f[6], humo: f[7] === "1" };
   const fxOf = sid => fxs[sid] || (fxs[sid] = { lluvia: false, tormenta: false, apagon: false, terremoto: false, humo: false, cristal: 0, huellas: 0, ventana: 0 });
@@ -396,14 +314,13 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     const F = sel ? fxOf(sel) : null;
     document.querySelectorAll(".chip").forEach(c => {
       const id = c.dataset.fx, k = KIND_[id], v = F ? F[id] : null, lit = k === "on" ? !!v : k === "n" ? v > 0 : false;
-      c.classList.toggle("lit", lit); c.classList.toggle("on", k === "on" && !!v);
+      c.disabled = !sel; c.classList.toggle("lit", lit); c.classList.toggle("on", k === "on" && !!v);
       c.querySelector("b").textContent = k === "on" ? "ON" : k === "n" && v ? "×" + v : "";
     });
     paintRetos();
   }
 
-  /* ------------------------------------------------ retos de la Aventura (A.CHAL, js/challenges.js): id, nombre, tipo, icono, que hace y lo que hace cada nivel.
-     Los absorbidos (Pangea, Barajados, Espejo del mapa...) son niveles de otro: Big bang 2 = Pangea, Big bang 3 = Barajados, Mundo del revés 2 = Espejo */
+  /* ------------------------------------------------ retos de la Aventura (A.CHAL, js/challenges.js): id, nombre, tipo, icono, que hace y lo que hace cada nivel */
   const RETOS = [
     ["shaky","Letras temblorosas","text","ch_shaky","El nombre baila y tiembla: cuesta leerlo.","Bailan y tiemblan|Más fuerte|Se dispersan y vuelven"],
     ["missing","Tinta borrada","text","ch_missing","Se borran letras del nombre; a más nivel, todas las vocales.","Falta 1/3 de las letras|Sin vocales|Sin vocales ni 1/3 de consonantes"],
@@ -458,14 +375,14 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   const RNOTE = { trap: "cambia las preguntas al repartirlas: se nota desde la ronda siguiente" };
   const RMAP = Object.fromEntries(RETOS.map(r => [r[0], r]));
   let rtab = "map";
-  const chs = {}, chAt = {};                                                   // sid -> { reto: nivel } (lo cuenta el juego; la mesa lo adelanta al pulsar)
+  const chs = {}, chAt = {};
   const parseCh = s => { const o = {}; String(s || "").split(",").forEach(p => { const [i, v] = p.split(":"); if (RMAP[i] && +v > 0) o[i] = +v; }); return o; };
   const chOf = sid => chs[sid] || (chs[sid] = {});
   const pips = n => "●".repeat(n) + "○".repeat(3 - n);
   function paintRetos() {
     const C = sel ? chOf(sel) : {}, tabs = $("rtabs"), grid = $("rgrid"); if (!tabs || !grid) return;
-    tabs.innerHTML = RK.map(([k, n]) => { const c = RETOS.filter(r => r[2] === k && C[r[0]]).length; return `<button class="rtab${k === rtab ? " on" : ""}" type="button" data-k="${k}">${n}${c ? `<i>×${c}</i>` : ""}</button>`; }).join("");
-    tabs.querySelectorAll(".rtab").forEach(b => b.onclick = () => { rtab = b.dataset.k; paintRetos(); });
+    tabs.innerHTML = RK.map(([k, n]) => { const c = RETOS.filter(r => r[2] === k && C[r[0]]).length; return `<button class="chipb${k === rtab ? " on" : ""}" type="button" data-k="${k}">${n}${c ? ` ×${c}` : ""}</button>`; }).join("");
+    tabs.querySelectorAll(".chipb").forEach(b => b.onclick = () => { rtab = b.dataset.k; paintRetos(); });
     grid.innerHTML = RETOS.filter(r => r[2] === rtab).map(([id, n, k, ico, d, lv]) => {
       const v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nAfecta a TODA la pantalla, no solo a la bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
       return `<button class="rc${v ? " lit" : ""}" type="button" data-id="${id}" title="${esc(tip)}"${sel ? "" : " disabled"}><img src="../assets/icons/${ico}.webp" alt=""><span>${esc(n)}</span><b>${pips(v)}</b></button>`;
@@ -478,7 +395,6 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     });
     $("rclear").disabled = !sel || !Object.keys(C).length;
   }
-  /* un reto: d = +1 (sube un nivel, hasta 3) o -1 (lo baja; el 0 lo quita) */
   async function retoHit(c, d) {
     if (!sel) return; const id = c.dataset.id, r = RMAP[id], C = chOf(sel), n = (C[id] || 0) + d;
     if (n < 0 || n > 3) return deny(c);
@@ -495,13 +411,57 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     try { await call("POST", { op: "ch", sid: sel, ch: "*", v: 0 }); toast("Retos quitados.", 1400); } catch (e) { toast("Sin conexión."); }
   }
 
-  /* ------------------------------------------------ el crupier de la mesa (el mismo sprite del juego) */
-  const FACES = ["sly", "laugh", "wink", "smug", "suspicious", "shock", "angry", "furious", "dare", "innocent", "puzzled", "nervous", "sad", "bored", "bow", "dark"];
-  const GEST = ["", "hat_tip", "hat_off_bow", "point", "finger_wag", "finger_up", "shh", "beckon", "slow_clap", "facepalm", "shrug", "twirl_moustache", "wink", "snap", "magic_pass", "coin_toss", "pocket_watch", "lean_in", "head_tilt", "hand_heart", "tantrum", "nod", "slow_blink", "turn_away", "yawn"];
-  const GNAME = { "": "Sin gesto", hat_tip: "Toca el ala", hat_off_bow: "Reverencia", point: "Señala", finger_wag: "No, no, no", finger_up: "Un momento", shh: "Chist", beckon: "Ven aquí", slow_clap: "Aplauso lento", facepalm: "Palmada en la cara", shrug: "Se encoge", twirl_moustache: "Atusa el bigote", wink: "Guiño", snap: "Chasquido", magic_pass: "Pase mágico", coin_toss: "Lanza moneda", pocket_watch: "Mira el reloj", lean_in: "Se acerca", head_tilt: "Ladea la cabeza", hand_heart: "Mano al pecho", tantrum: "Rabieta", nod: "Asiente", slow_blink: "Parpadeo lento", turn_away: "Se da la vuelta", yawn: "Bosteza" };
-  let face = "sly", gest = "", spr = null, doorSpr = null, quick = null;
-  const head = (f, el) => { const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = c.height = 44; const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(im, 42, 36, 44, 44, 0, 0, 44, 44); el.style.backgroundImage = `url(${c.toDataURL()})`; }; im.src = A.crupier.still(f, 1); };
-  const mount = (host, o) => { const s = A.crupier.mount(host, Object.assign({ round: true }, o)); s.set("sly"); return s; };
+  /* ------------------------------------------------ EL CRUPIER Y COMODIN: nombres de lo que puede hacer (los ids son los de js/crupier-data.js) */
+  const CARA = { sly: "normal", laugh: "risa", angry: "enfado", shock: "sorpresa", wink: "guiño", suspicious: "sospecha", smug: "chulería", sad: "tristeza", nervous: "nervios",
+    innocent: "inocencia", bored: "aburrido", sleep: "sueño", furious: "furia", puzzled: "desconcierto", dare: "desafío", bow: "reverencia", dark: "a oscuras", dark_vexed: "a oscuras 2",
+    admirado: "admirado", tramando: "tramando", orgulloso: "orgulloso", aliviado: "aliviado", cansado: "cansado", ofendido: "ofendido" };
+  const GN = {
+    hat_tip: "Toca el ala", hat_off_bow: "Reverencia", hat_pop: "Bote de chistera", hat_low: "Chistera baja", hat_chest: "Chistera al pecho", shuffle: "Baraja", deal_card: "Reparte",
+    card_reveal: "Enseña la carta", fan_self: "Se abanica", fan_open: "Abre el abanico", crumple: "Arruga", cards_hide: "Esconde las cartas", point: "Señala", tantrum: "Rabieta",
+    droop: "Se hunde", shrug: "Se encoge", finger_wag: "No, no, no", finger_up: "Un momento", shh: "Chist", beckon: "Ven aquí", pinch: "Por un pelo", slow_clap: "Aplauso lento",
+    facepalm: "Mano a la cara", scratch_head: "Se rasca", twirl_moustache: "Atusa el bigote", preen: "Se arregla", pocket_watch: "Reloj de bolsillo", coin_toss: "Lanza moneda",
+    stamp: "Sella", jot: "Apunta", glass_knock: "Toca el cristal", snap: "Chasquido", magic_pass: "Pase mágico", turn_away: "Se da la vuelta", head_tilt: "Ladea la cabeza",
+    hand_heart: "Mano al pecho", cards_tap: "Golpea las cartas", pocket_coin: "Se guarda la moneda", blow: "Sopla", yawn: "Bosteza", palco_clap: "Aplauso de palco",
+    nod: "Asiente", sway: "Se mece", tremble: "Tiembla", tremble_body: "Tiembla entero", lean_in: "Se acerca", freeze: "Se congela", slow_blink: "Parpadeo lento", wink: "Guiño",
+    r_acierto: "Acierto", r_fallo: "Fallo", r_diana: "Diana", r_pelos: "Por los pelos", r_racha: "Racha", r_racha_rota: "Racha rota", r_ultimo_seg: "Último segundo",
+    r_tiempo: "Se acabó el tiempo", r_otro_pais: "Otro país", r_mar: "En el mar", r_compra: "Compras", r_vende: "Vendes", r_reliquia: "Reliquia", r_logro: "Logro",
+    r_vida: "Pierdes una vida", r_ultima_vida: "Última vida", r_jefe_vencido: "Jefe vencido", r_gana_casino: "Ganas al casino", r_pierde_casino: "Pierdes al casino",
+    r_tienda: "La tienda", r_prueba_ropa: "Te pruebas ropa", r_vuelves: "Vuelves", r_mando: "Coges el mando", r_te_vas: "Te vas",
+    e_reparte: "Reparte la carta", e_jefe: "El jefe", e_sella: "Sella el ticket", e_truco: "Truco de la carta", e_desfile: "Desfile", e_despedida: "Despedida", e_cascada: "Cascada",
+    e_paga: "Paga fichas", e_reloj: "Mira el reloj", e_moneda: "La moneda", e_invita: "Te invita",
+    b_corta: "Corta la baraja", b_guante: "Ajusta el guante", b_peso: "Cambia el peso", b_estira: "Se estira", b_carta: "Voltea una carta", b_ficha: "Juega con una ficha",
+  };
+  const gname = id => { const [g, c] = String(id).split("@"); return (GN[g] || g) + (c ? " · " + (CARA[c] || c) : ""); };
+  /* los gestos por grupo: los da el juego (A.crupier.groups); si este crupier.js aun no lo tiene, se sacan de los datos por su nombre */
+  function groups() {
+    try { const g = A.crupier.groups && A.crupier.groups(); if (g && g.reacciones) return g; } catch (e) { /* abajo */ }
+    const D = A.CRUPIER_DATA, ids = Object.keys(D.gest), code = (A.crupier.gestures ? A.crupier.gestures() : []).filter(g => !D.gest[g]);
+    return { reacciones: ids.filter(i => i.startsWith("r_")), escena: ids.filter(i => i.startsWith("e_")), espera: ids.filter(i => i.startsWith("b_")),
+      clasicos: ids.filter(i => !/^[reb]_/.test(i) && !i.includes("@")).concat(code), parejas: ids.filter(i => i.includes("@")) };
+  }
+  const GTABS = [["reacciones", "Reacciones"], ["escena", "Escena"], ["espera", "Espera"], ["clasicos", "Clásicos"], ["parejas", "Parejas con cara"]];
+  const GAZE = [["← Izquierda", -1], ["→ Derecha", 1], ["↓ Abajo", 2], ["Duda", "duda"], ["Que siga al jugador", null]];
+  /* el humor: su cara de reposo y sus bucles de espera (los de la maqueta aprobada) */
+  const HUMOR = [["Según su partida", null], ["Contento", "contento"], ["Tenso", "tenso"], ["Picado", "picado"], ["Aburrido", "aburrido"], ["Admirado", "admirado"]];
+  const HUMOR_PREV = { contento: ["sly", ["shuffle", "b_carta", "b_ficha", "b_corta"]], tenso: ["nervous", ["fan_self", "e_reloj", "cards_tap"]], picado: ["ofendido", ["cards_tap", "b_guante", "finger_wag"]],
+    aburrido: ["bored", ["b_estira", "b_peso", "e_reloj"]], admirado: ["admirado", ["fan_open", "hand_heart", "shuffle"]] };
+  const CAT = [["espera", "Espera"], ["levanta", "Se levanta"], ["anda", "Anda"], ["salta", "Salta"], ["zarpa", "Zarpazo"], ["caricia", "Caricia (ronronea)"], ["regana", "Regañina"], ["duerme", "Se duerme"], ["despierta", "Se despierta"]];
+  const TRAS = [   /* revision del 22-oct: la partida es sagrada; las de la pregunta y el revelado ya no salen solas, solo desde aqui */
+    ["sello", "Sello gigante", "Solo desde aquí · en el revelado, DIANA"], ["cartas", "Lluvia de cartas", "Veredicto con racha de 5 (sale sola)"],
+    ["telon", "El telón del jefe", "Al empezar un jefe (sale sola)"], ["moneda", "La moneda del duelo", "Al empezar un Duelo (sale sola)"],
+    ["siesta", "La siesta de la mesa", "En la portada · bostezo y zetas"], ["desfile", "El desfile", "En la tienda · pase de modelo"],
+    ["mapa", "Comodín se pasea por el mapa", "Solo desde aquí · en la pregunta"], ["apagon", "Apagón con ojos", "Solo desde aquí · en la pregunta"],
+    ["ventana", "La ventana de mentira", "Solo desde aquí · «¿Seguro que es ahí?»"], ["guante", "El guante en su puntero", "Solo desde aquí · en la pregunta"],
+    ["ticket", "El gato y su ticket", "Solo desde aquí · en el revelado"],
+  ];
+  /* la carta de colores del vestuario (js/vestuario.js COLORS, en su orden): muestra = el color del traje; el traje azul ya es el A (#1689fb) */
+  const SWATCH = { rojo: "#e8283a", granate: "#a8142e", rosa: "#e5408f", cobre: "#c46a1b", oro: "#f5a623", verde: "#3fb54a", esmeralda: "#136b3e", turquesa: "#0dbeaf", azul: "#1689fb", morado: "#4a1d96", plata: "#8a8fa8", negro: "#3a2f58" };
+  const CASA = { traje: "morado", antifaz: "oro", pajarita: "rojo" };
+  const VTABS = [["traje", "Traje"], ["antifaz", "Antifaz"], ["pajarita", "Pajarita y cinta"]];
+
+  let face = "sly", gest = "", gmode = "frase", gtab = "reacciones", spr = null, doorSpr = null, quick = null;
+  const head = (f, el) => { const s = A.crupier.still(f, 1, "head"); if (s) el.style.backgroundImage = `url(${s})`; };
+  const mount = (host, o) => { const s = A.crupier.mount(host, Object.assign({ fidget: false }, o)); s.set("sly"); return s; };
 
   /* ------------------------------------------------ sonido de la mesa: fichas que tintinean y la voz del ensayo */
   let ac = null;
@@ -518,11 +478,20 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     if (r.status === 503) { logout("La mesa está apagada: falta MESA_KEY en Vercel."); throw new Error("off"); }
     return r.json();
   }
+  /* una accion al momento (op "act"): el juego la recibe en js/vivo.js y llama al crupier, a Comodin, al vestuario o a las trastadas */
+  async function act(a, v, ok) {
+    if (!sel) { toast("Ensayado aquí. Elige una partida para mandárselo."); return false; }
+    try {
+      const j = await call("POST", { op: "act", sid: sel, a, v });
+      if (!j.ok) toast("No se ha podido mandar."); else if (!j.live) toast("Esa partida ya se ha cerrado."); else if (ok) toast(ok, 1600);
+      return !!(j.ok && j.live);
+    } catch (e) { toast("Sin conexión: no ha salido."); return false; }
+  }
 
   /* ------------------------------------------------ puerta */
   function logout(msg) {
     key = ""; try { localStorage.removeItem(KEYS); } catch (e) { /* nada */ }
-    clearTimeout(pollT); $("app").classList.add("hidden"); $("door").classList.remove("hidden"); $("doorErr").textContent = msg || "";
+    clearTimeout(pollT); $("appWrap").classList.add("hidden"); $("door").classList.remove("hidden"); $("doorErr").textContent = msg || "";
     if (!doorSpr) doorSpr = mount($("doorFace")); doorSpr.set(msg ? "suspicious" : "sly"); if (msg) doorSpr.play("finger_wag");
     setTimeout(() => $("key").focus(), 50);
   }
@@ -532,13 +501,13 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   });
   $("logout").onclick = () => logout("");
 
-  /* ------------------------------------------------ los asientos */
+  /* ------------------------------------------------ las partidas */
   let list = [], sel = null, selSt = null, pollT = 0, watchT = 0;
   const said = {};                                                      // sid -> lo que le has dicho (en esta sesion)
   function enter(j) {
-    $("door").classList.add("hidden"); $("app").classList.remove("hidden");
+    $("door").classList.add("hidden"); $("appWrap").classList.remove("hidden");
     if (!spr) { spr = mount($("face")); setupControls(); }
-    if (j) got(j); poll(); lbLoad();
+    if (j) got(j); poll();
   }
   async function poll() {
     clearTimeout(pollT);
@@ -547,65 +516,44 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     if (key) pollT = setTimeout(poll, document.hidden ? 15000 : 3000);
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden && key) poll(); });
-  addEventListener("resize", () => arc());
   function got(j) {
     list = j.list.sort((a, b) => (a.st.t0 || 0) - (b.st.t0 || 0));
     $("nLive").textContent = list.length === 1 ? "1 partida en antena" : list.length + " partidas en antena";
+    $("nList").textContent = list.length ? list.length + (list.length === 1 ? " abierta" : " abiertas") : "";
     const L = $("list");
-    if (!list.length) L.innerHTML = `<div class="empty"><b>Mesa vacía</b>Nadie está jugando ahora mismo. El crupier baraja solo.</div>`;
-    else L.innerHTML = list.map((x, i) => { const st = x.st; return `<button class="seat${x.sid === sel ? " sel" : ""}" data-sid="${x.sid}">
-      <span class="no">PLAZA ${i + 1}</span>
-      <span class="top"><i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i><span class="nm${st.n ? "" : " anon"}">${esc(st.n || "Sin nombre")}</span></span>
-      <span class="lg2">Juega en ${esc(LANG[st.l] || st.l)}</span>
+    if (!list.length) L.innerHTML = `<div class="empty"><b>Nadie jugando</b>Ahora mismo no hay partidas abiertas. El crupier baraja solo.</div>`;
+    else L.innerHTML = list.map(x => { const st = x.st; return `<button class="seat${x.sid === sel ? " sel" : ""}" data-sid="${x.sid}">
+      <i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i>
+      <span class="nm${st.n ? "" : " anon"}">${esc(st.n || "Sin nombre")}<small>${esc(LANG[st.l] || st.l)}</small></span>
+      <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}${st.cam ? `<span class="tag camtag">Cámara</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span>${st.ch ? `<span class="tag live">${st.ch.split(",").length} reto${st.ch.includes(",") ? "s" : ""}</span>` : ""}</span>
       <span class="wh">${esc(where(st))}</span>
-      <span class="tags">${x.w ? `<span class="tag live">● Te escucha</span>` : ""}${st.cam ? `<span class="tag cam">Cámara</span>` : ""}<span class="tag">${esc(PLAT[st.p] || st.p)}</span><span class="tag">${since(st.t0)}</span>${st.ch ? `<span class="tag live">${st.ch.split(",").length} reto${st.ch.includes(",") ? "s" : ""}</span>` : ""}</span>
       </button>`; }).join("");
     for (const x of list) { const f = parseFx(x.st.fx); if (f && !(Date.now() - (fxAt[x.sid] || 0) < 5000)) fxs[x.sid] = f; if (!(Date.now() - (chAt[x.sid] || 0) < 5000)) chs[x.sid] = parseCh(x.st.ch); }
-    L.querySelectorAll(".seat").forEach(b => { b.onclick = () => pick(b.dataset.sid); const st = b.querySelector(".stack"); if (st) st.remove(); b.insertAdjacentHTML("beforeend", stackHtml(b.dataset.sid)); });
-    arc(); paintChips();
+    L.querySelectorAll(".seat").forEach(b => { b.onclick = () => pick(b.dataset.sid); });
+    paintChips();
     if (sel) { const x = list.find(y => y.sid === sel); if (x) { selSt = x.st; renderFacts(); } else gone(); }
   }
-  /* las fichas que tiene puestas, apiladas junto a su asiento */
-  const stackHtml = sid => {
-    const F = fxs[sid]; if (!F) return ""; const t = [];
-    for (const [id, , k] of CHIPS) if (k === "on" && F[id]) t.push(id); else if (k === "n") for (let i = 0; i < F[id]; i++) t.push(id);
-    return t.length ? `<span class="stack">${t.slice(-8).map((f, i) => `<img src="/mesa/fichas/${f}.webp" alt="" style="top:${-i * 5}px">`).join("")}</span>` : "";
-  };
-  /* en arco alrededor de la mesa: los del centro mas abajo, los de los lados suben */
-  function arc() {
-    const seats = [...document.querySelectorAll(".seat")]; if (!seats.length) return;
-    seats.forEach(s => s.style.setProperty("--dy", "0px"));
-    const box = $("list").getBoundingClientRect(), mid = box.left + box.width / 2, half = box.width / 2;
-    seats.forEach(s => { const r = s.getBoundingClientRect(), d = (r.left + r.width / 2 - mid) / half; s.style.setProperty("--dy", Math.round(-34 * d * d / 2) * 2 + "px"); });
-  }
 
-  /* ------------------------------------------------ la plaza elegida */
+  /* ------------------------------------------------ la partida elegida */
   function pick(sid) {
     if (sel === sid) return;
     if (sel) { camStop(); call("POST", { op: "unwatch", sid: sel }).catch(() => {}); }
     sel = sid; const x = list.find(y => y.sid === sid); selSt = x && x.st;
+    gazeV = humorV = null; if (ropa) { ropa = null; dressPrev(); } setupGaze(); setupVest(); nowSet();   // lo que la mesa le puso al anterior se fue con el (js/vivo.js, actOff)
     document.querySelectorAll(".seat").forEach(b => b.classList.toggle("sel", b.dataset.sid === sid));
-    document.querySelectorAll(".chip").forEach(c => (c.disabled = false)); paintChips(); $("txt").disabled = false; $("send").disabled = false;
-    quick = null; $("txt").value = ""; refresh();
+    $("room").classList.remove("off"); paintChips(); $("txt").disabled = false; $("send").disabled = false;
+    quick = null; $("txt").value = ""; refresh(); paintTras();
     watch(); renderFacts(); renderLog(); renderCards(); spr.set(face); spr.play("hat_tip"); clink(); clink(.07);
     $("txt").focus({ preventScroll: true });
   }
   async function watch() { clearTimeout(watchT); if (!sel) return; try { await call("POST", { op: "watch", sid: sel }); } catch (e) { /* reintenta */ } watchT = setTimeout(watch, 20000); }
   addEventListener("pagehide", () => { if (sel && key) fetch(API, { method: "POST", keepalive: true, headers: { "x-mesa": key, "content-type": "application/json" }, body: JSON.stringify({ op: "unwatch", sid: sel }) }).catch(() => {}); });
-  function gone() { camStop(true); toast("Se ha levantado de la mesa."); sel = null; selSt = null; clearTimeout(watchT); document.querySelectorAll(".chip").forEach(c => (c.disabled = true)); $("txt").disabled = true; $("send").disabled = true; paintRetos(); renderFacts(); }
+  function gone() { camStop(true); toast("Ha cerrado la partida."); sel = null; selSt = null; clearTimeout(watchT); $("room").classList.add("off"); $("txt").disabled = true; $("send").disabled = true; paintChips(); paintTras(); renderFacts(); }
 
   function setupControls() {
-    $("gest").innerHTML = GEST.map(g => `<option value="${g}">${GNAME[g]}</option>`).join("");
-    $("gest").onchange = e => { gest = e.target.value; if (gest) spr.play(gest); };
-    A.crupier.ready(() => {
-      $("faces").innerHTML = FACES.map(f => `<button class="fc${f === face ? " on" : ""}" data-f="${f}" title="${f}"></button>`).join(""); $("faces").querySelectorAll(".fc").forEach(b => head(b.dataset.f, b));
-      $("faces").querySelectorAll(".fc").forEach(b => b.onclick = () => setFace(b.dataset.f)); spr.set(face);
-    });
-    $("styles").innerHTML = STY.map(([k, n]) => `<button class="st${k === bst ? " on" : ""}" type="button" data-s="${k}">${n}</button>`).join("");
-    $("styles").querySelectorAll(".st").forEach(b => b.onclick = () => setStyle(b.dataset.s));
-    $("poss").innerHTML = POS.map(([k, n]) => `<button class="st${k === bpos ? " on" : ""}" type="button" data-p="${k}">${n}</button>`).join("");
-    $("poss").querySelectorAll(".st").forEach(b => b.onclick = () => { bpos = b.dataset.p; $("poss").querySelectorAll(".st").forEach(x => x.classList.toggle("on", x === b)); toast(bpos ? "Saldrá: " + b.textContent + ", por encima de todo." : "Saldrá donde suele."); });
     const tx = $("txt");
+    $("styles").innerHTML = STY.map(([k, n]) => `<button class="chipb${k === bst ? " on" : ""}" type="button" data-s="${k}">${n}</button>`).join("");
+    $("styles").querySelectorAll(".chipb").forEach(b => b.onclick = () => setStyle(b.dataset.s));
     $("play").onclick = () => playing ? stop(true) : rehearse();
     tx.oninput = e => { if (e) quick = null; if (playing) stop(false); refresh(); document.querySelectorAll(".card").forEach(c => c.classList.toggle("on", +c.dataset.i === quick)); };   // si tocas el texto, ya es tuyo: llega tal cual
     tx.onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); rehearse(); } else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
@@ -616,33 +564,122 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
       let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; chipHit(c, -1); }, 480); }, { passive: true });
       c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
     });
-    $("rclear").onclick = retoClear; paintRetos();
-    renderCards(); renderLog();
+    $("rclear").onclick = retoClear;
+    $("room").classList.add("off");
+    A.crupier.ready(() => { setupGest(); setupFaces(); });
+    setupGaze(); setupCat(); setupVest(); paintTras(); paintRetos(); renderCards(); renderLog(); nowSet();
   }
+
+  /* ------------------------------------------------ gestos por grupo: van con la frase o salen ya */
+  function setupGest() {
+    $("gmode").innerHTML = [["frase", "Con la próxima frase"], ["ya", "Mandarlo ya al pulsar"]].map(([k, n]) => `<button class="chipb${k === gmode ? " on" : ""}" type="button" data-m="${k}">${n}</button>`).join("");
+    $("gmode").querySelectorAll(".chipb").forEach(b => b.onclick = () => { gmode = b.dataset.m; $("gmode").querySelectorAll(".chipb").forEach(x => x.classList.toggle("on", x === b)); if (gmode === "ya") { gest = ""; paintGest(); } });
+    paintGest();
+  }
+  function paintGest() {
+    const G = groups();
+    $("gtabs").innerHTML = GTABS.filter(([k]) => (G[k] || []).length).map(([k, n]) => `<button class="chipb${k === gtab ? " on" : ""}" type="button" data-k="${k}">${n} <span style="opacity:.6">${G[k].length}</span></button>`).join("");
+    $("gtabs").querySelectorAll(".chipb").forEach(b => b.onclick = () => { gtab = b.dataset.k; paintGest(); });
+    const ids = (G[gtab] || []).slice().sort((a, b) => gname(a).localeCompare(gname(b), "es"));
+    $("ggrid").innerHTML = ids.map(id => `<button class="chipb${id === gest ? " on" : ""}" type="button" data-g="${esc(id)}" title="${esc(id)}">${esc(gname(id))}</button>`).join("");
+    $("ggrid").querySelectorAll(".chipb").forEach(b => b.onclick = () => {
+      const id = b.dataset.g; spr.release && spr.release(); spr.play(id);
+      if (gmode === "ya") { act("gest", id, gname(id) + ": ya en su pantalla."); return; }
+      gest = gest === id ? "" : id; paintGest();
+    });
+    $("gestSel").textContent = gest ? "con la frase: " + gname(gest) : gmode === "ya" ? "salen al pulsar" : "ninguno con la frase";
+  }
+
+  /* ------------------------------------------------ las 24 caras */
+  function faceList() { const D = A.CRUPIER_DATA; return Object.keys(D.caps || {}).length ? Object.keys(D.caps) : (A.crupier.list ? A.crupier.list() : Object.keys(CARA)); }
+  function setupFaces() {
+    $("faces").innerHTML = faceList().map(f => `<button class="fc${f === face ? " on" : ""}" type="button" data-f="${f}" title="${esc(CARA[f] || f)}" aria-label="Cara: ${esc(CARA[f] || f)}"><span>${esc(CARA[f] || f)}</span></button>`).join("");
+    $("faces").querySelectorAll(".fc").forEach(b => { head(b.dataset.f, b); b.onclick = () => setFace(b.dataset.f); });
+    $("faceNow").onclick = () => act("face", face, "Cara puesta: " + (CARA[face] || face) + ".");
+    $("faceOff").onclick = () => { setFace("sly"); };
+  }
+  function setFace(f) { face = f; document.querySelectorAll(".fc").forEach(c => c.classList.toggle("on", c.dataset.f === f)); spr.set(f); }
+
+  /* ------------------------------------------------ mirada y humor (al momento) */
+  let gazeV = null, humorV = null;
+  function setupGaze() {
+    $("gaze").innerHTML = GAZE.map(([n], i) => `<button class="chipb${GAZE[i][1] === gazeV ? " on" : ""}" type="button" data-i="${i}">${n}</button>`).join("");
+    $("gaze").querySelectorAll(".chipb").forEach(b => b.onclick = async () => {
+      const v = GAZE[+b.dataset.i][1]; spr.release && spr.release(); spr.set("sly"); spr.look(v);   // ensayo: la cara de la frase no cambia
+      if (await act("gaze", v, v == null ? "Mira otra vez al jugador." : "Mirada: " + b.textContent + ".")) { gazeV = v; setupGaze(); nowSet(); }
+    });
+    $("humor").innerHTML = HUMOR.map(([n, v]) => `<button class="chipb${v === humorV ? " on" : ""}" type="button" data-h="${v || ""}">${n}</button>`).join("");
+    $("humor").querySelectorAll(".chipb").forEach(b => b.onclick = async () => {
+      const v = b.dataset.h || null, P = v && HUMOR_PREV[v];
+      spr.set(P ? P[0] : face); if (P) spr.play(anyOf(P[1]));   // ensayo: la cara de la frase no cambia
+      if (await act("humor", v, v ? "Humor: " + b.textContent.toLowerCase() + "." : "Humor: según su partida.")) { humorV = v; setupGaze(); nowSet(); }
+    });
+  }
+
+  /* ------------------------------------------------ Comodin */
+  function setupCat() {
+    $("cat").innerHTML = CAT.map(([k, n]) => `<button class="chipb needsel" type="button" data-c="${k}">${n}</button>`).join("");
+    $("cat").querySelectorAll(".chipb").forEach(b => b.onclick = () => { act("cat", b.dataset.c, "Comodín: " + b.textContent.toLowerCase() + "."); });
+  }
+
+  /* ------------------------------------------------ vestuario en directo: se ensaya en el crupier de la mesa y se le manda entero (A.vestuario.preview) */
+  let vtab = "traje", ropa = null, vestT = 0;
+  const vItems = () => (A.vestuario && A.vestuario.items) || [];
+  const vSlots = () => (A.vestuario && A.vestuario.SLOTS) || ["traje", "antifaz", "pajarita", "chistera", "lunares", "clavel", "cadena", "pluma", "veneciano"];
+  const blank = () => Object.fromEntries(vSlots().map(s => [s, null]));
+  const vname = it => String(it.n || it.id).split("|")[0];
+  function setupVest() {
+    $("vtabs").innerHTML = VTABS.map(([k, n]) => `<button class="chipb${k === vtab ? " on" : ""}" type="button" data-v="${k}">${n}</button>`).join("");
+    $("vtabs").querySelectorAll(".chipb").forEach(b => b.onclick = () => { vtab = b.dataset.v; setupVest(); });
+    const R = ropa || blank(), cols = (A.vestuario && A.vestuario.colors) || Object.keys(SWATCH);
+    $("vcolors").innerHTML = cols.map(c => { const v = c === CASA[vtab] ? null : c, on = (R[vtab] || null) === v; return `<button class="swc${on ? " on" : ""}" type="button" data-c="${c}" title="${esc(c)}${c === CASA[vtab] ? " (el de la casa)" : ""}" style="background:${SWATCH[c] || "#555"}">${c === CASA[vtab] ? "<i>casa</i>" : ""}</button>`; }).join("");
+    $("vcolors").querySelectorAll(".swc").forEach(b => b.onclick = () => { const R2 = ropa || blank(); R2[vtab] = b.dataset.c === CASA[vtab] ? null : b.dataset.c; ropa = R2; dressPrev(); setupVest(); sendVest(); });
+    const P = vItems().filter(i => i.r === "p" || i.slot === "chistera");
+    $("vpieces").innerHTML = P.length ? P.map(it => `<button class="chipb${R[it.slot] === it.v ? " on" : ""}" type="button" data-id="${esc(it.id)}">${esc(vname(it))}</button>`).join("") : `<span class="none">Sin el vestuario del juego cargado.</span>`;
+    $("vpieces").querySelectorAll(".chipb").forEach(b => b.onclick = () => { const it = vItems().find(i => i.id === b.dataset.id); if (!it) return; const R2 = ropa || blank(); R2[it.slot] = R2[it.slot] === it.v ? null : it.v; ropa = R2; dressPrev(); setupVest(); sendVest(); });
+    $("vReset").onclick = () => { ropa = null; dressPrev(); setupVest(); clearTimeout(vestT); act("vest", null, "Vuelve a llevar lo suyo."); nowSet(); };
+    $("vHouse").onclick = () => { ropa = blank(); dressPrev(); setupVest(); sendVest(); };
+  }
+  function dressPrev() {
+    if (!A.vestuario || !A.vestuario.ready) return;
+    try { A.vestuario.ready(() => { const at = ropa ? A.vestuario.atlasFor(ropa) : null; spr.dress(at); spr.play(anyOf(["r_prueba_ropa", "preen", "e_desfile"])); }); } catch (e) { /* sin mapa de partes */ }
+  }
+  function sendVest() { nowSet(); clearTimeout(vestT); vestT = setTimeout(() => act("vest", ropa, "Ropa puesta en su partida."), 350); }
+
+  /* ------------------------------------------------ trastadas */
+  function paintTras() {
+    $("tras").innerHTML = TRAS.map(([id, n, c]) => `<button class="tr" type="button" data-t="${id}"${sel ? "" : " disabled"}><b>${esc(n)}</b><small>${esc(c)}</small></button>`).join("");
+    $("tras").querySelectorAll(".tr").forEach(b => b.onclick = () => { clink(); spr.play("magic_pass"); act("tras", b.dataset.t, "Trastada: " + b.querySelector("b").textContent + "."); });
+  }
+  /* lo que la mesa le tiene puesto (se va con ella al dejar de mirar) */
+  function nowSet() {
+    const t = []; if (!sel) { $("nowSet").innerHTML = ""; return; }
+    if (humorV) t.push("humor <b>" + humorV + "</b>");
+    if (gazeV !== null) t.push("mirada <b>" + (GAZE.find(g => g[1] === gazeV) || ["?"])[0].replace(/^[←→↓] /, "").toLowerCase() + "</b>");
+    if (ropa) t.push("ropa <b>de la mesa</b>");
+    $("nowSet").innerHTML = t.length ? "Le tienes puesto: " + t.join(" · ") : "";
+  }
+
   const STY = [["", "Normal"], ["shout", "Gritando"], ["tremble", "Tembloroso"], ["whisper", "Susurro"], ["think", "Pensando"], ["dark", "Siniestro"], ["sing", "Cantando"], ["glitch", "Glitch"], ["gold", "Gran anuncio"]];
   let bst = "";
-  const POS = [["", "Como siempre"], ["tl", "↖ Arriba izq."], ["tr", "↗ Arriba der."], ["bl", "↙ Abajo izq."], ["br", "↘ Abajo der."], ["c", "◎ Centro grande"]];
-  let bpos = "";
   function setStyle(s) {
-    bst = s; document.querySelectorAll(".st").forEach(b => b.classList.toggle("on", b.dataset.s === s));
+    bst = s; $("styles").querySelectorAll(".chipb").forEach(b => b.classList.toggle("on", b.dataset.s === s));
     const bub = document.querySelector(".bub"); bub.className = "bub" + (s ? " st-" + s : "");
     rehearse(outText() || "¡Ojo con lo que haces!");   // para verlo al momento aunque no haya nada escrito
   }
-  function setFace(f) { face = f; document.querySelectorAll(".fc").forEach(c => c.classList.toggle("on", c.dataset.f === f)); spr.set(f); }
   /* lo que de verdad le llegara: la carta en su idioma, o tu texto tal cual */
   const outText = () => quick != null ? phrase(QUICK[quick][1], lang()) : $("txt").value.trim();
   function refresh() {
     const tx = $("txt"), n = [...tx.value].length, out = outText(), p = $("prev"), m = $("mode"), l = lang();
     $("count").textContent = n + " / 160"; $("count").classList.toggle("max", n >= 160);
-    p.textContent = out || (sel ? "Lo que escribas sale aquí, tal cual lo verá." : "Elige un asiento y hablamos."); p.classList.toggle("ph", !out);
+    p.textContent = out || (sel ? "Lo que escribas sale aquí, tal cual lo verá." : "Elige una partida y hablamos."); p.classList.toggle("ph", !out);
     spr.talk(!!out && !playing); if (out) spr.syl();
-    m.classList.toggle("quick", quick != null);
     m.innerHTML = !sel ? "" : quick != null ? (same(l) ? "Carta: le llega tal cual." : `Carta traducida: le llega en <b>${esc(LANG[l] || l)}</b>.`) : same(l) ? "Juega en español." : `Tu texto le llega tal cual. Juega en <b>${esc(LANG[l] || l)}</b>.`;
   }
 
   function renderFacts() {
     const st = selSt, F0 = $("facts"), W = $("whoL");
-    if (!st) { F0.innerHTML = `<p class="none" style="margin:0">Elige un asiento de la mesa.</p>`; W.innerHTML = ""; refresh(); return; }
+    if (!st) { F0.innerHTML = `<p class="none">Elige una partida de la lista.</p>`; W.innerHTML = ""; refresh(); return; }
     W.innerHTML = `<i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i><b>${esc(st.n || "Sin nombre")}</b><span class="langTag">Juega en ${esc(LANG[st.l] || st.l)}</span>`;
     $("lvTag").textContent = phrase("EN DIRECTO|LIVE|EN DIRECT|AO VIVO|LIVE|IN DIRETTA|EN VIVO|直播中|생방송|生放送|В ЭФИРЕ|NA ŻYWO", st.l);
     const F = [["Juega en", PLAT[st.p] || st.p], ["Lleva", since(st.t0)], ["Versión", st.v]];
@@ -651,7 +688,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     if (st.d && st.md === "reto") F.push(["Reto", st.d]);
     F0.innerHTML = `<div class="facts"><div class="fact q"><span class="lbl">Ahora mismo</span><b>${esc(where(st))}${st.k && st.ph === "asking" ? ` · ${esc(KIND[st.k] || st.k)}` : ""}</b></div>` +
       F.map(([k, v]) => `<div class="fact"><span class="lbl">${k}</span><b>${esc(v)}</b></div>`).join("") + `</div>` +
-      (st.cam ? `<button class="btn camBtn" id="camBtn" type="button"><i></i>${mpc ? "Colgar la cámara" : "Ver su pantalla"}</button>` : `<p class="none" style="margin:10px 0 0;font-size:20px">Su pantalla solo se ve en la versión de escritorio.</p>`);
+      (st.cam ? `<button class="btn ghost camBtn" id="camBtn" type="button" style="margin-top:10px">${mpc ? "Colgar la cámara" : "Ver su pantalla"}</button>` : `<p class="note" style="margin-top:10px">Su pantalla solo se ve en la versión de escritorio.</p>`);
     const cb = $("camBtn"); if (cb) cb.onclick = () => mpc ? camStop() : camStart();
     refresh();
   }
@@ -659,68 +696,24 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     const l = lang();
     $("quick").innerHTML = QUICK.map(([f, s], i) => `<button class="card${i === quick ? " on" : ""}" data-i="${i}">${esc(phrase(s, "es"))}${sel && !same(l) ? `<small>→ ${esc(LANG[l] || l)}</small>` : ""}</button>`).join("");
     $("quick").querySelectorAll(".card").forEach(b => b.onclick = () => {
-      if (!sel) { toast("Primero elige un asiento."); return; }
+      if (!sel) { toast("Primero elige una partida."); return; }
       quick = +b.dataset.i; const [f, s] = QUICK[quick]; $("txt").value = phrase(s, "es"); setFace(f); $("txt").oninput(); clink();
       $("quick").querySelectorAll(".card").forEach(c => c.classList.toggle("on", c === b)); $("txt").focus();
     });
   }
   function renderLog() {
     const L = $("log"), a = said[sel] || [];
-    L.innerHTML = !sel ? `<p class="none" style="margin:0">—</p>` : a.length ? a.slice().reverse().map(x => `<div class="lg${x.ok ? "" : " ko"}"><i>${new Date(x.at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</i><b>${esc(x.t)}${x.es ? `<em>${esc(x.es)}</em>` : ""}</b></div>`).join("") : `<p class="none" style="margin:0">Todavía nada. Rompe el hielo.</p>`;
+    L.innerHTML = !sel ? `<p class="none">—</p>` : a.length ? a.slice().reverse().map(x => `<div class="lg${x.ok ? "" : " ko"}"><i>${new Date(x.at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</i><b>${esc(x.t)}${x.es ? `<em>${esc(x.es)}</em>` : ""}</b></div>`).join("") : `<p class="none">Todavía nada. Rompe el hielo.</p>`;
   }
 
-  /* ------------------------------------------------ clasificacion: quitar puntuaciones falsas y vetar a quien las mete (api/mesa.js ?lb=)
-     Borrar quita al jugador de TODAS las tablas (siempre, dias y Reto diario); Vetar ademas bloquea su id y su red (la IP llega cifrada) */
-  const dk = d => "advd-" + (d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate());   // "Hoy" y "Ayer" con la fecha local, como el juego
-  const LBT = [["adv-all", "Siempre"], ["today", "Hoy"], ["yday", "Ayer"], ["bans", "Vetados"]];
-  let lbTab = "adv-all", lbO = 0, lbN = 0;
-  const lbBoard = () => lbTab === "today" ? dk(new Date()) : lbTab === "yday" ? dk(new Date(Date.now() - 864e5)) : lbTab;
-  function lbTabs() {
-    $("lbTabs").innerHTML = LBT.map(([k, n]) => `<button class="st${k === lbTab ? " on" : ""}" type="button" data-k="${k}">${n}</button>`).join("");
-    $("lbTabs").querySelectorAll(".st").forEach(b => b.onclick = () => { lbTab = b.dataset.k; lbO = 0; lbLoad(); });
-  }
-  async function lbLoad() {
-    lbTabs(); const L = $("lbList"), bans = lbTab === "bans";
-    $("lbPrev").disabled = bans || lbO === 0; $("lbNext").disabled = true;
-    try {
-      if (bans) {
-        const j = await call("GET", null, "?bans=1"); if (!j.ok) throw 0;
-        const all = j.ids.map(v => ["id", v]).concat(j.ips.map(v => ["ip", v]));
-        $("lbCount").textContent = j.ids.length + " ids · " + j.ips.length + " redes";
-        L.innerHTML = all.length ? all.map(([k, v]) => `<div class="lbr ban"><i>${k === "id" ? "ID" : "RED"}</i><b>${esc(v)}</b><span></span><span></span><button class="st" type="button" data-un="${k}" data-v="${esc(v)}">Quitar veto</button></div>`).join("") : `<p class="none" style="margin:0">Nadie vetado.</p>`;
-        L.querySelectorAll("[data-un]").forEach(b => b.onclick = async () => { b.disabled = true; try { const r = await call("POST", { op: "unban", [b.dataset.un]: b.dataset.v }); toast(r.ok ? "Veto levantado." : "No se pudo."); } catch (e) { toast("Sin conexión."); } lbLoad(); });
-        return;
-      }
-      const j = await call("GET", null, "?lb=" + encodeURIComponent(lbBoard()) + "&o=" + lbO); if (!j.ok) throw 0;
-      lbN = j.count; $("lbNext").disabled = lbO + 50 >= lbN;
-      $("lbCount").textContent = lbN ? `${lbO + 1}-${Math.min(lbN, lbO + 50)} de ${lbN}` : "";
-      L.innerHTML = j.rows.length ? j.rows.map((r, i) => `<div class="lbr${r.ban ? " ban" : ""}"><i>${lbO + i + 1}</i><b title="${esc(r.name)}">${esc(r.name)}</b><span>${fmt(r.score)}</span>
-        <button class="st" type="button" data-del="${esc(r.id)}" data-n="${esc(r.name)}" data-s="${r.score}">Borrar</button><button class="st red" type="button" data-ban="${esc(r.id)}" data-n="${esc(r.name)}" data-s="${r.score}"${r.ban ? " disabled" : ""}>${r.ban ? "Vetado" : "Vetar"}</button>
-        <em>id ${esc(r.id)}${r.ip ? " · red " + esc(r.ip) : ""}</em></div>`).join("") : `<p class="none" style="margin:0">Tabla vacía.</p>`;
-      L.querySelectorAll("[data-del],[data-ban]").forEach(b => b.onclick = async () => {
-        const ban = !!b.dataset.ban, id = b.dataset.ban || b.dataset.del;
-        if (!confirm(`${ban ? "¿Vetar" : "¿Borrar"} a «${b.dataset.n}» (${fmt(+b.dataset.s)} puntos)?\n\nSale de TODAS las tablas${ban ? " y su id y su red ya no podrán enviar puntuaciones" : ""}.`)) return;
-        b.disabled = true;
-        try { const r = await call("POST", { op: "lbdel", id, ban }); toast(r.ok ? `Quitado de ${r.removed} ${r.removed === 1 ? "tabla" : "tablas"}${ban ? (r.ip ? " · id y red vetados" : " · id vetado") : ""}.` : "No se pudo."); }
-        catch (e) { toast("Sin conexión."); }
-        lbLoad();
-      });
-    } catch (e) { if (key) L.innerHTML = `<p class="none" style="margin:0">No se pudo leer la tabla.</p>`; }
-  }
-  $("lbPrev").onclick = () => { lbO = Math.max(0, lbO - 50); lbLoad(); };
-  $("lbNext").onclick = () => { if (lbO + 50 < lbN) { lbO += 50; lbLoad(); } };
-  $("lbReload").onclick = () => lbLoad();
-
-  /* ------------------------------------------------ lanzar una ficha: vuela de la bandeja a su asiento y el efecto cae en su partida */
-  /* una ficha: d = +1 (clic: poner, encender o un rayo mas) o -1 (clic derecho: quitar o apagar) */
+  /* ------------------------------------------------ lanzar una ficha: vuela de la bandeja a su fila y el efecto cae en su partida */
   async function chipHit(c, d) {
     if (!sel || c.disabled) return; const id = c.dataset.fx, k = KIND_[id], F = fxOf(sel); let v;
     if (k === "shot") { if (d < 0) return; v = undefined; }
     else if (k === "on") { if (d < 0 && !F[id]) return deny(c); v = d > 0 ? !F[id] : false; F[id] = v; }
     else { const n = F[id] + d; if (n < 0 || n > 5) return deny(c); v = F[id] = n; }
     fxAt[sel] = Date.now(); paintChips();
-    const off = k === "on" ? !v : k === "n" ? d < 0 : false;
-    fly(c, id, off);
+    fly(c, id, k === "on" ? !v : k === "n" ? d < 0 : false);
     try {
       const j = await call("POST", { op: "fx", sid: sel, fx: id, v });
       if (!(j.ok && j.live)) toast("Esa partida ya se ha cerrado.");
@@ -728,18 +721,15 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     } catch (e) { toast("Sin conexión: la ficha no ha salido."); }
   }
   function deny(c) { c.classList.remove("deny"); void c.offsetWidth; c.classList.add("deny"); tone(180, 0, .09, .04); }
-  /* la ficha vuela de la bandeja a su asiento (poner) o vuelve del asiento a la bandeja (quitar) */
   function fly(c, id, back) {
     const seat = document.querySelector(`.seat[data-sid="${sel}"]`); clink(); spr.play(back ? "snap" : "coin_toss");
-    const done = () => { if (!seat) return; const old = seat.querySelector(".stack"); if (old) old.remove(); seat.insertAdjacentHTML("beforeend", stackHtml(sel)); };
     if (!seat) return;
     const a = c.querySelector("img").getBoundingClientRect(), b = seat.getBoundingClientRect(), f = document.createElement("img");
-    f.className = "flyer"; f.src = `/mesa/fichas/${id}.webp`; f.style.left = a.left + "px"; f.style.top = a.top + "px"; document.body.appendChild(f);
-    const dx = b.right - 40 - a.left, dy = b.bottom - 44 - a.top, up = -Math.max(80, Math.abs(dx) * .25);
-    const there = `translate(${dx}px, ${dy}px) scale(.62) rotate(540deg)`, mid = `translate(${dx * .5}px, ${dy * .5 + up}px) scale(1.25) rotate(260deg)`, home = "translate(0,0) scale(1) rotate(0)";
-    if (back) done();                                                   // al quitar, sale de la pila y vuelve a la bandeja
+    f.className = "flyer"; f.src = `fichas/${id}.webp`; f.style.left = a.left + "px"; f.style.top = a.top + "px"; document.body.appendChild(f);
+    const dx = b.right - 70 - a.left, dy = b.top + b.height / 2 - 32 - a.top, up = -Math.max(80, Math.abs(dx) * .25);
+    const there = `translate(${dx}px, ${dy}px) scale(.5) rotate(540deg)`, mid = `translate(${dx * .5}px, ${dy * .5 + up}px) scale(1.2) rotate(260deg)`, home = "translate(0,0) scale(1) rotate(0)";
     const an = f.animate(back ? [{ transform: there }, { transform: mid, offset: .5 }, { transform: home }] : [{ transform: home }, { transform: mid, offset: .5 }, { transform: there }], { duration: back ? 520 : 620, easing: "cubic-bezier(.3,.6,.4,1)" });
-    an.onfinish = () => { f.remove(); clink(); clink(.05); if (!back) done(); };
+    an.onfinish = () => { f.remove(); clink(); clink(.05); };
   }
 
   /* ------------------------------------------------ LA CAMARA: su pantalla en directo (WebRTC de punto a punto; el servidor solo cruza oferta y respuesta) */
@@ -748,7 +738,7 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const iceDone = (p, ms) => new Promise(res => { if (p.iceGatheringState === "complete") return res(); const t = setTimeout(res, ms); p.addEventListener("icegatheringstatechange", () => { if (p.iceGatheringState === "complete") { clearTimeout(t); res(); } }); });
   function tvMsg(t) { $("tvmsg").innerHTML = t ? `<div><i></i>${esc(t)}</div>` : ""; }
-  function tvShow(on) { $("tv").classList.toggle("hidden", !on); document.querySelector(".felt.main").classList.toggle("watching", on); }
+  function tvShow(on) { $("tv").classList.toggle("hidden", !on); }
   async function camStart() {
     if (!sel) return; camStop(); const gen = ++camGen, sid = camSid = sel;
     tvShow(true); $("tvName").textContent = "Cámara · " + ((selSt && selSt.n) || "sin nombre"); tvMsg("Llamando a su pantalla…"); renderFacts();
@@ -800,13 +790,13 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
   /* ------------------------------------------------ ENSAYO: la escena entera como la vera el jugador (js/dealer.js) */
   let playing = false, playT = 0;
   function stop(reset) {
-    clearTimeout(playT); playing = false; const b = $("play"); b.classList.remove("on"); b.querySelector("span").textContent = "Ensayar";
+    clearTimeout(playT); playing = false; $("play").classList.remove("on"); $("play").textContent = "Ensayar";
     spr.talk(false); if (spr.release) spr.release();
     if (reset) refresh();
   }
   function rehearse(text) {
     const t = (text || outText()).trim();
-    stop(false); playing = true; const b = $("play"); b.classList.add("on"); b.querySelector("span").textContent = "Parar";
+    stop(false); playing = true; $("play").classList.add("on"); $("play").textContent = "Parar";
     if (!t) {   // sin texto: solo la cara y el gesto, para ensayar el gesto a secas
       if (spr.release) spr.release(); spr.set(face, { restart: true }); if (gest) spr.play(gest);
       playT = setTimeout(() => stop(false), 2800); return;
@@ -814,11 +804,11 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     const bub = document.querySelector(".bub"), p = $("prev"); bub.classList.remove("pop"); void bub.offsetWidth; bub.classList.add("pop");
     p.classList.remove("ph"); const sofar = document.createTextNode(""), rest = document.createElement("span"); rest.className = "rest"; rest.textContent = t; p.replaceChildren(sofar, rest);   // el bocadillo nace con su tamano final
     if (spr.release) spr.release(); spr.set(face, { restart: true }); if (gest) spr.play(gest);
-    const chars = [...t], step = face === "laugh" ? 44 : 34; let i = 0, at = 0;
+    const chars = [...t], step = face === "laugh" ? 44 : 34; let i = 0, at_ = 0;
     const tick = () => {
       if (!playing) return;
       if (i >= chars.length) { spr.talk(false); playT = setTimeout(() => stop(false), 2800); return; }   // su segundo de mas y un rato leyendose
-      sofar.data += chars[i]; at += chars[i].length; rest.textContent = t.slice(at);
+      sofar.data += chars[i]; at_ += chars[i].length; rest.textContent = t.slice(at_);
       if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && face !== "laugh") blip(i); } i++;
       playT = setTimeout(tick, step + (/[.,!?…。！？]/.test(chars[i - 1]) ? 140 : 0));
     };
@@ -828,15 +818,15 @@ select { padding: 8px 10px; background: rgba(5, 20, 12, .8); border: 0; box-shad
     const tx = $("txt"), t = outText(), es = quick != null && !same(lang()) ? phrase(QUICK[quick][1], "es") : ""; if (!t || !sel) return;
     const b = $("send"); b.disabled = true;
     try {
-      const j = await call("POST", { op: "say", sid: sel, t, e: face, g: gest, s: bst, p: bpos });
+      const j = await call("POST", { op: "say", sid: sel, t, e: face, g: gest, s: bst });
       (said[sel] = said[sel] || []).push({ t, es, at: Date.now(), ok: !!(j.ok && j.live) });
-      if (j.ok && j.live) { toast("En antena. Le llega en 1-2 s."); quick = null; tx.value = ""; tx.oninput(); rehearse(t); }   // y aqui lo ves como lo esta viendo
+      if (j.ok && j.live) { toast("En antena. Le llega en 1-2 s."); quick = null; tx.value = ""; tx.oninput(); rehearse(t); gest = ""; paintGest(); }   // y aqui lo ves como lo esta viendo
       else toast(j.ok ? "Esa partida ya se ha cerrado." : "No se ha podido enviar.");
     } catch (e) { toast("Sin conexión: no ha salido."); (said[sel] = said[sel] || []).push({ t, es, at: Date.now(), ok: false }); }
     b.disabled = false; renderLog(); renderCards(); tx.focus();
   }
 
-  if (key) call("GET").then(j => j.ok ? enter(j) : logout("")).catch(() => {}); else logout("");
+  if (key) call("GET").then(j => j.ok ? enter(j) : logout("")).catch(() => logout("")); else logout("");
 })();
 </script>
 </body>
