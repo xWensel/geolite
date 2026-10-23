@@ -61,3 +61,11 @@ html.no-shake .hh-socio.sc-v2.gain .sc-f, html.no-shake .hh-socio.sc-v2.gain .sc
 .pf-left.carta .pf-ix .ic { width: 28px; height: 28px; }
 .pf-left.carta .pf-ix span { white-space: normal; overflow: visible; text-overflow: clip; line-height: .95; text-wrap: balance; overflow-wrap: anywhere; }
 .pf-left.carta .pf-ix i { font-size: 17px; }
+
+/* v2 (El camino del socio): las ediciones de las 100 cartas. Lamina, un reflejo que cruza con el raton; holografica, el arcoiris que sigue al raton;
+   policroma, el arcoiris entero y vivo. Con el movimiento reducido del juego, quietas */
+.fx-lamina { background: linear-gradient(115deg, transparent 22%, rgba(255, 255, 255, .62) 38%, rgba(255, 246, 214, .34) 46%, transparent 60%) var(--gx, 20%) 0 / 260% 100% no-repeat; mix-blend-mode: overlay; }
+.fx-holo { background: linear-gradient(115deg, transparent 18%, rgba(255, 90, 140, .55) 32%, rgba(255, 220, 90, .55) 42%, rgba(90, 240, 180, .55) 52%, rgba(90, 160, 255, .55) 62%, transparent 76%) var(--gx, 20%) var(--gy, 0%) / 280% 280% no-repeat; mix-blend-mode: overlay; opacity: .78; }
+.fx-poli { background: linear-gradient(120deg, #ff4d6d, #ffd166, #06d6a0, #4cc9f0, #b5179e, #ff4d6d) var(--gx, 20%) var(--gy, 0%) / 300% 300%; mix-blend-mode: overlay; opacity: .68; animation: sc-poli 7s linear infinite; }
+@keyframes sc-poli { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+html.reduce-motion .fx-poli { animation: none; }

@@ -14,5 +14,5 @@ exports.pipeline = async cmds => {
    (daily-, suma de sus 3 intentos). day- (la mejor partida del dia de cualquier modo) solo se acepta de versiones anteriores del juego */
 exports.BOARD = /^(daily-\d{8}|advd-\d{8}|day-\d{8}|adv-all)$/;
 /* v0.3.174: el estilo de la carta del socio (js/socio.js, code): «categoria.marco.icono.titulo.nivel». Solo forma; el juego valida cada pieza al pintarla */
-exports.STYLE = /^\d{1,2}\.[a-z]{1,12}\.[a-z0-9_]{1,32}\.[a-z]{1,12}\.\d{1,4}$/;
+exports.STYLE = /^\d{1,2}\.[a-z]{1,12}\.[a-z0-9_]{1,32}\.[a-z]{1,12}\.\d{1,4}(\.\d{1,3}\.\d{1,3}\.\d)?$/;   // v2: + carta.fondo.material (El camino del socio)
 exports.style = v => (exports.STYLE.test(String(v || "")) ? String(v) : "");

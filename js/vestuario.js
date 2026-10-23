@@ -140,7 +140,8 @@ window.AIQ = window.AIQ || {};
   const worn = () => norm(st().wear);
   const wearing = id => { const it = get(id), w = worn(); if (!it) return false; return it.casa ? w[it.slot] === null : w[it.slot] === it.v; };
   const withItem = (id, base) => { const it = get(id), o = { ...(base || worn()) }; if (!it) return o; o[it.slot] = it.casa ? null : it.v; return o; };
-  const price = id => { const it = get(id); return !it || it.casa ? 0 : it.r === "l" ? PRICE.l : it.r === "p" ? PRICE.p : PRICE[it.slot] || 250; };
+  const full = id => { const it = get(id); return !it || it.casa ? 0 : it.r === "l" ? PRICE.l : it.r === "p" ? PRICE.p : PRICE[it.slot] || 250; };
+  const price = id => { const f = full(id), o = A.escaparate && A.escaparate.off ? A.escaparate.off("v:" + id) : 0; return o && f ? Math.round(f * (1 - o) / 10) * 10 : f; };   // con la ganga del escaparate (js/escaparate.js)
   const keyOf = o => SLOTS.map(s => o[s] || "-").join("|");
 
   /* ---------------------------------------------------------------- el recoloreado */
@@ -357,9 +358,10 @@ window.AIQ = window.AIQ || {};
     if (!A.club.spend(price(id))) return false;
     st().own[id] = Date.now(); save(); wear(id); return true;
   }
+  function give(id) { const it = get(id); if (!it || it.casa || owned(id)) return false; st().own[id] = Date.now(); save(); return true; }   // el lote: sin cobrar ni ponerla
 
   A.vestuario = {
-    items: ITEMS, SLOTS, BUY, colors: COLORS.map(c => c.k), get, owned, worn, wearing, wear, takeOff, buy, price, keyOf,
+    items: ITEMS, SLOTS, BUY, colors: COLORS.map(c => c.k), get, owned, worn, wearing, wear, takeOff, buy, give, price, full, keyOf,
     with: withItem, atlasFor, thumb, ready: prep, apply, preview, previewing: () => !!prev,
     name: id => A.pick6(get(id).n), desc: id => A.pick6(get(id).d),
     count: () => ITEMS.filter(i => !i.casa && owned(i.id)).length,

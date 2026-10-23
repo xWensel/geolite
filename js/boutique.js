@@ -71,7 +71,7 @@ window.AIQ = window.AIQ || {};
   /* v0.3.177: cuantas caben por pagina segun el alto del lienzo de diseno (a 1280x720 o 1920x1080 sobran menos filas que en la Deck 1280x800) */
   const short = () => { const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--k")) || 1; return innerHeight / k < 760; };
   const PERM = () => (short() ? 9 : 12), PERV = () => 8, PERP = () => (short() ? 6 : 9), PERC = () => 8;
-  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null, psel: null, ptab: "ret", ppage: 0, ptry: null, csel: null, ctab: "logro", cpage: 0 };
+  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null, psel: null, ptab: "ret", ppage: 0, ptry: null, csel: null, ctab: "carta", hsel: null, htick: 0, cpage: 0 };
   /* Bloque J: el vestidor (la tienda es tambien el vestuario) */
   const RX = {
     crup: "Crupier|Dealer|Croupier|Crupiê|Croupier|Croupier||荷官|딜러|ディーラー|Крупье|Krupier",
@@ -136,17 +136,163 @@ window.AIQ = window.AIQ || {};
   }
   /* el indice de la izquierda: las cuatro secciones, con su nombre siempre a la vista, lo que tienes y lo que llevas puesto */
   function stat(k) {
+    if (k === "hoy") { const T = ES().today(); return [T.slots.filter(x => !ES().owned(x)).length, T.slots.length, P6(HX.change).replace("{t}", hms(T.until))]; }
     if (k === "mesas") return [M().count(), M().list.length, M().name(M().current())];
     if (k === "vest") { const it = V().items, w = it.find(i => i.slot === "traje" && V().wearing(i.id)); return [it.filter(i => V().owned(i.id)).length, it.length, w ? V().name(w.id) : ""]; }
     if (k === "punt") { let n = 0, t = 0; PU().SLOTS.forEach(s => PU().list(s).forEach(id => { t++; if (PU().owned(s, id)) n++; })); return [n, t, PU().name("ret", PU().current("ret"))]; }
     const l = SO().icons().filter(x => x.kind !== "logro").concat(SO().titles(), SO().marcos()); return [l.filter(x => x.owned).length, l.length, SO().iconName(SO().icon())];   // lo de la tienda y de la casa; los iconos de logro se ganan solos
   }
-  const sections = () => [["mesas", "chip_g", VX.cMesas]].concat(V() ? [["vest", "boss_hat", RX.crup]] : [], A.punteros ? [["punt", "crosshair", PX.cPunt]] : [], A.socio ? [["carta", "m_prof", CX.cCarta]] : []);
+
+  /* ---------------------------------------------------------------- HOY: el escaparate del dia (js/escaparate.js). Seis piezas que aun no tienes,
+     una de ellas en ganga; debajo, el lote de tres y el regalo de la casa. A la derecha, la pieza elegida con su precio de hoy, «Lo quiero» y
+     el atajo a su seccion. Comprar aqui es la compra de su seccion (cobra el precio de hoy y te la pone) */
+  const HX = {
+    cHoy: "Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今日|오늘|今日|Сегодня|Dziś",
+    title: "Escaparate de hoy|Today's showcase|La vitrine du jour|Vitrine de hoje|Heutiges Schaufenster|La vetrina di oggi||今日橱窗|오늘의 진열장|今日のショーケース|Витрина дня|Witryna dnia",
+    change: "Cambia en {t}|Changes in {t}|Change dans {t}|Muda em {t}|Wechselt in {t}|Cambia tra {t}||{t} 后更换|{t} 후 교체|{t}後に入れ替え|Сменится через {t}|Zmiana za {t}",
+    ganga: "Ganga −{p} %|Bargain −{p} %|Affaire −{p} %|Pechincha −{p} %|Schnäppchen −{p} %|Affare −{p} %||特价 −{p}%|특가 −{p}%|お買い得 −{p}%|Выгода −{p} %|Okazja −{p}%",
+    surprise: "Sorpresa|Surprise|Surprise|Surpresa|Überraschung|Sorpresa||惊喜|서프라이즈|サプライズ|Сюрприз|Niespodzianka",
+    lote: "Lote de tres|Bundle of three|Lot de trois|Kit de três|Dreierpaket|Lotto da tre||三件套|3종 세트|3点セット|Набор из трёх|Zestaw trzech",
+    loteD: "Las tres juntas, −25 %. Dura {n} días más.|All three together, −25 %. {n} more days.|Les trois ensemble, −25 %. Encore {n} jours.|As três juntas, −25 %. Mais {n} dias.|Alle drei zusammen, −25 %. Noch {n} Tage.|Tutti e tre insieme, −25 %. Ancora {n} giorni.||三件一起买 −25%。还剩 {n} 天。|셋 함께 −25%. {n}일 남았어요.|3点まとめて −25%。あと{n}日。|Все три вместе — −25 %. Ещё дней: {n}.|Wszystkie trzy razem −25%. Jeszcze dni: {n}.",
+    loteLast: "Las tres juntas, −25 %. Último día.|All three together, −25 %. Last day.|Les trois ensemble, −25 %. Dernier jour.|As três juntas, −25 %. Último dia.|Alle drei zusammen, −25 %. Letzter Tag.|Tutti e tre insieme, −25 %. Ultimo giorno.||三件一起买 −25%。最后一天。|셋 함께 −25%. 마지막 날.|3点まとめて −25%。最終日。|Все три вместе — −25 %. Последний день.|Wszystkie trzy razem −25%. Ostatni dzień.",
+    loteDone: "Ya tienes las tres. Mañana o pasado llega otro lote.|You already have all three. Another bundle arrives soon.|Tu as déjà les trois. Un autre lot arrive bientôt.|Você já tem as três. Logo chega outro kit.|Du hast schon alle drei. Bald kommt ein neues Paket.|Hai già tutti e tre. Presto arriva un altro lotto.||三件你都有了。很快会有新的套装。|이미 셋 다 있어요. 곧 새 세트가 와요.|3点とも持っている。もうすぐ次のセットが来る。|У тебя уже все три. Скоро будет новый набор.|Masz już wszystkie trzy. Wkrótce nowy zestaw.",
+    gift: "Regalo de la casa|House gift|Cadeau de la maison|Presente da casa|Geschenk des Hauses|Regalo della casa||本店赠礼|하우스 선물|ハウスの贈り物|Подарок заведения|Prezent od kasyna",
+    giftD: "Gratis cada día. Se guarda 3 días: si no vienes, te espera.|Free every day. It keeps for 3 days: if you don't come, it waits.|Gratuit chaque jour. Il se garde 3 jours : si tu ne viens pas, il t'attend.|Grátis todo dia. Fica guardado 3 dias: se você não vier, ele espera.|Jeden Tag gratis. Hält 3 Tage: Wenn du nicht kommst, wartet es.|Gratis ogni giorno. Si conserva 3 giorni: se non vieni, ti aspetta.||每天免费。保留 3 天：你没来，它会等你。|매일 무료. 3일 동안 보관돼요. 안 와도 기다려요.|毎日無料。3日間取っておける。来なくても待っている。|Каждый день бесплатно. Хранится 3 дня: не придёшь — подождёт.|Codziennie za darmo. Czeka 3 dni: jeśli nie przyjdziesz, poczeka.",
+    claim: "Recoger|Collect|Récupérer|Pegar|Abholen|Ritira||领取|받기|受け取る|Забрать|Odbierz",
+    claimed: "Recogido: vuelve mañana|Collected: come back tomorrow|Récupéré : reviens demain|Recebido: volte amanhã|Abgeholt: komm morgen wieder|Ritirato: torna domani||已领取：明天再来|받았어요: 내일 또 와요|受け取り済み：また明日|Получено: приходи завтра|Odebrane: wróć jutro",
+    days: "{n} días guardados|{n} days saved up|{n} jours en réserve|{n} dias guardados|{n} Tage aufgespart|{n} giorni messi da parte||攒了 {n} 天|{n}일치 보관 중|{n}日分たまっている|Накоплено дней: {n}|Odłożone dni: {n}",
+    bought: "Comprado|Bought|Acheté|Comprado|Gekauft|Comprato||已购买|구매함|購入済み|Куплено|Kupione",
+    want: "Lo quiero|I want it|Je le veux|Quero|Will ich|Lo voglio||想要|갖고 싶어|欲しい|Хочу|Chcę",
+    wanted: "En tu lista de deseos|On your wish list|Dans ta liste d'envies|Na sua lista de desejos|Auf deiner Wunschliste|Nella tua lista dei desideri||已在愿望单|위시리스트에 있음|欲しい物リスト入り|В списке желаний|Na liście życzeń",
+    wantT: "Si sale en el escaparate, en el lote o en la oferta de la semana, la placa de La tienda de la portada te avisa con un punto.|If it shows up in the showcase, the bundle or the weekly offer, the boutique plaque on the main screen shows a dot.|S'il apparaît dans la vitrine, le lot ou l'offre de la semaine, la plaque de la boutique de l'écran d'accueil t'avertit d'un point.|Se aparecer na vitrine, no kit ou na oferta da semana, a placa da boutique na tela inicial avisa com um ponto.|Taucht es im Schaufenster, im Paket oder im Wochenangebot auf, zeigt die Boutique-Plakette auf dem Startbildschirm einen Punkt.|Se compare nella vetrina, nel lotto o nell'offerta della settimana, la targa della boutique nella schermata iniziale te lo segnala con un punto.||如果它出现在橱窗、套装或本周特价中，主界面的精品店牌子会亮起一个小点。|진열장, 세트, 이번 주 특가에 나오면 메인 화면의 부티크 명판에 점이 떠요.|ショーケースやセット、今週の特売に出たら、メイン画面のブティックの札に点がつく。|Если вещь появится на витрине, в наборе или в предложении недели, на табличке бутика на главном экране загорится точка.|Jeśli pojawi się w witrynie, zestawie lub ofercie tygodnia, tabliczka butiku na ekranie głównym pokaże kropkę.",
+    goSec: "Verla en su sección|See it in its section|La voir dans sa section|Ver na seção|In ihrer Abteilung ansehen|Vedila nella sua sezione||在所属分类中查看|해당 코너에서 보기|売り場で見る|Открыть в разделе|Zobacz w dziale",
+    todayD: "Hoy en el escaparate. A medianoche cambia, pero nada desaparece: sigue en su sección a su precio de siempre.|In today's showcase. It changes at midnight, but nothing disappears: it stays in its section at its usual price.|Dans la vitrine du jour. Elle change à minuit, mais rien ne disparaît : la pièce reste dans sa section à son prix habituel.|Na vitrine de hoje. Muda à meia-noite, mas nada some: continua na seção pelo preço de sempre.|Im heutigen Schaufenster. Um Mitternacht wechselt es, aber nichts verschwindet: Es bleibt in seiner Abteilung zum üblichen Preis.|Nella vetrina di oggi. Cambia a mezzanotte, ma niente sparisce: resta nella sua sezione al prezzo di sempre.||今日橱窗展品。午夜更换，但不会消失：它仍以原价留在所属分类里。|오늘의 진열장 상품. 자정에 바뀌지만 사라지진 않아요. 원래 코너에 원래 가격으로 남아요.|今日のショーケース。真夜中に入れ替わるが、消えはしない。いつもの値段で売り場に残る。|На витрине сегодня. В полночь витрина сменится, но ничего не пропадёт: вещь останется в своём разделе по обычной цене.|W dzisiejszej witrynie. O północy się zmienia, ale nic nie znika: zostaje w swoim dziale w zwykłej cenie.",
+    k: { m: "Mesa|Table|Table|Mesa|Tisch|Tavolo||牌桌|테이블|テーブル|Стол|Stół", v: "Prenda del crupier|Dealer's outfit|Tenue du croupier|Roupa do crupiê|Croupier-Outfit|Abito del croupier||荷官服饰|딜러 의상|ディーラーの衣装|Одежда крупье|Strój krupiera", p: "Puntero|Pointer|Pointeur|Ponteiro|Zeiger|Puntatore||指针|포인터|ポインター|Указатель|Wskaźnik", i: "Icono|Icon|Icône|Ícone|Symbol|Icona||图标|아이콘|アイコン|Значок|Ikona", t: "Título|Title|Titre|Título|Titel|Titolo||称号|칭호|称号|Титул|Tytuł", k: "Marco|Frame|Cadre|Moldura|Rahmen|Cornice||边框|프레임|額縁|Рамка|Ramka" },
+  };
+  const ES = () => A.escaparate;
+  const hms = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(x => String(x).padStart(2, "0")).join(":"); };
+  const keyCat = k => ({ m: "mesas", v: "vest", p: "punt", i: "carta", t: "carta", k: "carta" })[ES().kindOf(k)];
+  /* la miniatura de una pieza del escaparate: cada seccion con la suya (se pintan en hPaint, a escala entera) */
+  function hThumb(k, big) {
+    const [w, a, b] = k.split(":");
+    if (w === "m") return `<span class="bq-hth m"><img src="assets/mesas/${a}.webp" alt="" decoding="async"></span>`;
+    if (w === "v") return `<span class="bq-hth v"><img class="bq-hv" data-hv="${esc(a)}" alt=""></span>`;
+    if (w === "p") return `<span class="bq-hth"><canvas data-hp="${esc(a + ":" + b)}"></canvas></span>`;
+    if (w === "i") return `<span class="bq-hth"><canvas data-ci="${esc(a)}"></canvas></span>`;
+    if (w === "t") return `<span class="bq-hth t"><span class="bq-tplate"><span>${esc(SO().titleName(a))}</span></span></span>`;
+    return `<span class="bq-hth"><span class="bq-cbadge" data-cm="${esc(a)}"></span></span>`;
+  }
+  const hPrice = k => { const f = ES().full(k), p = ES().price(k); return `<span class="bq-pr">${p < f ? `<s>${A.fmt(f)}</s>` : ""}${fi()}<b>${A.fmt(p)}</b></span>`; };
+  function hItem(k, i, T) {
+    const own = ES().owned(k), g = T.ganga === k && !own;
+    return `<button type="button" class="bq-it bq-hit${ST.hsel === k ? " sel" : ""}${own ? " got" : ""}" data-hk="${esc(k)}" aria-pressed="${ST.hsel === k}">
+      ${g ? `<em class="bq-ganga">${esc(P6(HX.ganga).replace("{p}", Math.round(ES().GANGA * 100)))}</em>` : i === 5 ? `<em class="bq-sorp">${esc(P6(HX.surprise))}</em>` : ""}${ES().wished(k) && !own ? `<i class="bq-wdot">${A.icon("heart")}</i>` : ""}
+      ${hThumb(k)}<span class="bq-hk">${esc(P6(HX.k[ES().kindOf(k)]))}</span><span class="bq-prow"><b class="bq-nm">${esc(ES().name(k))}</b>${own ? `<em class="bq-own">${esc(P6(HX.bought))}</em>` : hPrice(k)}</span></button>`;
+  }
+  function hGridHtml() {
+    const T = ES().today(), lp = ES().lotePrice();
+    const lote = `<button type="button" class="bq-it bq-hl${ST.hsel === "lote" ? " sel" : ""}${lp.left.length ? "" : " got"}" data-hk="lote"><span class="bq-hk">${esc(P6(HX.lote))}</span>
+      <span class="bq-l3">${T.lote.map(k => `<span class="bq-l1${ES().owned(k) ? " got" : ""}">${hThumb(k)}</span>`).join("")}</span>
+      <span class="bq-prow"><b class="bq-nm">${esc(lp.left.length ? P6(T.loteUntil > 1 ? HX.loteD : HX.loteLast).replace("{n}", T.loteUntil) : P6(HX.loteDone))}</b>${lp.left.length ? `<span class="bq-pr"><s>${A.fmt(lp.full)}</s>${fi()}<b>${A.fmt(lp.price)}</b></span>` : ""}</span></button>`;
+    const gift = `<button type="button" class="bq-it bq-hg${ST.hsel === "regalo" ? " sel" : ""}${T.gift ? "" : " got"}" data-hk="regalo"><span class="bq-hk">${esc(P6(HX.gift))}</span>
+      <span class="bq-gi"><img src="assets/icons/ficha_oro.webp" alt=""><b>${T.gift ? "+" + A.fmt(T.gift) : "✓"}</b></span>
+      <span class="bq-nm">${esc(T.gift ? (T.giftDays > 1 ? P6(HX.days).replace("{n}", T.giftDays) : P6(HX.claim)) : P6(HX.claimed))}</span></button>`;
+    return `<div class="bq-bar"><b class="gx-t-m bq-hh">${esc(P6(HX.title))}</b><span class="bq-clock">${esc(P6(HX.change).replace("{t}", hms(T.until)))}</span></div>
+      <div class="bq-items hoy" id="bqItems">${T.slots.map((k, i) => hItem(k, i, T)).join("")}</div>
+      <div class="bq-hrow">${lote}${gift}</div>`;
+  }
+  function hDetHtml() {
+    const T = ES().today(), k = ST.hsel || T.slots[0], have = A.club ? A.club.fichas() : 0;
+    if (k === "regalo") {
+      return `<span class="bq-dth bq-cprev bq-hgift"><img src="assets/icons/ficha_oro.webp" alt=""></span><span class="gx-eyb bq-tier">${esc(P6(HX.gift))}</span>
+        <h3 class="gx-t-m bq-dn">${T.gift ? "+" + A.fmt(T.gift) : esc(P6(HX.claimed))}</h3><p class="bq-dd">${esc(P6(HX.giftD))}</p>
+        <div class="bq-acts">${T.gift ? `<button type="button" class="gx-btn pri wide" id="bqGift"><span>${esc(P6(HX.claim))}</span><span class="bq-bp">${fi("sm")}+${A.fmt(T.gift)}</span></button>` : `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(HX.claimed))}</span></button>`}</div>`;
+    }
+    if (k === "lote") {
+      const lp = ES().lotePrice();
+      const act = !lp.left.length ? `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(HX.bought))}</span></button>`
+        : have < lp.price ? `<button type="button" class="gx-btn wide bq-short" id="bqHBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(lp.price - have)))}</span>${fi("sm")}</button>`
+        : `<button type="button" class="gx-btn pri wide${ST.armed === "lote" ? " armed" : ""}" id="bqHBuy"><span>${esc(ST.armed === "lote" ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(lp.price)}</span></button>`;
+      return `<span class="bq-dth bq-cprev bq-hlote">${T.lote.map(x => `<span class="bq-l1${ES().owned(x) ? " got" : ""}">${hThumb(x)}</span>`).join("")}</span><span class="gx-eyb bq-tier">${esc(P6(HX.lote))}</span>
+        <ul class="bq-lul">${T.lote.map(x => `<li${ES().owned(x) ? ` class="got"` : ""}><span>${esc(ES().name(x))}</span><b>${ES().owned(x) ? esc(P6(HX.bought)) : A.fmt(ES().full(x))}</b></li>`).join("")}</ul>
+        <p class="bq-dd">${esc(lp.left.length ? P6(T.loteUntil > 1 ? HX.loteD : HX.loteLast).replace("{n}", T.loteUntil) : P6(HX.loteDone))}</p><div class="bq-acts">${act}</div>`;
+    }
+    const own = ES().owned(k), p = ES().price(k);
+    const act = own ? `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(HX.bought))}</span></button>`
+      : have < p ? `<button type="button" class="gx-btn wide bq-short" id="bqHBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`
+      : `<button type="button" class="gx-btn pri wide${ST.armed === k ? " armed" : ""}" id="bqHBuy"><span>${esc(ST.armed === k ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${p < ES().full(k) ? `<s>${A.fmt(ES().full(k))}</s>` : ""}${fi("sm")}${A.fmt(p)}</span></button>`;
+    return `<span class="bq-dth bq-cprev bq-hprev">${hThumb(k, true)}</span>
+      <span class="gx-eyb bq-tier">${esc(P6(HX.k[ES().kindOf(k)]))}${T.ganga === k && !own ? " · " + esc(P6(HX.ganga).replace("{p}", Math.round(ES().GANGA * 100))) : ""}</span>
+      <h3 class="gx-t-m bq-dn">${esc(ES().name(k))}</h3><p class="bq-dd">${esc(P6(HX.todayD))}</p>
+      <div class="bq-acts">${act}<button type="button" class="gx-btn gho wide" id="bqHGo"><span>${esc(P6(HX.goSec))}</span></button></div>`;
+  }
+  /* pintar las miniaturas: punteros, iconos y marcos (como en sus secciones) y las prendas (el retrato vestido, a escala entera) */
+  function hPaint() {
+    cPaint();
+    const dp = window.devicePixelRatio || 1;
+    document.querySelectorAll("#dlg canvas[data-hp]").forEach(cv => { const r = cv.getBoundingClientRect(), W = Math.max(16, Math.round(r.width * dp)), H = Math.max(12, Math.round(r.height * dp)); cv.width = W; cv.height = H; const [s, id] = cv.dataset.hp.split(":"); try { PU().thumb(cv, s, id, 0); } catch (e) { /* sin miniatura */ } });
+    document.querySelectorAll("#dlg img[data-hv]").forEach(im => {
+      if (!V()) return; im.src = V().thumb(V().with(im.dataset.hv), 1);
+      const fit = () => { const box = im.parentElement, z = box.currentCSSZoom || 1, d = z * dp, rb = box.getBoundingClientRect(), k = Math.max(1, Math.floor(Math.min((rb.width / z) * d / im.naturalWidth, (rb.height / z) * d / im.naturalHeight) + 0.01)); im.style.width = (im.naturalWidth * k) / d + "px"; im.style.height = (im.naturalHeight * k) / d + "px"; };
+      if (im.complete && im.naturalWidth) fit(); else im.onload = fit;
+    });
+  }
+  function hTick() { clearInterval(ST.htick); ST.htick = setInterval(() => { const c = document.querySelector("#dlg .bq-clock"); if (!c) { clearInterval(ST.htick); return; } const T = ES().today(); c.textContent = P6(HX.change).replace("{t}", hms(T.until)); if (T.until < 1500) setTimeout(() => repaint(), 1600); }, 1000); }
+  /* comprar del escaparate: dos pulsaciones, como en todas las secciones */
+  function hBuy() {
+    if (ST.busy) return; const k = ST.hsel; if (!k || k === "regalo") return;
+    const have = A.club ? A.club.fichas() : 0, isLote = k === "lote", p = isLote ? ES().lotePrice().price : ES().price(k);
+    if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqHBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
+    if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqHBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
+    ST.armed = null;
+    if (!(isLote ? ES().buyLote() : ES().buy(k))) return;
+    if (!isLote && ES().kindOf(k) === "m") { const id = k.split(":")[1]; M().seen([id]); M().use(id); }
+    repaint();
+    { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
+    if (A.casa && A.casa.premio) A.casa.premio(isLote ? 3 : 2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(isLote ? 3 : 2);
+    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.haptic) A.haptic(isLote ? [30, 60, 40] : [24]);
+    const wl = $("bqWal"), to = A.club.fichas(), n = 10;
+    for (let i = 1; i <= n; i++) setTimeout(() => { if (wl && wl.isConnected) wl.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
+    const det = $("bqDet"); if (det) det.classList.add("bq-sold");
+  }
+  function hGift() {
+    const have = A.club ? A.club.fichas() : 0, n = ES().claim(); if (!n) return;
+    repaint();
+    if (A.casa && A.casa.premio) A.casa.premio(n >= 40 ? 3 : 2); if (A.haptic) A.haptic([20, 30, 50]);
+    const wl = $("bqWal"), to = A.club.fichas(), m = 12;
+    for (let i = 1; i <= m; i++) setTimeout(() => { if (wl && wl.isConnected) wl.textContent = A.fmt(Math.round(have + ((to - have) * i) / m)); if (A.sfx && A.sfx.coin) A.sfx.coin(i); }, 120 + i * 60);
+  }
+  /* ir a la seccion de la pieza, con ella elegida */
+  function hGo() {
+    const k = ST.hsel; if (!k || k === "lote" || k === "regalo") return; const [w, a, b] = k.split(":");
+    if (w === "m") { ST.sel = a; ST.tab = "all"; const L = list(), i = L.findIndex(m => m.id === a); ST.page = i >= 0 ? Math.floor(i / PERM()) : 0; }
+    else if (w === "v") { ST.vsel = a; const it = V().get(a); ST.vtab = it.r === "l" ? "l" : it.r === "p" ? "pieza" : it.slot; const L = vOf(ST.vtab), i = L.findIndex(x => x.id === a); ST.vpage = i >= 0 ? Math.floor(i / PERV()) : 0; }
+    else if (w === "p") { ST.psel = a + ":" + b; ST.ptab = a; const L = pOf(a), i = L.findIndex(x => x.join(":") === ST.psel); ST.ppage = i >= 0 ? Math.floor(i / PERP()) : 0; }
+    else { ST.csel = (w === "k" ? "m" : w) + ":" + a; ST.ctab = w === "i" ? "obj" : w === "t" ? "tit" : "marco"; const L = cOf(ST.ctab), i = L.findIndex(x => x.k === ST.csel); ST.cpage = i >= 0 ? Math.floor(i / cPer()) : 0; }
+    setCat(keyCat(k));
+  }
+  /* «Lo quiero»: el corazon, en la ficha de la derecha de cualquier seccion (solo lo que se compra y aun no tienes) */
+  function wishKey() {
+    if (ST.cat === "hoy") return ST.hsel && !/^(lote|regalo)$/.test(ST.hsel) ? ST.hsel : null;
+    if (ST.cat === "mesas") return ST.sel && M().get(ST.sel).shop ? "m:" + ST.sel : null;
+    if (ST.cat === "vest") { const it = ST.vsel && V().get(ST.vsel); return it && !it.casa && V().full(it.id) > 0 ? "v:" + it.id : null; }
+    if (ST.cat === "punt") { const [s, id] = (ST.psel || "").split(":"); return id && id !== "casa" && PU().full(s, id) > 0 ? "p:" + s + ":" + id : null; }
+    if (ST.cat === "carta") { const [w, id] = (ST.csel || "").split(":"); const k = w === "i" ? "i:" + id : w === "t" ? "t:" + id : w === "m" ? "k:" + id : null; return k && ES().full(k) > 0 ? k : null; }
+    return null;
+  }
+  function addHeart() {
+    if (!ES()) return; const acts = document.querySelector("#bqDet .bq-acts"), k = wishKey(); if (!acts || !k || ES().owned(k)) return;
+    const on = ES().wished(k);
+    acts.insertAdjacentHTML("beforeend", `<button type="button" class="gx-btn gho wide bq-heart${on ? " on" : ""}" id="bqWish" aria-pressed="${on}" ${A.ttAttr ? A.ttAttr(P6(HX.want), P6(HX.wantT)) : ""}>${A.icon("heart")}<span>${esc(P6(on ? HX.wanted : HX.want))}</span></button>`);
+    $("bqWish").onclick = () => { const v = ES().wish(k); if (A.sfx && A.sfx.ui) A.sfx.ui(); const b = $("bqWish"); b.classList.toggle("on", v); b.setAttribute("aria-pressed", v); b.querySelector("span").textContent = P6(v ? HX.wanted : HX.want); };
+  }
+  const sections = () => (A.escaparate ? [["hoy", "coupon", HX.cHoy]] : []).concat([["mesas", "chip_g", VX.cMesas]], V() ? [["vest", "boss_hat", RX.crup]] : [], A.punteros ? [["punt", "crosshair", PX.cPunt]] : [], A.socio ? [["carta", "m_prof", CX.cCarta]] : []);
   const railHtml = () => `<nav class="bq-rail" id="bqRail" aria-label="${esc(P6(TX.title))}">${sections().map(([k, ic, t]) => { const [n, tot, w] = stat(k);
-    return `<button type="button" class="bq-rx${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}"><span class="bq-rxi">${A.icon(ic)}</span><b>${esc(P6(t))}</b><em>${n} / ${tot}</em><i>${esc(P6(RX.worn).replace("{x}", w))}</i></button>`; }).join("")}<span class="bq-rsp" data-dealer-niche></span>${offerHtml()}</nav>`;
-  const catBody = () => ST.cat === "vest" ? `<div id="bqGrid" class="bq-gw">${vGridHtml()}</div>` : ST.cat === "punt" ? `<div id="bqGrid" class="bq-gw">${pGridHtml()}</div>` : ST.cat === "carta" ? `<div id="bqGrid" class="bq-gw">${cGridHtml()}</div>` : `<div id="bqGrid" class="bq-gw">${gridHtml()}</div>`;
-  const catCls = () => (ST.cat === "vest" ? " vest" : ST.cat === "punt" ? " punt" : ST.cat === "carta" ? " carta" : "");
-  const detBody = () => (ST.cat === "vest" ? vDetHtml() : ST.cat === "punt" ? pDetHtml() : ST.cat === "carta" ? cDetHtml() : detHtml());
+    return `<button type="button" class="bq-rx${ST.cat === k ? " on" : ""}" data-cat="${k}" aria-pressed="${ST.cat === k}"><span class="bq-rxi">${A.icon(ic)}</span><b>${esc(P6(t))}</b><em>${n} / ${tot}</em><i>${esc(k === "hoy" ? w : P6(RX.worn).replace("{x}", w))}</i></button>`; }).join("")}<span class="bq-rsp" data-dealer-niche></span>${offerHtml()}</nav>`;
+  const catBody = () => ST.cat === "hoy" ? `<div id="bqGrid" class="bq-gw">${hGridHtml()}</div>` : ST.cat === "vest" ? `<div id="bqGrid" class="bq-gw">${vGridHtml()}</div>` : ST.cat === "punt" ? `<div id="bqGrid" class="bq-gw">${pGridHtml()}</div>` : ST.cat === "carta" ? `<div id="bqGrid" class="bq-gw">${cGridHtml()}</div>` : `<div id="bqGrid" class="bq-gw">${gridHtml()}</div>`;
+  const catCls = () => (ST.cat === "hoy" ? " hoy" : ST.cat === "vest" ? " vest" : ST.cat === "punt" ? " punt" : ST.cat === "carta" ? " carta" : "");
+  const detBody = () => (ST.cat === "hoy" ? hDetHtml() : ST.cat === "vest" ? vDetHtml() : ST.cat === "punt" ? pDetHtml() : ST.cat === "carta" ? cDetHtml() : detHtml());
   function html() {
     const have = A.club ? A.club.fichas() : 0, lv = A.club ? P6(A.club.tx.lv).replace("{n}", A.club.level()) : "";
     return `<div class="gx-veil bq-veil"></div><section class="bq-screen gx-stage" aria-labelledby="bqH" data-nosq>
@@ -458,35 +604,56 @@ window.AIQ = window.AIQ || {};
     eTit: "Título|Title|Titre|Título|Titel|Titolo||称号|칭호|称号|Титул|Tytuł",
     kLogro: "De un logro|From an achievement|D'un succès|De uma conquista|Aus einem Erfolg|Da un obiettivo||来自成就|업적 보상|実績のごほうび|За достижение|Z osiągnięcia",
     kTienda: "De la tienda|From the boutique|De la boutique|Da boutique|Aus der Boutique|Dalla boutique||来自精品店|부티크|ブティック|Из бутика|Z butiku",
+    kCat: "De tu categoría|From your rank|De ta catégorie|Da sua categoria|Von deinem Rang|Dalla tua categoria||来自你的身份|등급 보상|格のごほうび|За ступень|Z twojej rangi",
     kHito: "Se gana jugando|Earned by playing|S'obtient en jouant|Conquistado jogando|Wird erspielt|Si ottiene giocando||通过游戏获得|플레이로 획득|プレイで手に入る|Даётся за игру|Zdobywasz grając",
     dIcon: "El dibujo del centro de tu carta de socio.|The picture in the middle of your member card.|Le dessin au centre de ta carte de membre.|O desenho no centro da sua carta de sócio.|Das Bild in der Mitte deiner Mitgliedskarte.|Il disegno al centro della tua tessera socio.||你会员卡中央的图案。|회원 카드 가운데 그림이에요.|会員カードの真ん中の絵。|Рисунок в центре твоей клубной карты.|Rysunek na środku twojej karty członkowskiej.",
     dObj: "Un objeto de la casa para el centro de tu carta.|A house object for the middle of your card.|Un objet de la maison pour le centre de ta carte.|Um objeto da casa para o centro da sua carta.|Ein Objekt des Hauses für die Mitte deiner Karte.|Un oggetto della casa per il centro della tua carta.||本店的一件物品，放在你会员卡的中央。|카드 가운데에 놓을 하우스의 오브제예요.|カードの真ん中に飾るハウスのアイテム。|Предмет заведения для центра твоей карты.|Przedmiot kasyna na środek twojej karty.",
     dTit: "Va en una placa de cuero bajo tu nombre.|It goes on a leather plate under your name.|Il se place sur une plaque de cuir sous ton nom.|Fica numa placa de couro sob o seu nome.|Steht auf einem Lederschild unter deinem Namen.|Va su una targhetta di cuoio sotto il tuo nome.||刻在你名字下方的皮质铭牌上。|이름 아래 가죽 명판에 들어가요.|名前の下の革のプレートに入る。|Пишется на кожаной табличке под твоим именем.|Trafia na skórzaną tabliczkę pod twoim imieniem.",
+    tCarta: "Cartas|Cards|Cartes|Cartas|Karten|Carte||卡牌|카드|カード|Карты|Karty",
+    tFondo: "Fondos|Backgrounds|Fonds|Fundos|Hintergründe|Sfondi||底纹|배경|背景|Фоны|Tła",
+    tMat: "Bordes|Borders|Bordures|Bordas|Ränder|Bordi||边框材质|테두리|縁取り|Окантовки|Obramowania",
+    eCarta: "Carta|Card|Carte|Carta|Karte|Carta||卡牌|카드|カード|Карта|Karta",
+    eFondo: "Fondo de la chapa|Badge background|Fond du badge|Fundo do emblema|Abzeichen-Hintergrund|Sfondo della spilla||徽章底纹|배지 배경|バッジの背景|Фон значка|Tło odznaki",
+    eMat: "Borde|Border|Bordure|Borda|Rand|Bordo||边框材质|테두리|縁取り|Окантовка|Obramowanie",
+    kNivel: "Del camino del socio|From the member's path|Du parcours du membre|Do caminho do sócio|Vom Weg des Mitglieds|Dal cammino del socio||来自会员之路|회원의 길 보상|会員の道のごほうび|С пути члена клуба|Ze ścieżki członka",
+    dCarta: "Tu carta de socio: la llevas en la portada, en el Perfil y en la Clasificación. Sale una nueva con cada nivel.|Your member card: you show it on the main screen, in your Profile and on the Leaderboard. You get a new one every level.|Ta carte de membre : elle s'affiche sur l'écran d'accueil, dans ton Profil et au Classement. Une nouvelle à chaque niveau.|Sua carta de sócio: aparece na tela inicial, no Perfil e na Classificação. Ganha uma nova a cada nível.|Deine Mitgliedskarte: Du zeigst sie auf dem Startbildschirm, im Profil und in der Rangliste. Jede Stufe bringt eine neue.|La tua carta socio: la mostri nella schermata iniziale, nel Profilo e in Classifica. Ne arriva una nuova a ogni livello.||你的会员卡：显示在主界面、个人资料和排行榜上。每升一级都会得到一张新卡。|회원 카드예요. 메인 화면, 프로필, 순위표에 보여요. 레벨마다 새 카드가 나와요.|きみの会員カード。メイン画面、プロフィール、ランキングに出る。レベルが上がるたびに新しい一枚。|Твоя клубная карта: её видно на главном экране, в профиле и в таблице лидеров. Новая — с каждым уровнем.|Twoja karta członkowska: widać ją na ekranie głównym, w profilu i w rankingu. Nowa z każdym poziomem.",
+    dFondo: "El fondo de tu chapa, detrás del icono. Cada carta que consigues trae el suyo.|The background of your badge, behind the icon. Every card you earn brings its own.|Le fond de ton badge, derrière l'icône. Chaque carte obtenue apporte le sien.|O fundo do seu emblema, atrás do ícone. Cada carta que você ganha traz o dela.|Der Hintergrund deines Abzeichens hinter dem Symbol. Jede Karte, die du bekommst, bringt ihren mit.|Lo sfondo della tua spilla, dietro l'icona. Ogni carta che ottieni porta il suo.||徽章图标后面的底纹。每得到一张卡就会多一种。|배지 아이콘 뒤의 배경이에요. 카드를 얻을 때마다 하나씩 생겨요.|バッジのアイコンの後ろの背景。カードを手に入れるたびにひとつ増える。|Фон значка за иконкой. Каждая новая карта приносит свой.|Tło odznaki za ikoną. Każda zdobyta karta przynosi swoje.",
+    dMat: "El material del borde de tu carta y de tu chapa. Se gana uno al empezar cada serie de diez niveles.|The material of your card's and badge's border. You earn one when each series of ten levels begins.|La matière de la bordure de ta carte et de ton badge. Tu en gagnes une au début de chaque série de dix niveaux.|O material da borda da sua carta e do seu emblema. Você ganha um no começo de cada série de dez níveis.|Das Material des Rands deiner Karte und deines Abzeichens. Zu Beginn jeder Zehnerserie bekommst du eines.|Il materiale del bordo della tua carta e della tua spilla. Ne ottieni uno all'inizio di ogni serie di dieci livelli.||卡牌和徽章边框的材质。每开启一个十级系列就得到一种。|카드와 배지 테두리의 재질이에요. 10레벨 시리즈가 시작될 때마다 하나씩 얻어요.|カードとバッジの縁の素材。10レベルのシリーズが始まるたびにひとつ手に入る。|Материал окантовки карты и значка. Новый — в начале каждой серии из десяти уровней.|Materiał obramowania karty i odznaki. Nowy na początku każdej serii dziesięciu poziomów.",
+    surprise: "Sorpresa|Surprise|Surprise|Surpresa|Überraschung|Sorpresa||惊喜|서프라이즈|お楽しみ|Сюрприз|Niespodzianka",
     locked: "Aún no es tuyo|Not yours yet|Pas encore à toi|Ainda não é seu|Noch nicht deins|Non è ancora tuo||尚未获得|아직 없어요|まだ持っていない|Пока не твоё|Jeszcze nie twoje",
   };
   const SO = () => A.socio;
   /* la lista de una pestana: [clave, ...]; clave = "i:<icono>" o "t:<titulo>" */
-  const cOf = t => t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
-  const cFind = k => { const [w, id] = k.split(":"); const L = w === "m" ? SO().marcos() : w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
-  const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "m" ? SO().marco() === id : w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
+  /* v2: c = carta, f = fondo de chapa, b = material del borde (js/socio.js); las cartas que aun no tienes van boca abajo (sorpresa) */
+  const lvTag = L => P6(A.club.tx.lvS).replace("{n}", L);
+  const cCards = pre => SO().cartas().map(x => ({ k: pre + ":" + x.L, id: x.L, kind: "nivel", owned: x.owned, price: 0, name: x.owned ? x.name : P6(CX.surprise), how: P6(SO().tx.lockedCard).replace("{n}", x.L) }));
+  const cMats = () => SO().mats().map(x => ({ k: "b:" + x.id, id: x.id, kind: "nivel", owned: x.owned, price: 0, name: x.name, how: P6(SO().tx.byLv).replace("{n}", x.lv) }));
+  const cOf = t => t === "carta" ? cCards("c") : t === "fondo" ? cCards("f") : t === "mat" ? cMats() : t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("cat"), SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
+  const cFind = k => { const [w, id] = k.split(":"); if (w === "c" || w === "f") return cCards(w).find(x => x.id === +id) || null; if (w === "b") return cMats().find(x => x.id === +id) || null; const L = w === "m" ? SO().marcos() : w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
+  const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "c" ? SO().carta() === +id : w === "f" ? SO().fondo() === +id : w === "b" ? SO().mat() === +id : w === "m" ? SO().marco() === id : w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
   function cItem(x) {
     const st = cState(x.k), w = x.k[0], tag = st === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : x.kind === "casa" ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : st ? `<em class="bq-own">${esc(P6(VX.mine))}</em>`
       : x.price ? `<span class="bq-pr">${fi()}<b>${A.fmt(x.price)}</b></span>` : `<em class="bq-own lk" aria-label="${esc(P6(CX.locked))}">${A.icon("lock")}</em>`;
-    const th = w === "t" ? `<span class="bq-th bq-cth bq-ttl${x.owned || x.kind === "tienda" ? "" : " off"}"><span class="bq-tplate"><span>${esc(x.name)}</span></span></span>`
+    const th = w === "c" ? `<span class="bq-th bq-cth bq-ccard${x.owned ? "" : " lk"}"><canvas data-cc="${x.id}"${x.owned ? "" : " data-back=\"1\""}></canvas>${vivaTag(x)}</span>`
+      : w === "f" ? `<span class="bq-th bq-cth bq-cfondo${x.owned ? "" : " lk"}"><canvas data-cf="${x.id}"${x.owned ? "" : " data-back=\"1\""}></canvas></span>`
+      : w === "b" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned ? "" : " lk"}" data-cb="${x.id}"></span></span>`
+      : w === "t" ? `<span class="bq-th bq-cth bq-ttl${x.owned || x.kind === "tienda" ? "" : " off"}"><span class="bq-tplate"><span>${esc(x.name)}</span></span></span>`
       : w === "m" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned || x.kind === "tienda" ? "" : " lk"}" data-cm="${esc(x.id)}"></span></span>`
-      : `<span class="bq-th bq-cth"><canvas width="96" height="72" data-ci="${esc(x.id)}"${x.owned || x.kind !== "logro" ? "" : ` data-lk="${x.secret ? 2 : 1}"`}></canvas></span>`;
-    const nm = w === "t" ? esc(P6(x.kind === "tienda" ? CX.kTienda : CX.kHito)) : esc(x.name);
+      : `<span class="bq-th bq-cth"><canvas width="96" height="72" data-ci="${esc(x.id)}"${x.owned || (x.kind !== "logro" && x.kind !== "cat") ? "" : ` data-lk="${x.secret ? 2 : 1}"`}></canvas></span>`;
+    const nm = w === "c" || w === "f" ? esc(lvTag(x.id)) : w === "t" ? esc(P6(x.kind === "tienda" ? CX.kTienda : CX.kHito)) : esc(x.name);
     return `<button type="button" class="bq-it bq-cit${x.k === ST.csel ? " sel" : ""}${st ? " " + st : ""}${w === "t" ? " bq-ttl" : ""}" data-ck="${esc(x.k)}" aria-pressed="${x.k === ST.csel}" aria-label="${esc(x.name)}">
       ${th}<span class="bq-prow"><b class="bq-nm">${nm}</b>${tag}</span></button>`;
   }
+  const vivaTag = x => (x.owned && SO().vivaOf(x.id) ? `<em class="bq-viva">★</em>` : "");
+  const cPer = () => (ST.ctab === "carta" || ST.ctab === "fondo" || ST.ctab === "mat" ? 10 : PERC());   // las cartas y los fondos, de serie en serie (10)
   function cGridHtml() {
-    const L = cOf(ST.ctab), per = PERC(), pages = Math.max(1, Math.ceil(L.length / per)); ST.cpage = Math.min(ST.cpage, pages - 1);
+    const L = cOf(ST.ctab), per = cPer(), pages = Math.max(1, Math.ceil(L.length / per)); ST.cpage = Math.min(ST.cpage, pages - 1);
     const items = L.slice(ST.cpage * per, ST.cpage * per + per);
-    const cnt = k => { const l = cOf(k); return k === "obj" ? l.length : `${l.filter(x => x.owned).length}/${l.length}`; };
+    const cnt = k => { if (k === "carta" || k === "fondo") return ""; const l = cOf(k); return k === "obj" ? l.length : `${l.filter(x => x.owned).length}/${l.length}`; };
     const tab = (k, tx) => `<button type="button" class="bq-tab bq-ctab${ST.ctab === k ? " on" : ""}" data-ctab="${k}" aria-pressed="${ST.ctab === k}"><span>${esc(P6(tx))}</span><i>${cnt(k)}</i></button>`;
-    return `<div class="bq-bar"><nav class="bq-tabs">${tab("logro", CX.tLogro)}${tab("obj", CX.tObj)}${tab("tit", CX.tTit)}${tab("marco", CX.tMarco)}</nav>
+    return `<div class="bq-bar"><nav class="bq-tabs">${tab("carta", CX.tCarta)}${tab("fondo", CX.tFondo)}${tab("mat", CX.tMat)}${tab("logro", CX.tLogro)}${tab("obj", CX.tObj)}${tab("tit", CX.tTit)}${tab("marco", CX.tMarco)}</nav>
       <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqCPrev"${ST.cpage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.cpage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqCNext"${ST.cpage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
-      <div class="bq-items carta" id="bqItems">${items.map(cItem).join("")}</div>`;
+      <div class="bq-items carta${per === 10 ? " ten" : ""}" id="bqItems">${items.map(cItem).join("")}</div>`;
   }
   function cDetHtml() {
     const k = ST.csel, x = cFind(k), w = k[0], st = cState(k), have = A.club ? A.club.fichas() : 0;
@@ -498,22 +665,34 @@ window.AIQ = window.AIQ || {};
     else if (!x.price) act = `<button type="button" class="gx-btn wide" disabled>${A.icon("lock")}<span>${esc(P6(CX.locked))}</span></button>`;
     else if (have < x.price) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(x.price - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === k ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === k ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(x.price)}</span></button>`;
-    const kind = w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : CX.kTienda;
-    const desc = w === "m" ? CX.dMarco : w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
+    const kind = w === "c" || w === "f" || w === "b" ? CX.kNivel : w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : x.kind === "cat" ? CX.kCat : CX.kTienda;
+    const desc = w === "c" ? CX.dCarta : w === "f" ? CX.dFondo : w === "b" ? CX.dMat : w === "m" ? CX.dMarco : w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
     return `<span class="bq-dth bq-cprev"><span id="bqCCard"></span></span>
-      <span class="gx-eyb bq-tier">${esc(P6(w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
-      <h3 class="gx-t-m bq-dn">${esc(x.name)}</h3>
+      <span class="gx-eyb bq-tier">${esc(P6(w === "c" ? CX.eCarta : w === "f" ? CX.eFondo : w === "b" ? CX.eMat : w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
+      <h3 class="gx-t-m bq-dn">${esc((w === "c" || w === "f") && x.owned ? SO().cardNo(x.id) : x.name)}${(w === "c" || w === "f") && x.owned ? `<span class="bq-ed">${esc(SO().matName(SO().sOf(x.id)) + " · " + SO().edName(x.id))}</span>` : ""}</h3>
       <p class="bq-dd">${esc(P6(desc))}${x.how && !x.owned ? `<br><b class="bq-how">${esc(x.how)}</b>` : ""}</p>
       <div class="bq-acts">${act}</div>`;
   }
   /* la carta de la ficha (tu carta con la pieza puesta) y las miniaturas, a escala entera en pixeles reales */
   function cPaint() {
     const host = $("bqCCard"), k = ST.csel;
-    if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
+    if (host && k && /^[fb]:/.test(k)) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 128 }; if (w === "f") o.fondo = x && x.owned ? +id : 0; else o.mat = x && x.owned ? +id : undefined; host._sig = ""; host.innerHTML = ""; SO().badge(host, o); }
+    else if (host && k && /^c:/.test(k) && !(cFind(k) || {}).owned) { host._sig = ""; host.innerHTML = `<canvas class="bq-backbig"></canvas>`; const cv = host.firstChild; SO().back(cv); intPaint(cv, 160); }
+    else if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "c") o.carta = +id; else if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
     document.querySelectorAll("#dlg .bq-cbadge[data-cm]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, marco: el.dataset.cm }); });   // v0.3.174: cada marco, en tu chapa
+    document.querySelectorAll("#dlg .bq-cbadge[data-cb]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, mat: +el.dataset.cb }); });   // v2: cada material, en tu chapa
+    document.querySelectorAll("#dlg canvas[data-cc]").forEach(cv => { if (cv.dataset.back) SO().back(cv); else SO().art(cv, +cv.dataset.cc); fitCv(cv); });
+    document.querySelectorAll("#dlg canvas[data-cf]").forEach(cv => { if (cv.dataset.back) SO().back(cv); else SO().winArt(cv, +cv.dataset.cf, 32, 32); fitCv(cv); });
     const dp = window.devicePixelRatio || 1;
     document.querySelectorAll("#dlg canvas[data-ci]").forEach(cv => { const r = cv.getBoundingClientRect(), W = Math.max(16, Math.round(r.width * dp)), H = Math.max(12, Math.round(r.height * dp)); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; } SO().thumb(cv, cv.dataset.ci, { locked: !!cv.dataset.lk, secret: cv.dataset.lk === "2", base: ST.ctab === "obj" ? 64 : 48 }); });
   }
+  /* v2: un lienzo de pixel art en su hueco, al mayor entero de pixeles reales que quepa y centrado (nunca estirado) */
+  function fitCv(cv) {
+    const box = cv.parentElement; if (!box) return; const r = box.getBoundingClientRect(), dp = (box.currentCSSZoom || 1) * (window.devicePixelRatio || 1);
+    const k = Math.max(1, Math.floor(Math.min((r.width / (box.currentCSSZoom || 1)) * dp / cv.width, (r.height / (box.currentCSSZoom || 1)) * dp / cv.height) + 0.01));
+    cv.style.width = (cv.width * k) / dp + "px"; cv.style.height = (cv.height * k) / dp + "px";
+  }
+  function intPaint(cv, w) { const dp = window.devicePixelRatio || 1, k = Math.max(1, Math.floor((w * dp) / cv.width)); cv.style.width = (cv.width * k) / dp + "px"; cv.style.height = (cv.height * k) / dp + "px"; }
   /* comprar: como los punteros (dos pulsaciones, premio, monedero que baja) y queda puesto */
   function cBuy(k) {
     if (ST.busy || !k) return;
@@ -538,7 +717,8 @@ window.AIQ = window.AIQ || {};
   function repaint(focusSel) {
     const g = $("bqGrid"), d = $("bqDet"); if (!g || !d) return;
     const fid = document.activeElement && document.activeElement.id, fdata = document.activeElement && document.activeElement.dataset;
-    if (ST.cat === "vest") { g.innerHTML = vGridHtml(); d.innerHTML = vDetHtml(); vPaint(); }
+    if (ST.cat === "hoy") { g.innerHTML = hGridHtml(); d.innerHTML = hDetHtml(); hPaint(); }
+    else if (ST.cat === "vest") { g.innerHTML = vGridHtml(); d.innerHTML = vDetHtml(); vPaint(); }
     else if (ST.cat === "punt") { g.innerHTML = pGridHtml(); d.innerHTML = pDetHtml(); pStart(); }
     else if (ST.cat === "carta") { g.innerHTML = cGridHtml(); d.innerHTML = cDetHtml(); cPaint(); }
     else { g.innerHTML = gridHtml(); d.innerHTML = detHtml(); }
@@ -556,6 +736,7 @@ window.AIQ = window.AIQ || {};
     else if (fdata && fdata.pid) f = document.querySelector(`#dlg .bq-pit[data-pid="${fdata.pid}"]`);
     else if (fdata && fdata.ptab) f = document.querySelector(`#dlg .bq-ptab[data-ptab="${fdata.ptab}"]`);
     else if (fdata && fdata.ck) f = document.querySelector(`#dlg .bq-cit[data-ck="${fdata.ck}"]`);
+    else if (fdata && fdata.hk) f = document.querySelector(`#dlg .bq-hit[data-hk="${fdata.hk}"], #dlg [data-hk="${fdata.hk}"]`);
     else if (fdata && fdata.ctab) f = document.querySelector(`#dlg .bq-ctab[data-ctab="${fdata.ctab}"]`);
     if (f && !f.disabled) f.focus({ preventScroll: true });
   }
@@ -572,7 +753,9 @@ window.AIQ = window.AIQ || {};
   }
   function wireInner() {
     const sc = document.querySelector("#dlg .bq-screen"); if (!sc) return;
-    sc.querySelectorAll(".bq-it:not(.bq-vit):not(.bq-pit):not(.bq-cit), .bq-offer").forEach(b => { b.onclick = () => pick(b.dataset.id, b.classList.contains("bq-offer") ? "#dlg .bq-offer" : null); });
+    sc.querySelectorAll("[data-hk]").forEach(b => { b.onclick = () => { const k = b.dataset.hk; if (ST.busy) return; if (k !== ST.hsel) { ST.hsel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg [data-hk="${k}"]`); }; });
+    { const hb = $("bqHBuy"); if (hb) hb.onclick = hBuy; const hg = $("bqGift"); if (hg) hg.onclick = hGift; const hgo = $("bqHGo"); if (hgo) hgo.onclick = hGo; }
+    sc.querySelectorAll(".bq-it:not(.bq-vit):not(.bq-pit):not(.bq-cit):not([data-hk]), .bq-offer").forEach(b => { b.onclick = () => pick(b.dataset.id, b.classList.contains("bq-offer") ? "#dlg .bq-offer" : null); });
     sc.querySelectorAll(".bq-rx").forEach(b => { b.onclick = () => setCat(b.dataset.cat); });
     sc.querySelectorAll(".bq-tab:not(.bq-vtab)").forEach(b => { b.onclick = () => { if (ST.tab === b.dataset.tab) return; ST.tab = b.dataset.tab; ST.page = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-tab[data-tab="${ST.tab}"]`); }; });
     const pv = $("bqPrev"), nx = $("bqNext");
@@ -596,29 +779,30 @@ window.AIQ = window.AIQ || {};
     const we = $("bqWear"); if (we) we.onclick = () => { if (!V().wear(ST.vsel)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqOff"); vTried(ST.vsel, true); };
     const ofb = $("bqOff"); if (ofb) ofb.onclick = () => { V().takeOff(ST.vsel); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqWear"); vTookOff(); };
     /* «Tu carta» */
-    sc.querySelectorAll(".bq-cit").forEach(b => { b.onclick = () => { const k = b.dataset.ck; if (ST.busy) return; if (k !== ST.csel) { ST.csel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const [cw, cid] = k.split(":"), cx = cFind(k), put = cx && cx.owned && cState(k) !== "on" && (cw === "m" ? SO().setMarco(cid) : cw === "t" ? SO().setTitle(cid) : SO().setIcon(cid)); repaint(`#dlg .bq-cit[data-ck="${k}"]`); if (put) stampOn(); }; });
+    sc.querySelectorAll(".bq-cit").forEach(b => { b.onclick = () => { const k = b.dataset.ck; if (ST.busy) return; if (k !== ST.csel) { ST.csel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const [cw, cid] = k.split(":"), cx = cFind(k), put = cx && cx.owned && cState(k) !== "on" && (cw === "c" ? SO().setCarta(+cid) : cw === "f" ? SO().setFondo(+cid) : cw === "b" ? SO().setMat(+cid) : cw === "m" ? SO().setMarco(cid) : cw === "t" ? SO().setTitle(cid) : SO().setIcon(cid)); repaint(`#dlg .bq-cit[data-ck="${k}"]`); if (put) stampOn(); }; });
     sc.querySelectorAll(".bq-ctab").forEach(b => { b.onclick = () => { if (ST.ctab === b.dataset.ctab) return; ST.ctab = b.dataset.ctab; ST.cpage = 0; const L = cOf(ST.ctab); if (L.length && !L.some(x => x.k === ST.csel)) ST.csel = L[0].k; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-ctab[data-ctab="${ST.ctab}"]`); }; });
     const cp = $("bqCPrev"), cn = $("bqCNext");
     if (cp) cp.onclick = () => { if (ST.cpage > 0) { ST.cpage--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCPrev:not([disabled]), #bqCNext"); } };
     if (cn) cn.onclick = () => { ST.cpage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCNext:not([disabled]), #bqCPrev"); };
-    const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "m" ? SO().setMarco(id) : w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
+    const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "c" ? SO().setCarta(+id) : w === "f" ? SO().setFondo(+id) : w === "b" ? SO().setMat(+id) : w === "m" ? SO().setMarco(id) : w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
     const co = $("bqCOff"); if (co) co.onclick = () => { SO().setTitle(""); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCUse"); };
+    addHeart();
   }
   /* cambiar de seccion: solo cambian la izquierda y la derecha (la cabecera se queda); el vestuario espera a tener su atlas listo */
   function setCat(k, force) {
-    if ((k === ST.cat && !force) || ST.busy || (k === "vest" && !V()) || (k === "punt" && !PU()) || (k === "carta" && !SO())) return;
+    if ((k === ST.cat && !force) || ST.busy || (k === "vest" && !V()) || (k === "punt" && !PU()) || (k === "carta" && !SO()) || (k === "hoy" && !ES())) return;
     const go = () => {
       if (!$("bqCat")) return;
       if (ST.trying) tryOff(true);
       ST.cat = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card();
       if (k !== "vest") dropProb();
       const ca = $("bqCat"), d = $("bqDet");
-      ca.classList.toggle("vest", k === "vest"); d.classList.toggle("vest", k === "vest"); ca.classList.toggle("punt", k === "punt"); d.classList.toggle("punt", k === "punt"); ca.classList.toggle("carta", k === "carta"); d.classList.toggle("carta", k === "carta");
-      if (k === "carta" && !ST.csel) ST.csel = "i:" + SO().icon();
+      ca.classList.toggle("vest", k === "vest"); d.classList.toggle("vest", k === "vest"); ca.classList.toggle("punt", k === "punt"); d.classList.toggle("punt", k === "punt"); ca.classList.toggle("carta", k === "carta"); d.classList.toggle("carta", k === "carta"); ca.classList.toggle("hoy", k === "hoy"); d.classList.toggle("hoy", k === "hoy");
+      if (k === "carta" && !ST.csel) { const L0 = SO().carta(); ST.ctab = "carta"; ST.csel = "c:" + L0; ST.cpage = Math.floor((L0 - 1) / 10); }
       if (k === "punt" && !ST.psel) ST.psel = (pOf("ret").find(([s, id]) => !PU().owned(s, id)) || ["ret", "casa"]).join(":");
       ca.innerHTML = catBody(); d.innerHTML = detBody();
       const rl = $("bqRail"); if (rl) rl.outerHTML = railHtml();
-      wireInner(); if (k === "vest") vPaint(); if (k === "punt") pStart(); if (k === "carta") cPaint();
+      wireInner(); if (k === "vest") vPaint(); if (k === "punt") pStart(); if (k === "carta") cPaint(); if (k === "hoy") { hPaint(); hTick(); }
       if (k === "vest") vOpen(); else { clearTimeout(SV.browse); if (SV.busy) sayHide(); }   // bloque D: el maniqui te recibe; fuera del vestuario, calla
       const f = document.querySelector(`#dlg .bq-rx[data-cat="${k}"]`); if (f) f.focus({ preventScroll: true });
     };
@@ -711,14 +895,15 @@ window.AIQ = window.AIQ || {};
     if (id || !V()) ST.cat = "mesas";                                   // desde Perfil > Mesas se abre en las mesas
     if (ST.cat === "vest" && !ST.vsel) ST.vsel = vOf(ST.vtab)[0].id;
     if (ST.cat === "punt" && (!PU() || !ST.psel)) { if (!PU()) ST.cat = "mesas"; else ST.psel = "ret:casa"; }
-    if (ST.cat === "carta") { if (!SO()) ST.cat = "mesas"; else { const ic = SO().icon(); ST.csel = "i:" + ic; ST.ctab = SO().iconKind(ic) === "logro" ? "logro" : "obj"; const L = cOf(ST.ctab), i = L.findIndex(x => x.k === ST.csel); ST.cpage = i >= 0 ? Math.floor(i / PERC()) : 0; } }
+    if (ST.cat === "hoy") { if (!ES()) ST.cat = "mesas"; else { const T = ES().today(); if (!ST.hsel || (!T.slots.includes(ST.hsel) && !/^(lote|regalo)$/.test(ST.hsel))) ST.hsel = T.gift ? "regalo" : T.slots[0]; } }
+    if (ST.cat === "carta") { if (!SO()) ST.cat = "mesas"; else { const L0 = SO().carta(); ST.ctab = "carta"; ST.csel = "c:" + L0; ST.cpage = Math.floor((L0 - 1) / 10); } }   // v2: se abre en tus cartas, en la serie de la que llevas
     const draw = () => {
       c.dialog(html(), "tablewrap");
       A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
-      wireInner(); if (ST.cat === "vest") { vPaint(); vOpen(); } if (ST.cat === "punt") pStart(); if (ST.cat === "carta") cPaint();
+      wireInner(); if (ST.cat === "vest") { vPaint(); vOpen(); } if (ST.cat === "punt") pStart(); if (ST.cat === "carta") cPaint(); if (ST.cat === "hoy") { hPaint(); hTick(); }
       setTimeout(() => { const f = ST.cat === "vest" ? document.querySelector(`#dlg .bq-vit[data-vid="${ST.vsel}"]`) : ST.cat === "punt" ? document.querySelector(`#dlg .bq-pit[data-pid="${ST.psel}"]`) : ST.cat === "carta" ? document.querySelector(`#dlg .bq-cit[data-ck="${ST.csel}"]`) : document.querySelector(`#dlg .bq-it[data-id="${ST.sel}"]`) || document.querySelector("#dlg .bq-offer") || $("bqTry"); if (f) f.focus({ preventScroll: true }); }, 80);
     };
-    if (ST.cat === "vest") V().ready(draw); else draw();
+    if ((ST.cat === "vest" || ST.cat === "hoy") && V()) V().ready(draw); else draw();
   }
   /* si se sale de la boutique a mitad de una prueba, el mapa vuelve a tu mesa */
   const leave = () => { if (ST.trying) tryOff(true); if (ST.ptry) pTryOff(true); ST.armed = null; vLeave(); dropProb(); };

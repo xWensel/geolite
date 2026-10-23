@@ -129,8 +129,12 @@ window.AIQ = window.AIQ || {};
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
-    if (A.club) A.club.wire(() => { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); });   // tu carta: abre la tienda en «Tu carta» y cuenta las fichas de oro nuevas
-    if ($("bqBtn")) $("bqBtn").onclick = () => { A.sfx.card(); screen("boutique"); };   // la tienda: placa de la derecha (v0.3.157)
+    if (A.club) A.club.wire(() => { if (A.camino) screen("camino"); else { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); } });   // tu carta: abre el camino del socio (js/camino.js) y cuenta las fichas de oro nuevas
+    if ($("bqBtn")) {
+      $("bqBtn").onclick = () => { A.sfx.card(); if (A.escaparate && A.boutique.cat) A.boutique.cat("hoy"); screen("boutique"); };   // v2: la tienda se abre en el escaparate de hoy
+      /* el punto de la placa: algo de tu lista de deseos esta hoy delante, o te espera el regalo de la casa (js/escaparate.js) */
+      if (A.escaparate && (A.escaparate.alerts().length || A.escaparate.giftWaiting())) $("bqBtn").insertAdjacentHTML("beforeend", `<i class="plq-dot" aria-hidden="true"></i>`);
+    }   // la tienda: placa de la derecha (v0.3.157)
     if ($("clubRtBtn")) $("clubRtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // los retos del Club: placa de la izquierda (js/club-retos.js)
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura
@@ -529,7 +533,7 @@ window.AIQ = window.AIQ || {};
     const near = A.ACH.filter(a => !got(a) && !a.secret && prog[a.id] && prog[a.id][0] > 0 && prog[a.id][0] < prog[a.id][1])
       .sort((a, b) => prog[b.id][0] / prog[b.id][1] - prog[a.id][0] / prog[a.id][1]).slice(0, 3);
     const total = A.ach.total(), done = A.ach.count();
-    if (pfPage == null || (pfPage !== "near" && !tiers.some(x => x.i === pfPage))) { const open = tiers.find(x => x.n < x.list.length); pfPage = open ? open.i : tiers[0].i; }
+    if (pfPage == null || (pfPage !== "near" && pfPage !== "ins" && !tiers.some(x => x.i === pfPage))) { const open = tiers.find(x => x.n < x.list.length); pfPage = open ? open.i : tiers[0].i; }
     const row = a => {
       const g = got(a), hid = a.secret && !g, pr = !g && prog[a.id];
       const badge = hid ? `<span class="ic badge">${A.icon(A.ACH_FRAME[a.ev] || "blank_boss", "bd-base")}${A.icon("lock", "bd-in")}</span>` : A.badge(a.id);
@@ -538,7 +542,16 @@ window.AIQ = window.AIQ || {};
         : pr ? `<b>${A.fmt(pr[0])} / ${A.fmt(pr[1])}</b><span class="gx-bar"><i style="width:${pct(pr[0], pr[1])}%"></i></span>` : "";
       return `<li class="pf-row${g ? " got" : ""}${hid ? " hid" : ""}"><span class="pf-chip">${badge}</span><span class="pf-tx"><b>${hid ? "???" : esc(A.tx(a.name))}</b><i>${how}</i></span><span class="pf-mt">${meta}</span></li>`;
     };
+    /* v2 (insignias de la casa): la escalera entera de las 15 categorias, en el libro, con su insignia (las que te faltan, en sombra) */
+    const INSX = { t: "Insignias|Badges|Insignes|Insígnias|Abzeichen|Insegne||徽记|휘장|記章|Знаки|Insygnia", s: "De la puerta al despacho|From the door to the office|De la porte au bureau|Da porta ao escritório|Von der Tür ins Büro|Dalla porta all'ufficio||从门口到办公室|문 앞에서 집무실까지|入口から書斎まで|От двери до кабинета|Od drzwi do gabinetu", lv: "Nivel {n}|Level {n}|Niveau {n}|Nível {n}|Stufe {n}|Livello {n}||{n} 级|레벨 {n}|レベル{n}|Уровень {n}|Poziom {n}" };
+    const insBook = () => {
+      const CL = A.club, t = CL.tierNow(), n = CL.RANKS.length;
+      const rows = CL.RANKS.map((r, i) => { const g = t >= i, [who, sitio] = CL.rankX(i); return `<li class="pf-row${g ? " got" : " pf-lk"}"><span class="pf-chip pf-ins" data-kmax="1" data-ins="${CL.insignia(i)}"></span><span class="pf-tx"><b>${esc(CL.tierName(i))}</b><i>${esc(who)} · ${esc(sitio)}</i></span><span class="pf-mt"><b>${esc(A.pick6(INSX.lv).replace("{n}", r[1]))}</b></span></li>`; }).join("");
+      return `<header class="pf-bh"><span class="pf-bic pf-ins" data-ins="${CL.insignia(t)}"></span><span class="pf-bt"><span class="gx-eyb">${esc(A.pick6(INSX.s))}</span><h3 class="gx-t-m">${esc(A.pick6(INSX.t))}</h3></span><span class="pf-bc"><b>${t + 1}<i> / ${n}</i></b><span class="gx-bar"><i style="width:${pct(t + 1, n)}%"></i></span></span></header>
+        <div class="gx-hr"></div><ol class="pf-rows" id="pfRows">${rows}</ol>`;
+    };
     const book = () => {
+      if (pfPage === "ins" && A.club && A.club.INSIG) return insBook();
       const x = pfPage === "near" ? null : tiers.find(t => t.i === pfPage), list = x ? x.list : near;
       const ic = x ? A.icon("tier_" + x.i) : A.icon("u_star"), sub = x ? A.tx(x.t.t) : A.pick6("Los que tienes más cerca|The ones you're closest to|Ceux qui sont tout près|Os que estão mais perto|Die du fast hast|Quelli più vicini||最接近达成的|가장 가까운 업적|もう少しの実績|Ближе всего|Najbliżej");
       const cnt = x ? `<span class="pf-bc"><b>${x.n}<i> / ${x.list.length}</i></b><span class="gx-bar"><i style="width:${pct(x.n, x.list.length)}%"></i></span></span>` : "";
@@ -564,7 +577,7 @@ window.AIQ = window.AIQ || {};
             <b class="pf-name">${esc(nm)}</b>${since ? `<span class="pf-since">${since}</span>` : ""}<div class="gx-hr"></div>
             ${stat("a_pin", T("Preguntas", "Questions"), A.fmt(s.questions))}${stat("a_target", T("Dianas", "Bullseyes"), A.fmt(s.bulls))}${stat("a_lens", T("Error medio", "Avg. error"), A.fmtDist(avg))}
             ${stat("a_flame", T("Mejor racha", "Best streak"), A.fmt(s.bestStreak))}</div>`}
-          <nav class="pf-idx" id="pfIdx" aria-label="${T("Logros", "Achievements")}">${ix("near", "u_star", NEAR(), near.length, " hot")}${tiers.map(x => ix(x.i, "tier_" + x.i, A.tx(x.t.n), `${x.n} / ${x.list.length}`, x.n === x.list.length ? " full" : "")).join("")}<div class="pf-ix pf-soon" aria-disabled="true"><span class="pf-soonbox"></span><span>${esc(A.pick6(PFX.col))}</span><i>${esc(A.pick6(PFX.soon))}</i></div></nav>
+          <nav class="pf-idx" id="pfIdx" aria-label="${T("Logros", "Achievements")}">${ix("near", "u_star", NEAR(), near.length, " hot")}${tiers.map(x => ix(x.i, "tier_" + x.i, A.tx(x.t.n), `${x.n} / ${x.list.length}`, x.n === x.list.length ? " full" : "")).join("")}${A.club && A.club.INSIG ? ix("ins", A.club.insignia(A.club.tierNow()), esc(A.pick6(INSX.t)), `${A.club.tierNow() + 1} / ${A.club.RANKS.length}`, A.club.tierNow() + 1 === A.club.RANKS.length ? " full" : "") : ""}<div class="pf-ix pf-soon" aria-disabled="true"><span class="pf-soonbox"></span><span>${esc(A.pick6(PFX.col))}</span><i>${esc(A.pick6(PFX.soon))}</i></div></nav>
         </div>
         <div class="gx-sh pf-right"><div class="gx-paper pf-book" id="pfBook">${book()}</div></div>
       </div></section>`;
@@ -578,9 +591,10 @@ window.AIQ = window.AIQ || {};
       $("pfCardBtn").onclick = () => { A.sfx.card(); if (A.boutique) A.boutique.cat("carta"); screen("boutique"); };
     }
     $("pfIdx").onclick = e => {
-      const b = e.target.closest(".pf-ix"); if (!b) return; const p = b.dataset.p === "near" ? b.dataset.p : +b.dataset.p; if (p === pfPage) return;
-      pfPage = p; A.sfx.card(); document.querySelectorAll(".pf-ix").forEach(x => x.classList.toggle("on", x === b)); $("pfBook").innerHTML = v.book();
+      const b = e.target.closest(".pf-ix"); if (!b) return; const p = b.dataset.p === "near" || b.dataset.p === "ins" ? b.dataset.p : +b.dataset.p; if (p === pfPage) return;
+      pfPage = p; A.sfx.card(); document.querySelectorAll(".pf-ix").forEach(x => x.classList.toggle("on", x === b)); $("pfBook").innerHTML = v.book(); if (A.camino && A.camino.insFill) A.camino.insFill($("pfBook"));
     };
+    if (A.camino && A.camino.insFill) A.camino.insFill($("pfBook"));
     if (A.coverMap) A.coverMap("profile", true, () => !!document.querySelector("#dlg .pf-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
     if (A.dealer && A.dealer.profile) A.dealer.profile();              // su libreta: lo que ha cambiado desde tu ultima visita, o una casilla que se da la vuelta
   }
@@ -590,7 +604,7 @@ window.AIQ = window.AIQ || {};
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open() }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open(), camino: () => A.camino.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
     if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva
   }

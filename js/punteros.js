@@ -314,8 +314,10 @@ window.AIQ = window.AIQ || {};
   const owned = (s, id) => id === "casa" || !!st().own[s + ":" + id];
   let TRY = null;                                                         // «Probar en el mapa» (la tienda): la pieza se ve aunque aun no sea tuya
   const current = s => { if (TRY && TRY.s === s) return TRY.id; const w = st().wear[s]; return has(s, w) && owned(s, w) ? w : "casa"; };
-  const price = (s, id) => (id === "casa" ? 0 : (DEF[s][id] || {}).p || 0);
+  const full = (s, id) => (id === "casa" ? 0 : (DEF[s][id] || {}).p || 0);
+  const price = (s, id) => { const f = full(s, id), o = A.escaparate && A.escaparate.off ? A.escaparate.off("p:" + s + ":" + id) : 0; return o && f ? Math.round(f * (1 - o) / 10) * 10 : f; };   // con la ganga del escaparate
   function wear(s, id) { if (!has(s, id) || !owned(s, id)) return false; st().wear[s] = id; A.profile.save(); return true; }
+  function give(s, id) { if (!has(s, id) || owned(s, id)) return false; st().own[s + ":" + id] = Date.now(); A.profile.save(); return true; }   // el lote: sin cobrar ni ponerlo
   function buy(s, id) { if (!has(s, id) || owned(s, id) || !A.club || !A.club.spend) return false; if (!A.club.spend(price(s, id))) return false; const p = st(); p.own[s + ":" + id] = Date.now(); p.wear[s] = id; A.profile.save(); return true; }
   const name = (s, id) => P6(N[id] || N.casa);
   /* el estilo para el Duelo: chincheta.linea.diana (solo lo que no es de la casa se ve distinto) */
@@ -366,7 +368,7 @@ window.AIQ = window.AIQ || {};
   function vecPin(c, x, y, fill, ring, s) { c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(-4, -10, -13, -15, -13, -26); c.arc(0, -26, 13, Math.PI, 0); c.bezierCurveTo(13, -15, 4, -10, 0, 0); c.closePath(); c.fillStyle = fill; c.fill(); c.lineWidth = 2.5; c.strokeStyle = ring; c.stroke(); c.beginPath(); c.arc(0, -26, 4.6, 0, Math.PI * 2); c.fillStyle = ring; c.fill(); c.restore(); }
 
   A.punteros = {
-    SLOTS, CATS, TX, slotName: s => P6(TX[s]), slotPlural: s => P6(TX[s + "P"]), slotDesc: s => P6(TX[s + "D"]), name, price, owned, current, wear, buy, code, parse,
+    SLOTS, CATS, TX, slotName: s => P6(TX[s]), slotPlural: s => P6(TX[s + "P"]), slotDesc: s => P6(TX[s + "D"]), name, price, full, give, owned, current, wear, buy, code, parse,
     ret: () => RET[current("ret")] || CASA, corners, centerPin, _shape: SHAPE, _grid: grid,
     pinCanvas, drawLine: (c, a, b, e, id, o) => { const L = LIN[id]; if (!L) return false; L.draw(c, a, b, e, o); return true; },
     diana: (c, x, y, t, id, P, o) => { const D = DIA[id]; if (!D) return false; D.draw(c, x, y, t, P, o); return true; }, parts, DIA_MS,
