@@ -95,7 +95,8 @@ window.AIQ = window.AIQ || {};
   }
   const seedOf = tag => hash((prof().id || "anon") + ":esc:" + tag);
   function draw(e, d) {
-    const r = rng(seedOf("d" + d)), pl = pools(), left = {}; Object.keys(pl).forEach(w => { left[w] = pl[w].filter(k => !owned(k)); });
+    /* lo que ya va en el lote no sale tambien en el escaparate (el lote se sortea antes, en ensure) */
+    const ban = new Set(e.lote || []), r = rng(seedOf("d" + d)), pl = pools(), left = {}; Object.keys(pl).forEach(w => { left[w] = pl[w].filter(k => !owned(k) && !ban.has(k)); });
     const take = w => { const L = left[w]; if (!L || !L.length) return null; const k = L.splice(Math.floor(r() * L.length), 1)[0]; return k; };
     const order = ["m", "v", "i", "t", "k"], out = [];
     order.forEach(w => { const k = take(w) || take(["p", "v", "m", "i", "t", "k"].find(x => left[x] && left[x].length) || "p"); if (k) out.push(k); });
@@ -112,8 +113,8 @@ window.AIQ = window.AIQ || {};
   function ensure() {
     const e = st(), d = dayNo(), b = Math.floor(d / 3);
     let ch = false;
+    if (e.lb !== b || !Array.isArray(e.lote)) { drawLote(e, b); ch = true; }   // primero el lote: el escaparate del dia no repite sus piezas
     if (e.d !== d || !Array.isArray(e.s)) { draw(e, d); ch = true; }
-    if (e.lb !== b || !Array.isArray(e.lote)) { drawLote(e, b); ch = true; }
     if (!e.gifts.some(x => x.d === d)) { const r = rng(seedOf("g" + d)); e.gifts.push({ d, n: 10 + 5 * Math.floor(r() * 4), got: 0 }); ch = true; }
     const keep = e.gifts.filter(x => x.d > d - GIFT_DAYS); if (keep.length !== e.gifts.length) { e.gifts = keep; ch = true; }
     if (ch) save();
