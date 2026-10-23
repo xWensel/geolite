@@ -34,6 +34,42 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.194",
+      name: L("Elige tus sonidos", "Choose your sounds", "Choisis tes sons", "Escolha seus sons", "Wähl deine Sounds", "Scegli i tuoi suoni", "", "选择你的音效", "효과음을 고르세요", "効果音を選べる", "Выбери свои звуки", "Wybierz swoje dźwięki"),
+      date: "2026-10-23",
+      summary: L("Si echas de menos los sonidos de antes, vuelven: en Ajustes > Sonido > Estilo de sonido eliges entre Lounge dorado y Clásicos.",
+                "If you miss the old sounds, they're back: in Settings > Sound > Sound style you choose between Golden lounge and Classic.",
+                "Si les anciens sons te manquent, ils reviennent : dans Réglages > Son > Style sonore, choisis entre Lounge doré et Classiques.",
+                "Se você sente falta dos sons de antes, eles voltaram: em Configurações > Som > Estilo de som, escolha entre Lounge dourado e Clássicos.",
+                "Wenn dir die alten Sounds fehlen: Sie sind zurück. Unter Einstellungen > Ton > Klangstil wählst du zwischen Goldene Lounge und Klassisch.",
+                "Se ti mancano i suoni di prima, sono tornati: in Impostazioni > Suoni > Stile sonoro scegli tra Lounge dorato e Classici.",
+                "",
+                "如果你怀念以前的音效，它们回来了：在“设置 > 声音 > 音效风格”里，可以在“金色酒廊”和“经典”之间选择。",
+                "예전 효과음이 그립다면 다시 돌아왔습니다. 설정 > 소리 > 효과음 스타일에서 골든 라운지와 클래식 중에서 고르세요.",
+                "以前の効果音が恋しいなら、戻ってきました。設定 > サウンド > 効果音のスタイルで「ゴールデン・ラウンジ」と「クラシック」から選べます。",
+                "Если скучаешь по прежним звукам, они вернулись: в «Настройки > Звук > Стиль звуков» выбери «Золотой лаунж» или «Классические».",
+                "Jeśli brakuje ci dawnych dźwięków, wróciły: w Ustawienia > Dźwięk > Styl dźwięków wybierzesz Złoty lounge albo Klasyczne."),
+      chapters: [
+        { id: "ajustes", kicker: L("Novedad", "New", "Nouveauté", "Novidade", "Neu", "Novità", "", "新内容", "새 소식", "新要素", "Новое", "Nowość"),
+          title: L("Ajustes", "Settings", "Réglages", "Configurações", "Einstellungen", "Impostazioni", "", "设置", "설정", "設定", "Настройки", "Ustawienia"),
+          entries: [
+            E(L("Estilo de sonido", "Sound style", "Style sonore", "Estilo de som", "Klangstil", "Stile sonoro", "", "音效风格", "효과음 스타일", "効果音のスタイル", "Стиль звуков", "Styl dźwięków"), "new", "0.3.194", [
+              L("Lounge dorado son los sonidos nuevos; Clásicos, los de antes (campanas, kalimba y 8 bits) tal como eran, pero al mismo nivel que los nuevos: la música sigue al frente. Al cambiar suena un acierto con el estilo elegido. Los sonidos de los retos y del casino son los mismos con los dos.",
+                "Golden lounge is the new set; Classic brings back the old ones (bells, kalimba and 8-bit) just as they were, but at the same level as the new ones: the music still comes first. Switching plays a hit in the chosen style. Challenge and casino sounds are the same in both.",
+                "Lounge doré, ce sont les nouveaux sons ; Classiques, ceux d'avant (cloches, kalimba et 8 bits) tels qu'ils étaient, mais au même niveau que les nouveaux : la musique reste devant. En changeant, un coup réussi retentit dans le style choisi. Les sons des défis et du casino sont les mêmes dans les deux.",
+                "Lounge dourado são os sons novos; Clássicos, os de antes (sinos, kalimba e 8 bits) como eram, mas no mesmo nível dos novos: a música continua na frente. Ao trocar, toca um acerto no estilo escolhido. Os sons dos desafios e do cassino são os mesmos nos dois.",
+                "Goldene Lounge sind die neuen Sounds, Klassisch die alten (Glocken, Kalimba und 8-Bit) wie früher, aber so laut wie die neuen: Die Musik bleibt vorn. Beim Umschalten erklingt ein Treffer im gewählten Stil. Die Sounds der Herausforderungen und des Kasinos sind in beiden gleich.",
+                "Lounge dorato sono i suoni nuovi; Classici, quelli di prima (campane, kalimba e 8 bit) com'erano, ma allo stesso livello dei nuovi: la musica resta davanti. Quando cambi, suona un colpo riuscito nello stile scelto. I suoni delle sfide e del casinò sono gli stessi in entrambi.",
+                "",
+                "“金色酒廊”是新音效；“经典”是以前的音效（铃声、卡林巴琴和 8 比特），原汁原味，但和新音效一样响度：音乐依然在最前。切换时会用所选风格播放一次命中音效。挑战和赌场的音效两种风格相同。",
+                "골든 라운지는 새 효과음, 클래식은 예전 효과음(종소리, 칼림바, 8비트) 그대로입니다. 다만 새 효과음과 같은 크기라 음악이 여전히 앞에 섭니다. 바꾸면 고른 스타일로 적중 소리가 한 번 납니다. 도전과 카지노 소리는 두 스타일 모두 같습니다.",
+                "「ゴールデン・ラウンジ」は新しい効果音、「クラシック」は以前の効果音（鐘、カリンバ、8ビット）をそのままに、新しい音と同じ大きさで鳴らします。音楽が主役なのは変わりません。切り替えると、選んだスタイルで当たりの音が鳴ります。チャレンジとカジノの音はどちらでも同じです。",
+                "«Золотой лаунж» — новые звуки, «Классические» — прежние (колокольчики, калимба и 8-бит) такими, какими были, но на том же уровне, что и новые: музыка по-прежнему на первом плане. При переключении звучит попадание в выбранном стиле. Звуки испытаний и казино в обоих одинаковы.",
+                "Złoty lounge to nowe dźwięki, Klasyczne — dawne (dzwonki, kalimba i 8 bitów) takie, jakie były, ale na tym samym poziomie co nowe: muzyka dalej jest na pierwszym planie. Po przełączeniu rozlega się trafienie w wybranym stylu. Dźwięki wyzwań i kasyna są w obu takie same.")]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.193",
       name: L("Lounge dorado", "Golden lounge", "Lounge doré", "Lounge dourado", "Goldene Lounge", "Lounge dorato", "", "金色酒廊", "골든 라운지", "ゴールデン・ラウンジ", "Золотой лаунж", "Złoty lounge"),
       date: "2026-10-23",

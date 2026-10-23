@@ -10,7 +10,7 @@
     quality: "auto", settingsOpen: false, lastTimeStr: "", intro: true, reduce: false, booting: true, skin: "casino",
     hub: "home", ranked: null, run: null, tool: null, hits: 0,
     cursor: true, tips: true, songToast: true, setTab: "general",
-    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n", luces: "full",
+    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n", luces: "full", sonidos: "lounge",
   };
   const prog = id => (S.prog[id] = S.prog[id] || { unlocked: 1, best: 0, bestIq: 0 });
   function load() {
@@ -27,6 +27,7 @@
       S.shake = d.shake !== false; S.bgAudio = d.bgAudio !== false; S.curSize = d.curSize === "l" ? "l" : "n";   // v0.3.2: el temblor de pantalla ya no apaga la vibracion del mando (tiene la suya en Controles)
       S.flashSeen = !!d.flashSeen;
       S.luces = ["soft", "off"].includes(d.luces) ? d.luces : "full";                       // v0.3.52: Luces de la sala (js/casa.js)
+      S.sonidos = d.sonidos === "clasico" ? "clasico" : "lounge"; A.audio.setSonidos(S.sonidos);   // v0.3.194: estilo de los efectos (js/audio.js)
       /* v0.3.2: Movimiento en tres niveles (antes "Reducir movimiento" + "Destellos suaves", que se bloqueaba con el primero) */
       S.motion = ["full", "soft", "min"].includes(d.motion) ? d.motion : d.reduce ? "min" : d.softFlash ? "soft" : "full";
       S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
@@ -34,7 +35,7 @@
     } catch (e) { A.lang = A.detectLang(); }
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, sonidos: S.sonidos, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
   }
 
   const lv = () => S.camp.levels[S.level];
@@ -206,6 +207,7 @@
       inp.value = v; inp.style.setProperty("--p", ((v - inp.min) / (inp.max - inp.min)) * 100 + "%"); f.querySelector("output").textContent = v + "%";
     }
     segSet(document.querySelector('[data-seg="gfx"]'), S.quality); segSet(document.querySelector('[data-seg="luces"]'), S.luces); $("lucesNote").textContent = A.t("luz.d." + S.luces);
+    segSet(document.querySelector('[data-seg="sonidos"]'), S.sonidos); $("sonidosNote").textContent = A.t("sonidos.d." + S.sonidos);
     segSet(document.querySelector('[data-seg="units"]'), S.units);
     segSet(document.querySelector('[data-seg="cb"]'), S.colorblind);
     segSet(document.querySelector('[data-seg="qsize"]'), S.qSize); segSet(document.querySelector('[data-seg="motion"]'), S.motion); segSet(document.querySelector('[data-seg="cursz"]'), S.curSize);
@@ -379,7 +381,7 @@
       if (!rs.classList.contains("armed")) { rs.classList.add("armed"); rs.textContent = A.t("set.reset.ask"); A.sfx.ui(); clearTimeout(tm); tm = setTimeout(() => { rs.classList.remove("armed"); syncSettings(); }, 4000); return; }
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
-      S.quality = "auto"; map.setQuality("auto"); S.luces = "full"; A.casa.set("full"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
+      S.quality = "auto"; map.setQuality("auto"); S.luces = "full"; A.casa.set("full"); S.sonidos = "lounge"; A.audio.setSonidos("lounge"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
       S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
@@ -444,6 +446,11 @@
   document.querySelector('[data-seg="luces"]').addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.luces) return;
     S.luces = b.dataset.v; save(); A.sfx.ui(); A.casa.set(S.luces); syncSettings();
+  });
+  /* el estilo de los efectos: al cambiarlo suena un "muy bien" con el nuevo, para oir la diferencia */
+  document.querySelector('[data-seg="sonidos"]').addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.dataset.v === S.sonidos) return;
+    S.sonidos = b.dataset.v; A.audio.setSonidos(S.sonidos); save(); A.sfx.ui(); setTimeout(() => A.sfx.reveal(3), 220); syncSettings();
   });
   document.querySelector('[data-seg="units"]').addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.v === S.units) return;

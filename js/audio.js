@@ -511,7 +511,7 @@ window.AIQ = window.AIQ || {};
   /* el murmullo del crupier: triangular filtrada por dos formantes que alternan (sigue siendo "pixel", sin pitido) */
   const VM = { sly: { b: 52, pat: [0, 3, 5, 3, 7, 5], d: 0.065 }, laugh: { b: 60, pat: [7, 3], d: 0.08 }, angry: { b: 43, pat: [0, -2, 1, -3], d: 0.06 }, shock: { b: 57, pat: [0, 4, 8, 12], d: 0.055 }, boss: { b: 38, pat: [0, 0, -3, 2], d: 0.09 } };
 
-  A.sfx = {
+  const NW = {
     /* RATON (pasar): la ficha que roza el fieltro, apagada, por debajo de la musica, y una nota de vibrafono casi en susurro. Barrer varios controles
        seguidos sube por la escala (rebota arriba y baja: nunca chilla) y al parar un instante vuelve al principio. x: el lado (-1..1). Comparte hovT
        con menuHover: si dos oyentes saltan a la vez (Enciclopedia, parche), suena uno */
@@ -890,6 +890,190 @@ window.AIQ = window.AIQ || {};
       noise(t + 0.4, 0.7, { hp: 5000, vol: 0.025, sweepTo: 12000, type: "highpass" }); A.music.duck(0.65, 2000);
     }),
   };
+  /* ------------------------------------------------------------------ los sonidos de antes: «Clásicos» (Ajustes > Sonido) */
+  /* Los 38 sonidos que el Bloque F rehizo, tal como eran hasta la v0.3.192 (el mismo codigo: campanas, kalimba, pitidos de 8 bits, todo en Do y al
+     centro), para quien los prefiera. Cada uno entra por su tira, sin filtro, y suena en el MISMO escalon que su version nueva (CLA, dB, medido con
+     la misma vara): la musica sigue al frente. Los efectos de la regla (retos, globo, rasca y el resto del casino) son los mismos con las dos */
+  const CLA = {
+    ach: -17.7, barrido: -19.7, blip: -25.1, boss: -22.5, buy: -19.2, card: -15.4, clear: -17.3, coin: -25.5, count: -21.3, countEnd: -22.8, deny: -26.8, felt: -25.5,
+    flag: -16.8, goal: -19.1, golpe: -18.8, hover: -16.3, impacto: -26.6, intro: -25.5, jackpot1: -16.6, jackpot2: -15.9, jackpot3: -18.2, lampara: -21.5, lootStep: -20.2,
+    lose: -30.9, menuHover: -15.9, pause: -25.7, pin: -27.3, reveal0: -25.3, reveal1: -21.8, reveal2: -19.1, reveal3: -17.9, reveal4: -18.9, reveal5: -25.7,
+    rouBet: -24.9, rouStop: -30.7, rouTick: -25.9, sell: -18.6, stamp: -32.7, streak: -17.5, streakBreak: -20.6, tick: -17.6, toggle: -27.1, ui: -17.7, voice: -19.1,
+    win: -16.1,
+    otro: -20,
+  };
+  /* monedas que caen: tintineos metalicos agudos al azar (pentatonica, asi nunca desafinan); muy seguidas al principio y luego se posan */
+  function coins(t, n, span, vol = 0.03) {
+    for (let i = 0; i < n; i++) {
+      const d = t + span * Math.pow(i / n, 1.4) + Math.random() * 0.025;
+      bell(scaleNote(10 + Math.floor(Math.random() * 8), 60), d, { vol: vol * (0.5 + Math.random() * 0.7), dur: 0.08 + Math.random() * 0.2, rev: 0.2 });
+      if (i % 2 === 0) noise(d, 0.012, { hp: 6500, vol: vol * 0.8 });
+    }
+  }
+  /* el timbre de la maquina: dos notas alternando muy deprisa que se van apagando ("rrring") */
+  function ring(a, b, t, n, vol = 0.05) {
+    for (let i = 0; i < n; i++) bell(i % 2 ? b : a, t + i * 0.042, { vol: vol * (1 - 0.75 * i / n), dur: 0.13, rev: 0.4 });
+  }
+  /* corneta de 8 bits (v0.2.15, bandera del acierto): onda cuadrada filtrada con un pellizco de tono al atacar, como un metal, y vibrato opcional */
+  function horn(m, t, o = {}) {
+    const { vol = 0.03, dur = 0.14, vib = 0, bus = lb } = o;
+    const f = mtof(m), os = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+    os.type = "square"; os.frequency.setValueAtTime(f * 0.94, t); os.frequency.exponentialRampToValueAtTime(f, t + 0.028);
+    lp.type = "lowpass"; lp.Q.value = 1.1; lp.frequency.setValueAtTime(f * 2, t); lp.frequency.exponentialRampToValueAtTime(Math.min(9000, f * 4.5), t + 0.05);
+    if (vib) { const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = vib; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f * 0.011, t + dur * 0.55); lfo.connect(lg).connect(os.frequency); lfo.start(t); lfo.stop(t + dur + 0.1); }
+    os.connect(lp).connect(g).connect(bus); send(g, 0.22);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.014); g.gain.setValueAtTime(vol * 0.85, t + dur * 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    os.start(t); os.stop(t + dur + 0.05);
+  }
+  /* voz arcade del crupier: silabas cortas de onda cuadrada/diente de sierra, el tono cambia con el humor */
+  const VMOOD = {
+    sly: { b: 52, w: "square", pat: [0, 3, 5, 3, 7, 5], d: 0.06, v: 0.05, slide: 1 }, laugh: { b: 60, w: "square", pat: [7, 3], d: 0.08, v: 0.06, slide: -2 },
+    angry: { b: 40, w: "sawtooth", pat: [0, -2, 1, -3], d: 0.055, v: 0.055, slide: -1 }, shock: { b: 58, w: "square", pat: [0, 4, 8, 12], d: 0.05, v: 0.055, slide: 2 },
+    boss: { b: 34, w: "sawtooth", pat: [0, 0, -3, 2], d: 0.09, v: 0.075, slide: -1 },
+  };
+  /* Bloque J: los sonidos de raton (pasar, pulsar placa, pulsar boton) nunca suenan igual dos veces seguidas: 6 tonos por familia, ±3 % */
+  const bag = () => { let last = -1; return () => { let i; do { i = Math.floor(Math.random() * 6); } while (i === last); last = i; return (i - 2.5) * 0.2; }; };
+  const uiVar = bag(), cardVar = bag();
+  function stripC(key) {
+    const v = Math.pow(10, (CLA[key] != null ? CLA[key] : CLA.otro) / 20), g = ctx.createGain(), rs = ctx.createGain();
+    g.gain.value = v; rs.gain.value = v * 1.69; g.connect(sfxBus); rs.connect(revFx);
+    return { g, rs };
+  }
+  const cla = (key, fn) => go((t, ...a) => { const s = stripC(typeof key === "function" ? key(...a) : key), b0 = lb, r0 = lr; lb = s.g; lr = s.rs; try { return fn(t, ...a); } finally { lb = b0; lr = r0; } });
+  const PADK = MUS_BASE * 0.7;   // el acorde de fondo de antes iba por el bus de la musica (x0,55 x0,7 de fabrica): por su tira, a la misma fuerza
+  const CL = {
+    hover: cla("hover", t => {
+      if (t - hovT < 0.06) return;
+      const r = Math.random, since = t - hovT; hovT = t;
+      if (since > 0.75) { hovStep = 0; hovDir = 1; } else { hovStep += hovDir; if (hovStep >= 6) hovDir = -1; else if (hovStep <= 0) hovDir = 1; }
+      const m = scaleNote(8 + hovStep, 60) + (r() - 0.5) * 0.08, v = 0.0105 * (0.85 + 0.3 * r());
+      noise(t, 0.006 + 0.003 * r(), { type: "bandpass", lp: 3400 + 1800 * r(), q: 1.3, vol: 0.0042 });
+      pluck(m, t + 0.003, { vol: v, dur: 0.09 + 0.05 * r(), bright: 2.6 + 1.2 * r(), rev: 0.12, wave: r() < 0.7 ? "sine" : "triangle" });
+      bell(m + 12, t + 0.007, { vol: v * 0.24, dur: 0.14 + 0.08 * r(), rev: 0.3 });
+      if (hovStep >= 3 && r() < 0.5) chirp(m + 12, t + 0.005, v * 0.1, 0.02);                 // un pellizco de 8 bits cuando la escalera se calienta
+    }),
+    menuHover: cla("menuHover", (t, k = 0) => {
+      if (t - hovT < 0.05) return; hovT = t;                                          // barrido muy rapido por encima: no se amontonan
+      const r = Math.random, deg = HOV_DEG[k] != null ? HOV_DEG[k] : 7;
+      let m = hovLast; for (let i = 0; i < 6 && m === hovLast; i++) m = scaleNote(deg + Math.floor(r() * 3) - 1, 60);
+      hovLast = m; m += (r() - 0.5) * 0.1;                                             // +-5 cents: suena vivo, no de fabrica
+      const v = 0.01 * (0.8 + 0.4 * r());                                              // flojito: muy por debajo del clic que viene despues
+      noise(t, 0.006 + 0.004 * r(), { type: "bandpass", lp: 3200 + 2400 * r(), q: 1.4, vol: 0.0045 * (0.7 + 0.6 * r()) });
+      if (r() < 0.5) noise(t + 0.01 + 0.008 * r(), 0.005, { type: "bandpass", lp: 4200 + 2000 * r(), q: 1.4, vol: 0.0022 });   // a veces, la ficha de debajo
+      pluck(m, t + 0.004, { vol: v, dur: 0.08 + 0.06 * r(), bright: 2.5 + 1.5 * r(), rev: 0.1 + 0.08 * r(), wave: r() < 0.7 ? "sine" : "triangle" });
+      bell(m + (r() < 0.6 ? 12 : 19), t + 0.008 + 0.012 * r(), { vol: v * (0.22 + 0.12 * r()), dur: 0.12 + 0.1 * r(), rev: 0.3 });
+      if (r() < 0.6) chirp(m + 12, t + 0.006, v * 0.12, 0.02);
+    }),
+    ui: cla("ui", t => pluck(84 + uiVar(), t, { vol: 0.05, dur: 0.12, bright: 3, rev: 0.1 })),
+    card: cla("card", t => { const v = 1 + cardVar() * 0.06; noise(t, 0.05, { lp: 2600 * v, vol: 0.08, type: "bandpass", q: 0.8 }); noise(t + 0.04, 0.03, { hp: 3000 * v, vol: 0.04 }); }),
+    felt: cla("felt", t => { thump(t, { vol: 0.13, f0: 150, f1: 58, dur: 0.08 }); noise(t, 0.04, { lp: 1700, vol: 0.035 }); pluck(64, t + 0.012, { vol: 0.03, dur: 0.14, bright: 2, rev: 0.15 }); }),
+    toggle: cla("toggle", (t, on) => { thump(t, { vol: 0.16, f0: on ? 260 : 190, f1: 80, dur: 0.06 }); pluck(on ? 84 : 72, t + 0.015, { vol: 0.06, dur: 0.1, bright: 3, rev: 0.05 }); }),
+    blip: cla("blip", (t, v) => pluck(scaleNote(Math.round(v * 9), 67), t, { vol: 0.09, dur: 0.16, bright: 3, rev: 0.15 })),
+    deny: cla("deny", t => { thump(t, { vol: 0.2, f0: 120, f1: 60, dur: 0.1 }); pluck(46, t, { vol: 0.09, dur: 0.18, bright: 1 }); pluck(43, t + 0.09, { vol: 0.09, dur: 0.22, bright: 1 }); }),
+    pause: cla("pause", t => pluck(60, t, { vol: 0.08, dur: 0.3, bright: 3 })),
+    pin: cla("pin", (t, k = 0) => { thump(t, { vol: 0.32, f0: 320, f1: 70, dur: 0.1 }); noise(t, 0.05, { lp: 2200, vol: 0.06 }); pluck(76, t + 0.02, { vol: 0.05, dur: 0.15, rev: 0.15 });   // la chincheta que cae (antes A.sfx.tap)
+      const n = 60 + Math.min(k, 6) * 2; thump(t, { vol: 0.34, f0: 170, f1: 55, dur: 0.11 }); noise(t, 0.05, { hp: 2200, vol: 0.09 }); pluck(n + 12, t + 0.03, { vol: 0.11, dur: 0.28, bright: 4, rev: 0.25 }); bell(n + 24, t + 0.05, { vol: 0.04, dur: 0.4, rev: 0.4 }); }),
+    reveal: cla(tier => "reveal" + tier, (t, tier) => {
+      if (tier === 4) {
+        [72, 76, 79, 84].forEach((m, i) => bell(m + 12, t + i * 0.055, { vol: 0.085, dur: 1.4 })); thump(t, { vol: 0.28, f0: 90, f1: 38, dur: 0.4 });
+        A.music.duck(0.35, 1600);
+      } else if (tier === 3) { [72, 76, 79].forEach((m, i) => bell(m, t + i * 0.07, { vol: 0.09, dur: 1.1 })); A.music.duck(0.4, 1300); }
+      else if (tier === 2) { [76, 79].forEach((m, i) => bell(m, t + i * 0.08, { vol: 0.08, dur: 0.9 })); }
+      else if (tier === 1) { pluck(67, t, { vol: 0.12, dur: 0.5, bright: 3 }); pluck(64, t + 0.11, { vol: 0.1, dur: 0.6, bright: 3 }); }
+      else if (tier === 0) { pluck(57, t, { vol: 0.16, dur: 0.6, bright: 2 }); pluck(53, t + 0.16, { vol: 0.15, dur: 0.9, bright: 1.8 }); thump(t + 0.02, { vol: 0.12, f0: 100, f1: 50 }); }
+      else { thump(t, { vol: 0.26, f0: 150, f1: 55 }); pluck(50, t + 0.12, { vol: 0.14, dur: 0.9, bright: 1.5 }); noise(t, 0.09, { lp: 900, vol: 0.05 }); }
+    }),
+    impacto: cla("impacto", t => { thump(t, { vol: 0.34, f0: 70, f1: 30, dur: 0.45 }); noise(t, 0.09, { lp: 1400, vol: 0.1 }); }),
+    golpe: cla("golpe", (t, k = 0) => {
+      const r = Math.random, m = scaleNote(8 + 2 * k, 60) + (r() - 0.5) * 0.08;
+      noise(t, 0.016, { type: "bandpass", lp: 3700 + 400 * r(), q: 2, vol: 0.055 }); noise(t + 0.02 + 0.006 * r(), 0.01, { type: "bandpass", lp: 4600, q: 2, vol: 0.028 });
+      thump(t, { vol: 0.1, f0: 240, f1: 110, dur: 0.06 });
+      pluck(m, t + 0.004, { vol: 0.07 * (0.9 + 0.2 * r()), dur: 0.2, bright: 3, rev: 0.12 }); bell(m + 12, t + 0.01, { vol: 0.035, dur: 0.28, rev: 0.25 });
+    }),
+    count: cla("count", (t, k) => pluck(scaleNote(Math.floor(k * 9), 72), t, { vol: 0.045, dur: 0.09, bright: 3, rev: 0.05 })),
+    countEnd: cla("countEnd", t => { bell(84, t, { vol: 0.07, dur: 0.8 }); bell(91, t + 0.06, { vol: 0.04, dur: 0.8 }); }),
+    tick: cla("tick", (t, n) => pluck(88 - n * 2, t, { vol: 0.08, dur: 0.08, bright: 4, rev: 0.05 })),
+    streak: cla("streak", (t, n) => { const b = scaleNote(4 + Math.min(n, 7) * 2, 60); pluck(b, t, { vol: 0.12, dur: 0.4 }); pluck(b + 7, t + 0.07, { vol: 0.1, dur: 0.5 }); noise(t, 0.25, { hp: 2500, vol: 0.03, sweepTo: 9000, type: "highpass" }); }),
+    streakBreak: cla("streakBreak", t => {
+      const r = Math.random;
+      noise(t, 0.05, { type: "bandpass", lp: 3600 + 900 * r(), q: 2.2, vol: 0.07 });
+      for (let i = 0; i < 4; i++) noise(t + 0.012 + i * 0.019 + r() * 0.008, 0.012, { hp: 4500 + r() * 2500, vol: 0.028 });
+      thump(t, { vol: 0.15, f0: 140, f1: 48, dur: 0.14 });
+      pluck(64, t + 0.05, { vol: 0.065, dur: 0.22, bright: 2.5, wave: "square" }); pluck(59, t + 0.17, { vol: 0.06, dur: 0.38, bright: 2 });
+    }),
+    flag: cla("flag", (t, n = 1) => {
+      const r = Math.random, M = [[0, 2, 3], [0, 3, 5], [2, 3, 5], [0, 2, 5], [1, 3, 5]];
+      let mi = Math.floor(r() * M.length); if (mi === flagLast) mi = (mi + 1 + Math.floor(r() * (M.length - 1))) % M.length; flagLast = mi;
+      const base = [60, 62, 65][Math.floor(r() * 3)] + 12, v = 0.03 * (0.85 + 0.3 * r()), step = 0.1 + 0.025 * r();
+      noise(t, 0.08, { type: "bandpass", lp: 1300 + 700 * r(), q: 0.9, vol: 0.022 });
+      noise(t + 0.03, 0.05, { type: "bandpass", lp: 2200 + 900 * r(), q: 1.2, vol: 0.012 });
+      M[mi].forEach((d, i) => { const last = i === 2; horn(scaleNote(d, base) + (r() - 0.5) * 0.08, t + 0.05 + i * step, { vol: v * (last ? 1.08 : 0.9), dur: last ? 0.44 : 0.11, vib: last ? 5.5 + r() : 0 }); });
+      if (n > 1) M[mi].forEach((d, i) => horn(scaleNote(d, base) + 12, t + 0.2 + i * step, { vol: v * 0.32, dur: i === 2 ? 0.3 : 0.08 }));
+    }),
+    coin: cla("coin", (t, k = 0) => { const n = 88 + Math.round(k * 5); bell(n, t, { vol: 0.07, dur: 0.35, rev: 0.25 }); bell(n + 7, t + 0.055, { vol: 0.06, dur: 0.5, rev: 0.3 }); noise(t, 0.012, { hp: 6000, vol: 0.05 }); }),
+    jackpot: cla(l => "jackpot" + Math.max(1, Math.min(3, l | 0)), (t, level = 1) => {
+      const n = Math.max(1, Math.min(3, level | 0));
+      const S0 = { g: lb, r: lr }, inS = f => () => { const b0 = lb, r0 = lr; lb = S0.g; lr = S0.r; try { f(); } finally { lb = b0; lr = r0; } };   // los golpes que se crean mas tarde, por la misma tira
+      const ARP = [[72, 76, 79, 84], [76, 79, 84, 88], [76, 79, 84, 88, 91]], RING = [[84, 79], [88, 84], [91, 88]];
+      const P = [1.15, 1.3, 1.5], KICK = [[0.24, 160, 50, 0.14], [0.3, 145, 44, 0.2], [0.45, 110, 30, 0.6]];
+      const at = (when, fn) => { const ms = (when - JP_LEAD - ctx.currentTime) * 1000; if (ms <= 4) inS(fn)(); else setTimeout(() => { if (ctx.currentTime < when + 0.05) inS(fn)(); }, ms); };
+      const hit = k => {
+        const t0 = t + k * JP_GAP, a = ARP[k], p = P[k], [kv, f0, f1, kd] = KICK[k];
+        thump(t0, { vol: kv, f0, f1, dur: kd }); noise(t0, 0.04, { hp: 3000, vol: 0.08 * p });            // la palanca
+        a.forEach((m, i) => {
+          const tt = t0 + 0.012 + i * 0.034, fin = i === a.length - 1;
+          bell(m, tt, { vol: 0.075 * p * (fin ? 1.3 : 1), dur: fin ? 0.9 : 0.32, rev: 0.4 }); chirp(m + 12, tt, 0.022 * p);
+        });
+        pluck(a[a.length - 1] - 24, t0, { vol: 0.1 * p, dur: 0.55, bright: 3, rev: 0.3 });
+        ring(RING[k][0], RING[k][1], t0 + 0.19, k === n - 1 ? [9, 11, 17][k] : 5, 0.045 * p);
+        coins(t0 + 0.05, 3 + k * 2, 0.28, 0.026 * p);
+      };
+      for (let k = 0; k < n; k++) at(t + k * JP_GAP, () => hit(k));
+      const tl = t + (n - 1) * JP_GAP, rain = [8, 14, 28][n - 1], span = [0.5, 0.8, 1.5][n - 1], cut = tl + 0.22 + span * 0.45;
+      at(tl + 0.22, () => coins(tl + 0.22, Math.ceil(rain / 2), span * 0.45, 0.03));                       // la lluvia final, en dos tandas
+      at(cut, () => coins(cut, Math.floor(rain / 2), span * 0.55, 0.03));
+      if (n === 3) {
+        at(tl, () => { noise(tl + 0.02, 1.1, { hp: 2600, vol: 0.045, sweepTo: 12000, type: "highpass" }); pad([48, 55, 60, 64, 67, 72], tl + 0.05, 2.8, 0.065, lb); });
+        at(tl + 0.78, () => [96, 100, 103, 108].forEach((m, i) => bell(m, tl + 0.78 + i * 0.07, { vol: 0.035, dur: 0.9, rev: 0.7 })));
+      }
+      A.music.duck([0.5, 0.38, 0.25][n - 1], [1300, 1900, 3200][n - 1]);
+    }),
+    barrido: cla("barrido", t => { noise(t, 0.7, { type: "bandpass", lp: 900, sweepTo: 5200, q: 1.1, vol: 0.05 }); [84, 88, 91, 96].forEach((m, i) => bell(m, t + 0.1 + i * 0.09, { vol: 0.05, dur: 0.9, rev: 0.6 })); }),
+    goal: cla("goal", t => {
+      thump(t, { vol: 0.26, f0: 150, f1: 48, dur: 0.18 }); noise(t, 0.05, { hp: 2600, vol: 0.06 });
+      MOTIF.forEach((m, i) => { pluck(m + 12, t + 0.02 + i * 0.075, { vol: 0.13, dur: 0.75, rev: 0.5 }); bell(m + 24, t + 0.02 + i * 0.075, { vol: 0.03, dur: 0.3, rev: 0.3 }); });
+      bell(91, t + 0.2, { vol: 0.07, dur: 1.2, rev: 0.6 }); bell(98, t + 0.26, { vol: 0.04, dur: 1, rev: 0.6 });
+      noise(t + 0.16, 0.5, { hp: 4500, vol: 0.028, sweepTo: 12000, type: "highpass" }); A.music.duck(0.5, 1000);
+    }),
+    lootStep: cla("lootStep", (t, k = 1) => {
+      const n = scaleNote(5 + Math.min(4, Math.max(1, k)), 60) + 12;
+      bell(n, t, { vol: 0.08, dur: 0.4, rev: 0.3 }); bell(n + 7, t + 0.05, { vol: 0.06, dur: 0.6, rev: 0.35 }); noise(t, 0.012, { hp: 6000, vol: 0.05 });
+      for (let i = 0; i < 1 + k; i++) bell(n + 12 + (i % 2) * 5, t + 0.09 + i * 0.045, { vol: 0.025, dur: 0.18, rev: 0.25 });
+    }),
+    ach: cla("ach", t => { [79, 83, 86, 91].forEach((m, i) => bell(m, t + i * 0.08, { vol: 0.09, dur: 1.2, rev: 0.6 })); pluck(67, t, { vol: 0.12, dur: 0.6, rev: 0.4 }); noise(t + 0.25, 0.5, { hp: 5000, vol: 0.03, sweepTo: 12000, type: "highpass" }); }),
+    buy: cla("buy", t => { [0, 0.06, 0.12].forEach((d, i) => bell(84 + i * 5, t + d, { vol: 0.07, dur: 0.4, rev: 0.3 })); thump(t, { vol: 0.16, f0: 200, f1: 70, dur: 0.08 }); noise(t + 0.02, 0.05, { hp: 3500, vol: 0.05 }); }),
+    sell: cla("sell", t => { bell(76, t, { vol: 0.06, dur: 0.3 }); bell(69, t + 0.07, { vol: 0.06, dur: 0.4 }); noise(t, 0.04, { lp: 2400, vol: 0.06, type: "bandpass", q: 1 }); }),
+    clear: cla("clear", t => { thump(t, { vol: 0.3, f0: 130, f1: 40, dur: 0.25 }); [72, 76, 79, 84, 88].forEach((m, i) => pluck(m, t + 0.08 + i * 0.075, { vol: 0.13, dur: 0.9, rev: 0.5 })); bell(96, t + 0.5, { vol: 0.08, dur: 1.4, rev: 0.7 }); A.music.duck(0.35, 1800); }),
+    lose: cla("lose", t => { thump(t, { vol: 0.4, f0: 80, f1: 28, dur: 0.6 }); [57, 53, 50, 45].forEach((m, i) => pluck(m, t + i * 0.16, { vol: 0.12, dur: 1.3, bright: 1.5, rev: 0.7 })); noise(t, 0.6, { lp: 500, vol: 0.08 }); A.music.duck(0.25, 2400); }),
+    stamp: cla("stamp", t => { thump(t, { vol: 0.45, f0: 120, f1: 32, dur: 0.35 }); noise(t, 0.12, { lp: 1600, vol: 0.14 }); }),
+    win: cla("win", t => {
+      MOTIF.forEach((m, i) => pluck(m + 12, t + 0.12 + i * 0.11, { vol: 0.16, dur: 1.2, rev: 0.6 }));
+      [72, 76, 79, 84].forEach((m, i) => bell(m, t + 0.5 + i * 0.07, { vol: 0.08, dur: 1.6 }));
+      pad([48, 55, 60, 64], t + 0.4, 2.6, 0.05 * PADK, lb); A.music.duck(0.3, 2600);
+    }),
+    intro: cla("intro", t => { noise(t, 0.5, { lp: 400, sweepTo: 6000, vol: 0.09, type: "bandpass", q: 1.4 }); thump(t + 0.32, { vol: 0.25, f0: 100, f1: 40, dur: 0.3 }); MOTIF.forEach((m, i) => pluck(m - 12, t + 0.34 + i * 0.09, { vol: 0.1, dur: 0.6 })); A.music.duck(0.4, 1800); }),
+    lampara: cla("lampara", (t, i = 0) => { const r = Math.random; noise(t, 0.014, { hp: 3400 + 500 * i + 400 * r(), vol: 0.05 }); thump(t, { vol: 0.06, f0: 290 - 30 * i + 20 * r(), f1: 120, dur: 0.06 }); bell(i ? 91 : 86, t + 0.018, { vol: 0.016 + 0.005 * r(), dur: 0.7, rev: 0.35 }); }),
+    boss: cla("boss", t => { [0, 0.28, 0.56].forEach(d => thump(t + d, { vol: 0.42, f0: 95, f1: 34, dur: 0.32 })); pad([38, 41, 44, 50], t, 2.6, 0.09 * PADK, lb); pluck(50, t + 0.85, { vol: 0.14, dur: 1.4, bright: 2, rev: 0.7 }); pluck(47, t + 1.1, { vol: 0.14, dur: 1.8, bright: 2, rev: 0.8 }); A.music.duck(0.3, 2600); }),
+    voice: cla("voice", (t, mood = "sly", i = 0) => { const m = VMOOD[mood] || VMOOD.sly; blipSq(t, m.b + m.pat[i % m.pat.length] + ((i * 7) % 3), m); }),
+    rouBet: cla("rouBet", (t, k = 0) => { noise(t, 0.018, { hp: 4200, vol: 0.07 }); thump(t, { vol: 0.15, f0: 230, f1: 90, dur: 0.1 }); bell(86 + k * 3, t + 0.004, { vol: 0.05, dur: 0.3, rev: 0.25 }); bell(93 + k * 3, t + 0.045, { vol: 0.04, dur: 0.35, rev: 0.25 }); noise(t + 0.09, 0.012, { hp: 5200, vol: 0.04 }); }),
+    rouTick: cla("rouTick", (t, v = 0) => { pluck(86 - v * 22, t, { vol: 0.05 + v * 0.05, dur: 0.05 + v * 0.09, bright: 3.5, rev: 0.1 + v * 0.2 }); thump(t, { vol: 0.035 + v * 0.09, f0: 520 - v * 260, f1: 180, dur: 0.035 }); noise(t, 0.01 + v * 0.01, { hp: 3800, vol: 0.03 + v * 0.04 }); }),
+    rouStop: cla("rouStop", t => { thump(t, { vol: 0.42, f0: 170, f1: 50, dur: 0.24 }); noise(t, 0.07, { lp: 2600, vol: 0.11 }); noise(t + 0.012, 0.02, { hp: 5000, vol: 0.06 }); bell(79, t + 0.02, { vol: 0.07, dur: 0.7, rev: 0.3 }); }),
+  };
+  /* la eleccion (Ajustes > Sonido > Sonidos, la guarda js/game.js): "lounge" (los nuevos) o "clasico" (los de antes) */
+  A.audio.sonidos = "lounge";
+  A.audio.setSonidos = v => { A.audio.sonidos = v === "clasico" ? "clasico" : "lounge"; };
+  A.sfx = {};
+  for (const k in NW) A.sfx[k] = CL[k] ? (...a) => (A.audio.sonidos === "clasico" ? CL[k] : NW[k])(...a) : NW[k];
   /* ------------------------------------------------------------------ el ambiente de la sala (v0.3.56, el sonido de la casa 3b) */
   /* Debajo de la musica, la sala: fichas y cartas y alguna copa, sueltas y de tarde en tarde. Cada sitio suena distinto (A.amb.place; lo llama
      js/casa.js, que ya sabe en que pantalla estas): el salon de la portada, la sala que baja la voz mientras piensas, la caja, la barra del

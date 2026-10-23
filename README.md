@@ -143,7 +143,7 @@ Creada por Cousins Studios con AKAI; los audios se exportaron e integraron en el
 | 21 | Apuesta máxima | Max Bet | corrido | 1:45 |
 | 22 | Tipsters | Tipsters | noir | 1:45 |
 
-Los efectos de sonido del juego salen del propio motor de audio (`js/audio.js`): la familia «Lounge dorado», con el piano eléctrico de la canción 1, vibráfono, fichas y cartas grabadas («Casino Audio» de Kenney, CC0, las mismas del ambiente de la sala) y un toque de 8 bits solo en los premios y en la bandera. Afinan con la canción que suena, suenan en su lado de la pantalla y cada uno tiene su escalón respecto a la música, que va al frente.
+Los efectos de sonido del juego salen del propio motor de audio (`js/audio.js`): la familia «Lounge dorado», con el piano eléctrico de la canción 1, vibráfono, fichas y cartas grabadas («Casino Audio» de Kenney, CC0, las mismas del ambiente de la sala) y un toque de 8 bits solo en los premios y en la bandera. Afinan con la canción que suena, suenan en su lado de la pantalla y cada uno tiene su escalón respecto a la música, que va al frente. En Ajustes > Sonido > Estilo de sonido se puede volver a los de antes («Clásicos»: campanas, kalimba y 8 bits, al mismo nivel que los nuevos).
 
 ### Datos, tipografías y licencias
 
