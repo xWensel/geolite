@@ -148,6 +148,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const W = innerWidth, H = innerHeight; if (!W || !H) return;
     const R = rule(), L = LUX[mode], k = Math.min(W / 1280, H / 720), c = Math.max(2, Math.round(2 * k));
     root.classList.toggle("mute", !!R.off);
+    charco(R.off ? null : R.key);
     if (R.off) { if (map) map.calm = 0; sig = "off"; seq++; root.classList.remove("boss"); hora(); return; }
     const N = NOCHE[act] || NOCHE[0], boss = !!R.boss;
     const p = { w: Math.ceil(W / c), h: Math.ceil(H / c), c, amb: boss ? JEFE.amb : L.amb, dark: Math.min(1.6, L.dark * (boss ? 1 : N.k)), bands: 6, rgb: boss ? JEFE.rgb : N.rgb, glow: boss ? JEFE.glow : CALIDA, pools: R.pools, keep: R.keep || null, cones: R.cones || null };
@@ -161,12 +162,25 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (w) { w._c[id] = { c, boss }; w.postMessage(p); }
     else { const out = paint(p); onMap({ id, w: p.w, h: p.h, c, boss, buf: out.buffer, gbuf: tint(out, p.glow).buffer }); }   // sin Worker (no deberia pasar): se calcula aqui, una vez por pantalla
   }
+  /* v0.3.199 (Bloque F, paso 2): EL CHARCO de luz calida que deja la lampara en el tapete, detras de todas las piezas y solo en los menus
+     (portada, veredicto y cuadros): en la partida la tierra nunca cambia de color. x, y, radio en fraccion de la pantalla */
+  const CHARCO = { home: [0.5, 0.62, 0.62], vd: [0.5, 0.45, 0.55], box: [0.5, 0.5, 0.6] };
+  let charcoK = "";
+  function charco(key) {
+    const el = root && root.querySelector(".charco"); if (!el) return;
+    const c = CHARCO[key], f = mode === "soft" ? 0.6 : 1, k = c ? key + f : "";
+    if (k === charcoK) return; charcoK = k;
+    if (!c) { el.classList.remove("on"); return; }
+    const [x, y, r] = c;
+    el.style.background = `radial-gradient(ellipse ${r * 100}% ${r * 78}% at ${x * 100}% ${y * 100}%, rgba(255,200,130,${(0.17 * f).toFixed(3)}) 0%, rgba(255,190,120,${(0.09 * f).toFixed(3)}) 38%, rgba(0,0,0,0) 70%), radial-gradient(ellipse 120% 95% at ${x * 100}% ${y * 100}%, rgba(0,0,0,0) 45%, rgba(3,14,22,${(0.42 * f).toFixed(3)}) 100%)`;
+    el.classList.add("on");
+  }
   /* algo ha cambiado en pantalla: se mira cuando ha terminado de entrar y otra vez al final por si algo crecio despues.
      Siempre en un hueco libre del hilo principal (requestIdleCallback): ni una medida ni un mensaje en mitad de una animacion */
   const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2000 }) : requestAnimationFrame(fn));
   /* cambio de pantalla (no una pieza que entra en partida): la luz de la pantalla anterior se va enseguida a una penumbra neutra, para que su
      sombra no se quede un instante encima de la nueva; la luz nueva entra con su fundido en cuanto esta lista */
-  function neutral() { if (!root) return; cvs.forEach(c => c.classList.remove("on")); root.classList.add("neutral"); sig = ""; seq++; }
+  function neutral() { if (!root) return; cvs.forEach(c => c.classList.remove("on")); root.classList.add("neutral"); sig = ""; seq++; charco(null); }
   /* que pantalla es, sin medir nada (solo clases): si cambia, la luz vieja se va; si es la misma (el Campamento al comprar, una pieza nueva
      en partida), la luz se ajusta sin apagarse */
   let lastKind = "";
@@ -204,9 +218,18 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     coloca(lastKind);                                                   // tambien si la pantalla se ha vuelto a pintar entera y se ha llevado la capa por delante
     if (A.escena && A.escena.caja) A.escena.caja(lastKind === "vd");      // v0.3.76: la lampara de la caja cuelga mientras dura el veredicto
     clearTimeout(tm); clearTimeout(tm2);
+    relieve();                                                          // las piezas reciben su luz aunque las Luces de la sala esten apagadas
     if (mode === "off") { tm = setTimeout(hora, 650); return; }       // sin luces de sala, las bombillas siguen en hora
     tm = setTimeout(() => idle(look), performance.now() < prisa ? 140 : 650);   // las pantallas ya han entrado (deslizan unos 350-500 ms): se miden quietas
     tm2 = setTimeout(() => idle(look), 1600);
+  }
+  /* v0.3.199 (Bloque F, pasos 2 y 3): la luz de cada pieza (js/relieve.js) se mira con la sala: pronto (que no se vea la sombra de antes) y otra
+     vez cuando todo ha entrado; si nada se ha movido no hace nada */
+  let tr1 = 0, tr2 = 0;
+  function relieve() {
+    if (!A.relieve) return; clearTimeout(tr1); clearTimeout(tr2);
+    tr1 = setTimeout(() => idle(() => { A.relieve.pinta(); if (lastKind === "home") A.relieve.alinea(); }), 90);
+    tr2 = setTimeout(() => idle(() => A.relieve.pinta()), 760);
   }
 
   /* v0.3.55: el sitio en el que estas tambien se oye. En el Campamento la musica llega amortiguada, como desde la sala (js/audio.js) */
@@ -351,7 +374,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
   function init(m, how) {
     map = m || null;
     root = document.createElement("div"); root.id = "sala"; root.setAttribute("aria-hidden", "true");
-    root.innerHTML = '<canvas class="d"></canvas><canvas class="d"></canvas><canvas class="g"></canvas><i class="veil"></i><i class="beam"></i>';
+    root.innerHTML = '<i class="charco"></i><canvas class="d"></canvas><canvas class="d"></canvas><canvas class="g"></canvas><i class="veil"></i><i class="beam"></i>';
     cvs = [...root.querySelectorAll("canvas.d")]; glowCv = root.querySelector("canvas.g"); veil = root.querySelector(".veil"); beam = root.querySelector(".beam");
     lastKind = kind(); root.classList.toggle("mute", TAPETE(lastKind)); coloca(lastKind); lugar(lastKind);
     /* que mirar: cambios de pantalla (#layer, #dlg, #intro), las piezas que entran y salen en partida (#leftCol, el ticket del marcador) y el tamano */
@@ -366,5 +389,5 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     set(how || "full");
   }
 
-  A.casa = { init, set, mira, premio, perdida, impacto, luz, destello, carrera, ambiente, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
+  A.casa = { init, set, mira, kind, premio, perdida, impacto, luz, destello, carrera, ambiente, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
 })(window.AIQ);

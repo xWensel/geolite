@@ -1846,7 +1846,7 @@ void main(){
 
       // 0) fondo animado (remolino) a baja resolucion, ~24 fps
       let swT = null;
-      if (st.style === 1) {
+      if (st.style === 1 && st.remolino !== false) {                // v0.3.199: la mesa de siempre ya no lleva remolino (sin pase: el oceano es liso)
         swT = this._target("swirl", Math.max(2, Math.round(W / 4)), Math.max(2, Math.round(H / 4)));
         const fxo = this.fxOn !== false;
         if (!swT.ok || swT.fx !== fxo || (fxo && now - swT.at >= 41)) {
@@ -1905,7 +1905,7 @@ void main(){
             gl.uniform1i(P.ocean.u.u_news, 4); this._u(P.ocean, "u_nw", nb, pg.W, pg.H, 0); gl.activeTexture(gl.TEXTURE0); this._nw = [nb, pg.W, pg.H]; } }
         if (!(nb > 0)) { this._u(P.ocean, "u_nw", 0, 1024, 640, 0); this._nw = null; } }
       this._u(P.ocean, "u_sw1", ...ms.sw[0]); this._u(P.ocean, "u_sw2", ...ms.sw[1]); this._u(P.ocean, "u_sw3", ...ms.sw[2]);
-      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", this._calm); }   // la calma entra poco a poco (~0,7 s)
+      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", st.remolino === false ? 2.25 : this._calm); }   // sin remolino: el color medio del oceano, liso   // la calma entra poco a poco (~0,7 s)
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       gl.bindVertexArray(this.vaoFill);
