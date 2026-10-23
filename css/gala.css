@@ -179,6 +179,7 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(50% + 10px) calc(100% - 12px), 50% 100%, calc(50% - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
 .gx-vd-iq { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 14px; width: min(100%, 320px); }
 .gx-vd-iq > .ic, .gx-vd-iq > img { grid-row: span 2; width: 56px; height: 56px; image-rendering: pixelated; }
+.gx-vd-iq > .ic { width: 64px; height: 64px; } /* iconos de nivel: 64 px nativos, escala 1 */
 .gx-vd-iq .odo { font-family: var(--serif); font-size: 56px; line-height: 1; height: 1em; }
 .gx-vd-iq em { grid-column: 1 / -1; padding-top: 6px; border-top: 2px dotted var(--gx-line); font-style: normal; font-size: 22px; color: #c3332a; }
 
