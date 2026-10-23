@@ -34,7 +34,7 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
-      id: "__VER__",
+      id: "0.3.196",
       name: L("La tienda de cada día", "The daily boutique", "La boutique du jour", "A boutique de cada dia", "Die tägliche Boutique", "La boutique di ogni giorno", "", "每日精品店", "매일의 부티크", "毎日のブティック", "Бутик на каждый день", "Codzienny butik"),
       date: "2026-10-23",
       summary: L("La tienda se abre en «Hoy»: un escaparate de seis piezas que cambia a medianoche, con una ganga, un lote de tres, el regalo de la casa y tu lista de deseos. El catálogo entero sigue siempre a la venta.",
@@ -53,7 +53,7 @@ window.AIQ = window.AIQ || {};
         { id: "hoy", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新内容", "새 기능", "新要素", "Новое", "Nowość"),
           title: L("La tienda", "The boutique", "La boutique", "A boutique", "Die Boutique", "La boutique", "", "精品店", "부티크", "ブティック", "Бутик", "Butik"),
           entries: [
-            E(L("Escaparate de hoy", "Today's showcase", "La vitrine du jour", "Vitrine de hoje", "Heutiges Schaufenster", "La vetrina di oggi", "", "今日橱窗", "오늘의 진열장", "今日のショーケース", "Витрина дня", "Witryna dnia"), "new", "__VER__", [
+            E(L("Escaparate de hoy", "Today's showcase", "La vitrine du jour", "Vitrine de hoje", "Heutiges Schaufenster", "La vetrina di oggi", "", "今日橱窗", "오늘의 진열장", "今日のショーケース", "Витрина дня", "Witryna dnia"), "new", "0.3.196", [
               L("Seis piezas que aún no tienes (una mesa, una prenda del crupier, un icono, un título, un marco y una sorpresa) y una de ellas en **ganga a −40 %**. Cambia a medianoche, hora local; lo que sale del escaparate sigue en su sección a su precio de siempre.",
                 "Six pieces you don't own yet (a table, a dealer outfit, an icon, a title, a frame and a surprise), one of them a **−40 % bargain**. It changes at midnight, your local time; whatever leaves the showcase stays in its section at its usual price.",
                 "Six pièces que tu n'as pas encore (une table, une tenue du croupier, une icône, un titre, un cadre et une surprise), dont une en **affaire à −40 %**. Elle change à minuit, heure locale ; ce qui quitte la vitrine reste dans sa section à son prix habituel.",
@@ -66,7 +66,7 @@ window.AIQ = window.AIQ || {};
                 "まだ持っていない6点（テーブル、ディーラーの衣装、アイコン、称号、額縁、サプライズ）、そのうち1点は**−40%のお買い得**。現地時間の真夜中に入れ替わり、ショーケースから外れた物はいつもの値段で売り場に残る。",
                 "Шесть вещей, которых у тебя ещё нет (стол, одежда крупье, значок, титул, рамка и сюрприз), одна из них со **скидкой −40 %**. Витрина меняется в полночь по местному времени; то, что ушло с витрины, остаётся в своём разделе по обычной цене.",
                 "Sześć rzeczy, których jeszcze nie masz (stół, strój krupiera, ikona, tytuł, ramka i niespodzianka), jedna z nich jako **okazja za −40%**. Zmienia się o północy czasu lokalnego; to, co zejdzie z witryny, zostaje w swoim dziale w zwykłej cenie.")]),
-            E(L("Lote, regalo y lista de deseos", "Bundle, gift and wish list", "Lot, cadeau et liste d'envies", "Kit, presente e lista de desejos", "Paket, Geschenk und Wunschliste", "Lotto, regalo e lista dei desideri", "", "套装、赠礼和愿望单", "세트, 선물, 위시리스트", "セット、贈り物、欲しい物リスト", "Набор, подарок и список желаний", "Zestaw, prezent i lista życzeń"), "new", "__VER__", [
+            E(L("Lote, regalo y lista de deseos", "Bundle, gift and wish list", "Lot, cadeau et liste d'envies", "Kit, presente e lista de desejos", "Paket, Geschenk und Wunschliste", "Lotto, regalo e lista dei desideri", "", "套装、赠礼和愿望单", "세트, 선물, 위시리스트", "セット、贈り物、欲しい物リスト", "Набор, подарок и список желаний", "Zestaw, prezent i lista życzeń"), "new", "0.3.196", [
               L("**Lote de tres** piezas de secciones distintas a −25 % juntas, durante tres días (si ya tienes alguna, pagas solo las otras). **Regalo de la casa**: de 10 a 25 fichas gratis cada día, que se guardan 3 días. **Lo quiero**: marca cualquier pieza; si sale en el escaparate, en el lote o en la oferta de la semana, la placa de La tienda de la portada se enciende con un punto (también cuando te espera el regalo).",
                 "**Bundle of three** pieces from different sections at −25 % together, for three days (if you own one already, you only pay for the rest). **House gift**: 10 to 25 free chips every day, kept for 3 days. **I want it**: mark any piece; if it shows up in the showcase, the bundle or the weekly offer, the boutique plaque on the main screen lights up with a dot (it also does when your gift is waiting).",
                 "**Lot de trois** pièces de sections différentes à −25 % ensemble, pendant trois jours (si tu en as déjà une, tu ne paies que les autres). **Cadeau de la maison** : de 10 à 25 jetons gratuits chaque jour, gardés 3 jours. **Je le veux** : marque n'importe quelle pièce ; si elle apparaît dans la vitrine, le lot ou l'offre de la semaine, la plaque de la boutique sur l'écran d'accueil s'allume d'un point (aussi quand ton cadeau t'attend).",
