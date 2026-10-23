@@ -159,10 +159,10 @@ window.AIQ = window.AIQ || {};
   }, { passive: true });
   document.addEventListener("pointerleave", () => { suelta(cur); cur = null; }, true);
 
-  /* las fichas giran al tocarlas (doblones del Campamento, fichas de oro de la tienda): una vuelta entera y vuelven a su sitio */
-  const FICHAS = ".tb-coins > .ic, .bq-wal > .ic, .tb-coins > svg, .bq-wal > svg";
+  /* las fichas de oro de la tienda giran al tocarlas: una vuelta entera y vuelven a su sitio (el doblon del Campamento juega a cara o cruz: js/juguetes.js) */
+  const FICHAS = ".bq-wal > .ic, .bq-wal > svg";
   document.addEventListener("pointerdown", e => {
-    const box = e.target && e.target.closest ? e.target.closest(".tb-coins, .bq-wal") : null; if (!box || quieto()) return;
+    const box = e.target && e.target.closest ? e.target.closest(".bq-wal") : null; if (!box || quieto()) return;
     const f = box.querySelector(FICHAS); if (!f || f._lzGira) return;
     f._lzGira = f.animate([{ transform: "perspective(400px) translateY(0) rotateY(0deg)" }, { transform: "perspective(400px) translateY(-4px) rotateY(180deg)", offset: 0.5 }, { transform: "perspective(400px) translateY(0) rotateY(360deg)" }], { duration: Math.round(T.entrar * 1.6), easing: "cubic-bezier(.2, .8, .3, 1)" });
     f._lzGira.finished.then(() => { f._lzGira = null; }, () => { f._lzGira = null; });

@@ -1,0 +1,8 @@
+Los juguetes de la sala (Bloque F, paso 5): assets/sfx/juego.mp3. Grabaciones de Freesound, todas Creative Commons 0 (CC0 1.0, dominio publico,
+uso comercial libre), comprobadas una a una el 23-oct-2026. https://creativecommons.org/publicdomain/zero/1.0/
+- sello:          I.fekry, 470710 "traditional stamp"                       https://freesound.org/people/I.fekry/sounds/470710/
+- moneda (lanza, cae): jrsevers3, 452867 "CoinFlip"                          https://freesound.org/people/jrsevers3/sounds/452867/
+- moneda (ping):  el_boss, 677853 "Coin Flip Ping"                           https://freesound.org/people/el_boss/sounds/677853/
+- lampara (crujido): kyles, 637678 "metal creaks squeaks small various"     https://freesound.org/people/kyles/sounds/637678/
+- lampara (cadena): alienistcog, 124399 "chain-rattle-small"                https://freesound.org/people/alienistcog/sounds/124399/
+- ronroneo:       shyguy014, 463790 "Cat Purr"                               https://freesound.org/people/shyguy014/sounds/463790/

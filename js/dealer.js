@@ -2543,6 +2543,7 @@ window.AIQ = window.AIQ || {};
   }
   let catFirstSaid = false;
   function catPet(kind) {
+    if (kind === "harto") { catUntil = 0; return; }                                  // v0.3.202: le has acariciado demasiado: se despierta y se va de un salto (catTick)
     catUntil = Math.max(catUntil, Date.now() + 20000);                                // jugar con el alarga su visita
     if (!D.onHome || D.busy || held) return;
     if (!DS.catSeen) { DS.catSeen = 1; saveStore(); }

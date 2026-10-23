@@ -37,8 +37,14 @@ window.AIQ = window.AIQ || {};
   }
 
   /* el puntero, para seguirlo por el suelo (raton; con mando, la mira) */
-  const PT = { x: -1e4, y: -1e4, at: 0, in: false };
-  addEventListener("pointermove", e => { if (Math.abs(e.clientX - PT.x) + Math.abs(e.clientY - PT.y) > 2) PT.at = performance.now(); PT.x = e.clientX; PT.y = e.clientY; PT.in = true; }, { passive: true });
+  const PT = { x: -1e4, y: -1e4, at: 0, in: false, h: [] };
+  addEventListener("pointermove", e => {
+    const now = performance.now(); if (Math.abs(e.clientX - PT.x) + Math.abs(e.clientY - PT.y) > 2) PT.at = now;
+    PT.h.push([now, e.clientX, e.clientY]); while (PT.h.length > 2 && now - PT.h[0][0] > 160) PT.h.shift();   // v0.3.202: el rastro de los ultimos 160 ms (para su velocidad)
+    PT.x = e.clientX; PT.y = e.clientY; PT.in = true;
+  }, { passive: true });
+  /* lo deprisa que va el raton (px por ms), medido en el rastro de los ultimos 160 ms (un solo evento suelto no cuenta) */
+  const ptV = () => { const H = PT.h; if (H.length < 2) return 0; const span = H[H.length - 1][0] - H[0][0]; if (span < 40) return 0; let d = 0; for (let i = 1; i < H.length; i++) d += Math.hypot(H[i][1] - H[i - 1][1], H[i][2] - H[i - 1][2]); return performance.now() - H[H.length - 1][0] > 200 ? 0 : d / span; };
   document.addEventListener("pointerleave", () => { PT.in = false; });
   /* con mando no hay raton: persigue la seleccion (el boton enfocado) */
   document.addEventListener("focusin", e => {
@@ -68,6 +74,7 @@ window.AIQ = window.AIQ || {};
       this.anim = null; this.k = 0; this.key = ""; this.clicks = []; this.espT = performance.now() + rnd(5000, 9000); this.dead = false; this.born = performance.now();
       this.hop = null; this.clipY = null; this.blink = false; this.blinkT = 0;
       this.hit.addEventListener("pointerdown", e => { e.stopPropagation(); this.pet(); });
+      this.hit.addEventListener("pointermove", e => this.roza(e));        // v0.3.202: dormido, se le acaricia pasando el raton despacio por encima
       if (this.st === "sleep") this.play("duerme", { hold: true, at: 1e9 });
       load(() => { this.fit(); this.tick(); });
     }
@@ -133,6 +140,22 @@ window.AIQ = window.AIQ || {};
       if (this.clicks.length >= 3) { this.clicks = []; this.play("zarpa", { after: () => { this.st = "sit"; this.anim = null; } }); A.sfx && A.sfx.hiss && A.sfx.hiss(); cb("bufido"); }
       else { this.play("caricia", { after: () => { this.st = "sit"; this.anim = null; } }); A.sfx && A.sfx.purr && A.sfx.purr(); cb("caricia"); }
     }
+    /* v0.3.202 (Bloque F, paso 5): ACARICIARLE DORMIDO. Pasar el raton despacio por encima (no un clic) es una caricia: ronronea y se estira un
+       poco sin despertarse (los ultimos fotogramas de dormirse, ida y vuelta). Si insistes (seis pasadas en 10 s: cada ida o vuelta es una) se despierta y se lo dice a su
+       pantalla (onPet «harto»: en la portada se va de un salto). Deprisa no cuenta */
+    roza(e) {
+      if (this.st !== "sleep" || this.hop) return;
+      const now = performance.now(), R = this.rz || (this.rz = { x: e.clientX, y: e.clientY, t: now, len: 0, n: [], purr: 0, at: 0 });
+      const dt = now - R.t, d = Math.hypot(e.clientX - R.x, e.clientY - R.y); R.x = e.clientX; R.y = e.clientY; R.t = now;
+      if (dt > 400 || ptV() > 0.9) { R.len = 0; return; }                              // se ha parado o va deprisa: empieza otra pasada
+      R.len += d; const w = this.hit.getBoundingClientRect().width || 120;
+      if (R.len < w * 0.7 || now - R.at < 900) return;                                   // una caricia = una pasada (casi todo el lomo), y otra no antes de ~1 s
+      R.len = 0; R.at = now; R.n = R.n.filter(t => now - t < 10000); R.n.push(now);
+      if (R.n.length >= 6) { R.n = []; this.pet(); if (this.o.onPet) this.o.onPet("harto"); return; }   // la sexta seguida (tres idas y vueltas): hasta aqui
+      if (now - R.purr > 2400) { R.purr = now; if (A.juguete) A.juguete("ronroneo", { x: e.clientX, db: 2 }); }
+      const an = DATA().anim.duerme.f; if (reduced()) return;
+      this.anim = { name: "duerme", f: [an[7], an[6], an[5], an[5], an[6], an[7]], i: 0, t: now, hold: true, loop: false, after: null }; this.poke();
+    }
     walkTo(x, done) {
       if (reduced()) { this.x = x; this.place(); if (done) done(); return; }
       this.target = x; this.walkDone = done || null; this.dir = x >= this.x ? 1 : -1; this.st = "busy";
@@ -156,7 +179,7 @@ window.AIQ = window.AIQ || {};
         if (this.st === "sit" && !this.anim && now > this.espT) { this.espT = now + rnd(6000, 11000); this.play("espera"); }
         return;
       }
-      if (this.st === "sleep") { if (PT.in && idle < 400 && near) { this.st = "busy"; this.play("duerme", { rev: true, after: () => { this.st = "sit"; this.anim = null; } }); } return; }
+      if (this.st === "sleep") { if (PT.in && idle < 400 && near && ptV() > 0.9 && !(this.rz && now - this.rz.t < 900)) { this.st = "busy"; this.play("duerme", { rev: true, after: () => { this.st = "sit"; this.anim = null; } }); } return; }   // v0.3.202: despacio no le despierta (te acercas a acariciarle)
       if (this.st !== "sit" || this.anim && this.anim.name !== "espera") return;
       if (idle > 9000) { this.st = "sleep"; this.play("duerme", { hold: true }); if (this.o.onPet) this.o.onPet("duerme"); return; }
       const lo = this.o.min != null ? this.o.min : 0, hi = this.o.max != null ? this.o.max : r.width, tx = Math.max(lo, Math.min(hi, px));

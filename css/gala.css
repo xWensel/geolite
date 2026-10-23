@@ -972,6 +972,7 @@ html.reduce-motion .gx-camp .nr-body { scroll-behavior: auto; }
 #sala canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; }
 #sala canvas.d { transition: opacity .55s ease; will-change: opacity; }
 #sala canvas.d.on { opacity: 1; }
+#sala.vivo canvas.d { transition: none; }                                  /* v0.3.202: una lampara que se mece: la penumbra va con ella, sin fundido */
 /* v0.3.54 (la sala responde): la luz que sube (el mismo mapa, en calido: solo enciende la penumbra), el velo de la lampara que baja y el haz del barrido.
    Los tres se animan desde js/casa.js solo con opacidad y transform */
 #sala canvas.g { will-change: opacity; }

@@ -106,3 +106,22 @@ html.reduce-motion .esc-caja .cj-luz, html.soft-flash .esc-caja .cj-luz { animat
 .adv-telon { position: fixed; inset: 0; z-index: 100006; pointer-events: none; opacity: 0; transition: opacity .3s linear; }
 .adv-telon.on { opacity: 1; }
 .adv-card { position: fixed; left: 0; top: 0; z-index: 100007; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .4)); }
+
+/* v0.3.202 (Bloque F, paso 5): las lamparas que se mecen (js/escena.js, mece). Mientras se mueve, la lampara es un lienzo con su dibujo girado al
+   pixel (a escala entera); el toque es una zona invisible alrededor de la pantalla de la lampara. El parpadeo del susto: el mismo chasquido de
+   cuando se enciende, otra vez */
+.esc-mece { position: absolute; display: none; image-rendering: pixelated; pointer-events: none; }
+.esc-toque { position: absolute; z-index: 30; display: block; pointer-events: auto; cursor: grab; touch-action: none; }
+.esc-toque:active { cursor: grabbing; }
+html:not(.sala-on) .esc-toque { display: none; }
+#intro.out .esc-toque, #layer.hidden > .esc-toque { display: none; }
+.esc-lamp.clac, .esc-mece.clac { animation: esc-lamp-on .5s steps(1, end) both !important; }
+.esc-luces > i.clac, .esc-caja .cj-luz.clac { animation: esc-clac .5s steps(1, end) forwards !important; }
+@media (max-width: 899px), (max-height: 519px) { .esc-toque { display: none; } }
+
+/* v0.3.202 (Bloque F, paso 5): el sello que se vuelve a golpear y el doblon que juega a cara o cruz (js/juguetes.js) */
+.gx-vd .gx-vd-stamp { cursor: pointer; }
+.gx-vd .gx-vd-stamp.re { animation: none !important; pointer-events: none; cursor: default; }
+.gx-camp .tb-coins { cursor: pointer; }
+.dob-fx { position: fixed; z-index: 9000; pointer-events: none; background: url(../assets/icons/coin_spin.webp) 0 0 no-repeat; image-rendering: pixelated; }
+.dob-fx.canto { background-image: url(../assets/icons/coin_stand.webp); }

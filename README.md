@@ -147,6 +147,8 @@ Los efectos de sonido del juego salen del propio motor de audio (`js/audio.js`):
 
 **La sala sigue tu racha** (`js/casa.js`): cada acierto seguido calienta un escalón la penumbra de los bordes (hasta 5, sin tocar la tierra) y los paneles; un fallo la enfría un instante y vuelve. Con racha de 3 la música se abre y un fallo le quita los agudos un momento. Tu racha se apila en fichas junto al dock (hasta 7): cada acierto pone una, si fallas la pila se viene abajo y con cada golpe de premio brillan de abajo arriba. Mientras contestas no cambia nada.
 
+**Cosas con las que jugar** (se descubren solas): las lámparas de la intro y de la caja del veredicto se mecen si las empujas o las arrastras (`js/escena.js`: el dibujo gira al píxel con RotSprite, su luz y su cono en la penumbra van con ella; un empujón muy fuerte asusta al crupier); el sello del ticket se vuelve a golpear en su sitio, con más tinta, hasta que se acaba (`js/juguetes.js`); el doblón del contador del Campamento juega a cara o cruz y 1 de cada 60 veces se queda de canto; y Comodín, dormido, ronronea y se estira si le pasas el ratón despacio por encima, y se va si insistes (`js/comodin.js`). Sonidos CC0 de Freesound (`assets/sfx/juego.mp3`, `assets/sfx/LICENCIAS-juego.txt`).
+
 ### Datos, tipografías y licencias
 
 - **Fronteras:** Natural Earth (dominio público) vía `world-atlas` (ISC). **Mares, océanos y lagos** (`data/aguas.js`): polígonos de Natural Earth 10m (dominio público), simplificados. `topojson-client` (ISC).

@@ -30,7 +30,7 @@ window.AIQ = window.AIQ || {};
   const ROJO = "255, 92, 70";
   const px = () => Math.max(2, Math.round(2 * Math.min(innerWidth / 1280, innerHeight / 720)));   // px de pantalla por pixel de arte: 2 en 720p y Deck, 3 en 1080p
   let st = null;
-  function desmonta() { if (st) { st.tm.forEach(clearTimeout); st.tel.remove(); st.air.remove(); st = null; } }
+  function desmonta() { mece.quita("in"); if (st) { st.tm.forEach(clearTimeout); st.tel.remove(); st.air.remove(); st = null; } }
   /* o: { act } (el tema y si es un jefe se leen del propio cartel). Se llama al pintar la intro, con el crupier ya en su sitio (js/game.js) */
   function monta(o) {
     const intro = $("intro"); desmonta();
@@ -52,7 +52,7 @@ window.AIQ = window.AIQ || {};
     const cara = intro.querySelector(".intro-dealer .dl-face"), T = [intro.querySelector(".intro-num"), cara].filter(Boolean).map(caja); if (!T.length) return;
     /* el suelo del escenario: tan alto como deje el cartel (en pantallas bajas, o con el cartel largo de un jefe, se queda en un rodapie) */
     { const b = caja(en); st.fh = Math.max(12, Math.min(34, Math.floor((H - (b.t + b.h) - 8 * p) / p))) * p; st.tel.style.setProperty("--fh", st.fh + "px"); }
-    air.innerHTML = '<div class="esc-luces"></div>'; air.classList.toggle("ya", !nueva); const lz = air.firstChild, cones = [], pools = [];
+    air.innerHTML = '<div class="esc-luces"></div>'; air.classList.toggle("ya", !nueva); const lz = air.firstChild, cones = [], pools = [], mecer = [];
     const add = (host, cls, css, vars) => { const e = document.createElement("i"); e.className = cls; Object.assign(e.style, css); Object.entries(vars || {}).forEach(([k, v]) => e.style.setProperty(k, v)); host.appendChild(e); };
     /* el techo de la lampara del crupier: no puede bajar de su bocadillo (hasta tres lineas). Si a su pixel grande no cabe, las dos lamparas de
        la ronda se pintan al pixel normal, para que sigan siendo iguales */
@@ -66,11 +66,13 @@ window.AIQ = window.AIQ || {};
       if (crupier && top + M.h * q > techo) top = Math.max(Math.floor((techo - M.h * q) / p) * p, -(M.v - 1) * q);
       const my = top + M.b[0] * q, rm = M.b[1] * q, D = Math.max(60, cy - my), a = Math.max(5, Math.atan2(Math.max(0, rt * 1.12 - rm), D) * 180 / Math.PI), ta = Math.tan(a * Math.PI / 180);
       const hb = Math.min(H - my, D + r.h * 0.5 + H * 0.16), wb = 2 * (rm + ta * hb) * 1.5, ms = 500 + i * 320, d = nueva ? ms + "ms" : "0ms", duro = name === "foco";
-      if (top > 3 * p) add(air, "esc-cable", { left: cx - p + "px", top: 3 * p + "px", height: top - 3 * p + "px" });
+      let cableEl = null; if (top > 3 * p) { add(air, "esc-cable", { left: cx - p + "px", top: 3 * p + "px", height: top - 3 * p + "px" }); cableEl = air.lastChild; }
+      const luzDe = lz.children.length;                                    // sus tres luces (haz, resplandor, charco) empiezan aqui
       add(lz, "esc-haz", { left: cx - wb / 2 + "px", top: my + "px", width: wb + "px", height: hb + "px" }, { "--a": a.toFixed(2) + "deg", "--oy": -(rm / ta).toFixed(1) + "px", "--lc": lc, "--li": duro ? ".42" : ".3", "--d": d });
       add(lz, "esc-halo", { left: cx - rm * 2.6 - 20 + "px", top: my - rm * 1.9 - 16 + "px", width: rm * 5.2 + 40 + "px", height: rm * 4.4 + 32 + "px" }, { "--lc": lc, "--d": d });
       add(lz, "esc-charco", { left: cx - rt * 1.7 + "px", top: cy - rt * (crupier ? 1.05 : 1.5) + "px", width: rt * 3.4 + "px", height: rt * (crupier ? 2.1 : 3) + "px" }, { "--lc": lc, "--d": d });
       add(air, "esc-lamp", { left: cx - 32 * q + "px", top: top + "px", width: 64 * q + "px", height: 48 * q + "px", backgroundImage: `url(assets/esc/lamp_${name}.png)` }, { "--d": d });
+      mecer.push({ k: "in", i, name, q, px: cx, py: top > 3 * p ? 3 * p : top, cableA: top > 3 * p ? Math.round((top - 3 * p) / q) : 0, lamp: air.lastChild, cable: cableEl, luces: [...lz.children].slice(luzDe), host: air });
       cones.push([cx, my, cx, cy, rm * 1.1, rt * (duro ? 1.05 : 1.2), duro ? 1.5 : 1.25]); pools.push([cx, cy, rt * 1.5, rt * (crupier ? 1.05 : 1.4), 1.3]);
       /* el chasquido de cada lampara al encenderse (si la intro sigue ahi) */
       if (nueva) st.tm.push(setTimeout(() => { if (A.sfx && A.sfx.lampara && !intro.classList.contains("out") && !intro.classList.contains("hidden")) A.sfx.lampara(i); }, ms));
@@ -79,10 +81,127 @@ window.AIQ = window.AIQ || {};
     const body = intro.querySelector(".intro-body"); if (body) { const b = caja(body); pools.push([b.l + b.w / 2, b.t + b.h / 2, b.w * 0.8, b.h * 0.85, 0.72]); }
     /* y el suelo del escenario recoge lo que le llega de cada lampara */
     T.forEach((r, i) => pools.push([Math.round((r.l + r.w / 2) / p) * p, H - st.fh * 0.6, Math.max(r.w * 0.7, 80 * p), st.fh * 0.8, i ? 0.62 : 0.5]));
-    st.luz = { cones, pools };
+    st.luz = { cones, pools, base: { cones: cones.map(c => c.slice()), pools: pools.map(c => c.slice()) } };
+    mece.quita("in"); mecer.forEach(M => mece.pon(M, intro, st.luz));
     if (A.casa && A.casa.mira) A.casa.mira(false, true);                // la penumbra tiene que estar cuando se encienden las lamparas
   }
   addEventListener("resize", () => { if (st && st.tel.isConnected) { if (A.fitIntro) A.fitIntro(); st.p = px(); st.tel.style.setProperty("--p", st.p + "px"); st.air.style.setProperty("--p", st.p + "px"); coloca(false); } });
+
+
+  /* ================================================================ v0.3.202 (Bloque F, paso 5): LAS LAMPARAS SE MECEN
+     Las de la intro y la de la caja del veredicto se pueden empujar con un clic (o al pasar, un poco), o coger, arrastrar y soltar. Se mecen como
+     un pendulo (~1,7 s) y se paran solas. El dibujo gira de verdad en pixel art: RotSprite (Scale2x dos veces, giro al vecino y vuelta a la
+     rejilla del dibujo, con su pixel de arte entero), un fotograma por grado, hecho al vuelo y guardado. Su luz (haz, resplandor y charco) gira con
+     ella y su cono en la penumbra de la sala tambien (A.casa.vivo). En cada vuelta alta cruje la cadena. Un empujon fuerte (mas de 29 grados):
+     la bombilla parpadea y el crupier se asusta. Con Movimiento minimo no se mece: un clic la hace parpadear. Mientras contestas no hay lampara */
+  const D2R = Math.PI / 180, quieto = () => document.documentElement.classList.contains("reduce-motion");
+  const SUSTO = { in: "¡Eh! Que esa lámpara la pago yo.|Hey! I'm the one paying for that lamp.|Eh ! C'est moi qui la paie, cette lampe.|Ei! Quem paga essa luminária sou eu.|He! Die Lampe bezahle ich!|Ehi! Quella lampada la pago io.|¡Oye! Esa lámpara la pago yo.|喂！那盏灯可是我出的钱。|야! 그 램프 값은 내가 낸다고.|おい！そのランプは私の払いだぞ。|Эй! За эту лампу плачу я.|Hej! Za tę lampę płacę ja.",
+    vd: "Cuidado, que se nos va la luz de la caja.|Careful, or the till loses its light.|Attention, on va perdre la lumière de la caisse.|Cuidado, que a luz do caixa vai embora.|Vorsicht, sonst geht der Kasse das Licht aus.|Attento, che la cassa resta al buio.|Cuidado, que se va la luz de la caja.|小心，收银台的灯要灭了。|조심해, 계산대 불 나가겠다.|気をつけろ、レジの明かりが消えちまう。|Осторожно, касса останется без света.|Uważaj, bo kasa straci światło." };
+  const mece = (() => {
+    const ML = []; let raf = 0, tPrev = 0;
+    const imgs = {};
+    const img = (name, fn) => { let im = imgs[name]; if (!im) { im = imgs[name] = new Image(); im.src = "assets/esc/lamp_" + name + ".png"; } if (im.complete && im.naturalWidth) fn(im); else im.addEventListener("load", () => fn(im), { once: true }); };
+    function scale2x(src, w, h) {
+      const d = new Uint32Array(w * h * 4), W = w * 2;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const P = src[y * w + x], a = y > 0 ? src[(y - 1) * w + x] : P, b = x < w - 1 ? src[y * w + x + 1] : P, c = x > 0 ? src[y * w + x - 1] : P, e = y < h - 1 ? src[(y + 1) * w + x] : P;
+        d[(2 * y) * W + 2 * x] = c === a && c !== e && a !== b ? a : P; d[(2 * y) * W + 2 * x + 1] = a === b && a !== c && b !== e ? b : P;
+        d[(2 * y + 1) * W + 2 * x] = e === c && e !== b && c !== a ? c : P; d[(2 * y + 1) * W + 2 * x + 1] = b === e && b !== a && e !== c ? e : P;
+      }
+      return d;
+    }
+    /* el dibujo nativo (cable de 4 pixeles de arte con su contorno, como .esc-cable, y la lampara de 64 x 48 debajo), preparado una vez */
+    function prepara(M) {
+      if (M.s4 || !M.im) return !!M.s4;
+      const W = 64, H = M.cableA + 48, c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
+      if (M.cableA) { g.fillStyle = "#1d0a3d"; g.fillRect(30, 0, 4, M.cableA); g.fillStyle = "#f8cf5a"; g.fillRect(31, 0, 1, M.cableA); g.fillStyle = "#e09a1c"; g.fillRect(32, 0, 1, M.cableA); }
+      g.drawImage(M.im, 0, M.cableA);
+      const src = new Uint32Array(g.getImageData(0, 0, W, H).data.buffer.slice(0));
+      M.s4 = scale2x(scale2x(src, W, H), W * 2, H * 2); M.W = W; M.H = H; M.R = Math.ceil(H * Math.sin(40 * D2R)) + 34; M.OW = 2 * M.R; M.OH = H + 6; M.cache = {};
+      M.cv.width = M.OW; M.cv.height = M.OH; M.g = M.cv.getContext("2d");
+      const cs = M.cv.style; cs.left = M.px - M.R * M.q + "px"; cs.top = M.py + "px"; cs.width = M.OW * M.q + "px"; cs.height = M.OH * M.q + "px";
+      return true;
+    }
+    /* el fotograma de a grados (entero), en el sentido de rotate() de CSS: al vecino desde el dibujo ampliado x4 */
+    function marco(M, a) {
+      let im = M.cache[a]; if (im) return im;
+      im = new ImageData(M.OW, M.OH); const o = new Uint32Array(im.data.buffer), cs = Math.cos(a * D2R), sn = Math.sin(a * D2R), W4 = M.W * 4, H4 = M.H * 4;
+      for (let y = 0; y < M.OH; y++) for (let x = 0; x < M.OW; x++) {
+        const dx = x + 0.5 - M.R, dy = y + 0.5, sx = cs * dx + sn * dy + 32, sy = -sn * dx + cs * dy, ix = Math.floor(sx * 4), iy = Math.floor(sy * 4);
+        if (ix >= 0 && iy >= 0 && ix < W4 && iy < H4) o[y * M.OW + x] = M.s4[iy * W4 + ix];
+      }
+      return (M.cache[a] = im);
+    }
+    const rot = (M, x, y, ph) => { const c = Math.cos(ph * D2R), s = Math.sin(ph * D2R), dx = x - M.px, dy = y - M.py; return [M.px + dx * c - dy * s, M.py + dx * s + dy * c]; };
+    /* pinta la lampara en su angulo, gira su luz y le dice a la sala donde cae ahora su cono */
+    function pinta(M) {
+      const a = Math.round(Math.max(-40, Math.min(40, M.phi))), mov = Math.abs(M.phi) > 0.05 || Math.abs(M.w) > 0.05 || M.drag;
+      if (mov && prepara(M)) { if (a !== M.fa) { M.fa = a; M.g.putImageData(marco(M, a), 0, 0); } M.cv.style.display = "block"; M.lamp.style.visibility = "hidden"; if (M.cable) M.cable.style.visibility = "hidden"; }
+      else { M.cv.style.display = "none"; M.lamp.style.visibility = ""; if (M.cable) M.cable.style.visibility = ""; M.fa = null; }
+      M.luces.forEach(e => { e.style.transform = M.phi ? `rotate(${M.phi.toFixed(2)}deg)` : ""; });
+      const len = (M.cableA + 30) * M.q, mx = M.px - Math.sin(M.phi * D2R) * len, my = M.py + Math.cos(M.phi * D2R) * len, w = 74 * M.q, h = 50 * M.q;
+      Object.assign(M.hit.style, { left: mx - w / 2 + "px", top: my - h / 2 + "px", width: w + "px", height: h + "px" });
+      const L = M.luz, B = L && L.base; if (B) {
+        const c0 = B.cones[M.i]; if (c0 && L.cones[M.i]) { const m = rot(M, c0[0], c0[1], M.phi), t = rot(M, c0[2], c0[3], M.phi); L.cones[M.i] = [m[0], m[1], t[0], t[1], c0[4], c0[5], c0[6]]; }
+        const p0 = M.k === "in" ? B.pools[M.i] : null; if (p0 && L.pools[M.i]) { const c = rot(M, p0[0], p0[1], M.phi); L.pools[M.i] = [c[0], c[1], p0[2], p0[3], p0[4]]; }
+        if (A.casa && A.casa.vivo) A.casa.vivo();
+      }
+    }
+    function bucle(now) {
+      raf = 0; const dt = Math.min(0.033, (now - (tPrev || now)) / 1000); tPrev = now; let sigue = false;
+      ML.forEach(M => {
+        if (M.drag) { sigue = true; return; }
+        if (Math.abs(M.phi) <= 0.02 && Math.abs(M.w) <= 0.02) return;
+        const acc = -13.7 * Math.sin(M.phi * D2R) - 0.42 * M.w * D2R; M.w += acc / D2R * dt; M.phi += M.w * dt;
+        if (Math.abs(M.phi) < 0.05 && Math.abs(M.w) < 0.4) { M.phi = 0; M.w = 0; M.susto = false; }
+        /* en cada vuelta alta, la cadena cruje segun lo lejos que haya llegado */
+        const sg = Math.sign(M.w); if (M.sg && sg && sg !== M.sg && Math.abs(M.phi) > 7 && now - (M.cr || 0) > 500) { M.cr = now; if (A.juguete) A.juguete("lampara_cruje", { x: M.px, db: -14 + Math.abs(M.phi) * 0.45, rate: 0.9 + Math.random() * 0.2 }); }
+        M.sg = sg || M.sg;
+        if (Math.abs(M.phi) > 29 && !M.susto) { M.susto = true; asusta(M); }   // un susto por empujon: se rearma cuando la lampara se para
+        pinta(M); sigue = true;
+      });
+      if (sigue) raf = requestAnimationFrame(bucle); else tPrev = 0;
+    }
+    const anda = () => { if (!raf) { tPrev = 0; raf = requestAnimationFrame(bucle); } };
+    /* el parpadeo: la bombilla y su luz hacen clac */
+    function clac(M) { [M.lamp, M.cv, ...M.luces].forEach(e => { e.classList.remove("clac"); A.restyle ? A.restyle(e) : void e.offsetWidth; e.classList.add("clac"); }); }
+    function asusta(M) {
+      clac(M); if (A.sfx && A.sfx.lampara) A.sfx.lampara(1); if (A.sfx && A.sfx.lootStep) A.sfx.lootStep(2);
+      if (A.dealer && A.dealer.say && !(A.dealer.sacred && A.dealer.sacred())) A.dealer.say(A.pick6 ? A.pick6(SUSTO[M.k]) : SUSTO[M.k].split("|")[0], { mood: "shock", face: "shock", hold: 3200 });   // por la cola de siempre: nunca fuera de su pantalla
+    }
+    const pt = e => ({ x: e.clientX, y: e.clientY });
+    function pon(M, capa, luz) {
+      M.luz = luz; M.phi = 0; M.w = 0; M.drag = null; M.susto = false;
+      M.cv = document.createElement("canvas"); M.cv.className = "esc-mece"; M.cv.setAttribute("aria-hidden", "true"); M.host.appendChild(M.cv);
+      M.luces.forEach(e => { const l = parseFloat(e.style.left) || 0, t = parseFloat(e.style.top) || 0; e.style.transformOrigin = `${M.px - l}px ${M.py - t}px`; });
+      M.hit = document.createElement("i"); M.hit.className = "esc-toque"; M.hit.setAttribute("aria-hidden", "true"); capa.appendChild(M.hit);
+      img(M.name, im => { M.im = im; });
+      M.hit.addEventListener("pointerenter", () => { if (!quieto() && !M.drag && Math.abs(M.w) < 4 && Math.abs(M.phi) < 2) { M.w += (Math.random() < 0.5 ? -1 : 1) * 9; anda(); } });
+      M.hit.addEventListener("pointerdown", e => {
+        e.preventDefault(); e.stopPropagation(); try { M.hit.setPointerCapture(e.pointerId); } catch (er) { /* sin captura */ }
+        if (A.juguete) A.juguete("lampara_cadena", { x: M.px, db: quieto() ? -6 : -4 });
+        if (quieto()) { clac(M); if (A.sfx && A.sfx.lampara) A.sfx.lampara(0); return; }
+        const p = pt(e); M.drag = { x0: p.x, moved: false, last: [] }; anda();
+      });
+      M.hit.addEventListener("pointermove", e => {
+        if (!M.drag) return; const p = pt(e); if (Math.abs(p.x - M.drag.x0) > 6) M.drag.moved = true; if (!M.drag.moved) return;
+        const ph = Math.max(-34, Math.min(34, -Math.atan2(p.x - M.px, Math.max(40, p.y - M.py)) / D2R)), now = performance.now();
+        M.drag.last.push([now, ph]); while (M.drag.last.length > 5) M.drag.last.shift(); M.phi = ph; M.w = 0; pinta(M);
+      });
+      const suelta = e => {
+        if (!M.drag) return; const d = M.drag; M.drag = null;
+        if (d.moved) { const a = d.last[0], b = d.last[d.last.length - 1]; M.w = a && b && b[0] > a[0] ? Math.max(-160, Math.min(160, (b[1] - a[1]) / ((b[0] - a[0]) / 1000))) : 0; }
+        else { const len = (M.cableA + 30) * M.q, lado = Math.sign(e.clientX - (M.px - Math.sin(M.phi * D2R) * len)) || 1; M.w += -lado * (55 + Math.random() * 15); }
+        anda();
+      };
+      M.hit.addEventListener("pointerup", suelta); M.hit.addEventListener("pointercancel", suelta);
+      ML.push(M); pinta(M);
+    }
+    function quita(k) {
+      for (let i = ML.length - 1; i >= 0; i--) { const M = ML[i]; if (M.k !== k) continue; ML.splice(i, 1); M.hit.remove(); M.cv.remove(); if (M.lamp) M.lamp.style.visibility = ""; if (M.cable) M.cable.style.visibility = ""; M.luces.forEach(e => { e.style.transform = ""; }); }
+    }
+    return { pon, quita, get lamparas() { return ML.map(M => ({ k: M.k, i: M.i, phi: M.phi, w: M.w })); }, empuja(k, i, w) { const M = ML.find(m => m.k === k && m.i === i); if (M && !quieto()) { M.w += w; anda(); } } };
+  })();
 
   /* ================================================================ la portada: focos de sala y el resplandor del cartel */
   let hs = null, htm = 0, hmo = null, vista = false;
@@ -129,7 +248,7 @@ window.AIQ = window.AIQ || {};
      media pantalla. Va en #layer, detras de todas las piezas; su cono se recorta en la penumbra (luzCaja, js/casa.js). Ronda fallida: a media
      luz y sin resplandor. La pone y la quita js/casa.js, que sabe cuando hay veredicto. Con las Luces de la sala apagadas no hay lampara */
   let cj = null, cjT = 0;
-  function quitaCaja() { clearTimeout(cjT); cjT = 0; const lay = $("layer"); if (lay) lay.querySelectorAll(":scope > .esc-caja").forEach(e => e.remove()); cj = null; }
+  function quitaCaja() { mece.quita("vd"); clearTimeout(cjT); cjT = 0; const lay = $("layer"); if (lay) lay.querySelectorAll(":scope > .esc-caja").forEach(e => e.remove()); cj = null; }
   function ponCaja() {
     const lay = $("layer"), dlg = $("dlg"), vd = dlg && dlg.querySelector(".gx-vd"), papel = vd && vd.querySelector(".gx-vd-ticket");
     if (!papel || !luces()) return quitaCaja();
@@ -146,7 +265,9 @@ window.AIQ = window.AIQ || {};
     add("cj-luz cj-halo", { left: cx - rm * 2.3 + "px", top: my - rm * 1.5 + "px", width: rm * 4.6 + "px", height: rm * 3.4 + "px" });
     add("esc-lamp", { left: cx - 32 * p + "px", top: top + "px", width: 64 * p + "px", height: 48 * p + "px", backgroundImage: "url(assets/esc/lamp_billar.png)" });
     if (old) old.remove(); lay.insertBefore(host, dlg);
-    cj = { key, cones: [[cx, my, cx, r.top + r.height * 0.42, rm * 1.1, r.width * 0.66, baja ? 0.7 : 1.3]] };
+    cj = { key, cones: [[cx, my, cx, r.top + r.height * 0.42, rm * 1.1, r.width * 0.66, baja ? 0.7 : 1.3]] }; cj.base = { cones: cj.cones.map(c => c.slice()), pools: [] };
+    mece.quita("vd");
+    mece.pon({ k: "vd", i: 0, name: "billar", q: p, px: cx, py: top > 0 ? 0 : top, cableA: top > 0 ? Math.round(top / p) : 0, lamp: host.querySelector(".esc-lamp"), cable: host.querySelector(".esc-cable"), luces: [...host.querySelectorAll(".cj-luz")], host }, lay, cj);
     if (A.casa && A.casa.mira) A.casa.mira();                            // la penumbra se abre bajo la lampara
   }
   /* on: hay veredicto en pantalla. Se mide cuando ya ha entrado (sus piezas llegan con transform) y otra vez al final, por si algo crecio */
@@ -156,5 +277,5 @@ window.AIQ = window.AIQ || {};
   }
   A.escena = { recoloca: () => { if (st && st.tel.isConnected) coloca(false); },   // el cartel cambio de alto despues de montarlo (llego su letra: js/game.js)
     caja: laCaja, luzCaja: () => (cj && $("layer") && $("layer").querySelector(":scope > .esc-caja") && luces() ? cj : null), portada, luzPortada: () => { const d = $("dlg"); return hs && d && d.classList.contains("home") && luces() ? hs : null; },
-    monta, desmonta, luz: () => (st && st.luz && st.tel.isConnected && luces() ? st.luz : null) };
+    monta, desmonta, luz: () => (st && st.luz && st.tel.isConnected && luces() ? st.luz : null), mece };
 })(window.AIQ);

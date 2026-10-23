@@ -75,6 +75,7 @@ window.AIQ = window.AIQ || {};
     /* las fichas y cartas de verdad (las mismas del ambiente): se igualan al cargar */
     fetch(A.media("assets/sfx/sala.mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { NORM = normSala(b); sala = b; }).catch(() => { /* sin el archivo, la mano sobre el fieltro las sustituye */ });
     pubCarga();                                                       // el publico de la sala (v0.3.201), en segundo plano
+    setTimeout(jugCarga, 1600);                                       // los juguetes (v0.3.202): su hoja de sonidos, despues
     /* pestana oculta: se suspende el audio y se pausa la cancion (si no, seguiria avanzando en silencio y encadenando pistas sin que nadie las oiga) */
     let hidPlay = [];
     document.addEventListener("visibilitychange", () => {
@@ -495,6 +496,30 @@ window.AIQ = window.AIQ || {};
     const t = ctx.currentTime + Math.max(0, delay) / 1000, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     s.buffer = b; s.playbackRate.value = 0.96 + Math.random() * 0.08; f.type = "lowpass"; f.frequency.value = 7000; g.gain.value = PUB_G * (0.9 + Math.random() * 0.2);
     s.connect(f).connect(g); panTo(g, (Math.random() - 0.5) * 0.4).connect(sfxBus); s.start(t);
+  };
+  /* v0.3.202 (Bloque F, paso 5): LOS JUGUETES. Grabaciones CC0 (assets/sfx/LICENCIAS-juego.txt) en una sola hoja (assets/sfx/juego.mp3):
+     el sello, el doblon que gira y cae, el crujido y la cadena de la lampara y el ronroneo de Comodin. Cada familia tiene varias tomas y nunca
+     repite la anterior; cada vez con otra altura y otra fuerza, en su lado de la pantalla y con un poco de sala. El nivel es el de la maqueta:
+     su escalon sobre la musica (dB), con los reguladores de fabrica */
+  const JUG = { sello: [[0.09, 0.444]], moneda_lanza: [[0.624, 0.402]], moneda_cae: [[1.513, 0.69]], moneda_ping: [[3.088, 0.576]],
+    lampara_cruje: [[3.754, 0.923], [4.767, 0.553], [5.41, 0.629], [6.129, 0.473]], lampara_cadena: [[6.692, 0.381], [7.163, 0.387], [7.64, 0.388], [8.118, 0.415], [8.623, 0.413]], ronroneo: [[9.126, 4.2]] };
+  const JUG_DB = { sello: -24.4, moneda_lanza: -26.3, moneda_cae: -23.3, moneda_ping: -16.7, lampara_cruje: -45, lampara_cadena: -30.9, ronroneo: -25.1 };
+  let jugB = null, jugIni = false; const jugUlt = {};
+  function jugCarga() {
+    if (jugIni || !ctx) return; jugIni = true;
+    fetch(A.media("assets/sfx/juego.mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { jugB = b; }).catch(() => { /* sin la hoja, los juguetes callan */ });
+  }
+  /* o: { x (px de pantalla, para el lado), db, rate, dur, rev (envio a la sala), delay (ms) } */
+  A.juguete = (k, o = {}) => {
+    if (!A.audio.sfxOn || !ctx) return; jugCarga(); const L = JUG[k]; if (!L || !jugB) return;
+    let i = 0; if (L.length > 1) { do { i = Math.floor(Math.random() * L.length); } while (i === jugUlt[k]); jugUlt[k] = i; }
+    const [a, d] = L[i], t = ctx.currentTime + Math.max(0, o.delay || 0) / 1000, s = ctx.createBufferSource(), g = ctx.createGain();
+    s.buffer = jugB; s.playbackRate.value = (o.rate || 1) * (0.96 + Math.random() * 0.08);
+    g.gain.value = Math.pow(10, (JUG_DB[k] + (o.db || 0) + (Math.random() - 0.5) * 2) / 20) * 0.81;
+    const pan = o.x != null ? Math.max(-0.7, Math.min(0.7, (o.x / innerWidth - 0.5) * 1.2)) : 0, out = panTo(g, pan);
+    s.connect(g); out.connect(sfxBus); { const r = ctx.createGain(); r.gain.value = o.rev != null ? o.rev : 0.18; out.connect(r).connect(revFx); }
+    s.start(t, a, Math.min(d, o.dur || d));
+    return s;
   };
   A.audio.setSkin = () => {};   // las 22 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
   A.audio.state = () => (ctx ? ctx.state : 'none');
@@ -1165,6 +1190,8 @@ window.AIQ = window.AIQ || {};
   A.audio.setSonidos = v => { A.audio.sonidos = v === "clasico" ? "clasico" : "lounge"; };
   A.sfx = {};
   for (const k in NW) A.sfx[k] = CL[k] ? (...a) => (A.audio.sonidos === "clasico" ? CL[k] : NW[k])(...a) : NW[k];
+  /* v0.3.202: el gato ronronea cuando le acaricias (js/comodin.js llama a A.sfx.purr): la grabacion de los juguetes */
+  if (!A.sfx.purr) A.sfx.purr = () => A.juguete && A.juguete("ronroneo", { db: 2 });
   /* ------------------------------------------------------------------ el ambiente de la sala (v0.3.56, el sonido de la casa 3b) */
   /* Debajo de la musica, la sala: fichas y cartas y alguna copa, sueltas y de tarde en tarde. Cada sitio suena distinto (A.amb.place; lo llama
      js/casa.js, que ya sabe en que pantalla estas): el salon de la portada, la sala que baja la voz mientras piensas, la caja, la barra del

@@ -128,6 +128,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
   let root = null, cvs = [], glowCv = null, veil = null, beam = null, front = 0, wk = null, seq = 0, sig = "", mode = "full", tm = 0, tm2 = 0, map = null, act = 0, jefe = false;
   const onMap = async d => {
     const drop = () => { if (d.bmp) d.bmp.close(); if (d.gbmp) d.gbmp.close(); };
+    enCurso = false; if (vivoPend) { vivoPend = false; setTimeout(look, 0); }   // v0.3.202: una lampara que se mece pide la siguiente en cuanto llega esta
     if (d.id !== seq || !root) return drop();                           // llego tarde: ya hay otra luz en camino
     let bmp = d.bmp, gbmp = d.gbmp;
     if (!bmp) { try { bmp = await createImageBitmap(new ImageData(new Uint8ClampedArray(d.buf), d.w, d.h)); gbmp = await createImageBitmap(new ImageData(new Uint8ClampedArray(d.gbuf), d.w, d.h)); } catch (e) { return; } if (d.id !== seq) { bmp.close(); gbmp.close(); return; } }
@@ -157,9 +158,11 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const s = JSON.stringify([mode, ambi, act, boss, p.w, p.h, R.key, R.esc ? 1 : 0, R.pools.map(q => q.map(v => Math.round(v / 6))), p.keep, (R.cones || []).map(q => q.map(v => Math.round(v / 6)))]);
     if (map) map.calm = R.calm ? 1 : 0;                                 // en partida el remolino del oceano baja la voz (js/map.js)
     hora();
-    if (s === sig) return; sig = s;
+    if (s === sig) return;
+    if (vivoOn && enCurso) { vivoPend = true; return; }                // mientras se mece: una luz cada vez (si no, llegarian todas tarde)
+    sig = s;
     const id = p.id = ++seq, w = worker();
-    if (w) { w._c[id] = { c, boss }; w.postMessage(p); }
+    if (w) { w._c[id] = { c, boss }; enCurso = true; w.postMessage(p); }
     else { const out = paint(p); onMap({ id, w: p.w, h: p.h, c, boss, buf: out.buffer, gbuf: tint(out, p.glow).buffer }); }   // sin Worker (no deberia pasar): se calcula aqui, una vez por pantalla
   }
   /* v0.3.199 (Bloque F, paso 2): EL CHARCO de luz calida que deja la lampara en el tapete, detras de todas las piezas y solo en los menus
@@ -174,6 +177,16 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     const [x, y, r] = c;
     el.style.background = `radial-gradient(ellipse ${r * 100}% ${r * 78}% at ${x * 100}% ${y * 100}%, rgba(255,200,130,${(0.17 * f).toFixed(3)}) 0%, rgba(255,190,120,${(0.09 * f).toFixed(3)}) 38%, rgba(0,0,0,0) 70%), radial-gradient(ellipse 120% 95% at ${x * 100}% ${y * 100}%, rgba(0,0,0,0) 45%, rgba(3,14,22,${(0.42 * f).toFixed(3)}) 100%)`;
     el.classList.add("on");
+  }
+  /* v0.3.202 (Bloque F, paso 5): LA LUZ QUE SE MUEVE. Mientras una lampara se mece (js/escena.js), su cono se recalcula al momento, sin esperar
+     a un hueco libre y sin fundido (la penumbra va con la lampara); el Worker hace el trabajo y aqui solo se cambia la imagen. Se pide en cada
+     fotograma y se apaga sola cuando deja de pedirse */
+  let vivoOn = false, vivoPend = false, enCurso = false, vivoT = 0;
+  function vivo() {
+    if (!root || mode === "off") return;
+    if (!vivoOn) { vivoOn = true; root.classList.add("vivo"); }
+    clearTimeout(vivoT); vivoT = setTimeout(() => { vivoOn = false; vivoPend = false; if (root) root.classList.remove("vivo"); }, 350);
+    look();
   }
   /* algo ha cambiado en pantalla: se mira cuando ha terminado de entrar y otra vez al final por si algo crecio despues.
      Siempre en un hueco libre del hilo principal (requestIdleCallback): ni una medida ni un mensaje en mitad de una animacion */
@@ -465,5 +478,5 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     set(how || "full");
   }
 
-  A.casa = { init, set, mira, kind, racha, brilla, premio, perdida, impacto, luz, destello, carrera, ambiente, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
+  A.casa = { init, set, mira, kind, racha, brilla, vivo, premio, perdida, impacto, luz, destello, carrera, ambiente, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
 })(window.AIQ);
