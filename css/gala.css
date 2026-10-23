@@ -179,6 +179,7 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(50% + 10px) calc(100% - 12px), 50% 100%, calc(50% - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
 .gx-vd-iq { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 14px; width: min(100%, 320px); }
 .gx-vd-iq > .ic, .gx-vd-iq > img { grid-row: span 2; width: 56px; height: 56px; image-rendering: pixelated; }
+.gx-vd-iq > .ic { width: 64px; height: 64px; } /* iconos de nivel: 64 px nativos, escala 1 */
 .gx-vd-iq .odo { font-family: var(--serif); font-size: 56px; line-height: 1; height: 1em; }
 .gx-vd-iq em { grid-column: 1 / -1; padding-top: 6px; border-top: 2px dotted var(--gx-line); font-style: normal; font-size: 22px; color: #c3332a; }
 
@@ -446,7 +447,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .dia-ruta .rd.plan .rd-h b { font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); }
 .dia-ruta .rd.plan .rd-h i { font-family: var(--sans); font-size: 18px; }
 .dia-ruta .rd.plan .rd-ic { border-radius: 0; }   /* casillas pequenas sin recorte: a este tamano el escalon apenas se ve y cada recorte cuesta en la primera apertura */
-.dia-ruta .rd.plan .rd-ic .ic { width: 32px; height: 32px; } .dia-ruta .rd.plan .rd-n.boss .rd-ic .ic { width: 40px; height: 40px; }
+.dia-ruta .rd.plan .rd-ic .ic { width: 48px; height: 48px; } .dia-ruta .rd.plan .rd-n.boss .rd-ic .ic { width: 48px; height: 48px; }
 .dia-ruta .rd.plan .rd-n em { font-size: 16px; margin-top: 4px; }
 
 /* los tres intentos: tres fichas */
@@ -843,8 +844,8 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .nr { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0; }
 .gx-camp .nr-k { display: block; } .gx-camp .nr-k i { font-style: normal; margin: 0 6px; opacity: .55; }
 .gx-camp .nr-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.gx-camp .nr-badge { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 0; background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
-.gx-camp .nr-badge .ic { width: 30px; height: 30px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.gx-camp .nr-badge { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 0; background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.gx-camp .nr-badge .ic { width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
 .gx-camp .nr-ttl { display: grid; gap: 2px; min-width: 0; }
 .gx-camp .nr-sub { font-style: normal; font-size: 18px; line-height: 1.1; color: var(--gx-ink-2); }
 .gx-camp .nr-name { min-width: 0; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: .95; color: var(--gx-ink); text-shadow: none; text-wrap: balance; }
@@ -875,7 +876,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .nr.boss .nr-badge { background: radial-gradient(circle at 50% 38%, #c03a4f, #6e1a28 72%); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fe5f55; }
 /* despues (Ojo en el cielo): cada ronda siguiente en una fila baja, con sus fichas */
 .gx-camp .nr.far { grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 4px 10px; margin-top: 2px; padding-top: 10px; border-top: 2px dashed var(--gx-line); }
-.gx-camp .nr.far .nr-badge { width: 30px; height: 30px; } .gx-camp .nr.far .nr-badge .ic { width: 22px; height: 22px; }
+.gx-camp .nr.far .nr-badge { width: 56px; height: 56px; } .gx-camp .nr.far .nr-badge .ic { width: 48px; height: 48px; }
 .gx-camp .nr.far .nr-ttl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; min-width: 0; }
 .gx-camp .nr.far .nr-k { font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-gold-lo); }
 .gx-camp .nr.far .nr-name { font-size: 20px; }
@@ -886,7 +887,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 /* boleto apretado (.c1): los mismos textos al mismo tamano, con menos aire entre filas (cuatro retos de dos lineas caben sin desplazarse) */
 .gx-camp > .tb-next.c1 { gap: 6px; padding-top: 14px; padding-bottom: 16px; }
 .gx-camp > .tb-next.c1 .nr { gap: 5px; } .gx-camp > .tb-next.c1 .nr-body { gap: 6px; }
-.gx-camp > .tb-next.c1 .nr-top .nr-badge { width: 30px; height: 30px; } .gx-camp > .tb-next.c1 .nr-top .nr-badge .ic { width: 22px; height: 22px; }
+.gx-camp > .tb-next.c1 .nr-top .nr-badge { width: 56px; height: 56px; } .gx-camp > .tb-next.c1 .nr-top .nr-badge .ic { width: 48px; height: 48px; }
 .gx-camp > .tb-next.c1 .nr-top .nr-name { font-size: 24px; }
 .gx-camp > .tb-next.c1 .nr-row { gap: 2px 10px; padding: 4px 0 6px; } .gx-camp > .tb-next.c1 .nr-row > p { line-height: 1.05; }
 .gx-camp > .tb-next.c1 .nr-buy { height: 28px; }

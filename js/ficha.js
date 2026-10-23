@@ -74,7 +74,7 @@
     const full = disc(N, d), face = erode(N, full), in1 = erode(N, face);
     /* ficha pequena (menos de ~36 px): aro mas ancho en proporcion e incrustaciones pegadas al surco, sin filete ni rayitas, para que se siga leyendo */
     const hw = fine ? r * .124 : Math.max(1, r * .15), rimIn = r - (fine ? r * .26 : Math.max(2, r * .3));
-    const G = disc(N, par(N, 2 * rimIn)), Gout = fine ? dilate(N, G) : G, G1 = erode(N, G), G2 = erode(N, G1), G1sq = erode(N, G1, true), G3 = erode(N, G2);
+    const G = disc(N, par(N, 2 * rimIn)), Gout = fine ? dilate(N, G) : G, G1 = erode(N, G), G2 = erode(N, G1), G1sq = erode(N, G1, true);
     const in2 = erode(N, in1), in3 = erode(N, in2);
     /* incrustaciones: 8 radios de lados paralelos (los de 45 grados quedan en escalera 1:1 limpia) */
     const spoke = (X, Y, w) => {
@@ -84,24 +84,22 @@
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
       const p = y * N + x; if (!full[p]) continue;
       if (!face[p]) { put(p, INK); continue; }
-      const X = x + .5 - c, Y = y + .5 - c, rho = Math.hypot(X, Y) || 1e-6, lit = (-X * .62 - Y * .78) / rho;      // coseno con la luz (arriba-izquierda)
+      const X = x + .5 - c, Y = y + .5 - c, rho = Math.hypot(X, Y) || 1e-6, lit = -Y / rho;                         // coseno con la luz (de arriba: la ficha queda en espejo izquierda-derecha)
       let k;
       if (!G[p]) {                                                                   // aro
         const ins = !Gout[p] && spoke(X, Y, hw), edge = !in1[p];
         k = ins ? CREAM[1] : rp[2];
-        if (edge && lit > .35) k = ins ? CREAM[0] : rp[1];                            // bisel: luz arriba-izquierda, sombra abajo-derecha
+        if (edge && lit > .35) k = ins ? CREAM[0] : rp[1];                            // bisel: luz arriba, sombra abajo
         else if (edge && lit < -.35) k = ins ? CREAM[2] : rp[3];
-        else if (r >= 12 && in2[p] && !in3[p] && !ins) {                               // brillo corto del aro, a los lados de la incrustacion de arriba-izquierda
+        else if (r >= 12 && in2[p] && !in3[p] && !ins) {                               // brillo corto del aro, a los dos lados de la incrustacion de arriba (en espejo)
           const ang = (Math.atan2(X, -Y) * 180 / Math.PI + 360) % 360;
-          if (ang > 291 && ang < 339 && !spoke(X, Y, hw + 1.2)) k = rp[0];
+          if (((ang > 291 && ang < 339) || (ang > 21 && ang < 69)) && !spoke(X, Y, hw + 1.2)) k = rp[0];
         }
       } else if (!G1[p]) k = fine ? rp[4] : rp[3];                                    // surco
       else if (fine && !G2[p]) k = spoke(X, Y, 1.7) ? CREAM[1] : rp[2];               // filete con rayitas alineadas con las incrustaciones
       else {
-        const ctr = fine ? G2 : G1, ctrIn = fine ? G3 : G2;
-        k = rp[1];
+                k = rp[1];                                                                    // centro liso: igual arriba y abajo (sin sombra de centro hundido)
         if (fine && !G1sq[p] && spoke(X, Y, 1.7)) k = CREAM[1];                       // la rayita en diagonal, maciza (sin pixeles unidos solo por la esquina)
-        else if (ctr[p] && !ctrIn[p] && lit > .2) k = rp[2];                          // centro hundido: sombra arriba-izquierda
       }
       put(p, k);
     }
