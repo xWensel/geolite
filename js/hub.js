@@ -129,7 +129,7 @@ window.AIQ = window.AIQ || {};
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
-    if (A.club) A.club.wire(() => { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); });   // tu carta: abre la tienda en «Tu carta» y cuenta las fichas de oro nuevas
+    if (A.club) A.club.wire(() => { if (A.camino) screen("camino"); else { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); } });   // tu carta: abre el camino del socio (js/camino.js) y cuenta las fichas de oro nuevas
     if ($("bqBtn")) $("bqBtn").onclick = () => { A.sfx.card(); screen("boutique"); };   // la tienda: placa de la derecha (v0.3.157)
     if ($("clubRtBtn")) $("clubRtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // los retos del Club: placa de la izquierda (js/club-retos.js)
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
@@ -590,7 +590,7 @@ window.AIQ = window.AIQ || {};
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open() }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open(), camino: () => A.camino.open() }[id] || home)();
     C().refreshSkinBits && C().refreshSkinBits();
     if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva
   }

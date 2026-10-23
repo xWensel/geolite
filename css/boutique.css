@@ -214,3 +214,21 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-say p { margin: 0; text-wrap: pretty; } .bq-say .r { visibility: hidden; }
 .bq-prob.halo .cr-cv { filter: drop-shadow(0 0 14px rgba(253, 215, 66, .65)); transition: filter .4s; }
 html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
+
+/* v2 (El camino del socio): las cartas, los fondos y los bordes de «Tu carta», de serie en serie (5 x 2). Las cartas son de pie (96 x 128) y van
+   enteras a escala entera de pixeles reales y centradas; las que aun no tienes, boca abajo (sorpresa) */
+.bq-items.carta.ten { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.bq-th.bq-cth.bq-ccard, .bq-th.bq-cth.bq-cfondo { position: relative; display: grid; place-items: center; background: radial-gradient(62% 58% at 50% 46%, #2d6a4a 0, #1f4d38 60%, #123b25 100%); }
+.bq-ccard canvas, .bq-cfondo canvas { width: auto; height: auto; image-rendering: pixelated; }
+.bq-ccard.lk canvas, .bq-cfondo.lk canvas { filter: brightness(.8); }
+.bq-viva { position: absolute; right: 4px; top: 2px; font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; color: #ffe39a; text-shadow: 0 2px 0 #120e1c; }
+.bq-ed { display: block; margin-top: 4px; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-gold-lo); letter-spacing: .04em; }
+.bq-backbig { display: block; margin: 0 auto; image-rendering: pixelated; }
+/* v2: las siete pestanas de «Tu carta» en dos filas de cuatro (Cartas, Fondos, Bordes, Logros / Objetos, Titulos, Marcos) */
+.bq-cat.carta .bq-tabs { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 6px; }
+.bq-cat.carta .bq-tab { gap: 6px; padding: 5px 8px 6px; font-size: 18px; }
+.bq-cat.carta .bq-tab i:empty { display: none; }
+.bq-cat.carta .bq-bar { flex-wrap: wrap; row-gap: 8px; }
+.bq-cat.carta .bq-tabs { flex: 1 1 100%; }
+.bq-cat.carta .bq-pager { margin-left: auto; }
+.bq-th.bq-cth.bq-ccard { aspect-ratio: auto; height: 144px; }   /* la carta entera (96 x 128) cabe a x1 hasta en la Deck */

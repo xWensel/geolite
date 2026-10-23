@@ -33,3 +33,11 @@
 
 /* pantallas estrechas (la web en movil): la tarjeta deja de flotar */
 @media (max-width: 900px) { .hh-top .hh-socio-w { position: static; margin: 8px auto 0; } }
+
+/* v2 (El camino del socio): el doble de la primera partida del dia, lo siguiente en el recibo y, en la portada, bajo tu carta */
+.club-tk .ck-x2 { margin-left: auto; font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .04em; padding: 4px 7px 3px; color: #fff3d6; background: var(--gx-red); transform: rotate(-3deg); white-space: nowrap; }
+.club-tk .ck-next { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 18px; line-height: 1.05; color: var(--gx-ink-2); }
+.club-tk .ck-next .ck-fi.sm { margin: 0; }
+.hh-socio-nx { position: absolute; left: 0; top: 100%; margin-top: 10px; display: flex; align-items: center; gap: 6px; width: 100%; padding: 5px 8px 4px; box-sizing: border-box; font-size: 18px; line-height: 1; color: #ffd98a; background: rgba(5, 14, 10, .78); box-shadow: inset 0 0 0 2px rgba(245, 166, 35, .55); pointer-events: none; text-wrap: balance; }
+.hh-socio-nx .ck-fi.sm { margin: 0; width: 18px; height: 18px; }
+@media (max-width: 900px) { .hh-socio-nx { position: static; margin-top: 8px; } }

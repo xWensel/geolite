@@ -71,7 +71,7 @@ window.AIQ = window.AIQ || {};
   /* v0.3.177: cuantas caben por pagina segun el alto del lienzo de diseno (a 1280x720 o 1920x1080 sobran menos filas que en la Deck 1280x800) */
   const short = () => { const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--k")) || 1; return innerHeight / k < 760; };
   const PERM = () => (short() ? 9 : 12), PERV = () => 8, PERP = () => (short() ? 6 : 9), PERC = () => 8;
-  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null, psel: null, ptab: "ret", ppage: 0, ptry: null, csel: null, ctab: "logro", cpage: 0 };
+  const ST = { sel: null, tab: "all", page: 0, armed: null, armT: 0, trying: null, tryT: 0, busy: false, next: null, cat: "mesas", vsel: null, vtab: "traje", vpage: 0, spr: null, psel: null, ptab: "ret", ppage: 0, ptry: null, csel: null, ctab: "carta", cpage: 0 };
   /* Bloque J: el vestidor (la tienda es tambien el vestuario) */
   const RX = {
     crup: "Crupier|Dealer|Croupier|Crupiê|Croupier|Croupier||荷官|딜러|ディーラー|Крупье|Krupier",
@@ -462,31 +462,51 @@ window.AIQ = window.AIQ || {};
     dIcon: "El dibujo del centro de tu carta de socio.|The picture in the middle of your member card.|Le dessin au centre de ta carte de membre.|O desenho no centro da sua carta de sócio.|Das Bild in der Mitte deiner Mitgliedskarte.|Il disegno al centro della tua tessera socio.||你会员卡中央的图案。|회원 카드 가운데 그림이에요.|会員カードの真ん中の絵。|Рисунок в центре твоей клубной карты.|Rysunek na środku twojej karty członkowskiej.",
     dObj: "Un objeto de la casa para el centro de tu carta.|A house object for the middle of your card.|Un objet de la maison pour le centre de ta carte.|Um objeto da casa para o centro da sua carta.|Ein Objekt des Hauses für die Mitte deiner Karte.|Un oggetto della casa per il centro della tua carta.||本店的一件物品，放在你会员卡的中央。|카드 가운데에 놓을 하우스의 오브제예요.|カードの真ん中に飾るハウスのアイテム。|Предмет заведения для центра твоей карты.|Przedmiot kasyna na środek twojej karty.",
     dTit: "Va en una placa de cuero bajo tu nombre.|It goes on a leather plate under your name.|Il se place sur une plaque de cuir sous ton nom.|Fica numa placa de couro sob o seu nome.|Steht auf einem Lederschild unter deinem Namen.|Va su una targhetta di cuoio sotto il tuo nome.||刻在你名字下方的皮质铭牌上。|이름 아래 가죽 명판에 들어가요.|名前の下の革のプレートに入る。|Пишется на кожаной табличке под твоим именем.|Trafia na skórzaną tabliczkę pod twoim imieniem.",
+    tCarta: "Cartas|Cards|Cartes|Cartas|Karten|Carte||卡牌|카드|カード|Карты|Karty",
+    tFondo: "Fondos|Backgrounds|Fonds|Fundos|Hintergründe|Sfondi||底纹|배경|背景|Фоны|Tła",
+    tMat: "Bordes|Borders|Bordures|Bordas|Ränder|Bordi||边框材质|테두리|縁取り|Окантовки|Obramowania",
+    eCarta: "Carta|Card|Carte|Carta|Karte|Carta||卡牌|카드|カード|Карта|Karta",
+    eFondo: "Fondo de la chapa|Badge background|Fond du badge|Fundo do emblema|Abzeichen-Hintergrund|Sfondo della spilla||徽章底纹|배지 배경|バッジの背景|Фон значка|Tło odznaki",
+    eMat: "Borde|Border|Bordure|Borda|Rand|Bordo||边框材质|테두리|縁取り|Окантовка|Obramowanie",
+    kNivel: "Del camino del socio|From the member's path|Du parcours du membre|Do caminho do sócio|Vom Weg des Mitglieds|Dal cammino del socio||来自会员之路|회원의 길 보상|会員の道のごほうび|С пути члена клуба|Ze ścieżki członka",
+    dCarta: "Tu carta de socio: la llevas en la portada, en el Perfil y en la Clasificación. Sale una nueva con cada nivel.|Your member card: you show it on the main screen, in your Profile and on the Leaderboard. You get a new one every level.|Ta carte de membre : elle s'affiche sur l'écran d'accueil, dans ton Profil et au Classement. Une nouvelle à chaque niveau.|Sua carta de sócio: aparece na tela inicial, no Perfil e na Classificação. Ganha uma nova a cada nível.|Deine Mitgliedskarte: Du zeigst sie auf dem Startbildschirm, im Profil und in der Rangliste. Jede Stufe bringt eine neue.|La tua carta socio: la mostri nella schermata iniziale, nel Profilo e in Classifica. Ne arriva una nuova a ogni livello.||你的会员卡：显示在主界面、个人资料和排行榜上。每升一级都会得到一张新卡。|회원 카드예요. 메인 화면, 프로필, 순위표에 보여요. 레벨마다 새 카드가 나와요.|きみの会員カード。メイン画面、プロフィール、ランキングに出る。レベルが上がるたびに新しい一枚。|Твоя клубная карта: её видно на главном экране, в профиле и в таблице лидеров. Новая — с каждым уровнем.|Twoja karta członkowska: widać ją na ekranie głównym, w profilu i w rankingu. Nowa z każdym poziomem.",
+    dFondo: "El fondo de tu chapa, detrás del icono. Cada carta que consigues trae el suyo.|The background of your badge, behind the icon. Every card you earn brings its own.|Le fond de ton badge, derrière l'icône. Chaque carte obtenue apporte le sien.|O fundo do seu emblema, atrás do ícone. Cada carta que você ganha traz o dela.|Der Hintergrund deines Abzeichens hinter dem Symbol. Jede Karte, die du bekommst, bringt ihren mit.|Lo sfondo della tua spilla, dietro l'icona. Ogni carta che ottieni porta il suo.||徽章图标后面的底纹。每得到一张卡就会多一种。|배지 아이콘 뒤의 배경이에요. 카드를 얻을 때마다 하나씩 생겨요.|バッジのアイコンの後ろの背景。カードを手に入れるたびにひとつ増える。|Фон значка за иконкой. Каждая новая карта приносит свой.|Tło odznaki za ikoną. Każda zdobyta karta przynosi swoje.",
+    dMat: "El material del borde de tu carta y de tu chapa. Se gana uno al empezar cada serie de diez niveles.|The material of your card's and badge's border. You earn one when each series of ten levels begins.|La matière de la bordure de ta carte et de ton badge. Tu en gagnes une au début de chaque série de dix niveaux.|O material da borda da sua carta e do seu emblema. Você ganha um no começo de cada série de dez níveis.|Das Material des Rands deiner Karte und deines Abzeichens. Zu Beginn jeder Zehnerserie bekommst du eines.|Il materiale del bordo della tua carta e della tua spilla. Ne ottieni uno all'inizio di ogni serie di dieci livelli.||卡牌和徽章边框的材质。每开启一个十级系列就得到一种。|카드와 배지 테두리의 재질이에요. 10레벨 시리즈가 시작될 때마다 하나씩 얻어요.|カードとバッジの縁の素材。10レベルのシリーズが始まるたびにひとつ手に入る。|Материал окантовки карты и значка. Новый — в начале каждой серии из десяти уровней.|Materiał obramowania karty i odznaki. Nowy na początku każdej serii dziesięciu poziomów.",
+    surprise: "Sorpresa|Surprise|Surprise|Surpresa|Überraschung|Sorpresa||惊喜|서프라이즈|お楽しみ|Сюрприз|Niespodzianka",
     locked: "Aún no es tuyo|Not yours yet|Pas encore à toi|Ainda não é seu|Noch nicht deins|Non è ancora tuo||尚未获得|아직 없어요|まだ持っていない|Пока не твоё|Jeszcze nie twoje",
   };
   const SO = () => A.socio;
   /* la lista de una pestana: [clave, ...]; clave = "i:<icono>" o "t:<titulo>" */
-  const cOf = t => t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
-  const cFind = k => { const [w, id] = k.split(":"); const L = w === "m" ? SO().marcos() : w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
-  const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "m" ? SO().marco() === id : w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
+  /* v2: c = carta, f = fondo de chapa, b = material del borde (js/socio.js); las cartas que aun no tienes van boca abajo (sorpresa) */
+  const lvTag = L => P6(A.club.tx.lvS).replace("{n}", L);
+  const cCards = pre => SO().cartas().map(x => ({ k: pre + ":" + x.L, id: x.L, kind: "nivel", owned: x.owned, price: 0, name: x.owned ? x.name : P6(CX.surprise), how: P6(SO().tx.lockedCard).replace("{n}", x.L) }));
+  const cMats = () => SO().mats().map(x => ({ k: "b:" + x.id, id: x.id, kind: "nivel", owned: x.owned, price: 0, name: x.name, how: P6(SO().tx.byLv).replace("{n}", x.lv) }));
+  const cOf = t => t === "carta" ? cCards("c") : t === "fondo" ? cCards("f") : t === "mat" ? cMats() : t === "marco" ? SO().marcos().map(x => ({ k: "m:" + x.id, ...x })) : t === "tit" ? SO().titles().map(x => ({ k: "t:" + x.id, ...x })) : t === "obj" ? SO().icons("casa").concat(SO().icons("tienda")).map(x => ({ k: "i:" + x.id, ...x })) : SO().icons("logro").map(x => ({ k: "i:" + x.id, ...x }));
+  const cFind = k => { const [w, id] = k.split(":"); if (w === "c" || w === "f") return cCards(w).find(x => x.id === +id) || null; if (w === "b") return cMats().find(x => x.id === +id) || null; const L = w === "m" ? SO().marcos() : w === "t" ? SO().titles() : SO().icons(); return L.find(x => x.id === id) || null; };
+  const cState = k => { const [w, id] = k.split(":"), x = cFind(k); if (!x) return ""; return (w === "c" ? SO().carta() === +id : w === "f" ? SO().fondo() === +id : w === "b" ? SO().mat() === +id : w === "m" ? SO().marco() === id : w === "t" ? SO().title() === id : SO().icon() === id) ? "on" : x.owned ? "got" : ""; };
   function cItem(x) {
     const st = cState(x.k), w = x.k[0], tag = st === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : x.kind === "casa" ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : st ? `<em class="bq-own">${esc(P6(VX.mine))}</em>`
       : x.price ? `<span class="bq-pr">${fi()}<b>${A.fmt(x.price)}</b></span>` : `<em class="bq-own lk" aria-label="${esc(P6(CX.locked))}">${A.icon("lock")}</em>`;
-    const th = w === "t" ? `<span class="bq-th bq-cth bq-ttl${x.owned || x.kind === "tienda" ? "" : " off"}"><span class="bq-tplate"><span>${esc(x.name)}</span></span></span>`
+    const th = w === "c" ? `<span class="bq-th bq-cth bq-ccard${x.owned ? "" : " lk"}"><canvas data-cc="${x.id}"${x.owned ? "" : " data-back=\"1\""}></canvas>${vivaTag(x)}</span>`
+      : w === "f" ? `<span class="bq-th bq-cth bq-cfondo${x.owned ? "" : " lk"}"><canvas data-cf="${x.id}"${x.owned ? "" : " data-back=\"1\""}></canvas></span>`
+      : w === "b" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned ? "" : " lk"}" data-cb="${x.id}"></span></span>`
+      : w === "t" ? `<span class="bq-th bq-cth bq-ttl${x.owned || x.kind === "tienda" ? "" : " off"}"><span class="bq-tplate"><span>${esc(x.name)}</span></span></span>`
       : w === "m" ? `<span class="bq-th bq-cth bq-cmk"><span class="bq-cbadge${x.owned || x.kind === "tienda" ? "" : " lk"}" data-cm="${esc(x.id)}"></span></span>`
       : `<span class="bq-th bq-cth"><canvas width="96" height="72" data-ci="${esc(x.id)}"${x.owned || x.kind !== "logro" ? "" : ` data-lk="${x.secret ? 2 : 1}"`}></canvas></span>`;
-    const nm = w === "t" ? esc(P6(x.kind === "tienda" ? CX.kTienda : CX.kHito)) : esc(x.name);
+    const nm = w === "c" || w === "f" ? esc(lvTag(x.id)) : w === "t" ? esc(P6(x.kind === "tienda" ? CX.kTienda : CX.kHito)) : esc(x.name);
     return `<button type="button" class="bq-it bq-cit${x.k === ST.csel ? " sel" : ""}${st ? " " + st : ""}${w === "t" ? " bq-ttl" : ""}" data-ck="${esc(x.k)}" aria-pressed="${x.k === ST.csel}" aria-label="${esc(x.name)}">
       ${th}<span class="bq-prow"><b class="bq-nm">${nm}</b>${tag}</span></button>`;
   }
+  const vivaTag = x => (x.owned && SO().vivaOf(x.id) ? `<em class="bq-viva">★</em>` : "");
+  const cPer = () => (ST.ctab === "carta" || ST.ctab === "fondo" || ST.ctab === "mat" ? 10 : PERC());   // las cartas y los fondos, de serie en serie (10)
   function cGridHtml() {
-    const L = cOf(ST.ctab), per = PERC(), pages = Math.max(1, Math.ceil(L.length / per)); ST.cpage = Math.min(ST.cpage, pages - 1);
+    const L = cOf(ST.ctab), per = cPer(), pages = Math.max(1, Math.ceil(L.length / per)); ST.cpage = Math.min(ST.cpage, pages - 1);
     const items = L.slice(ST.cpage * per, ST.cpage * per + per);
-    const cnt = k => { const l = cOf(k); return k === "obj" ? l.length : `${l.filter(x => x.owned).length}/${l.length}`; };
+    const cnt = k => { if (k === "carta" || k === "fondo") return ""; const l = cOf(k); return k === "obj" ? l.length : `${l.filter(x => x.owned).length}/${l.length}`; };
     const tab = (k, tx) => `<button type="button" class="bq-tab bq-ctab${ST.ctab === k ? " on" : ""}" data-ctab="${k}" aria-pressed="${ST.ctab === k}"><span>${esc(P6(tx))}</span><i>${cnt(k)}</i></button>`;
-    return `<div class="bq-bar"><nav class="bq-tabs">${tab("logro", CX.tLogro)}${tab("obj", CX.tObj)}${tab("tit", CX.tTit)}${tab("marco", CX.tMarco)}</nav>
+    return `<div class="bq-bar"><nav class="bq-tabs">${tab("carta", CX.tCarta)}${tab("fondo", CX.tFondo)}${tab("mat", CX.tMat)}${tab("logro", CX.tLogro)}${tab("obj", CX.tObj)}${tab("tit", CX.tTit)}${tab("marco", CX.tMarco)}</nav>
       <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqCPrev"${ST.cpage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.cpage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqCNext"${ST.cpage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
-      <div class="bq-items carta" id="bqItems">${items.map(cItem).join("")}</div>`;
+      <div class="bq-items carta${per === 10 ? " ten" : ""}" id="bqItems">${items.map(cItem).join("")}</div>`;
   }
   function cDetHtml() {
     const k = ST.csel, x = cFind(k), w = k[0], st = cState(k), have = A.club ? A.club.fichas() : 0;
@@ -498,22 +518,34 @@ window.AIQ = window.AIQ || {};
     else if (!x.price) act = `<button type="button" class="gx-btn wide" disabled>${A.icon("lock")}<span>${esc(P6(CX.locked))}</span></button>`;
     else if (have < x.price) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(x.price - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === k ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === k ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(x.price)}</span></button>`;
-    const kind = w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : CX.kTienda;
-    const desc = w === "m" ? CX.dMarco : w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
+    const kind = w === "c" || w === "f" || w === "b" ? CX.kNivel : w === "t" || w === "m" ? (x.kind === "tienda" ? CX.kTienda : x.kind === "casa" ? VX.casaL : CX.kHito) : x.kind === "logro" ? CX.kLogro : x.kind === "casa" ? VX.casaL : CX.kTienda;
+    const desc = w === "c" ? CX.dCarta : w === "f" ? CX.dFondo : w === "b" ? CX.dMat : w === "m" ? CX.dMarco : w === "t" ? CX.dTit : x.kind === "logro" ? CX.dIcon : CX.dObj;
     return `<span class="bq-dth bq-cprev"><span id="bqCCard"></span></span>
-      <span class="gx-eyb bq-tier">${esc(P6(w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
-      <h3 class="gx-t-m bq-dn">${esc(x.name)}</h3>
+      <span class="gx-eyb bq-tier">${esc(P6(w === "c" ? CX.eCarta : w === "f" ? CX.eFondo : w === "b" ? CX.eMat : w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
+      <h3 class="gx-t-m bq-dn">${esc((w === "c" || w === "f") && x.owned ? SO().cardNo(x.id) : x.name)}${(w === "c" || w === "f") && x.owned ? `<span class="bq-ed">${esc(SO().matName(SO().sOf(x.id)) + " · " + SO().edName(x.id))}</span>` : ""}</h3>
       <p class="bq-dd">${esc(P6(desc))}${x.how && !x.owned ? `<br><b class="bq-how">${esc(x.how)}</b>` : ""}</p>
       <div class="bq-acts">${act}</div>`;
   }
   /* la carta de la ficha (tu carta con la pieza puesta) y las miniaturas, a escala entera en pixeles reales */
   function cPaint() {
     const host = $("bqCCard"), k = ST.csel;
-    if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
+    if (host && k && /^[fb]:/.test(k)) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 128 }; if (w === "f") o.fondo = x && x.owned ? +id : 0; else o.mat = x && x.owned ? +id : undefined; host._sig = ""; host.innerHTML = ""; SO().badge(host, o); }
+    else if (host && k && /^c:/.test(k) && !(cFind(k) || {}).owned) { host._sig = ""; host.innerHTML = `<canvas class="bq-backbig"></canvas>`; const cv = host.firstChild; SO().back(cv); intPaint(cv, 160); }
+    else if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "c") o.carta = +id; else if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
     document.querySelectorAll("#dlg .bq-cbadge[data-cm]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, marco: el.dataset.cm }); });   // v0.3.174: cada marco, en tu chapa
+    document.querySelectorAll("#dlg .bq-cbadge[data-cb]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, mat: +el.dataset.cb }); });   // v2: cada material, en tu chapa
+    document.querySelectorAll("#dlg canvas[data-cc]").forEach(cv => { if (cv.dataset.back) SO().back(cv); else SO().art(cv, +cv.dataset.cc); fitCv(cv); });
+    document.querySelectorAll("#dlg canvas[data-cf]").forEach(cv => { if (cv.dataset.back) SO().back(cv); else SO().winArt(cv, +cv.dataset.cf, 32, 32); fitCv(cv); });
     const dp = window.devicePixelRatio || 1;
     document.querySelectorAll("#dlg canvas[data-ci]").forEach(cv => { const r = cv.getBoundingClientRect(), W = Math.max(16, Math.round(r.width * dp)), H = Math.max(12, Math.round(r.height * dp)); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; } SO().thumb(cv, cv.dataset.ci, { locked: !!cv.dataset.lk, secret: cv.dataset.lk === "2", base: ST.ctab === "obj" ? 64 : 48 }); });
   }
+  /* v2: un lienzo de pixel art en su hueco, al mayor entero de pixeles reales que quepa y centrado (nunca estirado) */
+  function fitCv(cv) {
+    const box = cv.parentElement; if (!box) return; const r = box.getBoundingClientRect(), dp = (box.currentCSSZoom || 1) * (window.devicePixelRatio || 1);
+    const k = Math.max(1, Math.floor(Math.min((r.width / (box.currentCSSZoom || 1)) * dp / cv.width, (r.height / (box.currentCSSZoom || 1)) * dp / cv.height) + 0.01));
+    cv.style.width = (cv.width * k) / dp + "px"; cv.style.height = (cv.height * k) / dp + "px";
+  }
+  function intPaint(cv, w) { const dp = window.devicePixelRatio || 1, k = Math.max(1, Math.floor((w * dp) / cv.width)); cv.style.width = (cv.width * k) / dp + "px"; cv.style.height = (cv.height * k) / dp + "px"; }
   /* comprar: como los punteros (dos pulsaciones, premio, monedero que baja) y queda puesto */
   function cBuy(k) {
     if (ST.busy || !k) return;
@@ -596,12 +628,12 @@ window.AIQ = window.AIQ || {};
     const we = $("bqWear"); if (we) we.onclick = () => { if (!V().wear(ST.vsel)) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint("#bqOff"); vTried(ST.vsel, true); };
     const ofb = $("bqOff"); if (ofb) ofb.onclick = () => { V().takeOff(ST.vsel); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqWear"); vTookOff(); };
     /* «Tu carta» */
-    sc.querySelectorAll(".bq-cit").forEach(b => { b.onclick = () => { const k = b.dataset.ck; if (ST.busy) return; if (k !== ST.csel) { ST.csel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const [cw, cid] = k.split(":"), cx = cFind(k), put = cx && cx.owned && cState(k) !== "on" && (cw === "m" ? SO().setMarco(cid) : cw === "t" ? SO().setTitle(cid) : SO().setIcon(cid)); repaint(`#dlg .bq-cit[data-ck="${k}"]`); if (put) stampOn(); }; });
+    sc.querySelectorAll(".bq-cit").forEach(b => { b.onclick = () => { const k = b.dataset.ck; if (ST.busy) return; if (k !== ST.csel) { ST.csel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } const [cw, cid] = k.split(":"), cx = cFind(k), put = cx && cx.owned && cState(k) !== "on" && (cw === "c" ? SO().setCarta(+cid) : cw === "f" ? SO().setFondo(+cid) : cw === "b" ? SO().setMat(+cid) : cw === "m" ? SO().setMarco(cid) : cw === "t" ? SO().setTitle(cid) : SO().setIcon(cid)); repaint(`#dlg .bq-cit[data-ck="${k}"]`); if (put) stampOn(); }; });
     sc.querySelectorAll(".bq-ctab").forEach(b => { b.onclick = () => { if (ST.ctab === b.dataset.ctab) return; ST.ctab = b.dataset.ctab; ST.cpage = 0; const L = cOf(ST.ctab); if (L.length && !L.some(x => x.k === ST.csel)) ST.csel = L[0].k; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-ctab[data-ctab="${ST.ctab}"]`); }; });
     const cp = $("bqCPrev"), cn = $("bqCNext");
     if (cp) cp.onclick = () => { if (ST.cpage > 0) { ST.cpage--; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCPrev:not([disabled]), #bqCNext"); } };
     if (cn) cn.onclick = () => { ST.cpage++; if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCNext:not([disabled]), #bqCPrev"); };
-    const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "m" ? SO().setMarco(id) : w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
+    const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "c" ? SO().setCarta(+id) : w === "f" ? SO().setFondo(+id) : w === "b" ? SO().setMat(+id) : w === "m" ? SO().setMarco(id) : w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
     const co = $("bqCOff"); if (co) co.onclick = () => { SO().setTitle(""); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCUse"); };
   }
   /* cambiar de seccion: solo cambian la izquierda y la derecha (la cabecera se queda); el vestuario espera a tener su atlas listo */
@@ -614,7 +646,7 @@ window.AIQ = window.AIQ || {};
       if (k !== "vest") dropProb();
       const ca = $("bqCat"), d = $("bqDet");
       ca.classList.toggle("vest", k === "vest"); d.classList.toggle("vest", k === "vest"); ca.classList.toggle("punt", k === "punt"); d.classList.toggle("punt", k === "punt"); ca.classList.toggle("carta", k === "carta"); d.classList.toggle("carta", k === "carta");
-      if (k === "carta" && !ST.csel) ST.csel = "i:" + SO().icon();
+      if (k === "carta" && !ST.csel) { const L0 = SO().carta(); ST.ctab = "carta"; ST.csel = "c:" + L0; ST.cpage = Math.floor((L0 - 1) / 10); }
       if (k === "punt" && !ST.psel) ST.psel = (pOf("ret").find(([s, id]) => !PU().owned(s, id)) || ["ret", "casa"]).join(":");
       ca.innerHTML = catBody(); d.innerHTML = detBody();
       const rl = $("bqRail"); if (rl) rl.outerHTML = railHtml();
@@ -711,7 +743,7 @@ window.AIQ = window.AIQ || {};
     if (id || !V()) ST.cat = "mesas";                                   // desde Perfil > Mesas se abre en las mesas
     if (ST.cat === "vest" && !ST.vsel) ST.vsel = vOf(ST.vtab)[0].id;
     if (ST.cat === "punt" && (!PU() || !ST.psel)) { if (!PU()) ST.cat = "mesas"; else ST.psel = "ret:casa"; }
-    if (ST.cat === "carta") { if (!SO()) ST.cat = "mesas"; else { const ic = SO().icon(); ST.csel = "i:" + ic; ST.ctab = SO().iconKind(ic) === "logro" ? "logro" : "obj"; const L = cOf(ST.ctab), i = L.findIndex(x => x.k === ST.csel); ST.cpage = i >= 0 ? Math.floor(i / PERC()) : 0; } }
+    if (ST.cat === "carta") { if (!SO()) ST.cat = "mesas"; else { const L0 = SO().carta(); ST.ctab = "carta"; ST.csel = "c:" + L0; ST.cpage = Math.floor((L0 - 1) / 10); } }   // v2: se abre en tus cartas, en la serie de la que llevas
     const draw = () => {
       c.dialog(html(), "tablewrap");
       A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };

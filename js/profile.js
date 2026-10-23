@@ -66,7 +66,7 @@ window.AIQ = window.AIQ || {};
   /* Retos diarios completados = dias con algun intento cerrado (los "Dias jugados" del Reto diario). Contar las claves de P.daily sumaba
      dias con el intento a medias y las tablas "weekly-" del formato antiguo */
   const contDone = (c, k) => !!(c && c.cont && c.cont[k] && c.cont[k][1] > 0 && c.cont[k][0] >= c.cont[k][1]);
-  const dailyDays = () => (A.rank && A.rank.daily ? A.rank.daily.stats().days : 0);
+  const clubLv = () => (A.club ? A.club.level() : 0);                     // v2: los logros del Club (sustituyen a los del Reto diario, apagado)
   /* Tramos de dificultad (secciones del Perfil): de menos a mas dificil y de menos a mas horas de juego; los secretos, al final.
    * El orden no importa a Steam (el "API name" es el id). Todos comprobados como alcanzables (v0.34, 100 logros: el tope de Steam). */
   A.ACH_TIERS = [
@@ -100,7 +100,7 @@ window.AIQ = window.AIQ || {};
       AD("adv_act1", "🌅", "Las rutas conocidas", "The known roads", "Completa el Acto I.", "Complete Act I.", "adv", c => c.kind === "act" && c.act >= 1),
       AD("codex_100", "🏛️", "Erudito", "Scholar", "Consigue 100 tarjetas de la Enciclopedia.", "Collect 100 Encyclopedia cards.", "codex", c => c.u >= 100),
       AD("streak_10", "☄️", "Imparable", "Unstoppable", "Racha de 10 aciertos.", "10-hit streak.", "q", () => S().bestStreak >= 10),
-      AD("daily_1", "📅", "Reto del día", "Daily challenge", "Juega el Reto diario.", "Play the Daily challenge.", "daily", () => true),
+      AD("club_10", "🃏", "Socio del club", "Card-carrying member", "Llega al nivel 10 del Club de la casa.", "Reach level 10 of the House Club.", "club", () => clubLv() >= 10),
       AD("classic_world", "🌍", "Vuelta al mundo", "Round the world", "Termina la campaña Mundo.", "Finish the World campaign.", "classic", () => won("c-game1")),
       AD("casino_first", "🎲", "A la mesa", "Pull up a chair", "Juega tu primer juego del casino.", "Play your first casino game.", "casino", c => c.kind === "play"),
     ]),
@@ -168,7 +168,7 @@ window.AIQ = window.AIQ || {};
       AD("adv_asc2", "⛰️", "Ascensión II", "Ascension II", "Gana una expedición en Ascensión 2 o más.", "Win an expedition at Ascension 2 or higher.", "adv", c => c.kind === "act" && c.act >= 3 && !c.daily && c.asc >= 2),
       AD("adv_asc3", "⛰️", "Ascensión III", "Ascension III", "Gana una expedición en Ascensión 3 o más.", "Win an expedition at Ascension 3 or higher.", "adv", c => c.kind === "act" && c.act >= 3 && !c.daily && c.asc >= 3),
       AD("adv_flawless3", "🏵️", "Leyenda intachable", "Flawless legend", "Completa el Acto III sin perder provisiones.", "Complete Act III without losing a provision.", "adv", c => c.kind === "act" && c.flawless && c.act >= 3),
-      AD("daily_30", "🎟️", "Ritual diario", "Daily ritual", "Juega el Reto diario 30 días distintos.", "Play the Daily challenge on 30 different days.", "daily", () => dailyDays() >= 30),
+      AD("club_100", "👑", "La casa es tuya", "The house is yours", "Llega al nivel 100 del Club de la casa.", "Reach level 100 of the House Club.", "club", () => clubLv() >= 100),
       AD("codex_country", "🛂", "Pasaporte completo", "Full passport", "190 países en la Enciclopedia.", "190 countries in the Encyclopedia.", "codex", c => (c.by.country || [0])[0] >= 190),
       AD("adv_asc4", "⛰️", "Ascensión IV", "Ascension IV", "Gana una expedición en Ascensión 4 o más.", "Win an expedition at Ascension 4 or higher.", "adv", c => c.kind === "act" && c.act >= 3 && !c.daily && c.asc >= 4),
       AD("bull_500", "🦅", "Leyenda del mapa", "Map legend", "500 dianas en total.", "500 bullseyes in total.", "q", () => S().bulls >= 500),
@@ -212,7 +212,7 @@ window.AIQ = window.AIQ || {};
     streak_5: () => [S().bestStreak, 5], streak_10: () => [S().bestStreak, 10], streak_20: () => [S().bestStreak, 20], streak_50: () => [S().bestStreak, 50],
     km_equator: () => [Math.floor(S().km), 40075],
     adv_boss5: () => [ADV().boss, 5], adv_runs10: () => [ADV().runs, 10], adv_wins10: () => [ADV().wins, 10], adv_alldecks: () => [deckWins(), 4],
-    daily_30: () => [dailyDays(), 30],
+    club_10: () => [Math.min(clubLv(), 10), 10], club_100: () => [Math.min(clubLv(), 100), 100],
     classic_all: () => [classicIds().filter(won).length, classicIds().length], classic_gold5: () => [golds(), 5], classic_goldall: () => [golds(), classicIds().length],
     casino_tour: () => [Object.keys((P.casino || {}).games || {}).length, 8],
     codex_eu: c => c && c.cont && c.cont.eu && c.cont.eu.slice(), codex_as: c => c && c.cont && c.cont.as && c.cont.as.slice(), codex_af: c => c && c.cont && c.cont.af && c.cont.af.slice(),

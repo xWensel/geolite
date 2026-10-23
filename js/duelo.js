@@ -471,7 +471,7 @@ window.AIQ = window.AIQ || {};
       <div class="pl rv${his ? " bd" : ""}"><div data-src="rv"><div class="du-nm"><span class="nmt">${st.net ? foe() : T("Banca", "House")}</span><span class="tag line" id="duTagRv"></span></div>${tt(hisT)}<div class="num odo" id="duRv"></div></div>${his ? `<span class="av du-bd" id="duBdRv"></span>` : A.icon(RV_CHIP, "av")}</div>
       <div class="bal"><span><i id="duBal"></i></span></div>
       <div class="cuenta" id="duCuenta"></div></div>`);
-    if (SO) { SO.badge($("duBdMe"), { w: 80 }); if (his) SO.badge($("duBdRv"), { w: 80, other: true, t: his.t, marco: his.marco, icon: his.icon }); }
+    if (SO) { SO.badge($("duBdMe"), { w: 80 }); if (his) SO.badge($("duBdRv"), { w: 80, other: true, t: his.t, marco: his.marco, icon: his.icon, lvl: his.lvl, fondo: his.fondo, mat: his.mat }); }
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Rendirse", "Give up")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
     add("duPins", "du-pins du-st", `<svg aria-hidden="true"><line class="me"></line><line class="rv"></line></svg>`);

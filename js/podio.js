@@ -119,7 +119,7 @@ window.AIQ = window.AIQ || {};
     if (!root || !A.socio) return;
     /* la columna de la chapa mide lo mismo en todas las filas y en la cabecera (con o sin chapa): los nombres quedan alineados */
     const board = root.closest(".pd-board"), onsize = w => { if (board) board.style.setProperty("--bdw", w); };
-    root.querySelectorAll(".lb-bd[data-n]").forEach(el => { if (el.firstChild) return; const r = (rows || []).find(x => x && x._n === +el.dataset.n), st = styleOf(r); if (!st) return; A.socio.badge(el, st.me ? { w: 80, onsize } : { w: 80, other: true, t: st.t, marco: st.marco, icon: st.icon, onsize }); });
+    root.querySelectorAll(".lb-bd[data-n]").forEach(el => { if (el.firstChild) return; const r = (rows || []).find(x => x && x._n === +el.dataset.n), st = styleOf(r); if (!st) return; A.socio.badge(el, st.me ? { w: 80, onsize } : { w: 80, other: true, t: st.t, marco: st.marco, icon: st.icon, lvl: st.lvl, fondo: st.fondo, mat: st.mat, onsize }); });
   }
   const num = (rows, from) => (rows || []).map((r, k) => (r ? Object.assign(r, { _n: from + k }) : r));
   /* una pagina de la lista: siempre 5 filas (las que faltan, huecos), asi el panel nunca cambia de alto al pasar paginas */
@@ -220,7 +220,7 @@ window.AIQ = window.AIQ || {};
   function cards(root, rows) {
     if (!A.socio) return;
     root.querySelectorAll(".pd-card[data-n]").forEach(el => { const r = rows[+el.dataset.n - 1], st = styleOf(r); if (!st) return;
-      A.socio.mount(el, st.me ? { w: 192, nof: true } : { w: 192, other: true, name: r.name, lvl: st.lvl, t: st.t, marco: st.marco, icon: st.icon, title: st.title }); });
+      A.socio.mount(el, st.me ? { w: 192, nof: true } : { w: 192, other: true, name: r.name, lvl: st.lvl, t: st.t, marco: st.marco, icon: st.icon, title: st.title, carta: st.carta, mat: st.mat }); });
   }
   function wirePager() {
     const pv = $("pdPrev"), nx = $("pdNext"), me = $("pdMe");

@@ -1,0 +1,89 @@
+/* ---------------------------------------------------------------- EL CAMINO DEL SOCIO (js/camino.js)
+   La pantalla del hub (espacio de diseno 1280 x 720, como la tienda y los retos: gx-stage con --k, cabecera .bq-head) y la carta que sale del
+   mazo al subir de nivel. Letra minima de la Deck: 16 px Silkscreen y 18 px Jersey. Todo el pixel art, a escala entera (js/camino.js fitCv). */
+
+.cm-screen { z-index: 1; }
+.cm-grid { grid-template-rows: auto minmax(0, 1fr); row-gap: 14px; }
+.cm-left { grid-row: 2; grid-column: 1 / 5; min-width: 0; min-height: 0; }
+.cm-right { grid-row: 2; grid-column: 5 / 13; min-width: 0; min-height: 0; }
+
+/* ---------- tu carta y tu sitio */
+.cm-me { height: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto auto auto minmax(0, 1fr); column-gap: 16px; row-gap: 10px; align-content: start; padding: 18px 18px 16px 24px; }
+.cm-card { grid-row: 1; grid-column: 1; display: block; }
+.cm-who { grid-row: 1; grid-column: 2; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.cm-who .gx-t-m { font-size: 30px; color: var(--gx-ink); text-shadow: none; overflow-wrap: anywhere; }
+.cm-wp { margin: 0; font-size: 19px; line-height: 1.05; color: var(--gx-ink-2); text-wrap: pretty; }
+.cm-dl { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 0; font-size: 19px; line-height: 1.05; }
+.cm-dl dt { font-family: var(--mono); font-size: 16px; text-transform: uppercase; letter-spacing: .04em; color: var(--gx-gold-lo); padding-top: 2px; }
+.cm-dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.cm-nr { grid-column: 1 / -1; margin: 0; font-size: 18px; line-height: 1.05; color: var(--gx-ink-2); }
+.cm-prog { grid-column: 1 / -1; display: grid; gap: 6px; }
+.cm-pl { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 18px; color: var(--gx-ink-2); }
+.cm-pl b { font-family: var(--mono); font-weight: 400; font-size: 16px; color: #ffd98a; background: #16241c; padding: 3px 6px 2px; }
+.cm-prog .ck-bar { position: relative; display: block; height: 18px; background: #d8cba8; box-shadow: inset 0 0 0 2px var(--gx-ink); overflow: hidden; }
+.cm-prog .ck-bar i { position: absolute; left: 2px; top: 2px; bottom: 2px; max-width: calc(100% - 4px); background: repeating-linear-gradient(90deg, var(--gx-gold) 0 10px, var(--gx-gold-hi) 10px 12px); }
+.cm-nx { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 20px; line-height: 1.05; }
+.cm-nx .ck-fi { flex: none; margin: 0; }
+.cm-me #cmDress { grid-column: 1 / -1; align-self: end; }
+
+/* ---------- el camino, de serie en serie */
+.cm-road { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 14px 18px 12px; }
+.cm-bar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 2px dashed var(--gx-paper-lo); }
+.cm-tt { display: grid; gap: 4px; min-width: 0; }
+.cm-tt b { font-family: var(--serif); font-weight: 400; font-size: 32px; line-height: .95; color: var(--gx-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cm-sds { display: flex; gap: 4px; }
+.cm-sd { width: 30px; height: 30px; margin: 0; padding: 0; border: 0; cursor: pointer; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-ink-2); background: #efe2bf; box-shadow: inset 0 0 0 2px #cdb67e; }
+.cm-sd.got { color: var(--gx-ink); background: #f5d27a; box-shadow: inset 0 0 0 2px #a8782a; }
+.cm-sd.on { color: #fff3d6; background: var(--gx-ink); box-shadow: none; }
+.cm-sd:hover, .cm-sd.pad-hov { filter: brightness(1.06); }
+.cm-sd:focus { outline: none; }
+.cm-sd:focus-visible, html[data-input="pad"] .cm-sd:focus { box-shadow: 0 0 0 3px var(--gx-red); }
+.cm-nodes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 10px 12px; min-height: 0; }
+.cm-n { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: 6px; min-width: 0; min-height: 0; padding: 6px 4px 8px; background: rgba(22, 36, 28, .06); box-shadow: inset 0 0 0 2px rgba(22, 36, 28, .12); }
+.cm-n.got { background: rgba(245, 166, 35, .12); box-shadow: inset 0 0 0 2px rgba(196, 106, 27, .35); }
+.cm-n.cur { background: rgba(216, 40, 63, .1); box-shadow: inset 0 0 0 3px var(--gx-red); }
+.cm-n.nx { box-shadow: inset 0 0 0 2px var(--gx-ink), inset 0 0 0 4px #f5d27a; }
+.cm-pill { font-family: var(--mono); font-size: 16px; line-height: 1; padding: 4px 8px 3px; color: var(--gx-ink); background: #efe2bf; box-shadow: inset 0 0 0 2px #cdb67e; }
+.cm-n.got .cm-pill { background: #f5d27a; box-shadow: inset 0 0 0 2px #a8782a; }
+.cm-n.cur .cm-pill { color: #fff3d6; background: var(--gx-red); box-shadow: none; }
+.cm-n.m10 .cm-pill { color: #ffe39a; background: #4a1430; box-shadow: none; }
+.cm-art { position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; }
+.cm-art canvas { display: block; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(2, 6, 4, .45)); }
+.cm-viva { position: absolute; right: 4px; top: 0; font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; color: #c46a1b; }
+.cm-rw { display: grid; gap: 3px; justify-items: center; align-content: start; width: 100%; min-width: 0; height: 74px; }   /* sitio para tres lineas en todas: las cartas quedan a la misma escala y a la misma altura */
+.cm-b { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; font-family: var(--sans); font-size: 18px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--gx-ink); }
+.cm-b .ck-fi.sm { width: 18px; height: 18px; margin: 0 2px 0 0; vertical-align: 0; }
+.cm-b.f { color: var(--gx-gold-lo); }
+.cm-b.t { color: #ffd98a; background: #2a1e14; padding: 3px 5px 2px; }
+.cm-b.c { color: #ffe39a; background: #8f1426; padding: 3px 5px 2px; }
+.cm-b.b { color: #16243a; background: #cfe0f6; padding: 3px 5px 2px; }
+.cm-b.r { color: #fff3d6; background: var(--gx-ink); padding: 3px 5px 2px; }
+.cm-ft { margin: 0; font-size: 18px; line-height: 1.05; color: var(--gx-ink-2); text-align: center; }
+
+/* ---------- la carta del mazo (subida de nivel): encima de todo, sin tapar al crupier mas de lo justo */
+.cm-rv { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; pointer-events: auto; }
+.cm-rv-dim { position: absolute; inset: 0; background: rgba(2, 6, 4, .84); opacity: 0; transition: opacity .25s; }
+.cm-rv.on .cm-rv-dim { opacity: 1; }
+.cm-rv.out { opacity: 0; transition: opacity .3s; }
+.cm-rv-in { position: relative; display: grid; justify-items: center; gap: 14px; }
+.cm-rv-ey { font-size: 20px; color: #ffd98a; text-shadow: 0 2px 0 #050b08; padding: 6px 12px 5px; background: #16241c; box-shadow: inset 0 0 0 2px #a8782a; opacity: 0; transition: opacity .2s .5s; }
+.cm-rv.in .cm-rv-ey { opacity: 1; }
+.cm-rv-st { position: relative; display: grid; place-items: center; perspective: 900px; }
+.cm-rv-flip { position: relative; transform-style: preserve-3d; transform: translateY(-60vh) rotateY(180deg) scale(.7); transition: transform .5s cubic-bezier(.2, .9, .3, 1); }
+.cm-rv.in .cm-rv-flip { transform: translateY(0) rotateY(180deg) scale(1); }
+.cm-rv.open .cm-rv-flip { transform: rotateY(0deg) scale(1.04); transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); }
+.cm-rv.seal .cm-rv-flip { transform: rotateY(0deg) scale(1); }
+.cm-rv-f { display: block; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.cm-rv-f.bk { position: absolute; left: 0; top: 0; transform: rotateY(180deg); }
+.cm-rv-f.bk canvas { display: block; image-rendering: pixelated; }
+.cm-rv-pv { position: absolute; image-rendering: pixelated; opacity: 0; transition: transform .4s, opacity .3s; }
+.cm-rv.in .cm-rv-pv { opacity: 1; }
+.cm-rv.in .cm-rv-pv:nth-child(1) { transform: translate(-38%, -5%); }   /* sin girar: el pixel art nunca se gira */
+.cm-rv.in .cm-rv-pv:nth-child(2) { transform: translate(-19%, -2.5%); }
+.cm-rv-sl { position: absolute; right: -28px; top: -18px; z-index: 2; font-family: var(--serif); font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-red); padding: 6px 12px 4px; background: rgba(246, 239, 220, .94); box-shadow: inset 0 0 0 3px var(--gx-red); transform: rotate(-12deg) scale(2.2); opacity: 0; transition: transform .25s cubic-bezier(.2, 2, .4, 1), opacity .15s; }
+.cm-rv.seal .cm-rv-sl { transform: rotate(-12deg) scale(1); opacity: 1; }
+.cm-rv-loot { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 560px; }
+.cm-rv-loot .cm-b { font-size: 22px; padding: 5px 9px 4px; color: #fff3d6; background: #16241c; box-shadow: inset 0 0 0 2px #f5d27a; opacity: 0; transform: scale(.4); transition: transform .3s cubic-bezier(.2, 2, .4, 1), opacity .15s; }
+.cm-rv-loot .cm-b.f { color: #ffd98a; }
+.cm-rv-loot .cm-b.on { opacity: 1; transform: none; }
+html.reduce-motion .cm-rv-flip, html.reduce-motion .cm-rv-sl, html.reduce-motion .cm-rv-loot .cm-b, html.reduce-motion .cm-rv-pv { transition: none; }
