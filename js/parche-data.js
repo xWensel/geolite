@@ -34,7 +34,7 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
-      id: "__VER__",
+      id: "0.3.195",
       name: L("Insignias de la casa", "House badges", "Insignes de la maison", "Insígnias da casa", "Abzeichen des Hauses", "Insegne della casa", "", "赌场徽记", "하우스 휘장", "ハウスの記章", "Знаки заведения", "Insygnia kasyna"),
       date: "2026-10-23",
       summary: L("Cada categoría del Club tiene ahora su insignia, de la puerta al despacho: el catalejo del Mirón, la llave del Socio, la hucha del Accionista o la corona de la Leyenda.",
@@ -53,7 +53,7 @@ window.AIQ = window.AIQ || {};
         { id: "insignias", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新内容", "새 기능", "新要素", "Новое", "Nowość"),
           title: L("El Club de la casa", "The House Club", "Le Club de la maison", "O Clube da casa", "Der Club des Hauses", "Il Club della casa", "", "赌场俱乐部", "하우스 클럽", "ハウスクラブ", "Клуб заведения", "Klub kasyna"),
           entries: [
-            E(L("Quince insignias", "Fifteen badges", "Quinze insignes", "Quinze insígnias", "Fünfzehn Abzeichen", "Quindici insegne", "", "十五个徽记", "휘장 15개", "15の記章", "Пятнадцать знаков", "Piętnaście insygniów"), "new", "__VER__", [
+            E(L("Quince insignias", "Fifteen badges", "Quinze insignes", "Quinze insígnias", "Fünfzehn Abzeichen", "Quindici insegne", "", "十五个徽记", "휘장 15개", "15の記章", "Пятнадцать знаков", "Piętnaście insygniów"), "new", "0.3.195", [
               L("Al llegar a cada categoría ganas su insignia. Se pone como icono de tu chapa (Tu carta › Objetos, «De tu categoría»), sale junto a tu categoría en el camino y en la carta del mazo cuando subes, y el Perfil tiene la escalera entera en «Insignias».",
                 "Reaching each rank earns its badge. Use it as your badge icon (Your card › Objects, “From your rank”); it also shows next to your rank on the path and on the deck card when you rank up, and the Profile has the full ladder under “Badges”.",
                 "Chaque catégorie atteinte te donne son insigne. Mets-le comme icône de ton badge (Ta carte › Objets, « De ta catégorie ») ; il s'affiche aussi à côté de ta catégorie sur le parcours et sur la carte du paquet quand tu montes, et le Profil a l'échelle complète dans « Insignes ».",
