@@ -34,6 +34,42 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.192",
+      name: L("Tres reglas con cara nueva", "Three rules, new faces", "Trois règles, nouveaux visages", "Três regras de cara nova", "Drei Regeln mit neuem Gesicht", "Tre regole con un volto nuovo", "", "三条规则换新颜", "새 얼굴의 세 규칙", "3つのルールが新しい顔に", "Три правила в новом облике", "Trzy zasady w nowej odsłonie"),
+      date: "2026-10-23",
+      summary: L("Contrarreloj, Vendaval y Silencio estrenan icono, hecho con las piezas del juego.",
+                "Against the clock, Gale and Silence get new icons, made from the game's own pieces.",
+                "Contre la montre, Rafale et Silence ont une nouvelle icône, faite avec les pièces du jeu.",
+                "Contra o relógio, Vendaval e Silêncio ganham ícones novos, feitos com as peças do jogo.",
+                "Gegen die Uhr, Sturmböe und Stille bekommen neue Symbole aus den Teilen des Spiels.",
+                "Contro il tempo, Bufera e Silenzio hanno icone nuove, fatte con i pezzi del gioco.",
+                "",
+                "「争分夺秒」「狂风」「沉默」换上了用游戏自身部件做的新图标。",
+                "시간과의 싸움, 질풍, 침묵에 게임의 조각으로 만든 새 아이콘이 생겼습니다.",
+                "「時間との勝負」「疾風」「静寂」に、ゲームのパーツで作った新しいアイコン。",
+                "«Наперегонки со временем», «Шквал» и «Тишина» получили новые значки из деталей самой игры.",
+                "„Wyścig z czasem”, „Wichura” i „Cisza” dostały nowe ikony z elementów gry."),
+      chapters: [
+        { id: "reglas", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Retos de regla", "Rule challenges", "Défis de règle", "Desafios de regra", "Regel-Herausforderungen", "Sfide di regola", "", "规则挑战", "규칙 도전", "ルールのチャレンジ", "Испытания-правила", "Wyzwania z zasadą"),
+          entries: [
+            E(L("Iconos nuevos", "New icons", "Nouvelles icônes", "Ícones novos", "Neue Symbole", "Nuove icone", "", "新图标", "새 아이콘", "新しいアイコン", "Новые значки", "Nowe ikony"), "change", "0.3.192", [
+              L("Contrarreloj es el cronómetro del juego a toda prisa; Vendaval, ráfagas de viento empujando tu chincheta; y Silencio, la brújula bajo la señal de prohibido.",
+                "Against the clock is the game's stopwatch in a hurry; Gale, gusts of wind pushing your pin; and Silence, the compass under a no-entry sign.",
+                "Contre la montre, c'est le chronomètre du jeu pressé ; Rafale, des bourrasques qui poussent ton épingle ; et Silence, la boussole sous un panneau d'interdiction.",
+                "Contra o relógio é o cronômetro do jogo com pressa; Vendaval, rajadas de vento empurrando seu alfinete; e Silêncio, a bússola sob o sinal de proibido.",
+                "Gegen die Uhr ist die Stoppuhr des Spiels in Eile; Sturmböe sind Windstöße, die deinen Pin wegschieben; und Stille ist der Kompass unter einem Verbotsschild.",
+                "Contro il tempo è il cronometro del gioco di corsa; Bufera, raffiche di vento che spingono il tuo pin; e Silenzio, la bussola sotto il segnale di divieto.",
+                "",
+                "「争分夺秒」是游戏里飞奔的秒表；「狂风」是吹着你图钉的阵阵狂风；「沉默」是禁止标志下的指南针。",
+                "시간과의 싸움은 서두르는 게임의 스톱워치, 질풍은 핀을 밀어내는 돌풍, 침묵은 금지 표시 아래의 나침반입니다.",
+                "「時間との勝負」は急ぐゲームのストップウォッチ、「疾風」はピンを押し流す突風、「静寂」は禁止マークの下のコンパスです。",
+                "«Наперегонки со временем» — спешащий секундомер игры, «Шквал» — порывы ветра, сдувающие твою булавку, а «Тишина» — компас под запрещающим знаком.",
+                "„Wyścig z czasem” to pędzący stoper z gry, „Wichura” to podmuchy wiatru spychające twoją pinezkę, a „Cisza” to kompas pod znakiem zakazu.")]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.191",
       name: L("Una sola casa", "One house style", "Une seule maison", "Uma só casa", "Ein Haus, ein Stil", "Una sola casa", "", "统一的家风", "하나의 하우스 스타일", "ひとつの館の流儀", "Единый стиль дома", "Jeden styl domu"),
       date: "2026-10-23",
