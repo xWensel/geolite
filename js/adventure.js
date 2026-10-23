@@ -1295,7 +1295,7 @@ window.AIQ = window.AIQ || {};
       if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => A.casa.premio(3), 1100); } }   // +2 provisiones para el modo infinito
       if (!run.practice && A.clubRetos) A.clubRetos.ev("round", { n: roundNo() + 1, boss });   // entrega 3 del Club: rondas y jefes para los retos
       A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); if (!run.practice) A.profile.get().adv.boss++; }
-      A.sfx.stamp(); setTimeout(A.sfx.clear, 300);
+      A.sfx.stamp(); setTimeout(A.sfx.clear, 300); if (A.publico) A.publico("ronda", 300);   // v0.3.201: la sala aplaude la ronda superada
       if (boss) A.music.moment(run.act + 1 === 3 && !run.won ? "win" : run.inf ? "inf" : "a" + Math.min(3, run.act + 2));   // jefe derrotado: su tema se va; entra la cancion del acto que viene (o la de la victoria)
       const actDone = boss, winAct = actDone ? run.act + 1 : 0;
       if (actDone) { const flawless = run.livesLostAct === 0; A.ach.emit("adv", { kind: "act", act: winAct, flawless, asc: run.asc, daily: !!run.board }); run.livesLostAct = 0; if (!run.practice) A.profile.get().adv.bestAct = Math.max(A.profile.get().adv.bestAct || 0, winAct); }

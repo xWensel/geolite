@@ -668,7 +668,7 @@
   function startLevel_(idx) {
     if (!S.run && A.dealer && A.dealer.noteClassic) A.dealer.noteClassic();     // juegas al Clasico: al volver a la portada, el crupier lo comenta
     if (!S.run) A.music.moment("classic");                                       // la musica del Clasico: las de la portada y las del acto I (js/audio.js)
-    document.body.classList.remove("title-on"); S.level = idx; S.qs = lv().questions(); S.qi = 0; S.levelScore = 0; S.log = []; S.streak = 0; S.hits = 0; S.phase = "intro"; S.runMax0 = S.runMax;   // maximo acumulado al empezar el nivel (Reintentar vuelve a el)
+    document.body.classList.remove("title-on"); S.level = idx; S.qs = lv().questions(); S.qi = 0; S.levelScore = 0; S.log = []; S.streak = 0; S.hits = 0; if (A.casa.racha) A.casa.racha(0); S.phase = "intro"; S.runMax0 = S.runMax;   // maximo acumulado al empezar el nivel (Reintentar vuelve a el)
     closeDialog(); $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden");
     chrome(true); $("factText").textContent = ""; odoNow($("scLevel"), 0); updateHud();
     showIntro(nextQuestion);
@@ -924,11 +924,20 @@
       if (!still()) return; A.sfx.reveal(tier);
       if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); A.casa.destello(2); }          // la diana pega: golpe grave, un temblor y la lampara que sube
       else if (tier === 0 || tier === 5) A.casa.baja(tier === 0 && prevStreak >= 2 ? 1 : 0.7);    // fallo: la lampara baja un momento
+      /* v0.3.201 (Bloque F, paso 4): el mundo responde a tu racha (la sala, la musica y la pila de fichas: js/casa.js) y el publico de la sala
+         reacciona (js/audio.js): aplauso en la diana, «oooh» si te quedas a nada, vitores al llegar a racha 5 y un «ooow» si se rompe una de 3 o mas */
+      A.casa.racha(S.streak || 0, { fallo: !hit, antes: prevStreak });
+      if (A.publico) {
+        if (tier === 4 && guess && cxr.level !== 3) A.publico("diana", 120); else if (tier === 3) A.publico("porpoco", 80);   // con el premio gordo, la sala aplaude una vez, al final
+        if (hit && S.streak === 5) A.publico("racha5", 900);
+        if (!hit && prevStreak >= 3) A.publico("rota", 250);
+      }
     }, 480 + HS);
     if (up) setTimeout(() => { if (still() && A.sfx.flag) A.sfx.flag(fl.length); }, FLAG_AT);
     if (cxr.level) setTimeout(() => {
       if (!still()) return;
       A.casa.premio(cxr.level);                                                  // la casa: jackpots, un temblor por golpe que crece y la vibracion (js/casa.js)
+      if (cxr.level === 3 && A.publico) A.publico("jackpot", 2 * JP_MS + 600);     // el premio gordo: la sala aplaude y vitorea tras el tercer golpe
     }, JP_AT);
     if (adv && adv.coins) coinFx(adv.coins);
     /* la caja de la racha (Aventura y Reto diario): "on" se enciende o sube de nivel, "broken" se agrieta (perdiste una racha de 2 o mas), "off" se queda

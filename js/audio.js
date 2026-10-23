@@ -74,6 +74,7 @@ window.AIQ = window.AIQ || {};
       s.frequency.value = 0.55; g1.gain.value = 7; f.frequency.value = 6.2; g2.gain.value = 2; s.connect(g1).connect(wobN); f.connect(g2).connect(wobN); s.start(); f.start(); }
     /* las fichas y cartas de verdad (las mismas del ambiente): se igualan al cargar */
     fetch(A.media("assets/sfx/sala.mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { NORM = normSala(b); sala = b; }).catch(() => { /* sin el archivo, la mano sobre el fieltro las sustituye */ });
+    pubCarga();                                                       // el publico de la sala (v0.3.201), en segundo plano
     /* pestana oculta: se suspende el audio y se pausa la cancion (si no, seguiria avanzando en silencio y encadenando pistas sin que nadie las oiga) */
     let hidPlay = [];
     document.addEventListener("visibilitychange", () => {
@@ -337,7 +338,7 @@ window.AIQ = window.AIQ || {};
   const trimOf = l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20), TRIM_CL = LUFS_CL.map(trimOf), TRIM_BA = LUFS_BA.map(trimOf);
   const BEAT0 = () => (isCl() ? 60 : 51);                              // primer pulso (ms): las de antes, 59-62 ms; la banda, 50-53 ms (medido en los mp3)
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
-  let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
+  let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false, en = false;
   const decks = [], recent = [];                                        // dos platos: mientras uno entra, el otro sale
 
   function deck(k) {
@@ -367,7 +368,7 @@ window.AIQ = window.AIQ || {};
   const playAll = d => d.els.forEach(e => { if (e.getAttribute("src")) e.play().catch(() => {}); });
   const pauseAll = d => d.els.forEach(e => e.pause());
   /* que capas suenan: portada [0], partida [0, 1], ultimos segundos [0, 1, 2] */
-  const want = () => (isCl() ? [1, 0, 0] : mode === 2 ? [1, 1, 1] : mode === 1 ? [1, 1, 0] : [1, 0, 0]);   // las de antes: una sola pista
+  const want = () => (isCl() ? [1, 0, 0] : mode === 2 ? [1, 1, 1] : mode === 1 ? [1, 1, en ? 1 : 0] : [1, 0, 0]);   // las de antes: una sola pista. v0.3.201: con racha de 3, la tension entra tambien en la partida
   /* sube o baja las capas. at = "pulso": la capa que entra lo hace justo en el siguiente pulso de la cancion (el bombo cae a tiempo);
      la que sale se va en un tercio de segundo. Sin musica sonando, de inmediato */
   function layers(how) {
@@ -401,11 +402,13 @@ window.AIQ = window.AIQ || {};
   }
   /* cambio de cancion con su aviso (js/jukebox.js) */
   function change(i, how, at) { useTrack(i, how, at); if (A.music.onChange) A.music.onChange(i); }
-  const musLevel = () => MUS_BASE * A.audio.vol.music * (bar && !muf ? 0.7 : 1);
-  /* el timbre de la musica segun donde estes: amortiguada del todo (pausa, tu nombre, salir) o "desde la barra" (Campamento) */
+  const musLevel = () => MUS_BASE * A.audio.vol.music * (bar && !muf ? 0.7 : 1) * (en && isCl() && !bar && !muf ? 1.12 : 1);   // las de antes (sin capas), con racha: un punto mas
+  /* el timbre de la musica segun donde estes: amortiguada del todo (pausa, tu nombre, salir) o "desde la barra" (Campamento). Las de antes, que no
+     tienen capas, abren el filtro en los ultimos segundos y con racha */
+  const fcut = () => (muf ? 320 : bar ? 1250 : isCl() && (mode === 2 || en) ? 12500 : 8600);
   function tone() {
     if (!ctx) return; const t = ctx.currentTime;
-    musFilter.frequency.setTargetAtTime(muf ? 320 : bar ? 1250 : isCl() && mode === 2 ? 12500 : 8600, t, muf ? 0.08 : 0.15);   // las de antes: la tension abre el filtro
+    musFilter.frequency.setTargetAtTime(fcut(), t, muf ? 0.08 : 0.15);
     musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel(), t, 0.15);
   }
   A.music = {
@@ -432,6 +435,14 @@ window.AIQ = window.AIQ || {};
       musBus.gain.setTargetAtTime(base * level, t, 0.05); musBus.gain.setTargetAtTime(base, t + ms / 1000, 0.4);
     },
     muffle(on) { muf = !!on; tone(); },
+    /* v0.3.201 (Bloque F, paso 4): la musica sigue tu racha. energia(on): con racha de 3 o mas entra la capa de tension de la cancion (la de los
+       ultimos segundos) en el siguiente pulso, sin cortar, y se queda mientras dure la racha; las de antes, sin capas, se abren un punto.
+       enfria(): un fallo le quita los agudos un momento y vuelve. Solo se llaman al revelar: mientras contestas, la musica no cambia */
+    energia(on) { if (en === !!on) return; en = !!on; tone(); layers("pulso"); },
+    enfria() {
+      if (!ctx || muf || bar) return; const t = ctx.currentTime, f = musFilter.frequency;
+      f.cancelScheduledValues(t); f.setValueAtTime(f.value, t); f.setTargetAtTime(900, t, 0.06); f.setTargetAtTime(fcut(), t + 0.7, 0.35);
+    },
     /* el Campamento: la misma cancion, como si llegara desde la sala */
     room(on) { if (bar === !!on) return; bar = !!on; tone(); },
     /* el momento del juego: "home", "classic", "a1" | "a2" | "a3", "inf", "boss", "win". o.delay: ms hasta que entra el tema del jefe (tras el golpe de su llegada) */
@@ -464,6 +475,26 @@ window.AIQ = window.AIQ || {};
   A.audio.setMusica = v => {
     const nv = v === "clasica" ? "clasica" : "banda"; if (nv === MS) return; MS = A.audio.musica = nv;
     if (ctx && cur >= 0 && A.audio.musicOn && di >= 0 && !decks[di].el.paused) change(cur, "fade"); if (ctx) tone();
+  };
+  /* v0.3.201 (Bloque F, paso 4): EL PUBLICO DE LA SALA. Grabaciones reales de una sala pequena (Freesound, CC0: assets/sfx/publico/LICENCIAS.txt),
+     bajito: es la sala, no un estadio. Cada reaccion tiene la suya (votadas en la maqueta); los «oooh» son cuatro y nunca repiten el anterior;
+     cada vez con un punto distinto de tono, volumen y lado. Nunca abuchean. Van por el bus de efectos (el regulador de Efectos los mueve) y se
+     cargan al arrancar, en segundo plano: nada se descodifica en mitad de una partida. El nivel es el de la maqueta (0 dB): la grabacion a -20 dB
+     en la entrada de la mezcla, con los reguladores de fabrica */
+  const PUB = { diana: ["aplauso_corto"], porpoco: ["oooh_1", "oooh_2", "oooh_3", "oooh_4"], racha5: ["vitores"], rota: ["ooow"], jackpot: ["aplauso_vitores"], ronda: ["aplauso_largo"] };
+  const PUB_G = 0.1 / (0.9 * SFX_K), pubB = {}, pubUlt = {}; let pubIni = false;
+  function pubCarga() {
+    if (pubIni || !ctx) return; pubIni = true;
+    [...new Set(Object.values(PUB).flat())].forEach((n, i) => setTimeout(() => fetch(A.media("assets/sfx/publico/" + n + ".mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { pubB[n] = b; }).catch(() => { /* sin esa grabacion, esa reaccion calla */ }), 400 + i * 120));
+  }
+  A.publico = (k, delay = 0) => {
+    if (!A.audio.sfxOn || !ctx) return; pubCarga();
+    const L = PUB[k]; if (!L) return;
+    let i = 0; if (L.length > 1) { do { i = Math.floor(Math.random() * L.length); } while (i === pubUlt[k]); pubUlt[k] = i; }
+    const b = pubB[L[i]]; if (!b) return;
+    const t = ctx.currentTime + Math.max(0, delay) / 1000, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = b; s.playbackRate.value = 0.96 + Math.random() * 0.08; f.type = "lowpass"; f.frequency.value = 7000; g.gain.value = PUB_G * (0.9 + Math.random() * 0.2);
+    s.connect(f).connect(g); panTo(g, (Math.random() - 0.5) * 0.4).connect(sfxBus); s.start(t);
   };
   A.audio.setSkin = () => {};   // las 22 pistas ya son archivos fijos: el timbre/tempo por skin ya no aplica
   A.audio.state = () => (ctx ? ctx.state : 'none');

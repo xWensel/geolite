@@ -976,6 +976,21 @@ html.reduce-motion .gx-camp .nr-body { scroll-behavior: auto; }
    Los tres se animan desde js/casa.js solo con opacidad y transform */
 #sala canvas.g { will-change: opacity; }
 #sala .charco { position: absolute; inset: 0; opacity: 0; transition: opacity .55s ease; will-change: opacity; } #sala .charco.on { opacity: 1; }   /* v0.3.199: el charco de la lampara (js/casa.js) */
+/* v0.3.201 (Bloque F, paso 4): la sala sigue tu racha (js/casa.js, racha). Ambar en los bordes, un escalon por acierto seguido (hasta 5), solo en la
+   partida y por debajo del HUD: la tierra del centro no cambia. El frio del fallo, un instante. Los paneles se calientan un punto (su capa de luz) */
+#sala .calida, #sala .fria { position: absolute; inset: 0; opacity: 0; pointer-events: none; will-change: opacity; display: none; }
+#app > #sala .calida, #app > #sala .fria { display: block; }
+#sala .calida { background: radial-gradient(ellipse 74% 70% at 50% 52%, rgba(255, 150, 60, 0) 64%, rgba(255, 150, 60, .16) 82%, rgba(255, 140, 50, .42) 100%); transition: opacity .9s ease; }
+#sala .fria { background: radial-gradient(ellipse 72% 68% at 50% 52%, rgba(6, 20, 40, 0) 40%, rgba(6, 20, 40, .75) 100%); }
+html.lz-c1 #app > #sala .calida { opacity: .28; } html.lz-c2 #app > #sala .calida { opacity: .46; } html.lz-c3 #app > #sala .calida { opacity: .64; }
+html.lz-c4 #app > #sala .calida { opacity: .82; } html.lz-c5 #app > #sala .calida { opacity: 1; }
+html.sala-soft #app > #sala .calida { transition: opacity .9s ease; filter: opacity(.6); }
+#app .lz-sup::after { content: ""; position: absolute; inset: 0; background: #ffa848; opacity: 0; }
+html.lz-c1 #app .lz-sup::after { opacity: .06; } html.lz-c2 #app .lz-sup::after { opacity: .12; } html.lz-c3 #app .lz-sup::after { opacity: .18; }
+html.lz-c4 #app .lz-sup::after { opacity: .24; } html.lz-c5 #app .lz-sup::after { opacity: .3; }
+/* la pila de fichas de la racha, junto al dock: fichas de la casa a escala entera */
+#pilaRacha { position: fixed; inset: 0; pointer-events: none; }
+#pilaRacha .pr-f { position: absolute; image-rendering: pixelated; pointer-events: none; }
 #sala .veil { position: absolute; inset: 0; background: #020908; opacity: 0; will-change: opacity; }
 #sala .beam { position: absolute; top: -10%; left: 0; width: 46vw; height: 120%; opacity: 0; will-change: transform, opacity;
   background: linear-gradient(90deg, transparent, rgba(255, 230, 172, .13) 20%, rgba(255, 240, 200, .38) 50%, rgba(255, 230, 172, .13) 80%, transparent); }

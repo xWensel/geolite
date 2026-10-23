@@ -235,6 +235,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
   /* v0.3.55: el sitio en el que estas tambien se oye. En el Campamento la musica llega amortiguada, como desde la sala (js/audio.js) */
   function lugar(k) {
     if (A.music && A.music.room) A.music.room(k === "camp");
+    if (k === "home") racha(0);                                          // fuera de la partida, la racha no sigue encendiendo la sala
     /* v0.3.56: y la sala suena distinto en cada sitio (A.amb, js/audio.js): el salon, la sala que baja la voz mientras piensas, la caja,
        la barra del Campamento y el silencio mientras el jefe esta en la mesa. La Enciclopedia es un aparato: queda fuera de la sala */
     const jefe = k === "intro jefe" || ((k === "play" || k === "intro") && A.music && A.music.where === "boss");
@@ -350,13 +351,88 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(n);
     const top = Math.max(n, o.fuerza | 0), g = gapMs(), LZ = [0.3, 0.46, 0.74];
     /* con cada golpe la lampara sube un punto mas; tras el tercero, el barrido de luz */
-    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); destello(k); if (k === 3) { setTimeout(barrido, 60); } };   // el premio gordo: barrido de luz
+    const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); destello(k); brilla(); if (k === 3) { setTimeout(barrido, 60); } };   // el premio gordo: barrido de luz
     for (let k = 1; k <= n; k++) { if (k === 1) golpe(1); else setTimeout(() => golpe(k), (k - 1) * g); }
   }
   /* perdida: la apuesta que se va. Sonido de perder (o el que traiga quien llama), un temblor seco y la lampara que baja */
   function perdida(o = {}) { if (!o.mudo && A.sfx && A.sfx.lose) A.sfx.lose(); shake(o.fuerza || 1); baja(1); if (A.haptic) A.haptic([40, 20, 40]); }
   /* impacto: un golpe fisico sin premio (un sello, un dado contra la banda, una reliquia que paga) */
   function impacto(n = 1) { shake(Math.max(1, Math.min(3, n | 0))); }
+
+  /* ================================================================ v0.3.201 (Bloque F, paso 4): EL MUNDO RESPONDE A TU RACHA
+     - La sala se calienta un escalon con cada acierto seguido (hasta 5): ambar en los bordes, por debajo del HUD y sin tocar la tierra; los
+       paneles, un punto mas calidos (css/gala.css, html.lz-c1..5). Un fallo la enfria un instante y vuelve donde estaba.
+     - La musica: con racha de 3 se abre (A.music.energia); un fallo le quita los agudos un momento (A.music.enfria).
+     - La mesa: tu racha se apila en fichas junto al dock (hasta 7). Cada acierto pone una; si fallas, la pila se viene abajo; con cada golpe de
+       premio, brillan de abajo arriba. Nada salta ni vuela: son fichas sobre la mesa.
+     Solo al revelar (js/game.js): mientras contestas, nada cambia. Con Movimiento minimo las fichas aparecen y se van sin moverse */
+  let calor = 0, pila = null, fichasN = 0;
+  const PILA_MAX = 7, PILA_COL = ["chip_r", "chip_g", "chip_b"];
+  function racha(n, o = {}) {
+    n = Math.max(0, n | 0); const c = Math.min(5, n), h = document.documentElement.classList;
+    if (c !== calor) { h.remove("lz-c" + calor); calor = c; if (c) h.add("lz-c" + c); }
+    if (A.music && A.music.energia) A.music.energia(n >= 3);
+    if (o.fallo) { frio(); if (A.music && A.music.enfria) A.music.enfria(); }
+    fichas(n, !!o.fallo);
+  }
+  /* el frio del fallo: la penumbra de los bordes se vuelve azul noche un instante (solo opacidad) */
+  function frio() {
+    const k = fuerza(); if (!k || !root) return; const f = root.querySelector(".fria"); if (!f) return;
+    f.animate([{ opacity: 0 }, { opacity: 0.85 * k, offset: 0.18 }, { opacity: 0 }], { duration: 1100, easing: "ease-out" });
+  }
+  /* la pila: fichas de la casa dibujadas al pixel (js/ficha.js, 32 pixeles de arte a escala entera), a la derecha del dock */
+  function pilaMide() {
+    const d = $("dockSh"), r = d && d.getBoundingClientRect(); if (!r || !r.width) return null;
+    const P = Math.max(1, Math.round(r.height / 42)), S = 32 * P, k = Math.min(innerWidth / 1920, innerHeight / 1080);
+    return { x: Math.round(r.right + 16 * k), y: Math.round(r.bottom - S), S, dy: Math.max(2, Math.round(S * 0.16)), k };
+  }
+  function pilaHost() {
+    if (pila && pila.isConnected) return pila;
+    pila = document.createElement("div"); pila.id = "pilaRacha"; pila.setAttribute("aria-hidden", "true");
+    const app = $("app"), ref = root && root.parentNode === app ? root : app.querySelector(":scope > .vignette");
+    app.insertBefore(pila, ref ? ref.nextSibling : app.firstChild); return pila;
+  }
+  function pilaColoca() {
+    if (!pila || !pila.isConnected) return; const m = pilaMide(); if (!m) return;
+    const sx = -Math.max(1, Math.round(3 * m.k)), sy = Math.max(1, Math.round(5 * m.k));   // su sombra, lejos de la lampara de la mesa (arriba, en el centro)
+    pila.style.filter = "drop-shadow(" + sx + "px " + sy + "px 0 rgba(2, 6, 4, .5))";
+    [...pila.children].forEach((c, i) => { c.style.width = c.style.height = m.S + "px"; c.style.left = m.x + "px"; c.style.top = (m.y - i * m.dy) + "px"; c.style.zIndex = i + 1; });
+  }
+  function ficha(i) {
+    const c = document.createElement("canvas"), N = 32; c.width = c.height = N; c.className = "pr-f";
+    try { c.getContext("2d").putImageData(new ImageData(A.ficha.px(N, PILA_COL[i % 3]), N, N), 0, 0); } catch (e) { /* sin dibujo, sin ficha */ }
+    return c;
+  }
+  function fichas(n, fallo) {
+    const want = Math.min(PILA_MAX, n);
+    if (want > fichasN) {
+      const host = pilaHost(), m = pilaMide(); if (!m) return;
+      for (let i = fichasN; i < want; i++) host.appendChild(ficha(i));
+      const nuevas = want - fichasN; fichasN = want; pilaColoca();
+      if (!quieto()) {                                                   // la ultima se posa sobre la pila (las demas, si venias de otra ronda, ya estaban)
+        const ult = host.lastElementChild, up = -Math.round(14 * m.k), dn = Math.max(1, Math.round(m.k));
+        ult.animate([{ transform: "translateY(" + up + "px)", opacity: 0.4 }, { transform: "none", opacity: 1, offset: 0.7 }, { transform: "translateY(" + dn + "px)", offset: 0.85 }, { transform: "none" }], { duration: 230, easing: "cubic-bezier(.3, .7, .4, 1)" });
+      }
+      if (nuevas === 1 && A.sfx && A.sfx.coin) setTimeout(() => A.sfx.coin(Math.min(1, (want - 1) * 0.15)), 160);
+      return;
+    }
+    if (want < fichasN) {                                               // la racha se ha roto (o se empieza de cero): la pila se viene abajo
+      const host = pila; fichasN = 0; pila = null; if (!host) return;
+      if (!fallo || quieto() || !host.children.length) { host.remove(); return; }
+      const m = pilaMide() || { k: 1 }, base = host.firstElementChild ? parseFloat(host.firstElementChild.style.top) : 0;
+      [...host.children].forEach((c, i) => {
+        const dx = Math.round(((i % 2 ? 1 : -1) * (6 + i * 5) + (Math.random() - 0.5) * 8) * m.k), dy = Math.round(base - parseFloat(c.style.top) + (4 + Math.random() * 6) * m.k);
+        const to = "translate(" + dx + "px, " + dy + "px)";
+        c.animate([{ transform: "none", opacity: 1 }, { transform: to, opacity: 1, offset: 0.55 }, { transform: to, opacity: 0 }], { duration: 520 + i * 30, delay: i * 18, easing: "cubic-bezier(.4, 0, .7, 1)", fill: "forwards" });
+      });
+      setTimeout(() => host.remove(), 700 + host.children.length * 50);
+    }
+  }
+  /* con cada golpe de premio, la pila brilla de abajo arriba (solo luz: no se mueve) */
+  function brilla() {
+    if (!pila || !pila.isConnected || quieto()) return;
+    [...pila.children].forEach((c, i) => c.animate([{ filter: "brightness(1)" }, { filter: "brightness(1.7)", offset: 0.35 }, { filter: "brightness(1)" }], { duration: 320, delay: i * 40, easing: "ease-out" }));
+  }
 
   /* ================================================================ ajuste y arranque */
   function ambiente(v) {
@@ -374,7 +450,7 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
   function init(m, how) {
     map = m || null;
     root = document.createElement("div"); root.id = "sala"; root.setAttribute("aria-hidden", "true");
-    root.innerHTML = '<i class="charco"></i><canvas class="d"></canvas><canvas class="d"></canvas><canvas class="g"></canvas><i class="veil"></i><i class="beam"></i>';
+    root.innerHTML = '<i class="charco"></i><canvas class="d"></canvas><canvas class="d"></canvas><canvas class="g"></canvas><i class="calida"></i><i class="fria"></i><i class="veil"></i><i class="beam"></i>';
     cvs = [...root.querySelectorAll("canvas.d")]; glowCv = root.querySelector("canvas.g"); veil = root.querySelector(".veil"); beam = root.querySelector(".beam");
     lastKind = kind(); root.classList.toggle("mute", TAPETE(lastKind)); coloca(lastKind); lugar(lastKind);
     /* que mirar: cambios de pantalla (#layer, #dlg, #intro), las piezas que entran y salen en partida (#leftCol, el ticket del marcador) y el tamano */
@@ -382,12 +458,12 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     [["layer", { attributes: true, attributeFilter: ["class"], childList: true }], ["dlg", { attributes: true, attributeFilter: ["class"], childList: true }], ["intro", { attributes: true, attributeFilter: ["class"], childList: true }],
       ["leftCol", { childList: true }], ["ledgerSh", { childList: true }]].forEach(([id, o]) => { const el = $(id); if (el) mo.observe(el, o); });
     mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });                                      // cx-on: se abre o se cierra la Enciclopedia
-    addEventListener("resize", () => { sig = ""; mira(); });
+    addEventListener("resize", () => { sig = ""; mira(); pilaColoca(); });
     /* el compas: al empezar, parar o saltar una cancion (A.music.onBeat) y, cada dos segundos, por si el reproductor se ha ido o se ha quitado la musica */
     if (A.music) A.music.onBeat = compas;
     setInterval(compas, 2000); document.addEventListener("visibilitychange", () => { if (!document.hidden) compas(); });
     set(how || "full");
   }
 
-  A.casa = { init, set, mira, kind, premio, perdida, impacto, luz, destello, carrera, ambiente, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
+  A.casa = { init, set, mira, kind, racha, brilla, premio, perdida, impacto, luz, destello, carrera, ambiente, baja, barrido, acto, vario, compas, get MQ_P() { return mqP; }, get MQ_O() { return mqO; }, get modo() { return mode; }, get noche() { return act; }, _regla: () => rule() };   // _regla: para las pruebas
 })(window.AIQ);
