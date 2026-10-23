@@ -2,7 +2,7 @@
    y la linea del Club en la ficha de socio del Perfil. Letra minima de la Deck: 16 px Silkscreen (--mono) y 18 px Jersey (--sans). */
 
 /* ---------- el recibo: Club de la casa, +exp, la barra de nivel y lo que paga (cartulina lisa, como el ticket de caja) */
-.gx-vd-club { padding: 14px 16px 16px; max-width: 360px; box-shadow: inset 0 -4px 0 var(--gx-paper-lo), 0 6px 0 rgba(2, 6, 4, .55); }
+.gx-vd-club { padding: 14px 16px 16px; max-width: none; align-self: stretch; box-shadow: inset 0 -4px 0 var(--gx-paper-lo), 0 6px 0 rgba(2, 6, 4, .55); }
 .gx-vd-club::before, .gx-vd-club::after { display: none; }
 .du-club .gx-paper { padding: 14px 16px 16px; }
 .du-club .gx-paper::before, .du-club .gx-paper::after { display: none; }

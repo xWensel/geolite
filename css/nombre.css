@@ -47,7 +47,7 @@
 .nm.skipped .nm-card { animation: nm-card-drop .5s ease-in forwards; }
 @keyframes nm-card-drop { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(70px) rotate(4deg); } }
 .nm-card > .mqw { --mqi: -12px; --mqb: 7px; --mqr: -2px; }                  /* la marquesina de la casa (A.bulbs) alrededor del cartel */
-.nm.signed .nm-card .mq-lit { animation-duration: .38s; }                    /* al firmar corren mas deprisa */
+.nm.signed .nm-card .mq-lit { animation: mq-ch .38s linear infinite; animation-delay: calc(var(--mq-k, 0) * -.38s / 3); }                    /* al firmar corren mas deprisa */
 
 .nm-paper { display: grid; grid-template-columns: 236px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 0; row-gap: 12px; padding: 18px 22px 20px 0; min-height: 168px; }
 .nm-paper::before, .nm-paper::after { z-index: 0; }

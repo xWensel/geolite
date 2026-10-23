@@ -125,6 +125,7 @@ window.AIQ = window.AIQ || {};
     if (A.geoLogo) A.geoLogo.mount(document.querySelector("#dlg .hh-logo"));   // el logo vivo: la Tierra gira bajo la chistera (js/geologo.js)
     wireTools(); A.podio.wire(); if (A.parche) A.parche.wire();                                      // Clasificacion: js/podio.js
     mcFit(); fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
+    if (A.relieve) A.relieve.alinea();                                // v0.3.199: las cartas laterales sobre las columnas de sus placas
     if (A.salir) A.salir.wire();                                      // salir del juego: js/salir.js
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
@@ -600,11 +601,14 @@ window.AIQ = window.AIQ || {};
   }
 
   function screen(id) {
+    const de = C().S.hub;
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
+    const naipe = A.relieve ? A.relieve.antes(id, de) : null;             // v0.3.199 (Bloque F, paso 3): la pantalla se reparte como un naipe desde su pieza (js/relieve.js)
     ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open(), camino: () => A.camino.open() }[id] || home)();
+    if (naipe) A.relieve.despues(naipe, id);
     C().refreshSkinBits && C().refreshSkinBits();
     if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva
   }

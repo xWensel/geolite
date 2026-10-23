@@ -9,11 +9,11 @@ window.AIQ = window.AIQ || {};
   A.MAPSTYLES = A.MAPSTYLES || {};
 
   A.MAPSTYLES.casino = {
-    style: 1, animated: true,
+    style: 1, animated: false, remolino: false,   // v0.3.199 (Bloque F, paso 2): sin el remolino del mar; el oceano, liso y quieto (con la lampara de la sala basta)
     oceanTop: "#1f5a52", oceanBot: "#0d2c33", shallow: "#39a58c", swirl: ["#0f3b3a", "#1f7a63", "#6b2740"],
     land: ["#f6e6c8", "#ffd9a8", "#ffc4c4", "#c9e8c1", "#bfe0ff", "#f3d6ff", "#fff7e6"],
     line: [0.1, 0.07, 0.16, 0.95], lineW: 2.3, lineOff: [0, 0], lineOffCol: [0, 0, 0, 0], shadow: { off: [3, -4], col: [0.04, 0.02, 0.08, 0.5] },
-    grid: "#9fd6c8", gridA: 0.1, tropic: "#ffd98a", ao: 0.1, grain: 0.02, vignette: 0.5, postGrain: 0.045, tint: [1, 1, 1], crt: true,
+    grid: "#9fd6c8", gridA: 0.1, tropic: "#ffd98a", ao: 0.1, grain: 0.02, vignette: 0.5, postGrain: 0.045, tint: [1, 1, 1], crt: false,   // v0.3.198: sin CRT (Bloque F, paso 7: «el CRT se carga el pixel art»)
     ink: "#16241c", paper: "#f3eddc", red: "#fe5f55", brass: "#f8b449", hl: "#fe5f55",
   };
 
@@ -68,7 +68,7 @@ window.AIQ = window.AIQ || {};
     land: ["#f7eed6", "#e3cc98", "#f2d3c0", "#d3dfbd", "#d9d4c8", "#efdca8", "#fcf7ea"], line: [0.14, 0.03, 0.05, 0.95], shadow: { off: [3, -4], col: [0.08, 0, 0.02, 0.6] }, grid: "#e0b25a", gridA: 0.0 });
   A.MAPSTYLES.hielo = MS({ mat: 10, oceanTop: "#2d5f86", oceanBot: "#163a5c", shallow: "#a8d6ee", mc1: "#d8f0ff", mc2: "#6aa6cc", mp: [0.015, 0, 0, 2], felt: [0, 0.12, 0.3, 0.05],
     land: ["#f4f8fb", "#dcebf5", "#ece9f8", "#d9efe6", "#f6efe2", "#e2eafa", "#fbfdff"], line: [0.1, 0.18, 0.3, 0.9], shadow: { off: [3, -4], col: [0.02, 0.08, 0.16, 0.5] }, grid: "#d8f0ff", gridA: 0.14, tropic: "#ffe9b0" });
-  A.MAPSTYLES.tele = { ...A.MAPSTYLES.casino, animated: true, crt: true, swirl: ["#23262b", "#4d535b", "#8c939c"], shallow: "#7a8088", fx2: [1, 0.045, 1, 0], postGrain: 0.02, vignette: 0.62,
+  A.MAPSTYLES.tele = { ...A.MAPSTYLES.casino, animated: true, remolino: true, crt: true, swirl: ["#23262b", "#4d535b", "#8c939c"], shallow: "#7a8088", fx2: [1, 0.045, 1, 0], postGrain: 0.02, vignette: 0.62,
     land: ["#ececec", "#c9c9c9", "#dadada", "#b6b6b6", "#f4f4f4", "#c0c0c0", "#e2e2e2"], line: [0.06, 0.06, 0.07, 0.95], grid: "#c9c9c9", gridA: 0.1, tropic: "#ececec" };
   A.MAPSTYLES.cine = MS({ animated: true, oceanTop: "#6a645a", oceanBot: "#3a362f", shallow: "#7a7366", felt: [0, 0.22, 0.12, 0.08], fx2: [2, 0.035, 1, 0], vignette: 0.78,
     land: ["#e9e2d0", "#d4cab2", "#e2d8c0", "#c8bea6", "#efe8d8", "#d9cfb8", "#f4eee0"], line: [0.1, 0.08, 0.06, 0.95], shadow: { off: [3, -4], col: [0.05, 0.04, 0.02, 0.55] }, grid: "#e9e2d0", gridA: 0.1, tropic: "#e9e2d0" });
@@ -155,7 +155,7 @@ window.AIQ = window.AIQ || {};
     land: ["#f6f2ff", "#f2eeff", "#faf4ff", "#eef2ff", "#f4f0ff", "#f8f4ff", "#ffffff"], line: [0.1, 0.05, 0.2, 0.95], shadow: { off: [3, -4], col: [0.05, 0, 0.1, 0.5] }, gridA: 0 });
   A.MAPSTYLES.hiperespacio = MS({ mat: 52, animated: true, oceanTop: "#050a22", oceanBot: "#02051a", shallow: "#050a22", mc1: "#6a3aa8", mc2: "#cfe0ff", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#2a3a5a", "#324468", "#26364e", "#3a4c74", "#2c3e5e", "#34486c", "#243248"], line: [0.6, 0.8, 1, 0.9], shadow: null, gridA: 0 });
-  A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, mat: 54, animated: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
+  A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, mat: 54, animated: true, remolino: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
     land: ["#c84c0c", "#d8641c", "#b84410", "#e07a2a", "#c05818", "#d06a20", "#e8a050"], line: [0.25, 0.08, 0.02, 0.95], grid: "#8fb8ff", gridA: 0.08, tropic: "#ffd98a" };
 
   /* el catalogo, en orden. own(P): cuando es tuya (del perfil: los logros y, por si el perfil es anterior a algun logro, lo que guardan las

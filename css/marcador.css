@@ -135,6 +135,12 @@ html.reduce-motion .tk-rows > div.beat::after { animation: none; opacity: 0; }
 #ledger > .mc-mq > .mqw { --mqi: -9px; --mqb: 6px; --mqr: 14px; }
 .mc-mq.rev .mqb.l1 { --mq-k: 2; } .mc-mq.rev .mqb.l3 { --mq-k: 0; }
 .mc-mq.all .mqb.mq-lit { animation: none; opacity: 1; }
+/* v0.3.198 (Bloque F, paso 7): con racha grande, las bombillas del marcador se encienden de colores, cada tanda a su ritmo, y cada vez mas:
+   racha 5, una tanda de cada tres; 6, dos; 7 o mas, todas (js/marcador.js pone .neon y data-n) */
+.mc-mq.neon .mqb.mq-lit { animation: mq-fil var(--mq-fd, 3s) ease-in-out infinite alternate, mq-neon 2.4s steps(6, end) infinite; animation-delay: var(--mq-fo, 0s), var(--mq-nd, 0s); }
+.mc-mq.neon .mqb.l1 { --mq-nd: -.4s; } .mc-mq.neon .mqb.l2 { --mq-nd: -1.2s; } .mc-mq.neon .mqb.l3 { --mq-nd: -2s; }
+.mc-mq.neon[data-n="1"] .mqb.l2, .mc-mq.neon[data-n="1"] .mqb.l3, .mc-mq.neon[data-n="2"] .mqb.l3 { animation: mq-fil var(--mq-fd, 3s) ease-in-out infinite alternate; animation-delay: var(--mq-fo, 0s); }
+@keyframes mq-neon { from { filter: hue-rotate(0deg) saturate(1.7); } to { filter: hue-rotate(360deg) saturate(1.7); } }
 .tk-rows .tk-srow.off dd s { opacity: .55; margin-right: 6px; }
 
 /* la ecuacion: PUNTOS x RACHA, siempre a la vista en la Aventura y el Reto. La caja roja cuenta la racha: apagada (x1), encendida con llamas
