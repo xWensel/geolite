@@ -115,33 +115,33 @@ Todo el arte de Geolite es pixel art de Cousins Studios. La base está ideada po
 
 ### Banda sonora
 
-Creada por Cousins Studios con AKAI; los audios se exportaron e integraron en el motor de audio del juego. 22 canciones (37 min 28 s), con título en los 12 idiomas, que rotan sin repetirse seguidas y se navegan desde Ajustes > Sonido:
+Creada por Cousins Studios con AKAI; los audios se exportaron e integraron en el motor de audio del juego. 22 canciones (36 min 21 s), con título en los 12 idiomas, que rotan sin repetirse seguidas y se navegan desde Ajustes > Sonido. Cada una suena por capas, como en Balatro: en la portada, en calma con la base apagada; en la partida, con su base de hip hop entera (boom bap, 808 o lo-fi), y en los últimos segundos, con la tensión. En Ajustes > Sonido > Estilo de música se pueden poner las de antes («Clásicos»: las 22 tal como eran, 37 min 28 s):
 
 
 | N.º | Título | Title | Estilo | Duración |
 |---:|---|---|---|---:|
 | 01 | Apuesta segura | Sure Bet | lounge nocturno | 1:30 |
-| 02 | Doble o nada | Double or Nothing | ragtime | 1:44 |
-| 03 | Ambos marcan | Both Teams to Score | bossa nova | 1:41 |
-| 04 | Más de 2,5 goles | Over 2.5 Goals | samba | 1:37 |
-| 05 | Todo al rojo | All on Red | blues | 1:48 |
-| 06 | Huérfanos | Orphans | vals | 1:45 |
-| 07 | All-in | All In | funk | 1:33 |
-| 08 | Combinada | Parlay | big band | 1:43 |
-| 09 | Sube la apuesta | Raise the Stakes | mambo | 1:40 |
-| 10 | Retirar ganancias | Cash Out | lo-fi | 1:45 |
-| 11 | Banca al día | Bankroll | reggae | 1:42 |
-| 12 | Apuesta en vivo | Live Bet | reggaeton | 1:45 |
-| 13 | Pleno al quince | Straight Up | flamenco | 1:48 |
-| 14 | Hándicap asiático | Asian Handicap | deep house | 1:35 |
-| 15 | Gran apostador | High Roller | funk | 1:44 |
-| 16 | Bote acumulado | Progressive Jackpot | house | 1:34 |
-| 17 | Ventaja de la casa | House Edge | tecno | 1:46 |
-| 18 | Mano caliente | Hot Hand | merengue | 1:47 |
-| 19 | Ganador y colocado | Each Way | cha-cha-chá | 1:46 |
-| 20 | Empate no vale | Draw No Bet | ranchera | 1:43 |
-| 21 | Apuesta máxima | Max Bet | corrido | 1:45 |
-| 22 | Tipsters | Tipsters | noir | 1:45 |
+| 02 | Doble o nada | Double or Nothing | boogaloo de jazz | 1:26 |
+| 03 | Ambos marcan | Both Teams to Score | bossa lo-fi | 1:39 |
+| 04 | Más de 2,5 goles | Over 2.5 Goals | samba-jazz | 1:37 |
+| 05 | Todo al rojo | All on Red | blues de medianoche | 1:53 |
+| 06 | Huérfanos | Orphans | vals de jazz | 1:33 |
+| 07 | All-in | All In | jazz-funk | 1:41 |
+| 08 | Combinada | Parlay | swing de combo | 1:21 |
+| 09 | Sube la apuesta | Raise the Stakes | latin jazz | 1:39 |
+| 10 | Retirar ganancias | Cash Out | lo-fi | 1:52 |
+| 11 | Banca al día | Bankroll | dub | 1:40 |
+| 12 | Apuesta en vivo | Live Bet | jazz-hop | 1:48 |
+| 13 | Pleno al quince | Straight Up | flamenco-jazz | 1:34 |
+| 14 | Hándicap asiático | Asian Handicap | lo-fi house | 1:43 |
+| 15 | Gran apostador | High Roller | jazz de espías | 1:42 |
+| 16 | Bote acumulado | Progressive Jackpot | jazz-house | 1:39 |
+| 17 | Ventaja de la casa | House Edge | duelo noir | 1:39 |
+| 18 | Mano caliente | Hot Hand | swing de victoria | 1:33 |
+| 19 | Ganador y colocado | Each Way | chachachá | 1:37 |
+| 20 | Empate no vale | Draw No Bet | afro-jazz en 12/8 | 1:47 |
+| 21 | Apuesta máxima | Max Bet | exótica | 1:45 |
+| 22 | Tipsters | Tipsters | noir | 1:44 |
 
 Los efectos de sonido del juego salen del propio motor de audio (`js/audio.js`): la familia «Lounge dorado», con el piano eléctrico de la canción 1, vibráfono, fichas y cartas grabadas («Casino Audio» de Kenney, CC0, las mismas del ambiente de la sala) y un toque de 8 bits solo en los premios y en la bandera. Afinan con la canción que suena, suenan en su lado de la pantalla y cada uno tiene su escalón respecto a la música, que va al frente. En Ajustes > Sonido > Estilo de sonido se puede volver a los de antes («Clásicos»: campanas, kalimba y 8 bits, al mismo nivel que los nuevos).
 

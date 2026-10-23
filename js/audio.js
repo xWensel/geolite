@@ -291,9 +291,11 @@ window.AIQ = window.AIQ || {};
     ["Apuesta máxima", "Max Bet", "Mise maximale", "Aposta máxima", "Höchsteinsatz", "Puntata massima", "Apuesta máxima", "最大注", "최대 베팅", "マックスベット", "Максимальная ставка", "Maksymalna stawka"],
     ["Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters", "Tipsters"],
   ];
-  /* BSO v2 (v0.3.198): cada cancion son TRES capas que suenan a la vez y se suben o bajan segun el momento (como en Balatro):
-     .c0 = la portada en calma (melodia, acordes, bajo a dos; casi sin base), .c1 = lo que entra en la partida (el bajo entero, el bombo y la palmada,
-     la percusion), .c2 = la tension de los ultimos segundos (madera, aro, toms: nunca ruido). Partida = c0 + c1; ultimos segundos = c0 + c1 + c2. */
+  /* La banda de la casa (v0.3.200): cada cancion son TRES capas que suenan a la vez y se suben o bajan segun el momento (como en Balatro):
+     .c0 = la portada en calma (melodia y acordes; la base de hip hop apagada y bajita, como en la sala de al lado), .c1 = lo que entra en la
+     partida (la base entera: bombo que pega y caja o palmada en el pulso del rap; el bajo entero, la percusion), .c2 = la tension de los ultimos
+     segundos (tic, madera, aro, toms: nunca platos ni ruido). Partida = c0 + c1; ultimos segundos = c0 + c1 + c2. Todas se pueden rapear: las rapidas
+     llevan la base a medio tiempo (la melodia a su tempo). */
   const SONGS = [
     "01-apuesta-segura", "02-doble-o-nada", "03-ambos-marcan", "04-mas-de-2-5-goles", "05-todo-al-rojo", "06-huerfanos", "07-all-in", "08-combinada",
     "09-sube-la-apuesta", "10-retirar-ganancias", "11-banca-al-dia", "12-apuesta-en-vivo", "13-pleno-al-quince", "14-handicap-asiatico", "15-gran-apostador",
@@ -330,10 +332,10 @@ window.AIQ = window.AIQ || {};
      BPM = el pulso (la 20 de la banda va en 12/8: su pulso es la negra con puntillo) */
   const LUFS_CL = [-36.9, -38.3, -31.9, -35.6, -34.2, -33.8, -35.7, -31.6, -32.6, -36.3, -32.9, -36.8, -37.4, -33.6, -30.7, -33.9, -36.9, -32.3, -39.4, -31.3, -37.4, -35.1];
   const BPM_CL = [86, 112, 128, 100, 108, 138, 104, 132, 116, 74, 76, 92, 108, 122, 130, 124, 128, 145, 128, 132, 92, 92];
-  const LUFS_BA = [-34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34, -34];
+  const LUFS_BA = [-34.5, -34.4, -34.5, -34.4, -34.4, -34.4, -34.5, -34.5, -34.4, -34.4, -34.4, -34.5, -34.4, -34.5, -34.5, -34.4, -34.5, -34.5, -34.5, -34.5, -34.5, -34.5];
   const BPM_BA = [86, 116, 100, 104, 94, 120, 100, 152, 118, 74, 76, 88, 108, 100, 138, 122, 120, 132, 120, 108, 96, 80];
   const trimOf = l => Math.pow(10, Math.max(-4, Math.min(5.5, -34 - l)) / 20), TRIM_CL = LUFS_CL.map(trimOf), TRIM_BA = LUFS_BA.map(trimOf);
-  const BEAT0 = 60;
+  const BEAT0 = () => (isCl() ? 60 : 51);                              // primer pulso (ms): las de antes, 59-62 ms; la banda, 50-53 ms (medido en los mp3)
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
   let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false;
   const decks = [], recent = [];                                        // dos platos: mientras uno entra, el otro sale
@@ -448,11 +450,13 @@ window.AIQ = window.AIQ || {};
       /* de un momento a otro (portada -> acto, acto -> acto): la que suena termina y la siguiente ya sale del grupo nuevo */
     },
     get where() { return moment; },
+    /* para las pruebas: que suena en cada plato (archivo, segundo y ganancia de cada capa) */
+    _platos() { return decks.map(d => d && { idx: d.idx, sale: d.leaving, capas: d.els.map((e, c) => ({ f: (e.getAttribute("src") || "").split("/").pop(), t: Math.round(e.currentTime * 1000), g: Math.round(d.lg[c].gain.value * 1000) / 1000, parada: e.paused })) }); },
     /* el compas de la cancion que suena: { ms: lo que dura un pulso, at: cuantos ms hace que cayo el primero } o null si no suena nada. Sale del tempo
        medido de cada pista y del reloj del reproductor: no hace falta analizar la musica mientras suena */
     beat() {
       const d = di >= 0 ? decks[di] : null; if (!d || cur < 0 || d.el.paused || d.el.readyState < 2 || !A.audio.musicOn || !(A.audio.vol.music * A.audio.vol.master > 0)) return null;   // con la musica a cero no hay compas que seguir
-      return { ms: 60000 / (isCl() ? BPM_CL : BPM_BA)[cur], at: d.el.currentTime * 1000 - BEAT0 - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
+      return { ms: 60000 / (isCl() ? BPM_CL : BPM_BA)[cur], at: d.el.currentTime * 1000 - BEAT0() - ((ctx.outputLatency || ctx.baseLatency || 0) * 1000) };
     },
   };
   /* Ajustes > Sonido > Estilo de musica: al cambiarlo, la misma cancion en el otro estilo entra fundida (nunca un corte) */
@@ -504,7 +508,7 @@ window.AIQ = window.AIQ || {};
     { home: 5, set: MAJ(5) }, { home: 3, set: MAJ(3) }, { home: 9, set: MAJ(9) }, { home: 7, set: MAJ(7) }, { home: 2, set: MAJ(2) },
     { home: 0, set: MAJ(0) }, { home: 5, set: MAJ(5) },
   ];
-  /* la banda (v0.3.198): la pentatonica mayor de la relativa mayor de cada cancion nueva o rehecha (casa = su tonica); la 1 y la 10, las de siempre */
+  /* la banda (v0.3.200): la pentatonica mayor de la relativa mayor de cada cancion nueva o rehecha (casa = su tonica); la 1 y la 10, las de siempre */
   const TONOS_BA = [
     { home: 0, set: MAJ(0) }, { home: 3, set: MAJ(3) }, { home: 7, set: MAJ(7) }, { home: 2, set: MAJ(2) }, { home: 5, set: MAJ(5) },
     { home: 0, set: MAJ(0) }, { home: 7, set: MAJ(7) }, { home: 10, set: MAJ(10) }, { home: 3, set: MAJ(3) }, { home: 5, set: MAJ(5) },

@@ -29,7 +29,7 @@
       S.luces = ["soft", "off"].includes(d.luces) ? d.luces : "full";                       // v0.3.52: Luces de la sala (js/casa.js)
       S.ambiente = ["montecarlo", "gala", "teatro"].includes(d.ambiente) ? d.ambiente : "hoy";   // v0.3.198: el ambiente de la casa (js/casa.js), para probarlo
       S.sonidos = d.sonidos === "clasico" ? "clasico" : "lounge"; A.audio.setSonidos(S.sonidos);   // v0.3.194: estilo de los efectos (js/audio.js)
-      S.musica = d.musica === "clasica" ? "clasica" : "banda"; A.audio.setMusica(S.musica);       // v0.3.198: estilo de la musica (la banda por capas o las de antes)
+      S.musica = d.musica === "clasica" ? "clasica" : "banda"; A.audio.setMusica(S.musica);       // v0.3.200: estilo de la musica (la banda por capas o las de antes)
       /* v0.3.2: Movimiento en tres niveles (antes "Reducir movimiento" + "Destellos suaves", que se bloqueaba con el primero) */
       S.motion = ["full", "soft", "min"].includes(d.motion) ? d.motion : d.reduce ? "min" : d.softFlash ? "soft" : "full";
       S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
