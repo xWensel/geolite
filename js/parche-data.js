@@ -34,7 +34,7 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
-      id: "0.3.192",
+      id: "0.3.193",
       name: L("Lounge dorado", "Golden lounge", "Lounge doré", "Lounge dourado", "Goldene Lounge", "Lounge dorato", "", "金色酒廊", "골든 라운지", "ゴールデン・ラウンジ", "Золотой лаунж", "Złoty lounge"),
       date: "2026-10-23",
       summary: L("Todos los sonidos se rehacen con los de la canción 1: su piano eléctrico, vibráfono, fichas y cartas de verdad y un toque de 8 bits solo en los premios. Tu música va al frente y cada sonido tiene su escalón; afinan con la canción que suena y salen por su lado de la pantalla.",
@@ -53,7 +53,7 @@ window.AIQ = window.AIQ || {};
         { id: "sonido", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
           title: L("El sonido", "Sound", "Le son", "O som", "Der Sound", "Il suono", "", "声音", "사운드", "サウンド", "Звук", "Dźwięk"),
           entries: [
-            E(L("Una familia de sonidos", "One family of sounds", "Une famille de sons", "Uma família de sons", "Eine Klangfamilie", "Una famiglia di suoni", "", "同一家族的音效", "하나의 소리 가족", "ひとつの音の家族", "Одна семья звуков", "Jedna rodzina dźwięków"), "change", "0.3.192", [
+            E(L("Una familia de sonidos", "One family of sounds", "Une famille de sons", "Uma família de sons", "Eine Klangfamilie", "Una famiglia di suoni", "", "同一家族的音效", "하나의 소리 가족", "ひとつの音の家族", "Одна семья звуков", "Jedna rodzina dźwięków"), "change", "0.3.193", [
               L("Piano eléctrico, vibráfono, fichas y cartas grabadas y un grave que se siente más que se oye. Se acabaron las campanas metálicas y los pitidos agudos; el 8 bits queda para los premios y la corneta de la bandera. Ningún sonido sale dos veces igual.",
                 "Electric piano, vibraphone, recorded chips and cards and a low thump you feel more than hear. No more metallic bells or shrill beeps; 8-bit is kept for prizes and the flag's bugle. No sound comes out the same twice.",
                 "Piano électrique, vibraphone, jetons et cartes enregistrés et un grave qu'on sent plus qu'on ne l'entend. Fini les cloches métalliques et les bips aigus ; le 8 bits est réservé aux gains et au clairon du drapeau. Aucun son ne sort deux fois pareil.",
@@ -66,7 +66,7 @@ window.AIQ = window.AIQ || {};
                 "エレクトリックピアノ、ヴィブラフォン、録音したチップとカードの音、そして聞こえるより体で感じる低音。金属的な鐘や甲高いビープ音はなくなりました。8ビットは賞と旗のラッパだけに。同じ音が二度同じように鳴ることはありません。",
                 "Электропиано, вибрафон, записанные фишки и карты и низкий удар, который скорее чувствуешь, чем слышишь. Больше никаких металлических колокольчиков и пронзительных писков; 8-бит остался для выигрышей и горна флага. Ни один звук не повторяется одинаково.",
                 "Pianino elektryczne, wibrafon, nagrane żetony i karty oraz bas, który bardziej się czuje, niż słyszy. Koniec z metalicznymi dzwonkami i piskliwymi piknięciami; 8 bitów zostaje dla wygranych i trąbki flagi. Żaden dźwięk nie brzmi dwa razy tak samo.")]),
-            E(L("Tu música, al frente", "Your music comes first", "Ta musique en avant", "A sua música na frente", "Deine Musik vorn", "La tua musica davanti", "", "你的音乐放在最前", "음악이 먼저", "音楽が主役", "Твоя музыка — на первом плане", "Twoja muzyka na pierwszym planie"), "change", "0.3.192", [
+            E(L("Tu música, al frente", "Your music comes first", "Ta musique en avant", "A sua música na frente", "Deine Musik vorn", "La tua musica davanti", "", "你的音乐放在最前", "음악이 먼저", "音楽が主役", "Твоя музыка — на первом плане", "Twoja muzyka na pierwszym planie"), "change", "0.3.193", [
               L("La música suena unos 11 dB más alta y cada sonido tiene su escalón respecto a ella: el ratón, muy por debajo; pulsar, un poco por debajo; la jugada, encima; la diana y los jackpots, arriba del todo. Un jackpot 3 ya no tapa la canción: pasa de +32 a +19 dB sobre ella, y la música solo se agacha un poco. Un limitador evita que nada sature. Si ahora lo oyes todo más fuerte, baja el volumen general en Ajustes.",
                 "The music plays about 11 dB louder and every sound has its own step relative to it: the mouse well below, clicks a little below, plays above, bullseyes and jackpots at the very top. A jackpot 3 no longer drowns the song: it goes from +32 to +19 dB above it, and the music only dips a little. A limiter keeps anything from clipping. If it all sounds louder now, turn down the master volume in Settings.",
                 "La musique joue environ 11 dB plus fort et chaque son a son palier par rapport à elle : la souris bien en dessous, les clics un peu en dessous, les coups au-dessus, les « dans le mille » et les jackpots tout en haut. Un jackpot 3 ne couvre plus la chanson : il passe de +32 à +19 dB au-dessus, et la musique ne baisse qu'un peu. Un limiteur empêche toute saturation. Si tout te paraît plus fort, baisse le volume général dans les Réglages.",
@@ -79,7 +79,7 @@ window.AIQ = window.AIQ || {};
                 "音楽が約11dB大きくなり、すべての音が音楽に対して自分の段を持ちます。マウスはずっと下、クリックは少し下、プレイは上、ど真ん中とジャックポットは一番上。ジャックポット3が曲をかき消すことはもうありません。曲より+32dBから+19dBになり、音楽は少し下がるだけです。リミッターが音割れを防ぎます。全体が大きく聞こえる場合は、設定でマスター音量を下げてください。",
                 "Музыка звучит примерно на 11 дБ громче, и у каждого звука своя ступень относительно неё: мышь — сильно ниже, нажатия — чуть ниже, ходы — выше, «в яблочко» и джекпоты — на самом верху. Джекпот 3 больше не заглушает песню: теперь он на 19 дБ над ней вместо 32, а музыка лишь слегка приглушается. Лимитер не даёт ничему перегружаться. Если теперь всё кажется громче, убавь общую громкость в настройках.",
                 "Muzyka gra o około 11 dB głośniej, a każdy dźwięk ma swój stopień względem niej: mysz wyraźnie poniżej, kliknięcia trochę poniżej, zagrania powyżej, a strzały w dziesiątkę i jackpoty na samej górze. Jackpot 3 nie zagłusza już piosenki: zamiast +32 jest teraz +19 dB nad nią, a muzyka tylko lekko przycicha. Limiter pilnuje, żeby nic nie przesterowało. Jeśli teraz wszystko brzmi głośniej, ścisz głośność ogólną w Ustawieniach.")]),
-            E(L("Se reconoce sin mirar", "Recognisable without looking", "On reconnaît sans regarder", "Dá para reconhecer sem olhar", "Ohne hinzusehen erkennbar", "Si riconosce senza guardare", "", "不看也能听出来", "보지 않아도 알 수 있게", "見なくても分かる", "Узнаётся не глядя", "Rozpoznasz bez patrzenia"), "new", "0.3.192", [
+            E(L("Se reconoce sin mirar", "Recognisable without looking", "On reconnaît sans regarder", "Dá para reconhecer sem olhar", "Ohne hinzusehen erkennbar", "Si riconosce senza guardare", "", "不看也能听出来", "보지 않아도 알 수 있게", "見なくても分かる", "Узнаётся не глядя", "Rozpoznasz bez patrzenia"), "new", "0.3.193", [
               L("Cada resultado tiene su forma: mal, una nota sola; bien, dos que suben; muy bien, tres y el acorde; diana, un golpe, un glissando y 8 bits; fallo grande, dos notas graves que caen; tiempo agotado, el reloj. La cuenta, la racha y los premios siguen una misma frase que sube.",
                 "Each result has its own shape: poor, a single note; good, two rising notes; very good, three and the chord; bullseye, a thump, a glissando and 8-bit; a big miss, two low falling notes; time's up, the clock. The tally, the streak and the prizes follow one rising phrase.",
                 "Chaque résultat a sa forme : mauvais, une seule note ; bien, deux qui montent ; très bien, trois et l'accord ; dans le mille, un coup, un glissando et du 8 bits ; gros raté, deux notes graves qui descendent ; temps écoulé, l'horloge. Le décompte, la série et les gains suivent une même phrase qui monte.",
@@ -92,7 +92,7 @@ window.AIQ = window.AIQ || {};
                 "結果ごとに形があります。いまひとつは音ひとつ、まあまあは上がる2音、とても良いは3音と和音、ど真ん中はドンという一撃とグリッサンドと8ビット、大はずれは下がる低い2音、時間切れは時計の音。集計、連続、賞はひとつの上がっていくフレーズに乗ります。",
                 "У каждого результата своя форма: плохо — одна нота; хорошо — две восходящие; очень хорошо — три и аккорд; в яблочко — удар, глиссандо и 8-бит; большой промах — две низкие нисходящие ноты; время вышло — часы. Подсчёт, серия и выигрыши идут по одной восходящей фразе.",
                 "Każdy wynik ma swój kształt: słabo — jedna nuta; dobrze — dwie rosnące; bardzo dobrze — trzy i akord; w dziesiątkę — uderzenie, glissando i 8 bitów; duże pudło — dwie niskie, opadające nuty; koniec czasu — zegar. Liczenie, seria i wygrane idą jedną wznoszącą się frazą.")]),
-            E(L("Afina con la canción y suena en su lado", "In tune with the song, from its side", "Accordé à la chanson, de son côté", "Afinado com a música, do seu lado", "Im Ton des Songs, von seiner Seite", "Intonato con la canzone, dal suo lato", "", "跟着歌曲调音，从对应的一侧发声", "곡에 맞춰 조율, 제자리에서", "曲に合わせて、その側から", "В тон песне и со своей стороны", "W tonacji piosenki i ze swojej strony"), "new", "0.3.192", [
+            E(L("Afina con la canción y suena en su lado", "In tune with the song, from its side", "Accordé à la chanson, de son côté", "Afinado com a música, do seu lado", "Im Ton des Songs, von seiner Seite", "Intonato con la canzone, dal suo lato", "", "跟着歌曲调音，从对应的一侧发声", "곡에 맞춰 조율, 제자리에서", "曲に合わせて、その側から", "В тон песне и со своей стороны", "W tonacji piosenki i ze swojej strony"), "new", "0.3.193", [
               L("Los sonidos se afinan con la canción que suena (cada una tiene su escala), así que ya no chocan con ella. Y salen por su lado: el ratón, los botones y la chincheta suenan donde están en la pantalla; los premios se abren a los dos lados.",
                 "Sounds tune to the song that's playing (each has its own scale), so they no longer clash with it. And they come from their side: the mouse, buttons and pin sound where they are on screen; prizes open out to both sides.",
                 "Les sons s'accordent avec la chanson en cours (chacune a sa gamme) et ne jurent plus avec elle. Et ils viennent de leur côté : la souris, les boutons et la punaise sonnent là où ils sont à l'écran ; les gains s'ouvrent des deux côtés.",
@@ -105,7 +105,7 @@ window.AIQ = window.AIQ || {};
                 "音は流れている曲に合わせて調律され（曲ごとに音階があります）、もう曲とぶつかりません。そして、その側から鳴ります。マウス、ボタン、ピンは画面上の位置から聞こえ、賞は左右に広がります。",
                 "Звуки подстраиваются под играющую песню (у каждой своя гамма) и больше с ней не спорят. И звучат со своей стороны: мышь, кнопки и булавка — там, где они на экране; выигрыши раскрываются в обе стороны.",
                 "Dźwięki stroją się do grającej piosenki (każda ma swoją skalę), więc już się z nią nie gryzą. I dochodzą ze swojej strony: mysz, przyciski i pinezka brzmią tam, gdzie są na ekranie; wygrane rozchodzą się na obie strony.")]),
-            E(L("Llega el jefe", "The boss arrives", "Le boss arrive", "O chefe chega", "Der Boss kommt", "Arriva il boss", "", "首领登场", "보스 등장", "ボス登場", "Появляется босс", "Nadchodzi boss"), "change", "0.3.192", [
+            E(L("Llega el jefe", "The boss arrives", "Le boss arrive", "O chefe chega", "Der Boss kommt", "Arriva il boss", "", "首领登场", "보스 등장", "ボス登場", "Появляется босс", "Nadchodzi boss"), "change", "0.3.193", [
               L("Tres golpes de timbal, un acorde oscuro que crece desde lo grave y un motivo de piano que cae medio tono a medio tono.",
                 "Three timpani hits, a dark chord swelling up from the low end and a piano motif falling a semitone at a time.",
                 "Trois coups de timbale, un accord sombre qui monte depuis le grave et un motif de piano qui descend demi-ton par demi-ton.",
@@ -118,7 +118,7 @@ window.AIQ = window.AIQ || {};
                 "ティンパニが3発、低音からふくらむ暗い和音、そして半音ずつ下がっていくピアノのモチーフ。",
                 "Три удара литавр, мрачный аккорд, нарастающий из низов, и фортепианный мотив, спускающийся по полутону.",
                 "Trzy uderzenia kotłów, mroczny akord narastający z dołu i motyw fortepianu opadający o pół tonu.")]),
-            E(L("Retos y casino, sin agudos", "Challenges and casino, without the shrillness", "Défis et casino, sans les aigus", "Desafios e cassino, sem agudos", "Herausforderungen und Kasino ohne schrille Höhen", "Sfide e casinò, senza acuti", "", "挑战和赌场，不再刺耳", "도전과 카지노, 날카로움 없이", "チャレンジとカジノ、耳に痛い高音なし", "Испытания и казино — без резких верхов", "Wyzwania i kasyno bez piskliwych tonów"), "change", "0.3.192", [
+            E(L("Retos y casino, sin agudos", "Challenges and casino, without the shrillness", "Défis et casino, sans les aigus", "Desafios e cassino, sem agudos", "Herausforderungen und Kasino ohne schrille Höhen", "Sfide e casinò, senza acuti", "", "挑战和赌场，不再刺耳", "도전과 카지노, 날카로움 없이", "チャレンジとカジノ、耳に痛い高音なし", "Испытания и казино — без резких верхов", "Wyzwania i kasyno bez piskliwych tonów"), "change", "0.3.193", [
               L("Los sonidos de los retos, el globo, el rasca y el resto del casino se quedan como eran, pero sin agudos cortantes y cada uno a su nivel respecto a la música.",
                 "The sounds of the challenges, the balloon, the scratch card and the rest of the casino stay as they were, but without the cutting highs and each at its own level against the music.",
                 "Les sons des défis, du ballon, du jeu à gratter et du reste du casino restent tels quels, mais sans aigus tranchants et chacun à son niveau par rapport à la musique.",
@@ -131,7 +131,7 @@ window.AIQ = window.AIQ || {};
                 "チャレンジ、気球、スクラッチ、そのほかのカジノの音はそのままですが、耳に刺さる高音を抑え、それぞれ音楽に対してちょうどいい大きさにしました。",
                 "Звуки испытаний, воздушного шара, скретч-карты и остального казино остались прежними, но без режущих верхов и каждый на своём уровне относительно музыки.",
                 "Dźwięki wyzwań, balonu, zdrapki i reszty kasyna zostają takie jak były, ale bez ostrych wysokich tonów i każdy na swoim poziomie względem muzyki.")]),
-            E(L("Los interruptores suenan a interruptor", "Switches sound like switches", "Les interrupteurs sonnent comme des interrupteurs", "Os interruptores soam como interruptores", "Schalter klingen wie Schalter", "Gli interruttori suonano da interruttori", "", "开关有了开关的声音", "스위치는 스위치 소리로", "スイッチはスイッチの音に", "Переключатели звучат как переключатели", "Przełączniki brzmią jak przełączniki"), "fix", "0.3.192", [
+            E(L("Los interruptores suenan a interruptor", "Switches sound like switches", "Les interrupteurs sonnent comme des interrupteurs", "Os interruptores soam como interruptores", "Schalter klingen wie Schalter", "Gli interruttori suonano da interruttori", "", "开关有了开关的声音", "스위치는 스위치 소리로", "スイッチはスイッチの音に", "Переключатели звучат как переключатели", "Przełączniki brzmią jak przełączniki"), "fix", "0.3.193", [
               L("Los interruptores de Ajustes, la herramienta del Campamento, los controles y las notas del parche sonaban con el cartel de la jubilación del crupier (y muy fuerte): ahora tienen su clic de madera. El cartel sigue sonando donde le toca.",
                 "Settings switches, the Camp tool, the controls and the patch notes played the dealer's retirement sign sound (and very loud): now they have their own wooden click. The sign still sounds where it belongs.",
                 "Les interrupteurs des Réglages, l'outil du Campement, les commandes et les notes de patch jouaient le son de la pancarte de retraite du croupier (et très fort) : ils ont maintenant leur propre clic de bois. La pancarte sonne toujours là où il faut.",
@@ -144,6 +144,42 @@ window.AIQ = window.AIQ || {};
                 "設定のスイッチ、キャンプの道具、操作設定、パッチノートが、ディーラーの引退の看板の音を（しかもとても大きく）鳴らしていました。これからは木のカチッという自分の音です。看板の音は本来の場面でそのまま鳴ります。",
                 "Переключатели в настройках, инструмент в лагере, управление и список изменений звучали табличкой ухода крупье на пенсию (и очень громко): теперь у них свой деревянный щелчок. Табличка по-прежнему звучит там, где ей положено.",
                 "Przełączniki w Ustawieniach, narzędzie w obozie, sterowanie i lista zmian grały dźwiękiem tabliczki emerytury krupiera (i to bardzo głośno): teraz mają swoje drewniane kliknięcie. Tabliczka dalej brzmi tam, gdzie powinna.")]),
+          ] },
+      ],
+    },
+    {
+      id: "0.3.192",
+      name: L("Tres reglas con cara nueva", "Three rules, new faces", "Trois règles, nouveaux visages", "Três regras de cara nova", "Drei Regeln mit neuem Gesicht", "Tre regole con un volto nuovo", "", "三条规则换新颜", "새 얼굴의 세 규칙", "3つのルールが新しい顔に", "Три правила в новом облике", "Trzy zasady w nowej odsłonie"),
+      date: "2026-10-23",
+      summary: L("Contrarreloj, Vendaval y Silencio estrenan icono, hecho con las piezas del juego.",
+                "Against the clock, Gale and Silence get new icons, made from the game's own pieces.",
+                "Contre la montre, Rafale et Silence ont une nouvelle icône, faite avec les pièces du jeu.",
+                "Contra o relógio, Vendaval e Silêncio ganham ícones novos, feitos com as peças do jogo.",
+                "Gegen die Uhr, Sturmböe und Stille bekommen neue Symbole aus den Teilen des Spiels.",
+                "Contro il tempo, Bufera e Silenzio hanno icone nuove, fatte con i pezzi del gioco.",
+                "",
+                "「争分夺秒」「狂风」「沉默」换上了用游戏自身部件做的新图标。",
+                "시간과의 싸움, 질풍, 침묵에 게임의 조각으로 만든 새 아이콘이 생겼습니다.",
+                "「時間との勝負」「疾風」「静寂」に、ゲームのパーツで作った新しいアイコン。",
+                "«Наперегонки со временем», «Шквал» и «Тишина» получили новые значки из деталей самой игры.",
+                "„Wyścig z czasem”, „Wichura” i „Cisza” dostały nowe ikony z elementów gry."),
+      chapters: [
+        { id: "reglas", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Retos de regla", "Rule challenges", "Défis de règle", "Desafios de regra", "Regel-Herausforderungen", "Sfide di regola", "", "规则挑战", "규칙 도전", "ルールのチャレンジ", "Испытания-правила", "Wyzwania z zasadą"),
+          entries: [
+            E(L("Iconos nuevos", "New icons", "Nouvelles icônes", "Ícones novos", "Neue Symbole", "Nuove icone", "", "新图标", "새 아이콘", "新しいアイコン", "Новые значки", "Nowe ikony"), "change", "0.3.192", [
+              L("Contrarreloj es el cronómetro del juego a toda prisa; Vendaval, ráfagas de viento empujando tu chincheta; y Silencio, la brújula bajo la señal de prohibido.",
+                "Against the clock is the game's stopwatch in a hurry; Gale, gusts of wind pushing your pin; and Silence, the compass under a no-entry sign.",
+                "Contre la montre, c'est le chronomètre du jeu pressé ; Rafale, des bourrasques qui poussent ton épingle ; et Silence, la boussole sous un panneau d'interdiction.",
+                "Contra o relógio é o cronômetro do jogo com pressa; Vendaval, rajadas de vento empurrando seu alfinete; e Silêncio, a bússola sob o sinal de proibido.",
+                "Gegen die Uhr ist die Stoppuhr des Spiels in Eile; Sturmböe sind Windstöße, die deinen Pin wegschieben; und Stille ist der Kompass unter einem Verbotsschild.",
+                "Contro il tempo è il cronometro del gioco di corsa; Bufera, raffiche di vento che spingono il tuo pin; e Silenzio, la bussola sotto il segnale di divieto.",
+                "",
+                "「争分夺秒」是游戏里飞奔的秒表；「狂风」是吹着你图钉的阵阵狂风；「沉默」是禁止标志下的指南针。",
+                "시간과의 싸움은 서두르는 게임의 스톱워치, 질풍은 핀을 밀어내는 돌풍, 침묵은 금지 표시 아래의 나침반입니다.",
+                "「時間との勝負」は急ぐゲームのストップウォッチ、「疾風」はピンを押し流す突風、「静寂」は禁止マークの下のコンパスです。",
+                "«Наперегонки со временем» — спешащий секундомер игры, «Шквал» — порывы ветра, сдувающие твою булавку, а «Тишина» — компас под запрещающим знаком.",
+                "„Wyścig z czasem” to pędzący stoper z gry, „Wichura” to podmuchy wiatru spychające twoją pinezkę, a „Cisza” to kompas pod znakiem zakazu.")]),
           ] },
       ],
     },
