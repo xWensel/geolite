@@ -75,7 +75,7 @@
 .qx.stayed .qx-go { display: none; }                                              /* "Me quedo" ocupa su sitio con su salto de alegria */
 .qx.stayed .qx-stay { pointer-events: none; animation: qx-yes .5s cubic-bezier(.3, 1.6, .4, 1); }
 @keyframes qx-yes { 0% { transform: scale(.94); } 60% { transform: scale(1.04); } 100% { transform: none; } }
-.qx.stayed .qx-card .mq-lit { animation-duration: .38s; }
+.qx.stayed .qx-card .mq-lit { animation: mq-ch .38s linear infinite; animation-delay: calc(var(--mq-k, 0) * -.38s / 3); }
 
 /* ------------------------------------------------ trastadas */
 /* apagon: negro total; el crupier es una silueta que habla, y solo brilla "Me quedo" */
@@ -91,7 +91,7 @@
 @keyframes qx-flick { 0% { filter: brightness(3); } 20% { filter: brightness(.2); } 45% { filter: brightness(2.2); } 60% { filter: brightness(.4); } 100% { filter: none; } }
 
 /* rabieta: marquesina roja a toda velocidad, la tarjeta arde por dentro, el foco se tine de rojo y el globo GRITA */
-.qx.rage .qx-card .mq-lit { animation-duration: .3s; }
+.qx.rage .qx-card .mq-lit { animation: mq-ch .3s linear infinite; animation-delay: calc(var(--mq-k, 0) * -.3s / 3); }
 .qx.rage .qx-card .mqb-on { stroke: #ff6a5a; } .qx.rage .qx-card .mqb-on.mqb-c { stroke: #ffe6df; }
 .qx.rage .qx-card .mqb-on.mqb-h1 { stroke: rgba(255, 200, 190, .6); } .qx.rage .qx-card .mqb-on.mqb-h2 { stroke: rgba(255, 110, 90, .36); }
 .qx.rage .qx-card .mqb-on.mqb-h3 { stroke: rgba(255, 70, 60, .22); } .qx.rage .qx-card .mqb-on.mqb-h4 { stroke: rgba(255, 50, 40, .12); }

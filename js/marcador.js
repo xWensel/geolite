@@ -201,6 +201,7 @@ window.AIQ = window.AIQ || {};
     if (!on) { if (mq) mq.classList.remove("on", "all"); return; }
     if (!mq) { mq = document.createElement("span"); mq.className = "mc-mq"; mq.setAttribute("aria-hidden", "true"); led.appendChild(mq); }
     if (!mq.classList.contains("on")) { mq.innerHTML = A.bulbs(); mq.classList.toggle("rev", Math.random() < 0.5); A.restyle(mq); mq.classList.add("on"); }
+    { const st = (A.core && A.core.S && A.core.S.streak) || 0; mq.classList.toggle("neon", st >= 5); mq.dataset.n = st >= 7 ? 3 : st >= 6 ? 2 : 1; }   // v0.3.198: racha grande, de colores
     if (ms) mqOff = setTimeout(() => M.luces(false), ms);
   };
   /* todas encendidas a la vez un instante (la meta, cada jackpot) */
