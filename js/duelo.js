@@ -118,12 +118,15 @@ window.AIQ = window.AIQ || {};
   const oneGender = (t, l) => { if (l !== "fr") return t; const m = t.match(/^(.+?) ou (\S.*)$/); if (!m) return t; const a = m[1].split(" "), b = m[2].split(" "); if (a[0].slice(0, 4).toLowerCase() !== b[0].slice(0, 4).toLowerCase()) return t; return [...a, ...b.slice(a.length)].join(" "); };
   let CN = null;   // nombres del pais en los 11 idiomas por su clave del mapa (c:<clave> de data/places.js)
   const countryNames = () => { if (!CN) { CN = {}; (A.PLACES || []).forEach(r => { if (r[1] === "country") CN[r[0].slice(2)] = r[6]; }); } return CN; };
+  const BORN = { es: "Nació en", en: "Born in", fr: "Né(e) à", pt: "Nasceu em", de: "Geboren in", it: "Nato a", zh: "出生地：", ko: "출생지:", ja: "出身地：", ru: "Место рождения:", pl: "Urodzony w" };
   let PQ = null;
   function personQ(k) {
     if (!PQ) { PQ = {}; (A.DUELO_PERSONAS || []).forEach(r => (PQ[r[0]] = r)); }
     const r = PQ[k]; if (!r) return null; const [id, lat, lon, by, dy, names, roles, fl, , zone, ctry] = r, sub = {}, cn = !zone && ctry ? countryNames()[ctry] : null;   // el pais (actual) de nacimiento va debajo; en los de zona seria la respuesta
     Object.keys(names).forEach(l => { const y = yearsTxt(by, dy, l, fl), ro = cap(oneGender(roles[l] || roles.en || "", l)); sub[l] = [ro, y, cn && (cn[l] || cn.en)].filter(Boolean).join(" · "); });
-    const q = { t: "p", lat, lon, name: names, sub, clue: false, answer: null, fact: {}, cid: [id], kind: "character", topic: "character", tier: 0, fame: 0, cEn: [], cks: [] };
+    const bp = (A.DUELO_NACIMIENTOS || {})[id], fact = {};   // el descriptor de abajo, al revelar: la ciudad donde nacio (donde cae tu chincheta)
+    if (bp) Object.keys(names).forEach(l => (fact[l] = `${BORN[l] || BORN.en} ${bp[l] || bp.en}`));
+    const q = { t: "p", lat, lon, name: names, sub, clue: false, answer: null, fact, cid: [id], kind: "character", topic: "character", tier: 0, fame: 0, cEn: [], cks: [] };
     return zone ? zoneOf(q, zone) : q;   // nacimiento disputado o compartido (Gardel, Buda...): se acierta dentro de cualquiera de sus paises
   }
   /* una pregunta de data/duelo-extra.js (estadios, platos, estilos de musica, curiosidades): una zona de uno o varios paises (se acierta dentro de cualquiera)
