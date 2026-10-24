@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f0a1a">
 <title>La mesa del crupier</title>
-<link rel="icon" href="../favicon.ico">
-<link rel="stylesheet" href="mesa.css">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/mesa/mesa.css">
 <!-- La mesa del autor (bloque D): ve las partidas abiertas de Geolite y actua por Don Crupier y por Comodin en directo. A la izquierda, las partidas, su
      pantalla, las fichas de efectos, los retos y lo que le has dicho; a la derecha, los mandos: hablar (9 estilos y cartas traducidas), gestos por grupo,
      las 24 caras, mirada y humor, Comodin, su ropa en directo (sin comprar nada en la cuenta del jugador) y las 12 trastadas. Todo se ensaya antes en el
@@ -174,7 +174,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     <span class="onair"><i class="dot" id="netDot"></i><span id="nLive">0 en antena</span></span>
     <span class="sp"></span>
     <span id="net"></span>
-    <a class="lnk" href="moderacion.html">Clasificación y moderación</a>
+    <a class="lnk" href="/mesa/moderacion">Clasificación y moderación</a>
     <button id="logout" type="button">Salir</button>
   </header>
   <main class="room" id="room">
@@ -260,7 +260,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
 <script>
 (function () {
   const A = window.AIQ, $ = id => document.getElementById(id);
-  const KEYS = "geolite.mesa.key", API = "../api/mesa";
+  const KEYS = "geolite.mesa.key", API = "/api/mesa";
   let key = ""; try { key = localStorage.getItem(KEYS) || ""; } catch (e) { /* sin almacenamiento */ }
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const fmt = n => n == null ? "—" : Math.round(n).toLocaleString("es-ES");
@@ -305,7 +305,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
      rayo: uno por clic · interruptores: se quedan hasta quitarlos · contadores: x1 a x5, uno a uno */
   const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["humo", "Humo", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
   const KIND_ = Object.fromEntries(CHIPS.map(c => [c[0], c[2]])), NAME_ = Object.fromEntries(CHIPS.map(c => [c[0], c[1]]));
-  $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
+  $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
   /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores + el humo) y la mesa lo adelanta al pulsar */
   const fxs = {}, fxAt = {};
   const parseFx = f => !f || f.length < 7 ? null : { lluvia: f[0] === "1", tormenta: f[1] === "1", apagon: f[2] === "1", terremoto: f[3] === "1", cristal: +f[4], huellas: +f[5], ventana: +f[6], humo: f[7] === "1" };
@@ -725,7 +725,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     const seat = document.querySelector(`.seat[data-sid="${sel}"]`); clink(); spr.play(back ? "snap" : "coin_toss");
     if (!seat) return;
     const a = c.querySelector("img").getBoundingClientRect(), b = seat.getBoundingClientRect(), f = document.createElement("img");
-    f.className = "flyer"; f.src = `fichas/${id}.webp`; f.style.left = a.left + "px"; f.style.top = a.top + "px"; document.body.appendChild(f);
+    f.className = "flyer"; f.src = `/mesa/fichas/${id}.webp`; f.style.left = a.left + "px"; f.style.top = a.top + "px"; document.body.appendChild(f);
     const dx = b.right - 70 - a.left, dy = b.top + b.height / 2 - 32 - a.top, up = -Math.max(80, Math.abs(dx) * .25);
     const there = `translate(${dx}px, ${dy}px) scale(.5) rotate(540deg)`, mid = `translate(${dx * .5}px, ${dy * .5 + up}px) scale(1.2) rotate(260deg)`, home = "translate(0,0) scale(1) rotate(0)";
     const an = f.animate(back ? [{ transform: there }, { transform: mid, offset: .5 }, { transform: home }] : [{ transform: home }, { transform: mid, offset: .5 }, { transform: there }], { duration: back ? 520 : 620, easing: "cubic-bezier(.3,.6,.4,1)" });

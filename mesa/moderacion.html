@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f0a1a">
 <title>Clasificación y moderación</title>
-<link rel="icon" href="../favicon.ico">
-<link rel="stylesheet" href="mesa.css">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/mesa/mesa.css">
 <!-- Clasificacion y moderacion de las tablas (api/submit.js): quitar puntuaciones falsas y vetar a quien las mete. Salio de la mesa del crupier
      (mesa/index.html) en el bloque D. Misma API (api/mesa.js ?lb= / ?bans= / lbdel / unban) y la misma clave MESA_KEY, guardada en este navegador. -->
 <style>
@@ -36,7 +36,7 @@
   <header class="bar">
     <span class="brand">GEOLITE · CLASIFICACIÓN Y MODERACIÓN</span>
     <span class="sp"></span>
-    <a class="lnk" href="./">Volver a la mesa del crupier</a>
+    <a class="lnk" href="/mesa">Volver a la mesa del crupier</a>
     <button id="logout" type="button">Salir</button>
   </header>
   <main id="app">
@@ -53,7 +53,7 @@
 <script>
 (function () {
   const $ = id => document.getElementById(id);
-  const KEYS = "geolite.mesa.key", API = "../api/mesa";
+  const KEYS = "geolite.mesa.key", API = "/api/mesa";
   let key = ""; try { key = localStorage.getItem(KEYS) || ""; } catch (e) { /* sin almacenamiento */ }
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const fmt = n => n == null ? "—" : Math.round(n).toLocaleString("es-ES");
