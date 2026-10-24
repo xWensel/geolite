@@ -255,11 +255,21 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 #settings .set-panes.tight .set-grid { row-gap: 0; } #settings .set-panes.tight .set-card { padding-bottom: 8px; }
 :root body #settings .set-panes.tight .set-card > h3 { margin-bottom: 8px; } :root body #settings .set-panes.tight .set-note { margin-top: 4px; } :root body #settings .set-panes.tight .row-btn { margin-bottom: 2px; }
 #settings .set-panes.tight .dl-file .dlf-h { margin-bottom: 4px; } #settings .set-panes.tight .dlf { row-gap: 2px; }
+/* 24-oct: en apretado, las filas con menos aire y las tarjetas del mando sin su titulo (es el mismo que el selector Botones / Palancas / Sensacion) */
+#settings .set-panes.tight .set-card .row-sw, #settings .set-panes.tight .set-card .fader { padding: 5px 0; }
+#settings .set-panes.tight #padSticks > h3, #settings .set-panes.tight #padFeel > h3 { display: none; }
+#settings .set-panes.tight .pad-vizn { margin-top: 2px; }
+/* Datos: «Borrar todos mis datos» a lo ancho, boton a la izquierda y su nota a la derecha (alineados con las dos columnas de arriba): antes quedaba sola
+   abajo a la izquierda, con la columna derecha vacia, y en ja/ru la pestana se desplazaba */
+#settings [data-pane="data"] .set-card:has(> #resetAll) { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 32px; align-items: center; }
+#settings [data-pane="data"] .set-card:has(> #resetAll) > .set-note { margin-top: 0; }
 #settings .set-card { padding: 2px 0 14px; border-radius: 0; background: none; box-shadow: none; border-bottom: 2px solid var(--gx-line); }
 #settings .set-card:last-child, #settings .set-col > .set-card:last-child { border-bottom: 0; }
 :root body #settings .set-card > h3 { font-family: var(--mono); font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); margin: 0 0 12px; }
 #settings .set-card h3 > em { font-family: var(--sans); font-size: 18px; letter-spacing: 0; color: var(--gx-txt-2); }
 :root body #settings .set-note { font-family: var(--sans); font-size: 18px; line-height: 1.2; color: var(--gx-txt-2); margin-top: 10px; }
+html:lang(ja) #settings, html:lang(ja) .pf-screen { word-break: auto-phrase; }   /* japones: se parte por frases, no a media palabra (como la Enciclopedia) */
+#settings .set-note, #settings .rs-t > small, #settings .cloud small, #settings .set-nav small { text-wrap: pretty; } #settings .set-nav small { text-wrap: balance; } #settings .row-btn, #settings .row-btn > *, #settings .gx-btn > span { text-wrap: balance; }   /* sin palabras sueltas en la ultima linea (24-oct) */
 #settings .set-card .row-sw, #settings .set-card .fader { padding: 9px 0; border-bottom: 2px solid var(--gx-line); }
 #settings .set-card .row-sw:last-child, #settings .set-card .fader:last-child { border-bottom: 0; }
 #settings .rs-t label, #settings .fader label, #settings .stp-l { font-family: var(--sans); font-weight: 400; font-size: 24px; line-height: 1.05; }
@@ -274,6 +284,8 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 #settings .seg { border-radius: 0; clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px var(--gx-o); }
 #settings .seg button { font-family: var(--sans); font-size: clamp(18px, 5.4cqw, 22px); letter-spacing: 0; text-transform: none; color: var(--gx-txt-2); padding: 8px 4px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #settings .seg.s4 button { font-size: 18px; white-space: normal; line-height: 1; hyphens: auto; overflow-wrap: anywhere; }
+#settings .ctl-top .seg button { font-size: clamp(18px, 4.86cqw, 22px); }   /* la misma letra que con 360 px de ancho (5,4cqw) */
+html:lang(ru) #settings .ctl-top .seg button { font-size: 18px; }   /* «Клавиатура»: con la letra que crece con el selector (cqw) no cabia */
 #settings .seg button.on { color: var(--gx-ink); } #settings .seg button:hover:not(.on) { color: var(--gx-txt); }
 #settings .seg > i { border-radius: 0; background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
 #settings input[type=range]::-webkit-slider-runnable-track { height: 12px; border-radius: 0; background: linear-gradient(to right, var(--gx-rim) var(--p, 50%), #0b2118 var(--p, 50%)); box-shadow: inset 0 0 0 2px var(--gx-o); }
@@ -389,7 +401,7 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .pf-tx b { font-family: var(--sans); font-weight: 400; font-size: 24px; line-height: 1; color: var(--gx-ink); overflow-wrap: anywhere; }
 .pf-tx i { font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; overflow-wrap: anywhere; text-wrap: pretty; }   /* sin A.squeeze (data-nosq): media cada texto al abrir */
 .pf-row.hid .pf-tx b { letter-spacing: .2em; }
-.pf-row.hid .pf-tx i { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: center; }   /* la pista del crupier: su cara y su frase */
+.pf-row.hid .pf-tx i { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; }   /* la pista del crupier: su cara (52 px, su tamano nativo: con 36 pisaba la frase) y su frase */
 .pf-tx .pf-hint { display: block; width: 52px; height: 52px; image-rendering: pixelated; }
 .pf-mt { display: grid; gap: 6px; justify-items: end; min-width: 0; font-size: 18px; color: var(--gx-ink-2); }
 .pf-mt b { font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1; color: var(--gx-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -441,14 +453,16 @@ html[data-glyph="kb"] #settings .set-back::after { content: "Esc"; font-family: 
 .dia-nt b { min-width: 0; font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; color: var(--gx-ink); }
 .dia-nk > i { grid-column: 1 / -1; align-self: start; font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }   /* mas de 4 lineas (algun idioma): el resto, en la ayuda del naipe */
 /* la ruta del dia: el plano de la Aventura con las piezas del sistema (esquinas de pixel, fieltro y laton) */
-.dia-ruta .rd.plan { --s: 36px; --sb: 44px; --gap: 6px; gap: 12px; margin: 0; }
+.dia-ruta .rd.plan { --s: 50px; --sb: 50px; --gap: 4px; gap: 8px; margin: 0; }   /* casillas de 50 para el icono de 48 a escala entera (el dibujo ocupa ~42): con 36 se salia del cuadrado; el jefe, mismo tamano y en rojo */
 .dia-ruta .rd.plan .rd-n.inf em { display: none; }   /* solo el simbolo (su nombre, en la ayuda): "Бесконечный" ensanchaba la columna y los jefes se salian */
-.dia-ruta .rd.plan .rd-act, .dia-ruta .rd.plan .rd-inf { border-radius: 0; padding: 8px 12px 8px; background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
+.dia-ruta .rd.plan .rd-act, .dia-ruta .rd.plan .rd-inf { border-radius: 0; padding: 8px 6px 8px; background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
 .dia-ruta .rd.plan .rd-h b { font-size: 16px; letter-spacing: .08em; color: var(--gx-acc); }
 .dia-ruta .rd.plan .rd-h i { font-family: var(--sans); font-size: 18px; }
 .dia-ruta .rd.plan .rd-ic { border-radius: 0; }   /* casillas pequenas sin recorte: a este tamano el escalon apenas se ve y cada recorte cuesta en la primera apertura */
 .dia-ruta .rd.plan .rd-ic .ic { width: 48px; height: 48px; } .dia-ruta .rd.plan .rd-n.boss .rd-ic .ic { width: 48px; height: 48px; }
 .dia-ruta .rd.plan .rd-n em { font-size: 16px; margin-top: 4px; }
+.dia-ruta .rd.plan .rd-h { padding-left: 4px; }   /* el titulo del acto, alineado con su borde; las casillas usan los 6 px del panel por los dos lados */
+.dia-ruta .rd.plan .rd-inf { padding-left: 6px; padding-right: 6px; }
 
 /* los tres intentos: tres fichas */
 .dia-int { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 20px; min-height: 0; }
@@ -584,7 +598,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .av-art > .ic { display: block; width: 128px; height: 128px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .35)); }
 .av-lock { position: absolute; right: 8px; top: 8px; }   /* en la esquina del naipe */ .av-lock .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
 .av-dk > b { align-self: start; min-width: 0; font-weight: 400; font-size: 24px; line-height: 1; text-wrap: balance; }
-.av-dd { align-self: stretch; min-height: 0; font-style: normal; font-size: 18px; line-height: 1.15; color: #3f5045; text-wrap: pretty; overflow: hidden; }
+.av-dd { align-self: stretch; min-height: 0; font-style: normal; font-size: 18px; line-height: 1.1; color: #3f5045; text-wrap: pretty; overflow: hidden; }
 .av-dd.trim { align-self: start; display: -webkit-box; -webkit-box-orient: vertical; }   /* no cabe ni con retratos de 64: lineas enteras y "…" (js/hub.js, avFit) */
 .av-decks.tight .av-art, .av-decks.tight .av-art > .ic { width: 64px; height: 64px; }
 .av-kit { display: flex; align-items: center; gap: 2px; min-height: 28px; }   /* kit y doblones/provisiones en una linea (3 cartas como mucho: cabe) */
@@ -1095,3 +1109,6 @@ html.reduce-motion body #np { transition: opacity .2s; transform: none; }
 .bq-screen > .gx-grid, .pf-screen > .gx-grid { animation: gx-from .32s var(--gx-ease) both; }
 @keyframes gx-from { from { transform: translateX(calc(var(--hub-from, 0) * 56px)); opacity: 0; } }
 html.reduce-motion .bq-screen > .gx-grid, html.reduce-motion .pf-screen > .gx-grid { animation: none; }
+
+.gx-vd-ticket .gx-lead-row span.nokm i { display: none; }
+.gx-vd-ticket .gx-lead-row span.wrap { white-space: normal; text-wrap: balance; }

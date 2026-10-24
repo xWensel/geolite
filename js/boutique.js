@@ -19,10 +19,10 @@ window.AIQ = window.AIQ || {};
     rare: "Raras|Rare|Rares|Raras|Selten|Rare||稀有|레어|レア|Редкие|Rzadkie",
     leg: "Legendarias|Legendary|Légendaires|Lendárias|Legendär|Leggendarie||传说|전설|レジェンド|Легендарные|Legendarne",
     mine: "Tuyas|Yours|À toi|Suas|Deine|Tue||已拥有|보유|所持|Твои|Twoje",
-    tierR: "Mesa rara · quieta|Rare table · still|Table rare · fixe|Mesa rara · parada|Seltener Tisch · ruhig|Tavolo raro · fermo||稀有牌桌 · 静态|레어 테이블 · 정지|レアテーブル · 静止|Редкий стол · неподвижный|Rzadki stół · nieruchomy",
-    tierL: "Mesa legendaria · viva|Legendary table · alive|Table légendaire · vivante|Mesa lendária · viva|Legendärer Tisch · lebendig|Tavolo leggendario · vivo||传说牌桌 · 动态|전설 테이블 · 살아 있음|レジェンドテーブル · 動く|Легендарный стол · живой|Legendarny stół · żywy",
+    tierR: "Mesa rara · quieta|Rare table · still|Table rare · fixe|Mesa rara · parada|Seltener Tisch · ruhig|Tavolo raro · fermo||稀有牌桌 · 静态|레어 테이블 · 정지|レアテーブル · 静止|Редкий · статичный|Rzadki stół · nieruchomy",
+    tierL: "Mesa legendaria · viva|Legendary table · alive|Table légendaire · vivante|Mesa lendária · viva|Legendärer Tisch · lebendig|Tavolo leggendario · vivo||传说牌桌 · 动态|전설 테이블 · 살아 있음|レジェンドテーブル · 動く|Легендарный · живой|Legendarny stół · żywy",
     buy: "Comprar|Buy|Acheter|Comprar|Kaufen|Compra||购买|구매|購入|Купить|Kup",
-    sure: "¿Seguro? Pulsa otra vez|Sure? Press again|Sûr ? Appuie encore|Certeza? Aperte de novo|Sicher? Noch einmal|Sicuro? Premi ancora||确定吗？再按一次|정말요? 한 번 더|本当に？もう一度|Точно? Нажми ещё раз|Na pewno? Jeszcze raz",
+    sure: "¿Seguro?|Sure?|Sûr ?|Certeza?|Sicher?|Sicuro?||确定吗？|정말요?|本当に？|Точно?|Na pewno?",
     short: "Te faltan {n}|You need {n} more|Il t'en manque {n}|Faltam {n}|Dir fehlen {n}|Te ne mancano {n}||还差 {n}|{n}개 부족해요|あと{n}枚足りない|Не хватает {n}|Brakuje {n}",
     own: "Tuya|Yours|À toi|Sua|Deiner|Tuo||已拥有|보유 중|所持|Твой|Twój",
     use: "Usar en el mapa|Use on the map|Utiliser sur la carte|Usar no mapa|Auf der Karte nutzen|Usa sulla mappa||在地图上使用|지도에 사용|マップで使う|Поставить на карту|Użyj na mapie",
@@ -75,7 +75,7 @@ window.AIQ = window.AIQ || {};
   /* Bloque J: el vestidor (la tienda es tambien el vestuario) */
   const RX = {
     crup: "Crupier|Dealer|Croupier|Crupiê|Croupier|Croupier||荷官|딜러|ディーラー|Крупье|Krupier",
-    worn: "Puesta: {x}|Wearing: {x}|En place : {x}|Em uso: {x}|Aktiv: {x}|In uso: {x}||使用中：{x}|사용 중: {x}|使用中：{x}|Сейчас: {x}|Teraz: {x}",
+    worn: "Puesta: {x}|Wearing: {x}|En place : {x}|Em uso: {x}|Aktiv: {x}|In uso: {x}||使用中：{x}|사용 중: {x}|使用中：{x}|{x}|Teraz: {x}",
     tro: "De trofeo|Trophy|Trophée|Troféu|Trophäe|Trofeo||奖杯|트로피|トロフィー|Трофей|Trofeum",
     tierT: "Mesa de trofeo|Trophy table|Table trophée|Mesa de troféu|Trophäentisch|Tavolo trofeo||奖杯牌桌|트로피 테이블|トロフィーテーブル|Трофейный стол|Stół trofeum",
     ponerla: "Poner en el mapa|Put it on the map|La mettre sur la carte|Pôr no mapa|Auf die Karte legen|Mettila sulla mappa||放到地图上|지도에 놓기|マップに置く|Поставить на карту|Połóż na mapie",
@@ -106,7 +106,7 @@ window.AIQ = window.AIQ || {};
     const o = M().offer(); if (!o) return "";
     const got = M().owned(o.id);
     return `<button type="button" class="bq-offer${o.id === ST.sel && ST.cat === "mesas" ? " sel" : ""}" data-id="${o.id}"><span class="gx-eyb">${esc(P6(TX.offer))} · ${esc(P6(TX.till))}</span><img class="bq-oth" src="assets/mesas/${o.id}.webp" alt="">
-      <span class="bq-otx"><b>${esc(M().name(o.id))}${got ? "" : `<i>−${Math.round(o.off * 100)} %</i>`}</b>${got ? `<em class="bq-own">${esc(P6(TX.bought))}</em>` : priceHtml(o.id)}</span></button>`;
+      <span class="bq-otx"><b>${esc(M().name(o.id))}${got ? "" : `<i>−${Math.round(o.off * 100)} %</i>`}</b>${got ? `<em class="bq-own">${esc(P6(TX.bought))}</em>` : priceHtml(o.id)}</span></button>`;
   }
   function detHtml() {
     const id = ST.sel, s = state(id), have = A.club ? A.club.fichas() : 0, p = M().price(id);
@@ -121,7 +121,7 @@ window.AIQ = window.AIQ || {};
     return `<span class="bq-dth${leg ? " leg" : ""}${tro && !got ? " lk" : ""}"><img src="assets/mesas/${id}.webp" alt="" width="640" height="360" decoding="async"></span>
       <span class="gx-eyb bq-tier">${esc(P6(tro ? RX.tierT : leg ? TX.tierL : TX.tierR))}</span>
       <h3 class="gx-t-m bq-dn">${esc(M().name(id))}</h3>
-      <p class="bq-dd">${esc(tro && !got ? M().how(id) : M().desc(id))}</p>
+      <p class="bq-dd${tro && !got ? " how" : ""}">${esc(tro && !got ? M().how(id) : M().desc(id))}</p>
       ${s || tro ? "" : `<div class="bq-dp">${priceHtml(id, true)}</div>`}
       <div class="bq-acts">${tryBtn}${act}</div>`;
   }
@@ -150,11 +150,11 @@ window.AIQ = window.AIQ || {};
     cHoy: "Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今日|오늘|今日|Сегодня|Dziś",
     title: "Escaparate de hoy|Today's showcase|La vitrine du jour|Vitrine de hoje|Heutiges Schaufenster|La vetrina di oggi||今日橱窗|오늘의 진열장|今日のショーケース|Витрина дня|Witryna dnia",
     change: "Cambia en {t}|Changes in {t}|Change dans {t}|Muda em {t}|Wechselt in {t}|Cambia tra {t}||{t} 后更换|{t} 후 교체|{t}後に入れ替え|Сменится через {t}|Zmiana za {t}",
-    ganga: "Ganga −{p} %|Bargain −{p} %|Affaire −{p} %|Pechincha −{p} %|Schnäppchen −{p} %|Affare −{p} %||特价 −{p}%|특가 −{p}%|お買い得 −{p}%|Выгода −{p} %|Okazja −{p}%",
+    ganga: "Ganga −{p} %|Bargain −{p} %|Affaire −{p} %|Pechincha −{p} %|Schnäppchen −{p} %|Affare −{p} %||特价 −{p}%|특가 −{p}%|お買い得 −{p}%|Выгода −{p} %|Okazja −{p}%",
     surprise: "Sorpresa|Surprise|Surprise|Surpresa|Überraschung|Sorpresa||惊喜|서프라이즈|サプライズ|Сюрприз|Niespodzianka",
     lote: "Lote de tres|Bundle of three|Lot de trois|Kit de três|Dreierpaket|Lotto da tre||三件套|3종 세트|3点セット|Набор из трёх|Zestaw trzech",
-    loteD: "Las tres juntas, −25 %. Dura {n} días más.|All three together, −25 %. {n} more days.|Les trois ensemble, −25 %. Encore {n} jours.|As três juntas, −25 %. Mais {n} dias.|Alle drei zusammen, −25 %. Noch {n} Tage.|Tutti e tre insieme, −25 %. Ancora {n} giorni.||三件一起买 −25%。还剩 {n} 天。|셋 함께 −25%. {n}일 남았어요.|3点まとめて −25%。あと{n}日。|Все три вместе — −25 %. Ещё дней: {n}.|Wszystkie trzy razem −25%. Jeszcze dni: {n}.",
-    loteLast: "Las tres juntas, −25 %. Último día.|All three together, −25 %. Last day.|Les trois ensemble, −25 %. Dernier jour.|As três juntas, −25 %. Último dia.|Alle drei zusammen, −25 %. Letzter Tag.|Tutti e tre insieme, −25 %. Ultimo giorno.||三件一起买 −25%。最后一天。|셋 함께 −25%. 마지막 날.|3点まとめて −25%。最終日。|Все три вместе — −25 %. Последний день.|Wszystkie trzy razem −25%. Ostatni dzień.",
+    loteD: "Las tres juntas, −25 %. Dura {n} días más.|All three together, −25 %. {n} more days.|Les trois ensemble, −25 %. Encore {n} jours.|As três juntas, −25 %. Mais {n} dias.|Alle drei zusammen, −25 %. Noch {n} Tage.|Tutti e tre insieme, −25 %. Ancora {n} giorni.||三件一起买 −25%。还剩 {n} 天。|셋 함께 −25%. {n}일 남았어요.|3点まとめて −25%。あと{n}日。|Все три вместе — −25 %. Ещё дней: {n}.|Wszystkie trzy razem −25%. Jeszcze dni: {n}.",
+    loteLast: "Las tres juntas, −25 %. Último día.|All three together, −25 %. Last day.|Les trois ensemble, −25 %. Dernier jour.|As três juntas, −25 %. Último dia.|Alle drei zusammen, −25 %. Letzter Tag.|Tutti e tre insieme, −25 %. Ultimo giorno.||三件一起买 −25%。最后一天。|셋 함께 −25%. 마지막 날.|3点まとめて −25%。最終日。|Все три вместе — −25 %. Последний день.|Wszystkie trzy razem −25%. Ostatni dzień.",
     loteDone: "Ya tienes las tres. Mañana o pasado llega otro lote.|You already have all three. Another bundle arrives soon.|Tu as déjà les trois. Un autre lot arrive bientôt.|Você já tem as três. Logo chega outro kit.|Du hast schon alle drei. Bald kommt ein neues Paket.|Hai già tutti e tre. Presto arriva un altro lotto.||三件你都有了。很快会有新的套装。|이미 셋 다 있어요. 곧 새 세트가 와요.|3点とも持っている。もうすぐ次のセットが来る。|У тебя уже все три. Скоро будет новый набор.|Masz już wszystkie trzy. Wkrótce nowy zestaw.",
     gift: "Regalo de la casa|House gift|Cadeau de la maison|Presente da casa|Geschenk des Hauses|Regalo della casa||本店赠礼|하우스 선물|ハウスの贈り物|Подарок заведения|Prezent od kasyna",
     giftD: "Gratis cada día. Se guarda 3 días: si no vienes, te espera.|Free every day. It keeps for 3 days: if you don't come, it waits.|Gratuit chaque jour. Il se garde 3 jours : si tu ne viens pas, il t'attend.|Grátis todo dia. Fica guardado 3 dias: se você não vier, ele espera.|Jeden Tag gratis. Hält 3 Tage: Wenn du nicht kommst, wartet es.|Gratis ogni giorno. Si conserva 3 giorni: se non vieni, ti aspetta.||每天免费。保留 3 天：你没来，它会等你。|매일 무료. 3일 동안 보관돼요. 안 와도 기다려요.|毎日無料。3日間取っておける。来なくても待っている。|Каждый день бесплатно. Хранится 3 дня: не придёшь — подождёт.|Codziennie za darmo. Czeka 3 dni: jeśli nie przyjdziesz, poczeka.",
@@ -167,7 +167,7 @@ window.AIQ = window.AIQ || {};
     wantT: "Si sale en el escaparate, en el lote o en la oferta de la semana, la placa de La tienda de la portada te avisa con un punto.|If it shows up in the showcase, the bundle or the weekly offer, the boutique plaque on the main screen shows a dot.|S'il apparaît dans la vitrine, le lot ou l'offre de la semaine, la plaque de la boutique de l'écran d'accueil t'avertit d'un point.|Se aparecer na vitrine, no kit ou na oferta da semana, a placa da boutique na tela inicial avisa com um ponto.|Taucht es im Schaufenster, im Paket oder im Wochenangebot auf, zeigt die Boutique-Plakette auf dem Startbildschirm einen Punkt.|Se compare nella vetrina, nel lotto o nell'offerta della settimana, la targa della boutique nella schermata iniziale te lo segnala con un punto.||如果它出现在橱窗、套装或本周特价中，主界面的精品店牌子会亮起一个小点。|진열장, 세트, 이번 주 특가에 나오면 메인 화면의 부티크 명판에 점이 떠요.|ショーケースやセット、今週の特売に出たら、メイン画面のブティックの札に点がつく。|Если вещь появится на витрине, в наборе или в предложении недели, на табличке бутика на главном экране загорится точка.|Jeśli pojawi się w witrynie, zestawie lub ofercie tygodnia, tabliczka butiku na ekranie głównym pokaże kropkę.",
     goSec: "Verla en su sección|See it in its section|La voir dans sa section|Ver na seção|In ihrer Abteilung ansehen|Vedila nella sua sezione||在所属分类中查看|해당 코너에서 보기|売り場で見る|Открыть в разделе|Zobacz w dziale",
     todayD: "Hoy en el escaparate. A medianoche cambia, pero nada desaparece: sigue en su sección a su precio de siempre.|In today's showcase. It changes at midnight, but nothing disappears: it stays in its section at its usual price.|Dans la vitrine du jour. Elle change à minuit, mais rien ne disparaît : la pièce reste dans sa section à son prix habituel.|Na vitrine de hoje. Muda à meia-noite, mas nada some: continua na seção pelo preço de sempre.|Im heutigen Schaufenster. Um Mitternacht wechselt es, aber nichts verschwindet: Es bleibt in seiner Abteilung zum üblichen Preis.|Nella vetrina di oggi. Cambia a mezzanotte, ma niente sparisce: resta nella sua sezione al prezzo di sempre.||今日橱窗展品。午夜更换，但不会消失：它仍以原价留在所属分类里。|오늘의 진열장 상품. 자정에 바뀌지만 사라지진 않아요. 원래 코너에 원래 가격으로 남아요.|今日のショーケース。真夜中に入れ替わるが、消えはしない。いつもの値段で売り場に残る。|На витрине сегодня. В полночь витрина сменится, но ничего не пропадёт: вещь останется в своём разделе по обычной цене.|W dzisiejszej witrynie. O północy się zmienia, ale nic nie znika: zostaje w swoim dziale w zwykłej cenie.",
-    k: { m: "Mesa|Table|Table|Mesa|Tisch|Tavolo||牌桌|테이블|テーブル|Стол|Stół", v: "Prenda del crupier|Dealer's outfit|Tenue du croupier|Roupa do crupiê|Croupier-Outfit|Abito del croupier||荷官服饰|딜러 의상|ディーラーの衣装|Одежда крупье|Strój krupiera", p: "Puntero|Pointer|Pointeur|Ponteiro|Zeiger|Puntatore||指针|포인터|ポインター|Указатель|Wskaźnik", i: "Icono|Icon|Icône|Ícone|Symbol|Icona||图标|아이콘|アイコン|Значок|Ikona", t: "Título|Title|Titre|Título|Titel|Titolo||称号|칭호|称号|Титул|Tytuł", k: "Marco|Frame|Cadre|Moldura|Rahmen|Cornice||边框|프레임|額縁|Рамка|Ramka" },
+    k: { m: "Mesa|Table|Table|Mesa|Tisch|Tavolo||牌桌|테이블|テーブル|Стол|Stół", v: "Crupier|Dealer|Croupier|Crupiê|Croupier|Croupier||荷官|딜러|ディーラー|Крупье|Krupier", p: "Puntero|Pointer|Pointeur|Ponteiro|Zeiger|Puntatore||指针|포인터|ポインター|Указатель|Wskaźnik", i: "Icono|Icon|Icône|Ícone|Symbol|Icona||图标|아이콘|アイコン|Значок|Ikona", t: "Título|Title|Titre|Título|Titel|Titolo||称号|칭호|称号|Титул|Tytuł", k: "Marco|Frame|Cadre|Moldura|Rahmen|Cornice||边框|프레임|額縁|Рамка|Ramka" },
   };
   const ES = () => A.escaparate;
   const hms = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(x => String(x).padStart(2, "0")).join(":"); };
@@ -645,7 +645,7 @@ window.AIQ = window.AIQ || {};
       ${th}<span class="bq-prow"><b class="bq-nm">${nm}</b>${tag}</span></button>`;
   }
   const vivaTag = x => (x.owned && SO().vivaOf(x.id) ? `<em class="bq-viva">★</em>` : "");
-  const cPer = () => (ST.ctab === "carta" || ST.ctab === "fondo" || ST.ctab === "mat" ? 10 : PERC());   // las cartas y los fondos, de serie en serie (10)
+  const cPer = () => (ST.ctab === "carta" || ST.ctab === "fondo" || ST.ctab === "mat" ? (short() ? 5 : 10) : PERC());   // las cartas y los fondos, de serie en serie (10)
   function cGridHtml() {
     const L = cOf(ST.ctab), per = cPer(), pages = Math.max(1, Math.ceil(L.length / per)); ST.cpage = Math.min(ST.cpage, pages - 1);
     const items = L.slice(ST.cpage * per, ST.cpage * per + per);
@@ -670,15 +670,17 @@ window.AIQ = window.AIQ || {};
     return `<span class="bq-dth bq-cprev"><span id="bqCCard"></span></span>
       <span class="gx-eyb bq-tier">${esc(P6(w === "c" ? CX.eCarta : w === "f" ? CX.eFondo : w === "b" ? CX.eMat : w === "m" ? CX.eMarco : w === "t" ? CX.eTit : CX.eIcon))} · ${esc(P6(kind))}</span>
       <h3 class="gx-t-m bq-dn">${esc((w === "c" || w === "f") && x.owned ? SO().cardNo(x.id) : x.name)}${(w === "c" || w === "f") && x.owned ? `<span class="bq-ed">${esc(SO().matName(SO().sOf(x.id)) + " · " + SO().edName(x.id))}</span>` : ""}</h3>
-      <p class="bq-dd">${esc(P6(desc))}${x.how && !x.owned ? `<br><b class="bq-how">${esc(x.how)}</b>` : ""}</p>
+      <p class="bq-dd"><span class="bq-ddt">${esc(P6(desc))}</span>${x.how && !x.owned ? `<b class="bq-how">${esc(x.how)}</b>` : ""}</p>
       <div class="bq-acts">${act}</div>`;
   }
   /* la carta de la ficha (tu carta con la pieza puesta) y las miniaturas, a escala entera en pixeles reales */
   function cPaint() {
     const host = $("bqCCard"), k = ST.csel;
     if (host && k && /^[fb]:/.test(k)) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 128 }; if (w === "f") o.fondo = x && x.owned ? +id : 0; else o.mat = x && x.owned ? +id : undefined; host._sig = ""; host.innerHTML = ""; SO().badge(host, o); }
-    else if (host && k && /^c:/.test(k) && !(cFind(k) || {}).owned) { host._sig = ""; host.innerHTML = `<canvas class="bq-backbig"></canvas>`; const cv = host.firstChild; SO().back(cv); intPaint(cv, 160); }
-    else if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 160 }; if (w === "c") o.carta = +id; else if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
+    else if (host && k && /^c:/.test(k) && !(cFind(k) || {}).owned) { host._sig = ""; host.innerHTML = `<canvas class="bq-backbig"></canvas>`; const cv = host.firstChild; SO().back(cv); intPaint(cv, 192); }
+    else if (host && k) { const [w, id] = k.split(":"), x = cFind(k), o = { w: 192 }; if (w === "c") o.carta = +id; else if (w === "m") o.marco = id; else if (w === "t") o.title = id; else if (!(x && x.secret && !x.owned)) o.icon = id; host._sig = ""; SO().mount(host, o); }
+    /* la carta siempre entera: si la ficha no da para carta y descripcion, la descripcion de siempre se calla (lo que se gana y como, nunca) */
+    detFit();
     document.querySelectorAll("#dlg .bq-cbadge[data-cm]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, marco: el.dataset.cm }); });   // v0.3.174: cada marco, en tu chapa
     document.querySelectorAll("#dlg .bq-cbadge[data-cb]").forEach(el => { el._sig = ""; SO().badge(el, { w: 64, mat: +el.dataset.cb }); });   // v2: cada material, en tu chapa
     document.querySelectorAll("#dlg canvas[data-cc]").forEach(cv => { if (cv.dataset.back) SO().back(cv); else SO().art(cv, +cv.dataset.cc); fitCv(cv); });
@@ -751,6 +753,9 @@ window.AIQ = window.AIQ || {};
     repaint(focus || `#dlg .bq-it[data-id="${id}"]`);
     if (put) stampOn();
   }
+  /* la ficha de la derecha, siempre entera: si no da para todo, la descripcion de siempre se calla (lo que se gana y como, y los botones, nunca).
+     Antes, en algunas piezas e idiomas, los botones de abajo se salian del panel */
+  function detFit() { const d = $("bqDet"); if (!d) return; d.classList.remove("nodesc", "noname"); if (d.scrollHeight > d.clientHeight + 1) d.classList.add("nodesc"); if (d.scrollHeight > d.clientHeight + 1 && d.querySelector(".bq-cprev")) d.classList.add("noname"); }   // y si aun no, el nombre grande (ya va en la carta)
   function wireInner() {
     const sc = document.querySelector("#dlg .bq-screen"); if (!sc) return;
     sc.querySelectorAll("[data-hk]").forEach(b => { b.onclick = () => { const k = b.dataset.hk; if (ST.busy) return; if (k !== ST.hsel) { ST.hsel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg [data-hk="${k}"]`); }; });
@@ -787,6 +792,7 @@ window.AIQ = window.AIQ || {};
     const cu = $("bqCUse"); if (cu) cu.onclick = () => { const [w, id] = ST.csel.split(":"); if (!(w === "c" ? SO().setCarta(+id) : w === "f" ? SO().setFondo(+id) : w === "b" ? SO().setMat(+id) : w === "m" ? SO().setMarco(id) : w === "t" ? SO().setTitle(id) : SO().setIcon(id))) return; if (A.sfx && A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([14]); repaint(w === "t" ? "#bqCOff" : `#dlg .bq-cit[data-ck="${ST.csel}"]`); };
     const co = $("bqCOff"); if (co) co.onclick = () => { SO().setTitle(""); if (A.sfx && A.sfx.card) A.sfx.card(); repaint("#bqCUse"); };
     addHeart();
+    detFit(); requestAnimationFrame(detFit);                       // la ficha cabe entera (tambien tras pintar lienzos y el corazon)
   }
   /* cambiar de seccion: solo cambian la izquierda y la derecha (la cabecera se queda); el vestuario espera a tener su atlas listo */
   function setCat(k, force) {

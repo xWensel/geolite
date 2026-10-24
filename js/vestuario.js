@@ -146,25 +146,50 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- el recoloreado */
   let base = null, parts = null, waiting = [], plumaImg = null, venImg = null, guiImg = null;
+  /* los indices de cada zona (chistera, cinta, antifaz...) y del clavel: el mismo calculo aqui y en el hilo aparte */
+  function scan(w, h, data, pd, px) {
+    const idx = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }, cl = [], clc = [];     // 3 cinta, 5 pajarita, 6 y 7 sus lunares; las piezas pintadas aparte
+    for (let i = 0; i < pd.length; i += 4) { if (!data[i + 3]) continue; const v = pd[i], k = v & 7, c = v >> 3; if (k) idx[k].push(i); if (c && px[c]) { cl.push(i); clc.push(c); } }
+    Object.keys(idx).forEach(k => { idx[k] = Int32Array.from(idx[k]); });
+    return { w, h, data, idx, clav: Int32Array.from(cl), clavC: Uint8Array.from(clc) };
+  }
+  const BMO = { premultiplyAlpha: "none", colorSpaceConversion: "none" };     // los pixeles tal cual (los valores de la mascara de partes son indices)
+  const PREP_SRC = `${scan.toString()}
+onmessage = e => { try {
+  const { a, p, px } = e.data, w = a.width, h = a.height, c = new OffscreenCanvas(w, h), x = c.getContext("2d", { willReadFrequently: true });
+  x.drawImage(a, 0, 0); const data = x.getImageData(0, 0, w, h).data; x.clearRect(0, 0, w, h); x.drawImage(p, 0, 0); const pd = x.getImageData(0, 0, w, h).data;
+  const r = scan(w, h, data, pd, px), t = [r.data.buffer, r.clav.buffer, r.clavC.buffer].concat(Object.values(r.idx).map(v => v.buffer));
+  postMessage({ w, h, data: r.data.buffer, idx: r.idx, clav: r.clav, clavC: r.clavC }, t);
+} catch (err) { postMessage({ err: String(err) }); } };`;
   function prep(done) {
     if (base) return done && done();
     if (done) waiting.push(done);
     if (prep.busy) return; prep.busy = true;
     A.crupier.ready(() => {
       const atlas = A.crupier.atlas(), pim = new Image();
-      pim.onload = () => {
-        const w = atlas.naturalWidth || atlas.width, h = atlas.naturalHeight || atlas.height;
-        const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", { willReadFrequently: true });
-        x.drawImage(atlas, 0, 0); const data = x.getImageData(0, 0, w, h).data;
-        x.clearRect(0, 0, w, h); x.drawImage(pim, 0, 0); const pd = x.getImageData(0, 0, w, h).data;
-        const idx = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }, cl = [], clc = [];     // 3 cinta, 5 pajarita, 6 y 7 sus lunares; las piezas pintadas aparte
-        for (let i = 0; i < pd.length; i += 4) { if (!data[i + 3]) continue; const v = pd[i], k = v & 7, c = v >> 3; if (k) idx[k].push(i); if (c && PX[c]) { cl.push(i); clc.push(c); } }
-        Object.keys(idx).forEach(k => { idx[k] = Int32Array.from(idx[k]); });
-        base = { w, h, data, idx, clav: Int32Array.from(cl), clavC: Uint8Array.from(clc) };
-        const m = A.CRUPIER_DATA.master; base.master = m;
+      const w = () => atlas.naturalWidth || atlas.width, h = () => atlas.naturalHeight || atlas.height;
+      const after = r => {
+        base = r; base.master = A.CRUPIER_DATA.master;
         const fin = () => { prep.busy = false; waiting.splice(0).forEach(f => f()); };
         const imgs = [plumaImg, venImg, guiImg].filter(i => i && !i.complete); let left = imgs.length;     // y las capas, listas antes de las miniaturas
         if (!left) fin(); else imgs.forEach(i => { i.onload = i.onerror = () => { if (--left === 0) fin(); }; });
+      };
+      /* leer los pixeles del atlas entero costaba ~200 ms en el hilo principal (el tiron de la primera vez que se abria la tienda): se hace en un
+         hilo aparte (OffscreenCanvas); sin el, como siempre */
+      const local = () => {
+        const W = w(), H = h(), c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(atlas, 0, 0); const data = x.getImageData(0, 0, W, H).data;
+        x.clearRect(0, 0, W, H); x.drawImage(pim, 0, 0); const pd = x.getImageData(0, 0, W, H).data;
+        after(scan(W, H, data, pd, PX.map(Boolean)));
+      };
+      pim.onload = () => {
+        let wk = null;
+        try { if (window.Worker && window.OffscreenCanvas && window.createImageBitmap) wk = new Worker(URL.createObjectURL(new Blob([PREP_SRC], { type: "text/javascript" }))); } catch (e) { wk = null; }
+        if (!wk) return local();
+        let ok = false; const fail = () => { if (ok) return; ok = true; try { wk.terminate(); } catch (e) {} local(); };
+        wk.onerror = fail;
+        wk.onmessage = e => { if (ok) return; ok = true; wk.terminate(); if (!e.data || e.data.err) return local(); const r = e.data; after({ w: r.w, h: r.h, data: new Uint8ClampedArray(r.data), idx: r.idx, clav: r.clav, clavC: r.clavC }); };
+        Promise.all([createImageBitmap(atlas, BMO), createImageBitmap(pim, BMO)]).then(([a, p]) => wk.postMessage({ a, p, px: PX.map(Boolean) }, [a, p]), fail);
       };
       if (A.CRUPIER_PLUMA && !plumaImg) { plumaImg = new Image(); plumaImg.src = A.CRUPIER_PLUMA.img; }
       if (A.CRUPIER_VENECIANO && !venImg) { venImg = new Image(); venImg.src = A.CRUPIER_VENECIANO.img; }
@@ -365,8 +390,9 @@ window.AIQ = window.AIQ || {};
     with: withItem, atlasFor, thumb, ready: prep, apply, preview, previewing: () => !!prev,
     name: id => A.pick6(get(id).n), desc: id => A.pick6(get(id).d),
     count: () => ITEMS.filter(i => !i.casa && owned(i.id)).length,
+    _base: () => base, _scan: scan, _px: () => PX.map(Boolean),
   };
   /* al arrancar, el crupier sale con la ropa que lleve el perfil */
-  if (document.readyState === "loading") addEventListener("DOMContentLoaded", () => setTimeout(() => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); } }, 0));
-  else setTimeout(() => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); } }, 0);
+  if (document.readyState === "loading") addEventListener("DOMContentLoaded", () => setTimeout(() => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); else setTimeout(() => prep(), 6000); } }, 0));   // sin ropa: se prepara despues, en el hilo aparte (la tienda ya abre sin tiron)
+  else setTimeout(() => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); else setTimeout(() => prep(), 6000); } }, 0);
 })(window.AIQ);

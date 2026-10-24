@@ -76,7 +76,7 @@ window.AIQ = window.AIQ || {};
     const dt = last ? Math.min(250, now - last) : 0; last = now; acc += dt;
     while (acc >= DUR(f)) { acc -= DUR(f); f = (f + 1) % N; }
     const u = Math.max(0, (acc / DUR(f) - 0.2) / 0.8); a = u * u * (3 - 2 * u);   // se queda un momento en el fotograma y funde el resto
-    vivos.forEach(pinta);
+    vivos.forEach(cv => { if (!cv.checkVisibility || cv.checkVisibility()) pinta(cv); });   // el de la puerta sigue en la pagina, oculto: no se redibuja (antes, 60 veces por segundo toda la sesion)
     if (!document.hidden) raf = requestAnimationFrame(tick);
   }
   const arranca = () => { if (!raf && vivos.size) { last = 0; raf = requestAnimationFrame(tick); } };

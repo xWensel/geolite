@@ -34,7 +34,7 @@
 .bq-rxi .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; }
 .bq-rx b { font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; min-width: 0; overflow-wrap: anywhere; }
 .bq-rx em { font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-txt-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.bq-rx i { grid-column: 2 / 4; font-style: normal; font-size: 18px; line-height: 1.05; color: var(--gx-txt-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bq-rx i { grid-column: 2 / 4; font-style: normal; font-size: 18px; line-height: 1.05; color: var(--gx-txt-2); min-width: 0; text-wrap: balance; }   /* lo puesto, entero (en dos lineas si hace falta) */
 .bq-rx:hover:not(.on) { background: #143326; }
 .bq-rx.on { cursor: default; color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 8px 0 0 var(--gx-rim), inset 0 0 0 2px var(--gx-o); }
 .bq-rx.on em, .bq-rx.on i { color: var(--gx-ink-2); }
@@ -115,7 +115,7 @@ html.reduce-motion .bq-dth.leg::after { animation: none; display: none; }
 .bq-bp { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
 /* armado: la segunda pulsacion paga (rojo, como el «¿Seguro?» del resto del juego) */
 .bq-acts .gx-btn.pri.armed { --h: var(--gx-red-hi); --m: var(--gx-red); --l: var(--gx-red-lo); color: #fff; }
-.bq-acts .gx-btn.armed > span:first-child { white-space: normal; line-height: 1.05; text-align: left; }
+.bq-acts .gx-btn.armed > span:first-child { white-space: nowrap; }   /* «¿Seguro?» en una linea: a tres lineas empujaba «Lo quiero» fuera del panel */
 .bq-short { opacity: .7; cursor: default; }
 .bq-short:hover { transform: none; filter: none; }
 .bq-no { animation: bq-no .32s steps(4, end); }
@@ -140,7 +140,7 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 /* seis pestanas (trajes, antifaces, pajaritas, piezas, legendarias, tuyo): mas juntas para que quepan en una fila hasta en ruso */
 .bq-cat.vest .bq-tabs { gap: 6px; }
 .bq-cat.vest .bq-tab { gap: 6px; padding: 5px 8px 6px; font-size: 18px; }
-.bq-cat.vest .bq-tab i { font-size: 14px; }
+.bq-cat.vest .bq-tab i { font-size: 16px; }
 .bq-items.vest { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 10px; }
 /* el retrato: sobre tapete, con un foco suave detras (la luz va detras del crupier, nunca encima) */
 .bq-vth { aspect-ratio: 5 / 4; overflow: hidden; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
@@ -174,7 +174,7 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-prow .bq-nm { flex: 1 1 auto; min-width: min-content; overflow-wrap: normal; padding: 0 2px; }   /* una palabra no se parte: antes baja la etiqueta */
 .bq-prow .bq-pr { font-size: 20px; gap: 4px; }
 .bq-prow .bq-pr .bq-fi { width: 18px; height: 18px; }
-.bq-prow .bq-own { font-size: 14px; padding: 3px 5px 2px; }
+.bq-prow .bq-own { font-size: 16px; padding: 3px 5px 2px; }
 /* la vista grande: 16:10 si cabe, y si la descripcion es larga (ruso a 720) cede lo que falte; el lienzo llena su caja (js/boutique.js lo mide en
    pixeles reales), asi la caja no depende del lienzo y la etiqueta nunca pisa el marco */
 .bq-det.punt { grid-template-rows: minmax(0, auto) auto auto auto auto; }
@@ -190,12 +190,12 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-cth.bq-cmk { display: grid; place-items: center; overflow: visible; }                   /* v0.3.174: un marco = tu chapa con ese marco (lo que asoma, por fuera) */
 .bq-cbadge.lk { filter: grayscale(1) brightness(.62); }
 .bq-cth.bq-ttl { display: grid; place-items: center; padding: 0 8px; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 52%, #123b25 100%); }
-.bq-tplate { display: grid; place-items: center; min-height: 34px; max-width: 100%; padding: 4px 8px 5px; font-size: 19px; text-align: center; color: #ffd98a; background: #2a1e14; box-shadow: inset 0 2px 0 #4a3624, 0 0 0 2px #120e1c, 0 4px 0 2px rgba(2, 6, 4, .45); font-family: var(--sans); font-size: 20px; line-height: 1; text-shadow: 0 2px 0 #120e1c; }
-.bq-tplate span { text-wrap: balance; }
+.bq-tplate { display: grid; place-items: center; min-height: 34px; max-width: calc(100% - 8px); box-sizing: border-box; padding: 4px 5px 5px; font-size: 19px; text-align: center; color: #ffd98a; background: #2a1e14; box-shadow: inset 0 2px 0 #4a3624, 0 0 0 2px #120e1c, 0 4px 0 2px rgba(2, 6, 4, .45); font-family: var(--sans); font-size: 20px; line-height: 1; text-shadow: 0 2px 0 #120e1c; }
+.bq-tplate span { text-wrap: balance; hyphens: manual; }   /* palabras largas: guion blando en el texto (de, ru) */
 .bq-cth.bq-ttl.off .bq-tplate { color: #9a8a70; background: #241c14; filter: grayscale(.6); }
 .bq-own.lk { display: inline-grid; place-items: center; padding: 2px 4px; }
 .bq-own.lk .ic { width: 18px; height: 18px; image-rendering: pixelated; }
-.bq-cit.bq-ttl .bq-nm { font-family: var(--mono); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-ink-2); }
+.bq-cit.bq-ttl .bq-nm { font-family: var(--mono); font-size: 16px; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-ink-2); }
 .bq-det.carta { grid-template-rows: auto auto auto auto auto; }
 .bq-dth.bq-cprev { aspect-ratio: auto; display: grid; place-items: center; padding: 14px 0 18px; background: radial-gradient(58% 64% at 50% 48%, #3d8a5f 0, #23633f 50%, #10351f 100%); }
 .bq-how { font-weight: 400; color: var(--gx-ink); }
@@ -203,7 +203,7 @@ html.reduce-motion .bq-det.bq-sold .bq-prob { animation: none; }
 .bq-cit .bq-nm { font-size: 18px; line-height: 1; }
 .bq-cit .bq-prow { align-items: flex-start; }
 .bq-cat.carta .bq-tab { padding-left: 10px; padding-right: 10px; white-space: nowrap; }
-.bq-dth.leg { margin-bottom: 10px; }   /* el marco de laton de la legendaria no pisa la etiqueta de debajo */
+.bq-dth.leg { margin-bottom: 14px; }   /* el marco de laton de la legendaria no pisa la etiqueta de debajo */
 
 /* bloque D: el crupier es el maniqui del probador. Habla en su propio globo (js/boutique.js, vSay), encima del panel del probador, con la cola
    hacia el; al comprar, su halo de desfile va DETRAS de su figura (nunca delante: crupier-delante-de-la-luz) */
@@ -225,7 +225,7 @@ html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
 .bq-ed { display: block; margin-top: 4px; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-gold-lo); letter-spacing: .04em; }
 .bq-backbig { display: block; margin: 0 auto; image-rendering: pixelated; }
 /* v2: las siete pestanas de «Tu carta» en dos filas de cuatro (Cartas, Fondos, Bordes, Logros / Objetos, Titulos, Marcos) */
-.bq-cat.carta .bq-tabs { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 6px; }
+.bq-cat.carta .bq-tabs { display: flex; flex-wrap: wrap; justify-content: start; gap: 6px; }   /* en ruso «Достижения» se salia del panel */
 .bq-cat.carta .bq-tab { gap: 6px; padding: 5px 8px 6px; font-size: 18px; }
 .bq-cat.carta .bq-tab i:empty { display: none; }
 .bq-cat.carta .bq-bar { flex-wrap: wrap; row-gap: 8px; }
@@ -245,7 +245,7 @@ html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
 .bq-hth img.bq-hv { image-rendering: pixelated; }
 .bq-hth.t { padding: 0 8px; }
 .bq-hk { font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-gold-lo); }
-.bq-hit .bq-pr s, .bq-hl .bq-pr s, .bq-bp s { font-size: .75em; color: var(--gx-ink-2); margin-right: 2px; }
+.bq-hit .bq-pr s, .bq-hl .bq-pr s, .bq-bp s { font-size: max(.75em, 18px); color: var(--gx-ink-2); margin-right: 2px; }
 .bq-ganga, .bq-sorp { position: absolute; z-index: 2; top: -8px; left: -6px; font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; padding: 4px 6px 3px; color: #fff3d6; background: var(--gx-red); transform: rotate(-4deg); box-shadow: 0 2px 0 rgba(22, 36, 28, .35); }
 .bq-sorp { background: var(--gx-ink); color: var(--gx-acc); }
 .bq-wdot { position: absolute; z-index: 2; top: 12px; right: 12px; width: 24px; height: 24px; }
@@ -274,6 +274,22 @@ html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
 /* la placa de La tienda de la portada: el punto del deseo o del regalo */
 .plq-dot { position: absolute; z-index: 4; top: -6px; right: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--gx-red); box-shadow: 0 0 0 3px #fff3d6, 0 2px 0 3px rgba(2, 6, 4, .5); }
 .bq-hit { gap: 5px; padding: 7px 7px 8px; }
-.bq-hit .bq-hk { font-size: 16px; }
-.bq-hit .bq-prow { flex-wrap: nowrap; }
-.bq-hit .bq-prow .bq-nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.bq-hit .bq-hk { font-size: 16px; white-space: nowrap; overflow: hidden; }
+.bq-hit .bq-prow { flex-wrap: wrap; row-gap: 2px; }   /* el nombre entero, en dos lineas si hace falta (con «…» se cortaba en los 12 idiomas) */
+.bq-hit .bq-prow .bq-nm { flex: 1 1 100%; min-width: 0; white-space: normal; text-wrap: balance; }
+.bq-hit .bq-prow .bq-pr { margin-left: auto; }
+
+#bqDet > * { min-width: 0; }   /* nada de la ficha se sale por la derecha (ru, 1280x800) */
+.bq-dd .bq-ddt + .bq-how { display: block; margin-top: 4px; }
+.bq-det.nodesc .bq-ddt { display: none; }   /* no cabe entera: fuera, nunca a medias */
+.bq-dth.bq-cprev { overflow: visible; }   /* la carta manda en su hueco */
+.bq-tplate { font-size: 18px; }   /* 18 px: la minima de la Deck, y la palabra larga cabe entera */
+/* «Lo quiero»: un corazon cuadrado al lado del ultimo boton (una fila menos: abajo se salia del panel) */
+.bq-acts:has(> #bqWish) { grid-template-columns: minmax(0, 1fr) auto; }
+.bq-acts:has(> #bqWish) > * { grid-column: 1 / -1; }
+.bq-acts > :nth-last-child(2):has(+ #bqWish) { grid-column: 1; }
+.bq-acts > #bqWish { grid-column: 2; justify-content: center; padding-left: 0; padding-right: 0; aspect-ratio: 1; }
+.bq-acts > #bqWish > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.bq-det.nodesc .bq-dd:not(.how):not(:has(.bq-how)) { display: none; }
+.bq-det.noname .bq-dn { display: none; }
+.bq-acts .gx-btn.wide { column-gap: 12px; }

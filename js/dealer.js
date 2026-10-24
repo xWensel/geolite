@@ -441,7 +441,7 @@ window.AIQ = window.AIQ || {};
       "Segundo acto: aquí la gente empieza a hablarle a la pantalla. Te oigo, por cierto.|Second act: this is where people start talking to the screen. I can hear you, by the way.|Deuxième acte : c'est là que les gens commencent à parler à l'écran. Je t'entends, au fait.|Segundo ato: é aqui que as pessoas começam a falar com a tela. Eu te ouço, aliás.|Zweiter Akt: Hier fangen die Leute an, mit dem Bildschirm zu reden. Ich hör dich übrigens.|Secondo atto: qui la gente inizia a parlare allo schermo. Ti sento, tra l'altro.||第二幕：从这里开始，大家会对着屏幕说话。顺便说一句，我听得见。|2막: 여기서부터 다들 화면에 대고 말하기 시작하지. 참고로, 다 들려.|第二幕。ここから人は画面に話しかけ始める。ちなみに、聞こえてるよ。|Второй акт: тут люди начинают разговаривать с экраном. Я тебя слышу, кстати.|Akt drugi: tu ludzie zaczynają mówić do ekranu. Swoją drogą, słyszę cię.",
     ],
     act3: [
-      "Acto III: Terra Incognita. De aquí nadie vuelve con el mapa entero. Ni con la dignidad.|Act III: Terra Incognita. Nobody comes back from here with a whole map. Or their dignity.|Acte III : Terra Incognita. Personne ne revient d'ici avec une carte entière. Ni avec sa dignité.|Ato III: Terra Incognita. Ninguém volta daqui com o mapa inteiro. Nem com a dignidade.|Akt III: Terra Incognita. Von hier kommt keiner mit vollständiger Karte zurück. Und auch nicht mit seiner Würde.|Atto III: Terra Incognita. Nessuno torna da qui con la mappa intera. Né con la dignità.||第三幕：未知之地。从这儿回去的人，地图没一张完整的。尊严也是。|3막: 테라 인코그니타. 여기서 지도를 온전히 들고 돌아간 사람은 없어. 체면도.|第三幕：テラ・インコグニタ。ここから完全な地図を持ち帰った者はいない。尊厳もね。|Акт III: Terra Incognita. Отсюда никто не возвращается ни с целой картой, ни с достоинством.|Akt III: Terra Incognita. Nikt nie wraca stąd z całą mapą. Ani z godnością.",
+      "Acto III: Terra Incognita. De aquí nadie vuelve con el mapa entero. Ni con la dignidad.|Act III: Terra Incognita. Nobody comes back from here with a whole map. Or their dignity.|Acte III : Terra Incognita. Personne ne revient d'ici avec une carte entière. Ni avec sa dignité.|Ato III: Terra Incognita. Ninguém volta daqui com o mapa inteiro. Nem com a dignidade.|Akt III: Terra Incognita. Von hier kommt keiner mit vollständiger Karte zurück. Und auch nicht mit seiner Würde.|Atto III: Terra Incognita. Nessuno torna da qui con la mappa intera. Né con la dignità.||第三幕：未知之地。从这儿回去的人，地图没一张完整的。尊严也是。|3막: 테라 인코그니타. 여기서 지도를 온전히 들고 돌아간 사람은 없어. 체면도.|第三幕：テラ・インコグニタ。ここから完全な地図を持ち帰った者はいない。尊厳もね。|Акт III: Терра инкогнита. Отсюда никто не возвращается ни с целой картой, ни с достоинством.|Akt III: Terra Incognita. Nikt nie wraca stąd z całą mapą. Ani z godnością.",
       "Último acto. Si llegas al final, me cierras la mesa. Casi nadie lo ha conseguido.|Final act. Reach the end and you shut down my table. Almost nobody has pulled it off.|Dernier acte. Si tu arrives au bout, tu fermes ma table. Presque personne n'y est arrivé.|Último ato. Se chegar ao fim, você fecha a minha mesa. Quase ninguém conseguiu.|Letzter Akt. Schaffst du es bis zum Ende, sprengst du meine Bank. Das hat kaum jemand geschafft.|Ultimo atto. Se arrivi alla fine, mi chiudi il tavolo. Quasi nessuno ci è riuscito.|Último acto. Si llegas al final, me cierras la mesa. Casi nadie lo consiguió.|最后一幕。撑到最后，你就能让我收摊。几乎没人做到过。|마지막 막. 끝까지 가면 내 테이블을 닫게 돼. 해낸 사람은 거의 없어.|最終幕。最後までたどり着けば、私のテーブルを閉店に追い込める。ほとんど誰もやってないけどね。|Последний акт. Дойдёшь до конца — закроешь мой стол. Почти никому это не удавалось.|Ostatni akt. Dojdziesz do końca — zamkniesz mój stół. Prawie nikomu się to nie udało.",
     ],
     finalBoss: [
@@ -2716,6 +2716,28 @@ window.AIQ = window.AIQ || {};
      portada, encima de la columna de Encargos o de la ficha del articulo. No se le corta: se encoge y la acaba en el mayor hueco libre de la pantalla
      nueva (la cabecera, el fondo vacio de un panel) sin tapar textos, fotos ni botones, y se va como siempre. Sin hueco, la acaba abajo a la izquierda */
   const ASIDE_G = 8;                                                            // rejilla de busqueda (px)
+  /* lo que no se puede tapar de la pantalla: textos, fotos, botones y los bordes de los paneles */
+  function busyRects() {
+    const out = [], mark = r => { if (r && r.width >= 2 && r.height >= 2) out.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }); };
+    const root = $("dlg"), rg = document.createRange(), seen = n => { const c = getComputedStyle(n); return c.visibility !== "hidden" && c.opacity !== "0"; };
+    for (const host of [root, $("hud"), $("dock")].filter(Boolean)) {
+      host.querySelectorAll("img, canvas, svg, button, input, select, [role=button], [data-tt]").forEach(e => { if (!e.closest(".dealer") && seen(e)) mark(e.getBoundingClientRect()); });
+      host.querySelectorAll("div, section, ul, article").forEach(e => {
+        const r = e.getBoundingClientRect(); if (r.width < 200 || r.height < 120 || r.width > innerWidth - 40) return;
+        const c = getComputedStyle(e); if (c.boxShadow === "none" && c.clipPath === "none" && !parseFloat(c.borderTopWidth) && c.backgroundImage === "none") return;
+        for (const b of [[r.left, r.top, r.right, r.top + 1], [r.left, r.bottom - 1, r.right, r.bottom], [r.left, r.top, r.left + 1, r.bottom], [r.right - 1, r.top, r.right, r.bottom]]) mark({ left: b[0], top: b[1], right: b[2], bottom: b[3], width: b[2] - b[0] + 2, height: b[3] - b[1] + 2 });
+      });
+      const tw = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+      for (let n; (n = tw.nextNode());) if (n.nodeValue.trim() && n.parentElement && !n.parentElement.closest(".dealer") && seen(n.parentElement)) { rg.selectNodeContents(n); for (const r of rg.getClientRects()) mark(r); }
+    }
+    return out;
+  }
+  /* ya colocado a un lado: si la pantalla termino de llenarse debajo de el (filas o fotos que entran tarde), tapa algo */
+  function asideCovers() {
+    if (!el || !el.classList.contains("aside")) return false;
+    const parts = [face, bubble].filter(n => n && getComputedStyle(n).display !== "none").map(n => n.getBoundingClientRect()).filter(r => r.width > 2);
+    return busyRects().some(b => parts.some(p => b.left < p.right - 2 && b.right > p.left + 2 && b.top < p.bottom - 2 && b.bottom > p.top + 2));
+  }
   function freeRect(minW, minH) {
     const W = Math.ceil(innerWidth / ASIDE_G), H = Math.ceil(innerHeight / ASIDE_G), busy = new Uint8Array(W * H), M = 10;
     const mark = r => { if (!r || r.width < 2 || r.height < 2) return; const x0 = Math.max(0, Math.floor((r.left - M) / ASIDE_G)), x1 = Math.min(W - 1, Math.floor((r.right + M) / ASIDE_G)), y0 = Math.max(0, Math.floor((r.top - M) / ASIDE_G)), y1 = Math.min(H - 1, Math.floor((r.bottom + M) / ASIDE_G)); for (let y = y0; y <= y1; y++) busy.fill(1, y * W + x0, y * W + x1 + 1); };
@@ -2770,8 +2792,24 @@ window.AIQ = window.AIQ || {};
     const talking = speaking(); if (D.onHome) D.homeTease(false);            // deja de asomar (la pantalla nueva suele haberlo hecho ya: js/game.js, dialog). A media frase: la acaba (release) y se va
     if (!el || D.host || !talking || !el.classList.contains("home")) return;
     el.classList.remove("home", ...HOME_CORNERS); el.classList.add("aside");
-    const go = () => { if (el.classList.contains("aside") && speaking()) asidePlace(); };
-    requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 320); setTimeout(go, 760);   // la pantalla nueva se ajusta (A.fitK) en sus primeros fotogramas
+    /* una sola medida, con la pantalla nueva ya quieta: antes media a los 2 fotogramas, a 320 y a 760 ms mientras la pantalla aun entraba como naipe
+       (A.relieve) y el crupier saltaba 2-3 veces (izquierda, encima de los paneles) antes de irse. Invisible hasta entonces; aparece ya en su sitio */
+    el.style.transition = "none"; el.style.opacity = "0";
+    const show = () => { el.style.transition = "opacity .18s"; el.style.opacity = ""; };
+    const go = () => {
+      if (!el.classList.contains("aside") || !speaking()) { show(); return; }
+      asidePlace();
+      if (asideCovers()) { D.hide(); requestAnimationFrame(show); return; }      // sin hueco de verdad: no sale (la frase la acaba sin el)
+      show();
+      setTimeout(() => { if (speaking() && asideCovers()) { el.style.transition = "opacity .25s"; el.style.opacity = "0"; setTimeout(() => { if (el.style.opacity === "0") { D.hide(); el.style.opacity = ""; } }, 260); } }, 600);   // nunca encima de nada: se retira, no salta
+    };
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const scr = document.querySelector("#dlg > *");
+      const anims = scr && scr.getAnimations ? scr.getAnimations({ subtree: true }).filter(an => { try { return an.effect && isFinite(an.effect.getComputedTiming().endTime); } catch (e) { return false; } }) : [];
+      const cap = new Promise(res => setTimeout(res, 1200));                 // por si alguna animacion no acaba nunca
+      const imgs = scr ? [...scr.querySelectorAll("img")].filter(im => !im.complete).map(im => new Promise(res => { im.addEventListener("load", res, { once: true }); im.addEventListener("error", res, { once: true }); })) : [];
+      Promise.race([Promise.all(anims.map(an => an.finished.catch(() => 0)).concat(imgs)), cap]).then(() => setTimeout(() => requestAnimationFrame(go), 250));   // y lo que entra tarde (filas, fotos)
+    }));
   };
   addEventListener("resize", () => { if (D.busy) fitCorner(); });
   D.refit = () => { if (D.busy) fitCorner(); };                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
@@ -2800,7 +2838,10 @@ window.AIQ = window.AIQ || {};
     if (!o.live && !o.pos && !o.table && sacred()) return;            // bloque D: LA PARTIDA ES SAGRADA (contestando o leyendo el ticket no habla; la mesa del autor si)
     const homeCtx = D.onHome && !D.host && !o.camp && !o.screen && !o.pos && !(el && el.closest("#vdDealer"));
     if (homeCtx && !o.bye) visit();                                   // en la portada, hablar es estar de visita (y alarga el rato); la despedida no
-    if (cornerTaken(o)) { if (!(pend && pend[1].live && !o.live)) pend = [line, o]; waitCorner(); return; }   // v0.3.79: el monton de tarjetas tiene la esquina (o la ha pedido): espera a que se vaya
+    if (cornerTaken(o)) { if (!(pend && pend[1].live && !o.live)) pend = [line, o]; waitCorner(); return; }
+    if (!o.force && !o.live && !o.table && !o.camp && document.querySelector("#dlg .gx-camp")) return;   // el Campamento es sin crupier (votado 23-oct): lo que esperaba turno (la subida de nivel tras la carta nueva) no sale ahi tapando la Barra
+    if (!o.force && !o.live && !o.pos && document.getElementById("cmRv")) { if (!(pend && pend[1].live)) pend = [line, o]; waitHold(); return; }   // la carta nueva del Club tapa el veredicto: espera a que se cierre
+    if (!o.force && !o.live && !o.pos && !D.host && A.core && A.core.S && A.core.S.paused) { if (!(pend && pend[1].live)) pend = [line, o]; waitHold(); return; }   // en la pausa no se le ve (su velo lo tapa): lo dice al volver   // v0.3.79: el monton de tarjetas tiene la esquina (o la ha pedido): espera a que se vaya
     if (el) ensure();
     const left = D.busy && el ? (typing ? Infinity : doneAt + LINGER - Date.now()) : 0;   // tambien las escenas (force) esperan a que acabe la frase en curso
     if (left > 0) { if (pend && pend[1].live && !o.live) return; if (!pend && left !== Infinity) later(flush, left); pend = [line, o]; return; }   // lo que te dice en directo no lo pisa una frase suya
@@ -2860,7 +2901,7 @@ window.AIQ = window.AIQ || {};
       }
       grow(i); sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
     };
-    typing = true; tick(); D.busy = true;
+    typing = true; if (o.fx === "blackout") later(tick, 1100); else tick(); D.busy = true;   // el apagon tapa 1,3 s: empieza a escribir cuando vuelve la luz
   };
   /* se va: lo que estuviera diciendo o fuera a decir se corta con el (antes seguia escribiendo oculto, con su voz, y el resto de la intro asomaba luego en la esquina) */
   D.hide = () => {
@@ -2896,6 +2937,8 @@ window.AIQ = window.AIQ || {};
   const pileOn = () => !!(A.codex && A.codex.toastOn && A.codex.toastOn());
   const cornerTaken = o => !o.force && !o.live && !o.pos && !o.camp && !o.screen && !o.table && !D.host && D.on && !D.onHome && (!!cornerAsk || pileOn());
   const grantCorner = () => { const f = cornerAsk; cornerAsk = null; clearTimeout(cornerT); if (f) f(); };
+  let holdW = 0;
+  function waitHold() { if (holdW) return; holdW = setInterval(() => { const S = A.core && A.core.S; if (document.getElementById("cmRv") || (S && S.paused)) return; clearInterval(holdW); holdW = 0; if (pend && !D.busy) flush(); }, 180); }
   function waitCorner() { if (cornerW) return; cornerW = setInterval(() => { if (pend && (cornerAsk || pileOn())) return; clearInterval(cornerW); cornerW = 0; if (pend && !D.busy) flush(); }, 160); }
   function giveCorner() { const p = pend; D.hide(); pend = p; if (pend) waitCorner(); }
   D.yieldCorner = (cb, max = 4500) => {

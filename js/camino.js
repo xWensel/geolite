@@ -73,7 +73,7 @@ window.AIQ = window.AIQ || {};
     const dots = SER.map((x, i) => `<button type="button" class="cm-sd${i === s ? " on" : ""}${(i * 10 + 1) <= lv ? " got" : ""}" data-s="${i}" aria-pressed="${i === s}" aria-label="${esc(P6(TX.serie).replace("{n}", i + 1).replace("{x}", P6(x.n)))}">${i + 1}</button>`).join("");
     const nodes = []; for (let L = a; L <= b; L++) nodes.push(node(L, lv));
     return `<div class="cm-bar"><button type="button" class="gx-btn sm gho" id="cmPrev"${s ? "" : " disabled"} aria-label="‹">‹</button>
-        <div class="cm-tt"><span class="gx-eyb">${esc(P6(TX.levels).replace("{a}", a).replace("{b}", b))}</span><b>${esc(P6(TX.serie).replace("{n}", s + 1).replace("{x}", P6(SER[s].n)))}</b></div>
+        <div class="cm-tt"><span class="gx-eyb">${esc(P6(TX.serie).replace("{n}", s + 1).replace("{x}", P6(TX.levels).replace("{a}", a).replace("{b}", b)))}</span><b>${esc(P6(SER[s].n))}</b></div>
         <nav class="cm-sds">${dots}</nav>
         <button type="button" class="gx-btn sm gho" id="cmNext"${s < 9 ? "" : " disabled"} aria-label="›">›</button></div>
       <div class="cm-nodes">${nodes.join("")}</div>
@@ -125,7 +125,7 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- la carta del mazo: sale boca abajo, se da la vuelta y se sella */
   function reveal(levels, o = {}) {
-    if (!levels || !levels.length || !S() || !C()) return;
+    if (!levels || !levels.length || !S() || !C()) { if (o.done) o.done(); return; }
     const app = $("app") || document.body, L = levels[levels.length - 1], k = Math.max(1, Math.min(3, o.k || 1)), rm = reduce();
     const old = $("cmRv"); if (old) old.remove();
     const r = document.createElement("div"); r.id = "cmRv"; r.className = "cm-rv"; r.setAttribute("role", "status");
@@ -145,7 +145,7 @@ window.AIQ = window.AIQ || {};
     sizeBack();
     r.querySelectorAll(".cm-rv-pv").forEach(cv => { S().back(cv); cv.style.width = host.style.width; cv.style.height = parseFloat(host.style.width) * 128 / 96 + "px"; });
     let done = false;
-    const close = () => { if (done) return; done = true; r.classList.add("out"); document.removeEventListener("keydown", onKey, true); setTimeout(() => r.remove(), rm ? 0 : 320); };
+    const close = () => { if (done) return; done = true; r.classList.add("out"); document.removeEventListener("keydown", onKey, true); setTimeout(() => { r.remove(); if (o.done) o.done(); }, rm ? 0 : 320); };   // o.done: lo que esperaba a que se cerrara la carta (la frase del crupier)
     const onKey = e => { e.preventDefault(); e.stopPropagation(); close(); };
     r.addEventListener("pointerdown", close);
     setTimeout(() => document.addEventListener("keydown", onKey, true), 400);

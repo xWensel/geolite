@@ -73,6 +73,7 @@ html.reduce-motion .dl-live i { animation: none; } html.reduce-motion .dl-bubble
    (x2 exacto) y el cirilico (Pixelify, mas alta que Jersey) tambien, para que no abulte mas que el resto. --dll escala todas las variantes del globo */
 html:lang(zh), html:lang(ja), html:lang(ko), html:lang(ru) { --dll: .889; }
 .dealer.big { position: relative; left: 0; bottom: 0; transform: none; opacity: 1; flex-direction: column; align-items: center; gap: 8px; z-index: 100010; }
+.dealer .dl-bubble { z-index: 5; }   /* el globo, siempre encima de su figura: al quitarse la chistera (o con las cartas en alto) el sombrero tapaba las letras */
 .dealer.big .dl-face { width: clamp(320px, calc(54 * var(--vh)), 540px); height: clamp(320px, calc(54 * var(--vh)), 540px); order: 2; }
 .dealer.big .dl-bubble { margin: 0; max-width: min(520px, calc(80 * var(--vw))); font-size: calc(27px * var(--dll, 1)); order: 1; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(50% + 10px) calc(100% - 12px), 50% 100%, calc(50% - 10px) calc(100% - 12px), 0 calc(100% - 12px)); padding-bottom: 20px; }
 @media (max-width: 720px) { .dl-face { width: 170px; height: 170px; } .dealer { bottom: 130px; } .dl-bubble { font-size: calc(22px * var(--dll, 1)); max-width: calc(62 * var(--vw)); margin-bottom: 20px; }

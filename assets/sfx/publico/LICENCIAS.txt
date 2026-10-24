@@ -5,4 +5,6 @@ comprobadas una a una el 23-oct-2026. https://creativecommons.org/publicdomain/z
 - vitores.mp3         Nox_Sound, 752708 "Cheer"                                                        https://freesound.org/people/Nox_Sound/sounds/752708/
 - ooow.mp3            Nox_Sound, 752706 "Awww"                                                         https://freesound.org/people/Nox_Sound/sounds/752706/
 - aplauso_largo.mp3   snakebarney, 138113 "Small Crowd Applause 1"                                     https://freesound.org/people/snakebarney/sounds/138113/
+- aplauso_largo_2.mp3 snakebarney, 138111 "Small Crowd Applause 3" (misma sala y misma sesion que 138113)  https://freesound.org/people/snakebarney/sounds/138111/
+- aplauso_largo_3.mp3 snakebarney, 138114 "Small Crowd Clapping 2" (misma sala y misma sesion que 138113)   https://freesound.org/people/snakebarney/sounds/138114/
 - oooh_1..4.mp3       noah0189, 264499 "Crowd Ooohs and Ahhhs in Excitement" (cuatro recortes)         https://freesound.org/people/noah0189/sounds/264499/

@@ -222,6 +222,7 @@
     for (const k in st) { const el = document.querySelector('.sw[data-sw="' + k + '"]'); if (el) el.setAttribute("aria-checked", !!st[k]); }
     const sg = document.querySelector('.sw[data-sw="songs"]'); if (sg) sg.closest(".row-sw").classList.toggle("off", !A.audio.musicOn);
     $("rowCursor").classList.toggle("hidden", !A.cursor.available);
+    { const dc = $("demoCredits"), cd = dc && dc.closest(".set-card"); if (cd) cd.classList.toggle("hidden", !(A.truco && A.truco.activo && A.truco.activo())); }   // el boton temporal de los creditos (solo en espanol): solo con el truco de pruebas (7x7)
     setTab(S.setTab, true); if (A.jukebox) A.jukebox.sync();
     const rs = $("resetSet"); if (rs && !rs.classList.contains("armed")) rs.textContent = A.t("set.reset"); $("resetSetNote").textContent = A.t("set.reset.d");
     const ra = $("resetAll"); if (ra && !ra.classList.contains("armed")) ra.textContent = A.pick6("Borrar todos mis datos y empezar de cero|Delete all my data and start over|Effacer toutes mes données et repartir de zéro|Apagar todos os meus dados e começar do zero|Alle meine Daten löschen und neu anfangen|Cancella tutti i miei dati e ricomincia da zero|Borrar todos mis datos y empezar de cero|删除我的全部数据，从头开始|내 데이터를 모두 지우고 처음부터 시작|すべてのデータを消して最初から始める|Удалить все мои данные и начать заново|Usuń wszystkie moje dane i zacznij od nowa");   // antes "(desarrollo)": es un borrado completo para cualquier jugador, con doble confirmacion
@@ -1080,6 +1081,9 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (iq != null) { const el = $("iqNum"); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, iq, { ms: 1400, delay: 1000 })); }
     buttons.forEach(b => ($(b.id).onclick = b.onclick));
     if (A.dealer && A.dealer.on) A.dealer.anchor($("vdDealer"));                // el crupier habla dentro del veredicto, sin tapar botones
+    /* los lugares del recibo, enteros: si un nombre largo (de, ru) no cabe, primero se va su distancia; si aun no, baja a dos lineas (antes, con «…»).
+       Antes de pintar: sin saltos */
+    requestAnimationFrame(() => document.querySelectorAll("#dlg .gx-vd-rows .gx-lead-row > span").forEach(s => { if (s.scrollWidth > s.clientWidth + 1) { s.classList.add("nokm"); if (s.scrollWidth > s.clientWidth + 1) s.classList.add("wrap"); } }));
     if (A.trastadas && A.trastadas.veredicto) A.trastadas.veredicto();          // bloque D: si cerraste la ronda con racha, la lluvia de cartas (nunca a media pregunta)
     if (club) A.club.play(club, document.querySelector("#dlg .gx-vd-club"), 1700);
     /* v0.3.203 (Bloque F, paso 6): cuando el sello cae (1,5 s + su golpe), hunde el ticket, la tinta se corre y la lampara sube segun el margen (js/celebra.js) */

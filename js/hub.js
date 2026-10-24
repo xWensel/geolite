@@ -63,6 +63,12 @@ window.AIQ = window.AIQ || {};
     const el = document.querySelector("#dlg > .hh"); if (!el) return;
     const all = [...el.querySelectorAll(".hh-cards .mcard")].map(card => { const win = card.querySelector(".mc-win"), pic = win && win.querySelector(".pic"); return { card, win, pic, im: pic && pic.querySelector(".pic-img"), hero: card.classList.contains("hero") }; }).filter(o => o.im);
     const sides = all.filter(o => !o.hero), hero = all.find(o => o.hero); if (!sides.length) return;
+    /* la misma portada (ventana, escala, idioma y textos) ya se ajusto: se ponen sus medidas sin volver a probar escalas. Antes, en cada arranque y en
+       cada vuelta a la portada, se repetia 3-4 veces (cada una, una maquetacion entera) justo mientras se reparten las cartas: el reparto iba a tirones */
+    const key = [innerWidth, innerHeight, window.devicePixelRatio || 1, A.lang, getComputedStyle(el).getPropertyValue("--k"), el.style.getPropertyValue("--k"), all.map(o => o.card.className + o.card.textContent).join("|")].join("#");
+    if (el._mcKey === key) return;
+    const memo = mcMemo.get(key);
+    if (memo && memo.length === all.length) { all.forEach((o, i) => { [o.card, o.win, o.pic, o.im].forEach((e, j) => { e.style.cssText = memo[i][j]; }); o.pic.classList.toggle("mc-cut", memo[i][4]); }); el._mcKey = key; return; }
     all.forEach(o => [o.card, o.win, o.pic, o.im].forEach(e => e.removeAttribute("style")));   // la medida natural de la portada: el hueco de cada arte
     all.forEach(o => { const cs = getComputedStyle(o.card), mw = getComputedStyle(o.win); o.ins = o.pic.offsetLeft; o.pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(mw.marginLeft) + parseFloat(mw.marginRight); o.w0 = parseFloat(cs.width); o.bw = o.pic.clientWidth; o.bh = o.pic.clientHeight; });   // .pic va metida 3 px en su ventana
     const z = sides[0].win.currentCSSZoom || 1, r = z * (window.devicePixelRatio || 1), so = el.querySelector(".hh-socio-w"), c0 = sides[0].card.getBoundingClientRect().left;
@@ -78,7 +84,10 @@ window.AIQ = window.AIQ || {};
       const h = Math.max(...sides.map(o => o.card.offsetHeight)); sides.forEach(o => { o.card.style.minHeight = h + "px"; });   // las dos laterales, en espejo: el mismo alto
       if (k === 1 || ok()) break;
     }
+    mcMemo.set(key, all.map(o => [o.card, o.win, o.pic, o.im].map(e => e.style.cssText).concat(o.pic.classList.contains("mc-cut")))); if (mcMemo.size > 12) mcMemo.delete(mcMemo.keys().next().value);
+    el._mcKey = key;
   };
+  const mcMemo = new Map();
   addEventListener("resize", () => { if (document.querySelector(".hh")) requestAnimationFrame(mcFit); });
   let homeDealt = false;
   function home() {
@@ -298,6 +307,10 @@ window.AIQ = window.AIQ || {};
     nm.forEach((b, i) => { b.style.whiteSpace = ""; const [w, cw] = ws[i], f = Math.floor(24 * cw / w); if (w > cw + 1 && f >= 18) b.style.fontSize = f + "px"; });
     nm.forEach(b => { for (let f = parseFloat(b.style.fontSize) || 24; f > 18 && b.scrollWidth > b.clientWidth + 1; ) b.style.fontSize = --f + "px"; });   // una palabra sola que no cabe
     const dd = [...document.querySelectorAll(".av-dd")], over = () => dd.filter(e => e.scrollHeight > e.clientHeight + 1);
+    /* se puede repetir: deshace el recorte anterior y mide otra vez (la pantalla cambia de escala, A.fitK, despues de abrirse: medido antes, el
+       texto se quedaba cortado con «…» y dos lineas libres debajo) */
+    dd.forEach(e => { e.classList.remove("trim"); e.style.webkitLineClamp = e.style.maxHeight = ""; e.removeAttribute("data-tt"); });
+    if ($("avDecks")) $("avDecks").classList.remove("tight");
     if (!over().length) return;
     $("avDecks").classList.add("tight");
     const cut = over().map(e => [e, parseFloat(getComputedStyle(e).lineHeight) || 21, e.clientHeight]);
@@ -309,7 +322,7 @@ window.AIQ = window.AIQ || {};
     if (advSel.asc > A.profile.get().adv.asc) advSel.asc = 0;
     c.dialog(avHtml(sm, saved), "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
-    avFit();
+    avFit(); requestAnimationFrame(avFit);                            // y otra vez ya a su escala (A.fitK va en el fotograma siguiente, antes de pintar)
     if (A.coverMap) A.coverMap("adventure", true, () => !!document.querySelector("#dlg .av-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
     const sub = () => { const el = $("avNewSub"); if (el) el.textContent = `${A.tx(D[advSel.deck].n)} · A${advSel.asc}`; };
     $("avDecks").onclick = e => {
@@ -512,7 +525,7 @@ window.AIQ = window.AIQ || {};
     hint: () => A.pick6("Pulsa tu carta para cambiarla|Press your card to change it|Appuie sur ta carte pour la changer|Toque na sua carta para trocá-la|Tippe deine Karte an, um sie zu ändern|Tocca la tua carta per cambiarla||点击你的会员卡来更换|카드를 눌러 바꿔요|カードを押して変更|Нажми на карту, чтобы изменить|Dotknij karty, aby ją zmienić"),
     cardTt: () => A.pick6("Tu carta|Your card|Ta carte|Sua carta|Deine Karte|La tua carta||你的会员卡|내 카드|きみのカード|Твоя карта|Twoja karta"),
     col: "Colecciones|Collections|Collections|Coleções|Sammlungen|Collezioni||收藏|컬렉션|コレクション|Коллекции|Kolekcje",
-    soon: "Pronto|Soon|Bientôt|Em breve|Bald|Presto||即将推出|곧 만나요|近日公開|Скоро|Wkrótce",
+    soon: "Pronto|Soon|Bientôt|Em breve|Bald|Presto||即将推出|곧 만나요|近日|Скоро|Wkrótce",
   };
   /* lo que se pinta (tambien para el precalentamiento de la puerta, A.gala.warm: la primera apertura perdia fotogramas) y la pagina del libro */
   function pfBuild() {
@@ -562,7 +575,7 @@ window.AIQ = window.AIQ || {};
     };
     const ix = (p, ic, name, n, cls = "") => `<button type="button" class="pf-ix${pfPage === p ? " on" : ""}${cls}" data-p="${p}">${A.icon(ic)}<span>${name}</span><i>${n}</i></button>`;
     const nm = P.name || A.pick6("Anónimo|Anonymous|Anonyme|Anônimo|Anonym|Anonimo||匿名|익명|匿名|Аноним|Anonim");
-    const since = P.created ? A.pick6("Socio desde el {d}|Member since {d}|Membre depuis le {d}|Sócio desde {d}|Mitglied seit {d}|Socio dal {d}||{d} 入会|{d} 가입|{d} 入会|С нами с {d}|Członek od {d}").replace("{d}", day(P.created)) : "";
+    const since = P.created ? A.pick6("Socio desde el {d}|Member since {d}|Depuis le {d}|Sócio desde {d}|Mitglied seit {d}|Socio dal {d}||{d} 入会|{d} 가입|{d} 入会|С нами с {d}|Członek od {d}").replace("{d}", day(P.created)) : "";
     const html = `<div class="gx-veil"></div><section class="pf-screen gx-stage s-prof" aria-labelledby="pfH" data-nosq>
       <div class="gx-grid pf-grid12">
         <header class="pf-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>

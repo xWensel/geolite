@@ -81,3 +81,5 @@ html[data-skin="casino"] #tip { border-radius: 8px; box-shadow: 0 4px 0 rgba(0, 
 html[data-skin="casino"] #factText { font-style: normal; font-size: 19px; }
 
 
+
+html:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }   /* coreano: se parte entre palabras, no entre silabas */

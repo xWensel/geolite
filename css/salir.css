@@ -43,7 +43,7 @@
 @keyframes qx-pop { from { opacity: 0; transform: translateY(46px); } }   /* v0.32: sin escalar (el sprite hace su propio bote) */
 .qx-stage .dealer.big .dl-face { width: var(--face); height: var(--face); transition: filter .25s; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .45)) drop-shadow(0 0 22px rgba(255, 214, 140, .25)); }
 /* el bocadillo empieza donde acaba su figura (--crk, a escala entera): su mano con las cartas ya no se come la primera letra (23-oct) */
-.qx-stage .dealer.big .dl-bubble, .qxc-stage .dealer.big .dl-bubble { position: absolute; left: max(calc(100% - 8px), calc(var(--crk, 0px) + 6px)); bottom: 56%; width: max-content; max-width: min(420px, calc(50 * var(--vw) - var(--face) / 2 - 12px)); margin: 0;
+.qx-stage .dealer.big .dl-bubble, .qxc-stage .dealer.big .dl-bubble { position: absolute; left: max(calc(100% - 8px), calc(var(--crk, 0px) / var(--k, 1) + 6px)); bottom: 56%; width: max-content; max-width: min(420px, calc(50 * var(--vw) + var(--face) / 2 - max(calc(var(--face) - 8px), calc(var(--crk, 0px) / var(--k, 1) + 6px)) - 16px)); margin: 0;
   padding: 11px 18px 13px 16px; font-family: var(--sans); font-weight: 400; font-size: calc(27px * var(--dll, 1)); line-height: 1.12; transform-origin: 0 100%; clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); }
 
 /* J9 (Bloque J): la tarjeta es del sistema "Naipe de gala": panel de fieltro con filete de laton (.gx-pnl) y la penumbra dura DETRAS (sombra del sistema).

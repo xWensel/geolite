@@ -732,10 +732,18 @@ void main(){
     for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); p.u[info.name.replace("[0]", "")] = gl.getUniformLocation(p, info.name); }
     return p;
   }
+  /* el oceano, una version por mesa: FS_OCEAN lleva el agua de TODAS las mesas (u_style, u_mat) y el compilador de la GPU (D3D en Windows) tardaba
+     ~10 s con la cache vacia (primer arranque, o tras actualizar el controlador) en compilarlo entero, con el juego congelado. Con la mesa fija como
+     constante, cada version solo lleva su rama; se compila al ponerla (la de la mesa puesta, al arrancar) y se guarda */
+  function oceanProg(gl, cache, style, mat) {
+    const key = style + "|" + mat; let p = cache.get(key); if (p) return p;
+    const src = FS_OCEAN.replace("uniform int u_style;", "const int u_style=" + (style | 0) + ";").replace("uniform int u_mat;", "const int u_mat=" + (mat | 0) + ";");
+    p = compile(gl, VS_FULL, src); cache.set(key, p); return p;
+  }
   function buildPrograms(gl) {
     return {
       sil: compile(gl, VS_FILL, FS_SIL), solid: compile(gl, VS_FILL, FS_SOLID), land: compile(gl, VS_FILL, FS_LAND), hatch: compile(gl, VS_FILL, FS_HATCH),
-      line: compile(gl, VS_LINE, FS_LINE), blur: compile(gl, VS_FULL, FS_BLUR), ocean: compile(gl, VS_FULL, FS_OCEAN), post: compile(gl, VS_FULL, FS_POST), swirl: compile(gl, VS_FULL, FS_SWIRL),
+      line: compile(gl, VS_LINE, FS_LINE), blur: compile(gl, VS_FULL, FS_BLUR), post: compile(gl, VS_FULL, FS_POST), swirl: compile(gl, VS_FULL, FS_SWIRL),
     };
   }
 
@@ -1134,7 +1142,7 @@ void main(){
 
     /* ---------- GL: programas, geometria y buffers ---------- */
     _initGL() {
-      const gl = this.gl; this.P = buildPrograms(gl);
+      const gl = this.gl; this.P = buildPrograms(gl); this._oc = new Map();
       // geometria: triangulos (earcut) y segmentos de frontera
       const pos = [], ci = [], ct = [], sct = [], idx = [], segs = [];
       this._initContinents();
@@ -1928,19 +1936,20 @@ void main(){
       // 3) escena: oceano + reticula, tierra, fronteras, resalte
       gl.bindFramebuffer(gl.FRAMEBUFFER, scene.fbo); gl.viewport(0, 0, sw, sh);
       const sc = scale(sw), gp = this._gridParams();
-      gl.useProgram(P.ocean); gl.bindVertexArray(this.vaoEmpty);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.ocean.u.u_blurN, 0);
-      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bW.tex); gl.uniform1i(P.ocean.u.u_blurW, 1);
-      if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(P.ocean.u.u_swirl, 2); }
-      gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, (bX || bW).tex); gl.uniform1i(P.ocean.u.u_blurX, 3);
-      gl.uniform1i(P.ocean.u.u_mat, ms.mat); this._u(P.ocean, "u_mc1", ...ms.mc1); this._u(P.ocean, "u_mc2", ...ms.mc2); this._u(P.ocean, "u_mp", ...ms.mp);
-      this._u(P.ocean, "u_center", cw, v.cy); this._u(P.ocean, "u_scale", sc); this._u(P.ocean, "u_res", sw, sh); this._u(P.ocean, "u_dpr", dpr * RS); this._setDist(P.ocean);
-      this._u(P.ocean, "u_oTop", ...ms.oTop); this._u(P.ocean, "u_oBot", ...ms.oBot); this._u(P.ocean, "u_shallow", ...ms.shallow); this._u(P.ocean, "u_grid", ...ms.grid); this._u(P.ocean, "u_tropic", ...ms.tropic);
-      this._u(P.ocean, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(P.ocean, "u_felt", f[0], f[1], f[2], f[3]); }
-      this._u(P.ocean, "u_time", this.fxOn === false ? 0 : now / 1000); gl.uniform1i(P.ocean.u.u_style, st.style || 0);
+      const PO = oceanProg(gl, this._oc || (this._oc = new Map()), st.style || 0, ms.mat || 0);   // la version del oceano de esta mesa (se compila una vez)
+      gl.useProgram(PO); gl.bindVertexArray(this.vaoEmpty);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(PO.u.u_blurN, 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bW.tex); gl.uniform1i(PO.u.u_blurW, 1);
+      if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(PO.u.u_swirl, 2); }
+      gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, (bX || bW).tex); gl.uniform1i(PO.u.u_blurX, 3);
+       this._u(PO, "u_mc1", ...ms.mc1); this._u(PO, "u_mc2", ...ms.mc2); this._u(PO, "u_mp", ...ms.mp);
+      this._u(PO, "u_center", cw, v.cy); this._u(PO, "u_scale", sc); this._u(PO, "u_res", sw, sh); this._u(PO, "u_dpr", dpr * RS); this._setDist(PO);
+      this._u(PO, "u_oTop", ...ms.oTop); this._u(PO, "u_oBot", ...ms.oBot); this._u(PO, "u_shallow", ...ms.shallow); this._u(PO, "u_grid", ...ms.grid); this._u(PO, "u_tropic", ...ms.tropic);
+      this._u(PO, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(PO, "u_felt", f[0], f[1], f[2], f[3]); }
+      this._u(PO, "u_time", this.fxOn === false ? 0 : now / 1000); 
       { const it = this._it, hv = this.mouse, live = this._livingMat(), age = it && live ? (now - it.t) / 1000 : -1;
-        this._u(P.ocean, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
-        this._u(P.ocean, "u_hv", hv && live ? hv.x * sw / this.W : -9999, hv && live ? (this.H - hv.y) * sh / this.H : -9999); }
+        this._u(PO, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
+        this._u(PO, "u_hv", hv && live ? hv.x * sw / this.W : -9999, hv && live ? (this.H - hv.y) * sh / this.H : -9999); }
       { let nb = 0;                                                                                      // Periodico: la pagina con notas de la Enciclopedia entra entre 30x y 60x de zoom
         if (ms.mat === 33 && A.periodico) { nb = Math.min(1, Math.max(0, (v.s / this.minS - 30) / 30));
           if (nb > 0) { const c0 = this.screenToLonLat(this.W / 2, this.H / 2), pg = A.periodico.page(c0[0], c0[1]);
@@ -1948,10 +1957,10 @@ void main(){
             if (!this._newsTex) { this._newsTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, this._newsTex); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); this._newsVer = -1; }
             gl.bindTexture(gl.TEXTURE_2D, this._newsTex);
             if (this._newsVer !== pg.ver) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pg.canvas); this._newsVer = pg.ver; }
-            gl.uniform1i(P.ocean.u.u_news, 4); this._u(P.ocean, "u_nw", nb, pg.W, pg.H, 0); gl.activeTexture(gl.TEXTURE0); this._nw = [nb, pg.W, pg.H]; } }
-        if (!(nb > 0)) { this._u(P.ocean, "u_nw", 0, 1024, 640, 0); this._nw = null; } }
-      this._u(P.ocean, "u_sw1", ...ms.sw[0]); this._u(P.ocean, "u_sw2", ...ms.sw[1]); this._u(P.ocean, "u_sw3", ...ms.sw[2]);
-      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(P.ocean, "u_calm", st.remolino === false ? 2.25 : this._calm); }   // sin remolino: el color medio del oceano, liso   // la calma entra poco a poco (~0,7 s)
+            gl.uniform1i(PO.u.u_news, 4); this._u(PO, "u_nw", nb, pg.W, pg.H, 0); gl.activeTexture(gl.TEXTURE0); this._nw = [nb, pg.W, pg.H]; } }
+        if (!(nb > 0)) { this._u(PO, "u_nw", 0, 1024, 640, 0); this._nw = null; } }
+      this._u(PO, "u_sw1", ...ms.sw[0]); this._u(PO, "u_sw2", ...ms.sw[1]); this._u(PO, "u_sw3", ...ms.sw[2]);
+      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(PO, "u_calm", st.remolino === false ? 2.25 : this._calm); }   // sin remolino: el color medio del oceano, liso   // la calma entra poco a poco (~0,7 s)
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       gl.bindVertexArray(this.vaoFill);

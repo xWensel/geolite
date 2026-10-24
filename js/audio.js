@@ -482,7 +482,7 @@ window.AIQ = window.AIQ || {};
      cada vez con un punto distinto de tono, volumen y lado. Nunca abuchean. Van por el bus de efectos (el regulador de Efectos los mueve) y se
      cargan al arrancar, en segundo plano: nada se descodifica en mitad de una partida. El nivel es el de la maqueta (0 dB): la grabacion a -20 dB
      en la entrada de la mezcla, con los reguladores de fabrica */
-  const PUB = { diana: ["aplauso_corto"], porpoco: ["oooh_1", "oooh_2", "oooh_3", "oooh_4"], racha5: ["vitores"], rota: ["ooow"], jackpot: ["aplauso_vitores"], ronda: ["aplauso_largo"] };
+  const PUB = { diana: ["aplauso_corto"], porpoco: ["oooh_1", "oooh_2", "oooh_3", "oooh_4"], racha5: ["vitores"], rota: ["ooow"], jackpot: ["aplauso_vitores"], ronda: ["aplauso_largo", "aplauso_largo_2", "aplauso_largo_3"] };   // la ronda: tres tomas de la misma sala y la misma tarde (snakebarney); las demas reacciones son tomas unicas de su serie
   const PUB_G = 0.1 / (0.9 * SFX_K), pubB = {}, pubUlt = {}; let pubIni = false;
   function pubCarga() {
     if (pubIni || !ctx) return; pubIni = true;

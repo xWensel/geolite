@@ -100,13 +100,13 @@ window.AIQ = window.AIQ || {};
   };
   /* los titulos: ach = se gana con ese logro; duel = duelos ganados a la banca; p = precio en la tienda */
   const TITLES = [
-    { id: "ojo", ach: "bull_100", n: "Ojo de halcón|Hawk eye|Œil de faucon|Olho de falcão|Falkenauge|Occhio di falco||鹰眼|매의 눈|鷹の目|Соколиный глаз|Sokole oko" },
+    { id: "ojo", ach: "bull_100", n: "Ojo de halcón|Hawk eye|Œil de faucon|Olho de falcão|Falkenauge|Occhio di falco||鹰眼|매의 눈|鷹の目|Соко­линый глаз|Sokole oko" },
     { id: "racha", ach: "streak_20", n: "Racha de oro|Golden streak|Série en or|Sequência de ouro|Goldene Serie|Serie d'oro||黄金连胜|황금 연승|黄金の連勝|Золотая серия|Złota passa" },
-    { id: "enciclo", ach: "codex_1000", n: "Enciclopedia andante|Walking encyclopedia|Encyclopédie vivante|Enciclopédia ambulante|Wandelndes Lexikon|Enciclopedia ambulante||活百科全书|걸어 다니는 백과사전|歩く百科事典|Ходячая энциклопедия|Chodząca encyklopedia" },
-    { id: "capital", ach: "classic_capitals", n: "Mente capital|Capital mind|Esprit capital|Mente capital|Hauptstadtkopf|Mente capitale||首都通|수도 박사|首都の達人|Столичный ум|Stołeczny umysł" },
-    { id: "mar", ach: "codex_water", n: "Alma marinera|Sea soul|Âme de marin|Alma de marinheiro|Seemannsseele|Anima marinara||航海之魂|바다의 영혼|海の魂|Морская душа|Dusza żeglarza" },
+    { id: "enciclo", ach: "codex_1000", n: "Enciclopedia andante|Walking encyclopedia|Encyclo­pédie vivante|Enciclopédia ambulante|Wandelndes Lexikon|Enciclopedia ambulante||活百科全书|걸어 다니는 백과사전|歩く百科事典|Ходячая энцикло­педия|Chodząca encyklopedia" },
+    { id: "capital", ach: "classic_capitals", n: "Mente capital|Capital mind|Esprit capital|Mente capital|Haupt­stadt­kopf|Mente capitale||首都通|수도 박사|首都の達人|Столич­ный ум|Stołeczny umysł" },
+    { id: "mar", ach: "codex_water", n: "Alma marinera|Sea soul|Âme de marin|Alma de marinheiro|See­manns­seele|Anima marinara||航海之魂|바다의 영혼|海の魂|Морская душа|Dusza żeglarza" },
     { id: "casa", ach: "adv_wins10", n: "De vuelta a casa|Home again|De retour à la maison|De volta para casa|Wieder zu Hause|Di nuovo a casa||凯旋归来|귀환|ただいま帰還|Снова дома|Z powrotem w domu" },
-    { id: "banca", duel: 25, n: "Le gana a la banca|Beats the house|Bat la banque|Vence a banca|Schlägt die Bank|Batte il banco||赢过庄家|하우스를 이긴 자|胴元に勝つ者|Обыгрывает казино|Ogrywa kasyno" },
+    { id: "banca", duel: 25, n: "Le gana a la banca|Beats the house|Bat la banque|Vence a banca|Schlägt die Bank|Batte il banco||赢过庄家|하우스를 이긴 자|胴元に勝つ者|Обыгры­вает казино|Ogrywa kasyno" },
     { id: "vuelta", ach: "classic_world", n: "La vuelta al mundo|Around the world|Le tour du monde|A volta ao mundo|Einmal um die Welt|Il giro del mondo||环游世界|세계 일주|世界一周|Вокруг света|Dookoła świata" },
     { id: "turista", p: 20, n: "Turista accidental|Accidental tourist|Touriste par hasard|Turista acidental|Zufallstourist|Turista per caso||意外的游客|우연한 여행자|うっかり観光客|Случайный турист|Przypadkowy turysta" },
     { id: "mapa", p: 20, n: "Mapa en mano|Map in hand|Carte en main|Mapa na mão|Karte in der Hand|Mappa alla mano||地图在手|지도를 든 자|地図を片手に|С картой в руке|Z mapą w ręku" },

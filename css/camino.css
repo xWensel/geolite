@@ -51,8 +51,8 @@
 .cm-art canvas { display: block; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(2, 6, 4, .45)); }
 .cm-viva { position: absolute; right: 4px; top: 0; font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; color: #c46a1b; }
 .cm-rw { display: grid; gap: 3px; justify-items: center; align-content: start; width: 100%; min-width: 0; height: 74px; }   /* sitio para tres lineas en todas: las cartas quedan a la misma escala y a la misma altura */
-.cm-b { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; font-family: var(--sans); font-size: 18px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--gx-ink); }
-.cm-b .ck-fi.sm { width: 18px; height: 18px; margin: 0 2px 0 0; vertical-align: 0; }
+.cm-b { display: block; max-width: 100%; font-family: var(--sans); font-size: 18px; line-height: 1.05; text-align: center; text-wrap: balance; color: var(--gx-ink); }   /* el premio entero, en dos lineas si hace falta (antes se cortaba en seco) */
+.cm-b .ck-fi.sm { display: inline-block; width: 18px; height: 18px; margin: 0 2px 0 0; vertical-align: -3px; }
 .cm-b.f { color: var(--gx-gold-lo); }
 .cm-b.t { color: #ffd98a; background: #2a1e14; padding: 3px 5px 2px; }
 .cm-b.c { color: #ffe39a; background: #8f1426; padding: 3px 5px 2px; }

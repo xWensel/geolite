@@ -225,9 +225,9 @@ window.AIQ = window.AIQ || {};
   const DECKS = {
     explorer: { ico: "deck_explorer", n: L("Explorador", "Explorer"), d: L("Un Sonar y 4 doblones. La baraja para aprender.", "A Sonar and 4 doubloons. The deck for learning."), tools: ["sonar"], perks: [], coins: 4, lives: 3, unlock: null },
     /* con los nombres de ahora de sus cartas (antes Cuaderno, Diccionario, Brujula de 16 rumbos y Linterna de minero, que ya no existen) */
-    historian: { ico: "deck_historian", n: L("Historiador", "Historian"), d: L6("Libro de la casa y Soplo del crupier: siempre sabes por dónde empezar.|House ledger and Dealer's tip-off: you always know where to start.|Registre de la maison et Tuyau du croupier : tu sais toujours par où commencer.|Livro da casa e Dica do crupiê: você sempre sabe por onde começar.|Hausregister und Tipp vom Croupier: Du weißt immer, wo du anfangen musst.|Registro della casa e Soffiata del croupier: sai sempre da dove partire.|Libro de la casa y Soplo del crupier: siempre sabes por dónde empezar.|赌场账簿与荷官的暗示：你总知道从哪儿下手。|하우스 장부와 딜러의 귀띔: 어디서 시작할지 늘 압니다.|ハウスの帳簿とディーラーの耳打ち：どこから始めるか、いつもわかる。|«Книга заведения» и «Наводка крупье»: ты всегда знаешь, с чего начать.|Księga kasyna i cynk od krupiera: zawsze wiesz, od czego zacząć."), tools: [], perks: ["almanac", "sextant"], coins: 3, lives: 3, unlock: "adv_win", asc: 0 },
+    historian: { ico: "deck_historian", n: L("Historiador", "Historian"), d: L6("Libro de la casa y Soplo del crupier: siempre sabes por dónde empezar.|House ledger and Dealer's tip-off: you always know where to start.|Registre de la maison et Tuyau du croupier : tu sais toujours par où commencer.|Livro da casa e Dica do crupiê: você sempre sabe por onde começar.|Hausregister und Tipp vom Croupier: Du weißt immer, wo du anfangen musst.|Registro della casa e Soffiata del croupier: sai sempre da dove partire.|Libro de la casa y Soplo del crupier: siempre sabes por dónde empezar.|赌场账簿与荷官的暗示：你总知道从哪儿下手。|하우스 장부와 딜러의 귀띔: 어디서 시작할지 늘 압니다.|ハウスの帳簿とディーラーの耳打ち：どこから始めるか、いつもわかる。|«Книга заведения» и «Наводка крупье»: верный старт.|Księga kasyna i cynk od krupiera: zawsze wiesz, od czego zacząć."), tools: [], perks: ["almanac", "sextant"], coins: 3, lives: 3, unlock: "adv_win", asc: 0 },
     navigator: { ico: "deck_navigator", n: L("Navegante", "Navigator"), d: L6("Dos brújulas y el Catalejo. Nunca te pierdes.|Two compasses and the Spyglass. You never get lost.|Deux boussoles et la Longue-vue. Tu ne te perds jamais.|Duas bússolas e a Luneta. Você nunca se perde.|Zwei Kompasse und das Fernrohr. Du verirrst dich nie.|Due bussole e il Cannocchiale. Non ti perdi mai.||两个指南针加望远镜。你永远不会迷路。|나침반 두 개와 망원경. 절대 길을 잃지 않습니다.|2つのコンパスと望遠鏡。決して迷わない。|Два компаса и подзорная труба. Ты никогда не заблудишься.|Dwa kompasy i luneta. Nigdy się nie zgubisz."), tools: ["compass", "compass"], perks: ["glass"], coins: 3, lives: 3, unlock: "adv_asc", asc: 1 },
-    blind: { ico: "deck_blind", n: L("Aventurero ciego", "Blind adventurer"), d: L6("Sin herramientas, con el Foco del vigilante y 4 provisiones.|No tools, but the Pit boss's spotlight and 4 provisions.|Sans outils, avec le Projecteur du chef de table et 4 provisions.|Sem ferramentas, com o Holofote do supervisor e 4 provisões.|Ohne Werkzeuge, mit dem Scheinwerfer des Pitbosses und 4 Proviant.|Senza strumenti, con il Faro del capotavolo e 4 provviste.||没有工具，携带场务经理的聚光灯与 4 份补给。|도구 없이 플로어 매니저의 스포트라이트와 식량 4개.|道具なし。ピットボスのスポットライトと食料4つで出発。|Без инструментов, с прожектором пит-босса и 4 запасами.|Bez narzędzi, z reflektorem szefa sali i 4 zapasami."), tools: [], perks: ["miner"], coins: 6, lives: 4, unlock: "adv_asc2", asc: 2 },
+    blind: { ico: "deck_blind", n: L("Aventurero ciego", "Blind adventurer"), d: L6("Sin herramientas, con el Foco del vigilante y 4 provisiones.|No tools, but the Pit boss's spotlight and 4 provisions.|Sans outils, avec le Projecteur du chef de table et 4 provisions.|Sem ferramentas, com o Holofote do supervisor e 4 provisões.|Ohne Werkzeuge, mit dem Scheinwerfer des Pitbosses und 4 Proviant.|Senza strumenti, con il Faro del capotavolo e 4 provviste.||没有工具，携带场务经理的聚光灯与 4 份补给。|도구 없이 플로어 매니저의 스포트라이트와 식량 4개.|道具なし。ピットボスのスポットライトと食料4つで出発。|Прожектор пит-босса и 4 запаса — и всё.|Bez narzędzi, z reflektorem szefa sali i 4 zapasami."), tools: [], perks: ["miner"], coins: 6, lives: 4, unlock: "adv_asc2", asc: 2 },
   };
   const TOPIC_ICON = { capital: "t_capital", landmark: "t_landmark", city: "t_city", country: "t_country", history: "t_battle", nature: "t_nature", clue: "t_curio", character: "t_person", culture: "t_event", mixed: "slot", flag: "t_country" };
   const BOSS_IC = "boss_hat";                                        // v0.35: el jefe del acto es la chistera del crupier (los mismos pixeles de su retrato: tools/crupier/chistera.py)
@@ -1502,14 +1502,14 @@ window.AIQ = window.AIQ || {};
     const r = roundNo(), cf = chalFor(r), c = cf.list.find(x => x.id === id); if (!c) return; const cost = bribePrice(c, cf.boss);
     if (run.coins < cost) { A.sfx.deny(); flash(A.T("No te alcanzan los doblones.", "Not enough doubloons.")); return; }
     run.coins -= cost; run.bribeN = (run.bribeN || 0) + 1; run.bribed = run.bribed || {}; (run.bribed[r] = run.bribed[r] || []).push(id); A.sfx.buy(); persist(); A.ach.emit("adv", { kind: "bribe" });
-    A.dealer.enable(true); A.dealer.say(A.dealer.line("bribe"), { mood: "angry", hold: 1800 }); renderShop(run.phase === "chest");
+    renderShop(run.phase === "chest");
   }
   function rerollChal() {
     if (!tapOnce("shuffle")) return;
     const r = roundNo(), cost = chalRerollCost(); if (run.coins < cost) { A.sfx.deny(); flash(A.T("No te alcanzan los doblones.", "Not enough doubloons.")); return; }
     if (freeShuf()) { run.freeShuf = run.shopKey; A.adv.flash("spyhole", 0, A.tx(H_FREE)); }
     run.coins -= cost; run.salt = run.salt || {}; run.salt[r] = (run.salt[r] || 0) + 1; A.sfx.reroll(); persist();   // los sobornos pagados se quedan: si el truco vuelve a salir, sigue fuera
-    A.dealer.enable(true); A.dealer.say(A.dealer.line("reroll"), { mood: "laugh", hold: 1800 }); renderShop(run.phase === "chest");
+    renderShop(run.phase === "chest");
   }
   const routeHtml = () => A.adv.road({ size: "bar", route: run.route, cur: roundNo() });   // siempre las 12 rondas y el infinito (antes, una ventana de 12 que se corria)
   const rerollCost = () => { const sx = shopCtx(); return run.freeUsed < sx.freeReroll ? 0 : price(3 + run.rerolls); };
@@ -1836,7 +1836,7 @@ window.AIQ = window.AIQ || {};
       el.querySelectorAll("[data-n]").forEach(btn => (btn.onclick = e => {
         e.stopPropagation(); const retos = offerRetos(r, +btn.dataset.n), pay = retos.reduce((m, c) => m + offerPay(c), 0);
         run.bets = run.bets || {}; run.bets[r] = { id: "offer", retos, pay }; run.coins += pay; persist(); renderShop(false);
-        A.casa.premio(1); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "laugh", hold: 2400 });   // lluvia de monedas
+        A.casa.premio(1);   // lluvia de monedas
       }));
       el.onclick = () => { const b = (run.bets || {})[r]; if (!b || b.id !== "offer") return; if (run.coins < b.pay) { A.sfx.deny(); shake(el); return; } run.coins -= b.pay; delete run.bets[r]; A.sfx.sell(); persist(); renderShop(false); };   // en la misma visita, te echas atras devolviendo lo cobrado
       return;
@@ -1911,7 +1911,7 @@ window.AIQ = window.AIQ || {};
       const retos = pickSealed(r, k === "final" ? 2 : 1, k === "final" ? "final" : "doble"); if (!retos.length) { A.sfx.deny(); shake(el); return; }
       run.bets[r] = { id: k, retos, stake: k === "double" ? run.coins : 0 }; if (k === "double") run.coins = 0;
       A.sfx.chip(0.2); setTimeout(() => A.sfx.chip(0.6), 120); setTimeout(() => A.sfx.stamp(), 260); persist(); renderShop(false);
-      A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "sly", hold: 2400 });   // cierra el trato
+        // cierra el trato
     };
   }
   /* ---------------- la ruleta lineal de Rojo o negro (v0.73) ----------------
@@ -2588,7 +2588,7 @@ window.AIQ = window.AIQ || {};
       run.paid = run.paid || {}; run.paidAt = run.paidAt || {}; run.paid[s.id] = c; run.paidAt[s.id] = run.shopKey;
       if (p.buy) p.buy(run); if (p.r === 3 && chest) run.legAch = 1;
       if (p.r === 3) (run.legAct = run.legAct || {})[run.act] = s.id;
-      if (p.pact) setTimeout(() => { A.sfx.stamp(); A.casa.impacto(2); A.dealer.enable(true); A.dealer.say(A.dealer.line("betDeal"), { mood: "sly", hold: 2400 }); }, 200);   // trato hecho: un hueco lacrado mas   // tanda 12: la legendaria de este acto   // Botin legendario: solo la del cofre del jefe. Se concede en la tienda (openShop): su aviso no tapa la secuencia
+      if (p.pact) setTimeout(() => { A.sfx.stamp(); A.casa.impacto(2); }, 200);   // trato hecho: un hueco lacrado mas   // tanda 12: la legendaria de este acto   // Botin legendario: solo la del cofre del jefe. Se concede en la tienda (openShop): su aviso no tapa la secuencia
     } else {
       const c = cardCost(s);
       if (!run.tools[s.id] && Object.keys(run.tools).length >= 4) { A.sfx.deny(); shake(el); flash(A.T("Solo 4 herramientas distintas.", "Only 4 different tools.")); return; }

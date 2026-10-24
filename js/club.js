@@ -267,8 +267,9 @@ window.AIQ = window.AIQ || {};
           if (A.casa && A.casa.premio) A.casa.premio(k); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(k);
           if (A.sfx && A.sfx.coin) setTimeout(() => A.sfx.coin(), 260);
           /* v2: la carta nueva sale del mazo, se da la vuelta y se sella (js/camino.js), al cruzar el ultimo nivel de la partida */
-          if (!s.ley && nl === lastUp && A.camino && A.camino.reveal) A.camino.reveal(ups, { k });
-          if (!said && A.dealer && A.dealer.on && A.dealer.say) { said = true; const pool = k === 3 ? [CHEST] : UP, c = st(); let i2 = Math.floor(Math.random() * pool.length); if (pool.length > 1 && i2 === c.lastLine) i2 = (i2 + 1) % pool.length; c.lastLine = i2; A.dealer.say(P6(pool[i2]).replace("{n}", nl), { mood: "sly", hold: 3200 }); }
+          /* la frase de subida, al cerrarse la carta: dicha a la vez quedaba debajo de su velo (el crupier del veredicto vive en #layer) */
+          const sayUp = () => { if (!said && A.dealer && A.dealer.on && A.dealer.say) { said = true; const pool = k === 3 ? [CHEST] : UP, c = st(); let i2 = Math.floor(Math.random() * pool.length); if (pool.length > 1 && i2 === c.lastLine) i2 = (i2 + 1) % pool.length; c.lastLine = i2; A.dealer.say(P6(pool[i2]).replace("{n}", nl), { mood: "sly", hold: 3200 }); } };
+          if (!s.ley && nl === lastUp && A.camino && A.camino.reveal) A.camino.reveal(ups, { k, done: sayUp }); else sayUp();
         }, t);
         t += reduce ? 0 : 520 + 180 * k + (!s.ley && nl === lastUp ? 2200 : 0);
         T(() => { bar.style.transition = "none"; bar.style.width = "0%"; }, t - 1);
