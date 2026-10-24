@@ -255,7 +255,7 @@ html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
 .bq-hl, .bq-hg { align-content: start; }
 .bq-l3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .bq-l1.got { filter: grayscale(.8) brightness(.75); }
-.bq-l1 .bq-hth { aspect-ratio: 2.2 / 1; }
+.bq-l1 .bq-hth { aspect-ratio: 1.7 / 1; }   /* mas alta: la plaquita de un titulo de tres lineas cabe con su marco (habia sitio libre debajo) */
 .bq-hg { background: linear-gradient(180deg, #fff6e2, #f0d9b0); }
 .bq-hg.got { opacity: .7; }
 .bq-gi { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; }
