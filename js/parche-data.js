@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.207",
+      name: L("Salir y Ajustes, en su esquina", "Exit and Settings, in their corners", "Quitter et Réglages, dans leur coin", "Sair e Ajustes, no canto deles", "Beenden und Einstellungen in ihrer Ecke", "Esci e Impostazioni, nel loro angolo", "", "退出和设置回到角落", "나가기와 설정은 제자리에", "終了と設定は隅っこに", "Выход и настройки — в своих углах", "Wyjście i Ustawienia w swoich rogach"),
+      date: "2026-10-24",
+      summary: L("Los botones de salir y de ajustes de la portada quedan pegados a las esquinas, con el mismo margen en Grande, Media y Compacta.", "The exit and settings buttons on the title screen sit in the corners, with the same margin in Large, Medium and Compact.", "Les boutons Quitter et Réglages de l'accueil restent dans les coins, avec la même marge en Grand, Moyen et Compact.", "Os botões de sair e de ajustes da tela inicial ficam nos cantos, com a mesma margem em Grande, Média e Compacta.", "Die Buttons für Beenden und Einstellungen auf dem Startbildschirm sitzen in den Ecken, mit gleichem Abstand bei Groß, Mittel und Kompakt.", "I pulsanti Esci e Impostazioni della home restano negli angoli, con lo stesso margine in Grande, Media e Compatta.", "", "主界面的退出和设置按钮贴在角落，大、中、小三种界面尺寸下边距一致。", "메인 화면의 나가기와 설정 버튼이 모서리에 붙고, 크게·보통·작게 모두 같은 여백을 가집니다.", "タイトル画面の終了と設定ボタンが隅に付き、大・中・小で余白が同じになります。", "Кнопки выхода и настроек на главном экране стоят в углах с одинаковым отступом в режимах «Большой», «Средний» и «Компактный».", "Przyciski wyjścia i ustawień na ekranie głównym trzymają się rogów, z takim samym marginesem w rozmiarach Duży, Średni i Kompaktowy."),
+      chapters: [
+        { id: "esquinas", kicker: L("Arreglos", "Fixes", "Corrections", "Correções", "Korrekturen", "Correzioni", "", "修正", "수정", "修正", "Исправления", "Poprawki"),
+          title: L("Cada botón en su esquina", "Each button in its corner", "Chaque bouton dans son coin", "Cada botão no seu canto", "Jeder Button in seiner Ecke", "Ogni pulsante nel suo angolo", "", "每个按钮都在角落", "버튼마다 제자리 모서리", "ボタンはそれぞれの隅に", "Каждая кнопка в своём углу", "Każdy przycisk w swoim rogu"),
+          entries: [
+            E(L("Esquinas fijas en todos los tamaños", "Fixed corners at every size", "Coins fixes à toutes les tailles", "Cantos fixos em todos os tamanhos", "Feste Ecken in jeder Größe", "Angoli fissi a ogni dimensione", "", "所有尺寸下角落固定", "모든 크기에서 고정된 모서리", "どのサイズでも隅に固定", "Фиксированные углы при любом размере", "Stałe rogi w każdym rozmiarze"), "fix", "0.3.207", [
+              L("Al cambiar el tamaño de la interfaz, salir y ajustes se quedaban a medio camino de la esquina. Ahora van siempre pegados a ella, a la misma distancia.", "When you changed the interface size, exit and settings ended up part-way from the corner. They now always stay in the corner, at the same distance.", "En changeant la taille de l'interface, Quitter et Réglages restaient à mi-chemin du coin. Ils restent maintenant toujours dans le coin, à la même distance.", "Ao mudar o tamanho da interface, sair e ajustes ficavam a meio caminho do canto. Agora ficam sempre no canto, à mesma distância.", "Beim Ändern der Oberflächengröße blieben Beenden und Einstellungen auf halbem Weg zur Ecke. Jetzt sitzen sie immer in der Ecke, im gleichen Abstand.", "Cambiando la dimensione dell'interfaccia, Esci e Impostazioni restavano a metà strada dall'angolo. Ora stanno sempre nell'angolo, alla stessa distanza.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.206",
       name: L("La versión, en su rincón", "The version, in its corner", "La version, dans son coin", "A versão, no seu canto", "Die Version in ihrer Ecke", "La versione, nel suo angolo", "", "版本号归位", "버전은 제자리에", "バージョンは隅っこに", "Версия в своём углу", "Wersja w swoim rogu"),
       date: "2026-10-24",

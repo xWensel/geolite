@@ -169,3 +169,12 @@ html body #dlg > .hh-ver { font-size: 9px; z-index: 60; }
   .hh .hh-tag { font-size: 24px; }
   .hh .mcard .mc-name { font-size: 30px; }
 }
+
+/* ---------- salir (arriba izquierda) y ajustes (arriba derecha): pegados a las ESQUINAS de la pantalla, con el mismo margen en Grande, Media y Compacta.
+   Antes colgaban del relleno de .hh (4 % del ancho, o mucho mas con la fila de cinco placas: hasta 300 px de la esquina) y se quedaban a medio camino al cambiar la escala de la interfaz.
+   El margen se mide en px del lienzo (el zoom de --k lo escala igual que a los botones); en pantallas estrechas siguen en el relleno (arriba) ---------- */
+@media (min-width: 900px) and (min-height: 520px) {
+  .hh .hh-top { --cx: 14px; --cy: 12px; }
+  .hh .hh-top .menu-quit { left: calc(var(--cx) - (100 * var(--vw) - 100%) / 2); top: calc(var(--cy) - clamp(14px, calc(2.4 * var(--vh)), 30px)); }
+  .hh .hh-top .menu-tools { right: calc(var(--cx) - (100 * var(--vw) - 100%) / 2); top: calc(var(--cy) - clamp(14px, calc(2.4 * var(--vh)), 30px)); }
+}
