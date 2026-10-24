@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.206",
+      name: L("La versión, en su rincón", "The version, in its corner", "La version, dans son coin", "A versão, no seu canto", "Die Version in ihrer Ecke", "La versione, nel suo angolo", "", "版本号归位", "버전은 제자리에", "バージョンは隅っこに", "Версия в своём углу", "Wersja w swoim rogu"),
+      date: "2026-10-24",
+      summary: L("El número de versión de la portada es más pequeño y la tienda ya no lo tapa.", "The version number on the title screen is smaller and the shop no longer covers it.", "Le numéro de version de l'accueil est plus petit et la boutique ne le cache plus.", "O número da versão na tela inicial está menor e a loja não o cobre mais.", "Die Versionsnummer auf dem Startbildschirm ist kleiner und der Shop verdeckt sie nicht mehr.", "Il numero di versione della home è più piccolo e il negozio non lo copre più.", "", "主界面的版本号更小了，商店也不再遮住它。", "메인 화면의 버전 번호가 더 작아졌고 상점이 더는 가리지 않습니다.", "タイトル画面のバージョン番号が小さくなり、ショップに隠れなくなりました。", "Номер версии на главном экране стал меньше, и магазин его больше не закрывает.", "Numer wersji na ekranie głównym jest mniejszy, a sklep już go nie zasłania."),
+      chapters: [
+        { id: "version", kicker: L("Arreglos", "Fixes", "Corrections", "Correções", "Korrekturen", "Correzioni", "", "修正", "수정", "修正", "Исправления", "Poprawki"),
+          title: L("Nada tapa la versión", "Nothing covers the version", "Rien ne cache la version", "Nada cobre a versão", "Nichts verdeckt die Version", "Niente copre la versione", "", "没有东西遮住版本号", "아무것도 버전을 가리지 않음", "バージョンは隠れない", "Ничто не закрывает версию", "Nic nie zasłania wersji"),
+          entries: [
+            E(L("Versión pequeña y a la vista", "Small, visible version", "Version petite et visible", "Versão pequena e visível", "Kleine, sichtbare Version", "Versione piccola e visibile", "", "更小且清晰的版本号", "작지만 보이는 버전", "小さく見えるバージョン", "Маленькая, но видимая версия", "Mała, widoczna wersja"), "fix", "0.3.206", [
+              L("El número de versión sigue abajo a la derecha, bastante más pequeño, y queda por encima de la tienda y de los demás paneles.", "The version number stays at the bottom right, much smaller, and sits above the shop and the other panels.", "Le numéro de version reste en bas à droite, bien plus petit, au-dessus de la boutique et des autres panneaux.", "O número da versão continua embaixo à direita, bem menor, e fica acima da loja e dos outros painéis.", "Die Versionsnummer bleibt unten rechts, deutlich kleiner, und liegt über dem Shop und den anderen Fenstern.", "Il numero di versione resta in basso a destra, molto più piccolo, sopra il negozio e gli altri pannelli.", "", "版本号仍在右下角，小了很多，并显示在商店和其他面板之上。", "버전 번호는 오른쪽 아래에 그대로 있고 훨씬 작아졌으며 상점과 다른 패널 위에 표시됩니다.", "バージョン番号は右下のまま、ずっと小さくなり、ショップや他のパネルより手前に表示されます。", "Номер версии остаётся справа внизу, стал заметно меньше и находится поверх магазина и других панелей.", "Numer wersji zostaje w prawym dolnym rogu, jest znacznie mniejszy i leży nad sklepem i innymi panelami."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.3.205",
       name: L("Todo a la vista", "Everything in view", "Tout en vue", "Tudo à vista", "Alles im Blick", "Tutto in vista", "", "一切尽在眼前", "모두 한눈에", "すべてが見える", "Всё на виду", "Wszystko na widoku"),
       date: "2026-10-24",

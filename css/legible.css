@@ -19,7 +19,7 @@
 :root body .rd-h > i, :root body .rd-n.inf > em { font-size: 18px; }
 
 /* ---------- reglas con mas peso que las de arriba: la version de la portada, la Enciclopedia, la ruta del plan y el Campamento ---------- */
-:root body #dlg > .hh-ver { font-size: 16px; }
+:root body #dlg > .hh-ver { font-size: 9px; z-index: 60; }   /* la version va pequena y por encima de la tienda y los modales: que no la tape nada */
 :root body .adv-debuff i:not(.ch-lv), :root body .adv-debuff .ch-new, :root body .ch-new { font-size: 18px; }
 
 /* Ajustes: las descripciones de las pestanas a 16 px piden una columna algo mas ancha y botones mas juntos (las 6 caben sin desplazarse) */
