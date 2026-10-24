@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.210",
+      name: L("Cartas con su sitio", "Cards in their place", "Cartes à leur place", "Cartas no seu lugar", "Karten am richtigen Platz", "Carte al loro posto", "", "卡牌各就各位", "카드 제자리", "カードを定位置に", "Карты на своих местах", "Karty na swoich miejscach"),
+      date: "2026-10-24",
+      summary: L("En la portada, con la interfaz en Media o Compacta, Clásico y Duelo ya no se montan sobre la Aventura.", "On the home screen, with the interface at Medium or Compact, Classic and Duel no longer overlap the Adventure card.", "Sur l'accueil, avec l'interface en Moyenne ou Compacte, Classique et Duel ne chevauchent plus l'Aventure.", "Na tela inicial, com a interface em Média ou Compacta, Clássico e Duelo já não se sobrepõem à Aventura.", "Auf dem Startbildschirm überdecken Klassisch und Duell die Abenteuer-Karte bei mittlerer oder kompakter Oberfläche nicht mehr.", "Nella schermata iniziale, con l'interfaccia Media o Compatta, Classico e Duello non si sovrappongono più all'Avventura.", "", "在主界面中，界面为“中”或“紧凑”时，经典和对决不再压在冒险卡上。", "홈 화면에서 인터페이스가 보통 또는 컴팩트일 때 클래식과 대결 카드가 모험 카드를 더 이상 가리지 않습니다.", "ホーム画面で、インターフェースが「中」または「コンパクト」のとき、クラシックと対決が冒険カードに重ならなくなりました。", "На главном экране при среднем или компактном интерфейсе «Классика» и «Дуэль» больше не наезжают на «Приключение».", "Na ekranie głównym przy średnim lub kompaktowym interfejsie Klasyczny i Pojedynek nie nachodzą już na Przygodę."),
+      chapters: [
+        { id: "portada", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Portada", "Home screen", "Accueil", "Início", "Start", "Home", "", "主界面", "홈 화면", "ホーム", "Главная", "Ekran główny"),
+          entries: [
+            E(L("Cartas sin solapar", "No overlapping cards", "Cartes sans chevauchement", "Cartas sem sobreposição", "Keine überlappenden Karten", "Carte senza sovrapposizioni", "", "卡牌不再重叠", "카드 겹침 없음", "カードが重ならない", "Карты не накладываются", "Karty bez nakładania"), "fix", "0.3.210", [
+              L("Las cartas laterales ya no pisan a la Aventura: al alinearlas con sus placas se respeta siempre un hueco entre ellas.", "The side cards no longer cover the Adventure: when aligned with their plaques a gap is always kept between them.", "Les cartes latérales ne couvrent plus l'Aventure : à l'alignement sur leurs plaques, un espace reste toujours entre elles.", "As cartas laterais já não cobrem a Aventura: ao alinhá-las com as suas placas mantém-se sempre um espaço entre elas.", "Die seitlichen Karten verdecken das Abenteuer nicht mehr: Beim Ausrichten an ihren Plaketten bleibt immer ein Abstand.", "Le carte laterali non coprono più l'Avventura: allineandole alle loro placche resta sempre uno spazio tra loro.", "", "两侧卡牌不再盖住冒险卡：与下方牌匾对齐时，始终保留一段间距。", "양옆 카드가 더 이상 모험 카드를 덮지 않습니다. 아래 명판에 맞출 때 항상 간격을 둡니다.", "左右のカードが冒険カードを覆わなくなりました。下のプレートに揃えるときも、必ずすき間を保ちます。", "Боковые карты больше не закрывают «Приключение»: при выравнивании по плашкам всегда остаётся зазор.", "Boczne karty nie zasłaniają już Przygody: przy wyrównaniu do plakietek zawsze zostaje odstęp.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.209",
       name: L("Dónde nació", "Where they were born", "Où ils sont nés", "Onde nasceram", "Wo sie geboren wurden", "Dove sono nati", "", "出生在哪里", "태어난 곳", "生まれた場所", "Где они родились", "Gdzie się urodzili"),
       date: "2026-10-24",
