@@ -234,7 +234,7 @@ window.AIQ = window.AIQ || {};
      Si cambia la pantalla con el aviso a la vista (del veredicto al Campamento, a la partida...), se recoloca. Saber la zona no mide nada (solo clases y
      nodos): solo se mide al cambiar de zona */
   let zoneSig = "", zoneT = 0;
-  const HEAD = ".scr-head, .pf-head, .bq-head";                                  // las cabeceras con titulo (menus del hub y pantallas del Naipe de gala)
+  const HEAD = ".scr-head, .pf-head, .bq-head, .cl-head, .av-head, .pt-head, .du-st .hd";   // las cabeceras con titulo (menus del hub y pantallas del Naipe de gala). v0.3.205: + Clasico, Aventura, notas y Duelo (sin ellas el aviso caia arriba a la izquierda, encima de «Cerrar» y del titulo)
   function zoneOf() {
     const pl = document.getElementById("plate"), lay = document.getElementById("layer"), d = document.getElementById("dlg");
     if (pl && !pl.classList.contains("hidden")) return "run";
@@ -285,7 +285,7 @@ window.AIQ = window.AIQ || {};
   /* de donde llega el aviso a su bandeja (y por donde se va): desde fuera de la pantalla, por su esquina */
   const LADO = { tl: [-260, -260, -14], tr: [260, -260, 14], bl: [-260, 260, 14], br: [260, 260, -14], t: [0, -220, 6] };
   function place(el) {
-    const sig = zoneOf(); if (sig === zoneSig && el.isConnected) return; zoneSig = sig;
+    const sig = zoneOf(); if (sig === zoneSig && el.isConnected) return; zoneSig = (A.relieve && A.relieve.vivo) ? "" : sig;   // v0.3.205: con la pantalla aun entrando, se vuelve a colocar en cuanto se pose
     const st = el.style, col = el.parentElement, R = e => e.getBoundingClientRect();
     document.body.classList.toggle("ach-title", sig === "camp");
     el.classList.toggle("free", sig !== "run");
@@ -299,8 +299,11 @@ window.AIQ = window.AIQ || {};
     const L = LADO[b.side] || LADO.tl; st.setProperty("--lz-ax", L[0] + "px"); st.setProperty("--lz-ay", L[1] + "px"); st.setProperty("--lz-ar", L[2] + "deg");
     if (A.relieve) A.relieve.pieza(el);                                                                       // su sombra, desde la lampara de esa pantalla
   }
+  let dlW = 0;
   function toast() {
-    if (showing || !queue.length) return; showing = true;
+    if (showing || !queue.length) return;
+    if (A.dealer && A.dealer.asideOn && A.dealer.asideOn() && dlW++ < 20) { setTimeout(toast, 400); return; }   // v0.3.205: el crupier acaba su frase en esa pantalla: el aviso, despues (no encima)
+    dlW = 0; showing = true;
     const a = queue.shift(); if (a.fake) return fakeToast(a);
     let el = document.getElementById("achToast");
     if (!el) { el = document.createElement("div"); el.id = "achToast"; el.className = "ach-toast hidden"; (document.getElementById("leftCol") || document.getElementById("app")).appendChild(el); }

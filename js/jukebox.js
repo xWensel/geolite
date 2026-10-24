@@ -5,7 +5,7 @@
 (() => {
   "use strict";
   const A = window.AIQ = window.AIQ || {};
-  let el = null, tm = 0, hover = false, wait = 0, waits = 0;
+  let el = null, tm = 0, hover = false, wait = 0, waits = 0, zt = 0;
   const SONG = "Canción|Song|Chanson|Música|Song|Brano||歌曲|곡|曲|Песня|Utwór";
   const S = () => (A.core && A.core.S) || {};
   const musicOn = () => A.audio && A.audio.musicOn;
@@ -45,8 +45,13 @@
     if (!musicOn() || S().songToast === false || S().settingsOpen || A.music.index() < 0) return;
     if (A.salir && A.salir.isOpen && A.salir.isOpen()) return;                     // en la salida (y en su apagon) no: taparia al crupier
     if (A.ach && A.ach.busy && A.ach.busy()) { clearTimeout(wait); if (++waits < 30) wait = setTimeout(show, 500); return; }       // un logro a la vista: la cancion espera a que se recoja
+    /* v0.3.205: si la pantalla nueva aun esta entrando (se reparte como un naipe, js/relieve.js), sus piezas no estan en su sitio: se espera a que se pose.
+       Antes el aviso media la cabecera a medio movimiento y se quedaba encima del titulo (en Aventura tapaba «Av») */
+    if (A.relieve && A.relieve.vivo) { clearTimeout(wait); if (++waits < 30) wait = setTimeout(show, 120); return; }
+    if (A.dealer && A.dealer.asideOn && A.dealer.asideOn()) { clearTimeout(wait); if (++waits < 30) wait = setTimeout(show, 400); return; }   // el crupier acaba su frase en esa cabecera: despues
     waits = 0; clearTimeout(wait);
     if (!el) build(); fill(el); el.classList.remove("show"); A.restyle(el); slot(); el.classList.add("show"); arm(4600);
+    clearInterval(zt); zt = setInterval(() => { if (!el.classList.contains("show")) { clearInterval(zt); return; } if (!(A.relieve && A.relieve.vivo)) slot(); }, 250);   // si cambias de pantalla con el a la vista, va a la zona de la nueva
   }
   /* control equivalente dentro de Ajustes */
   function sync() {

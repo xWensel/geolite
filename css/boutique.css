@@ -293,3 +293,7 @@ html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
 .bq-det.nodesc .bq-dd:not(.how):not(:has(.bq-how)) { display: none; }
 .bq-det.noname .bq-dn { display: none; }
 .bq-acts .gx-btn.wide { column-gap: 12px; }
+/* v0.3.205: «Te faltan 110» junto al corazon no cabia y se partia en tres renglones cortados: una linea que se aprieta y, si ni asi, dos (js/boutique.js, fitShort) */
+.bq-acts .gx-btn.wide.bq-short { padding-left: 14px; padding-right: 12px; column-gap: 8px; }   /* mas sitio para el texto: el boton es estrecho */
+.bq-acts .gx-btn.wide.bq-short > span.bq-fit { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-align: left; line-height: 1.1; }
+.bq-acts .gx-btn.wide.bq-short > span.bq-fit.wrap { white-space: normal; text-wrap: balance; }

@@ -2712,10 +2712,31 @@ window.AIQ = window.AIQ || {};
     const minM = noFace ? 0 : mob ? 20 : 74, want = Math.max(minM, floor - bFloor), maxM = Math.max(0, floor - top - bh);
     bs.marginBottom = Math.min(want, maxM) + "px";                                    // si no cabe del todo, antes pisa las herramientas que la placa
   }
+  /* v0.3.205: EL GLOBO SIEMPRE ENTERO EN PANTALLA. Cada pantalla coloca el suyo (portada, esquina, veredicto, salida, intro, apartado...); como red de
+     seguridad, al empezar cada frase (y al cambiar la ventana) se mide con la frase ENTERA (el parrafo crece renglon a renglon al escribir) y, si se sale
+     por algun borde, se desplaza lo justo hacia dentro con la propiedad translate (no pisa las animaciones del globo ni las del crupier). Si estan
+     entrando (el crupier deslizandose, el globo subiendo), se mide cuando acaban */
+  const MARGEN = 8;
+  function cabe() {
+    if (!el || !bubble || !bubble.classList.contains("on") || !el.isConnected) return;
+    const an = [...el.getAnimations(), ...bubble.getAnimations()].filter(a => a.playState === "running" && isFinite(a.effect.getComputedTiming().endTime));
+    if (an.length) { const me = lineN; Promise.all(an.map(a => a.finished.catch(() => null))).then(() => { if (me === lineN) requestAnimationFrame(cabe); }); return; }
+    const h0 = txt.style.height; bubble.style.translate = ""; txt.style.height = "";
+    const r = bubble.getBoundingClientRect(), base = getComputedStyle(bubble).translate; txt.style.height = h0;
+    if (r.width < 4 || getComputedStyle(bubble).display === "none") return;
+    const W = innerWidth, H = innerHeight, fit = (a, b, max) => (b - a > max - 2 * MARGEN ? MARGEN - a : a < MARGEN ? MARGEN - a : b > max - MARGEN ? max - MARGEN - b : 0);
+    const dx = fit(r.left, r.right, W), dy = fit(r.top, r.bottom, H); if (!dx && !dy) return;
+    const z = bubble.offsetWidth ? r.width / bubble.offsetWidth : 1, px = v => (v / z).toFixed(1) + "px";
+    if (!base || base === "none") bubble.style.translate = px(dx) + " " + px(dy);
+    else { const [tx, ty = "0px"] = base.split(" "); bubble.style.translate = `calc(${tx} + ${px(dx)}) calc(${ty} + ${px(dy)})`; }
+  }
+  D._cabe = cabe;
   /* v0.3.172: ABRES OTRA PANTALLA DEL HUB (Retos, la tienda, el Perfil...) CON EL A MEDIA FRASE EN LA PORTADA. Antes la terminaba en su esquina de la
      portada, encima de la columna de Encargos o de la ficha del articulo. No se le corta: se encoge y la acaba en el mayor hueco libre de la pantalla
      nueva (la cabecera, el fondo vacio de un panel) sin tapar textos, fotos ni botones, y se va como siempre. Sin hueco, la acaba abajo a la izquierda */
   const ASIDE_G = 8;                                                            // rejilla de busqueda (px)
+  /* v0.3.205: los avisos flotantes a la vista (cancion y logro) tampoco se tapan: viven fuera de #dlg y antes el globo caia encima del de la cancion */
+  const avisos = () => [document.querySelector("#np.show"), document.querySelector("#achToast:not(.hidden)")].filter(Boolean).map(e => e.getBoundingClientRect()).filter(r => r.width > 2 && r.height > 2);
   /* lo que no se puede tapar de la pantalla: textos, fotos, botones y los bordes de los paneles */
   function busyRects() {
     const out = [], mark = r => { if (r && r.width >= 2 && r.height >= 2) out.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }); };
@@ -2730,6 +2751,7 @@ window.AIQ = window.AIQ || {};
       const tw = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
       for (let n; (n = tw.nextNode());) if (n.nodeValue.trim() && n.parentElement && !n.parentElement.closest(".dealer") && seen(n.parentElement)) { rg.selectNodeContents(n); for (const r of rg.getClientRects()) mark(r); }
     }
+    avisos().forEach(mark);
     return out;
   }
   /* ya colocado a un lado: si la pantalla termino de llenarse debajo de el (filas o fotos que entran tarde), tapa algo */
@@ -2752,6 +2774,7 @@ window.AIQ = window.AIQ || {};
       const tw = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
       for (let n; (n = tw.nextNode());) if (n.nodeValue.trim() && n.parentElement && !n.parentElement.closest(".dealer") && seen(n.parentElement)) { rg.selectNodeContents(n); for (const r of rg.getClientRects()) mark(r); }
     }
+    avisos().forEach(mark);
     for (let x = 0; x < W; x++) { busy[x] = 1; busy[(H - 1) * W + x] = 1; } for (let y = 0; y < H; y++) { busy[y * W] = 1; busy[y * W + W - 1] = 1; }   // nada pegado al borde
     /* el mayor rectangulo libre (histograma por filas) que cumpla el minimo; a igualdad, el de mas arriba */
     const hgt = new Int32Array(W); let best = null;
@@ -2767,7 +2790,7 @@ window.AIQ = window.AIQ || {};
     return best;
   }
   function asidePlace() {
-    const fs = face.style, bs = bubble.style; el.style.bottom = ""; bs.marginBottom = ""; fs.display = ""; txt.style.height = ""; el.classList.remove("aside-niche");   // el globo a su alto final para medir (relines lo vuelve a dejar en lo escrito)
+    const fs = face.style, bs = bubble.style; el.style.bottom = ""; bs.marginBottom = ""; fs.display = ""; txt.style.height = ""; el.classList.remove("aside-niche", "aside-solo");   // el globo a su alto final para medir (relines lo vuelve a dejar en lo escrito)
     /* Bloque J: una pantalla con su nicho para el crupier ([data-dealer-niche]: el hueco vacio del indice de la tienda) lo acaba ahi, la cara arriba y el
        globo debajo, sin tapar nunca la rejilla ni sus textos. Si el nicho no da para la frase entera, la busqueda de siempre */
     const nz = document.querySelector("#dlg [data-dealer-niche]");
@@ -2776,7 +2799,7 @@ window.AIQ = window.AIQ || {};
       const full = nz.parentElement ? nz.parentElement.getBoundingClientRect().bottom - q.top : q.height;   // si el hueco no da, tapa un momento la oferta de debajo (nunca la rejilla)
       if (q.width >= Math.max(200, kc()) && full >= 140) {
         el.classList.add("aside-niche"); el.style.left = Math.round(q.left) + "px"; el.style.top = Math.round(q.top) + "px"; el.style.width = Math.round(q.width) + "px"; bs.maxWidth = Math.round(q.width) + "px";
-        for (const room of [q.height, full]) { const f = kc(); if (f + 6 + (bubble.offsetHeight || 90) <= room) { relines(); return; } }   // bloque D: a su tamano o nada
+        for (const room of [q.height, full]) { const f = kc(); if (f + 6 + (bubble.offsetHeight || 90) <= room) { relines(); cabe(); return; } }   // bloque D: a su tamano o nada
         el.classList.remove("aside-niche"); el.style.left = el.style.top = el.style.width = "";
       }
     }
@@ -2784,9 +2807,15 @@ window.AIQ = window.AIQ || {};
     if (r) {
       const w = Math.min(r.w, f + 12 + 720); fs.width = fs.height = f + "px"; bs.maxWidth = (w - f - 12) + "px";   // globo ancho si el hueco lo es: menos renglones, cabe en franjas bajas como la cabecera
       const bh = bubble.offsetHeight || 90, h = Math.max(f, bh);
-      if (h <= r.h) { el.style.left = Math.round(r.x + (r.w - w) / 2) + "px"; el.style.top = Math.round(r.y + (r.h - h) / 2) + "px"; el.style.width = w + "px"; el.classList.remove("aside-low"); relines(); return; }
+      if (h <= r.h) { el.style.left = Math.round(r.x + (r.w - w) / 2) + "px"; el.style.top = Math.round(r.y + (r.h - h) / 2) + "px"; el.style.width = w + "px"; el.classList.remove("aside-low"); relines(); cabe(); return; }
     }
-    el.style.left = el.style.top = el.style.width = ""; D.hide();                  // bloque D: sin hueco a su tamano, no sale (antes: abajo a la izquierda, pequeno)
+    /* v0.3.205: sin hueco para el y su globo, la frase NO se pierde: la acaba el globo solo, su voz desde fuera, en el mayor hueco libre (sin tapar
+       textos, fotos ni botones). El crupier no sale encogido: simplemente no se le ve */
+    fs.display = "none"; const wb = Math.min(560, innerWidth - 32); bs.maxWidth = wb + "px"; el.classList.add("aside-solo");
+    const bh = bubble.offsetHeight || 90, r2 = freeRect(Math.min(wb, 300), bh + 8);
+    if (r2) { const w = Math.min(r2.w, wb); el.style.left = Math.round(r2.x + (r2.w - w) / 2) + "px"; el.style.top = Math.round(r2.y + (r2.h - bh) / 2) + "px"; el.style.width = w + "px"; el.classList.remove("aside-low"); }
+    else { el.style.left = el.style.top = el.style.width = ""; D.hide(); return; }   // ni el globo cabe sin tapar nada: no sale (D.aside, una sola medida)
+    relines(); cabe();
   }
   D.aside = () => {
     const talking = speaking(); if (D.onHome) D.homeTease(false);            // deja de asomar (la pantalla nueva suele haberlo hecho ya: js/game.js, dialog). A media frase: la acaba (release) y se va
@@ -2811,8 +2840,9 @@ window.AIQ = window.AIQ || {};
       Promise.race([Promise.all(anims.map(an => an.finished.catch(() => 0)).concat(imgs)), cap]).then(() => setTimeout(() => requestAnimationFrame(go), 250));   // y lo que entra tarde (filas, fotos)
     }));
   };
-  addEventListener("resize", () => { if (D.busy) fitCorner(); });
-  D.refit = () => { if (D.busy) fitCorner(); };                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
+  addEventListener("resize", () => { if (D.busy) { fitCorner(); if (el && el.classList.contains("aside")) asidePlace(); requestAnimationFrame(cabe); } });
+  D.refit = () => { if (D.busy) fitCorner(); };
+  D.asideOn = () => !!(el && el.classList.contains("aside") && el.classList.contains("in"));   // v0.3.205: acabando una frase en otra pantalla (los avisos esperan a que acabe: js/jukebox.js, js/profile.js)                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
   /* v0.32: la cara y el gesto de cada frase. Manda la escena si lo pide (o.face / o.gesture); si no, la tabla XMAP por clave (y por indice,
      "clave#i"), revisada frase a frase; si la frase no esta en la tabla, el mood de siempre. Un gesto no se repite dos veces seguidas en 20 s */
   let lastGest = "", lastGestAt = 0;
@@ -2864,7 +2894,7 @@ window.AIQ = window.AIQ || {};
     sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest"; rest.textContent = text + ZW; txt.replaceChildren(sofar, rest);
     if (!el.classList.contains("aside")) el.style.left = el.style.width = "";   // lo que le dejo el apartado (D.aside)
     if (!el.classList.contains("peek")) { el.style.right = ""; if (!el.classList.contains("home")) el.style.top = ""; }   // bloque D: ni lo de asomado ni lo de la portada pisan otros sitios
-    fitCorner(); spr.fit(); spr.shown(true); spr.talk(true);
+    fitCorner(); spr.fit(); spr.shown(true); spr.talk(true); bubble.style.translate = ""; requestAnimationFrame(cabe);   // v0.3.205: y siempre entero en pantalla
     /* el globo crece renglon a renglon al escribir (la frase ya esta maquetada y oculta, asi que ninguna palabra salta): se mide una sola vez
        a que renglon cae cada letra y luego solo se sube la altura del parrafo cuando empieza uno nuevo (sin leer el layout por letra) */
     txt.style.height = ""; let lineOf = null, lineH = 0, nLines = 1, shown = -1;
@@ -2899,6 +2929,8 @@ window.AIQ = window.AIQ || {};
         if (o.hold !== 0) later(() => D.hide(), (o.hold || 1800 + text.length * 22) + LINGER);
         if (o.done && released !== me) later(o.done, LINGER); return;
       }
+      /* v0.3.205: un renglon nuevo espera a que el globo se abra (su alto crece en 0,2 s): antes su primera letra asomaba cortada por abajo */
+      if (lineOf && (lineOf[i] || 0) > shown && !document.documentElement.classList.contains("reduce-motion")) { grow(i); later(tick, 190); return; }
       grow(i); sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
     };
     typing = true; if (o.fx === "blackout") later(tick, 1100); else tick(); D.busy = true;   // el apagon tapa 1,3 s: empieza a escribir cuando vuelve la luz

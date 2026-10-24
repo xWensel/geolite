@@ -7,8 +7,10 @@
 .du-club .gx-paper { padding: 14px 16px 16px; }
 .du-club .gx-paper::before, .du-club .gx-paper::after { display: none; }
 .club-tk { display: grid; gap: 10px; color: var(--gx-ink); }
-.club-tk .ck-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
-.club-tk .ck-t { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--mono); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--gx-gold-lo); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v0.3.205: el titulo nunca se corta (con el «x2 hoy» salia «CLUB DE LA C...»): si no cabe todo en una linea, el «x2 hoy» y la experiencia bajan a la segunda */
+.club-tk .ck-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; min-width: 0; }
+.club-tk .ck-t { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; max-width: 100%; font-family: var(--mono); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--gx-gold-lo); white-space: nowrap; }
+.club-tk .ck-g { margin-left: auto; }
 .club-tk .ck-g { font-weight: 400; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ck-fi { width: 32px; height: 32px; image-rendering: pixelated; flex: none; display: inline-block; }
 .ck-fi.sm { width: 24px; height: 24px; vertical-align: -5px; margin-left: 6px; }

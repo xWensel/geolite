@@ -115,7 +115,7 @@ window.AIQ = window.AIQ || {};
     if (s === "on") act = `<button type="button" class="gx-btn wide" id="bqUse" disabled><span>${esc(P6(TX.using))}</span></button>`;
     else if (s === "got") act = `<button type="button" class="gx-btn pri wide" id="bqUse"><span>${esc(P6(RX.ponerla))}</span></button>`;
     else if (tro) act = `<button type="button" class="gx-btn wide" disabled>${A.icon("lock")}<span>${esc(P6(CX.kHito))}</span></button>`;
-    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
+    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span class="bq-fit">${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === id ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === id ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
     const tryBtn = tro && !got ? "" : `<button type="button" class="gx-btn gho wide" id="bqTry"><span>${esc(P6(TX.try))}</span></button>`;
     return `<span class="bq-dth${leg ? " leg" : ""}${tro && !got ? " lk" : ""}"><img src="assets/mesas/${id}.webp" alt="" width="640" height="360" decoding="async"></span>
@@ -334,7 +334,7 @@ window.AIQ = window.AIQ || {};
     if (s === "on" && it.casa) act = `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(VX.on))}</span></button>`;
     else if (s === "on") act = `<button type="button" class="gx-btn gho wide" id="bqOff"><span>${esc(P6(VX.off))}</span></button>`;
     else if (s === "got") act = `<button type="button" class="gx-btn pri wide" id="bqWear"><span>${esc(P6(VX.wear))}</span></button>`;
-    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
+    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span class="bq-fit">${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === id ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === id ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
     return `<span class="bq-prob${leg ? " leg" : ""}"><span class="bq-probl">${esc(P6(VX.prob))}</span><span class="bq-probh" id="bqProb"></span></span>
       <span class="gx-eyb bq-tier">${esc(P6(leg ? VX.tierL : it.casa ? VX.casaL : VX.tierR))} · ${esc(P6(VX.slot[it.slot]))}</span>
@@ -518,7 +518,7 @@ window.AIQ = window.AIQ || {};
     let act;
     if (st === "on") act = `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(VX.on))}</span></button>`;
     else if (st === "got") act = `<button type="button" class="gx-btn pri wide" id="bqPUse"><span>${esc(P6(PX.use))}</span></button>`;
-    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
+    else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span class="bq-fit">${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === ST.psel ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === ST.psel ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
     return `<span class="bq-dth bq-pprev"><canvas width="320" height="200" id="bqPCv"></canvas></span>
       <span class="gx-eyb bq-tier">${esc(PU().slotName(s))}${id === "casa" ? " · " + esc(P6(VX.casaL)) : ""}</span>
@@ -755,7 +755,18 @@ window.AIQ = window.AIQ || {};
   }
   /* la ficha de la derecha, siempre entera: si no da para todo, la descripcion de siempre se calla (lo que se gana y como, y los botones, nunca).
      Antes, en algunas piezas e idiomas, los botones de abajo se salian del panel */
-  function detFit() { const d = $("bqDet"); if (!d) return; d.classList.remove("nodesc", "noname"); if (d.scrollHeight > d.clientHeight + 1) d.classList.add("nodesc"); if (d.scrollHeight > d.clientHeight + 1 && d.querySelector(".bq-cprev")) d.classList.add("noname"); }   // y si aun no, el nombre grande (ya va en la carta)
+  /* v0.3.205: «Te faltan 110» junto al corazon no cabia y se partia en tres renglones cortados. Una linea, apretando la letra hasta la minima de la
+     Deck (18 px); si ni asi, dos lineas (nunca mas). Va aparte del apretado general (A.squeeze), que lo dejaba a tres renglones al volver a pasar */
+  function fitShort(b) {
+    const sp = b && b.querySelector(".bq-fit"); if (!sp) return;
+    sp.style.fontSize = ""; sp.classList.remove("wrap");
+    const fs0 = parseFloat(getComputedStyle(sp).fontSize) || 26, ancho = () => sp.scrollWidth <= sp.clientWidth + 1, K = [1, 0.92, 0.85, 0.78, 0.72];
+    for (const k of K) { const f = Math.max(18, fs0 * k); sp.style.fontSize = f.toFixed(1) + "px"; if (ancho()) return; if (f <= 18) break; }
+    sp.classList.add("wrap");
+    for (const k of K) { const f = Math.max(18, fs0 * k); sp.style.fontSize = f.toFixed(1) + "px"; const lh = parseFloat(getComputedStyle(sp).lineHeight) || f * 1.1; if (sp.offsetHeight <= lh * 2 + 2 && ancho()) return; if (f <= 18) break; }
+  }
+  function detFit() { const d = $("bqDet"); if (!d) return; fitShort(d.querySelector(".bq-short"));   // v0.3.205: «Te faltan 110» entero
+    d.classList.remove("nodesc", "noname"); if (d.scrollHeight > d.clientHeight + 1) d.classList.add("nodesc"); if (d.scrollHeight > d.clientHeight + 1 && d.querySelector(".bq-cprev")) d.classList.add("noname"); }   // y si aun no, el nombre grande (ya va en la carta)
   function wireInner() {
     const sc = document.querySelector("#dlg .bq-screen"); if (!sc) return;
     sc.querySelectorAll("[data-hk]").forEach(b => { b.onclick = () => { const k = b.dataset.hk; if (ST.busy) return; if (k !== ST.hsel) { ST.hsel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg [data-hk="${k}"]`); }; });
