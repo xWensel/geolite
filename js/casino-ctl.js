@@ -103,8 +103,8 @@ window.AIQ = window.AIQ || {};
     const fit = () => { const s = Math.max(2, Math.min(4, Math.round(innerHeight / 270))); dock.style.setProperty("--s", s); dock.style.setProperty("--r", s >= 4 ? 3 : 2); dock.style.setProperty("--u", s >= 4 ? 3 : 2); };
     fit(); addEventListener("resize", fit);
 
-    const mute = on => {                                                                       // saltando no suena nada (todo el sonido se amontonaria): se restaura en cuanto vuelve a x1
-      try { if (on && S.saved == null) { S.saved = A.audio.vol.sfx; A.audio.setVol("sfx", 0); } else if (!on && S.saved != null) { A.audio.setVol("sfx", S.saved); S.saved = null; } } catch (e) { /* sin audio */ }
+    const mute = on => {                                                                       // saltando no suena nada (todo el sonido se amontonaria): se suelta en cuanto vuelve a x1. v0.3.208: se retiene con A.audio.sfxHold, el regulador del jugador no se toca
+      try { if (A.audio && A.audio.sfxHold) A.audio.sfxHold(S, !!on); } catch (e) { /* sin audio */ }
     };
     const update = () => {
       if (S.dead) return;

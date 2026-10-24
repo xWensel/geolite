@@ -526,14 +526,33 @@ window.AIQ = window.AIQ || {};
   A.audio.tap = () => { if (!ctx) return null; const an = ctx.createAnalyser(); an.fftSize = 2048; outTap.connect(an); return an; };   // para las pruebas: un medidor de lo que sale por los altavoces
   /* volumen 0..1 de "master" | "music" | "sfx" | "amb" */
   A.audio.setVol = (kind, v) => {
+    if (!Number.isFinite(v)) return;                                                   // un valor roto nunca llega al regulador
     v = Math.max(0, Math.min(1, v)); A.audio.vol[kind] = v;
     if (!ctx) return;
     const t = ctx.currentTime;
     if (kind === "master") { if (!ducked) master.gain.setTargetAtTime(v, t, 0.03); }
     else if (kind === "music") { musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel(), t, 0.03); }
     else if (kind === "amb") ambApply();
-    else { sfxBus.gain.setTargetAtTime(v * SFX_K, t, 0.03); revFx.gain.setTargetAtTime(v * SFX_K, t, 0.03); }
+    else sfxApply();
   };
+  /* v0.3.208: el volumen de Efectos es del jugador (su regulador) y nadie mas lo toca. Quien necesite callar los efectos un rato (saltar en el
+     casino) los RETIENE con su propia clave: no cambia A.audio.vol.sfx, asi que nunca puede quedarse a cero guardado ni pisar al regulador */
+  const sfxHolds = new Map();
+  const sfxWant = () => (sfxHolds.size ? 0 : A.audio.vol.sfx * SFX_K);
+  function sfxApply() { if (!ctx) return; const t = ctx.currentTime, v = sfxWant(); sfxBus.gain.setTargetAtTime(v, t, 0.03); revFx.gain.setTargetAtTime(v, t, 0.03); }
+  A.audio.sfxHold = (key, on) => { if (on) sfxHolds.set(key, performance.now()); else sfxHolds.delete(key); sfxApply(); };
+  /* autocuracion: cada 2 s, con el juego delante, los efectos tienen que sonar a lo que dice el regulador. Si el contexto se ha dormido, se
+     despierta; si una retencion lleva mas de 30 s (nadie la suelta), se tira; si el volumen real no es el que toca, se vuelve a poner */
+  setInterval(() => {
+    if (!ctx || document.hidden) return;
+    try {
+      if (ctx.state === "suspended" || ctx.state === "interrupted") ctx.resume();
+      const now = performance.now(); sfxHolds.forEach((t0, k) => { if (now - t0 > 30000) sfxHolds.delete(k); });
+      if (!Number.isFinite(A.audio.vol.sfx)) A.audio.vol.sfx = 0.9;
+      const want = sfxWant();
+      if (Math.abs(sfxBus.gain.value - want) > 0.02 || Math.abs(revFx.gain.value - want) > 0.02) sfxApply();
+    } catch (e) { /* sin audio */ }
+  }, 2000);
   /* Ajustes > Sonido > Sonar en segundo plano (v0.3.2): baja el volumen general a 0 mientras el juego no esta delante y lo devuelve al volver */
   let ducked = false;
   A.audio.duck = on => { ducked = !!on; if (ctx) master.gain.setTargetAtTime(ducked ? 0 : A.audio.vol.master, ctx.currentTime, ducked ? 0.08 : 0.15); };
