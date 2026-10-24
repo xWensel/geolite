@@ -177,7 +177,14 @@ window.AIQ = window.AIQ || {};
     const pl = [...deck.querySelectorAll(":scope > .plq, :scope > *")].filter(x => x.getBoundingClientRect().width > 40); if (pl.length !== 5) return;
     const mid = e => { const r = e.getBoundingClientRect(); return r.left + r.width / 2; }, z = zoomDe(cards[0], cards[0].getBoundingClientRect());
     /* en px enteros de pantalla (el dibujo de la carta no cae entre dos pixeles), escritos en px de su escala */
-    [[cards[0], pl[1]], [cards[2], pl[3]]].forEach(([c, p]) => { const d = Math.round(mid(p) - mid(c)); if (d && Math.abs(d) < 120 * z) c.style.translate = (d / z).toFixed(4) + "px 0"; });
+    /* nunca a costa de la Aventura: en Media y Compacta las placas quedan mas cerca del centro que las cartas y, sin tope, las laterales se le montaban encima.
+       La separacion que ya tenian (menos 12 px) es lo maximo que pueden acercarse, igual en las dos para que sigan en espejo */
+    const hr = cards[1].getBoundingClientRect(), r0 = cards[0].getBoundingClientRect(), r2 = cards[2].getBoundingClientRect();
+    const room = Math.max(0, Math.min(hr.left - r0.right, r2.left - hr.right) - 12 * z);
+    [[cards[0], pl[1], 1], [cards[2], pl[3], -1]].forEach(([c, p, dir]) => {
+      let d = Math.round(mid(p) - mid(c)); if (d * dir > 0) d = dir * Math.min(Math.abs(d), Math.floor(room));   // hacia el centro, con tope
+      if (d && Math.abs(d) < 120 * z) c.style.translate = (d / z).toFixed(4) + "px 0";
+    });
   }
 
   /* ================================================================ las pantallas, como naipes sobre la mesa */
