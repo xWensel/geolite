@@ -305,11 +305,16 @@ window.AIQ = window.AIQ || {};
     let el = document.getElementById("achToast");
     if (!el) { el = document.createElement("div"); el.id = "achToast"; el.className = "ach-toast hidden"; (document.getElementById("leftCol") || document.getElementById("app")).appendChild(el); }
     el.innerHTML = `<span class="ach-ico">${A.badge(a.id)}</span><span class="ach-t"><em>${A.T("Logro desbloqueado", "Achievement unlocked")}</em><b>${A.tx(a.name)}</b><i>${A.tx(a.desc)}</i></span>`;
-    el.classList.remove("hidden", "in", "out"); zoneSig = ""; place(el); A.restyle(el); el.classList.add("in"); A.sfx.ach();
+    el.classList.remove("hidden", "in", "out", "qm"); zoneSig = ""; place(el); A.restyle(el); el.classList.add("in"); A.sfx.ach();
+    if (A.celebra && A.celebra.logro) A.celebra.logro(el);                       // v0.3.203: aparece quemandose en oro, en su sitio (js/celebra.js)
     clearInterval(zoneT); zoneT = setInterval(() => place(el), 250);              // la pantalla puede cambiar con el aviso a la vista
     if (A.dealer && A.dealer.noteAch) A.dealer.noteAch(a);                       // el crupier lo comenta a veces (js/dealer.js)
     /* se va por donde vino (en la partida, como siempre) y deja paso al siguiente */
-    setTimeout(() => { clearInterval(zoneT); el.classList.add("out"); setTimeout(() => { el.classList.add("hidden"); el.classList.remove("out"); document.body.classList.remove("ach-title"); showing = false; setTimeout(toast, 250); }, el.classList.contains("free") ? 300 : 0); }, 4600);
+    setTimeout(() => {
+      clearInterval(zoneT); const fin = () => { el.classList.add("hidden"); el.classList.remove("out"); document.body.classList.remove("ach-title"); showing = false; setTimeout(toast, 250); };
+      if (A.celebra && A.celebra.logroFuera && A.celebra.logroFuera(el, fin)) return;   // y se va igual, quemandose
+      el.classList.add("out"); setTimeout(fin, el.classList.contains("free") ? 300 : 0);
+    }, 4600);
   }
   /* EL LOGRO FALSO del crupier (js/dealer.js): identico a un aviso de verdad (mismo sonido), con su cara en la ficha; al segundo le cae el sello
      "De broma", el crupier se rie y el aviso se tuerce y se cae. No pasa por P.ach, ni por el contador ni por Steam. Va en #app (se ve tambien en el inicio) */

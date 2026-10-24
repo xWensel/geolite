@@ -632,6 +632,7 @@ void main(){ o=vec4(swirl(gl_FragCoord.xy),1.0); }`;
 precision highp float;
 uniform sampler2D u_scene; uniform vec2 u_res; uniform vec2 u_zc; uniform float u_zv; uniform vec2 u_pv; uniform float u_vig; uniform float u_grain; uniform vec3 u_tint; uniform float u_time;
 uniform float u_crt; uniform float u_dpr; uniform float u_lite; uniform vec4 u_fx2;
+uniform vec4 u_ring[4]; uniform vec4 u_rw[4]; uniform vec4 u_glow; uniform float u_nr; uniform float u_ab;
 out vec4 o;
 ${NOISE}
 void main(){
@@ -640,6 +641,14 @@ void main(){
   vec2 suv=uv;                                                  // la escena ya viene girada (Ruleta, Mundo del reves): aqui solo la curva CRT
   float inside=step(0.0,suv.x)*step(suv.x,1.0)*step(0.0,suv.y)*step(suv.y,1.0);
   vec2 fr=uv*u_res;
+  /* v0.3.203 (Bloque F, paso 6): la onda de choque del acierto. Cada aro empuja el mapa hacia fuera en su frente (una gota en el agua) y separa un
+     poco los colores; detras queda luz calida. El desplazamiento va a pixel entero: el mapa no se emborrona. Los anillos 300/150/75 y las chinchetas
+     van en la capa de encima (_drawFx): la onda pasa por debajo de ellos sin tocarlos */
+  vec2 woff=vec2(0.0); float wl=0.0;
+  if(u_nr>0.5){
+    for(int i=0;i<4;i++){ vec4 r=u_ring[i]; if(r.w<=0.0&&u_rw[i].y<=0.0) continue; vec2 d=fr-r.xy; float L=length(d)+0.001; float x=(L-r.z)/u_rw[i].x; float prof=exp(-x*x); woff-=d/L*r.w*x*prof*1.6; wl+=prof*u_rw[i].y; }
+    vec2 sf=fr+woff; if(u_crt<0.5) sf=floor(sf)+0.5; suv=sf/u_res;
+  }
   vec2 toC=(u_zc-fr);
   float zvA=clamp(u_zv,-4.0,4.0);
   vec2 off=toC*zvA*0.018+u_pv*0.004;                            // estela de movimiento sutil (antes era tan fuerte que parecia lag)
@@ -657,6 +666,7 @@ void main(){
     vec2 dir=normalize(toC+vec2(0.0001)); vec2 cav=dir*ca*u_res.y/u_res*0.5;
     col.r=texture(u_scene,suv+cav).r; col.b=texture(u_scene,suv-cav).b;
   }
+  if(u_nr>0.5&&u_ab>0.0){ vec2 ua=woff*u_ab/u_res; col.r=texture(u_scene,suv+ua).r; col.b=texture(u_scene,suv-ua).b; }
   if(u_crt>0.5){
     float sl=0.5+0.5*sin(fr.y*3.14159265/(1.5*u_dpr));
     col*=0.95+0.05*sl;                                          // lineas de barrido
@@ -698,6 +708,11 @@ void main(){
     col+=(tb+hs)*0.08*hash(floor(frag/u_dpr)+fract(u_time*9.7)*53.0);
     col+=(hash(floor(frag/u_dpr)+fract(u_time*9.7)*37.0)-0.5)*u_fx2.y;
     col*=0.93+0.07*sin(fr.y*3.14159265/(1.5*u_dpr));
+  }
+  if(u_nr>0.5&&!(u_fx2.x>2.5&&u_fx2.x<3.5)){                    // en la mesa de bolsillo (cuatro verdes) no entra luz de otro color
+    float g=clamp(u_glow.w*exp(-dot(fr-u_glow.xy,fr-u_glow.xy)/(u_glow.z*u_glow.z)),0.0,0.85);
+    col=mix(col,col*vec3(1.22,1.06,0.78)+vec3(0.07,0.045,0.0),g);          // luz de lampara calida sobre la tierra (no la quema a blanco)
+    col+=vec3(1.0,0.9,0.7)*clamp(wl,0.0,0.6)*0.22;                          // el frente de la onda coge un poco de luz
   }
   vec2 q2=uv-0.5; float v=1.0-u_vig*smoothstep(0.30,0.95,length(q2*vec2(1.05,1.0))+min(abs(zvA)*0.01,0.04));
   col*=v*u_tint;
@@ -1639,6 +1654,36 @@ void main(){
         }
       }
     }
+    /* v0.3.203 (Bloque F, paso 6): LA ONDA DEL ACIERTO. Nace en tu chincheta (la de las marcas: si la vista se mueve, va con ella) y deforma el mapa
+       en el ultimo pase (FS_POST). aros: [{ r1, s, w, l, ms, delay }] en px a 1080p; luz: { r, k, ms }. Se va sola; clearMarks la corta */
+    onda(aros, luz) {
+      const now = performance.now(), k = Math.min(this.W / 1920, this.H / 1080) || 1;
+      this.ondas = (this.ondas || []).filter(o => now - o.t0 < o.ms).concat((aros || []).map(o => ({ ...o, t0: now + (o.delay || 0), sc: k })));
+      if (luz) this.ondaLuz = { ...luz, t0: now + (luz.delay || 0), sc: k };
+      this.dirty = true;
+    }
+    _ondaVivas(now) {
+      if (!this.ondas || !this.marks.guess) { this.ondas = null; this.ondaLuz = null; return false; }
+      this.ondas = this.ondas.filter(o => now - o.t0 < o.ms); if (this.ondaLuz && now - this.ondaLuz.t0 >= this.ondaLuz.ms) this.ondaLuz = null;
+      if (!this.ondas.length && !this.ondaLuz) { this.ondas = null; return false; }
+      return true;
+    }
+    _ondaU(now) {
+      const P = this.P.post, gl = this.gl;
+      if (!this._ondaVivas(now)) { this._u(P, "u_nr", 0); return; }
+      const m = this.marks, dpr = this.cdpr, H = this.H;
+      let ref; if (m.answer) { this.lonLatToScreen(m.answer[0], m.answer[1]); ref = this._lwx; }
+      const G = this.lonLatToScreen(m.guess[0], m.guess[1], m.gct, undefined, ref), [gx, gy] = this._crt(G[0], G[1]), cx = gx * dpr, cy = (H - gy) * dpr;
+      const ease = p => 1 - Math.pow(1 - p, 3), R = new Float32Array(16), Rw = new Float32Array(16);
+      this.ondas.filter(o => now >= o.t0).slice(0, 4).forEach((o, i) => {
+        const p = (now - o.t0) / o.ms, f = o.sc * dpr;
+        R.set([cx, cy, o.r1 * f * ease(p), o.s * f * Math.pow(1 - p, 1.3)], i * 4); Rw.set([o.w * f * (1 + p * 0.8), o.l * (1 - p), 0, 0], i * 4);
+      });
+      const g = this.ondaLuz && now >= this.ondaLuz.t0 ? this.ondaLuz : null, gp = g ? (now - g.t0) / g.ms : 1;
+      const gk = g ? g.k * (gp < 0.12 ? gp / 0.12 : Math.pow(1 - (gp - 0.12) / 0.88, 1.6)) : 0;
+      gl.uniform4fv(P.u.u_ring, R); gl.uniform4fv(P.u.u_rw, Rw);
+      this._u(P, "u_glow", cx, cy, g ? g.r * g.sc * dpr : 1, gk); this._u(P, "u_nr", 1); this._u(P, "u_ab", 0.22);
+    }
     quakeKick(amp, jolt) { const a = Math.random() * Math.PI * 2; this._qk = { t0: performance.now(), ms: 750, amp, jx: Math.cos(a) * jolt, jy: Math.sin(a) * jolt, done: 0 }; this.dirty = this.fxDirty = true; }
     distorted() { return !!(this.dist.spec && this.dist.k > 0.01); }
     /* uniformes de deformacion para un programa */
@@ -1806,6 +1851,7 @@ void main(){
       if (this._it && this._livingMat() && now - this._it.t < 6000) this.dirty = true;                       // la salpicadura dura seis segundos
       if (this.sk.animated && this.fxOn !== false && !this.pointers.size && now - this._lastDraw >= this.idleMs) this.dirty = true;   // fondo animado: ~25 fps en reposo
       if (this.dirty) { this.dirty = false; this._drawGL(now); if (this.onView) this.onView(this.view); }
+      else if (this.ondas && this._sceneT) this._post(now);                                                 // la onda del acierto: solo el ultimo pase
       if (this.fxDirty) { this.fxDirty = false; this._drawFx(now); }
     }
 
@@ -1976,9 +2022,15 @@ void main(){
       gl.disable(gl.BLEND);
 
       // 4) post-proceso a pantalla: desenfoque radial y aberracion segun velocidad de zoom, viñeta y grano
+      this._sceneT = scene; this._post(now);
+    }
+    /* el ultimo pase, aparte: mientras corre la onda del acierto sin que la vista cambie, solo se repite este (la escena ya esta pintada) */
+    _post(now) {
+      const gl = this.gl, W = this.W, H = this.H, dpr = this.cdpr, P = this.P, st = this.sk, scene = this._sceneT; if (!scene) return;
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, this.cv.width, this.cv.height);
       gl.useProgram(P.post); gl.bindVertexArray(this.vaoEmpty);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, scene.tex); gl.uniform1i(P.post.u.u_scene, 0);
+      this._ondaU(now);
       const zc = this.zc || [W / 2, H / 2];
       this._u(P.post, "u_res", this.cv.width, this.cv.height); this._u(P.post, "u_zc", zc[0] * dpr, (H - zc[1]) * dpr);
       const fxk = this.blurOn === false ? 0 : 1;

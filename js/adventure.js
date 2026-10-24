@@ -1305,7 +1305,7 @@ window.AIQ = window.AIQ || {};
         kind: "ok", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: boss ? A.T("¡Jefe derrotado!", "Boss defeated!") : A.T("Ronda superada", "Round cleared"),
         text: `${A.fmt(S.levelScore)} / ${A.fmt(Lv.advance)}`, lines, meter: [S.levelScore, Lv.advance], places: true,
         stats: [[A.T("Puntos de la ronda", "Round points"), S.levelScore], [A.T("Total de la expedición", "Expedition total"), run.score], [A.T("Doblones", "Doubloons"), run.coins]],
-        stamp: A.T("SUPERADA", "CLEARED"), stampSub: String(roundNo() + 1).padStart(2, "0"), art: boss ? "chest" : "win",
+        stamp: A.T("SUPERADA", "CLEARED"), stampSub: String(roundNo() + 1).padStart(2, "0"), art: boss ? "chest" : "win", superada: lt.margin >= 3 ? 3 : lt.margin >= 1 ? 2 : 1,   // el sello, segun el margen: justa, holgada o aplastante (js/celebra.js)
         buttons: [{ id: "nlBtn", cls: "btn-ink", label: boss ? A.T("Abrir el cofre del jefe", "Open the boss chest") : A.T("Al campamento", "To camp"), arrow: true, primary: true, onclick: () => { if (boss && run.act < 2 && !run.chestStuckDone && Math.random() < 0.6) { run.chestStuckDone = true; persist(); return stuckChest(); } afterVerdict(boss); } }, { id: "vdMenu", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().runMenu(), keep: true }],
       });
       relicPay(lines.filter(l => l[2] && !l[3]).map(l => l[2]));
@@ -2571,7 +2571,8 @@ window.AIQ = window.AIQ || {};
   function buy(el, chest) {
     if (legOn) return;
     const i = +el.dataset.ix, s = run.stock[i]; if (!s || run.bought.includes(i)) return;   // data-ix (no data-i: cambiar de idioma reescribe todo [data-i] con A.t)
-    if (s.k === "life") { const c = lifePrice(); if (run.lives >= run.maxLives) { A.sfx.deny(); shake(el); return; } if (run.coins < c) return noFunds(el); run.coins -= c; run.lives++; run.lifeBuys = (run.lifeBuys || 0) + 1; run.bought.push(i); A.sfx.buy(); persist(); return renderShop(chest); }
+    const qf = !chest && A.celebra && A.celebra.antesDeComprar ? A.celebra.antesDeComprar(el, i) : null;   // v0.3.203: lo que cambia se quema en oro al repintar (js/celebra.js)
+    if (s.k === "life") { const c = lifePrice(); if (run.lives >= run.maxLives) { A.sfx.deny(); shake(el); return; } if (run.coins < c) return noFunds(el); run.coins -= c; run.lives++; run.lifeBuys = (run.lifeBuys || 0) + 1; run.bought.push(i); A.sfx.buy(); persist(); renderShop(chest); if (qf) qf(); return; }
     if (s.k === "perk") {
       const p = A.RELICS[s.id], c = chest ? 0 : cardCost(s);
       if (owned(s.id)) return;                                            // 0.2.5: un amuleto no se compra dos veces (tiendas guardadas de antes, con su recarga)
@@ -2599,7 +2600,7 @@ window.AIQ = window.AIQ || {};
     run.bought.push(i); run.visitBuys = (run.visitBuys || 0) + 1; if (!leg) A.sfx.buy(); persist();
     if (chest) { run.stock = null; run.bought = []; if (leg) run.phase = "shop"; persist(); return leg ? legendary(el) : openShop(false); }   // guardada ya en la tienda: si se cierra a mitad, la reliquia es tuya y no vuelve el cofre
     if (leg) return legendary(el);
-    renderShop(chest);
+    renderShop(chest); if (qf) qf();
   }
   /* PAN DE ORO: al elegir la legendaria en el cofre del jefe (~2 s, la secuencia del prototipo aprobado). Las otras cartas caen de la mesa y la sala
      se oscurece en ambar; la legendaria sube al centro con un bote (pasa por x1,12 y se posa a x1: el pixel queda entero) mientras suena su subida

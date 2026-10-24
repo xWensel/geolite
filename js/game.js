@@ -922,6 +922,7 @@
     if (HS) setTimeout(() => { if (still()) A.music.duck(0.12, 260); }, 480 - 30);
     setTimeout(() => {
       if (!still()) return; A.sfx.reveal(tier);
+      if (A.celebra && guess && tier >= 1 && tier <= 4) A.celebra.acierto(tier);                 // v0.3.203: la onda de choque en el mapa, bajo tu chincheta (js/celebra.js)
       if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); A.casa.destello(2); }          // la diana pega: golpe grave, un temblor y la lampara que sube
       else if (tier === 0 || tier === 5) A.casa.baja(tier === 0 && prevStreak >= 2 ? 1 : 0.7);    // fallo: la lampara baja un momento
       /* v0.3.201 (Bloque F, paso 4): el mundo responde a tu racha (la sala, la musica y la pila de fichas: js/casa.js) y el publico de la sala
@@ -937,6 +938,7 @@
     if (cxr.level) setTimeout(() => {
       if (!still()) return;
       A.casa.premio(cxr.level);                                                  // la casa: jackpots, un temblor por golpe que crece y la vibracion (js/casa.js)
+      if (A.celebra) for (let k = 1; k <= cxr.level; k++) setTimeout(() => { if (still()) A.celebra.jackpot(k); }, (k - 1) * JP_MS);   // y con cada golpe, otra onda
       if (cxr.level === 3 && A.publico) A.publico("jackpot", 2 * JP_MS + 600);     // el premio gordo: la sala aplaude y vitorea tras el tercer golpe
     }, JP_AT);
     if (adv && adv.coins) coinFx(adv.coins);
@@ -944,6 +946,7 @@
        apagada a x1. En el Clasico la racha no multiplica: solo cuenta (fila RACHA) */
     const eq = S.run ? (mult > 1 ? "on" : prevStreak >= 2 && !S.streak ? "broken" : "off") : null;
     const broke = eq === "broken" || (!S.run && prevStreak >= 2 && !S.streak);
+    if (A.celebra) A.celebra.racha({ antes: prevStreak, ahora: S.streak || 0, eq, slam: T_SLAM });   // v0.3.203: el fuego de la racha detras de la caja roja
     setTimeout(() => {
       if (!still()) { if (S.phase === "asking") setStreak(); return; }
       if (eq === "on" || (!S.run && S.streak >= 2)) { A.sfx.streak(S.streak); if (eq === "on") A.casa.luz(0.4, 520); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
@@ -1046,7 +1049,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
      en el centro el ticket de caja (lugar a lugar, puntos, lo que paga la casa y el sello) y a la derecha la ficha y el crupier. Los botones van
      abajo a la derecha y el principal, el ultimo, con su tecla. meter: [puntos, objetivo] dibuja la barra bajo el titular */
   const TICKET_HEAD = "Casa Geolite · caja|Geolite House · cashier|Maison Geolite · caisse|Casa Geolite · caixa|Haus Geolite · Kasse|Casa Geolite · cassa||Geolite 赌场 · 收银台|Geolite 하우스 · 계산대|Geolite ハウス・会計|Дом Geolite · касса|Dom Geolite · kasa";
-  function verdict({ kind, level, tag, title, text, stats, stamp, iq, tier, tierName, buttons, art, lines, meter, places: withPlaces }) {
+  function verdict({ kind, level, tag, title, text, stats, stamp, iq, tier, tierName, buttons, art, lines, meter, places: withPlaces, superada }) {
     /* el Club de la casa: terminar suma un poco y aqui se cobra la experiencia de la ronda o el nivel (recibo propio bajo el titular, js/club.js) */
     const club = A.club ? (A.club.bonus(A.club.bonusFor(kind)), A.club.cash()) : null;
     const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -1079,6 +1082,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (A.dealer && A.dealer.on) A.dealer.anchor($("vdDealer"));                // el crupier habla dentro del veredicto, sin tapar botones
     if (A.trastadas && A.trastadas.veredicto) A.trastadas.veredicto();          // bloque D: si cerraste la ronda con racha, la lluvia de cartas (nunca a media pregunta)
     if (club) A.club.play(club, document.querySelector("#dlg .gx-vd-club"), 1700);
+    /* v0.3.203 (Bloque F, paso 6): cuando el sello cae (1,5 s + su golpe), hunde el ticket, la tinta se corre y la lampara sube segun el margen (js/celebra.js) */
+    if (superada && stamp && kind === "ok" && A.celebra) { const vd = document.querySelector("#dlg .gx-vd"); setTimeout(() => { if (vd && vd.isConnected) A.celebra.superada(superada, vd); }, 1700); }
   }
 
   function finishLevel() {
@@ -1100,7 +1105,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       A.sfx.stamp(); setTimeout(A.sfx.win, 380);
       verdict({
         kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
-        stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1),
+        stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1), superada: S.levelScore >= L.advance * 1.5 ? 3 : S.levelScore >= L.advance * 1.1 ? 2 : 1,
         buttons: [{ id: "nlBtn", cls: "btn-ink", label: A.t("btn.nextLevel"), arrow: true, primary: true, onclick: () => startLevel_(S.level + 1) }],
       });
     } else { A.sfx.stamp(); setTimeout(A.sfx.fail, 380); endScreen(false, iq); }
