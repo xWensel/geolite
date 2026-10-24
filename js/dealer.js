@@ -3579,7 +3579,7 @@ window.AIQ = window.AIQ || {};
   function pfWatch() {
     const root = document.querySelector("#dlg .s-prof"); if (!root || root._pfw) return; root._pfw = 1;
     const opened = Date.now();
-    const card = root.querySelector("#pfCardBtn, .pf-socio"); if (card) card.addEventListener("pointerenter", () => { if (Date.now() - opened > 1500) pfOnceSay("pfCard"); });
+    const card = root.querySelector("#cmCard"); if (card) card.addEventListener("pointerenter", () => { if (Date.now() - opened > 1500) pfOnceSay("pfCard"); });
     root.querySelectorAll(".pf-stat").forEach(c => c.addEventListener("pointerenter", () => {
       if (Date.now() - opened < 1500) return;
       if (c.classList.contains("book")) { if (!pfOnceSay("pfPage")) pfOnceSay("pfBook"); } else pfOnceSay("pfStats");

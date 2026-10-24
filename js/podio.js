@@ -110,7 +110,9 @@ window.AIQ = window.AIQ || {};
   const OF = () => P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}");
   const dots = r => (mode === "daily" ? `<span class="lb-tries">${[0, 1, 2].map(i => `<i class="${r.tries && i < r.tries.length ? "on" : ""}"></i>`).join("")}</span>` : "");
   /* el estilo de la carta de una fila: la tuya, la que guardo el servidor (r.c) o ninguna (quien no ha vuelto a jugar desde la v0.3.174) */
-  const styleOf = r => { if (!r || !A.socio) return null; if (r.id && r.id === A.profile.get().id) return { me: true }; return r.c ? A.socio.parse(r.c) : null; };
+  /* 24-oct: quien no ha guardado el estilo de su carta (puntuaciones de antes de las cartas) sale con la carta de la casa: los tres del podio, siempre con carta */
+  const BASIC = { t: 0, lvl: 1, marco: "filete", icon: "globe", title: "", carta: 1, fondo: 1, mat: 0 };
+  const styleOf = r => { if (!r || !A.socio) return null; if (r.id && r.id === A.profile.get().id) return { me: true }; return (r.c && A.socio.parse(r.c)) || BASIC; };
   const subOf = st => !st || !A.socio ? "" : st.me ? A.socio.titleName(A.socio.title()) || A.club.tierName(A.club.tierNow()) : (st.title && A.socio.titleName(st.title)) || A.club.tierName(st.t);
   const li = (r, n, i, my, nob) => { const st = nob ? null : styleOf(r), sub = subOf(st);
     return `<li class="${r.id === my ? "me" : ""}" style="--i:${i}"><span class="lb-n">${A.fmt(n)}</span><span class="lb-bd"${st ? ` data-n="${n}"` : ""}></span><span class="lb-who"><span class="lb-name">${esc(r.name || "—")}</span>${sub ? `<em class="lb-tt">${esc(sub)}</em>` : ""}</span>${dots(r)}<b>${A.fmt(r.score)}</b></li>`; };

@@ -88,16 +88,64 @@
 .cm-rv-loot .cm-b.on { opacity: 1; transform: none; }
 html.reduce-motion .cm-rv-flip, html.reduce-motion .cm-rv-sl, html.reduce-motion .cm-rv-loot .cm-b, html.reduce-motion .cm-rv-pv { transition: none; }
 
-/* v2 (insignias de la casa): la insignia de tu categoria junto a su nombre y en la carta del mazo; siempre a escala entera (js/camino.js insFill) */
+/* el nombre de tu categoria (sin insignia desde el Perfil del 24-oct) */
 .cm-rk { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.cm-ins { flex: none; display: grid; place-items: center; width: 64px; height: 64px; }
-.cm-ins canvas, .cm-ri canvas { display: block; image-rendering: pixelated; }
-.cm-ri { display: inline-grid; place-items: center; width: 48px; height: 48px; margin: -12px 6px -12px -4px; vertical-align: middle; }
-.cm-rv-loot .cm-b.r { padding-left: 4px; }
-/* el Perfil: la entrada «Insignias» del indice abre la escalera en el libro */
-.pf-chip.pf-ins, .pf-bic.pf-ins { display: grid; place-items: center; filter: none; }
-.pf-ins canvas { display: block; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(22, 36, 28, .35)); }
-.pf-row.pf-lk .pf-ins canvas { filter: brightness(0) opacity(.28); }
-.pf-row.pf-lk .pf-tx b { color: var(--gx-ink-2); }
 .cm-rk { flex-direction: column; align-items: flex-start; gap: 4px; }
 .cm-who .gx-t-m { overflow-wrap: normal; hyphens: auto; }
+
+/* ---------------------------------------------------------------- EL PERFIL (maqueta «Perfil del socio», 24-oct-2026, direccion B «Tu sitio en la casa»)
+   La pantalla del camino con tres pestanas de carpeta que asoman de la cabecera sobre el libro (Camino, Logros, Records; js/camino.js).
+   Letra minima de la Deck: 16 px Silkscreen y 18 px Jersey. El pixel art, a escala entera (insFill). */
+.pf-head2 { position: relative; grid-template-columns: auto minmax(0, 1fr) auto auto; }
+.pf-head2 .bq-h { min-width: 0; }
+.pf-tabs { position: absolute; left: 0; bottom: -17px; display: flex; align-items: flex-end; gap: 6px; z-index: 2; }
+.pf-tab { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; margin: 0; border: 0; cursor: pointer; font-family: var(--sans); font-size: 22px; line-height: 1; white-space: nowrap; color: var(--gx-rim-hi); background: #16241c;
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .45); clip-path: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% 100%, 0 100%); }
+.pf-tab i { font-style: normal; font-size: 18px; color: var(--gx-txt-2); font-variant-numeric: tabular-nums; }
+.pf-tab.on { height: 48px; color: var(--gx-ink); background: var(--gx-card); box-shadow: inset 0 2px 0 var(--gx-o), inset 2px 0 0 var(--gx-o), inset -2px 0 0 var(--gx-o); cursor: default; }
+.pf-tab.on i { color: var(--gx-ink-2); }
+.pf-tab:hover:not(.on), .pf-tab.pad-hov:not(.on) { background: #1f3a2c; }
+.pf-tab:focus { outline: none; }
+.pf-tab:focus-visible, html[data-input="pad"] .pf-tab:focus { box-shadow: inset 0 0 0 3px var(--gx-red); }
+
+.cm-rk .gx-t-m { align-self: stretch; min-width: 0; }
+.cm-left .cm-me { column-gap: 12px; padding-right: 12px; }   /* unos px mas para el nombre de la categoria junto a la carta */   /* el nombre mide su hueco (fitTxt lo baja de letra si una palabra no cabe) */
+.cm-nx > span { flex: 1 1 auto; min-width: 0; }
+.cm-dl[hidden], .cm-nr[hidden], .cm-b[hidden] { display: none; }
+
+/* ---------- la hoja Logros: fila de tramos (moneda y cuenta; el nombre va en el encabezado) y la lista de siempre */
+.cm-right .pf-book { height: 100%; grid-template-rows: auto auto auto minmax(0, 1fr); padding: 14px 18px 14px; }
+.pf-trs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.pf-tr { position: relative; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 52px; margin: 0; padding: 2px 4px; border: 0; cursor: pointer; font-family: var(--sans); color: var(--gx-txt); background: #16241c; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.pf-tr i { font-style: normal; font-size: 18px; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pf-tr.on { color: var(--gx-ink); background: #fffaec; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px var(--gx-rim); cursor: default; }
+.pf-tr.full:not(.on) i { color: var(--gx-rim-hi); }
+.pf-tr.hot:not(.on) { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
+.pf-tr:hover:not(.on), .pf-tr.pad-hov:not(.on) { background: #1f3a2c; }
+.pf-tr:focus { outline: none; }
+.pf-tr:focus-visible, html[data-input="pad"] .pf-tr:focus { box-shadow: inset 0 0 0 3px var(--gx-red); }
+.pf-tri, .pf-bic { flex: none; display: grid; place-items: center; width: 48px; height: 48px; }
+.pf-tri canvas, .pf-bic canvas, .pf-cki canvas, .pf-rci canvas { display: block; image-rendering: pixelated; }
+.pf-ec { min-height: 32px; padding: 2px 10px 4px; font-size: 18px; white-space: nowrap; }
+
+/* ---------- la hoja Records: tus cifras en un ticket y una fila por modo */
+.cm-right .pf-recb { grid-template-rows: auto auto auto minmax(0, 1fr); }
+.pf-rh { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; min-width: 0; }
+.pf-rh .pf-since { font-size: 18px; color: var(--gx-ink-2); white-space: nowrap; }
+.pf-cks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #fffaec; box-shadow: inset 0 0 0 2px var(--gx-ink); }
+.pf-ck { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; row-gap: 2px; align-items: center; padding: 8px 12px; border-right: 2px dashed var(--gx-paper-lo); min-width: 0; }
+.pf-ck:last-child { border-right: 0; }
+.pf-cki { grid-row: 1 / 3; width: 64px; height: 64px; display: grid; place-items: center; }
+.pf-ck b { font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1; color: var(--gx-ink); white-space: nowrap; font-variant-numeric: tabular-nums; align-self: end; }
+.pf-ck span { font-size: 18px; line-height: 1.05; color: var(--gx-ink-2); align-self: start; overflow-wrap: anywhere; }
+.pf-rmh { margin-top: 2px; }
+.pf-rcs { list-style: none; margin: 0; padding: 0 8px 0 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: grid; align-content: start; }
+.pf-rc { display: grid; grid-template-columns: 64px minmax(0, 1.1fr) repeat(3, minmax(0, 1fr)); gap: 14px; align-items: center; padding: 4px 0; border-bottom: 2px solid var(--gx-line); }
+.pf-rc:last-child { border-bottom: 0; }
+.pf-rci { width: 64px; height: 64px; display: grid; place-items: center; }
+.pf-rcn { font-family: var(--sans); font-weight: 400; font-size: 26px; line-height: 1; color: var(--gx-ink); overflow-wrap: anywhere; }
+.pf-kv { display: grid; gap: 3px; min-width: 0; }
+.pf-kv i { font-style: normal; font-size: 18px; line-height: 1.05; color: var(--gx-ink-2); overflow-wrap: anywhere; }
+.pf-kv b { font-family: var(--sans); font-weight: 400; font-size: 24px; line-height: 1; color: var(--gx-ink); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+/* la tienda: tu carta en pequeno en la seccion Tu carta */
+.bq-rxc { display: block; image-rendering: pixelated; }

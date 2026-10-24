@@ -345,28 +345,14 @@ html:lang(ru) #settings .ctl-top .seg button { font-size: 18px; }   /* «Кла�
   #settings .set-keys { padding: 10px 16px 12px; justify-content: center; }
 }
 
-/* ---------------------------------------------------------------- PERFIL (v0.3.41): el libro de logros (js/hub.js, profile). 12 columnas:
-   la ficha de socio (papel, cifras en columna) y el indice de tramos en las columnas 1-4; el libro (5-12), una pagina por tramo con una fila
-   por logro: su ficha (gris si aun no la tienes), el nombre, COMO SE CONSIGUE y el progreso o la fecha. Solo la lista de la pagina se desplaza,
-   fila a fila. Fondo de fieltro opaco: el mapa de detras no compite con la letra (y deja de dibujarse, A.coverMap) */
+/* ---------------------------------------------------------------- PERFIL: la lista del libro de logros (las filas: ficha, nombre, como se consigue y
+   el progreso o la fecha). La pantalla es la del camino del socio con sus pestanas (js/camino.js y css/camino.css, seccion EL PERFIL); .pf-ix es el
+   indice de los Creditos (js/creditos.js). Fondo de fieltro opaco: el mapa de detras deja de dibujarse (A.coverMap) */
 .pf-screen { z-index: 1; }
-.pf-grid12 { grid-template-rows: auto minmax(0, 1fr); row-gap: 16px; }
-.pf-head { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 24px; min-width: 0; }
-.pf-head #hubBack .ic { width: 22px; height: 22px; }
-.pf-h { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
-.pf-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
-.pf-sum { grid-column: 4; display: grid; grid-template-columns: auto auto 160px; align-items: center; gap: 12px; }
-.pf-sum b { font-family: var(--sans); font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pf-sum b i { font-style: normal; font-size: 24px; color: var(--gx-txt-2); }
-.pf-head .menu-tools { grid-column: 5; }
 
-.pf-left { grid-column: 1 / 5; grid-row: 2; min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; }
-.pf-socio { display: grid; gap: 5px; padding: 14px 18px 16px; }
-.pf-name { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: .95; color: var(--gx-ink); overflow-wrap: anywhere; }
 .pf-since { font-size: 18px; line-height: 1.1; color: var(--gx-ink-2); }
 .pf-stat { font-size: 18px; line-height: 1.05; }
 .pf-stat s { transform: translateY(-4px); }
-.pf-idx { display: grid; gap: 3px; align-content: start; min-height: 0; overflow-y: auto; padding: 2px; }   /* v0.3.62: ocho filas (con Mesas): a 16:9 caben sin desplazar */
 .pf-ix { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 36px; padding: 3px 14px 3px 10px; border: 0; cursor: pointer; text-align: left;
   font-family: var(--sans); font-size: 20px; line-height: 1; color: var(--gx-txt); clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
 .pf-ix .ic { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
@@ -377,15 +363,10 @@ html:lang(ru) #settings .ctl-top .seg button { font-size: 18px; }   /* «Кла�
 .pf-ix.on i { color: var(--gx-ink-2); }
 .pf-ix.hot:not(.on) { box-shadow: inset 0 0 0 2px var(--gx-rim); } .pf-ix.hot:not(.on) i, .pf-ix.full:not(.on) i { color: var(--gx-rim-hi); }
 .pf-ix:focus { outline: none; }
-.pf-ix.pf-soon:hover { background: none; }
-.pf-ix.pf-soon { cursor: default; opacity: .7; background: none; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); border-style: dashed; }
-.pf-soonbox { display: block; width: 28px; height: 28px; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .55); }
 .pf-ix:focus-visible::after, html[data-input="pad"] .pf-ix:focus::after { content: ""; position: absolute; inset: 4px; box-shadow: inset 0 0 0 2px #fff; animation: gx-focus 1.2s steps(2, end) infinite; pointer-events: none; }
 
-.pf-right { grid-column: 5 / 13; grid-row: 2; min-width: 0; min-height: 0; }
 .pf-book { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 10px; padding: 16px 22px 18px; }
 .pf-bh { display: grid; grid-template-columns: 48px minmax(0, 1fr) 200px; gap: 14px; align-items: center; }
-.pf-bic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; }
 .pf-bt { display: grid; gap: 4px; min-width: 0; }
 .pf-bt .gx-t-m { color: var(--gx-ink); text-shadow: none; overflow-wrap: anywhere; }
 .pf-bc { display: grid; gap: 6px; justify-items: end; }
@@ -416,9 +397,6 @@ html:lang(ru) #settings .ctl-top .seg button { font-size: 18px; }   /* «Кла�
 .dealer.screen.prof .dl-bubble { max-width: 420px; margin-bottom: 36px; }
 @media (max-width: 899px), (max-height: 519px) {                                  /* movil: una columna y la pantalla entera se desplaza */
   .pf-screen { overflow-y: auto; }
-  .pf-grid12 { position: static; padding: 14px 16px 20px; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: 12px; }
-  .pf-head { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; } .pf-sum { display: none; } .pf-head .menu-tools { grid-column: 3; } .pf-h { font-size: 40px; }
-  .pf-left, .pf-right { grid-column: 1; grid-row: auto; } .pf-idx { overflow: visible; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pf-book { height: auto; } .pf-rows { overflow: visible; }
   .pf-row { grid-template-columns: 48px minmax(0, 1fr); } .pf-chip { width: 48px; height: 48px; } .pf-mt { grid-column: 2; justify-items: start; } .pf-bh { grid-template-columns: 40px minmax(0, 1fr); } .pf-bc { grid-column: 1 / -1; justify-items: start; }
 }

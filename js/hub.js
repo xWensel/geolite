@@ -114,7 +114,7 @@ window.AIQ = window.AIQ || {};
     })() : null;
     const noDeal = homeDealt; homeDealt = true;                       // las cartas se reparten solo la primera vez que se ve la portada; al volver de Perfil & co. ya estan en la mesa
     c.dialog(`<div class="hh${noDeal ? " nodeal" : ""}">
-      <div class="hh-top">${A.salir ? A.salir.button() : ""}${A.club ? A.club.card() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${tools()}</div>
+      <div class="hh-top">${A.salir ? A.salir.button() : ""}${A.club ? A.club.card() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${A.club ? tools().replace('<div class="menu-tools">', '<div class="menu-tools">' + A.club.wallet()) : tools()}</div>
       <p class="hh-tag">${A.t("title.tag")}</p>
       <div class="hh-cards">
         ${mc("classic", "K", "s_palm", "card_classic", T("Clásico", "Classic"), T("Regiones del mundo, banderas, pistas, sucesos y personajes, contra el reloj.", "Regions of the world, flags, clues, events and famous people, against the clock."), T("Directo al grano", "No frills"))}
@@ -127,7 +127,7 @@ window.AIQ = window.AIQ || {};
         <div class="hh-deck${clubPlq ? " five" : ""}">
           ${clubPlq ? clubPlq[0] : ""}${plaque("plq-codex", "codexBtn", "m_codex", A.t("codex.title"), `${A.fmt(cx.u)} / ${A.fmt(cx.t)}`, (100 * cx.u) / Math.max(1, cx.t), A.ttAttr(A.t("codex.title"), A.tip6("Fichas de lugares, historia y datos clave: se descubren acertando cerca.|Cards for places, history and key facts: found by pinning close.|Cartes de lieux, d'histoire et de faits clés : on les découvre en visant juste.|Cartas de lugares, história e dados-chave: descobertas ao acertar perto.|Karten zu Orten, Geschichte und Kernfakten: entdeckt durch genaue Treffer.|Schede di luoghi, storia e dati chiave: si scoprono colpendo vicino.||地点、历史与关键信息的卡片：准确标出即可发现。|장소, 역사, 핵심 정보 카드: 가깝게 맞히면 발견됩니다.|場所・歴史・重要な事実のカード：近くに当てると見つかる。|Карточки мест, истории и ключевых фактов: открываются точными попаданиями.|Karty miejsc, historii i kluczowych faktów: odkrywasz je celnymi trafieniami.")))}
           ${A.podio.button()}
-          ${plaque("plq-prof", "profBtn", "m_prof", T("Perfil", "Profile"), `${A.icon("u_star")}${A.fmt(A.ach.count())} / ${A.fmt(A.ach.total())}`, (100 * A.ach.count()) / Math.max(1, A.ach.total()), A.ttAttr(T("Perfil", "Profile"), A.tip6("Tus estadísticas y tus logros.|Your stats and achievements.|Tes statistiques et tes succès.|Suas estatísticas e conquistas.|Deine Statistiken und Erfolge.|Le tue statistiche e i tuoi obiettivi.||你的统计数据和成就。|내 통계와 업적.|あなたの記録と実績。|Твоя статистика и достижения.|Twoje statystyki i osiągnięcia.")))}${clubPlq ? clubPlq[1] : ""}
+          ${plaque("plq-prof", "profBtn", "m_prof", T("Perfil", "Profile"), `${A.icon("u_star")}${A.fmt(A.ach.count())} / ${A.fmt(A.ach.total())}`, (100 * A.ach.count()) / Math.max(1, A.ach.total()), A.ttAttr(T("Perfil", "Profile"), A.tip6("Tu camino en el Club, tus logros y tus récords.|Your path in the Club, your achievements and your records.|Ton parcours au Club, tes succès et tes records.|Seu caminho no Clube, suas conquistas e seus recordes.|Dein Weg im Club, deine Erfolge und deine Rekorde.|Il tuo cammino nel Club, i tuoi obiettivi e i tuoi record.||你在俱乐部的会员之路、成就和纪录。|클럽에서의 길, 업적과 기록.|クラブでの道のり、実績と記録。|Твой путь в клубе, достижения и рекорды.|Twoja ścieżka w Klubie, osiągnięcia i rekordy.")))}${clubPlq ? clubPlq[1] : ""}
         </div>
       </div></div>
       <span class="hh-ver">Geolite · v${A.VERSION}</span>${A.parche ? A.parche.button() : ""}`, "home");               // fuera de .hh: no cuenta para la composicion ni para A.fitK
@@ -504,8 +504,7 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ Perfil y logros
-     v0.3.41: Naipe de gala, "libro de logros" (mesa de diseño, paso 3). 12 columnas: ficha de socio de papel con las cifras en columna y el indice
-     (1-4); el libro (5-12), una pagina por tramo con UNA FILA POR LOGRO: su ficha (la insignia del juego, en gris si aun no la tienes), el nombre,
+     El libro de logros (v0.3.41, mesa de diseño): una pagina por tramo con UNA FILA POR LOGRO: su ficha (gris si aun no la tienes), el nombre,
      COMO SE CONSIGUE y el progreso ("412 / 1.000", como en Steam) o la fecha. "A punto": los tres que tienes mas cerca. Los secretos no dicen
      como se consiguen: el crupier da una pista. Solo la lista de la pagina se desplaza (fila a fila) */
   const SECRET_HINT = {
@@ -519,108 +518,118 @@ window.AIQ = window.AIQ || {};
     adv_ascmax: "Si llegas a lo más alto de la Ascensión, me jubilo. Palabra de crupier.|Reach the top of the Ascension and I'll retire. Dealer's word.|Si tu atteins le sommet de l'Ascension, je prends ma retraite. Parole de croupier.|Se você chegar ao topo da Ascensão, eu me aposento. Palavra de crupiê.|Erreichst du den höchsten Aufstieg, setze ich mich zur Ruhe. Croupier-Ehrenwort.|Se arrivi in cima all'Ascensione, vado in pensione. Parola di croupier.||你要是打到最高进阶，我就退休。荷官说话算话。|어센션 꼭대기까지 오르면 은퇴하지. 딜러의 약속이야.|アセンションの頂点まで来たら、引退してやる。ディーラーの約束だ。|Дойдёшь до вершины Восхождения — уйду на пенсию. Слово крупье.|Dojdź na szczyt Wniebowstąpienia, a przejdę na emeryturę. Słowo krupiera.",
   };
   const NEAR = () => A.pick6("A punto|Almost there|Presque|Quase lá|Fast geschafft|Quasi fatto||即将达成|거의 다 왔어요|あと少し|Почти|Prawie");
-  let pfPage = null;                                                    // pagina abierta del libro (se recuerda mientras dure la sesion)
-  /* Bloque J: el Perfil es quien eres y que has hecho; tu carta se cambia en la tienda (Tu carta) y las mesas viven alli */
+  let pfPage = null;                                                    // tramo abierto del libro de logros (se recuerda mientras dure la sesion)
+  /* el Perfil (maqueta «Perfil del socio», 24-oct): la pantalla es la de js/camino.js (tu carta y tu sitio a la izquierda, un libro con tres pestanas);
+     aqui viven sus dos hojas de texto: Logros (una fila de fichas por tramo encima de la lista) y Records (tus cifras y lo de cada modo) */
   const PFX = {
-    hint: () => A.pick6("Pulsa tu carta para cambiarla|Press your card to change it|Appuie sur ta carte pour la changer|Toque na sua carta para trocá-la|Tippe deine Karte an, um sie zu ändern|Tocca la tua carta per cambiarla||点击你的会员卡来更换|카드를 눌러 바꿔요|カードを押して変更|Нажми на карту, чтобы изменить|Dotknij karty, aby ją zmienić"),
-    cardTt: () => A.pick6("Tu carta|Your card|Ta carte|Sua carta|Deine Karte|La tua carta||你的会员卡|내 카드|きみのカード|Твоя карта|Twoja karta"),
-    col: "Colecciones|Collections|Collections|Coleções|Sammlungen|Collezioni||收藏|컬렉션|コレクション|Коллекции|Kolekcje",
-    soon: "Pronto|Soon|Bientôt|Em breve|Bald|Presto||即将推出|곧 만나요|近日|Скоро|Wkrótce",
+    onCard: "En tu carta|On your card|Sur ta carte|Na sua carta|Auf deine Karte|Sulla tua carta||放到会员卡|카드에 달기|カードに付ける|На карту|Na kartę",
+    onCardT: "Su icono, en el centro de tu carta: te lleva a la tienda, a Tu carta.|Its icon, in the middle of your card: takes you to the shop, to Your card.|Son icône, au centre de ta carte : t'emmène à la boutique, dans Ta carte.|O ícone dela no centro da sua carta: leva você à loja, em Sua carta.|Sein Symbol in die Mitte deiner Karte: bringt dich in den Laden, zu Deine Karte.|La sua icona al centro della tua carta: ti porta al negozio, in La tua carta.||把它的图标放到会员卡中央：前往商店的“你的会员卡”。|업적 아이콘을 카드 가운데에: 상점의 ‘내 카드’로 가요.|その実績のアイコンをカードの中央に。ショップの「きみのカード」へ。|Его значок — в центр твоей карты: откроется магазин, раздел «Твоя карта».|Jego ikona na środku twojej karty: przenosi do sklepu, do „Twoja karta”.",
+    figs: "Tus cifras|Your numbers|Tes chiffres|Seus números|Deine Zahlen|I tuoi numeri||你的数据|내 기록|きみの数字|Твои цифры|Twoje liczby",
+    modes: "En cada modo|In each mode|Dans chaque mode|Em cada modo|In jedem Modus|In ogni modalità||各模式|모드별|モードごと|В каждом режиме|W każdym trybie",
+    classic: "Clásico|Classic|Classique|Clássico|Klassisch|Classico||经典|클래식|クラシック|Классика|Klasyczny",
+    adv: "Aventura|Adventure|Aventure|Aventura|Abenteuer|Avventura||冒险|모험|アドベンチャー|Приключение|Przygoda",
+    duelo: "Duelo de fichas|Chip duel|Duel de jetons|Duelo de fichas|Chip-Duell|Duello di fiches||筹码对决|칩 대결|チップ対決|Дуэль фишек|Pojedynek żetonów",
+    codex: "Enciclopedia|Encyclopedia|Encyclopédie|Enciclopédia|Enzyklopädie|Enciclopedia||百科全书|백과사전|百科事典|Энциклопедия|Encyklopedia",
+    barra: "La Barra|The Bar|Le Bar|O Bar|Die Bar|Il Bar||吧台|바|バー|Бар|Bar",
+    camps: "Campañas ganadas|Campaigns won|Campagnes gagnées|Campanhas vencidas|Gewonnene Kampagnen|Campagne vinte||赢得的战役|이긴 캠페인|勝ったキャンペーン|Пройдено кампаний|Wygrane kampanie",
+    golds: "Con oro|With gold|Avec l'or|Com ouro|Mit Gold|Con l'oro||金牌|금메달|金メダル|С золотом|Ze złotem",
+    medals: "Medallas|Medals|Médailles|Medalhas|Medaillen|Medaglie||奖牌|메달|メダル|Медали|Medale",
+    wins: "Victorias|Wins|Victoires|Vitórias|Siege|Vittorie||胜场|승리|勝利|Победы|Zwycięstwa",
+    of: "{a} de {b}|{a} of {b}|{a} sur {b}|{a} de {b}|{a} von {b}|{a} su {b}||{b} 场中 {a}|{b}번 중 {a}|{b}回中{a}|{a} из {b}|{a} z {b}",
+    best: "Mejor partida|Best run|Meilleure partie|Melhor partida|Bester Lauf|Partita migliore||最佳成绩|최고 기록|ベストスコア|Лучшая партия|Najlepsza gra",
+    asc: "Ascensión|Ascension|Ascension|Ascensão|Aufstieg|Ascensione||进阶|어센션|アセンション|Восхождение|Wniebowstąpienie",
+    vsBank: "Contra la banca|Against the house|Contre la banque|Contra a banca|Gegen die Bank|Contro il banco||对庄家|하우스 상대|胴元相手|Против банка|Przeciw kasynu",
+    streak: "Racha|Streak|Série|Sequência|Serie|Serie||连胜|연승|連勝|Серия|Seria",
+    league: "Liga|League|Ligue|Liga|Liga|Lega||联赛|리그|リーグ|Лига|Liga",
+    cards: "Tarjetas|Cards|Cartes|Cartas|Karten|Carte||卡片|카드|カード|Карточки|Karty",
+    done: "Completada|Completed|Complétée|Concluída|Erledigt|Completata||完成度|완성도|達成率|Готово|Ukończona",
+    ach: "Sus logros|Its achievements|Ses succès|Conquistas|Erfolge|Obiettivi||相关成就|관련 업적|実績|Достижения|Osiągnięcia",
+    plays: "Partidas|Games|Parties|Partidas|Spiele|Partite||局数|판 수|プレイ数|Партии|Gry",
+    games: "Juegos distintos|Different games|Jeux différents|Jogos diferentes|Verschiedene Spiele|Giochi diversi||不同游戏|다른 게임|遊んだゲーム|Разных игр|Różne gry",
   };
-  /* lo que se pinta (tambien para el precalentamiento de la puerta, A.gala.warm: la primera apertura perdia fotogramas) y la pagina del libro */
-  function pfBuild() {
-    const P = A.profile.get(), s = P.stats, avg = s.questions - s.timeouts > 0 ? Math.round(s.km / (s.questions - s.timeouts)) : 0, st = A.codexStats();
-    const prog = A.ach.progress(), got = a => !!P.ach[a.id];
-    const LOC = { pt: "pt-BR", zh: "zh-CN" }[A.lang] || A.lang || "es";
-    const day = ts => { try { return new Intl.DateTimeFormat(LOC, { day: "numeric", month: "short", year: "numeric" }).format(ts); } catch (e) { return new Date(ts).toLocaleDateString(); } };
-    const pct = (n, d) => Math.round((100 * n) / Math.max(1, d));
-    /* las cifras, en columna como el ticket. data-ic: la casilla que el crupier da la vuelta con su libreta (js/dealer.js, flipCell) */
-    const TIP = {
-      a_pin: A.tip6("Lugares que has respondido en total.|Places you've answered in total.|Lieux auxquels tu as répondu.|Lugares que você respondeu no total.|Orte, die du insgesamt beantwortet hast.|Luoghi a cui hai risposto in totale.|Lugares que respondiste en total.|你累计回答过的地点数。|지금까지 답한 장소의 총수.|これまでに答えた場所の合計。|Общее число отвеченных мест.|Łączna liczba twoich odpowiedzi."),
-      a_target: A.tip6("Respuestas casi perfectas, clavadas sobre el lugar.|Near-perfect answers, right on the spot.|Réponses quasi parfaites, en plein sur le lieu.|Respostas quase perfeitas, bem em cima do lugar.|Fast perfekte Antworten, punktgenau am Ort.|Risposte quasi perfette, proprio sul luogo.||近乎完美的回答，正中目标。|거의 완벽한 답, 바로 그 자리.|ほぼ完璧な回答、まさにその場所。|Почти идеальные ответы — точно в цель.|Niemal idealne odpowiedzi, prosto w cel."),
-      a_lens: A.tip6("Distancia media entre tu pin y el lugar real.|Average distance between your pin and the real place.|Distance moyenne entre ton épingle et le vrai lieu.|Distância média entre seu pino e o lugar real.|Durchschnittliche Entfernung zwischen deinem Pin und dem echten Ort.|Distanza media tra il tuo pin e il luogo reale.|Distancia promedio entre tu pin y el lugar real.|你的图钉与真实地点之间的平均距离。|핀과 실제 장소 사이의 평균 거리.|ピンと実際の場所との平均距離。|Среднее расстояние между твоей меткой и настоящим местом.|Średnia odległość między twoją pinezką a prawdziwym miejscem."),
-      a_flame: A.tip6("Más aciertos seguidos que has logrado.|Longest run of correct answers in a row.|Plus longue série de bonnes réponses.|Maior sequência de acertos seguidos.|Längste Serie richtiger Antworten.|Serie più lunga di risposte giuste.|Más aciertos seguidos que lograste.|最长的连续答对纪录。|가장 긴 연속 정답 기록.|最長の連続正解記録。|Самая длинная серия правильных ответов подряд.|Najdłuższa seria dobrych odpowiedzi z rzędu."),
-    };
-    const stat = (ic, l, v) => `<div class="gx-lead-row pf-stat" data-ic="${ic}" ${A.ttAttr(l, TIP[ic] || "")}><span>${l}</span><s></s><b>${v}</b></div>`;
+  const P6p = k => A.pick6(PFX[k]);
+  const LOC = () => ({ pt: "pt-BR", zh: "zh-CN" }[A.lang] || A.lang || "es");
+  const pfDay = ts => { try { return new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", year: "numeric" }).format(ts); } catch (e) { return new Date(ts).toLocaleDateString(); } };
+  const pfPct = (n, d) => Math.round((100 * n) / Math.max(1, d));
+  /* los tramos de logros y los que tienes a punto */
+  function pfData() {
+    const P = A.profile.get(), prog = A.ach.progress(), got = a => !!P.ach[a.id];
     const tiers = A.ACH_TIERS.map((t, i) => { const list = A.ACH.filter(a => a.tier === i); return { t, i, list, n: list.filter(got).length }; }).filter(x => x.list.length);
     /* A punto: los que ya has empezado y tienes mas cerca (por proporcion), nunca un secreto */
     const near = A.ACH.filter(a => !got(a) && !a.secret && prog[a.id] && prog[a.id][0] > 0 && prog[a.id][0] < prog[a.id][1])
       .sort((a, b) => prog[b.id][0] / prog[b.id][1] - prog[a.id][0] / prog[a.id][1]).slice(0, 3);
-    const total = A.ach.total(), done = A.ach.count();
-    if (pfPage == null || (pfPage !== "near" && pfPage !== "ins" && !tiers.some(x => x.i === pfPage))) { const open = tiers.find(x => x.n < x.list.length); pfPage = open ? open.i : tiers[0].i; }
+    if (pfPage == null || (pfPage !== "near" && !tiers.some(x => x.i === pfPage))) { const open = tiers.find(x => x.n < x.list.length); pfPage = open ? open.i : tiers[0].i; }
+    return { P, prog, got, tiers, near };
+  }
+  /* la placa Perfil abre el libro en «A punto» si tienes alguno; si no, en el primer tramo sin terminar */
+  const pfStart = () => { pfPage = null; const d = pfData(); return d.near.length ? "near" : pfPage; };
+  /* la hoja de Logros: la fila de tramos (cada uno su moneda y su cuenta; el nombre va en el encabezado de la pagina) y la lista */
+  function logrosHtml() {
+    const { P, prog, got, tiers, near } = pfData();
     const row = a => {
       const g = got(a), hid = a.secret && !g, pr = !g && prog[a.id];
       const badge = hid ? `<span class="ic badge">${A.icon(A.ACH_FRAME[a.ev] || "blank_boss", "bd-base")}${A.icon("lock", "bd-in")}</span>` : A.badge(a.id);
       const how = hid ? `${A.icon("dealer_mini", "pf-hint")}<span>${esc(A.pick6(SECRET_HINT[a.id] || "") || T("Logro secreto", "Secret achievement"))}</span>` : esc(A.tx(a.desc));
-      const meta = g ? `<span class="pf-got">${A.icon("u_star")}<em>${day(P.ach[a.id])}</em></span>`
-        : pr ? `<b>${A.fmt(pr[0])} / ${A.fmt(pr[1])}</b><span class="gx-bar"><i style="width:${pct(pr[0], pr[1])}%"></i></span>` : "";
+      const meta = g ? `<span class="pf-got">${A.icon("u_star")}<em>${pfDay(P.ach[a.id])}</em></span><button type="button" class="gx-btn sm gho pf-ec" data-ach="${a.id}" ${A.ttAttr(P6p("onCard"), P6p("onCardT"))}><span>${esc(P6p("onCard"))}</span></button>`
+        : pr ? `<b>${A.fmt(pr[0])} / ${A.fmt(pr[1])}</b><span class="gx-bar"><i style="width:${pfPct(pr[0], pr[1])}%"></i></span>` : "";
       return `<li class="pf-row${g ? " got" : ""}${hid ? " hid" : ""}"><span class="pf-chip">${badge}</span><span class="pf-tx"><b>${hid ? "???" : esc(A.tx(a.name))}</b><i>${how}</i></span><span class="pf-mt">${meta}</span></li>`;
     };
-    /* v2 (insignias de la casa): la escalera entera de las 15 categorias, en el libro, con su insignia (las que te faltan, en sombra) */
-    const INSX = { t: "Insignias|Badges|Insignes|Insígnias|Abzeichen|Insegne||徽记|휘장|記章|Знаки|Insygnia", s: "De la puerta al despacho|From the door to the office|De la porte au bureau|Da porta ao escritório|Von der Tür ins Büro|Dalla porta all'ufficio||从门口到办公室|문 앞에서 집무실까지|入口から書斎まで|От двери до кабинета|Od drzwi do gabinetu", lv: "Nivel {n}|Level {n}|Niveau {n}|Nível {n}|Stufe {n}|Livello {n}||{n} 级|레벨 {n}|レベル{n}|Уровень {n}|Poziom {n}" };
-    const insBook = () => {
-      const CL = A.club, t = CL.tierNow(), n = CL.RANKS.length;
-      const rows = CL.RANKS.map((r, i) => { const g = t >= i, [who, sitio] = CL.rankX(i); return `<li class="pf-row${g ? " got" : " pf-lk"}"><span class="pf-chip pf-ins" data-kmax="1" data-ins="${CL.insignia(i)}"></span><span class="pf-tx"><b>${esc(CL.tierName(i))}</b><i>${esc(who)} · ${esc(sitio)}</i></span><span class="pf-mt"><b>${esc(A.pick6(INSX.lv).replace("{n}", r[1]))}</b></span></li>`; }).join("");
-      return `<header class="pf-bh"><span class="pf-bic pf-ins" data-ins="${CL.insignia(t)}"></span><span class="pf-bt"><span class="gx-eyb">${esc(A.pick6(INSX.s))}</span><h3 class="gx-t-m">${esc(A.pick6(INSX.t))}</h3></span><span class="pf-bc"><b>${t + 1}<i> / ${n}</i></b><span class="gx-bar"><i style="width:${pct(t + 1, n)}%"></i></span></span></header>
-        <div class="gx-hr"></div><ol class="pf-rows" id="pfRows">${rows}</ol>`;
-    };
-    const book = () => {
-      if (pfPage === "ins" && A.club && A.club.INSIG) return insBook();
-      const x = pfPage === "near" ? null : tiers.find(t => t.i === pfPage), list = x ? x.list : near;
-      const ic = x ? A.icon("tier_" + x.i) : A.icon("u_star"), sub = x ? A.tx(x.t.t) : A.pick6("Los que tienes más cerca|The ones you're closest to|Ceux qui sont tout près|Os que estão mais perto|Die du fast hast|Quelli più vicini||最接近达成的|가장 가까운 업적|もう少しの実績|Ближе всего|Najbliżej");
-      const cnt = x ? `<span class="pf-bc"><b>${x.n}<i> / ${x.list.length}</i></b><span class="gx-bar"><i style="width:${pct(x.n, x.list.length)}%"></i></span></span>` : "";
-      const rows = list.length ? list.map(row).join("") : `<li class="pf-empty">${A.pick6("Aquí saldrán los logros que tengas a punto de caer. Juega un poco y vuelve.|Achievements you're about to unlock show up here. Play a little and come back.|Les succès presque débloqués apparaîtront ici. Joue un peu et reviens.|Aqui aparecem as conquistas prestes a cair. Jogue um pouco e volte.|Hier erscheinen Erfolge, die du fast hast. Spiel ein bisschen und komm wieder.|Qui compariranno gli obiettivi quasi raggiunti. Gioca un po' e torna.||即将解锁的成就会显示在这里。玩一会儿再回来。|곧 달성할 업적이 여기에 나와요. 조금 플레이하고 다시 와요.|もうすぐ解除できる実績がここに出ます。少し遊んでから戻ってきて。|Здесь появятся почти полученные достижения. Поиграй немного и возвращайся.|Tu pojawią się osiągnięcia, które masz prawie zdobyte. Zagraj trochę i wróć.")}</li>`;
-      return `<header class="pf-bh"><span class="pf-bic">${ic}</span><span class="pf-bt"><span class="gx-eyb">${sub}</span><h3 class="gx-t-m">${x ? A.tx(x.t.n) : NEAR()}</h3></span>${cnt}</header>
-        <div class="gx-hr"></div><ol class="pf-rows" id="pfRows">${rows}</ol>`;
-    };
-    const ix = (p, ic, name, n, cls = "") => `<button type="button" class="pf-ix${pfPage === p ? " on" : ""}${cls}" data-p="${p}">${A.icon(ic)}<span>${name}</span><i>${n}</i></button>`;
-    const nm = P.name || A.pick6("Anónimo|Anonymous|Anonyme|Anônimo|Anonym|Anonimo||匿名|익명|匿名|Аноним|Anonim");
-    const since = P.created ? A.pick6("Socio desde el {d}|Member since {d}|Depuis le {d}|Sócio desde {d}|Mitglied seit {d}|Socio dal {d}||{d} 入会|{d} 가입|{d} 入会|С нами с {d}|Członek od {d}").replace("{d}", day(P.created)) : "";
-    const html = `<div class="gx-veil"></div><section class="pf-screen gx-stage s-prof" aria-labelledby="pfH" data-nosq>
-      <div class="gx-grid pf-grid12">
-        <header class="pf-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
-          <h2 class="gx-t-l pf-h" id="pfH"><span class="pf-hic">${A.icon("m_prof")}</span>${T("Perfil", "Profile")}</h2>
-          <span class="pf-sum"><span class="gx-eyb">${T("Logros", "Achievements")}</span><b>${A.fmt(done)}<i> / ${A.fmt(total)}</i></b><span class="gx-bar"><i style="width:${pct(done, total)}%"></i></span></span>${tools()}</header>
-        <div class="pf-left${A.socio ? " carta" : ""}">
-          ${A.socio ? `<div class="gx-paper pf-socio pf-carta"><button type="button" class="pf-cc pf-cardbtn" id="pfCardBtn" title="${esc(PFX.cardTt())}" aria-label="${esc(PFX.hint())}"><span id="pfCard"></span></button>
-            <div class="pf-cs">${since ? `<span class="pf-since">${since}</span><div class="gx-hr"></div>` : ""}
-            ${stat("a_pin", T("Preguntas", "Questions"), A.fmt(s.questions))}${stat("a_target", T("Dianas", "Bullseyes"), A.fmt(s.bulls))}${stat("a_lens", T("Error medio", "Avg. error"), A.fmtDist(avg))}
-            ${stat("a_flame", T("Mejor racha", "Best streak"), A.fmt(s.bestStreak))}
-            <span class="pf-hint">${esc(PFX.hint())}</span></div></div>`
-          : `<div class="gx-paper pf-socio"><span class="gx-eyb">${A.pick6("Ficha de socio|Member card|Carte de membre|Ficha de sócio|Mitgliedskarte|Tessera del socio||会员卡|회원 카드|会員カード|Карта игрока|Karta członkowska")}</span>
-            <b class="pf-name">${esc(nm)}</b>${since ? `<span class="pf-since">${since}</span>` : ""}<div class="gx-hr"></div>
-            ${stat("a_pin", T("Preguntas", "Questions"), A.fmt(s.questions))}${stat("a_target", T("Dianas", "Bullseyes"), A.fmt(s.bulls))}${stat("a_lens", T("Error medio", "Avg. error"), A.fmtDist(avg))}
-            ${stat("a_flame", T("Mejor racha", "Best streak"), A.fmt(s.bestStreak))}</div>`}
-          <nav class="pf-idx" id="pfIdx" aria-label="${T("Logros", "Achievements")}">${ix("near", "u_star", NEAR(), near.length, " hot")}${tiers.map(x => ix(x.i, "tier_" + x.i, A.tx(x.t.n), `${x.n} / ${x.list.length}`, x.n === x.list.length ? " full" : "")).join("")}${A.club && A.club.INSIG ? ix("ins", A.club.insignia(A.club.tierNow()), esc(A.pick6(INSX.t)), `${A.club.tierNow() + 1} / ${A.club.RANKS.length}`, A.club.tierNow() + 1 === A.club.RANKS.length ? " full" : "") : ""}<div class="pf-ix pf-soon" aria-disabled="true"><span class="pf-soonbox"></span><span>${esc(A.pick6(PFX.col))}</span><i>${esc(A.pick6(PFX.soon))}</i></div></nav>
-        </div>
-        <div class="gx-sh pf-right"><div class="gx-paper pf-book" id="pfBook">${book()}</div></div>
-      </div></section>`;
-    return { html, book };
+    const x = pfPage === "near" ? null : tiers.find(t => t.i === pfPage), list = x ? x.list : near;
+    const ic = x ? "tier_" + x.i : "u_star", sub = x ? A.tx(x.t.t) : A.pick6("Los que tienes más cerca|The ones you're closest to|Ceux qui sont tout près|Os que estão mais perto|Die du fast hast|Quelli più vicini||最接近达成的|가장 가까운 업적|もう少しの実績|Ближе всего|Najbliżej");
+    const cnt = x ? `<span class="pf-bc"><b>${x.n}<i> / ${x.list.length}</i></b><span class="gx-bar"><i style="width:${pfPct(x.n, x.list.length)}%"></i></span></span>` : "";
+    const rows = list.length ? list.map(row).join("") : `<li class="pf-empty">${A.pick6("Aquí saldrán los logros que tengas a punto de caer. Juega un poco y vuelve.|Achievements you're about to unlock show up here. Play a little and come back.|Les succès presque débloqués apparaîtront ici. Joue un peu et reviens.|Aqui aparecem as conquistas prestes a cair. Jogue um pouco e volte.|Hier erscheinen Erfolge, die du fast hast. Spiel ein bisschen und komm wieder.|Qui compariranno gli obiettivi quasi raggiunti. Gioca un po' e torna.||即将解锁的成就会显示在这里。玩一会儿再回来。|곧 달성할 업적이 여기에 나와요. 조금 플레이하고 다시 와요.|もうすぐ解除できる実績がここに出ます。少し遊んでから戻ってきて。|Здесь появятся почти полученные достижения. Поиграй немного и возвращайся.|Tu pojawią się osiągnięcia, które masz prawie zdobyte. Zagraj trochę i wróć.")}</li>`;
+    const tr = (p, ico, name, n, cls = "") => `<button type="button" class="pf-tr${pfPage === p ? " on" : ""}${cls}" data-p="${p}" aria-pressed="${pfPage === p}" aria-label="${esc(name)} · ${n}" ${A.ttAttr(name, n)}><span class="pf-tri" data-ins="${ico}" data-kmax="1"></span><i>${n}</i></button>`;
+    return `<nav class="pf-trs" id="pfTrs" aria-label="${T("Logros", "Achievements")}">${tr("near", "u_star", NEAR(), A.fmt(near.length), " hot")}${tiers.map(t => tr(t.i, "tier_" + t.i, A.tx(t.t.n), `${t.n} / ${t.list.length}`, t.n === t.list.length ? " full" : "")).join("")}</nav>
+      <header class="pf-bh"><span class="pf-bic" data-ins="${ic}" data-kmax="1"></span><span class="pf-bt"><span class="gx-eyb">${sub}</span><h3 class="gx-t-m">${x ? A.tx(x.t.n) : NEAR()}</h3></span>${cnt}</header>
+      <div class="gx-hr"></div><ol class="pf-rows" id="pfRows">${rows}</ol>`;
   }
-  function profile() {
-    const v = pfBuild(); C().dialog(v.html, "tablewrap");
-    wireTools(); $("hubBack").onclick = () => screen("home");
-    if (A.socio && $("pfCard")) {                                     // v0.3.157: tu carta del socio, en grande, y el icono del centro a elegir
-      $("pfCard")._sig = ""; A.socio.mount($("pfCard"), { w: 256 });
-      $("pfCardBtn").onclick = () => { A.sfx.card(); if (A.boutique) A.boutique.cat("carta"); screen("boutique"); };
-    }
-    $("pfIdx").onclick = e => {
-      const b = e.target.closest(".pf-ix"); if (!b) return; const p = b.dataset.p === "near" || b.dataset.p === "ins" ? b.dataset.p : +b.dataset.p; if (p === pfPage) return;
-      pfPage = p; A.sfx.card(); document.querySelectorAll(".pf-ix").forEach(x => x.classList.toggle("on", x === b)); $("pfBook").innerHTML = v.book(); if (A.camino && A.camino.insFill) A.camino.insFill($("pfBook"));
-    };
-    if (A.camino && A.camino.insFill) A.camino.insFill($("pfBook"));
-    if (A.coverMap) A.coverMap("profile", true, () => !!document.querySelector("#dlg .pf-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
-    if (A.dealer && A.dealer.profile) A.dealer.profile();              // su libreta: lo que ha cambiado desde tu ultima visita, o una casilla que se da la vuelta
+  /* la hoja de Records: tus cifras de siempre (la libreta del crupier les da la vuelta: data-ic) y lo que el juego guarda de cada modo */
+  const TIP = () => ({
+    a_pin: A.tip6("Lugares que has respondido en total.|Places you've answered in total.|Lieux auxquels tu as répondu.|Lugares que você respondeu no total.|Orte, die du insgesamt beantwortet hast.|Luoghi a cui hai risposto in totale.|Lugares que respondiste en total.|你累计回答过的地点数。|지금까지 답한 장소의 총수.|これまでに答えた場所の合計。|Общее число отвеченных мест.|Łączna liczba twoich odpowiedzi."),
+    a_target: A.tip6("Respuestas casi perfectas, clavadas sobre el lugar.|Near-perfect answers, right on the spot.|Réponses quasi parfaites, en plein sur le lieu.|Respostas quase perfeitas, bem em cima do lugar.|Fast perfekte Antworten, punktgenau am Ort.|Risposte quasi perfette, proprio sul luogo.||近乎完美的回答，正中目标。|거의 완벽한 답, 바로 그 자리.|ほぼ完璧な回答、まさにその場所。|Почти идеальные ответы — точно в цель.|Niemal idealne odpowiedzi, prosto w cel."),
+    a_lens: A.tip6("Distancia media entre tu pin y el lugar real.|Average distance between your pin and the real place.|Distance moyenne entre ton épingle et le vrai lieu.|Distância média entre seu pino e o lugar real.|Durchschnittliche Entfernung zwischen deinem Pin und dem echten Ort.|Distanza media tra il tuo pin e il luogo reale.|Distancia promedio entre tu pin y el lugar real.|你的图钉与真实地点之间的平均距离。|핀과 실제 장소 사이의 평균 거리.|ピンと実際の場所との平均距離。|Среднее расстояние между твоей меткой и настоящим местом.|Średnia odległość między twoją pinezką a prawdziwym miejscem."),
+    a_flame: A.tip6("Más aciertos seguidos que has logrado.|Longest run of correct answers in a row.|Plus longue série de bonnes réponses.|Maior sequência de acertos seguidos.|Längste Serie richtiger Antworten.|Serie più lunga di risposte giuste.|Más aciertos seguidos que lograste.|最长的连续答对纪录。|가장 긴 연속 정답 기록.|最長の連続正解記録。|Самая длинная серия правильных ответов подряд.|Najdłuższa seria dobrych odpowiedzi z rzędu."),
+  });
+  function recHtml() {
+    const P = A.profile.get(), s = P.stats, avg = s.questions - s.timeouts > 0 ? Math.round(s.km / (s.questions - s.timeouts)) : 0, tip = TIP();
+    const cell = (ic, l, v) => `<div class="pf-stat pf-ck" data-ic="${ic}" ${A.ttAttr(l, tip[ic] || "")}><i class="pf-cki" data-ins="${ic}" data-kmax="1"></i><b>${v}</b><span>${l}</span></div>`;
+    const since = P.created ? A.pick6("Socio desde el {d}|Member since {d}|Membre depuis le {d}|Sócio desde {d}|Mitglied seit {d}|Socio dal {d}||{d} 入会|{d} 가입|{d} 入会|С нами с {d}|Członek od {d}").replace("{d}", pfDay(P.created)) : "";
+    const of = (a, b) => P6p("of").replace("{a}", A.fmt(a)).replace("{b}", A.fmt(b));
+    const ids = (A.CAMPAIGNS || []).filter(c => c.mode === "classic").map(c => c.id), won = ids.filter(id => P.records["classic:" + id + ":win"]).length;
+    const med = ids.filter(id => P.medals[id]).length, gold = ids.filter(id => P.medals[id] === "gold").length;
+    const ad = P.adv || {}, du = A.duelo && A.duelo.stats ? A.duelo.stats() : { d: 0, w: 0, s: 0, lp: 0 };
+    const lg = du.d && A.duelo.rankOf && A.duelo.rankName ? A.duelo.rankName(A.duelo.rankOf(du.lp)) : "—";
+    const cx = A.codexStats ? A.codexStats() : { u: 0, t: 0 }, cas = P.casino || { games: {}, plays: 0 };
+    const achOf = ev => { const l = A.ACH.filter(a => a.ev === ev); return `${l.filter(a => P.ach[a.id]).length} / ${l.length}`; };
+    const mode = (ic, name, kv) => `<li class="pf-rc"><span class="pf-rci" data-ins="${ic}" data-kmax="1"></span><b class="pf-rcn">${esc(P6p(name))}</b>${kv.map(([k, v]) => `<span class="pf-kv"><i>${esc(P6p(k))}</i><b>${v}</b></span>`).join("")}</li>`;
+    return `<header class="pf-rh"><span class="gx-eyb">${esc(P6p("figs"))}</span>${since ? `<span class="pf-since">${since}</span>` : ""}</header>
+      <div class="pf-cks">${cell("a_pin", T("Preguntas", "Questions"), A.fmt(s.questions))}${cell("a_target", T("Dianas", "Bullseyes"), A.fmt(s.bulls))}${cell("a_lens", T("Error medio", "Avg. error"), A.fmtDist(avg))}${cell("a_flame", T("Mejor racha", "Best streak"), A.fmt(s.bestStreak))}</div>
+      <span class="gx-eyb pf-rmh">${esc(P6p("modes"))}</span>
+      <ol class="pf-rcs" id="pfRows">
+        ${mode("globe", "classic", [["camps", `${won} / ${ids.length}`], ["golds", A.fmt(gold)], ["medals", `${med} / ${ids.length}`]])}
+        ${mode("deck_explorer", "adv", [["wins", of(ad.wins || 0, ad.runs || 0)], ["best", A.fmt(ad.bestScore || 0)], ["asc", "A" + (ad.asc || 0)]])}
+        ${mode("medal_gold", "duelo", [["vsBank", of(du.w, du.d)], ["streak", A.fmt(du.s)], ["league", esc(lg)]])}
+        ${mode("m_codex", "codex", [["cards", `${A.fmt(cx.u)} / ${A.fmt(cx.t)}`], ["done", pfPct(cx.u, cx.t) + " %"], ["ach", achOf("codex")]])}
+        ${mode("chip_g", "barra", [["plays", A.fmt(cas.plays || 0)], ["games", `${Object.keys(cas.games || {}).length} / 8`], ["ach", achOf("casino")]])}
+      </ol>`;
   }
+  /* los botones de la hoja: los tramos y «En tu carta» (la tienda, en Tu carta, con el icono de ese logro elegido) */
+  function pfWire(root, redraw) {
+    root.querySelectorAll(".pf-tr").forEach(b => { b.onclick = () => { const p = b.dataset.p === "near" ? "near" : +b.dataset.p; if (p === pfPage) return; pfPage = p; A.sfx.card(); redraw(); const f = root.querySelector(`.pf-tr[data-p="${b.dataset.p}"]`); if (f) f.focus({ preventScroll: true }); }; });
+    root.querySelectorAll(".pf-ec").forEach(b => { b.onclick = () => { A.sfx.card(); if (A.boutique && A.boutique.icon) A.boutique.icon("ach_" + b.dataset.ach); screen("boutique"); }; });
+  }
+  const PF = { logrosHtml, recHtml, wire: pfWire, page: p => { pfPage = p; }, start: pfStart };
+  function profile() { A.camino.open({ tab: "logros", page: pfStart() }); if (A.coverMap) A.coverMap("profile", true, () => !!document.querySelector("#dlg .pf-screen") && !$("layer").classList.contains("hidden")); if (A.dealer && A.dealer.profile) A.dealer.profile(); }
+  function camino() { A.camino.open({ tab: "camino" }); if (A.coverMap) A.coverMap("profile", true, () => !!document.querySelector("#dlg .pf-screen") && !$("layer").classList.contains("hidden")); if (A.dealer && A.dealer.profile) A.dealer.profile(); }
 
   function screen(id) {
     const de = C().S.hub;
     A.podio.reset();                                                  // el podio de la portada no se queda encima de otra pantalla
     if (id !== "home" && A.mesas && A.mesas.cancel) A.mesas.cancel(); // el estreno de una mesa es de la portada
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
-    C().S.hub = id; if (A.coverMap) { if (id !== "profile") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
+    C().S.hub = id; if (A.coverMap) { if (id !== "profile" && id !== "camino") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
     const naipe = A.relieve ? A.relieve.antes(id, de) : null;             // v0.3.199 (Bloque F, paso 3): la pantalla se reparte como un naipe desde su pieza (js/relieve.js)
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open(), camino: () => A.camino.open() }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open(), camino }[id] || home)();
     if (naipe) A.relieve.despues(naipe, id);
     C().refreshSkinBits && C().refreshSkinBits();
     if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva
@@ -633,5 +642,5 @@ window.AIQ = window.AIQ || {};
   const adventureHtml = () => { const sv = A.adv.hasSave(); return avHtml(sv && A.adv.summary(), sv).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
   /* Bloque J: la pantalla que abres entra desde el lado de la placa que pulsaste (solo transform y opacity; css/gala.css, gx-from) */
   document.addEventListener("pointerdown", e => { const b = e.target.closest && e.target.closest(".plq"); if (!b) return; const r = b.getBoundingClientRect(); document.documentElement.style.setProperty("--hub-from", (((r.left + r.width / 2) / innerWidth - 0.5) * 2).toFixed(2)); }, true);
-  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, mcFit, dailyHtml, classicHtml, adventureHtml, profileHtml: () => pfBuild().html.replace(/ (id|aria-labelledby)="[^"]*"/g, "") };   // sin ids: es la copia del precalentamiento
+  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, mcFit, dailyHtml, classicHtml, adventureHtml, profileHtml: () => A.camino.warmHtml(), pf: PF };   // sin ids: es la copia del precalentamiento
 })(window.AIQ);

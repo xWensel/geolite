@@ -132,7 +132,6 @@ window.AIQ = window.AIQ || {};
   const TX = {
     secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|숨겨진 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
     byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Conquistado com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就「{a}」后获得|업적 「{a}」 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
-    byCat: "Insignia de {x}: se gana en el nivel {n}|Badge of the {x} rank: earned at level {n}|Insigne de la catégorie {x} : s'obtient au niveau {n}|Insígnia de {x}: conquistada no nível {n}|Abzeichen des Rangs {x}: auf Stufe {n}|Insegna di {x}: si ottiene al livello {n}||{x}的徽记：{n} 级获得|{x} 등급 휘장: 레벨 {n}에서 획득|{x}の記章：レベル{n}で手に入る|Знак ступени «{x}»: на уровне {n}|Insygnia rangi {x}: na poziomie {n}",
     byLv: "Se gana en el nivel {n} del Club|Earned at Club level {n}|S'obtient au niveau {n} du Club|Conquistado no nível {n} do Clube|Freigeschaltet mit Club-Stufe {n}|Si ottiene al livello {n} del Club||俱乐部 {n} 级时获得|클럽 레벨 {n}에서 획득|クラブのレベル{n}で手に入る|Даётся на уровне клуба {n}|Zdobywasz na poziomie klubu {n}",
     lockedCard: "Se descubre en el nivel {n}|Revealed at level {n}|Se dévoile au niveau {n}|Revelada no nível {n}|Wird auf Stufe {n} aufgedeckt|Si scopre al livello {n}||{n} 级时揭晓|레벨 {n}에서 공개|レベル{n}で明かされる|Откроется на уровне {n}|Odkryjesz na poziomie {n}",
     byDuel: "Se gana con 25 duelos ganados a la banca (llevas {n})|Earned by winning 25 duels against the house ({n} so far)|S'obtient en gagnant 25 duels contre la banque ({n} pour l'instant)|Conquistado vencendo 25 duelos contra a banca ({n} até agora)|Freigeschaltet mit 25 gewonnenen Duellen gegen die Bank (bisher {n})|Si ottiene vincendo 25 duelli contro il banco (finora {n})||战胜庄家 25 次后获得（目前 {n} 次）|하우스와의 대결 25승 시 획득(현재 {n}승)|胴元との勝負に25回勝つと手に入る（いま{n}勝）|Даётся за 25 побед в дуэлях с казино (пока {n})|Zdobywasz za 25 wygranych pojedynków z kasynem (na razie {n})",
@@ -143,11 +142,8 @@ window.AIQ = window.AIQ || {};
   const achs = () => A.ACH || [];
   const achOf = id => achs().find(a => a.id === id);
   const achGot = id => !!(prof().ach || {})[id];
-  /* v2: las insignias de categoria (A.club.INSIG). Las que tambien vende la tienda (la corona, los dados) se pueden comprar o ganar */
-  const catIdx = id => (A.club && A.club.insigOf ? A.club.insigOf(id) : -1);
-  const catOwned = id => { const i = catIdx(id); return i >= 0 && A.club.tierNow() >= i; };
-  const iconKind = id => CASA_IC.includes(id) ? "casa" : SHOP_IC[id] ? "tienda" : catIdx(id) >= 0 ? "cat" : /^ach_/.test(id) && achOf(id.slice(4)) ? "logro" : null;
-  const iconOwned = id => { const k = iconKind(id); return k === "casa" || catOwned(id) || (k === "logro" && achGot(id.slice(4))) || (k === "tienda" && !!(prof().club || {}).ic && !!prof().club.ic[id]); };
+  const iconKind = id => CASA_IC.includes(id) ? "casa" : SHOP_IC[id] ? "tienda" : /^ach_/.test(id) && achOf(id.slice(4)) ? "logro" : null;
+  const iconOwned = id => { const k = iconKind(id); return k === "casa" || (k === "logro" && achGot(id.slice(4))) || (k === "tienda" && !!(prof().club || {}).ic && !!prof().club.ic[id]); };
   const icon = () => { const c = prof().club || {}; return c.icon && iconOwned(c.icon) ? c.icon : "globe"; };   // el de antes (ficha de oro o crupier) ya no esta: vuelve el globo
   const setIcon = id => { if (!iconOwned(id)) return false; club().icon = id; A.profile.save(); return true; };
   const iconName = id => { const k = iconKind(id); if (k !== "logro") return P6(IC_N[id] || ""); const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? "???" : A.tx(a.name); };
@@ -155,11 +151,10 @@ window.AIQ = window.AIQ || {};
   const deal = (k, f) => { const o = A.escaparate && A.escaparate.off ? A.escaparate.off(k) : 0; return o && f ? Math.round(f * (1 - o) / 10) * 10 : f; };
   const iconFull = id => SHOP_IC[id] || 0;
   const iconPrice = id => deal("i:" + id, iconFull(id));
-  const iconHow = id => { const k = iconKind(id), ci = catIdx(id); if (ci >= 0 && k !== "casa" && !catOwned(id)) return P6(TX.byCat).replace("{x}", A.club.tierName(ci)).replace("{n}", A.club.RANKS[ci][1]); if (k !== "logro") return ""; const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? P6(TX.secret) : P6(TX.byAch).replace("{a}", A.tx(a.name)); };
+  const iconHow = id => { const k = iconKind(id); if (k !== "logro") return ""; const a = achOf(id.slice(4)); return a.secret && !achGot(a.id) ? P6(TX.secret) : P6(TX.byAch).replace("{a}", A.tx(a.name)); };
   /* el catalogo: casa | logro (lo que tienes primero, en el orden de los logros) | tienda */
   function icons(kind) {
-    const CAT = (A.club && A.club.INSIG ? A.club.INSIG : []).filter(id => !CASA_IC.includes(id) && !SHOP_IC[id]);
-    const L = kind === "casa" ? CASA_IC.slice() : kind === "tienda" ? Object.keys(SHOP_IC) : kind === "cat" ? CAT.slice() : kind === "logro" ? achs().map(a => "ach_" + a.id) : CASA_IC.concat(CAT, Object.keys(SHOP_IC), achs().map(a => "ach_" + a.id));
+    const L = kind === "casa" ? CASA_IC.slice() : kind === "tienda" ? Object.keys(SHOP_IC) : kind === "logro" ? achs().map(a => "ach_" + a.id) : CASA_IC.concat(Object.keys(SHOP_IC), achs().map(a => "ach_" + a.id));
     const out = L.map(id => ({ id, kind: iconKind(id), owned: iconOwned(id), price: iconPrice(id), name: iconName(id), how: iconHow(id), secret: iconKind(id) === "logro" && achOf(id.slice(4)).secret }));
     return kind === "logro" ? out.filter(i => i.owned).concat(out.filter(i => !i.owned)) : out;
   }
@@ -434,7 +429,6 @@ window.AIQ = window.AIQ || {};
       const L = draw(cv, D.card, two, !!tt, mk, D.mt, 0, D.pr);
       drawIcon(L.ctx, L.win, ic);
       const px = v => v * d + "px", box = (r, cls, html) => `<span class="${cls}" style="left:${px(r[0])};top:${px(r[1])};width:${px(r[2])};height:${px(r[3])}">${html}</span>`;
-      const fi = `<img class="sc-fi" src="assets/icons/ficha_oro.webp" alt="" style="width:${px(9)};height:${px(9)}">`;
       card.style.width = px(96); card.style.height = px(L.H); card.style.setProperty("--sd", d);
       card.style.setProperty("--ink", L.ink);
       /* el lienzo y sus capas (sombra, brillo, reflejo) llevan el margen del marco alrededor: la carta mide lo mismo y lo que asoma sale por fuera */
@@ -443,14 +437,14 @@ window.AIQ = window.AIQ || {};
       const mask = `url(${cv.toDataURL()})`;
       ["sc-shadow", "sc-fx fx-" + (L.fx || "no"), "sc-glare"].forEach((cls, i) => { const m = document.createElement("span"); m.className = cls; m.style.cssText = ext; m.style.webkitMaskImage = m.style.maskImage = mask; (i ? tilt : card).appendChild(m); });
       tilt.insertAdjacentHTML("beforeend", box(L.cat, "sc-cat" + (two ? " two" : ""), `<span>${esc(D.cat)}</span>`)
-        + box(L.name, "sc-name", esc(D.name))
+        + box(L.name, "sc-name", `<span>${esc(D.name)}</span>`)
         + (L.tit ? box(L.tit, "sc-tit", `<span>${esc(titleName(tt))}</span>`) : "")
-        + box(L.foot, "sc-foot", `<b class="sc-lv">${esc(P6(A.club.tx.lvS).replace("{n}", D.lvl))}</b>${D.f == null ? "" : `<span class="sc-f">${fi}<b${o.id ? ` id="${o.id}"` : ""}>${A.fmt(D.f)}</b></span>`}`));
+        + box(L.foot, "sc-foot", `<b class="sc-lv">${esc(P6(A.club.tx.lvS).replace("{n}", D.lvl))}</b>`));   // 24-oct: la franja de abajo es solo el nivel, centrado (tus fichas van en su caja: la portada, el Perfil y la tienda)
       card.appendChild(tilt); host.appendChild(card); host.style.width = px(96); host.style.height = px(L.H);
       /* las cartas vivas (la decima de cada serie): su fondo se mueve despacio (unos 7 fotogramas por segundo, solo los pixeles del fondo y el
          icono encima). Con el movimiento reducido del juego, o la ventana oculta, se queda quieta */
       if (L.viva && !reduce()) { let tv = 0; host._viva = setInterval(() => { if (!host.isConnected || host._sig !== sig) { clearInterval(host._viva); host._viva = 0; return; } if (document.hidden || reduce()) return; tv += .12; L.redraw(tv); drawIcon(L.ctx, L.win, ic); }, 140); }
-      fit(tilt.querySelector(".sc-cat"), two ? 8 : 10, d); fit(tilt.querySelector(".sc-name"), 13, d); squeeze(tilt.querySelector(".sc-cat > span"), tilt.querySelector(".sc-cat"));
+      fit(tilt.querySelector(".sc-cat"), two ? 8 : 10, d); fit(tilt.querySelector(".sc-name"), 13, d); squeeze(tilt.querySelector(".sc-name > span"), tilt.querySelector(".sc-name"), .72); squeeze(tilt.querySelector(".sc-cat > span"), tilt.querySelector(".sc-cat"));
       if (L.tit) { fit(tilt.querySelector(".sc-tit"), 9, d); squeeze(tilt.querySelector(".sc-tit > span"), tilt.querySelector(".sc-tit"), .72); }
       /* se inclina hacia el raton; el brillo y el reflejo le siguen */
       const tgt = o.hover || host;
@@ -517,7 +511,7 @@ window.AIQ = window.AIQ || {};
     const t = +m[1]; if (!A.club.RANKS[t]) return null;
     const lvl = Math.max(1, +m[5]), top = Math.max(1, Math.min(NCARD, lvl)), clip = v => Math.max(1, Math.min(top, +v || top));
     return { t, marco: MAR[m[2]] ? m[2] : "filete", icon: iconKind(m[3]) ? m[3] : "globe", title: TIT[m[4]] ? m[4] : "", lvl,
-      carta: m[6] ? clip(m[6]) : top, fondo: m[7] ? clip(m[7]) : top, mat: m[8] != null && +m[8] <= sOf(top) ? +m[8] : sOf(top) };
+      carta: m[6] ? clip(m[6]) : top, fondo: m[6] ? clip(m[6]) : top, mat: m[8] != null && +m[8] <= sOf(top) ? +m[8] : sOf(top) };
   }
   /* una sola palabra mas larga que la banda (el ruso «Путешественник») no se puede partir: se estrecha lo justo, como mucho un 20 % */
   function squeeze(sp, box, min = .8) { if (!sp || !box) return; sp.style.display = "inline-block"; sp.style.transform = ""; const room = box.clientWidth - parseFloat(getComputedStyle(box).paddingLeft) * 2, w = sp.scrollWidth; if (w > room && room > 0) sp.style.transform = `scaleX(${Math.max(min, room / w).toFixed(3)})`; }
@@ -528,11 +522,10 @@ window.AIQ = window.AIQ || {};
      mas nueva (cambia sola al subir), el fondo de tu carta y el material de su serie. Lo que pase de tu nivel no se puede poner */
   const lvNow = () => A.club.level();
   const carta = () => { const c = prof().club || {}, L = Math.min(NCARD, lvNow()); return c.carta >= 1 && c.carta <= L ? c.carta : L; };
-  const fondo = () => { const c = prof().club || {}, L = Math.min(NCARD, lvNow()); return c.fondo >= 1 && c.fondo <= L ? c.fondo : carta(); };
+  const fondo = () => carta();   // 24-oct: el fondo de la chapa es siempre el de la carta que llevas
   const matOwned = m => m >= 0 && m <= 9 && lvNow() >= m * 10 + 1;
   const mat = () => { const c = prof().club || {}; return c.mat != null && c.mat >= 0 && matOwned(c.mat) ? c.mat : sOf(carta()); };
   const setCarta = L => { const top = Math.min(NCARD, lvNow()); if (!(L >= 1 && L <= top)) return false; club().carta = L === top ? 0 : L; A.profile.save(); return true; };
-  const setFondo = L => { const top = Math.min(NCARD, lvNow()); if (L && !(L >= 1 && L <= top)) return false; club().fondo = L || 0; A.profile.save(); return true; };
   const setMat = m => { if (m != null && m >= 0 && !matOwned(m)) return false; club().mat = m == null || m < 0 ? -1 : m; A.profile.save(); return true; };
   const cardName = L => P6(CARD_N).replace("{n}", L) + " · " + P6(SERIES[sOf(L)].n);
   const edName = L => P6(ED_N[edOf(L)]) + (vivaOf(L) ? " · " + P6(VIVA_N) : "");
@@ -547,6 +540,6 @@ window.AIQ = window.AIQ || {};
     marcos, marco, setMarco, buyMarco, marcoName, marcoHow, marcoOwned, badge, code, parse, _todo, iconFull, titleFull, marcoFull,
     /* el lote del escaparate: darla sin cobrar ni ponerla (w = i icono, t titulo, k marco) */
     give: (w, id) => { const c = club(); if (w === "i" && SHOP_IC[id] && !iconOwned(id)) c.ic[id] = Date.now(); else if (w === "t" && TIT[id] && TIT[id].p && !titleOwned(id)) c.tt[id] = Date.now(); else if (w === "k" && MAR[id] && MAR[id].p && !marcoOwned(id)) { c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; c.mc[id] = Date.now(); } else return false; A.profile.save(); return true; },
-    carta, fondo, mat, setCarta, setFondo, setMat, matOwned, cartas, mats, cardName, edName, cardNo: L => P6(CARD_N).replace("{n}", L), matName, edOf, vivaOf, sOf, SERIES, NCARD, tx: TX,
+    carta, fondo, mat, setCarta, setMat, matOwned, cartas, mats, cardName, edName, cardNo: L => P6(CARD_N).replace("{n}", L), matName, edOf, vivaOf, sOf, SERIES, NCARD, tx: TX,
     mini, art: (cv, L, o = {}) => draw(cv, L, false, false, o.marco || "filete", o.mat != null ? o.mat : -1, o.t || 0, -1), back, winArt, _badge: badgeArt };
 })(window.AIQ);

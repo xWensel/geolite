@@ -2,7 +2,8 @@
  * Geolite - EL CAMINO DEL SOCIO (maqueta «El camino del socio», 23-oct-2026): los 100 niveles del Club y lo que da cada uno, y la carta nueva
  * que sale del mazo al subir de nivel.
  *
- *   La pantalla (A.hub.screen("camino"), al pulsar tu carta en la portada): a la izquierda tu carta, tu sitio en la casa (la categoria, quien eres,
+ *   La pantalla es tambien el PERFIL (maqueta «Perfil del socio», 24-oct-2026): A.hub.screen("camino") (tu carta) la abre en la pestana Camino y
+ *   A.hub.screen("profile") (la placa Perfil) en Logros. A la izquierda tu carta, tu sitio en la casa (la categoria, quien eres,
  *   tu sitio y como te llama el crupier), la barra de tu nivel, lo siguiente y «Vestir tu carta» (el vestidor, js/boutique.js). A la derecha el
  *   camino, de serie en serie (10 niveles por pagina, sin desplazar nada): cada nivel con su carta (las que aun no tienes, boca abajo: son
  *   sorpresa), sus fichas, su titulo (5, 15, 25…), su cofre (cada 10), el borde de una serie nueva (11, 21…) y la categoria que empieza en el.
@@ -47,12 +48,12 @@ window.AIQ = window.AIQ || {};
     return out;
   }
   /* un lienzo de pixel art a escala entera de pixeles reales, el mayor que quepa en su caja, centrado */
-  const kOf = (cv, box) => { const z = box.currentCSSZoom || 1, dp = z * (window.devicePixelRatio || 1), r = box.getBoundingClientRect(); return { k: Math.max(1, Math.floor(Math.min((r.width / z) * dp / cv.width, (r.height / z) * dp / cv.height) + 0.01)), dp }; };
+  const kOf = (cv, box) => { const z = box.currentCSSZoom || 1, dp = z * (window.devicePixelRatio || 1); return { k: Math.max(1, Math.floor(Math.min(box.clientWidth * dp / cv.width, box.clientHeight * dp / cv.height) + 0.01)), dp }; };   // medidas de diseno: no le afecta la animacion de entrada
   function fitCv(cv, box, k0) { const { k, dp } = kOf(cv, box), kk = k0 || k; cv.style.width = (cv.width * kk) / dp + "px"; cv.style.height = (cv.height * kk) / dp + "px"; }
   /* todas las cartas del camino a la MISMA escala entera: la mayor que quepa en la caja mas pequena */
   function fitAll(root) { const cvs = [...root.querySelectorAll("canvas[data-n]")]; if (!cvs.length) return; const k = Math.min(...cvs.map(cv => kOf(cv, cv.parentElement).k)); cvs.forEach(cv => fitCv(cv, cv.parentElement, k)); }
 
-  /* la insignia de una categoria (pieza aprobada de assets/icons, a su rejilla nativa) en un lienzo, a escala entera en su caja */
+  /* un icono del juego (pieza aprobada de assets/icons, a su rejilla nativa) en un lienzo, a escala entera en su caja: las monedas de los tramos, las cifras y los modos del Perfil */
   function insFill(root) {
     (root || document).querySelectorAll("[data-ins]").forEach(box => {
       if (box.firstChild) return; const id = box.dataset.ins, im = new Image(), cv = document.createElement("canvas"); box.appendChild(cv);
@@ -79,26 +80,68 @@ window.AIQ = window.AIQ || {};
       <div class="cm-nodes">${nodes.join("")}</div>
       <p class="cm-ft">${esc(P6(TX.legend).replace("{n}", A.fmt(C().CFG.ley)))}</p>`;
   }
+  /* ---------------------------------------------------------------- el Perfil (maqueta «Perfil del socio», 24-oct-2026, direccion B «Tu sitio en la casa»)
+     Una sola pantalla para ti: a la izquierda, siempre, tu carta, tu categoria (quien eres, tu sitio, como te llama el crupier), tu nivel y «Vestir tu carta» (la tienda, en Tu carta);
+     a la derecha un libro con tres pestanas de carpeta que asoman en la cabecera: Camino (los 100 niveles), Logros (js/hub.js, A.hub.pf) y Records.
+     Tu carta, en cualquier pantalla, te trae aqui (pestana Camino); la placa Perfil de la portada, a Logros */
+  const PX = {
+    tabs: { camino: "Camino|Path|Parcours|Caminho|Weg|Cammino||会员之路|회원의 길|会員の道|Путь|Ścieżka", logros: "Logros|Achievements|Succès|Conquistas|Erfolge|Obiettivi||成就|업적|実績|Достижения|Osiągnięcia", rec: "Récords|Records|Records|Recordes|Rekorde|Record||纪录|기록|記録|Рекорды|Rekordy" },
+    title: "Perfil|Profile|Profil|Perfil|Profil|Profilo||个人资料|프로필|プロフィール|Профиль|Profil",
+  };
+  const UIP = { tab: "camino" };
   function meHtml() {
     const now = C().now(), lv = now.lvl, t = C().tierNow(), [who, sitio, trato] = C().rankX(t), nr = C().RANKS[t + 1];
     const left = now.max ? P6(C().tx.max) : P6(C().tx.left).replace("{n}", A.fmt(now.need - now.into)).replace("{m}", lv + 1);
     return `<span class="cm-card" id="cmCard"></span>
-      <div class="cm-who"><span class="gx-eyb">${esc(P6(TX.you))}</span><div class="cm-rk"><span class="cm-ins" data-ins="${C().insignia(t)}"></span><h3 class="gx-t-m">${esc(C().tierName(t))}</h3></div><p class="cm-wp">${esc(who)}</p></div>
+      <div class="cm-who"><span class="gx-eyb">${esc(P6(TX.you))}</span><div class="cm-rk"><h3 class="gx-t-m">${esc(C().tierName(t))}</h3></div><p class="cm-wp">${esc(who)}</p></div>
       <dl class="cm-dl"><dt>${esc(P6(TX.sitio))}</dt><dd>${esc(sitio)}</dd><dt>${esc(P6(TX.trato))}</dt><dd>«${esc(trato)}»</dd></dl>
       <p class="cm-nr">${esc(nr ? P6(TX.nextRank).replace("{x}", P6(nr[0])).replace("{n}", nr[1]) : P6(TX.top))}</p>
       <div class="cm-prog"><div class="cm-pl"><b>${esc(P6(C().tx.lvS).replace("{n}", lv))}</b><span>${esc(left)}</span></div><span class="ck-bar"><i style="width:${Math.round((100 * now.into) / Math.max(1, now.need))}%"></i></span></div>
       <p class="cm-nx">${fi("sm")}<span>${esc(C().nextText(lv))}</span></p>
       <button type="button" class="gx-btn pri wide" id="cmDress"><span>${esc(P6(TX.dress))}</span></button>`;
   }
+  /* los rotulos de una palabra (la categoria, el nombre de cada modo): si no caben enteros en su hueco, bajan de letra hasta 18 px; solo entonces se parten */
+  function fitTxt(root) {
+    (root || document).querySelectorAll("#dlg .cm-who .gx-t-m, #dlg .pf-rcn, #dlg .cm-nx > span, #cmRoad .cm-b").forEach(e => {
+      e.style.fontSize = ""; e.style.whiteSpace = ""; e.style.overflowWrap = ""; if (!e.isConnected || e.clientWidth < 8 || (e.classList.contains("cm-b") && e.parentElement.clientWidth < 8)) return;   // sin medidas aun: se mide cuando la pantalla este quieta
+      e.style.whiteSpace = "nowrap"; e.style.overflowWrap = "normal"; let fs = parseFloat(getComputedStyle(e).fontSize);
+      const lim = () => (e.classList.contains("cm-b") ? e.parentElement.clientWidth : e.clientWidth), long = () => e.scrollWidth > lim() + 1, words = e.textContent.trim().split(/\s+/).length;
+      if (words > 1 && e.classList.contains("gx-t-m")) { e.style.whiteSpace = ""; const w = [...e.textContent.trim().split(/\s+/)]; const sp = document.createElement("span"); sp.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap"; e.appendChild(sp); const widest = () => Math.max(...w.map(x => { sp.textContent = x; return sp.offsetWidth; })); while (fs > 18 && widest() > e.clientWidth) { fs -= 1; e.style.fontSize = fs + "px"; } sp.remove(); if (widest() > e.clientWidth) e.style.overflowWrap = "anywhere"; return; }
+      while (fs > 18 && long()) { fs -= 1; e.style.fontSize = fs + "px"; }
+      if (long()) { e.style.whiteSpace = ""; e.style.overflowWrap = "anywhere"; }
+    });
+    meFit();
+    /* un nivel con tres premios (fichas, titulo y categoria) puede no caber en su casilla en idiomas largos: primero se calla la linea de las fichas
+       (son las de siempre del nivel); si aun no cabe, la casilla crece y todas las cartas se vuelven a medir */
+    let grew = false;
+    document.querySelectorAll("#cmRoad .cm-rw").forEach(rw => { rw.style.height = ""; rw.querySelectorAll(".cm-b.f").forEach(b => { b.hidden = false; });
+      if (rw.scrollHeight > rw.clientHeight + 1) { const f = rw.querySelector(".cm-b.f"); if (f && rw.children.length > 2) f.hidden = true; }
+      if (rw.scrollHeight > rw.clientHeight + 1) { rw.style.height = "auto"; grew = true; } });
+    if (grew && $("cmRoad")) fitAll($("cmRoad"));
+  }
+  /* la columna de tu carta, en pantallas bajas: si lo de debajo de la carta no cabe sobre «Vestir tu carta», se calla primero la proxima categoria
+     y despues el sitio y el trato (estan tambien en el camino y en el saludo del crupier); nunca se monta texto sobre el boton */
+  function meFit() {
+    const me = document.querySelector("#dlg .cm-me"), dr = $("cmDress"), nx = me && me.querySelector(".cm-nx"); if (!me || !dr || !nx) return;
+    const nr = me.querySelector(".cm-nr"), dl = me.querySelector(".cm-dl"); [nr, dl].forEach(e => { if (e) e.hidden = false; });
+    const over = () => nx.offsetTop + nx.offsetHeight > dr.offsetTop - 4;
+    if (over() && nr) nr.hidden = true;
+    if (over() && dl) dl.hidden = true;
+  }
+  const tabsHtml = () => `<nav class="pf-tabs" id="pfTabs" role="tablist" aria-label="${esc(P6(PX.title))}">${["camino", "logros", "rec"].map(k => {
+    const n = k === "camino" ? esc(P6(C().tx.lvS).replace("{n}", C().level())) : k === "logros" ? `${A.fmt(A.ach.count())} / ${A.fmt(A.ach.total())}` : "";
+    return `<button type="button" class="pf-tab${UIP.tab === k ? " on" : ""}" role="tab" data-tab="${k}" aria-selected="${UIP.tab === k}"><span>${esc(P6(PX.tabs[k]))}</span>${n ? `<i>${n}</i>` : ""}</button>`; }).join("")}</nav>`;
+  const bookHtml = () => UIP.tab === "camino" ? `<div class="gx-paper cm-road" id="cmRoad">${roadHtml(C().level())}</div>`
+    : `<div class="gx-paper pf-book${UIP.tab === "rec" ? " pf-recb" : ""}" id="pfBook">${UIP.tab === "rec" ? A.hub.pf.recHtml() : A.hub.pf.logrosHtml()}</div>`;
   function html() {
     const lv = C().level(), have = C().fichas();
-    return `<div class="gx-veil bq-veil"></div><section class="cm-screen gx-stage" aria-labelledby="cmH" data-nosq>
+    return `<div class="gx-veil bq-veil"></div><section class="cm-screen pf-screen gx-stage s-prof" aria-labelledby="cmH" data-nosq>
       <div class="gx-grid cm-grid">
-        <header class="bq-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
-          <h2 class="gx-t-l bq-h" id="cmH"><span><span class="gx-eyb">${esc(P6(C().tx.club))} · ${esc(P6(C().tx.lv).replace("{n}", lv))}</span>${esc(P6(TX.title))}</span></h2>
-          <span class="bq-wal" aria-label="${esc(P6(C().tx.fichas))}">${fi("bq-fi")}<b>${A.fmt(have)}</b></span>${A.hub.tools()}</header>
+        <header class="bq-head pf-head2"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+          <h2 class="gx-t-l bq-h" id="cmH"><span><span class="gx-eyb">${esc(P6(C().tx.club))} · ${esc(P6(C().tx.lv).replace("{n}", lv))}</span>${esc(P6(PX.title))}</span></h2>
+          ${tabsHtml()}<span class="bq-wal" aria-label="${esc(P6(C().tx.fichas))}">${fi("bq-fi")}<b>${A.fmt(have)}</b></span>${A.hub.tools()}</header>
         <div class="gx-sh cm-left"><div class="gx-paper cm-me">${meHtml()}</div></div>
-        <div class="gx-sh cm-right"><div class="gx-paper cm-road" id="cmRoad">${roadHtml(lv)}</div></div>
+        <div class="gx-sh cm-right" id="pfRight">${bookHtml()}</div>
       </div></section>`;
   }
   function paintRoad() {
@@ -108,20 +151,48 @@ window.AIQ = window.AIQ || {};
     const pv = $("cmPrev"), nx = $("cmNext");
     if (pv) pv.onclick = () => { if (UI.page > 0) { UI.page--; if (A.sfx && A.sfx.card) A.sfx.card(); road("#cmPrev:not([disabled]), #cmNext"); } };
     if (nx) nx.onclick = () => { if (UI.page < 9) { UI.page++; if (A.sfx && A.sfx.card) A.sfx.card(); road("#cmNext:not([disabled]), #cmPrev"); } };
+    fitTxt();
     return lv;
   }
   function road(focusSel) { const el = $("cmRoad"); if (!el) return; el.innerHTML = roadHtml(C().level()); paintRoad(); if (focusSel) { const f = document.querySelector(focusSel); if (f) f.focus({ preventScroll: true }); } }
-  function open() {
+  /* las pestanas asoman sobre el libro: empiezan donde empieza el libro (o justo despues del titulo, si el titulo es mas largo) */
+  function tabsFit() {
+    const t = $("pfTabs"), r = $("pfRight"), hd = t && t.parentElement, h = $("cmH"); if (!t || !r || !hd || !h) return;
+    let x = r.offsetLeft - hd.offsetLeft + 2;                                            // en px de diseno: no le afecta la animacion de entrada
+    const tn = h.querySelector(":scope > span"), last = tn && [...tn.childNodes].filter(n => n.nodeType === 3).pop(), H = hd.getBoundingClientRect(), s = H.width / Math.max(1, hd.offsetWidth);
+    if (last && s > 0) { const rg = document.createRange(); rg.selectNodeContents(last); x = Math.max(x, (rg.getBoundingClientRect().right - H.left) / s + 16); }   // nunca encima del titulo
+    t.style.left = Math.round(x) + "px";
+  }
+  /* el libro de la derecha: cambia la hoja con sonido de papel */
+  function paintBook() {
+    fitTxt();
+    if (UIP.tab === "camino") { paintRoad(); return; }
+    const b = $("pfBook"); if (b) { insFill(b); A.hub.pf.wire(b, () => { b.innerHTML = UIP.tab === "rec" ? A.hub.pf.recHtml() : A.hub.pf.logrosHtml(); paintBook(); }); }
+  }
+  function setTab(k, focus) {
+    if (k === UIP.tab || !$("pfRight")) return; UIP.tab = k; if (A.sfx && A.sfx.card) A.sfx.card();
+    document.querySelectorAll("#pfTabs .pf-tab").forEach(b => { const on = b.dataset.tab === k; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+    const r = $("pfRight"); r.innerHTML = bookHtml(); paintBook();
+    { const D = A.dealer, de = D && D.el && D.el(); if (de && de.classList.contains("in") && D.hide) D.hide(); }   // si hablaba en un hueco de la hoja de antes, se va: nunca tapa la nueva
+    if (!reduce() && r.firstElementChild) r.firstElementChild.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 160, easing: "ease-out" });
+    if (focus) { const f = document.querySelector(`#pfTabs .pf-tab[data-tab="${k}"]`); if (f) f.focus({ preventScroll: true }); }
+  }
+  function open(o = {}) {
     const c = A.core; if (!c || !S() || !C()) return;
     const lv = C().level(); UI.page = Math.min(9, Math.floor(Math.min(99, lv) / 10));   // la serie de tu siguiente nivel
+    UIP.tab = o.tab === "logros" || o.tab === "rec" ? o.tab : "camino"; if (o.page != null && A.hub.pf) A.hub.pf.page(o.page);
     c.dialog(html(), "tablewrap");
     A.hub.wireTools(); $("hubBack").onclick = () => { if (A.sfx && A.sfx.ui) A.sfx.ui(); A.hub.screen("home"); };
     S().mount($("cmCard"), { w: 192 }); insFill($("dlg"));
     $("cmDress").onclick = () => { if (A.sfx && A.sfx.card) A.sfx.card(); if (A.boutique) A.boutique.cat("carta"); A.hub.screen("boutique"); };
-    paintRoad();
-    if (window.ResizeObserver) { const ro = new ResizeObserver(() => { const r = $("cmRoad"); if (!r) { ro.disconnect(); return; } fitAll(r); }); ro.observe($("cmRoad")); }
-    setTimeout(() => { const f = document.querySelector("#cmRoad .cm-sd.on") || $("hubBack"); if (f) f.focus({ preventScroll: true }); }, 80);
+    $("pfTabs").onclick = e => { const b = e.target.closest(".pf-tab"); if (b) setTab(b.dataset.tab); };
+    $("pfTabs").onkeydown = e => { if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return; const ks = ["camino", "logros", "rec"], i = ks.indexOf(UIP.tab) + (e.key === "ArrowRight" ? 1 : -1); if (i >= 0 && i < 3) { e.preventDefault(); setTab(ks[i], true); } };
+    paintBook(); tabsFit(); requestAnimationFrame(() => { tabsFit(); fitTxt(); }); setTimeout(() => { if ($("pfRight")) { tabsFit(); fitTxt(); } }, 450); if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if ($("pfRight")) fitTxt(); });   // otra vez con la pantalla ya posada (la entrada como naipe) y las letras cargadas
+    if (window.ResizeObserver) { const ro = new ResizeObserver(() => { const r = $("pfRight"); if (!r) { ro.disconnect(); return; } const cr = $("cmRoad"); if (cr) fitAll(cr); tabsFit(); fitTxt(); }); ro.observe($("pfRight")); ro.observe(document.querySelector(".cm-me")); }
+    setTimeout(() => { const f = document.querySelector("#pfTabs .pf-tab.on") || $("hubBack"); if (f) f.focus({ preventScroll: true }); }, 80);
   }
+  /* la pantalla tal cual, sin ids (el precalentamiento de la puerta, A.gala.warm) */
+  const warmHtml = () => { const k = UIP.tab; UIP.tab = "logros"; const h = html().replace(/ (id|aria-labelledby)="[^"]*"/g, ""); UIP.tab = k; return h; };
 
   /* ---------------------------------------------------------------- la carta del mazo: sale boca abajo, se da la vuelta y se sella */
   function reveal(levels, o = {}) {
@@ -130,14 +201,14 @@ window.AIQ = window.AIQ || {};
     const old = $("cmRv"); if (old) old.remove();
     const r = document.createElement("div"); r.id = "cmRv"; r.className = "cm-rv"; r.setAttribute("role", "status");
     const prev = levels.slice(-3, -1).map(() => `<canvas class="cm-rv-pv"></canvas>`).join("");
-    const all = []; levels.forEach(l => bits(l).forEach(b => { if (b[0] !== "f" && b[0] !== "") all.push(b[0] === "r" ? [b[0], b[1], C().insignia(C().rewardOf(l).rank)] : b); }));   // la categoria nueva, con su insignia
+    const all = []; levels.forEach(l => bits(l).forEach(b => { if (b[0] !== "f" && b[0] !== "") all.push(b); }));   // la categoria nueva, por su nombre: la insignia
     const fsum = levels.reduce((a, l) => a + C().payOf(l), 0);
     const chips = [["f", P6(TX.fichas).replace("{n}", A.fmt(fsum))]].concat(all);
     r.innerHTML = `<i class="cm-rv-dim"></i><div class="cm-rv-in">
       <span class="gx-eyb cm-rv-ey">${esc(P6(TX.newCard))}${levels.length > 1 ? " · " + esc(P6(TX.more).replace("{n}", levels.length)) : ""}</span>
       <div class="cm-rv-st">${prev}<div class="cm-rv-flip"><span class="cm-rv-f fr"><span id="cmRvCard"></span></span><span class="cm-rv-f bk"><canvas id="cmRvBack"></canvas></span></div>
         <b class="cm-rv-sl">${esc(P6(C().tx.lvS).replace("{n}", L))}</b></div>
-      <div class="cm-rv-loot">${chips.map(([kk, t, ins]) => `<span class="cm-b ${kk}">${kk === "f" ? fi("sm") : ""}${ins ? `<span class="cm-ri" data-ins="${ins}"></span>` : ""}${esc(t)}</span>`).join("")}</div></div>`;
+      <div class="cm-rv-loot">${chips.map(([kk, t]) => `<span class="cm-b ${kk}">${kk === "f" ? fi("sm") : ""}${esc(t)}</span>`).join("")}</div></div>`;
     app.appendChild(r); insFill(r);
     S().mount($("cmRvCard"), { w: 288, carta: L, mat: S().sOf(L), nobar: true });
     const host = $("cmRvCard"), bk = $("cmRvBack"); S().back(bk);
@@ -163,5 +234,5 @@ window.AIQ = window.AIQ || {};
     T(close, 3400 + chips.length * 220 + 400 * (k - 1));
   }
 
-  A.camino = { open, reveal, bits, insFill, tx: TX };
+  A.camino = { open, reveal, bits, insFill, warmHtml, tx: TX };
 })(window.AIQ);

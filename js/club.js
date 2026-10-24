@@ -92,9 +92,6 @@ window.AIQ = window.AIQ || {};
       "El despacho del dueño|The owner's office|Le bureau du patron|O escritório do dono|Das Büro des Besitzers|L'ufficio del padrone||老板办公室|주인의 집무실|オーナーの書斎|Кабинет владельца|Gabinet właściciela",
       "Maestro|Maestro|Maître|Mestre|Meister|Maestro||大师|마에스트로|マエストロ|Маэстро|Mistrzu"],
   ];
-  /* la insignia de cada categoria (maqueta «Insignias de la casa», 23-oct-2026): todas son piezas ya aprobadas de assets/icons. Se ganan al llegar
-     a la categoria y se ven en la chapa (vestidor), el camino, el Perfil y la carta del mazo al subir */
-  const INSIG = ["glass", "iq_0", "coupon", "minbet", "journal", "iq_1", "dice", "cards", "chips", "purse", "masterkey", "pact", "hoard", "boss_hat", "crown"];
   const need = L => 50 + 20 * (L - 1);
   const need1 = L => Math.min(400 + 20 * (L - 1), 1200);                  // la curva de antes (v1): solo para pasar los perfiles viejos
   const TOT = (() => { let s = 0; for (let L = 1; L < CFG.max; L++) s += need(L); return s; })();   // experiencia para el nivel 100
@@ -295,32 +292,35 @@ window.AIQ = window.AIQ || {};
     const nr = L.max ? P6(TX.nextLey).replace("{n}", A.fmt(CFG.leyPay)) : P6(TX.next).replace("{n}", L.lvl + 1) + " · +" + A.fmt(payOf(L.lvl + 1) + chestOf(L.lvl + 1));
     return `<span class="hh-socio-w sc-v2"><button type="button" class="hh-socio sc-v2" id="socioBtn" ${tt} aria-label="${esc(lab)}"><span id="socioCard"></span></button><span class="hh-socio-nx" aria-hidden="true">${fi("sm")}<span>${esc(nr)}</span></span></span>`;
   }
-  /* al volver a la portada con fichas nuevas, la tarjeta las cuenta delante de ti (moneda a moneda), con su brillo */
+  /* tus fichas de oro en la portada, en su caja junto al engranaje (24-oct: ya no van en la carta). Al volver con fichas nuevas, la caja las cuenta
+     delante de ti (moneda a moneda), con su brillo. Empieza en las que ya viste contar (fSeen) */
+  const wallet = () => { const c = st(), f = c.fSeen == null ? c.f : Math.min(c.fSeen, c.f); return `<span class="bq-wal hh-wal" id="hhWal" ${A.ttAttr ? A.ttAttr(P6(TX.fichas)) : ""} aria-label="${esc(P6(TX.fichas))}">${fi("bq-fi")}<b id="socioF">${A.fmt(f)}</b></span>`; };
+  /* al volver a la portada con fichas nuevas, la caja las cuenta delante de ti (moneda a moneda), con su brillo */
   function wire(onOpen) {
     const b = document.getElementById("socioBtn"); if (!b) return;
-    if (A.socio) A.socio.mount(document.getElementById("socioCard"), { w: 192, id: "socioF", hover: b });   // la carta, antes de contar sus fichas
+    if (A.socio) A.socio.mount(document.getElementById("socioCard"), { w: 192, hover: b });
     if (A.ach && A.ach.emit) A.ach.emit("club");                            // v2: quien ya pasaba del 10 o del 100 al llegar la v2
     if (onOpen) b.onclick = () => { if (A.sfx && A.sfx.card) A.sfx.card(); onOpen(); };
     const c = st(), from = c.fSeen == null ? c.f : c.fSeen, to = c.f;
     if (to > from) {
-      const el = document.getElementById("socioF"), S = A.core && A.core.S, reduce = !!(S && S.reduce);
+      const el = document.getElementById("socioF"), wl = document.getElementById("hhWal"), S = A.core && A.core.S, reduce = !!(S && S.reduce); if (!el || !wl) { c.fSeen = to; save(); return; }
       setTimeout(() => {
         if (!el.isConnected) return;
-        b.classList.add("gain");
+        wl.classList.add("gain");
         const n = Math.min(12, to - from), step = reduce ? 0 : 1100 / n;
         for (let i = 1; i <= n; i++) setTimeout(() => { if (!el.isConnected) return; el.textContent = A.fmt(Math.round(from + ((to - from) * i) / n)); if (A.sfx && A.sfx.coin) A.sfx.coin(); }, i * step);
-        setTimeout(() => { b.classList.remove("gain"); }, 1400);
+        setTimeout(() => { wl.classList.remove("gain"); }, 1400);
       }, 900);
       c.fSeen = to; save();
     } else if (c.fSeen !== to) { c.fSeen = to; save(); }
   }
 
   A.club = {
-    CFG, RANKS, RANKX, need, levelOf, tierOf, groupOf, q, bonus, cash, strip, play, card, wire, tierNow,
+    CFG, RANKS, RANKX, need, levelOf, tierOf, groupOf, q, bonus, cash, strip, play, card, wallet, wire, tierNow,
     payOf, chestOf, rewardOf, nextText, TOT, TITLE_AT,
     level: () => levelOf(st().xp).lvl, xp: () => st().xp, fichas: () => st().f, now: () => levelOf(st().xp),
     rankX: i => (RANKX[i] || RANKX[0]).map(P6),
-    INSIG, insignia: i => INSIG[Math.max(0, Math.min(INSIG.length - 1, i | 0))], insigOf: id => INSIG.indexOf(id),
+   
     /* v0.3.132: gastar fichas de oro (la boutique). La tarjeta no las cuenta hacia arriba: lo gastado ya se ha visto irse */
     give(n) { const c = st(); n = Math.max(0, Math.round(n)); c.f += n; save(); return c.f; },   // entrega 3: lo que pagan los retos (la tarjeta lo cuenta al volver: fSeen no se toca)
     spend(n) { const c = st(); n = Math.max(0, Math.round(n)); if (!(c.f >= n)) return false; c.f -= n; c.fSeen = Math.min(c.fSeen == null ? c.f : c.fSeen, c.f); save(); return true; },
