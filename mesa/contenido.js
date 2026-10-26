@@ -97,11 +97,12 @@
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
   const NAVG = [["", [["inicio", "Inicio"]]], ["Balancear", [["plan", "Mi receta de balanceo"], ["balanceo", "Balanceo"], ["rondas", "Simulador de rondas"]]], ["Contenido", [["preguntas", "Preguntas"], ["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"]]], ["Decidir", [["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Saber", [["como", "Cómo funciona hoy"]]]];
-  function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, lim: o.lim || 80 }); let list = data.slice();
+  function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
     if (o.nav !== false) CURLIST = list.map(r => r.key || r.id || r).slice(0, 3000);
-    const sh = list.slice(0, st.lim);
-    return `<div class="tw"><table><tr>${cols.map((c, i) => `<th class="${c.n ? "num" : ""} ${st.s === i ? "s" : ""}" ${c.v ? `data-sort="${id}:${i}"` : ""}>${c.h}${st.s === i ? (st.d > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr>${sh.map(r => `<tr>${cols.map(c => `<td class="${(c.n ? "num " : "") + (c.w ? "w " : "") + (c.a ? "act" : "")}">${c.f(r)}</td>`).join("")}</tr>`).join("")}</table></div>${list.length > sh.length ? `<button class="chipb more" data-more="${id}">Mostrar ${Math.min(100, list.length - sh.length)} más (${sh.length} de ${list.length})</button>` : `<p class="note" style="margin:0">${list.length} en total</p>`}`; }
+    const per = st.per, pages = Math.max(1, Math.ceil(list.length / per)); st.page = Math.max(0, Math.min(st.page, pages - 1)); const from = st.page * per, sh = list.slice(from, from + per);
+    return `<div class="tw" data-tid="${id}"><table><tr>${cols.map((c, i) => `<th class="${c.n ? "num" : ""} ${st.s === i ? "s" : ""}" ${c.v ? `data-sort="${id}:${i}"` : ""}>${c.h}${st.s === i ? (st.d > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr>${sh.map(r => `<tr>${cols.map(c => `<td class="${(c.n ? "num " : "") + (c.w ? "w " : "") + (c.a ? "act" : "")}">${c.f(r)}</td>`).join("")}</tr>`).join("")}</table></div>
+      <div class="pager"><button class="chipb" data-pg="${id}:first" ${st.page ? "" : "disabled"}>⏮</button><button class="chipb" data-pg="${id}:-1" ${st.page ? "" : "disabled"}>← Anterior</button><span>Página <b>${st.page + 1}</b> de ${pages} · filas ${list.length ? from + 1 : 0}–${from + sh.length} de ${list.length}</span><button class="chipb" data-pg="${id}:1" ${st.page < pages - 1 ? "" : "disabled"}>Siguiente →</button><button class="chipb" data-pg="${id}:last" ${st.page < pages - 1 ? "" : "disabled"}>⏭</button></div>`; }
   const nmc = r => `<span class="nm" data-open="${esc(r.key)}">${esc(r.name)}</span>`;
   const zbar = r => (r.dif2 == null ? "—" : `<span class="bar3" style="width:110px;display:inline-flex;height:14px;vertical-align:middle"><i style="width:${r.dif2}%;background:${ZC[r.zone]}"></i></span> ${Math.round(r.dif2)}`);
   const zmove = r => (r.zone == null ? "—" : `${ZN[r.zoneHoy]} → <b style="font-weight:400;color:${ZC[r.zone]}">${ZN[r.zone]}</b>`);
@@ -267,7 +268,7 @@
       <div class="tools">${inp("sugerencias", "q", "buscar")}${sel("sugerencias", "cat", [["persona", "Personajes"], ["sello", "Sello del país"]], "Personajes y Sello")}${sel("sugerencias", "sub", [...new Set(SG.map(x => x.sub))].sort().map(x => [x, x]), "Todas las subcategorías")}${sel("sugerencias", "pais", [...new Set(SG.map(x => x.pais))].sort().map(x => [x, x]), "Todos los países")}${sel("sugerencias", "sg", [["pend", "Sin mirar"], ["limpias", "Limpias (seguridad alta, sin aviso)"], ["aviso", "Con aviso"], ["media", "Seguridad media"]], "Toda seguridad")}${sel("sugerencias", "w", [["m", "Solo mujeres"], ["h", "Solo hombres"]], "Hombres y mujeres")}<button class="chipb" data-act="clrf" data-v="sugerencias">Limpiar</button></div>
       <div class="row"><button class="btn" data-act="oklimpias">Bien a las ${limp} limpias de esta lista</button><button class="btn ghost" data-act="nolist">No a las ${L.filter(x => !N[SGKEY(x)]).length} sin mirar de esta lista</button></div></div>
       <div class="pl">${T("sug", [{ h: "Propuesta", f: x => `<span class="nm" data-open="${esc(SGKEY(x))}">${esc(x.es)}</span>`, v: x => x.es }, { h: "Tipo", f: x => (x.cat === "persona" ? "Personaje" : "Sello") + ` <span class="pill">${esc(x.sub)}</span>`, v: x => x.cat + x.sub }, { h: "País", f: x => esc(x.pais), v: x => x.pais }, { h: "Nació en", f: x => esc(x.nacWD || x.nac || "—") }, { h: "Idiomas", n: 1, f: x => x.idiomas, v: x => x.idiomas }, { h: "Nivel", f: x => (x.cat === "persona" ? nivPers(x) : "—") }, { h: "Por qué", w: 1, f: x => esc(x.por_que) }, { h: "Avisos", w: 1, f: x => x.avisos.map(a => `<span class="pill bad">${esc(a)}</span>`).join("") + (x.seguridad === "media" ? '<span class="pill warn">dudosa</span>' : "") }, { h: "Opinión", a: 1, f: x => vb(SGKEY(x)) }], L, { s: 4, d: -1, lim: 60 })}
-      ${(A.SUG.sinCandidatos || []).length ? `<p class="note">Sin candidato válido según los documentalistas: ${A.SUG.sinCandidatos.map(([c, n]) => esc(c) + (n ? " (" + esc(n) + ")" : "")).join("; ")}.</p>` : ""}</div>`;
+      ${(A.SUG.sinCandidatos || []).length ? `<p class="note" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none" title="${esc(A.SUG.sinCandidatos.map(([c, n]) => c + (n ? " (" + n + ")" : "")).join("; "))}">Sin candidato válido según los documentalistas: ${A.SUG.sinCandidatos.length} países (pasa el ratón para verlos).</p>` : ""}</div>`;
   };
 
   /* ================= PARA QUITAR ================= */
@@ -377,12 +378,20 @@
     v.querySelectorAll(".tw").forEach(tw => { const p = tw.closest(".pl"); if (p && p.parentElement && p === p.parentElement.lastElementChild) p.classList.add("fill"); });
     if (kids.length && v.querySelector(".cols:not(.auto)")) v.querySelector(".cols:not(.auto)").style.flex = "1";
   }
+  /* cuantas filas caben en la altura libre del panel: asi no hay scroll (solo paginas) */
+  let fitN = 0;
+  function fit() {
+    if (!matchMedia("(min-width: 1500px)").matches) return; let changed = false;
+    $$("#view .pl.fill > .tw").forEach(tw => { const st = ST[tw.dataset.tid]; if (!st) return; const trs = tw.querySelectorAll("tr"); if (trs.length < 2) return; const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1, head = trs[0].getBoundingClientRect().height / z, rh = Math.max(20, (trs[trs.length - 1].getBoundingClientRect().top + trs[trs.length - 1].getBoundingClientRect().height - trs[1].getBoundingClientRect().top) / z / (trs.length - 1));
+      const per = Math.max(4, Math.floor((tw.clientHeight - head - 4) / rh)); if (per !== st.per) { st.per = per; changed = true; } });
+    if (changed && fitN < 4) { fitN++; draw(); } else fitN = 0;
+  }
   /* ================= pintar ================= */
   function draw() {
     const a = document.activeElement, fid = a && a.id && a.id.startsWith("in_") ? a.id : null, pos = fid ? a.selectionStart : 0;
     $("#nav").innerHTML = NAVG.map(([g, items]) => (g ? `<h4>${g}</h4>` : "") + items.map(([k, l]) => { let b = ""; if (k === "sugerencias") { const n = SG.filter(x => !N[SGKEY(x)]).length; b = n ? `<small>${n}</small>` : ""; } if (k === "notas") b = userNotes().length ? `<small>${userNotes().length}</small>` : ""; return `<button class="nav ${k === cur ? "on" : ""}" data-view="${k}"><span>${l}</span>${b}</button>`; }).join("")).join("");
     $("#scen").innerHTML = SCEN ? "Viendo: <b>con mis decisiones</b>" : "Viendo: <b>hoy</b>"; $("#scen").dataset.act = "scen"; $("#cuts").innerHTML = `Cortes <b>${CFG.t[0]}</b> · <b>${CFG.t[1]}</b>`; $("#nvotes").innerHTML = `Opiniones <b>${userNotes().length}</b>`;
-    const v = VIEWS[cur] || VIEWS.inicio; $("#view").className = "content v-" + cur; $("#view").innerHTML = v(); layout();
+    const v = VIEWS[cur] || VIEWS.inicio; $("#view").className = "content v-" + cur; $("#view").innerHTML = v(); layout(); fit();
     if (fid) { const n = $("#" + fid); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
     bindRanges();
   }
@@ -403,20 +412,20 @@
     if (d.vote) return vote(d.k, d.vote);
     if (d.note) return note(d.k);
     if (d.zone != null) { const f = ff("balanceo"); f.bz = f.bz == d.zone ? "" : d.zone; return draw(); }
-    if (d.more) { ST[d.more].lim += 100; return draw(); }
-    if (d.sort) { const [id, i] = d.sort.split(":"), s = ST[id]; if (s.s === +i) s.d = -s.d; else { s.s = +i; s.d = 1; } return draw(); }
+    if (d.pg) { const [id, k] = d.pg.split(":"), st = ST[id]; if (k === "first") st.page = 0; else if (k === "last") st.page = 1e9; else st.page += +k; return draw(); }
+    if (d.sort) { const [id, i] = d.sort.split(":"), s = ST[id]; if (s.s === +i) s.d = -s.d; else { s.s = +i; s.d = 1; } s.page = 0; return draw(); }
     if (d.lang) { return open(DKEY, d.lang); }
     if (d.sim) { const [k, a, b] = d.sim.split(":"), f = ff("rondas"); if (k === "src") f.src = a; if (k === "asc") f.asc = +a; if (k === "rd") f.rd = +a; if (k === "cell") { f.asc = +a; f.rd = +b; } return draw(); }
     switch (d.act) {
       case "prev": return navDrawer(-1); case "next": return navDrawer(1); case "closed": return closeDrawer();
-      case "clrbal": F.balanceo = {}; return draw(); case "clrf": F[d.v] = {}; Object.keys(ST).forEach(k => (ST[k].lim = 80)); return draw();
+      case "clrbal": F.balanceo = {}; return draw(); case "clrf": F[d.v] = {}; Object.keys(ST).forEach(k => (ST[k].page = 0)); return draw();
       case "savehist": return ask("Nombre de esta versión", "Cortes " + CFG.t.join(" / ") + " · se guardan con los pesos actuales", "Cortes " + CFG.t.join("-"), n => { HIST.push({ name: n || "Sin nombre", t: Date.now(), cuts: CFG.t.slice(), w: Object.assign({}, CFG.w), counts: [0, 1, 2].map(k => rows.filter(r => r.zone === k).length), z: snapZ() }); saveCfg(); toast("Versión guardada"); draw(); });
       case "cmp": { const f = ff("balanceo"); f.cmp = f.cmp == d.i ? "" : d.i; return draw(); }
       case "restore": { const h = HIST[+d.i]; CFG.t = h.cuts.slice(); CFG.w = Object.assign({}, h.w); saveCfg(); toast("Cortes restaurados"); return draw(); }
       case "delhist": HIST.splice(+d.i, 1); saveCfg(); return draw();
       case "oklimpias": SG.filter(x => !x.avisos.length && x.seguridad === "alta" && !N[SGKEY(x)] && sgVisible(x)).forEach(x => (N[SGKEY(x)] = { v: "ok", nota: "", t: Date.now() })); saveN(); toast("Hecho"); return draw();
       case "nolist": SG.filter(x => !N[SGKEY(x)] && sgVisible(x)).forEach(x => (N[SGKEY(x)] = { v: "no", nota: "", t: Date.now() })); saveN(); return draw();
-      case "grp": ff("quitar").open = d.g; ST.rem && (ST.rem.lim = 50); return draw();
+      case "grp": ff("quitar").open = d.g; ST.rem && (ST.rem.page = 0); return draw();
       case "nogrp": remGroups()[d.g].rows.filter(r => !N[r.key]).forEach(r => (N[r.key] = { v: "no", nota: "regla: " + d.g, t: Date.now() })); saveN(); toast("Marcadas como «No»"); return draw();
       case "okgrp": remGroups()[d.g].rows.filter(r => !N[r.key]).forEach(r => (N[r.key] = { v: "ok", nota: "", t: Date.now() })); saveN(); return draw();
       case "copynotes": { const out = userNotes().map(k => ({ cosa: nameOfKey(k), id: k, veredicto: N[k].v, nota: N[k].nota })); navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(out, null, 1)); return toast("Copiado: pégamelo"); }
@@ -427,18 +436,20 @@
     }
   });
   function sgVisible(x) { const f = ff("sugerencias"); return (!f.cat || x.cat === f.cat) && (!f.sub || x.sub === f.sub) && (!f.pais || x.pais === f.pais) && (!f.sg || (f.sg === "aviso" ? x.avisos.length : f.sg === "limpias" ? !x.avisos.length && x.seguridad === "alta" : f.sg === "pend" ? !N[SGKEY(x)] : x.seguridad === f.sg)) && (!f.w || (f.w === "m" ? x.mujer : !x.mujer)) && (!f.q || (x.es + x.en + x.pais).toLowerCase().includes(f.q.toLowerCase())); }
-  function onField(e) { const t = e.target; if (!t.dataset || !t.dataset.f) return; const [v, k] = t.dataset.f.split("."); ff(v)[k] = t.value; Object.keys(ST).forEach(s => (ST[s].lim = ST[s].lim > 100 ? 80 : ST[s].lim)); draw(); }
+  function onField(e) { const t = e.target; if (!t.dataset || !t.dataset.f) return; const [v, k] = t.dataset.f.split("."); ff(v)[k] = t.value; Object.keys(ST).forEach(k => (ST[k].page = 0)); draw(); }
   document.addEventListener("input", e => { if (e.target.tagName === "INPUT" && e.target.dataset.f) onField(e); });
   document.addEventListener("change", e => { if (e.target.tagName === "SELECT" && e.target.dataset.f) onField(e); });
   document.addEventListener("keydown", e => {
     const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
     if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) { e.preventDefault(); if (!$("#finder")) openFinder(); return; }
     if ($("#finder") && e.key === "Escape") { $("#finder").remove(); return; }
+    if (!DKEY && !typing && !$(".ov")) { const t = $("#view .pager [data-pg]"); const id = t && t.dataset.pg.split(":")[0]; if (id && ST[id] && (e.key === "PageDown" || e.key === "PageUp")) { ST[id].page += e.key === "PageDown" ? 1 : -1; e.preventDefault(); draw(); return; } }
     if (!DKEY || typing) return;
     if (e.key === "Escape") closeDrawer(); else if (e.key === "ArrowRight") navDrawer(1); else if (e.key === "ArrowLeft") navDrawer(-1); else if (e.key.toLowerCase() === "b") vote(DKEY, "ok"); else if (e.key.toLowerCase() === "n") vote(DKEY, "no"); else if (e.key.toLowerCase() === "c") note(DKEY);
   });
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h && VIEWS[h] && h !== cur) { cur = h; draw(); } });
   $("#find").onclick = openFinder;
+  let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { fitN = 0; fit(); }, 200); });
 
   /* ================= arranque ================= */
   if (!VIEWS[cur]) cur = "inicio";
