@@ -72,3 +72,6 @@ steam-output/
 tools/cache-ne/
 tools/barra_px/g/
 tools/barra_px/z/
+
+# mesa de contenido: tus opiniones locales (el portal las guarda en Redis)
+mesa/notas-contenido.json
