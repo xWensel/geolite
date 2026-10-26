@@ -532,13 +532,13 @@ window.AIQ = window.AIQ || {};
     const r = cv.getBoundingClientRect(), dp = window.devicePixelRatio || 1, W = Math.max(16, Math.round(r.width * dp)), H = ratio ? Math.round(W * ratio) : Math.max(10, Math.round(r.height * dp));
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; cv._still = 0; }
   }
+  function pPaint(t) {
+    document.querySelectorAll("#dlg canvas[data-pt]").forEach(cv => { pFit(cv); if (cv._still) return; const [s, id] = cv.dataset.pt.split(":"); PU().thumb(cv, s, id, t); if (s === "pin") cv._still = 1; });
+    const big = $("bqPCv"); if (big && ST.psel) { pFit(big); const [s, id] = ST.psel.split(":"); if (!(s === "pin" && big._still === ST.psel)) { PU().thumb(big, s, id, t, true); if (s === "pin") big._still = ST.psel; } }
+  }
   function pAnim(now) {
     pRaf = 0; if (ST.cat !== "punt" || !document.querySelector("#dlg .bq-screen") || document.hidden) return;
-    if (now - pLast > 60) {
-      pLast = now; const t = now / 1000;
-      document.querySelectorAll("#dlg canvas[data-pt]").forEach(cv => { pFit(cv); if (cv._still) return; const [s, id] = cv.dataset.pt.split(":"); PU().thumb(cv, s, id, t); if (s === "pin") cv._still = 1; });
-      const big = $("bqPCv"); if (big && ST.psel) { pFit(big); const [s, id] = ST.psel.split(":"); if (!(s === "pin" && big._still === ST.psel)) { PU().thumb(big, s, id, t, true); if (s === "pin") big._still = ST.psel; } }
-    }
+    if (now - pLast > 60) { pLast = now; pPaint(now / 1000); }
     pRaf = requestAnimationFrame(pAnim);
   }
   const pStart = () => { if (!pRaf) pRaf = requestAnimationFrame(pAnim); };
@@ -718,7 +718,7 @@ window.AIQ = window.AIQ || {};
     const fid = document.activeElement && document.activeElement.id, fdata = document.activeElement && document.activeElement.dataset;
     if (ST.cat === "hoy") { g.innerHTML = hGridHtml(); d.innerHTML = hDetHtml(); hPaint(); }
     else if (ST.cat === "vest") { g.innerHTML = vGridHtml(); d.innerHTML = vDetHtml(); vPaint(); }
-    else if (ST.cat === "punt") { g.innerHTML = pGridHtml(); d.innerHTML = pDetHtml(); pStart(); }
+    else if (ST.cat === "punt") { g.innerHTML = pGridHtml(); d.innerHTML = pDetHtml(); pPaint(performance.now() / 1000); pStart(); }   // los lienzos nuevos se pintan ya: si no, parpadean vacios hasta el siguiente fotograma
     else if (ST.cat === "carta") { g.innerHTML = cGridHtml(); d.innerHTML = cDetHtml(); cPaint(); }
     else { g.innerHTML = gridHtml(); d.innerHTML = detHtml(); }
     const rl = $("bqRail"); if (rl) rl.outerHTML = railHtml();

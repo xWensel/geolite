@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.214",
+      name: L("Punteros sin parpadeo", "Pointers without flicker", "Des pointeurs sans clignotement", "Ponteiros sem piscar", "Zeiger ohne Flackern", "Puntatori senza sfarfallio", "", "指针不再闪烁", "깜빡이지 않는 포인터", "ポインターがちらつかない", "Указатели без мерцания", "Wskaźniki bez migotania"),
+      date: "2026-10-26",
+      summary: L("Al cambiar de puntero en la tienda ya no hay un parpadeo: las miniaturas y la vista grande se pintan en el mismo instante en que cambian.", "Switching pointers in the shop no longer flickers: the thumbnails and the big preview are drawn the very moment they change.", "Changer de pointeur dans la boutique ne fait plus clignoter : les miniatures et le grand aperçu se dessinent à l'instant même où ils changent.", "Trocar de ponteiro na loja não pisca mais: as miniaturas e a visão grande são desenhadas no mesmo instante em que mudam.", "Beim Wechsel des Zeigers im Laden flackert nichts mehr: Die Vorschaubilder und die große Ansicht werden im selben Moment gezeichnet, in dem sie wechseln.", "Cambiando puntatore nel negozio non c'è più lo sfarfallio: le miniature e l'anteprima grande vengono disegnate nell'istante stesso in cui cambiano.", "", "在商店里切换指针时不再闪烁：缩略图和大预览在变化的那一刻就已绘制好。", "상점에서 포인터를 바꿀 때 더는 깜빡이지 않아요. 썸네일과 큰 미리보기가 바뀌는 바로 그 순간에 그려져요.", "ショップでポインターを切り替えてもちらつかない。サムネイルと大きなプレビューは、切り替わる瞬間に描かれる。", "При смене указателя в магазине больше нет мерцания: миниатюры и большой предпросмотр рисуются в тот же миг, когда меняются.", "Zmiana wskaźnika w sklepie już nie migocze: miniatury i duży podgląd rysują się w tej samej chwili, w której się zmieniają."),
+      chapters: [
+        { id: "punteros", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("La tienda", "The shop", "La boutique", "A loja", "Der Laden", "Il negozio", "", "商店", "상점", "ショップ", "Магазин", "Sklep"),
+          entries: [
+            E(L("Sin parpadeo al cambiar de puntero", "No flicker when switching pointers", "Plus de clignotement en changeant de pointeur", "Sem piscar ao trocar de ponteiro", "Kein Flackern beim Zeigerwechsel", "Niente sfarfallio cambiando puntatore", "", "切换指针时不再闪烁", "포인터를 바꿀 때 깜빡임 없음", "ポインター切り替えでちらつかない", "Нет мерцания при смене указателя", "Brak migotania przy zmianie wskaźnika"), "fix", "0.3.214", [
+              L("Al elegir otro puntero en la tienda, las miniaturas y la vista grande se veían vacías un instante antes de dibujarse. Ahora se dibujan al momento.", "When you picked another pointer in the shop, the thumbnails and the big preview showed empty for an instant before being drawn. Now they are drawn right away.", "En choisissant un autre pointeur dans la boutique, les miniatures et le grand aperçu apparaissaient vides un instant avant d'être dessinés. Ils se dessinent maintenant tout de suite.", "Ao escolher outro ponteiro na loja, as miniaturas e a visão grande apareciam vazias por um instante antes de serem desenhadas. Agora são desenhadas na hora.", "Wenn du im Laden einen anderen Zeiger gewählt hast, waren die Vorschaubilder und die große Ansicht einen Moment lang leer, bevor sie gezeichnet wurden. Jetzt werden sie sofort gezeichnet.", "Scegliendo un altro puntatore nel negozio, le miniature e l'anteprima grande restavano vuote per un istante prima di essere disegnate. Ora vengono disegnate subito.", "", "在商店里选择另一个指针时，缩略图和大预览会先空白一瞬才绘制出来。现在会立即绘制。", "상점에서 다른 포인터를 고르면 썸네일과 큰 미리보기가 그려지기 전에 잠깐 비어 보였어요. 이제 바로 그려져요.", "ショップで別のポインターを選ぶと、サムネイルと大きなプレビューが描かれる前に一瞬空になっていた。今はすぐに描かれる。", "При выборе другого указателя в магазине миниатюры и большой предпросмотр на миг оставались пустыми, прежде чем нарисоваться. Теперь они рисуются сразу.", "Po wybraniu innego wskaźnika w sklepie miniatury i duży podgląd przez chwilę były puste, zanim się narysowały. Teraz rysują się od razu.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.213",
       name: L("Nivel bien cerrado", "Level, properly framed", "Niveau bien encadré", "Nível bem fechado", "Level sauber umrahmt", "Livello ben chiuso", "", "关卡框线闭合", "레벨 테두리 완성", "レベルの枠をきれいに", "Уровень в рамке", "Poziom w pełnej ramce"),
       date: "2026-10-26",
