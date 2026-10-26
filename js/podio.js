@@ -84,7 +84,7 @@ window.AIQ = window.AIQ || {};
         <header class="pd-head"><button type="button" class="gx-btn sm pd-x" id="pdX">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l" id="pdH"><span class="pd-ic">${A.icon("m_rank")}</span>${TITLE()}</h2>
           <div class="pd-tabset" id="pdTabs">${tabsHtml()}</div></header>
-        <div class="pd-body wait" id="pdBody">${body(null)}</div>
+        <div class="pd-body wait" id="pdBody">${body(null, true)}</div>
       </section></div>`);
     /* como con Ajustes: el crupier del inicio se aparta mientras miras la tabla y vuelve al cerrarla */
     if (A.dealer && A.dealer.homeTease) { dealerWas = !!A.dealer.onHome; if (dealerWas) A.dealer.homeTease(false); }
@@ -151,7 +151,7 @@ window.AIQ = window.AIQ || {};
   const prefetch = () => { const b = boardOf(mode, per); [page - 1, page + 1].forEach(q => { if (q > 0 && q < pages) A.rank.topC(b, PER, 30000, 3 + q * PER); }); };
   /* contenido: origen y fecha, podio (2.o, 1.o, 3.o), lista de 5 con sus flechas y el pie (tu puesto, lo que te falta para el podio o como entrar).
      res = null: esperando al servidor (mismas medidas, sin nadie: al llegar, los escalones suben desde el suelo) */
-  function body(res) {
+  function body(res, intro) {
     const rows = (res && res.rows) || [], day = mode === "daily", my = A.profile.get().id, meI = rows.findIndex(r => r.id === my), b = boardOf(mode, per);
     /* cada puesto es una pila de fichas: su alto mide la puntuacion (la del primero, la mas alta); sin nadie, una ficha suelta */
     const top = rows[0] ? Math.max(1, rows[0].score) : 1, MEDAL = ["", "medal_gold", "medal_silver", "medal_bronze"];
@@ -173,7 +173,7 @@ window.AIQ = window.AIQ || {};
       else if (res.global) foot = `<p class="pd-hint"><span>${P6("A {n} pts del podio|{n} pts from the podium|À {n} pts du podium|A {n} pts do pódio|{n} Pkt. bis zum Podest|A {n} punti dal podio||距领奖台还差 {n} 分|시상대까지 {n}점|表彰台まであと{n}点|До пьедестала {n} очк.|Do podium brakuje {n} pkt").replace("{n}", A.fmt(Math.max(1, rows[2].score - rows[meI].score + 1)))}</span></p>`;
     }
     const when = per === "all" ? "" : dayOf(b);
-    return `<div class="pd-left gx-from-left"><p class="lb-src pd-src">${res ? src(res) : "<span>…</span>"}${when ? `<span class="pd-day">${esc(when)}</span>` : ""}</p>
+    return `<div class="pd-left${intro ? " gx-from-left" : ""}"><p class="lb-src pd-src">${res ? src(res) : "<span>…</span>"}${when ? `<span class="pd-day">${esc(when)}</span>` : ""}</p>
         <div class="pd-stage">${col(2)}${col(1)}${col(3)}</div></div>
       <div class="podio pd-board gx-paper"><div class="pd-bh${day ? " dy" : ""}"><span>#</span><span></span><span>${P6("Jugador|Player|Joueur|Jogador|Spieler|Giocatore||玩家|플레이어|プレイヤー|Игрок|Gracz")}</span>${day ? `<span>${P6("Intentos|Attempts|Essais|Tentativas|Versuche|Tentativi||尝试|시도|挑戦|Попытки|Podejścia")}</span>` : ""}<span>${P6("Puntos|Points|Points|Pontos|Punkte|Punti||分数|점수|ポイント|Очки|Punkty")}</span></div>
         <ol class="lb pd-list${day ? " dy" : ""}" id="pdList">${listHtml(rows.slice(3, 3 + PER), 4, res)}</ol>
@@ -185,7 +185,11 @@ window.AIQ = window.AIQ || {};
   const DQ = { roll: Math.random() < 1 / 3, done: false };
   const DQ_T = "Descalificado|Disqualified|Disqualifié|Desclassificado|Disqualifiziert|Squalificato||取消资格|실격|失格|Дисквалифицирован|Zdyskwalifikowany";
   function paint(el, res) {
-    el.innerHTML = body(res); el.classList.remove("wait");
+    /* se conserva el .pd-left (y su entrada en curso): solo cambia su contenido y la pizarra, sin que nada parpadee ni vuelva a deslizarse */
+    const tpl = document.createElement("template"); tpl.innerHTML = body(res);
+    const oldL = el.querySelector(".pd-left"), newL = tpl.content.querySelector(".pd-left"), oldB = el.querySelector(".pd-board");
+    if (oldL && oldB && newL) { oldL.replaceChildren(...newL.childNodes); oldB.replaceWith(tpl.content.querySelector(".pd-board")); } else el.innerHTML = body(res);
+    el.classList.remove("wait");
     { const rows = res.rows || []; cards(el, rows); badges($("pdList"), rows.slice(3, 3 + PER)); }
     const play = $("pdPlay"); if (play) play.onclick = () => A.hub.screen(mode === "daily" ? "daily" : "adventure");   // hub.screen quita el podio (reset)
     wirePager();

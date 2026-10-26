@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.212",
+      name: L("Clasificación sin parpadeo", "Leaderboard without flicker", "Classement sans scintillement", "Classificação sem piscar", "Rangliste ohne Flackern", "Classifica senza sfarfallio", "", "排行榜不再闪烁", "깜빡이지 않는 순위표", "ちらつかないランキング", "Рейтинг без мерцания", "Ranking bez migotania"),
+      date: "2026-10-26",
+      summary: L("Al entrar en la Clasificación ya no hay parpadeo: el panel del podio no se vuelve a deslizar y la lista no enseña huecos que luego desaparecen.", "Opening the Leaderboard no longer flickers: the podium panel doesn't slide in a second time and the list no longer shows blanks that then vanish.", "L'ouverture du Classement ne scintille plus : le panneau du podium ne glisse plus une seconde fois et la liste n'affiche plus de vides qui disparaissent ensuite.", "Abrir a Classificação já não pisca: o painel do pódio não desliza uma segunda vez e a lista já não mostra vazios que depois desaparecem.", "Beim Öffnen der Rangliste flackert nichts mehr: Das Podest-Feld gleitet nicht ein zweites Mal ein, und die Liste zeigt keine Lücken mehr, die gleich wieder verschwinden.", "Aprendo la Classifica non sfarfalla più: il pannello del podio non scorre una seconda volta e la lista non mostra più vuoti che poi spariscono.", "", "打开排行榜时不再闪烁：领奖台面板不会再滑入第二次，列表也不再先显示随后消失的空位。", "순위표를 열 때 더 이상 깜빡이지 않아요. 시상대 패널이 두 번 미끄러져 들어오지 않고, 목록에 곧 사라질 빈칸도 보이지 않아요.", "ランキングを開いてもちらつかなくなりました。表彰台のパネルが2度スライドせず、すぐ消える空欄も表示されません。", "При входе в рейтинг больше нет мерцания: панель пьедестала не выезжает второй раз, а список не показывает пустые строки, которые потом исчезают.", "Wejście do rankingu nie migocze: panel podium nie wsuwa się drugi raz, a lista nie pokazuje pustych wierszy, które zaraz znikają."),
+      chapters: [
+        { id: "clasificacion", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Clasificación", "Leaderboard", "Classement", "Classificação", "Rangliste", "Classifica", "", "排行榜", "순위표", "ランキング", "Рейтинг", "Ranking"),
+          entries: [
+            E(L("Entrada limpia", "A clean entrance", "Une entrée nette", "Entrada limpa", "Sauberer Auftritt", "Ingresso pulito", "", "干净的入场", "깔끔한 등장", "すっきりした登場", "Чистое появление", "Czyste wejście"), "fix", "0.3.212", [
+              L("Cuando la tabla tarda en llegar, el panel de la izquierda ya no vuelve a empezar su entrada y las filas esperan ocultas en vez de enseñar «…».", "When the board takes a while to arrive, the left panel no longer restarts its entrance and the rows wait hidden instead of showing “…”.", "Quand le tableau tarde à arriver, le panneau de gauche ne recommence plus son entrée et les lignes attendent masquées au lieu d'afficher « … ».", "Quando a tabela demora a chegar, o painel da esquerda já não recomeça a entrada e as linhas esperam ocultas em vez de mostrar «…».", "Wenn die Tabelle länger braucht, beginnt das linke Feld seinen Auftritt nicht mehr von vorn, und die Zeilen warten unsichtbar, statt „…“ zu zeigen.", "Quando la tabella tarda ad arrivare, il pannello di sinistra non ricomincia più il suo ingresso e le righe aspettano nascoste invece di mostrare «…».", "", "榜单加载较慢时，左侧面板不再重新开始入场，行也会先隐藏等待，而不是显示“…”。", "순위표가 늦게 도착해도 왼쪽 패널이 다시 등장하지 않고, 줄은 “…” 대신 숨어서 기다려요.", "表が届くのが遅いときも、左のパネルは登場をやり直さず、行は「…」を見せずに隠れて待ちます。", "Если таблица приходит не сразу, левая панель больше не начинает появление заново, а строки ждут скрытыми вместо «…».", "Gdy tabela dochodzi dłużej, lewy panel nie zaczyna wejścia od nowa, a wiersze czekają ukryte zamiast pokazywać „…”.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.211",
       name: L("Tu sitio en la casa", "Your place in the house", "Ta place dans la maison", "Seu lugar na casa", "Dein Platz im Haus", "Il tuo posto nella casa", "", "你在赌场的位置", "하우스에서의 네 자리", "ハウスでのきみの居場所", "Твоё место в заведении", "Twoje miejsce w kasynie"),
       date: "2026-10-24",
