@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.222",
+      name: L("La cara del personaje", "The character's face", "Le visage du personnage", "O rosto do personagem", "Das Gesicht der Figur", "Il volto del personaggio", "", "人物的脸", "인물의 얼굴", "人物の顔", "Лицо персонажа", "Twarz postaci"),
+      date: "2026-10-27",
+      summary: L("En la Aventura, las preguntas de personajes vuelven a mostrar su retrato junto al nombre.", "In the Adventure, character questions show their portrait next to the name again.", "Dans l'Aventure, les questions sur les personnages affichent de nouveau leur portrait à côté du nom.", "Na Aventura, as perguntas de personagens voltam a mostrar o retrato ao lado do nome.", "Im Abenteuer zeigen Fragen zu Figuren wieder ihr Porträt neben dem Namen.", "Nell'Avventura, le domande sui personaggi mostrano di nuovo il ritratto accanto al nome.", "", "冒险模式中，人物题目再次在名字旁显示他们的肖像。", "모험에서 인물 문제가 다시 이름 옆에 초상화를 보여 줘요.", "冒険で、人物の問題に名前の隣の肖像がふたたび表示される。", "В Приключении вопросы о персонажах снова показывают портрет рядом с именем.", "W Przygodzie pytania o postacie znów pokazują portret obok imienia."),
+      chapters: [
+        { id: "retrato", kicker: L("Arreglo", "Fix", "Correctif", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Retratos", "Portraits", "Portraits", "Retratos", "Porträts", "Ritratti", "", "肖像", "초상화", "肖像", "Портреты", "Portrety"),
+          entries: [
+            E(L("Retrato en la pregunta", "Portrait on the question", "Portrait sur la question", "Retrato na pergunta", "Porträt in der Frage", "Ritratto nella domanda", "", "题目中的肖像", "문제 속 초상화", "問題の肖像", "Портрет в вопросе", "Portret w pytaniu"), "fix", "0.3.222", [
+              L("En la Aventura, los retos de texto reescribían el nombre y borraban el retrato del personaje de la pregunta. Ahora el retrato se queda y el reto actúa solo sobre el nombre.", "In the Adventure, the text challenges rewrote the name and wiped the character's portrait from the question. Now the portrait stays and the challenge only affects the name.", "Dans l'Aventure, les défis de texte réécrivaient le nom et effaçaient le portrait du personnage. Désormais le portrait reste et le défi n'agit que sur le nom.", "Na Aventura, os desafios de texto reescreviam o nome e apagavam o retrato do personagem. Agora o retrato fica e o desafio só afeta o nome.", "Im Abenteuer überschrieben die Text-Herausforderungen den Namen und löschten das Porträt der Figur. Jetzt bleibt das Porträt, und die Herausforderung wirkt nur auf den Namen.", "Nell'Avventura, le sfide di testo riscrivevano il nome e cancellavano il ritratto del personaggio. Ora il ritratto resta e la sfida agisce solo sul nome.", "", "冒险模式中，文字挑战会改写名字并抹掉人物的肖像。现在肖像会保留，挑战只作用于名字。", "모험에서 글자 도전이 이름을 다시 써서 인물 초상화를 지워 버렸어요. 이제 초상화는 그대로 남고 도전은 이름에만 적용돼요.", "冒険で、文字チャレンジが名前を書き換えて人物の肖像を消していた。今は肖像が残り、チャレンジは名前にだけ働く。", "В Приключении текстовые испытания переписывали имя и стирали портрет персонажа. Теперь портрет остаётся, а испытание действует только на имя.", "W Przygodzie wyzwania tekstowe nadpisywały imię i kasowały portret postaci. Teraz portret zostaje, a wyzwanie działa tylko na imię.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.221",
       name: L("Nada fuera de la pantalla", "Nothing off the screen", "Rien hors de l'écran", "Nada fora da tela", "Nichts außerhalb des Bildschirms", "Niente fuori dallo schermo", "", "不再超出屏幕", "화면 밖으로 나가지 않아요", "画面からはみ出さない", "Ничего за краем экрана", "Nic poza ekranem"),
       date: "2026-10-26",

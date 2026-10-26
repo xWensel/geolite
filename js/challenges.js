@@ -520,7 +520,9 @@ window.AIQ = window.AIQ || {};
   const syncChips = () => { const b = S.pub.find(c => c.id === "babel"); if (!b) return; document.querySelectorAll('#chalBar .ch-chip[data-of="babel"]').forEach(el => { const want = S.qsub ? S.qsub.id : "babel"; if (el.dataset.ch !== want) el.outerHTML = A.chal.chip(b, el.classList.contains("sm")); }); if (A.adv && A.adv.centerIcons) A.adv.centerIcons(document.getElementById("chalBar")); };
   /* el nombre y el pais de debajo sufren los mismos retos de texto (el pais tambien tiembla, se borra, se cambia...) */
   function decorate(o) {
-    const el = $("askName"), sub = $("askSub"); if (!el || !o) return; clearText();
+    let el = $("askName"), sub = $("askSub"); if (!el || !o) return; clearText();
+    const pn = el.classList.contains("ask-person-wrap") && el.querySelector(".ask-portrait") ? el.querySelector("b") : null;   // v0.3.222: con retrato, los retos de texto actuan sobre el nombre (<b>) y el retrato se queda
+    if (pn) { pn.className = ""; pn.style.fontSize = ""; pn.textContent = A.tx(o.name); el = pn; }
     const hadSub = !!S.qsub; S.qsub = null; S.qlist = null;
     if (o.t === "c" && A.adv && A.adv.isFlagRound && A.adv.isFlagRound()) { if (sub) sub.textContent = ""; if (A.adv.renderFlag) A.adv.renderFlag(o); flagClass(el, o); if (hadSub) syncChips(); return; }   // ronda de banderas: la bandera manda, nunca el texto
     const nameTxt = A.tx(o.name), subTxt = A.tx(o.sub);
