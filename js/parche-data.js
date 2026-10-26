@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.213",
+      name: L("Nivel bien cerrado", "Level, properly framed", "Niveau bien encadré", "Nível bem fechado", "Level sauber umrahmt", "Livello ben chiuso", "", "关卡框线闭合", "레벨 테두리 완성", "レベルの枠をきれいに", "Уровень в рамке", "Poziom w pełnej ramce"),
+      date: "2026-10-26",
+      summary: L("En la ficha de cada categoría, el nivel elegido ya cierra su cuadrado también por arriba.", "On each category's sheet, the chosen level now closes its square at the top too.", "Sur la fiche de chaque catégorie, le niveau choisi referme aussi son carré par le haut.", "Na ficha de cada categoria, o nível escolhido agora fecha o quadrado também em cima.", "Auf dem Blatt jeder Kategorie schließt das gewählte Level sein Quadrat jetzt auch oben.", "Nella scheda di ogni categoria, il livello scelto chiude il suo quadrato anche in alto.", "", "在每个类别的卡片上，选中的关卡现在连上边框也闭合了。", "각 카테고리 카드에서 선택한 레벨의 네모가 이제 위쪽도 닫혀요.", "各カテゴリのカードで、選んだレベルの四角が上側もきちんと閉じるようになりました。", "На карточке каждой категории выбранный уровень теперь замкнут рамкой и сверху.", "Na karcie każdej kategorii wybrany poziom zamyka teraz swój kwadrat także od góry."),
+      chapters: [
+        { id: "fichas", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Fichas de categoría", "Category sheets", "Fiches de catégorie", "Fichas de categoria", "Kategorieblätter", "Schede di categoria", "", "类别卡片", "카테고리 카드", "カテゴリのカード", "Карточки категорий", "Karty kategorii"),
+          entries: [
+            E(L("Nivel elegido sin hueco", "Chosen level, no gap", "Niveau choisi sans trou", "Nível escolhido sem falha", "Gewähltes Level ohne Lücke", "Livello scelto senza buchi", "", "选中关卡无缺口", "선택한 레벨 빈틈 없음", "選んだレベルに隙間なし", "Выбранный уровень без пробела", "Wybrany poziom bez luki"), "fix", "0.3.213", [
+              L("Al elegir desde qué nivel empezar, la casilla marcada se veía abierta por arriba; ahora lleva su contorno oscuro completo.", "When choosing which level to start from, the selected box looked open at the top; it now has its full dark outline.", "En choisissant le niveau de départ, la case sélectionnée semblait ouverte par le haut ; elle a maintenant son contour sombre complet.", "Ao escolher de que nível começar, a caixa marcada parecia aberta em cima; agora tem o contorno escuro completo.", "Beim Wählen des Startlevels wirkte das markierte Feld oben offen; jetzt hat es seinen vollständigen dunklen Rand.", "Scegliendo da quale livello partire, la casella selezionata sembrava aperta in alto; ora ha il suo contorno scuro completo.", "", "选择起始关卡时，选中的格子上边看起来是开口的；现在拥有完整的深色轮廓。", "시작 레벨을 고를 때 선택한 칸의 위쪽이 열려 보였어요. 이제 어두운 테두리가 완전해요.", "開始レベルを選ぶとき、選択中のマスの上側が開いて見えていました。今は濃い輪郭が一周しています。", "При выборе стартового уровня выбранная клетка выглядела открытой сверху; теперь у неё полный тёмный контур.", "Przy wyborze poziomu startowego zaznaczone pole wyglądało na otwarte u góry; teraz ma pełny ciemny kontur.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.212",
       name: L("Clasificación sin parpadeo", "Leaderboard without flicker", "Classement sans scintillement", "Classificação sem piscar", "Rangliste ohne Flackern", "Classifica senza sfarfallio", "", "排行榜不再闪烁", "깜빡이지 않는 순위표", "ちらつかないランキング", "Рейтинг без мерцания", "Ranking bez migotania"),
       date: "2026-10-26",
