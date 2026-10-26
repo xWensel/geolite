@@ -166,7 +166,7 @@
     $("askKind").textContent = A.t("kind." + (o.clue ? "clue" : o.kind || lv().kind));
     if (o.clue && o.answer && !(o.sub && (o.sub.en || o.sub.es))) o.sub = A.blankObj(o.answer);        // descripcion: debajo, la casilla de cada letra
     const flagRound = (o.kind || lv().kind) === "flag" || !!(S.run && o.t === "c" && A.adv.isFlagRound && A.adv.isFlagRound());
-    const portrait = !flagRound && !!o.img;
+    const portrait = !flagRound && (!!o.img || ((o.kind || lv().kind) === "character" || o.topic === "character") && !!(o.cid && o.cid[0]));   // v0.3.217: las preguntas de personajes (Clasico, Aventura y Duelo) llevan SU retrato a la izquierda; la foto es la de su carta
     $("askName").classList.toggle("ask-flag-wrap", flagRound);
     $("askName").classList.toggle("ask-person-wrap", portrait);
     if (flagRound && A.adv.renderFlag) { A.adv.renderFlag(o); }

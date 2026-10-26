@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.217",
+      name: L("La cara del personaje", "The character's face", "Le visage du personnage", "O rosto do personagem", "Das Gesicht der Persönlichkeit", "Il volto del personaggio", "", "人物的脸", "인물의 얼굴", "人物の顔", "Лицо персонажа", "Twarz postaci"),
+      date: "2026-10-26",
+      summary: L("En las preguntas de personajes (¿dónde nació…?) ahora sale su retrato a la izquierda del nombre, en la Aventura, el Clásico y el Duelo.", "In character questions (where was … born?) their portrait now appears to the left of the name, in Adventure, Classic and Duel.", "Dans les questions sur les personnages (où est né… ?), son portrait s'affiche désormais à gauche du nom, en Aventure, en Classique et en Duel.", "Nas perguntas de personagens (onde nasceu…?), o retrato agora aparece à esquerda do nome, na Aventura, no Clássico e no Duelo.", "Bei den Fragen zu Persönlichkeiten (Wo wurde … geboren?) erscheint ihr Porträt jetzt links neben dem Namen, im Abenteuer, im Klassik-Modus und im Duell.", "Nelle domande sui personaggi (dove è nato…?) ora il ritratto compare a sinistra del nome, in Avventura, Classico e Duello.", "", "在人物题（……出生在哪里？）中，肖像现在显示在名字左边，冒险、经典和对决模式都有。", "인물 문제(…는 어디서 태어났을까?)에서 이름 왼쪽에 초상이 나와요. 모험, 클래식, 대결 모두요.", "人物の問題（…はどこで生まれた？）で、名前の左に肖像が出るようになりました。冒険・クラシック・対決のすべてです。", "В вопросах о персонажах («Где родился…?») слева от имени теперь виден его портрет — в Приключении, Классике и Дуэли.", "W pytaniach o postaciach (gdzie urodził się…?) po lewej stronie nazwiska pojawia się teraz jej portret, w Przygodzie, Klasyku i Pojedynku."),
+      chapters: [
+        { id: "cara", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Personajes", "Characters", "Personnages", "Personagens", "Persönlichkeiten", "Personaggi", "", "人物", "인물", "人物", "Персонажи", "Postacie"),
+          entries: [
+            E(L("Su retrato, junto al nombre", "Their portrait, next to the name", "Son portrait, à côté du nom", "O retrato, ao lado do nome", "Das Porträt neben dem Namen", "Il ritratto, accanto al nome", "", "肖像就在名字旁边", "이름 옆의 초상", "名前の横に肖像", "Портрет рядом с именем", "Portret obok nazwiska"), "fix", "0.3.217", [
+              L("La foto de su carta de la Enciclopedia acompaña al nombre en cada pregunta de personajes. Antes no salía en la Aventura ni en el Duelo.", "The photo from their Encyclopedia card now goes with the name in every character question. It did not show up in Adventure or Duel before.", "La photo de sa carte de l'Encyclopédie accompagne maintenant le nom dans chaque question sur les personnages. Elle n'apparaissait pas avant en Aventure ni en Duel.", "A foto da carta da Enciclopédia agora acompanha o nome em cada pergunta de personagens. Antes ela não aparecia na Aventura nem no Duelo.", "Das Foto ihrer Enzyklopädie-Karte steht jetzt bei jeder Frage zu Persönlichkeiten neben dem Namen. Im Abenteuer und im Duell fehlte es bisher.", "La foto della loro carta dell'Enciclopedia ora accompagna il nome in ogni domanda sui personaggi. Prima non compariva in Avventura né in Duello.", "", "百科卡片上的照片现在会和名字一起出现在每道人物题里。之前冒险和对决模式里没有。", "백과사전 카드의 사진이 이제 모든 인물 문제에서 이름 옆에 나와요. 전에는 모험과 대결에 안 나왔어요.", "百科事典のカードの写真が、人物の問題ごとに名前の横に出ます。これまで冒険と対決では出ていませんでした。", "Фото с карточки Энциклопедии теперь стоит рядом с именем в каждом вопросе о персонажах. Раньше в Приключении и Дуэли его не было.", "Zdjęcie z karty Encyklopedii towarzyszy teraz nazwisku w każdym pytaniu o postacie. Wcześniej nie pojawiało się w Przygodzie ani w Pojedynku.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.216",
       name: L("Retratos de verdad", "Real portraits", "De vrais portraits", "Retratos de verdade", "Echte Porträts", "Ritratti veri", "", "真正的肖像", "진짜 초상화", "本物の肖像", "Настоящие портреты", "Prawdziwe portrety"),
       date: "2026-10-26",
