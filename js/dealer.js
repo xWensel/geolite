@@ -2718,6 +2718,7 @@ window.AIQ = window.AIQ || {};
      entrando (el crupier deslizandose, el globo subiendo), se mide cuando acaban */
   const MARGEN = 8;
   function cabe() {
+    cabeFig();                                                                  // la figura tambien: nunca fuera de la pantalla
     if (!el || !bubble || !bubble.classList.contains("on") || !el.isConnected) return;
     const an = [...el.getAnimations(), ...bubble.getAnimations()].filter(a => a.playState === "running" && isFinite(a.effect.getComputedTiming().endTime));
     if (an.length) { const me = lineN; Promise.all(an.map(a => a.finished.catch(() => null))).then(() => { if (me === lineN) requestAnimationFrame(cabe); }); return; }
@@ -2730,6 +2731,19 @@ window.AIQ = window.AIQ || {};
     if (!base || base === "none") bubble.style.translate = px(dx) + " " + px(dy);
     else { const [tx, ty = "0px"] = base.split(" "); bubble.style.translate = `calc(${tx} + ${px(dx)}) calc(${ty} + ${px(dy)})`; }
   }
+  /* guardarrail de la figura: a ninguna ventana, tamano de interfaz ni escena se le permite dejar al crupier (cara y cuerpo) fuera de la pantalla.
+     Igual que cabe() con el globo: se mide con las animaciones acabadas y, si se sale, se desplaza con `translate` lo justo (nunca se encoge: es un solo tamano) */
+  function cabeFig() {
+    if (!el || !face || !el.isConnected || !el.classList.contains("in") || getComputedStyle(el).display === "none") return;
+    const an = el.getAnimations().filter(a => a.playState === "running" && isFinite(a.effect.getComputedTiming().endTime));
+    if (an.length) { Promise.all(an.map(a => a.finished.catch(() => null))).then(() => requestAnimationFrame(cabeFig)); return; }
+    el.style.translate = "";
+    const r = face.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
+    const W = innerWidth, H = innerHeight, dx = r.left < MARGEN ? MARGEN - r.left : r.right > W - MARGEN ? W - MARGEN - r.right : 0, dy = r.top < MARGEN ? MARGEN - r.top : r.bottom > H - MARGEN ? H - MARGEN - r.bottom : 0;
+    if (!dx && !dy) return;
+    el.style.translate = Math.round(dx) + "px " + Math.round(dy) + "px";
+  }
+  D._cabeFig = cabeFig;
   D._cabe = cabe;
   /* v0.3.172: ABRES OTRA PANTALLA DEL HUB (Retos, la tienda, el Perfil...) CON EL A MEDIA FRASE EN LA PORTADA. Antes la terminaba en su esquina de la
      portada, encima de la columna de Encargos o de la ficha del articulo. No se le corta: se encoge y la acaba en el mayor hueco libre de la pantalla
@@ -2840,7 +2854,7 @@ window.AIQ = window.AIQ || {};
       Promise.race([Promise.all(anims.map(an => an.finished.catch(() => 0)).concat(imgs)), cap]).then(() => setTimeout(() => requestAnimationFrame(go), 250));   // y lo que entra tarde (filas, fotos)
     }));
   };
-  addEventListener("resize", () => { if (D.busy) { fitCorner(); if (el && el.classList.contains("aside")) asidePlace(); requestAnimationFrame(cabe); } });
+  addEventListener("resize", () => { if (D.busy) { fitCorner(); if (el && el.classList.contains("aside")) asidePlace(); requestAnimationFrame(cabe); } else requestAnimationFrame(cabeFig); });
   D.refit = () => { if (D.busy) fitCorner(); };
   D.asideOn = () => !!(el && el.classList.contains("aside") && el.classList.contains("in"));   // v0.3.205: acabando una frase en otra pantalla (los avisos esperan a que acabe: js/jukebox.js, js/profile.js)                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
   /* v0.32: la cara y el gesto de cada frase. Manda la escena si lo pide (o.face / o.gesture); si no, la tabla XMAP por clave (y por indice,

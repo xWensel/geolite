@@ -143,6 +143,10 @@ html.reduce-motion .mqb.mq-lit { animation: none; }                             
 .intro-in.fit1 .adv-chal-h { margin: 6px 0 0; }
 .intro-in.fit1 .adv-debuff { margin-top: 6px; padding: 7px 12px; }
 .intro-in.fit2 .intro-flav { display: none; }
+/* fit4 (ventana baja o estrecha, una sola columna): el hueco 16:10 del crupier hacia el cartel mas alto que la pantalla y lo dejaba debajo, fuera de ella;
+   sin hueco, el crupier entra en el flujo, justo bajo el cartel. fit5: ni asi cabe, no sale (guardarrail: nada de la intro se queda fuera de pantalla) */
+.intro-in.fit4 .intro-hueco { display: none; } #intro .intro-in.fit4 .intro-dealer { position: relative; bottom: auto; left: auto; right: auto; }
+.intro-in.fit5 .intro-art { display: none; }
 .intro-in.fit3 .adv-debuff b { line-height: 1.05; } .intro-in.fit3 .adv-debuff i { line-height: 1.1; } .intro-in.fit3 .adv-debuff { padding: 5px 12px; margin-top: 5px; }
 /* el acto, las monedas y los retos de arriba (#topHud, v0.3.103) no pisan la intro: ya los cuenta el cartel. Vuelven cuando se va */
 #intro:not(.hidden):not(.out) ~ #topHud { opacity: 0; visibility: hidden; }

@@ -539,7 +539,8 @@
   /* v0.2.27: Ajustes > Pantalla > Interfaz multiplica la k automatica. Nunca baja de 1 (el tamano de diseno: la letra no se hace ilegible) ni pasa
      de lo que cabe en la ventana (min(w/1280, h/720): mismas proporciones que a 1280x720, asi que nada se solapa ni hace falta desplazarse) */
   const kRange = (w = innerWidth, h = innerHeight) => { const geo = Math.min(w / 1280, h / 720), auto = Math.max(1, Math.min(1.85, geo)); return { auto, lo: 1 / auto, hi: Math.max(1, geo) / auto }; };
-  const setK = () => { const w = innerWidth, h = innerHeight, r = kRange(w, h), k = (w < 900 || h < 520) ? 1 : Math.max(1, r.auto * Math.min(100, S.uiScale || 100) / 100); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
+  /* ventana por debajo del tamano de diseno (960x600 es la menor de la lista de Ajustes): la escala baja de 1 hasta un 0,72 para que las pantallas quepan enteras (antes se quedaba en 1 y la tienda, el Perfil o Ajustes se salian por abajo) */
+  const setK = () => { const w = innerWidth, h = innerHeight, r = kRange(w, h), small = (w < 1280 || h < 720) && w >= 900 && h >= 520, k = small ? Math.max(0.72, Math.min(w / 1280, h / 720)) : (w < 900 || h < 520) ? 1 : Math.max(1, r.auto * Math.min(100, S.uiScale || 100) / 100); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
   /* ajuste fino: si una pantalla escalada (inicio, campamento, veredicto...) no cabe en la ventana, se baja SU k hasta que quepa entera (nunca hay que desplazarse: esto es un juego de escritorio) */
   const FIT = ".hh, .scr, .table, .vd";
   /* huella de lo que decide el ajuste (pantalla, ventana, escala, fuentes y medidas): si no ha cambiado desde el ultimo, el resultado seria el mismo
@@ -699,13 +700,15 @@
   function fitIntro() {
     const el = $("intro"), en = el && el.querySelector(".intro-in"); if (!en || el.classList.contains("hidden")) return;
     const h2 = en.querySelector(".intro-body h2"), p = Math.max(2, Math.round(2 * Math.min(innerWidth / 1280, innerHeight / 720)));
-    en.classList.remove("fit1", "fit2", "fit3"); en.style.removeProperty("--h2fit");
+    en.classList.remove("fit1", "fit2", "fit3", "fit4", "fit5"); en.style.removeProperty("--h2fit");
     const room = innerHeight - 40 * p, fits = () => en.offsetHeight <= room;
     if (fits()) return;
     en.classList.add("fit1");
     if (!fits() && h2) { const f0 = parseFloat(getComputedStyle(h2).fontSize), f1 = Math.max(30, Math.round(f0 * 0.64)); for (let f = Math.floor(f0 / 2) * 2 - 2; f >= f1 && !fits(); f -= 2) en.style.setProperty("--h2fit", f + "px"); }   // una variable y no font-size: A.squeeze (js/uikit.js) reescribe el font-size en linea sin !important
     if (!fits()) en.classList.add("fit2");
     if (!fits()) en.classList.add("fit3");
+    if (!fits()) en.classList.add("fit4");                           // guardarrail: sin el hueco del crupier (una columna) y el, justo debajo del cartel
+    if (!fits()) en.classList.add("fit5");                           // ni asi cabe: el crupier no sale (nada se queda fuera de la pantalla)
   }
   A.fitIntro = fitIntro;
   function nextQuestion() {
