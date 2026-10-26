@@ -236,6 +236,7 @@ window.AIQ = window.AIQ || {};
       const normal = BOSS[a].filter(c => !c.ids.some(noop)), flags = FLAG_BOSS.filter(c => !c.ids.some(noop)), rb = A.rng(`${seed}:boss:${act}`);
       if (flagRound) combo = act === 1 && normal.length && A.rng(`${seed}:bossmix:${act}`)() < normal.length / (flags.length + normal.length) ? rb.pick(normal) : rb.pick(flags);
       else combo = rb.pick(normal.length ? normal : BOSS[a]);
+      if (combo.k === "duel" && act >= 2) { const rest = (normal.length ? normal : BOSS[a]).filter(c => c.k !== "duel"); if (rest.length) combo = A.rng(`${seed}:boss:${act}:noduel`).pick(rest); }   // el jefe final (R12, Jackpot) nunca es el Duelo con la banca: el resto de sorteos queda igual
       if (ctx.force) combo = [...BOSS[a], ...FLAG_BOSS].find(c => c.k === ctx.force) || combo;   // pruebas: A.adv._forceBoss
       list = combo.ids.map((id, i) => { const c = canon({ id, lv: clamp(lv + (i === 0 ? 1 : 0), 1, 3) }); return { ...c, lv0: c.lv, bx: 1 }; }).filter(c => !noop(c.id));
       if (combo.k === "wheel") list = wheelList(seed, act, lv, noop, flagRound, ctx.H); else if (combo.k === "collector") list = collectorList(seed, act, lv);

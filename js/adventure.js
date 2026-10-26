@@ -1305,8 +1305,8 @@ window.AIQ = window.AIQ || {};
         kind: "ok", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: boss ? A.T("¡Jefe derrotado!", "Boss defeated!") : A.T("Ronda superada", "Round cleared"),
         text: `${A.fmt(S.levelScore)} / ${A.fmt(Lv.advance)}`, lines, meter: [S.levelScore, Lv.advance], places: true,
         stats: [[A.T("Puntos de la ronda", "Round points"), S.levelScore], [A.T("Total de la expedición", "Expedition total"), run.score], [A.T("Doblones", "Doubloons"), run.coins]],
-        stamp: A.T("SUPERADA", "CLEARED"), stampSub: String(roundNo() + 1).padStart(2, "0"), art: boss ? "chest" : "win", superada: lt.margin >= 3 ? 3 : lt.margin >= 1 ? 2 : 1,   // el sello, segun el margen: justa, holgada o aplastante (js/celebra.js)
-        buttons: [{ id: "nlBtn", cls: "btn-ink", label: boss ? A.T("Abrir el cofre del jefe", "Open the boss chest") : A.T("Al campamento", "To camp"), arrow: true, primary: true, onclick: () => { if (boss && run.act < 2 && !run.chestStuckDone && Math.random() < 0.6) { run.chestStuckDone = true; persist(); return stuckChest(); } afterVerdict(boss); } }, { id: "vdMenu", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().runMenu(), keep: true }],
+        stamp: A.T("SUPERADA", "CLEARED"), stampSub: String(roundNo() + 1).padStart(2, "0"), art: boss && !fin ? "chest" : "win", superada: lt.margin >= 3 ? 3 : lt.margin >= 1 ? 2 : 1,   // el sello, segun el margen: justa, holgada o aplastante (js/celebra.js)
+        buttons: [{ id: "nlBtn", cls: "btn-ink", label: fin ? A.pick6("Continuar|Continue|Continuer|Continuar|Weiter|Continua||继续|계속|続ける|Продолжить|Dalej") : boss ? A.T("Abrir el cofre del jefe", "Open the boss chest") : A.T("Al campamento", "To camp"), arrow: true, primary: true, onclick: () => { if (boss && run.act < 2 && !run.chestStuckDone && Math.random() < 0.6) { run.chestStuckDone = true; persist(); return stuckChest(); } afterVerdict(boss); } }, { id: "vdMenu", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().runMenu(), keep: true }],
       });
       relicPay(lines.filter(l => l[2] && !l[3]).map(l => l[2]));
       const wb = { big: lt.margin >= 3, c: got, p: pctOf(S.levelScore - Lv.advance, Lv.advance), rn: roundNo() + 1, close: S.levelScore - Lv.advance < Lv.advance * 0.05 ? S.levelScore - Lv.advance : null };   // close: por los pelos   // aplastar la meta (+50 %) tiene sus propias frases
@@ -1319,6 +1319,7 @@ window.AIQ = window.AIQ || {};
       if (insured) run.segN = (run.segN || 0) + 1;                       // el Seguro de ronda se ha gastado: el siguiente cuesta 2 mas (superar la ronda no lo encarece)
       run.attempt++; run.phase = "retry";
       /* consuelo: lo que puntuaste en la ronda fallida se cobra (1 por cada tercio del objetivo) para comprar ayuda antes de la revancha */
+      const fin = boss && run.act + 1 === 3 && !run.won;   // el jefe final (R12): no hay cofre; el boton lleva a la eleccion de victoria (Modo infinito o Cobrar y terminar, winScreen)
       const q = S.levelScore / Math.max(1, Math.max(Lv.advance, baseTarget())), conso = run.lives > 0 ? gain(consoOf(q)) : 0;
       if (conso) { run.coins += conso; run.stats.coinsEarned += conso; }
       persist();
