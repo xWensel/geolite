@@ -42,7 +42,7 @@
   /* ---- guardado: servidor local (notas-contenido.json) o portal (api/contenido + Redis, con la clave de la mesa) ---- */
   const REMOTE = !/^(localhost|127\.0\.0\.1)$/.test(location.hostname), API = REMOTE ? "/api/contenido" : "/api/notas";
   let KEY = "", RVER = 0, OFF = "", SYNC = {}, saving = false, again = false;
-  try { KEY = localStorage.getItem("mc.key") || ""; SYNC = JSON.parse(localStorage.getItem("mc.sync") || "{}"); } catch (e) {}
+  try { KEY = localStorage.getItem("geolite.mesa.key") || localStorage.getItem("mc.key") || ""; SYNC = JSON.parse(localStorage.getItem("mc.sync") || "{}"); } catch (e) {}
   const hdr = h => Object.assign(REMOTE ? { "x-mesa": KEY } : {}, h || {});
   const setNet = () => { const e = $("#net"); if (e) { e.textContent = SERVER ? (REMOTE ? "● portal conectado: Claude lee tus notas" : "● conectado: Claude lee tus notas") : OFF || "○ sin servidor: notas solo en este navegador"; e.style.color = SERVER ? "#5ee07a" : "#ff9aa4"; } };
   /* fusiona lo del servidor: lo que NO has tocado desde la ultima sincronizacion lo manda el servidor; lo que has tocado tu (incluso si lo has borrado) manda tu */
@@ -53,7 +53,7 @@
       if (r.status === 401) { KEY = ""; try { localStorage.removeItem("mc.key"); } catch (e) {} SERVER = false; OFF = "○ falta la clave"; setNet(); return door("Esa no es la clave."); }
       if (r.status === 429) { SERVER = false; OFF = "○ demasiados intentos: espera 10 minutos"; return setNet(); }
       if (r.status === 503) { SERVER = false; OFF = "○ el portal aún no está activado (falta MESA_KEY o Redis)"; return setNet(); }
-      if (!r.ok) throw new Error("http"); const j = await r.json(); SERVER = true; OFF = ""; if (REMOTE) { RVER = j.ver; try { localStorage.setItem("mc.key", KEY); } catch (e) {} }
+      if (!r.ok) throw new Error("http"); const j = await r.json(); SERVER = true; OFF = ""; if (REMOTE) { RVER = j.ver; try { localStorage.setItem("mc.key", KEY); localStorage.setItem("geolite.mesa.key", KEY); } catch (e) {} }
       const ch = reconcile(REMOTE ? j.notas : j); loadCfg(); setNet(); if (redraw || ch) draw(); } catch (e) { SERVER = false; setNet(); } }
   async function pushN() { if (saving) { again = true; return; } saving = true;
     try { do { again = false; const r = await fetch(API, { method: "POST", headers: hdr({ "content-type": "application/json" }), body: JSON.stringify(REMOTE ? { ver: RVER, notas: N } : N) });
@@ -241,10 +241,10 @@
 
   /* ================= PERSONAJES ================= */
   VIEWS.personajes = () => {
-    reindex(); const P = rows.filter(r => r.topic === "character"), byO = Object.entries(countBy(P, r => r.sub)).sort((a, b) => b[1] - a[1]).slice(0, 16), era = countBy(P, r => (r.yr < 0 ? "a. C." : r.yr < 1500 ? "<1500" : r.yr < 1800 ? "1500-1799" : r.yr < 1900 ? "1800s" : r.yr < 1950 ? "1900-49" : "1950+"));
+    reindex(); const P = rows.filter(r => r.topic === "character"), byO = Object.entries(countBy(P, r => r.sub)).sort((a, b) => b[1] - a[1]).slice(0, 9), era = countBy(P, r => (r.yr < 0 ? "a. C." : r.yr < 1500 ? "<1500" : r.yr < 1800 ? "1500-1799" : r.yr < 1900 ? "1800s" : r.yr < 1950 ? "1900-49" : "1950+"));
     const mis = P.filter(r => r.zone != null && Math.abs(r.zone - r.zoneHoy) === 2), bC = Object.entries(countBy(P, r => r.ctry)).sort((a, b) => b[1] - a[1]);
     return `<div class="grid2"><div class="pl"><h2>Personajes <small>${P.length} · ${bC.length} países · ${P.filter(isHand).length} curados a mano</small></h2><div class="bars">${byO.map(([o, n]) => `<div class="br"><span class="l">${esc(o)}</span>${zstack(P.filter(r => r.sub === o))}<span class="n">${n} · ${pct(n, P.length)}</span></div>`).join("")}</div><p class="note">Colores = zona con tu índice. Casi todo es fútbol y música: falta deporte variado, ciencia y mujeres (mira «Para añadir»).</p></div>
-      <div class="pl"><h2>Por época y país <small>dónde se concentran</small></h2><div class="bars">${["a. C.", "<1500", "1500-1799", "1800s", "1900-49", "1950+"].map(e => bar(e, era[e] || 0, 150, pct(era[e] || 0, P.length), "g")).join("")}<div class="br"><span class="l"></span><span></span><span></span></div>${bC.slice(0, 8).map(([c, n]) => bar(c, n, bC[0][1], pct(n, P.length), n / P.length > .08 ? "r" : "")).join("")}</div></div></div>
+      <div class="pl"><h2>Por época y país <small>dónde se concentran</small></h2><div class="bars">${["a. C.", "<1500", "1500-1799", "1800s", "1900-49", "1950+"].map(e => bar(e, era[e] || 0, 150, pct(era[e] || 0, P.length), "g")).join("")}<div class="br"><span class="l"></span><span></span><span></span></div>${bC.slice(0, 6).map(([c, n]) => bar(c, n, bC[0][1], pct(n, P.length), n / P.length > .08 ? "r" : "")).join("")}</div></div></div>
       <div class="pl"><h2>Personajes cuya zona cambia 2 niveles <small>${mis.length} · el nivel de hoy no encaja con su fama real</small></h2>${T("pmis", [{ h: "Personaje", f: nmc, v: r => r.name }, { h: "País", f: r => esc(r.ctry), v: r => r.ctry }, { h: "Idiomas", n: 1, f: r => (SN[r.wid] || [])[0], v: r => (SN[r.wid] || [])[0] }, { h: "Zona hoy → nueva", f: zmove }, { h: "Opinión", a: 1, f: r => vb(r.key) }], mis, { s: 2, d: -1, lim: 40 })}</div>`;
   };
 
@@ -360,12 +360,29 @@
     const run = () => { const q = i.value.trim().toLowerCase(); let out = []; if (q.length >= 2) { out = rows.filter(r => (r.name + " " + r.key).toLowerCase().includes(q)).slice(0, 12).map(r => [r.key, r.name, CATS[r.topic] + " · " + (r.ctry || "—")]).concat(COUNTRIES.filter(c => c.toLowerCase().includes(q)).slice(0, 4).map(c => ["pais:" + c, c, "país"]), SG.filter(x => (x.es + x.en).toLowerCase().includes(q)).slice(0, 8).map(x => [SGKEY(x), x.es, "propuesta · " + x.pais])); } $("#fres").innerHTML = out.map(([k, n, s], j) => `<button data-fopen="${esc(k)}" class="${j === 0 ? "on" : ""}"><span>${esc(n)}</span><small>${esc(s)}</small></button>`).join(""); };
     i.oninput = run; i.onkeydown = e => { if (e.key === "Escape") o.remove(); if (e.key === "Enter") { const b = $("#fres button"); if (b) { o.remove(); CURLIST = [b.dataset.fopen]; open(b.dataset.fopen); } } }; }
 
+  /* ---- maquetacion por pantalla (2540 de ancho: nada de scroll de pagina; ver contenido.css) ---- */
+  function layout() {
+    const v = $("#view"), pl = t => [...v.querySelectorAll(".pl")].find(p => { const h = p.querySelector("h2"); return h && h.textContent.trim().toLowerCase().startsWith(t.toLowerCase()); });
+    const mk = (items, cls) => { const w = document.createElement("div"); w.className = "cols " + (cls || ""); items.forEach(col => { const c = document.createElement("div"); c.className = "col"; col.filter(Boolean).forEach(n => c.appendChild(n)); w.appendChild(c); }); return w; };
+    const place = (w, before) => { v.insertBefore(w, before || null); };
+    const clean = () => v.querySelectorAll(".grid2").forEach(g => { if (!g.children.length) g.remove(); });
+    const kids = [...v.children];
+    if (cur === "inicio") { const w = mk([[v.querySelector(".hero"), v.querySelector(".kpis"), pl("Qué te recomiendo")], [pl("Cambios en vivo"), pl("Cómo se usa"), pl("Estado del balanceo")]]); v.appendChild(w); clean(); }
+    else if (cur === "balanceo") { const main = pl("Balanceo de dificultad"), list = pl("Todo lo que hay"); const w = mk([[main], [pl("Qué cuenta"), pl("Versiones guardadas")], [pl("Por categoría")]], "auto"); v.insertBefore(w, list); clean(); }
+    else if (cur === "rondas") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 2) { v.appendChild(mk([[ps[0]], [ps[1]]])); } }
+    else if (cur === "plan") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 5) v.appendChild(mk([[ps[0], ps[1]], [ps[2]], [ps[3], ps[4]]])); }
+    else if (cur === "personajes") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 3) { v.appendChild(mk([[ps[0], ps[1]], [ps[2]]])); clean(); } }
+    else if (cur === "sello") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 2) { v.appendChild(mk([[ps[0]], [ps[1]]])); clean(); } }
+    else if (cur === "como") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 3) v.appendChild(mk([[ps[0], ps[2]], [ps[1]]])); }
+    v.querySelectorAll(".tw").forEach(tw => { const p = tw.closest(".pl"); if (p && p.parentElement && p === p.parentElement.lastElementChild) p.classList.add("fill"); });
+    if (kids.length && v.querySelector(".cols:not(.auto)")) v.querySelector(".cols:not(.auto)").style.flex = "1";
+  }
   /* ================= pintar ================= */
   function draw() {
     const a = document.activeElement, fid = a && a.id && a.id.startsWith("in_") ? a.id : null, pos = fid ? a.selectionStart : 0;
     $("#nav").innerHTML = NAVG.map(([g, items]) => (g ? `<h4>${g}</h4>` : "") + items.map(([k, l]) => { let b = ""; if (k === "sugerencias") { const n = SG.filter(x => !N[SGKEY(x)]).length; b = n ? `<small>${n}</small>` : ""; } if (k === "notas") b = userNotes().length ? `<small>${userNotes().length}</small>` : ""; return `<button class="nav ${k === cur ? "on" : ""}" data-view="${k}"><span>${l}</span>${b}</button>`; }).join("")).join("");
     $("#scen").innerHTML = SCEN ? "Viendo: <b>con mis decisiones</b>" : "Viendo: <b>hoy</b>"; $("#scen").dataset.act = "scen"; $("#cuts").innerHTML = `Cortes <b>${CFG.t[0]}</b> · <b>${CFG.t[1]}</b>`; $("#nvotes").innerHTML = `Opiniones <b>${userNotes().length}</b>`;
-    const v = VIEWS[cur] || VIEWS.inicio; $("#view").innerHTML = v();
+    const v = VIEWS[cur] || VIEWS.inicio; $("#view").className = "content v-" + cur; $("#view").innerHTML = v(); layout();
     if (fid) { const n = $("#" + fid); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
     bindRanges();
   }

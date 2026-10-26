@@ -83,3 +83,28 @@ tr:hover td { background: #2b2147; }
 .ov .box { width: min(740px, 100%); background: var(--panel); box-shadow: 0 0 0 3px var(--gold); padding: 14px; display: grid; gap: 10px; } .ov textarea, .ov input { width: 100%; font-size: 26px; background: var(--panel2); border: 0; padding: 10px; box-shadow: inset 0 0 0 1px var(--line2); }
 .res { display: grid; gap: 2px; max-height: 50vh; overflow: auto; } .res button { text-align: left; padding: 8px 10px; background: var(--panel2); font-size: 24px; display: flex; justify-content: space-between; gap: 10px; } .res button:hover, .res button.on { background: var(--gold); color: var(--inkd); } .res small { font-family: var(--mono); font-size: 10px; opacity: .8; }
 #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 120; background: var(--gold); color: var(--inkd); font-family: var(--mono); font-size: 13px; padding: 10px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.5); display: none; }
+
+/* ===== pantalla grande (2540 de ancho): sin scroll de pagina; paneles en columnas y solo las tablas largas se desplazan por dentro ===== */
+@media (min-width: 1500px) {
+  html, body { height: 100%; overflow: hidden; }
+  .app { height: 100vh; min-height: 0; }
+  .side { height: 100vh; }
+  .main { height: 100vh; min-height: 0; grid-template-rows: auto auto minmax(0, 1fr); }
+  .content { max-width: none; width: 100%; height: 100%; min-height: 0; padding: 12px 18px 14px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+  .content > .pl, .content > .hero, .content > .kpis { flex: none; }
+  .content > .pl.fill { flex: 1; min-height: 0; }
+  .pl.fill { display: flex; flex-direction: column; min-height: 0; }
+  .pl.fill > .tw { flex: 1; min-height: 0; max-height: none; }
+  .cols { display: grid; gap: 12px; flex: 1; min-height: 0; grid-template-columns: var(--cols, 1fr 1fr); }
+  .cols.auto { flex: none; }
+  .cols > .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; overflow: auto; scrollbar-width: thin; }
+  .cols > .col > .pl { flex: none; } .cols > .col > .pl.fill { flex: 1; min-height: 0; }
+  .col .grid2 { display: contents; }
+  .v-balanceo .cols.auto { --cols: 1.35fr 1fr 1fr; } .v-inicio .cols { --cols: 1.15fr 1fr; } .v-rondas .cols { --cols: 1.25fr 1fr; } .v-plan .cols { --cols: 1fr 1.25fr 1fr; }
+  .v-personajes .cols { --cols: 1fr 1.2fr; } .v-sello .cols { --cols: 1fr 1.1fr; } .v-como .cols { --cols: 1fr 1fr; }
+  .hist2 { height: 120px; } .zone b { font-size: 52px; } .kpi b { font-size: 38px; }
+}
+@media (max-width: 1499px) { .cols { display: block; } .cols > .col { display: grid; gap: 12px; margin-bottom: 12px; } }
+/* a partir de 2200 px de ancho (2540 en tu pantalla) todo se agranda un 30 % para leer bien sin forzar la vista; la altura se compensa para no tener scroll */
+@media (min-width: 2200px) { html { zoom: 1.3; } .app, .side, .main { height: calc(100vh / 1.3); } }
+@media (min-width: 1500px) { .hero { padding: 12px 16px; } .hero h1 { font-size: 36px; } .hero p { font-size: 20px; } .task { padding: 6px 10px; } .task b { font-size: 22px; } .task span { font-size: 18px; } .task .num { font-size: 34px; } }
