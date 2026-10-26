@@ -13,7 +13,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const { project, unproject, D2R } = A.geo;
-  const BX0 = -Math.PI, BX1 = Math.PI, BY0 = -1.5, BY1 = 2.1;
+  const BX0 = -Math.PI, BX1 = Math.PI, BY0 = -1.5, BY1 = 2.1, POLE_MARGIN = 0.4;
   /* marco de un punto en el mapa deformado: el continente (0-5; 6 = el resto) y, si viene de un clic, la vuelta al mundo de la copia tocada,
      con la misma cuenta que los vertices de la GPU: ct + 8 * (vuelta + 2). Sin vuelta (t null), el punto se envuelve al lado visible del mundo */
   const frameOf = ct => (ct == null ? [null, null] : ct < 8 ? [ct, null] : [ct % 8, Math.floor(ct / 8) - 2]);
@@ -1267,7 +1267,9 @@ void main(){
     _clamp(v) {
       const hw = this.W / (2 * v.s), hh = this.H / (2 * v.s);
       v.cx = wrapCx(v.cx);                                             // mundo infinito: sin bordes a izquierda y derecha (se normaliza a una vuelta; el dibujo repite las copias)
-      v.cy = hh * 2 >= BY1 - BY0 ? (BY0 + BY1) / 2 : clamp(v.cy, BY0 + hh, BY1 - hh);
+      /* margen polar: se puede arrastrar un poco mas alla del Artico y la Antartida para que no cueste enfocar sus bordes; crece con el zoom (a mundo entero es 0, sin salto) */
+      const span = BY1 - BY0, pm = POLE_MARGIN * clamp((span - hh * 2) / (span * 0.5), 0, 1);
+      v.cy = hh * 2 >= span ? (BY0 + BY1) / 2 : clamp(v.cy, BY0 - pm + hh, BY1 + pm - hh);
       return v;
     }
     setHome(spec) { this.homeSpec = { lat: spec.lat, lon: spec.lon, zoom: spec.zoom || 1 }; }
