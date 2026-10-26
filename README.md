@@ -37,7 +37,7 @@ Cada Campamento sortea un juego de los ocho. Todos se deciden con la semilla de 
 | Juego | Cómo se juega | Retorno al jugador |
 |---|---|---|
 | Rojo o negro | Ruleta europea de 37 casillas; si aciertas, la siguiente ronda paga un 50 % más y empiezas en racha. El verde apostado y acertado te salta un acto | — |
-| Moneda al aire | Cara o cruz; a veces cae de canto y paga ×6 | — |
+| Moneda al aire | Cara o cruz; a veces cae de canto y paga ×2 pidas lo que pidas | — |
 | Ruleta de premios | Casillas de suministros, reto extra, Atraco, Reloj corto… | — |
 | Los tres cubiletes | Sigue el doblón con la vista; acertar paga ×2 | ×2 |
 | El duelo de dados | Dos dados cada uno contra Don Crupier; gana el total mayor y paga ×2 (un empate se repite una vez) | ×2 |
