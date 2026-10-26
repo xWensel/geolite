@@ -540,6 +540,13 @@ html.vivo-inv, html.vivo-inv * { cursor: none !important; }
 /* LA CAMARA DEL CRUPIER (js/vivo.js): el piloto de arriba mientras la mesa del autor ve la ventana del juego, y su mano (25x37 de su sprite, escala entera) */
 #vivoEye { position: fixed; left: 50%; top: 10px; z-index: 2147483100; display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 2px; background: rgba(10, 14, 12, .88); box-shadow: inset 0 0 0 2px rgba(232, 40, 58, .65), 0 4px 0 rgba(0, 0, 0, .4); font-family: var(--mono); font-size: 16px; line-height: 1; color: #ff8a93; text-transform: uppercase; white-space: nowrap; pointer-events: none; transform: translate(-50%, -70px); transition: transform .45s cubic-bezier(.2, 1.4, .4, 1); }
 #vivoEye.on { transform: translate(-50%, 0); }
+/* el regalo de la casa (js/vivo.js gift): una carta de latón arriba en el centro; por encima de todo, como lo que lanza la mesa */
+#vivoGift { position: fixed; left: 50%; top: 72px; z-index: 2147483200; width: min(520px, calc(100vw - 32px)); display: flex; align-items: center; gap: 14px; padding: 12px 18px 12px 12px; background: #1b1409; color: #f6e7bd; box-shadow: inset 0 0 0 3px #d9a441, 0 6px 0 rgba(0, 0, 0, .5); cursor: pointer; transform: translate(-50%, -140%); transition: transform .35s steps(6); }
+#vivoGift.on { transform: translate(-50%, 0); }
+#vivoGift img { width: 64px; height: 64px; flex: none; image-rendering: pixelated; }
+#vivoGift b { display: block; font-family: var(--mono); font-size: 16px; line-height: 1.1; letter-spacing: .04em; color: #d9a441; margin-bottom: 4px; }
+#vivoGift i { display: block; font-style: normal; font-family: var(--sans); font-size: 26px; line-height: 1.1; }
+html.reduce-motion #vivoGift { transition: none; }
 #vivoEye img { width: 52px; height: 52px; image-rendering: pixelated; }
 #vivoEye i { width: 8px; height: 8px; background: #e8283a; box-shadow: 0 0 0 2px rgba(232, 40, 58, .22); animation: dlLive 1.2s steps(1) infinite; }
 #vivoGlove { position: fixed; left: 0; top: 0; z-index: 2147483200; pointer-events: none; opacity: 0; transition: opacity .2s, transform .1s linear; }

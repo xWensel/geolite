@@ -66,6 +66,8 @@
 @keyframes deny { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .hint { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
 .hint em { font-style: normal; color: var(--gold); }
+.gift { align-items: center; } #gAmt { width: 120px; padding: 7px 9px; font: inherit; font-size: 24px; color: var(--gold); background: var(--panel2); border: 0; box-shadow: inset 0 0 0 1px var(--line2); }
+#gMsg { margin: 8px 0 0; font-size: 9px; line-height: 1.5; text-transform: none; }
 .flyer { position: fixed; z-index: 50; width: 64px; height: 64px; pointer-events: none; image-rendering: pixelated; }
 
 /* los retos de la Aventura */
@@ -241,6 +243,13 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
         <div class="sw" id="vcolors"></div>
         <div class="sub"><span class="lbl">Piezas</span><div class="row" id="vpieces"></div></div>
         <div class="row"><button class="chipb" id="vReset" type="button">Lo suyo (lo que lleva el jugador)</button><button class="chipb" id="vHouse" type="button">Lo de la casa</button></div>
+      </section>
+
+      <section class="pl">
+        <h2>Regalo de la casa <small>fichas de oro para que se pongan guapos: les sale un aviso en la pantalla</small></h2>
+        <div class="row gift"><label class="lbl" for="gAmt">Fichas de oro</label><input id="gAmt" type="number" min="1" max="5000" step="50" value="300" inputmode="numeric"></div>
+        <div class="row"><button class="btn" id="gOne" type="button" disabled>Regalar al jugador elegido</button><button class="btn red" id="gAll" type="button" disabled>Regalar a todos los conectados</button></div>
+        <p class="hint" id="gMsg">Les llega: «El desarrollador te obsequia con 300 fichas de oro para que te puedas poner guapo.» (en su idioma).</p>
       </section>
 
       <section class="pl">
@@ -479,6 +488,29 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     if (r.status === 503) { logout("La mesa está apagada: falta MESA_KEY en Vercel."); throw new Error("off"); }
     return r.json();
   }
+  /* el regalo de la casa (op "gift"): al jugador elegido o, con doble pulsacion, a todos los que estan conectados */
+  const gAmt = () => { const n = Math.round(+$("gAmt").value); return n >= 1 && n <= 5000 ? n : 0; };
+  let gArm = 0;
+  function giftSync() {
+    $("gOne").disabled = !sel; $("gAll").disabled = !list.length;
+    if (!gArm) $("gAll").textContent = list.length ? "Regalar a todos los conectados (" + list.length + ")" : "Regalar a todos los conectados";
+  }
+  async function giftTo(sids, n) {
+    let ok = 0; for (const sid of sids) { try { const j = await call("POST", { op: "gift", sid, n }); if (j.ok && j.live) ok++; } catch (e) { /* sigue con el resto */ } }
+    return ok;
+  }
+  $("gAmt").oninput = () => { const n = gAmt(); $("gMsg").textContent = n ? "Les llega: «El desarrollador te obsequia con " + n + " fichas de oro para que te puedas poner guapo.» (en su idioma)." : "Pon una cantidad de 1 a 5000."; };
+  $("gOne").onclick = async () => {
+    const n = gAmt(); if (!sel || !n) return toast("Elige un jugador y una cantidad de 1 a 5000.");
+    clink(); const ok = await giftTo([sel], n); toast(ok ? n + " fichas de oro en camino." : "Ya no está conectado.");
+  };
+  $("gAll").onclick = async () => {
+    const n = gAmt(); if (!list.length || !n) return toast("Pon una cantidad de 1 a 5000.");
+    if (!gArm) { $("gAll").textContent = "¿Seguro? " + n + " a cada uno de los " + list.length + " (pulsa otra vez)"; gArm = setTimeout(() => { gArm = 0; giftSync(); }, 5000); return; }
+    clearTimeout(gArm); gArm = 0; giftSync(); clink();
+    const ok = await giftTo(list.map(x => x.sid), n); toast(ok + (ok === 1 ? " jugador recibe " : " jugadores reciben ") + n + " fichas de oro.", 3200);
+  };
+
   /* una accion al momento (op "act"): el juego la recibe en js/vivo.js y llama al crupier, a Comodin, al vestuario o a las trastadas */
   async function act(a, v, ok) {
     if (!sel) { toast("Ensayado aquí. Elige una partida para mandárselo."); return false; }
@@ -531,7 +563,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
       </button>`; }).join("");
     for (const x of list) { const f = parseFx(x.st.fx); if (f && !(Date.now() - (fxAt[x.sid] || 0) < 5000)) fxs[x.sid] = f; if (!(Date.now() - (chAt[x.sid] || 0) < 5000)) chs[x.sid] = parseCh(x.st.ch); }
     L.querySelectorAll(".seat").forEach(b => { b.onclick = () => pick(b.dataset.sid); });
-    paintChips();
+    paintChips(); giftSync();
     if (sel) { const x = list.find(y => y.sid === sel); if (x) { selSt = x.st; renderFacts(); } else gone(); }
   }
 
@@ -671,6 +703,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
   /* lo que de verdad le llegara: la carta en su idioma, o tu texto tal cual */
   const outText = () => quick != null ? phrase(QUICK[quick][1], lang()) : $("txt").value.trim();
   function refresh() {
+    giftSync();
     const tx = $("txt"), n = [...tx.value].length, out = outText(), p = $("prev"), m = $("mode"), l = lang();
     $("count").textContent = n + " / 160"; $("count").classList.toggle("max", n >= 160);
     p.textContent = out || (sel ? "Lo que escribas sale aquí, tal cual lo verá." : "Elige una partida y hablamos."); p.classList.toggle("ph", !out);

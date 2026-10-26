@@ -56,7 +56,7 @@ window.AIQ = window.AIQ || {};
       const r = await fetch(URL_, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "text/plain" }, signal: c.signal }).finally(() => clearTimeout(k));
       if (r.status === 503 || r.status === 404) { dead = Date.now() + 300000; fast = false; return sched(30000); }   // la web sin la API: se vuelve a probar en 5 min
       const j = await r.json();
-      if (j && j.ok) { const was = fast; fast = !!j.w; fails = 0; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (!fast) fxOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "ch" ? chal(m.ch, m.v) : m.k === "act" ? act(m.a, m.v) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
+      if (j && j.ok) { const was = fast; fast = !!j.w; fails = 0; if (!fast && pc) camOff(); if (was && !fast) hushTill = Date.now() + 90000; if (!fast) fxOff(); (j.m || []).forEach(m => m.k === "fx" ? fx(m.fx, m.v) : m.k === "ch" ? chal(m.ch, m.v) : m.k === "act" ? act(m.a, m.v) : m.k === "gift" ? gift(m) : m.k === "cam" ? camOn() : m.k === "rtc" ? camAnswer(m.sdp) : m.k === "camoff" ? camOff() : queue.push(m)); drain(); }   // las fichas y la camara, al momento; las frases, en orden (si la mesa deja de mirar, se cuelga)   // la mesa se ha ido: sus efectos, fuera
     } catch (e) { fast = false; if (++fails >= 2) fxOff(); }                  // dos latidos seguidos sin respuesta: sin conexion, fuera los efectos
     sched(fast ? 2000 : fails === 1 ? 5000 : document.hidden ? 60000 : 25000);
   }
@@ -78,6 +78,24 @@ window.AIQ = window.AIQ || {};
   function fx(k, v) { if (A.chfx && A.chfx.live) A.chfx.live(k, v); }
   /* los retos de la Aventura, a mano: A.adv.mesaCh (js/adventure.js) los monta en la pregunta en marcha y se quedan hasta quitarlos; "*" = todos */
   function chal(id, v) { if (A.adv && A.adv.mesaCh) A.adv.mesaCh(String(id || ""), +v || 0); }   // rayo, interruptores (v true/false) y contadores (v = cuantos deben quedar)
+  /* EL REGALO DE LA CASA (api/mesa.js op "gift"): fichas de oro con un aviso en la pantalla, sea la que sea (la mesa manda). Cada orden lleva su id: si llega repetida, no se cobra dos veces */
+  const GIFT = "El desarrollador te obsequia con {n} fichas de oro para que te puedas poner guapo.|The developer is gifting you {n} gold chips so you can look sharp.|Le développeur t'offre {n} jetons d'or pour que tu puisses te faire beau.|O desenvolvedor te presenteia com {n} fichas de ouro para você ficar elegante.|Der Entwickler schenkt dir {n} Goldchips, damit du dich schick machen kannst.|Lo sviluppatore ti regala {n} fiche d'oro per metterti in ghingheri.||开发者送你 {n} 枚金筹码，好让你打扮得漂漂亮亮。|개발자가 멋지게 꾸미라고 골드 칩 {n}개를 선물해요.|開発者から、おめかし用に金のチップ{n}枚のプレゼント。|Разработчик дарит тебе {n} золотых фишек, чтобы ты мог принарядиться.|Twórca podarowuje ci {n} złotych żetonów, żebyś mógł się wystroić.";
+  const GIFT_T = "REGALO DE LA CASA|GIFT FROM THE HOUSE|CADEAU DE LA MAISON|PRESENTE DA CASA|GESCHENK DES HAUSES|REGALO DELLA CASA||来自赌场的礼物|하우스의 선물|ハウスからの贈り物|ПОДАРОК ОТ ЗАВЕДЕНИЯ|PREZENT OD DOMU";
+  const gifted = [];
+  function gift(m) {
+    const n = Math.round(+m.n), id = String(m.id || ""); if (!(n >= 1 && n <= 5000) || !A.club || !A.club.give) return;
+    let seen = []; try { seen = JSON.parse(localStorage.getItem(KEY + ".gifts") || "[]"); } catch (e) { /* sin almacenamiento */ }
+    if (id && (gifted.includes(id) || seen.includes(id))) return;
+    gifted.push(id); try { localStorage.setItem(KEY + ".gifts", JSON.stringify(seen.concat(id).slice(-30))); } catch (e) { /* sin almacenamiento */ }
+    A.club.give(n); if (A.sfx && A.sfx.coin) { A.sfx.coin(); setTimeout(() => A.sfx.coin(), 140); setTimeout(() => A.sfx.coin(), 280); }
+    let el = $("vivoGift"); if (el) el.remove();
+    el = document.createElement("div"); el.id = "vivoGift"; el.setAttribute("role", "status");
+    el.innerHTML = `<img src="assets/icons/ficha_oro.webp" alt="" draggable="false"><span><b></b><i></i></span>`;
+    el.querySelector("b").textContent = A.pick6(GIFT_T); el.querySelector("i").textContent = A.pick6(GIFT).replace("{n}", A.fmt ? A.fmt(n) : n);
+    el.onclick = () => close(); document.body.appendChild(el); requestAnimationFrame(() => el.classList.add("on"));
+    let t = setTimeout(close, 11000);
+    function close() { clearTimeout(t); el.classList.remove("on"); setTimeout(() => el.remove(), 400); }
+  }
   /* BLOQUE D: el crupier y Comodin a mano desde la mesa, al momento (api/mesa.js op "act"): gesto, cara, mirada, humor, Comodin, ropa en directo
      (sin comprar nada: A.vestuario.preview) y las trastadas. Cada funcion se comprueba antes de llamarla (una version vieja del juego no la tiene).
      Lo que la mesa deja puesto (ropa, mirada, humor) se va con ella, como las fichas: actOff */

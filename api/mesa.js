@@ -6,6 +6,7 @@
      POST { op: "say", sid, t, e, g, s, p }     ->  el crupier dice t con la cara e y el gesto g (se pierde si en 90 s no la recoge)
      POST { op: "fx", sid, fx, v }        ->  una ficha: rayo (sin v), lluvia/tormenta/apagon/terremoto/humo (v true/false), cristal/huellas/ventana (v 0-5)
      POST { op: "ch", sid, ch, v }        ->  un reto de la Aventura (los de A.CHAL, js/challenges.js) a nivel v 0-3 (0 lo quita); ch "*" los quita todos
+     POST { op: "gift", sid, n }          ->  regalo de la casa: n fichas de oro (1-5000, 300 por defecto) con su aviso en la pantalla del jugador; cada orden lleva un id y el juego la cobra una sola vez
      POST { op: "act", sid, a, v }        ->  el crupier y Comodin al momento (bloque D): a = gest (id de gesto, "<gesto>@<cara>" incluido), face (cara),
                                               gaze (-1 | 1 | 2 | "duda" | null = sigue al raton), humor (contento/tenso/picado/aburrido/admirado | null = segun
                                               su partida), cat (accion de Comodin), vest (ropa en directo { hueco: valor | null } o null = la suya) o tras (trastada)
@@ -120,6 +121,14 @@ module.exports = async (req, res) => {
       const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
       await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "ch", ch, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
       return res.status(200).json({ ok: true, live: !!st });
+    }
+    if (b.op === "gift") {                                           // fichas de oro para ponerse guapo: la orden llega por el latido y se cobra una sola vez (id)
+      const n = b.n === undefined ? 300 : b.n; if (!Number.isInteger(n) || n < 1 || n > 5000) return res.status(400).json({ ok: false });
+      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
+      if (!st) return res.status(200).json({ ok: true, live: false });   // ya no esta: no se guarda nada para nadie
+      let who = ""; try { who = JSON.parse(st).n || ""; } catch (x) { /* ya no esta */ }
+      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "gift", n, id: crypto.randomBytes(6).toString("hex"), at: now })], ["EXPIRE", ik, 300], ["SET", wk, 1, "EX", 45], ["LPUSH", "vivo:log", JSON.stringify({ sid, who, t: "Regalo de la casa: " + n + " fichas de oro", e: "", at: now })], ["LTRIM", "vivo:log", 0, 199], ["EXPIRE", "vivo:log", 604800]]);
+      return res.status(200).json({ ok: true, live: true });
     }
     if (b.op === "act") {                                            // el crupier y Comodin, al momento: gesto, cara, mirada, humor, Comodin, ropa o trastada
       const a = String(b.a || ""), v = actVal(a, b.v === undefined ? undefined : b.v); if (v === undefined) return res.status(400).json({ ok: false });
