@@ -470,7 +470,7 @@ window.AIQ = window.AIQ || {};
   setInterval(() => { if (!raf && anyPad()) start(); }, 500);
   addEventListener("focus", () => { if (!raf && anyPad()) start(); });
   /* el menu de Steam u otra ventana encima: los sticks se sueltan y, si estabas respondiendo con el mando, la pregunta se pausa */
-  addEventListener("blur", () => { snap = null; const S = A.core && A.core.S; if (M.on && S && S.phase === "asking" && !S.paused && A.core.runMenu) A.core.runMenu(); });
+  addEventListener("blur", () => { snap = null; });
   addEventListener("resize", () => { cache = null; M.x = Math.min(M.x, innerWidth - 1); M.y = Math.min(M.y, innerHeight - 1); moved = true; });
   M.running = () => !!raf;                                               // para las pruebas (dev/)
   if (anyPad()) start();

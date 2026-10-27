@@ -204,3 +204,26 @@
 /* de 901 a 1100 px con el ticket abierto la nota va a la izquierda (css/marcador.css): aqui solo pierde el giro */
 @media (min-width: 901px) and (max-width: 1100px) and (min-height: 521px) { html[data-skin="casino"] body.mc-on:not(.duelo-on) .note-sh { transform: none; } }
 html.reduce-motion #ledgerSh .btn-ink { transition: none; }
+
+/* ---------------------------------------------------------------- SIN PAUSA EN LA RONDA (v0.3.224)
+   Mientras corre el reloj de una pregunta (body.q-live, js/game.js) no hay dock ni pausa: Esc abre el cartel «El reloj sigue» (veilMenu con .live):
+   el mapa queda a la vista y el carril de papel se coloca arriba a la derecha, bajo el reloj. P y el rotulo #noPause avisan de que no se detiene. */
+body.q-live #dockSh { display: none; }
+#veil .gx-pause.live .gx-veil { background: none; }
+#veil .gx-pause.live .gx-railw { grid-column: 9 / 13; align-self: end; margin: 0 72px 0 -72px; }   /* abajo a la derecha, junto al zoom y bajo el marcador */
+#veil .gx-pause.live .gx-lead { display: none; }
+#veil .gx-pause.live .gx-rail { height: auto; }
+#veil .gx-pause.live .gx-railw.gx-from-left { --gx-fx: 48px; }
+.gx-layer.gx-in .gx-pause.live .gx-from-left { animation-name: gx-from-right; }
+.gx-layer.gx-out .gx-pause.live .gx-from-left { animation-name: gx-to-right; }
+@keyframes gx-from-right { from { opacity: 0; transform: translateX(48px); } }
+@keyframes gx-to-right { to { opacity: 0; transform: translateX(24px); } }
+.gx-pause .lv-mix { display: grid; grid-template-columns: 7ch minmax(0, 1fr); gap: 12px; align-items: center; font-size: 20px; color: var(--gx-ink); }
+.gx-pause .lv-mix input { width: 100%; accent-color: var(--gx-rim-lo); }
+#noPause { position: fixed; left: 50%; top: calc(88px * var(--k, 1)); transform: translateX(-50%); z-index: 60; padding: 8px 14px 6px; pointer-events: none; opacity: 0;
+  font-family: var(--mono); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--gx-red-hi); background: var(--gx-o);
+  box-shadow: inset 0 0 0 2px var(--gx-red); clip-path: var(--gx-notch); }
+#noPause.on { opacity: 1; animation: nopause-shk .28s steps(4); }
+@keyframes nopause-shk { 25% { margin-left: -6px; } 75% { margin-left: 6px; } }
+html.reduce-motion #noPause.on { animation: none; }
+.intro-nop { margin: 10px 0 0; font-size: 20px; opacity: .85; }

@@ -505,7 +505,7 @@ window.AIQ = window.AIQ || {};
   D.pause = () => (st.net ? { mode: `${NAME()} · ${T("Amistoso", "Friendly")}`,
     note: T("Entre jugadores no hay pausa: el reloj sigue corriendo para los dos. Si sales al menú, pierdes el duelo.", "There's no pause between players: the clock keeps running for both. If you exit to the menu, you lose the duel."),
     rows: row(T("Tus fichas", "Your chips"), A.fmt(st.me)) + row(Tf("Fichas de {name}", "{name}'s chips", { name: foe() }), A.fmt(st.rv)) } : { mode: `${NAME()} · ${A.tx(st.table.n)}`,
-    note: T("Prototipo contra la banca: aquí la pausa detiene el reloj. En un duelo entre jugadores no habrá pausa.", "Prototype against the house: here the pause stops the clock. A duel between players won't have one."),
+    note: T("Contra la banca el reloj tampoco se detiene durante la pregunta.", "Against the house the clock doesn't stop during a question either."),
     rows: row(T("Tus fichas", "Your chips"), A.fmt(st.me)) + row(T("Fichas de la banca", "The house's chips"), A.fmt(st.rv)) + row(T("Nivel de la banca", "The house's level"), st.level) });
 
   /* ---------------- las fichas sobre el mapa (tu respuesta y la del rival): piezas sueltas encima del mapa del juego, que siguen su camara.

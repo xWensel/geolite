@@ -12,6 +12,8 @@
     cursor: true, tips: true, songToast: true, setTab: "general",
     panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n", luces: "full", musica: "banda", sonidos: "lounge",
   };
+  /* mientras corre el reloj de una pregunta (phase "asking") no hay pausa: el dock se esconde (body.q-live, css/partida.css) y Esc abre el cartel «El reloj sigue» sin parar nada */
+  (() => { let ph = S.phase; Object.defineProperty(S, "phase", { get: () => ph, set: v => { ph = v; document.body.classList.toggle("q-live", v === "asking"); }, enumerable: true }); })();
   const prog = id => (S.prog[id] = S.prog[id] || { unlocked: 1, best: 0, bestIq: 0 });
   function load() {
     try {
@@ -271,7 +273,7 @@
   addEventListener("resize", fitSetSoon);
   let setFocusBack = null;
   function openSettings(on) {
-    if (on && S.phase === "asking" && !S.paused) togglePause();           // Ajustes tapa el mapa: la pregunta queda en pausa (antes el reloj seguia corriendo detras y se perdia)
+    if (on && S.phase === "asking") return;                                // sin pausa en la ronda: durante la pregunta no hay Ajustes (el volumen esta en el cartel de Esc)
     const was = S.settingsOpen; S.settingsOpen = on; const sh = $("setSh"), sv = $("setVeil");
     sh.classList.toggle("hidden", !on);
     if (sv) sv.classList.toggle("hidden", !on);
@@ -682,6 +684,7 @@
     el.innerHTML = `<div class="intro-in"><div class="intro-num">${pad2(S.level + 1)}</div><div class="intro-body">
       <span class="tag">${L.bonus ? A.t("intro.bonus") : A.t("kind." + L.kind)}</span><h2>${A.tx(L.name)}</h2>
       <p>${A.t("intro.q", { n: S.qs.length })} · ${A.t("intro.t", { s: L.secText || L.seconds })}${L.advance > 1 ? " · " + A.t("intro.goal", { a: A.fmt(L.advance) }) : ""}</p></div></div>`;
+    try { if (!localStorage.getItem("atlasiq.sinpausa")) { const b = el.querySelector(".intro-body, .intro-in"); if (b) { const n = document.createElement("p"); n.className = "intro-nop"; n.textContent = A.t("pause.first"); b.appendChild(n); localStorage.setItem("atlasiq.sinpausa", "1"); } } } catch (e) { /* sin almacenamiento: no se avisa */ }   // una sola vez en la vida: aqui no hay pausa
     A.sfx.intro(); map.animateTo(map.home(), 1100);
     const tok = (S.introTok = (S.introTok || 0) + 1);                 // si llega otra intro (reinicio, abandono, otra partida), los temporizadores de esta ya no hacen nada
     let done = false, ms = S.run ? (L.boss ? 4200 : 3300) : 2600, talking = false, timeUp = false;
@@ -719,7 +722,6 @@
     if (S.run) A.adv.onQuestion();
     if (A.codex && A.codex.toastAside) A.codex.toastAside();         // el monton de tarjetas nuevas no se queda tapando el mapa con el reloj corriendo
     updateHud();
-    if ((document.hidden || S.settingsOpen) && !S.paused) togglePause();    // la intro acabo con la pestana oculta o con Ajustes abierto (el reloj corria debajo): la pregunta empieza en pausa
   }
   /* efectos del clic: pin que cae, ondas y chispas donde pulsas */
   let lastPtr = { x: innerWidth / 2, y: innerHeight / 2 };
@@ -1162,38 +1164,49 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (!g) { v.classList.add("hidden"); v.classList.remove("gx"); v.innerHTML = ""; return; }
     v._gx = null; g.close(() => { if (!v._gx) { v.classList.add("hidden"); v.classList.remove("gx"); v.innerHTML = ""; } });
   }
+  const fmtLeft = () => { const l = Math.max(0, Math.ceil(S.limit - (performance.now() - S.t0 - S.pausedAcc) / 1000)); return Math.floor(l / 60) + ":" + String(l % 60).padStart(2, "0"); };
+  /* P (o el engranaje) durante la pregunta: el reloj no se para; un rotulo bajo el reloj lo dice */
+  let noPauseT = 0;
+  function noPause() {
+    A.sfx.deny(); let e = $("noPause"); if (!e) { e = document.createElement("div"); e.id = "noPause"; e.setAttribute("role", "status"); document.body.appendChild(e); }
+    e.textContent = A.t("pause.no"); e.classList.remove("on"); void e.offsetWidth; e.classList.add("on"); clearTimeout(noPauseT); noPauseT = setTimeout(() => e.classList.remove("on"), 1500);
+  }
   function veilMenu(onResume) {
+    const live = S.phase === "asking";                                      // sin pausa: el cartel «El reloj sigue» (el reloj de la pregunta corre mientras esta abierto)
     const adv = !!S.run || A.adv.active(), prac = adv && A.adv.isPractice(), daily = adv && A.adv.isDaily() && !prac, v = $("veil"), run = adv ? A.adv.run : null;
     const du = S.duel ? A.duelo.pause() : null;                            // Duelo de fichas: su nombre, su nota y sus dos pilas
     /* intento del Reto diario: se guarda en su propia ranura y vuelve a su pantalla; no se "empieza otra", se termina aqui (cuenta lo que lleva) */
     const newLbl = daily ? A.pick6("Terminar el intento aquí|End the attempt here|Terminer l'essai ici|Encerrar a tentativa aqui|Versuch hier beenden|Chiudi qui il tentativo||在此结束本次尝试|여기서 시도 끝내기|ここで挑戦を終える|Закончить попытку здесь|Zakończ podejście tutaj") : A.T("Empezar una partida nueva", "Start a new run");
-    const note = du ? du.note : prac ? A.pick6("La práctica no se guarda: si sales, se acaba. Puedes repetirla cuando quieras desde el Reto diario.|Practice isn't saved: if you leave, it ends. You can replay it any time from the Daily challenge.|L'entraînement n'est pas enregistré : si tu pars, il s'arrête. Tu peux le rejouer quand tu veux depuis le Défi quotidien.|O treino não é salvo: se você sair, ele acaba. Pode repeti-lo quando quiser no Desafio diário.|Das Training wird nicht gespeichert: Wenn du gehst, ist es vorbei. Du kannst es jederzeit über die Tagesherausforderung wiederholen.|L'allenamento non si salva: se esci, finisce. Puoi rifarlo quando vuoi dalla Sfida giornaliera.||练习不会保存：退出即结束。你可以随时在每日挑战中再来一次。|연습은 저장되지 않아요. 나가면 끝나요. 일일 도전에서 언제든 다시 할 수 있어요.|練習は保存されない。出ると終わる。デイリーチャレンジからいつでもやり直せる。|Тренировка не сохраняется: выйдешь — она закончится. Повторить можно в любой момент из Испытания дня.|Trening się nie zapisuje: jeśli wyjdziesz, się kończy. Możesz go powtórzyć kiedy chcesz z Wyzwania dnia.")
+    const note = live ? A.t("pause.liveNote") : du ? du.note : prac ? A.pick6("La práctica no se guarda: si sales, se acaba. Puedes repetirla cuando quieras desde el Reto diario.|Practice isn't saved: if you leave, it ends. You can replay it any time from the Daily challenge.|L'entraînement n'est pas enregistré : si tu pars, il s'arrête. Tu peux le rejouer quand tu veux depuis le Défi quotidien.|O treino não é salvo: se você sair, ele acaba. Pode repeti-lo quando quiser no Desafio diário.|Das Training wird nicht gespeichert: Wenn du gehst, ist es vorbei. Du kannst es jederzeit über die Tagesherausforderung wiederholen.|L'allenamento non si salva: se esci, finisce. Puoi rifarlo quando vuoi dalla Sfida giornaliera.||练习不会保存：退出即结束。你可以随时在每日挑战中再来一次。|연습은 저장되지 않아요. 나가면 끝나요. 일일 도전에서 언제든 다시 할 수 있어요.|練習は保存されない。出ると終わる。デイリーチャレンジからいつでもやり直せる。|Тренировка не сохраняется: выйдешь — она закончится. Повторить можно в любой момент из Испытания дня.|Trening się nie zapisuje: jeśli wyjdziesz, się kończy. Możesz go powtórzyć kiedy chcesz z Wyzwania dnia.")
       : daily ? A.pick6("Tu intento se guarda solo. Puedes salir y continuarlo desde el Reto diario.|Your attempt saves itself. You can leave and pick it up again from the Daily challenge.|Ton essai s'enregistre tout seul. Tu peux partir et le reprendre depuis le Défi quotidien.|Sua tentativa é salva automaticamente. Você pode sair e continuá-la no Desafio diário.|Dein Versuch wird automatisch gespeichert. Du kannst gehen und ihn in der Tagesherausforderung fortsetzen.|Il tuo tentativo si salva da solo. Puoi uscire e riprenderlo dalla Sfida giornaliera.||你的尝试会自动保存。可以离开，稍后在每日挑战中继续。|시도는 자동으로 저장돼요. 나갔다가 일일 도전에서 이어서 할 수 있어요.|挑戦は自動で保存されます。抜けても、デイリーチャレンジから続きができます。|Попытка сохраняется сама. Можно выйти и продолжить её в Испытании дня.|Podejście zapisuje się samo. Możesz wyjść i dokończyć je w Wyzwaniu dnia.")
       : adv ? A.T("Tu expedición se guarda sola. Puedes salir y continuarla desde Aventura.", "Your expedition saves itself. You can leave and pick it up again from Adventure.") : A.t("pause.p");
     const mode = du ? du.mode : prac ? A.pick6("Práctica|Practice|Entraînement|Treino|Training|Allenamento||练习|연습|練習|Тренировка|Trening") : daily ? A.T("Reto diario", "Daily challenge") : adv ? A.T("Aventura", "Adventure") : A.t("mode.classic");
     const inRound = (S.phase === "asking" || S.phase === "reveal") && S.camp, L = inRound ? lv() : null;
     const rows = [];
+    if (live) rows.push(`<div class="gx-lead-row"><span>${A.t("pause.time")}</span><s></s><b id="lvTime">${fmtLeft()}</b></div>`
+      + ["music", "sfx"].map(k => `<label class="lv-mix"><span>${A.t("vol." + k)}</span><input type="range" min="0" max="100" value="${Math.round(A.audio.vol[k] * 100)}" data-vk="${k}" aria-label="${A.t("vol." + k)}"></label>`).join(""));
     if (du) rows.push(du.rows); else
-    if (L) rows.push(`<div class="gx-lead-row"><span>${A.t("score.level")}</span><s></s><b>${A.fmt(S.levelScore)}${L.advance > 1 ? ` <small>/ ${A.fmt(L.advance)}</small>` : ""}</b></div>`
+    if (L && !live) rows.push(`<div class="gx-lead-row"><span>${A.t("score.level")}</span><s></s><b>${A.fmt(S.levelScore)}${L.advance > 1 ? ` <small>/ ${A.fmt(L.advance)}</small>` : ""}</b></div>`
       + (L.advance > 1 ? `<div class="gx-bar"><i style="width:${Math.min(100, (100 * S.levelScore) / L.advance)}%"></i></div>` : ""));
     if (run && !prac) rows.push(`<div class="gx-lead-row"><span>${A.pick6("Doblones|Doubloons|Doublons|Dobrões|Dublonen|Dobloni||金币|도블론|ダブロン|Дублоны|Dublony")}</span><s></s><b>${A.fmt(run.coins || 0)}</b></div>`);
     const hearts = run && !run.inf && run.lives > 0 ? `<div class="gx-hearts" aria-label="${A.pick6("Provisiones|Provisions|Provisions|Provisões|Proviant|Provviste||补给|식량|食料|Запасы|Zapasy")}: ${run.lives}">${A.icon("heart").repeat(Math.min(run.lives, 9))}</div>` : "";
-    const withDealer = S.phase === "asking" && adv && A.dealer && A.dealer.on && innerWidth > 899 && innerHeight > 519;
     const exitBtn = prac ? `<button class="gx-btn wide" id="saveExitBtn"><span>${A.pick6("Salir de la práctica|Leave practice|Quitter l'entraînement|Sair do treino|Training verlassen|Esci dall'allenamento||退出练习|연습 나가기|練習をやめる|Выйти из тренировки|Wyjdź z treningu")}</span></button>`
       : adv ? `<button class="gx-btn wide" id="saveExitBtn"><span>${A.T("Guardar y salir al menú", "Save and exit to menu")}</span></button>` : `<button class="gx-btn wide" id="exitBtn"><span>${A.T("Salir al menú", "Exit to menu")}</span></button>`;
     v.className = "gx"; v._gx = null;
-    v.innerHTML = `<div class="gx-pause${withDealer ? "" : " solo"}"><div class="gx-veil"></div>${withDealer ? `<div class="gx-spot"></div>` : ""}
+    v.innerHTML = `<div class="gx-pause solo${live ? " live" : ""}"><div class="gx-veil"></div>
       <div class="gx-stage"><div class="gx-grid"><div class="gx-sh gx-railw gx-from-left"><section class="gx-pnl gx-rail" aria-labelledby="pvTitle">
-        <div class="gx-head"><span class="gx-eyb">${mode}</span><h2 class="gx-t-l" id="pvTitle">${A.t("pause.h")}</h2>${L ? `<p class="gx-lead">${$("lvlText").textContent}</p>` : ""}${hearts}</div>
+        <div class="gx-head"><span class="gx-eyb">${mode}</span><h2 class="gx-t-l" id="pvTitle">${A.t(live ? "pause.live" : "pause.h")}</h2>${L ? `<p class="gx-lead">${$("lvlText").textContent}</p>` : ""}${hearts}</div>
         ${rows.length ? `<div class="gx-paper">${rows.join("")}</div>` : "<div></div>"}
         <div class="gx-acts col gx-menu"><button class="gx-btn pri wide" id="resBtn" data-primary><span>${A.t("btn.resume")}</span>${A.gala.keyHint("Esc", "b")}</button>
-          <button class="gx-btn wide" id="pvSet"><span>${A.t("set.title")}</span></button>${exitBtn}</div>
-        <div class="gx-foot"><div class="gx-hr"></div>${adv && !prac ? `<div class="gx-acts"><button class="gx-btn gho sm" id="newRunBtn">${newLbl}</button></div>` : ""}<p class="gx-note">${note}</p></div>
-      </section></div></div>${withDealer ? `<div class="gx-dealer" id="pvDealer"></div>` : ""}</div></div>`;
-    if (withDealer) { A.dealer.dock($("pvDealer")); v._dealer = true; }
+          ${live ? "" : `<button class="gx-btn wide" id="pvSet"><span>${A.t("set.title")}</span></button>`}${exitBtn}</div>
+        <div class="gx-foot"><div class="gx-hr"></div>${adv && !prac && !live ? `<div class="gx-acts"><button class="gx-btn gho sm" id="newRunBtn">${newLbl}</button></div>` : ""}<p class="gx-note">${note}</p></div>
+      </section></div></div></div></div>`;
     v.classList.remove("hidden"); v._gx = A.gala.enter(v.firstElementChild);
     $("resBtn").onclick = onResume;
-    $("pvSet").onclick = () => { A.sfx.ui(); openSettings(true); };
+    if (live) {
+      v.querySelectorAll("[data-vk]").forEach(inp => inp.oninput = () => { A.audio.unlock(); A.audio.setVol(inp.dataset.vk, +inp.value / 100); save(); });
+      const tick = () => { const e = $("lvTime"); if (!e || !v._gx) return; e.textContent = fmtLeft(); requestAnimationFrame(tick); }; requestAnimationFrame(tick);
+    } else $("pvSet").onclick = () => { A.sfx.ui(); openSettings(true); };
     const leave = to => { closeVeil(); if (adv) A.adv.leave(); S.paused = false; A.music.muffle(false); showTitle(to); };   // primero se guarda (con la pausa puesta): si no, el rato en el menu de pausa contaba como tiempo gastado y al volver la pregunta salia agotada
     if (prac) $("saveExitBtn").onclick = () => { A.sfx.ui(); leave("daily"); };
     else if (adv) {
@@ -1206,19 +1219,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       };
     } else $("exitBtn").onclick = () => { A.sfx.ui(); leave(); };
   }
-  function togglePause() {
-    if (S.phase !== "asking") return;
-    if (S.duel && S.duel.net) return;                                       // Duelo entre jugadores: el reloj es de los dos y no se para (el menu se abre sin pausa: runMenu)
-    S.paused = !S.paused; A.sfx.pause(); A.music.muffle(S.paused);
-    const note = S.run && A.dealer && A.dealer.notePause;                      // el crupier te espera en la pausa (js/dealer.js): habla antes de acoplarse y, al volver, ya en su esquina
-    if (S.paused) { S.pauseAt = performance.now(); map.setPick(false); if (note) A.dealer.notePause(true); veilMenu(togglePause); }
-    else { S.pausedAcc += performance.now() - S.pauseAt; map.setPick(true); closeVeil(); if (note) A.dealer.notePause(false); }
-  }
-  /* pestana oculta o ventana minimizada: la pregunta se pausa (antes el reloj seguia corriendo y al volver ya se habia agotado) */
-  document.addEventListener("visibilitychange", () => { if (document.hidden && S.phase === "asking" && !S.paused) togglePause(); });
   function runMenu() {
     if (S.booting || !(S.run || S.camp || A.adv.active()) || S.phase === "title" || S.phase === "intro") return;
-    if (S.phase === "asking" && !(S.duel && S.duel.net)) return togglePause();
     if (!$("veil").classList.contains("hidden")) return closeVeil();
     A.sfx.pause(); veilMenu(closeVeil);
   }
@@ -1238,7 +1240,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   $("zoomIn").onclick = () => map.zoomBy(1.6);
   $("zoomOut").onclick = () => map.zoomBy(1 / 1.6);
   $("zoomHome").onclick = () => map.animateTo(S.camp ? map.home() : { ...map.home(), s: map.minS }, 600);
-  $("pauseBtn").onclick = () => (S.duel && S.duel.net ? runMenu() : togglePause());
+  $("pauseBtn").onclick = () => runMenu();
   function toggleFs() {
     const host = window.geoliteHost;
     const to = host && host.windowMode ? (host.windowMode() === "full" ? "window" : "full") : document.fullscreenElement ? "window" : "full";
@@ -1262,7 +1264,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (e.target && e.target.tagName === "INPUT") { if (e.key === "Escape") openSettings(false); return; }
     A.audio.unlock(!S.booting);
     if (S.booting) return;
-    if (e.key === "Escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else if (S.duel && S.duel.net) openSettings(true); else runMenu(); return; }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
+    if (e.key === "Escape") { if (A.adv.busy && A.adv.busy()) return; if (S.settingsOpen) openSettings(false); else if (S.run && S.tool) A.adv.cancelTool(); else if (S.phase === "title" && S.hub !== "home") A.hub.screen("home"); else runMenu(); return; }   // busy: la legendaria del cofre se esta luciendo (~5 s); el menu no la tapa ni la deja temblando debajo
     const act = K.pan(e) || K.which(e); if (!act) return;   // las flechas son tambien de cancion anterior/siguiente: el mapa va primero
     if (S.settingsOpen && !["fs", "sfx", "mus"].includes(act)) return;    // con Ajustes abierto solo valen sus atajos: Intro pulsaba el boton de la pantalla de debajo (p. ej. Jugar) y P reanudaba la pregunta tapada
     if (/^t[1-4]$/.test(act)) { if (S.run && S.phase === "asking" && !e.repeat) A.adv.toolKey(+act[1] - 1); return; }   // mantener pulsada la tecla encendia y apagaba la herramienta sin parar
@@ -1271,7 +1273,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     else if (act === "codex") { if (S.phase === "title") (A.codex.isOpen() ? A.codex.close() : A.codex.open()); }
     else if (act === "sfx") toggleSwitch("sfx");
     else if (act === "mus") toggleSwitch("music");
-    else if (act === "pause") { if (!(S.duel && S.duel.net)) togglePause(); }
+    else if (act === "pause") { if (S.phase === "asking") noPause(); else runMenu(); }
     else if (act === "zin") map.zoomBy(1.6);
     else if (act === "zout") map.zoomBy(1 / 1.6);
     else if (act === "home") $("zoomHome").click();
