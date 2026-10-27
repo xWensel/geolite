@@ -65,13 +65,27 @@
   function saveN() { VER++; try { localStorage.setItem("mc.notas", JSON.stringify(N)); } catch (e) {} pushN(); }
   function saveCfg() { N["cfg:balanceo"] = { v: "cfg", nota: JSON.stringify(CFG), t: Date.now() }; N["cfg:historial"] = { v: "cfg", nota: JSON.stringify(HIST), t: Date.now() }; saveN(); }
   function saveOv() { N["cfg:dif"] = { v: "cfg", nota: JSON.stringify(OV), t: Date.now() }; VER++; saveN(); }
+  /* REPASO: recorre lo que aun no has mirado, de uno en uno, con la ficha abierta; al opinar pasa a la siguiente */
+  let REP = null;
+  const repPending = k => !N[k];
+  function repStart(src) {
+    reindex(); let list = [];
+    if (src === "entra") list = SG.filter(x => !N[SGKEY(x)]).sort((a, b) => b.idiomas - a.idiomas).map(SGKEY);
+    else if (src === "linea") list = rows.filter(r => !N[r.key]).sort((a, b) => (a.dif2 == null ? 101 : a.dif2) - (b.dif2 == null ? 101 : b.dif2)).map(r => r.key);
+    else { const seen = new Set(); Object.values(remGroups()).forEach(g => g.rows.forEach(r => { if (!N[r.key]) seen.add(r.key); })); list = [...seen]; }
+    if (!list.length) return toast("No queda nada sin mirar aquí");
+    REP = { src, list }; CURLIST = list.slice(); open(list[0]);
+  }
+  function repNext() { if (!REP) return; const i = CURLIST.indexOf(DKEY); let k = null; for (let j = i + 1; j < CURLIST.length; j++) if (repPending(CURLIST[j])) { k = CURLIST[j]; break; } if (k == null) for (let j = 0; j < i; j++) if (repPending(CURLIST[j])) { k = CURLIST[j]; break; }
+    if (k == null) { toast("¡Repaso terminado! No queda nada sin mirar"); REP = null; return closeDrawer(); } open(k); }
+  const repLeft = () => (REP ? CURLIST.filter(repPending).length : 0);
   const userNotes = () => Object.keys(N).filter(k => !k.startsWith("cfg:"));
   if (REMOTE && !KEY) door(); else loadNotes(true);
   if (REMOTE) setInterval(() => { if (KEY && !document.hidden && !$(".ov")) loadNotes(false); }, 25000);
   function toast(t) { const e = $("#toast"); e.textContent = t; e.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => (e.style.display = "none"), 1700); }
-  function vote(k, v) { if (N[k] && N[k].v === v) { delete N[k]; toast("Opinión quitada"); } else { N[k] = { v, nota: (N[k] && N[k].nota) || "", t: Date.now() }; toast(v === "ok" ? "Bien ✓" : "No ✕"); } saveN(); draw(); refreshDrawerVotes(); }
+  function vote(k, v) { if (N[k] && N[k].v === v) { delete N[k]; toast("Opinión quitada"); } else { N[k] = { v, nota: (N[k] && N[k].nota) || "", t: Date.now() }; toast(v === "ok" ? "Bien ✓" : "No ✕"); } saveN(); draw(); refreshDrawerVotes(); if (REP && N[k]) repNext(); }
   function ask(title, sub, init, cb, long) { const o = document.createElement("div"); o.className = "ov"; o.innerHTML = `<div class="box"><h2 class="lbl" style="margin:0;color:var(--gold);font-size:14px!important">${esc(title)}</h2><p class="note" style="margin:0">${esc(sub || "")}</p>${long ? '<textarea id="askv" rows="5"></textarea>' : '<input id="askv">'}<div class="row"><button class="btn" id="askok">Guardar</button><button class="btn ghost" id="askno">Cancelar</button></div></div>`; document.body.appendChild(o); const i = $("#askv"); i.value = init || ""; i.focus(); const done = ok => { const v = i.value; o.remove(); if (ok) cb(v); }; $("#askok").onclick = () => done(true); $("#askno").onclick = () => done(false); i.onkeydown = e => { if (e.key === "Escape") done(false); if (e.key === "Enter" && (!long || e.ctrlKey)) done(true); }; }
-  function note(k) { ask("Qué quieres que cambie", nameOfKey(k), (N[k] && N[k].nota) || "", t => { N[k] = { v: (N[k] && N[k].v) || "cambiar", nota: t, t: Date.now() }; saveN(); toast("Nota guardada"); draw(); refreshDrawerVotes(); }, true); }
+  function note(k) { ask("Qué quieres que cambie", nameOfKey(k), (N[k] && N[k].nota) || "", t => { N[k] = { v: (N[k] && N[k].v) || "cambiar", nota: t, t: Date.now() }; saveN(); toast("Nota guardada"); draw(); refreshDrawerVotes(); if (REP) repNext(); }, true); }
   const vb = k => { const n = N[k] || {}, e = esc(k); return `<span class="vt"><button class="y ${n.v === "ok" ? "on" : ""}" data-vote="ok" data-k="${e}">Bien</button><button class="n ${n.v === "no" ? "on" : ""}" data-vote="no" data-k="${e}">No</button><button class="c ${n.nota ? "on" : ""}" data-note="1" data-k="${e}">${n.nota ? "Nota ✎" : "Cambiar…"}</button></span>`; };
   const SGKEY = x => "sug:" + x.id, sgByKey = {}; SG.forEach(x => (sgByKey[SGKEY(x)] = x));
   function nameOfKey(k) { if (byKey[k]) return byKey[k].name; if (sgByKey[k]) return "NUEVO: " + sgByKey[k].es + " (" + sgByKey[k].pais + ")"; if (k.startsWith("enc:")) return "ficha " + encName(k.slice(4)); if (k.startsWith("pais:")) return k.slice(5); return k; }
@@ -81,7 +95,7 @@
   const scoreOf = (k, val) => { const a = ANC[k]; if (!a || val == null) return null; const f = k === "sl" || k === "st" ? val : Math.log10(val + 1); return cl01(100 * (f - a[0]) / (a[1] - a[0])); };
   function famaOf(id) { const a = SN[id]; if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; }
   const zoneOf = d => (d < CFG.t[0] ? 0 : d < CFG.t[1] ? 1 : 2);
-  function reindex() { rows.forEach(r => { const f = famaOf(r.wid); r.fama = f; r.dif2 = OV[r.key] != null ? OV[r.key] : f == null ? null : 100 - f; r.zone = r.dif2 == null ? null : zoneOf(r.dif2); r.zoneHoy = zoneOf(r.d); }); }
+  function reindex() { rows.forEach(r => { const f = famaOf(r.wid); r.fama = f; r.dif2 = OV[r.key] != null ? OV[r.key] : (r.topic === "flag" || r.topic === "clue") ? (r.d == null ? null : r.d) : f == null ? null : 100 - f; r.zone = r.dif2 == null ? null : zoneOf(r.dif2); r.zoneHoy = zoneOf(r.d); }); }
   /* escenario: "hoy" o "con mis decisiones" (propuestas en Bien entran, filas en No salen) */
   let SCEN = false; try { SCEN = localStorage.getItem("mc.scen") === "1"; } catch (e) {}
   const SUGSIG = A.SUGSIG || {};
@@ -97,7 +111,7 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["rondas", "Probar las rondas"]]], ["Decidir", [["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
   const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
@@ -124,10 +138,18 @@
     reindex(); const R = cohort().filter(r => r.dif2 != null), cnt = [0, 1, 2].map(k => R.filter(r => r.zone === k).length), pend = SG.filter(x => !N[SGKEY(x)]).length, g = remGroups(), quitar = Object.values(g).reduce((n, x) => n + x.rows.filter(r => !N[r.key]).length, 0);
     return `<div class="hero"><h1>La mesa de contenido</h1><p>Aquí decides qué hay en Geolite. Tres pasos. Tú decides, yo lo aplico al juego cuando me lo digas: nada cambia antes.</p></div>
       <div class="pl"><div class="bars" style="gap:10px">
+        <div class="task"><span class="num">★</span><div><b>Repasar de uno en uno</b><span>Lo más fácil: te enseño una cosa cada vez, tú pulsas Bien o No y paso a la siguiente.</span></div><button class="btn" data-go="repaso">Empezar el repaso</button></div>
         <div class="task"><span class="num">1</span><div><b>Pon la dificultad</b><span>Una sola línea de 0 a 100 para TODO el juego (Aventura, Clásico y Duelo). Dos cortes la parten en Fácil, Medio y Difícil: ${cnt[0]} · ${cnt[1]} · ${cnt[2]} preguntas.</span></div><button class="btn" data-go="balanceo">Abrir la línea</button></div>
         <div class="task"><span class="num">2</span><div><b>Decide qué entra</b><span>${SG.length} propuestas nuevas de personajes y de Sello del país. Quedan ${pend} sin mirar.</span></div><button class="btn" data-go="sugerencias">Para añadir</button></div>
         <div class="task"><span class="num">3</span><div><b>Decide qué sale</b><span>Marcas, orígenes disputados, repetidas y lo menos conocido. Quedan ${quitar} sin mirar.</span></div><button class="btn" data-go="quitar">Para quitar</button></div></div></div>
       <div class="pl"><h2>Cómo se usa <small>30 segundos</small></h2><div class="bars" style="gap:6px;font-size:23px"><div>• <b>Bien</b> = que entre o se quede · <b>No</b> = fuera · <b>Cambiar…</b> = me escribes qué quieres.</div><div>• Pincha en cualquier nombre: se abre su ficha con sus fotos, su dificultad y el texto.</div><div>• En la ficha: <span class="keys"><kbd>←</kbd> <kbd>→</kbd> cambian de elemento · <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>Esc</kbd> cierra</span></div><div>• <span class="keys"><kbd>/</kbd></span> o <span class="keys"><kbd>Ctrl K</kbd></span> busca cualquier cosa.</div><div>• Tus ${userNotes().length} opiniones se guardan solas. Mira «Mis notas» para repasarlas.</div></div></div>`;
+  };
+
+  VIEWS.repaso = () => {
+    reindex(); const nE = SG.filter(x => !N[SGKEY(x)]).length, nL = rows.filter(r => !N[r.key]).length, g = remGroups(), seen = new Set(); Object.values(g).forEach(x => x.rows.forEach(r => { if (!N[r.key]) seen.add(r.key); }));
+    const card = (id, n, t, d) => `<div class="task"><span class="num">${n}</span><div><b>${t}</b><span>${d}</span></div><button class="btn" data-act="rep" data-s="${id}">${id === "entra" ? nE : id === "linea" ? nL : seen.size} sin mirar · Empezar</button></div>`;
+    return `<div class="hero"><h1>Repaso</h1><p>Te enseño las cosas de una en una, con su foto y su dificultad. Pulsa <b>Bien</b> o <b>No</b> (o las teclas <kbd>B</kbd> y <kbd>N</kbd>) y pasa a la siguiente sola. <kbd>→</kbd> salta sin opinar. Puedes parar cuando quieras: se guarda todo y la próxima vez sigue por donde lo dejaste.</p></div>
+      <div class="pl"><div class="bars" style="gap:10px">${card("entra", 1, "Lo que podría entrar", "Propuestas nuevas de personajes y Sello del país. Bien = que entre · No = que no.")}${card("sale", 2, "Lo que podría salir", "Marcas, orígenes disputados, repetidas, lo menos conocido. Bien = se queda · No = fuera.")}${card("linea", 3, "Toda la línea", "Cada pregunta del juego, de la más fácil a la más difícil. Ajusta su número en la ficha si no te cuadra.")}</div></div>`;
   };
 
   /* ================= BALANCEO ================= */
@@ -308,9 +330,9 @@
   const loadLang = lg => (TXT[lg] ? Promise.resolve(TXT[lg]) : fetch("../data/wiki/" + lg + ".json").then(r => r.json()).then(j => (TXT[lg] = j)));
   const loadShort = lg => (TXT["s" + lg] ? Promise.resolve(TXT["s" + lg]) : fetch("../data/wiki/" + lg + "-s.json").then(r => r.json()).then(j => (TXT["s" + lg] = j)).catch(() => ({})));
   const dr = () => $("#drawer"); let DKEY = null;
-  function closeDrawer() { dr().style.display = "none"; $("#shade").style.display = "none"; DKEY = null; if (DIRTY) { DIRTY = false; draw(); } }
+  function closeDrawer() { dr().style.display = "none"; $("#shade").style.display = "none"; DKEY = null; REP = null; if (DIRTY) { DIRTY = false; draw(); } }
   function refreshDrawerVotes() { const e = $("#dvotes"); if (e && DKEY) e.innerHTML = vb(DKEY); }
-  function head(key) { const i = CURLIST.indexOf(key); return `<div class="dh"><button class="chipb" data-act="prev">← Anterior</button><button class="chipb" data-act="next">Siguiente →</button><span class="pos">${i >= 0 ? i + 1 + " de " + CURLIST.length : ""}</span><span class="sp"></span><button class="chipb" data-act="closed">Cerrar ✕</button></div>`; }
+  function head(key) { const i = CURLIST.indexOf(key); return `<div class="dh"><button class="chipb" data-act="prev">← Anterior</button><button class="chipb" data-act="next">Siguiente →</button><span class="pos">${REP ? "Repaso · quedan " + repLeft() + " sin mirar" : i >= 0 ? i + 1 + " de " + CURLIST.length : ""}</span><span class="sp"></span><button class="chipb" data-act="closed">Cerrar ✕</button></div>`; }
   /* las tres fotos de la ficha (portada, Historia, Dato clave) tal cual las ve el jugador; si falta una, un hueco rojo */
   /* caja de dificultad de la ficha: un numero unico 0-100, deslizador, +-1/+-5 y quitar el ajuste (lo puesto a mano manda sobre el calculado) */
   let DIRTY = false, DID = null;
@@ -435,6 +457,7 @@
       case "scen": SCEN = !SCEN; try { localStorage.setItem("mc.scen", SCEN ? "1" : "0"); } catch (e) {} return draw();
       case "dnudge": { const k = d.k, v = effOfKey(k, DID); return setDif(k, (v == null ? 50 : Math.round(v)) + +d.d); }
       case "dreset": return setDif(d.k, null);
+      case "rep": return repStart(d.s);
       case "reload": return location.reload();
       case "clearnotes": if (t.dataset.sure) { userNotes().forEach(k => delete N[k]); saveN(); return draw(); } t.dataset.sure = 1; t.textContent = "Pulsa otra vez para vaciar"; return;
     }
