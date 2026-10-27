@@ -82,6 +82,8 @@ window.AIQ = window.AIQ || {};
     stamp: "Puesta|On|Posée|Em uso|Aktiv|In uso||已用|적용|使用中|Выбрано|Użyte",
   };
   const V = () => A.vestuario;
+  /* la muestra de una mesa: un trozo del mapa de 768 x 432 px de pagina, dibujado por el propio mapa a 1x y a 2x (assets/mesas/<id>.webp y <id>@2x.webp); el navegador coge la de su densidad, asi nunca se amplia a trozos ni se suaviza */
+  const mesaImg = (id, cls) => `<img${cls ? ` class="${cls}"` : ""} src="assets/mesas/${id}.webp" srcset="assets/mesas/${id}.webp 1x, assets/mesas/${id}@2x.webp 2x" alt=""${cls ? "" : " width=768 height=432"} decoding="async">`;
   const fi = (cls = "") => `<img class="bq-fi${cls ? " " + cls : ""}" src="assets/icons/ficha_oro.webp" alt="">`;
   const M = () => A.mesas;
   const list = () => {
@@ -98,14 +100,14 @@ window.AIQ = window.AIQ || {};
   function item(m) {
     const s = state(m.id), lk = trofeo(m.id) && !s;
     return `<button type="button" class="bq-it${m.id === ST.sel ? " sel" : ""}${s ? " " + s : ""}${m.shop === "l" ? " leg" : ""}${lk ? " lk" : ""}" data-id="${m.id}" aria-pressed="${m.id === ST.sel}">
-      <span class="bq-th"><img src="assets/mesas/${m.id}.webp" alt="" width="640" height="360" decoding="async">${s === "on" ? `<em class="bq-own on">${esc(P6(RX.stamp))}</em>` : lk ? `<em class="bq-own lkt">${A.icon("lock")}<span>${esc(P6(RX.tro))}</span></em>` : ""}</span>
+      <span class="bq-th">${mesaImg(m.id)}${s === "on" ? `<em class="bq-own on">${esc(P6(RX.stamp))}</em>` : lk ? `<em class="bq-own lkt">${A.icon("lock")}<span>${esc(P6(RX.tro))}</span></em>` : ""}</span>
       <span class="bq-prow"><b class="bq-nm">${esc(M().name(m.id))}</b>${s || lk ? "" : priceHtml(m.id)}</span></button>`;
   }
   /* la oferta de la casa, al pie del indice (siempre a la vista): una mesa que aun no tienes, -30 %, hasta el lunes */
   function offerHtml() {
     const o = M().offer(); if (!o) return "";
     const got = M().owned(o.id);
-    return `<button type="button" class="bq-offer${o.id === ST.sel && ST.cat === "mesas" ? " sel" : ""}" data-id="${o.id}"><span class="gx-eyb">${esc(P6(TX.offer))} · ${esc(P6(TX.till))}</span><img class="bq-oth" src="assets/mesas/${o.id}.webp" alt="">
+    return `<button type="button" class="bq-offer${o.id === ST.sel && ST.cat === "mesas" ? " sel" : ""}" data-id="${o.id}"><span class="gx-eyb">${esc(P6(TX.offer))} · ${esc(P6(TX.till))}</span>${mesaImg(o.id, "bq-oth")}
       <span class="bq-otx"><b>${esc(M().name(o.id))}${got ? "" : `<i>−${Math.round(o.off * 100)} %</i>`}</b>${got ? `<em class="bq-own">${esc(P6(TX.bought))}</em>` : priceHtml(o.id)}</span></button>`;
   }
   function detHtml() {
@@ -118,7 +120,7 @@ window.AIQ = window.AIQ || {};
     else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span class="bq-fit">${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === id ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === id ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
     const tryBtn = tro && !got ? "" : `<button type="button" class="gx-btn gho wide" id="bqTry"><span>${esc(P6(TX.try))}</span></button>`;
-    return `<span class="bq-dth${leg ? " leg" : ""}${tro && !got ? " lk" : ""}"><img src="assets/mesas/${id}.webp" alt="" width="640" height="360" decoding="async"></span>
+    return `<span class="bq-dth${leg ? " leg" : ""}${tro && !got ? " lk" : ""}">${mesaImg(id)}</span>
       <span class="gx-eyb bq-tier">${esc(P6(tro ? RX.tierT : leg ? TX.tierL : TX.tierR))}</span>
       <h3 class="gx-t-m bq-dn">${esc(M().name(id))}</h3>
       <p class="bq-dd${tro && !got ? " how" : ""}">${esc(tro && !got ? M().how(id) : M().desc(id))}</p>
@@ -175,7 +177,7 @@ window.AIQ = window.AIQ || {};
   /* la miniatura de una pieza del escaparate: cada seccion con la suya (se pintan en hPaint, a escala entera) */
   function hThumb(k, big) {
     const [w, a, b] = k.split(":");
-    if (w === "m") return `<span class="bq-hth m"><img src="assets/mesas/${a}.webp" alt="" decoding="async"></span>`;
+    if (w === "m") return `<span class="bq-hth m">${mesaImg(a)}</span>`;
     if (w === "v") return `<span class="bq-hth v"><img class="bq-hv" data-hv="${esc(a)}" alt=""></span>`;
     if (w === "p") return `<span class="bq-hth"><canvas data-hp="${esc(a + ":" + b)}"></canvas></span>`;
     if (w === "i") return `<span class="bq-hth"><canvas data-ci="${esc(a)}"></canvas></span>`;
