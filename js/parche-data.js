@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.224",
+      name: L("Menú tras cada nivel", "Menu after each level", "Menu après chaque niveau", "Menu após cada nível", "Menü nach jedem Level", "Menu dopo ogni livello", "", "每关之后的菜单", "레벨마다 메뉴", "レベルごとのメニュー", "Меню после каждого уровня", "Menu po każdym poziomie"),
+      date: "2026-10-27",
+      summary: L("En el Clásico, al superar un nivel ya puedes volver al menú sin pasar por la pausa.", "In Classic, after clearing a level you can now go back to the menu without opening the pause.", "En Classique, après un niveau réussi, tu peux revenir au menu sans passer par la pause.", "No Clássico, ao superar um nível já dá para voltar ao menu sem passar pela pausa.", "Im Klassik-Modus kommst du nach einem geschafften Level direkt ins Menü, ohne die Pause.", "Nel Classico, dopo un livello superato puoi tornare al menu senza passare dalla pausa.", "", "经典模式中通关后可以直接回到主菜单,无需打开暂停。", "클래식에서 레벨을 통과한 뒤 일시정지 없이 바로 메뉴로 돌아갈 수 있습니다.", "クラシックでレベルをクリアした後、ポーズを開かずにメニューへ戻れます。", "В Классике после пройденного уровня можно вернуться в меню без паузы.", "W trybie Klasycznym po ukończeniu poziomu możesz wrócić do menu bez pauzy."),
+      chapters: [
+        { id: "clasico", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Modifica", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Clásico", "Classic", "Classique", "Clássico", "Klassik", "Classico", "", "经典", "클래식", "クラシック", "Классика", "Klasyczny"),
+          entries: [
+            E(L("Menú principal al superar el nivel", "Main menu after clearing a level", "Menu principal après un niveau réussi", "Menu principal ao superar o nível", "Hauptmenü nach geschafftem Level", "Menu principale dopo il livello", "", "通关后的主菜单", "레벨 통과 후 메인 메뉴", "クリア後のメインメニュー", "Главное меню после уровня", "Menu główne po poziomie"), "change", "0.3.224", [
+              L("La pantalla de nivel superado ya tiene «Menú principal» junto a «Siguiente nivel». Tu progreso queda guardado.", "The level-cleared screen now has “Main menu” next to “Next level”. Your progress is saved.", "L'écran de niveau réussi a désormais « Menu principal » à côté de « Niveau suivant ». Ta progression est sauvegardée.", "A tela de nível superado agora tem «Menu principal» ao lado de «Próximo nível». Seu progresso fica guardado.", "Der Bildschirm nach einem geschafften Level hat jetzt „Hauptmenü“ neben „Nächstes Level“. Dein Fortschritt bleibt gespeichert.", "La schermata di livello superato ora ha «Menu principale» accanto a «Livello successivo». I progressi restano salvati.", "", "通关画面现在在“下一关”旁边有“主菜单”。进度已保存。", "레벨 통과 화면에 '다음 레벨' 옆에 '메인 메뉴'가 생겼습니다. 진행 상황은 저장됩니다.", "クリア画面に「次のレベル」と並んで「メインメニュー」が付きました。進行状況は保存されます。", "На экране пройденного уровня рядом с «Следующий уровень» появилась кнопка «Главное меню». Прогресс сохраняется.", "Ekran ukończonego poziomu ma teraz „Menu główne” obok „Następny poziom”. Postęp jest zapisany.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.223",
       name: L("La chistera del Rasca", "The Scratch card top hat", "La haute-forme du Gratte", "A cartola do Raspe", "Der Zylinder des Rubbellos", "Il cilindro del Gratta", "", "刮刮卡的礼帽", "스크래치 카드의 모자", "スクラッチの帽子", "Цилиндр скретч-карты", "Cylinder zdrapki"),
       date: "2026-10-27",

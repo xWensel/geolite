@@ -1113,7 +1113,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       verdict({
         kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
         stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1), superada: S.levelScore >= L.advance * 1.5 ? 3 : S.levelScore >= L.advance * 1.1 ? 2 : 1,
-        buttons: [{ id: "nlBtn", cls: "btn-ink", label: A.t("btn.nextLevel"), arrow: true, primary: true, onclick: () => startLevel_(S.level + 1) }],
+        buttons: [{ id: "menuBtn", cls: "btn-line", label: A.t("btn.newGame"), onclick: () => { S.startLevel = 0; showTitle(); } },   // salir al menu sin tener que rendirse en la pausa (el progreso ya esta guardado arriba)
+          { id: "nlBtn", cls: "btn-ink", label: A.t("btn.nextLevel"), arrow: true, primary: true, onclick: () => startLevel_(S.level + 1) }],
       });
     } else { A.sfx.stamp(); setTimeout(A.sfx.fail, 380); endScreen(false, iq); }
   }
