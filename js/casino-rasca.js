@@ -257,7 +257,7 @@ window.AIQ = window.AIQ || {};
       else if (kind === "beam") { const b = Q(".ra-beam"); b.classList.remove("on"); void b.offsetWidth; b.classList.add("on"); rain(img("coin"), 48, Math.round(N * 0.5)); }
       else if (kind === "gems") { const gs = syms.filter(n => n.startsWith("gem_")); for (let i = 0; i < N; i++) P({ img: img(gs[i % gs.length]), w: 48, h: 48, x: 80 + rnd() * 1760, y: -80 - rnd() * 700, vx: (rnd() - .5) * 120, vy: 80 + rnd() * 200, g: 1400, floor: 960 + rnd() * 40, bnc: 0.55, life: 2.6 + rnd() }); }
       else if (kind === "storm") { flash(); for (let i = 0; i < N * 2; i++) P({ x: rnd() * 1960 - 40, y: -60 - rnd() * 900, vx: -120, vy: 900 + rnd() * 500, g: 0, w: 4, h: 28, col: i % 4 ? "#8fd4ff" : "#ffffff", life: 1.8 + rnd() * 0.8 }); }
-      if (big) { const hats = out.cls === "x100"; for (let i = 0; i < (hats ? 26 : 16); i++) P({ img: img(hats ? "hat" : "diamond"), w: 72, h: 72, x: 80 + rnd() * 1760, y: -100 - rnd() * 800, vx: (rnd() - .5) * 200, vy: 100 + rnd() * 200, g: 1300, floor: 970, bnc: 0.45, life: 3.2 + rnd() * 1.2 }); }   // chisteras = solo el jackpot (3 chisteras)
+      if (big) { const hats = out.cls === "x100"; for (let i = 0; i < (hats ? 26 : 16); i++) P({ img: img(hats ? "hat" : "diamond"), w: 96, h: 96, x: 80 + rnd() * 1760, y: -100 - rnd() * 800, vx: (rnd() - .5) * 200, vy: 100 + rnd() * 200, g: 1300, floor: 970, bnc: 0.45, life: 3.2 + rnd() * 1.2 }); }   // chisteras = solo el jackpot (3 chisteras)
     }
 
     /* ---- temblor del escenario, destellos de luz y recompensas por niveles (sonido + temblor de pantalla + vibracion + particulas crecientes) ---- */

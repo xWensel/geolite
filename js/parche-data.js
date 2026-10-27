@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.223",
+      name: L("La chistera del Rasca", "The Scratch card top hat", "La haute-forme du Gratte", "A cartola do Raspe", "Der Zylinder des Rubbellos", "Il cilindro del Gratta", "", "刮刮卡的礼帽", "스크래치 카드의 모자", "スクラッチの帽子", "Цилиндр скретч-карты", "Cylinder zdrapki"),
+      date: "2026-10-27",
+      summary: L("En el Rasca y gana, la chistera de los símbolos es ya la del crupier.", "On the Scratch card, the top hat symbol is now the dealer's own.", "Au Gratte et gagne, le symbole haute-forme est désormais celui du croupier.", "Na Raspe e ganhe, o símbolo da cartola agora é o do crupiê.", "Beim Rubbellos ist das Zylinder-Symbol jetzt der des Dealers.", "Nel Gratta e vinci, il simbolo del cilindro è ora quello del croupier.", "", "在刮刮乐中，礼帽符号现在就是荷官的那顶礼帽。", "스크래치에서 모자 기호가 이제 딜러의 모자와 같습니다.", "スクラッチでは、帽子の絵柄がディーラーのものになりました。", "В скретч-карте символ цилиндра теперь тот же, что у крупье.", "W zdrapce symbol cylindra to teraz cylinder krupiera."),
+      chapters: [
+        { id: "rasca", kicker: L("Arreglo", "Fix", "Correctif", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Rasca y gana", "Scratch card", "Gratte et gagne", "Raspe e ganhe", "Rubbellos", "Gratta e vinci", "", "刮刮乐", "스크래치", "スクラッチ", "Скретч-карта", "Zdrapka"),
+          entries: [
+            E(L("Chistera del crupier", "The dealer's top hat", "Haute-forme du croupier", "Cartola do crupiê", "Zylinder des Dealers", "Cilindro del croupier", "", "荷官的礼帽", "딜러의 모자", "ディーラーの帽子", "Цилиндр крупье", "Cylinder krupiera"), "fix", "0.3.223", [
+              L("El símbolo de la chistera (el del ×100) era otro dibujo. Ahora es la chistera del crupier, con sus mismos píxeles, en la tarjeta, la tabla de premios y la lluvia del jackpot.", "The top hat symbol (the ×100 one) was a different drawing. Now it is the dealer's top hat, with the very same pixels, on the card, the prize table and the jackpot rain.", "Le symbole haute-forme (celui du ×100) était un autre dessin. C'est désormais la haute-forme du croupier, avec les mêmes pixels, sur la carte, la table des gains et la pluie du jackpot.", "O símbolo da cartola (o do ×100) era outro desenho. Agora é a cartola do crupiê, com os mesmos pixels, na cartela, na tabela de prêmios e na chuva do jackpot.", "Das Zylinder-Symbol (das ×100) war eine andere Zeichnung. Jetzt ist es der Zylinder des Dealers, mit denselben Pixeln, auf der Karte, in der Gewinntabelle und im Jackpot-Regen.", "Il simbolo del cilindro (quello del ×100) era un altro disegno. Ora è il cilindro del croupier, con gli stessi pixel, sul biglietto, nella tabella dei premi e nella pioggia del jackpot.", "", "礼帽符号（×100 的那个）原本是另一幅图。现在换成荷官的礼帽，像素完全一致，出现在卡片、奖金表和大奖雨中。", "모자 기호(×100)가 다른 그림이었습니다. 이제 딜러의 모자와 같은 픽셀로 카드, 상금표, 잭팟 비에 나옵니다.", "帽子の絵柄（×100）は別の絵でした。今はディーラーの帽子と同じピクセルで、カード・賞金表・ジャックポットの雨に出ます。", "Символ цилиндра (тот, что ×100) был другим рисунком. Теперь это цилиндр крупье, с теми же пикселями: на карточке, в таблице призов и в дожде джекпота.", "Symbol cylindra (ten od ×100) był innym rysunkiem. Teraz to cylinder krupiera, z tymi samymi pikselami: na karcie, w tabeli wygranych i w deszczu jackpotu.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.222",
       name: L("La cara del personaje", "The character's face", "Le visage du personnage", "O rosto do personagem", "Das Gesicht der Figur", "Il volto del personaggio", "", "人物的脸", "인물의 얼굴", "人物の顔", "Лицо персонажа", "Twarz postaci"),
       date: "2026-10-27",
