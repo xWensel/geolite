@@ -1100,14 +1100,6 @@ window.AIQ = window.AIQ || {};
     dejavu: [
       "Vaya… una cara nueva. Qué raro, tengo un déjà vu rarísimo. ¿Nos conocíamos?|Well, well… a new face. Strange, I've got the weirdest déjà vu. Have we met?|Tiens, tiens… un nouveau visage. Bizarre, j'ai une impression de déjà-vu. On se connaît ?|Ora, ora… um rosto novo. Estranho, tô com um déjà-vu esquisito. A gente se conhece?|Sieh an… ein neues Gesicht. Seltsam, ich hab ein komisches Déjà-vu. Kennen wir uns?|Guarda un po'… una faccia nuova. Strano, ho un déjà-vu stranissimo. Ci conosciamo?|Vaya… una cara nueva. Qué raro, tengo un déjà vu rarísimo. ¿Nos conocíamos?|哟……一张新面孔。奇怪，我有种很强的似曾相识感。我们见过吗？|오호… 새 얼굴이네. 이상하다, 엄청난 데자뷔가 느껴져. 우리 만난 적 있나?|おや……新しい顔だ。妙だな、ひどいデジャヴがする。どこかで会ったか？|Так-так… новое лицо. Странно, у меня жуткое дежавю. Мы знакомы?|No proszę… nowa twarz. Dziwne, mam jakieś przedziwne déjà vu. Znamy się?"
     ],
-    /* ---- la pausa: te espera en el velo (pauseWait) y, si tardas mas de 2 min, lo comenta al volver ({t} = cuanto) */
-    pauseWait: [
-      "Te espero. El reloj también. Por una vez.|I'll wait. So will the clock. For once.|Je t'attends. L'horloge aussi. Pour une fois.|Eu espero. O relógio também. Pra variar.|Ich warte. Die Uhr auch. Ausnahmsweise.|Ti aspetto. Anche l'orologio. Per una volta.||我等你。时钟也等。难得一次。|기다릴게. 시계도 기다려. 이번만.|待ってるぞ。時計もな。今回だけは。|Я подожду. Часы тоже. В кои-то веки.|Poczekam. Zegar też. Wyjątkowo.",
-      "Pausa. Aprovecho para barajar. Tú aprovecha para pensar.|Pause. I'll use it to shuffle. You use it to think.|Pause. J'en profite pour battre les cartes. Toi, profite-en pour réfléchir.|Pausa. Vou aproveitar pra embaralhar. Aproveita pra pensar.|Pause. Ich nutze sie zum Mischen. Du zum Nachdenken.|Pausa. Io ne approfitto per mescolare. Tu approfittane per pensare.||暂停。我趁机洗牌。你趁机想想。|일시정지. 난 카드 좀 섞을게. 넌 생각 좀 해.|一時停止だ。私はシャッフルする。君は考えな。|Пауза. Я пока потасую. А ты подумай.|Pauza. Ja potasuję. Ty pomyśl."
-    ],
-    pauseBack: [
-      "{t} de pausa. Yo he contado cartas. Tú, ¿ovejas?|Paused for {t}. I counted cards. You counted sheep?|{t} de pause. Moi, j'ai compté les cartes. Toi, les moutons ?|{t} de pausa. Eu contei cartas. E você, carneirinhos?|{t} Pause. Ich hab Karten gezählt. Du Schäfchen?|{t} di pausa. Io ho contato le carte. Tu le pecore?|{t} de pausa. Yo conté cartas. ¿Y tú, ovejas?|暂停了{t}。我在数牌。你在数羊？|{t} 동안 일시정지. 난 카드를 셌어. 넌 양을 셌어?|{t}の休憩。私はカードを数えていた。君は羊でも数えてたか？|Пауза длиной {t}. Я считал карты. А ты — овец?|{t} przerwy. Ja liczyłem karty. A ty owce?"
-    ],
     /* ---- se queda traspuesto en la portada tras el "¿sigues ahi?" y se despierta de golpe cuando vuelves */
     wake: [
       "¡Estaba despierto! Solo descansaba los ojos.|I was awake! Just resting my eyes.|J'étais réveillé ! Je me reposais juste les yeux.|Eu tava acordado! Só descansando os olhos.|Ich war wach! Hab nur die Augen ausgeruht.|Ero sveglio! Riposavo solo gli occhi.||我醒着呢！只是闭目养神。|깨어 있었어! 눈만 잠깐 쉬고 있었지.|起きてたぞ！目を休めていただけだ。|Я не спал! Просто глаза отдыхали.|Nie spałem! Tylko dawałem odpocząć oczom.",
@@ -2142,9 +2134,6 @@ window.AIQ = window.AIQ || {};
       "Una sola provisión. Ahora sí que se oye el reloj.|Just one provision. Now you can really hear the clock.|Une seule provision. Là, on entend vraiment le tic-tac.|Uma provisão só. Agora sim dá pra ouvir o relógio.|Nur noch ein Proviant. Jetzt hört man die Uhr ticken.|Una sola provvista. Adesso sì che si sente l'orologio.||只剩一份补给。现在连时钟的声音都听得见了。|식량 하나 남았어. 이제야 시계 소리가 들리네.|食料は残りひとつ。時計の音がよく聞こえるようになったな。|Один-единственный запас. Вот теперь слышно, как тикают часы.|Został jeden zapas. Teraz naprawdę słychać zegar.",
       "Última provisión. Hasta el gato ha dejado de lamerse la pata.|Last provision. Even the cat stopped licking his paw.|Dernière provision. Même le chat a arrêté de se lécher la patte.|Última provisão. Até o gato parou de lamber a pata.|Letzter Proviant. Sogar der Kater hat aufgehört, sich die Pfote zu lecken.|Ultima provvista. Perfino il gatto ha smesso di leccarsi la zampa.|Última provisión. Hasta el gato dejó de lamerse la pata.|最后一份补给。连猫都不舔爪子了。|마지막 식량. 고양이도 발 핥기를 멈췄어.|最後の食料だ。猫まで前足をなめるのをやめたぞ。|Последний запас. Даже кот перестал вылизывать лапу.|Ostatni zapas. Nawet kot przestał lizać łapę.",
     ],
-    pauseWait: [
-      "Pausa. Comodín se ha echado la siesta encima de Europa.|Pause. Joker is napping on top of Europe.|Pause. Joker fait la sieste sur l'Europe.|Pausa. O Coringa tirou uma soneca em cima da Europa.|Pause. Joker hält ein Nickerchen auf Europa.|Pausa. Jolly si è fatto un pisolino sopra l'Europa.|Pausa. Comodín se echó una siesta encima de Europa.|暂停。小丑趴在欧洲上睡午觉了。|일시 정지. 조커가 유럽 위에서 낮잠 자는 중이야.|一時停止。ジョーカーがヨーロッパの上で昼寝を始めた。|Пауза. Джокер устроил сиесту прямо на Европе.|Pauza. Joker uciął sobie drzemkę na Europie.",
-    ],
     betWin: [
       "Ganas tú. Qué raro suena. Procuraré no repetirlo.|You win. Sounds so strange. I'll try not to say it again.|Tu gagnes. Ça sonne bizarre. J'essaierai de ne pas le répéter.|Você ganhou. Que estranho isso soa. Vou tentar não repetir.|Du gewinnst. Klingt komisch. Soll nicht wieder vorkommen.|Vinci tu. Che strano suona. Cercherò di non ripeterlo.||你赢了。听着真别扭。我尽量别再说第二次。|네가 이겼어. 이상하게 들리네. 다시는 말 안 하도록 노력할게.|君の勝ち。妙な響きだ。二度と言わずに済むようにする。|Выигрыш твой. Странно звучит. Постараюсь не повторять.|Wygrywasz. Dziwnie to brzmi. Postaram się tego nie powtarzać.",
       "Cobra. Te lo pago sonriendo. Por fuera.|Collect. I'm paying you with a smile. On the outside.|Encaisse. Je te paie avec le sourire. En façade.|Pode receber. Pago sorrindo. Por fora.|Kassier. Ich zahl's dir lächelnd aus. Äußerlich.|Incassa. Ti pago sorridendo. Di facciata.||收钱吧。我笑着付给你。表面上。|가져가. 웃으면서 줄게. 겉으로만.|受け取れ。笑顔で払ってやる。顔だけはな。|Забирай. Плачу с улыбкой. Внешней.|Bierz. Płacę z uśmiechem. Na zewnątrz.",
@@ -2289,8 +2278,7 @@ window.AIQ = window.AIQ || {};
     relicOn: ["sly", "hat_tip"], "relicOn#1": ["sly", "stamp"], "relicOn#2": ["suspicious", "pinch"], "relicOn#3": ["sly", "point"],
     secondWin: ["shock", "hat_pop"], "secondWin#1": ["sly"], cxFirst: ["sly", "fan_open"],
     cxPace: ["puzzled"], cxPaceSlow: ["laugh"], cxNothing: ["bored"], lockMine: ["suspicious", "finger_wag"], cxTease: ["sly", "cards_hide"],
-    fileFirst: ["wink", "shh"], forgetBye: ["sad", "hand_heart"], dejavu: ["puzzled", "lean_in"], pauseWait: ["sly", "shuffle"],
-    "pauseWait#0": ["sly", "pocket_watch"], pauseBack: ["laugh", "shuffle"], wake: ["nervous", "hat_pop"], "wake#2": ["bored", "hat_pop"],
+    fileFirst: ["wink", "shh"], forgetBye: ["sad", "hand_heart"], dejavu: ["puzzled", "lean_in"], wake: ["nervous", "hat_pop"], "wake#2": ["bored", "hat_pop"],
     tagFix: ["smug", "point"], tierUp: ["sly", "stamp"], tierHi: ["sly", "hat_tip"], "tierUp#10": ["bow", "hat_off_bow"], "tierUp#13": ["bow", "hat_off_bow"],
     tierHome1: ["sly", "hat_tip"], "tierHome1#2": ["sly", "cards_tap"], tierHome2: ["sly"], "tierHome2#0": ["wink", "lean_in"],
     "tierHome2#1": ["bored"], "tierHome2#2": ["sly", "shuffle"], tierHome3: ["wink", "shh"], "tierHome3#1": ["sly", "beckon"],
@@ -2345,7 +2333,7 @@ window.AIQ = window.AIQ || {};
     "achRun#2": ["admirado", "r_logro"], "achRun#3": ["sly", "r_logro"], "roundFail#6": ["smug", "r_vida"], "roundFail#7": ["tramando", "r_vida"], "roundFail#8": ["laugh", "r_vida"], "roundFail#9": ["sad", "hat_chest"],
     "roundFailLast#2": ["tramando", "r_ultima_vida"], "roundFailLast#3": ["smug", "r_ultima_vida"], "roundFailLast#4": ["tramando", "r_ultima_vida"], "bossBeat#0": ["ofendido", "r_jefe_vencido"], "bossBeat#1": ["admirado", "r_jefe_vencido"], "bossBeat#2": ["furious", "tantrum"],
     "bossBeat#3": ["tramando", "r_jefe_vencido"], "bossBeat#4": ["cansado", "r_jefe_vencido"], "bossWins#0": ["orgulloso", "hat_tip"], "bossWins#1": ["smug", "jot"], "bossWins#2": ["laugh", "e_paga"], "bossWins#3": ["bow", "hat_off_bow"],
-    "bossWins#4": ["aliviado", "shrug"], "catSlow#0": ["suspicious", "point"], "missFar#0": ["laugh", "r_fallo"], "pauseWait#2": ["innocent", "point"], "bossBeat_blackout#0": ["admirado", "hat_tip"], "bossWins_blackout#0": ["wink"],
+    "bossWins#4": ["aliviado", "shrug"], "catSlow#0": ["suspicious", "point"], "missFar#0": ["laugh", "r_fallo"], "bossBeat_blackout#0": ["admirado", "hat_tip"], "bossWins_blackout#0": ["wink"],
     "bossBeat_dizzy#0": ["cansado", "sway"], "bossWins_dizzy#0": ["laugh"], "bossBeat_onecont#0": ["dare", "point"], "bossWins_onecont#0": ["wink", "shrug"], "bossBeat_blind#0": ["puzzled", "facepalm"], "bossWins_blind#0": ["innocent"],
     "bossBeat_nightfall#0": ["admirado"], "bossWins_nightfall#0": ["tramando"], "bossBeat_siesta#0": ["cansado"], "bossWins_siesta#0": ["sleep", "yawn"], "bossBeat_falsealarm#0": ["ofendido", "turn_away"], "bossWins_falsealarm#0": ["laugh"],
     "bossBeat_quakehall#0": ["nervous", "tremble_body"], "bossWins_quakehall#0": ["wink", "shrug"], "bossBeat_fourthwall#0": ["cansado", "glass_knock"], "bossWins_fourthwall#0": ["smug"], "bossBeat_mirror#0": ["ofendido", "facepalm"], "bossWins_mirror#0": ["laugh", "head_tilt"],
@@ -2956,7 +2944,7 @@ window.AIQ = window.AIQ || {};
     el.classList.remove("in", "done", "laugh", "angry", "shock", "sly", "boss", "doze", "nap", "nap1", "nap2", "stay", "peek", "pk-r", "pk-l"); spr.shown(false);
   };   // se va: si el monton de tarjetas esperaba la esquina, ya es suya
   D.enable = on => {
-    roundObs = null; if (typeof freezeOut === "function") freezeOut();                                                                  // lo que vio en tu ronda no pasa de una expedicion a otra
+    roundObs = null;                                                                  // lo que vio en tu ronda no pasa de una expedicion a otra
     D.on = !!on; clearTimeout(runT);
     if (on && D.onHome) D.homeTease(false);                           // entrar en partida (p. ej. Continuar desde el inicio) apaga las apariciones del menu
     if (!on) { if (speaking()) { D.dock(null); D.release(); } else { D.dock(null); D.hide(); if (el) el.classList.add("hidden"); } }   // a media frase: la acaba en la esquina (sin quedarse enganchado a la pantalla de antes) y se va
@@ -3724,28 +3712,6 @@ window.AIQ = window.AIQ || {};
     tag.innerHTML = `<s class="tag-x">${tag.innerHTML}</s> <b class="tag-fix">${A.pick6("Yo sí.|I do.|Moi, oui.|Eu sei.|Ich schon.|Io sì.||我知道。|난 알지.|私は知ってる。|Я знаю.|Ja wiem.")}</b>`;
     A.sfx.card(); return true;
   }
-  /* LA PAUSA: te espera en el velo (una frase cada 10 min como mucho) y, si la pausa pasa de 2 min, lo comenta al volver (una vez por sesion).
-     La pausa automatica al cambiar de ventana no cuenta */
-  let pauseAt0 = 0, pauseSaidAt = -1e9;
-  /* LA PAUSA CONGELADA (votada 23-oct): una vez por sesion, al pausar asoma con un gesto exagerado y se queda congelado a mitad, como un video en
-     pausa (con su banda de imagen). Al quitar la pausa el gesto acaba de golpe y se va: disimula. Sin frase: al volver, la partida es sagrada */
-  const FREEZE = ["hat_pop", "tantrum", "coin_toss", "magic_pass", "facepalm", "twirl_moustache"];
-  let frozen = false;
-  function freezeIn() {
-    if (frozen || once.freeze || !spr || D.busy || held || (A.core && A.core.S && A.core.S.reduce)) return;
-    const G = (A.CRUPIER_DATA && A.CRUPIER_DATA.gest) || {}, pool = FREEZE.filter(g => G[g]); if (!pool.length) return;
-    const g = rand(pool); once.freeze = 1;
-    if (D.host) spr.play(g); else if (!D.gesture(g, true)) return;                   // en la pausa esta acoplado a su foco (D.host): el gesto, ahi mismo
-    frozen = true; spr.freeze("mid", () => { if (!pauseAt0 || !el || !frozen) { spr.freeze(false); frozen = false; return; } el.classList.add("vhs"); A.sfx.cartel && A.sfx.cartel(); });   // se queda congelado en lo mas exagerado del gesto
-  }
-  function freezeOut() { if (!frozen) return; frozen = false; if (el) el.classList.remove("vhs"); if (spr) spr.freeze(false); }
-  D.notePause = p => {
-    if (!D.on || D.host || document.hidden) { pauseAt0 = 0; freezeOut(); return; }
-    if (p) { pauseAt0 = Date.now(); if (Date.now() - pauseSaidAt > 600000 && !D.busy && once.freeze) { pauseSaidAt = Date.now(); const t = say1("pauseWait"); if (t) D.say(t, { mood: "sly", hold: holdFor(t) }); } else setTimeout(freezeIn, 600); return; }
-    freezeOut();
-    const d = pauseAt0 ? Date.now() - pauseAt0 : 0; pauseAt0 = 0;
-    if (d > 120000 && !once.pauseBack) { once.pauseBack = 1; const t = say1("pauseBack", { t: durTxt(d) }); if (t) D.say(t, { mood: "laugh", hold: holdFor(t) }); }
-  };
   /* LA ENCICLOPEDIA: al abrirla (como mucho cada 2 min) tu ritmo real; la primera vez, cuantas tienes; a veces, que no has traido ninguna.
      Y de vez en cuando (desde la 3.a visita, cada 4 o mas, a la mitad) te ensena una bloqueada 3 s y te la quita. Si pulsas 3 bloqueadas, la cerradura es suya */
   let cxAt = -1e9;

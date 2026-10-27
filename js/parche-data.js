@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.226",
+      name: L("Adiós a la pausa del crupier", "Goodbye to the dealer's pause", "Adieu la pause du croupier", "Adeus à pausa do crupiê", "Tschüss, Pause des Dealers", "Addio alla pausa del croupier", "", "告别荷官的暂停", "딜러의 일시정지와 작별", "ディーラーの一時停止とお別れ", "Прощай, пауза крупье", "Żegnaj, pauzo krupiera"),
+      date: "2026-10-27",
+      summary: L("Sin pausa en la ronda, el crupier ya no se congela ni comenta la pausa.", "With no pause during a round, the dealer no longer freezes or comments on it.", "Sans pause en pleine manche, le croupier ne se fige plus et ne commente plus la pause.", "Sem pausa durante a rodada, o crupiê já não congela nem comenta a pausa.", "Ohne Pause in der Runde friert der Dealer nicht mehr ein und kommentiert sie nicht mehr.", "Senza pausa durante il round, il croupier non si congela più e non commenta la pausa.", "", "回合中没有暂停后，荷官不再定格，也不再评论暂停。", "라운드 중 일시정지가 없어져 딜러가 더 이상 얼어붙거나 일시정지를 언급하지 않습니다.", "ラウンド中の一時停止がなくなり、ディーラーは固まったり一時停止に触れたりしなくなりました。", "Без паузы в раунде крупье больше не замирает и не комментирует паузу.", "Bez pauzy w rundzie krupier już nie zastyga i nie komentuje pauzy."),
+      chapters: [
+        { id: "crupier", kicker: L("Sale", "Removed", "Retiré", "Removido", "Entfernt", "Rimosso", "", "移除", "삭제", "削除", "Убрано", "Usunięto"),
+          title: L("Crupier", "Dealer", "Croupier", "Crupiê", "Dealer", "Croupier", "", "荷官", "딜러", "ディーラー", "Крупье", "Krupier"),
+          entries: [
+            E(L("La pausa congelada y sus frases", "The frozen pause and its lines", "La pause figée et ses répliques", "A pausa congelada e as suas falas", "Die eingefrorene Pause und ihre Sprüche", "La pausa congelata e le sue battute", "", "定格暂停及其台词", "멈춘 일시정지와 대사", "固まる一時停止とそのセリフ", "Застывшая пауза и её реплики", "Zastygła pauza i jej teksty"), "out", "0.3.226", [
+              L("Se retiran el gesto congelado con banda de vídeo y las frases de «te espero» y «x de pausa»: ya no hay pausa a media pregunta y el menú del ticket no las necesita.", "The frozen gesture with its video band and the “I'll wait” and “paused for x” lines are gone: there's no pause mid-question and the ticket menu doesn't need them.", "Le geste figé avec sa bande vidéo et les répliques « je t'attends » et « x de pause » disparaissent : plus de pause en pleine question et le menu du ticket n'en a pas besoin.", "Saem o gesto congelado com faixa de vídeo e as falas «eu espero» e «x de pausa»: já não há pausa a meio da pergunta e o menu do ticket não precisa delas.", "Die eingefrorene Geste mit Videobalken und die Sprüche „Ich warte“ und „x Pause“ entfallen: Mitten in der Frage gibt es keine Pause und das Ticket-Menü braucht sie nicht.", "Escono il gesto congelato con la banda video e le battute «ti aspetto» e «x di pausa»: non c'è più pausa a metà domanda e il menu del ticket non le serve.", "", "移除了带录像条的定格动作，以及“我等你”和“暂停了 x”的台词：题目中途不再有暂停，小票菜单也用不上它们。", "비디오 띠가 있는 멈춘 동작과 ‘기다릴게’, ‘x 동안 일시정지’ 대사를 없앴습니다. 문제 도중 일시정지가 없어졌고 티켓 메뉴에서도 필요 없습니다.", "ビデオ帯つきの固まる動作と「待ってるよ」「x 一時停止」のセリフを削除しました。問題の途中に一時停止はなく、チケットのメニューにも不要です。", "Убраны застывший жест с видеополосой и реплики «Я подожду» и «x паузы»: посреди вопроса паузы нет, а меню билета в них не нуждается.", "Usunięto zastygły gest z paskiem wideo oraz teksty „Poczekam” i „x pauzy”: w środku pytania nie ma pauzy, a menu biletu ich nie potrzebuje.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.225",
       name: L("Sin pausa en la ronda", "No pause during a round", "Pas de pause en pleine manche", "Sem pausa durante a rodada", "Keine Pause während der Runde", "Nessuna pausa durante il round", "", "回合中不能暂停", "라운드 중에는 일시정지 없음", "ラウンド中は一時停止なし", "Без паузы во время раунда", "Bez pauzy w trakcie rundy"),
       date: "2026-10-27",

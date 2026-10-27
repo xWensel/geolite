@@ -360,14 +360,12 @@ window.AIQ = window.AIQ || {};
       this.lastFidget = g; this.fidgetAt = now + gap(); this.play(g); if (this.gest) this.gest.fid = true;
     }
     draw(force) {
-      if (this.dead || !loaded || !this.k || this.frozen) return;                     // congelado (la pausa): se queda el ultimo fotograma pintado
+      if (this.dead || !loaded || !this.k) return;
       const now = performance.now(); this.fidget(now);
       const p = this.pose(now), key = JSON.stringify(p);
       if (!force && key === this.key) return;
       this.key = key; compose(p, this.o.atlas);
       const c = this.ctx, k = this.k; c.clearRect(0, 0, this.cv.width, this.cv.height); c.drawImage(work, 0, 0, W, H, p.x * k, p.y * k, W * k, H * k);
-      const G = this.gest, fm = this.freezeMid;                                       // la pausa congelada: se para en la mitad del gesto (su pose mas exagerada)
-      if (fm && (!G || G.i >= Math.floor(G.x.frames.length * 0.45))) { this.freezeMid = null; this.frozen = true; if (fm.cb) fm.cb(); }
     }
     /* reloj propio: solo repinta cuando cambia algo (nada de 60 fps): ~30 ms con gesto o habla, si no a su ritmo */
     tick() {
@@ -379,7 +377,6 @@ window.AIQ = window.AIQ || {};
       this.timer = setTimeout(() => this.tick(), busy ? 33 : this.visible ? (this.fol ? 60 : 90) : 400);
     }
     poke() { if (loaded && !this.dead) { clearTimeout(this.timer); this.timer = setTimeout(() => this.tick(), 0); } }
-    freeze(on, cb) { if (on === "mid") { this.freezeMid = { cb }; this.poke(); return this; } this.freezeMid = null; this.frozen = !!on; if (!on) { this.key = ""; this.poke(); } return this; }   // la pausa congelada (js/dealer.js): como un video en pausa ("mid": a mitad del gesto que va a hacer)
     dress(atlas) { this.o.atlas = atlas || null; this.key = ""; this.poke(); }
     destroy() { this.dead = true; clearTimeout(this.timer); if (this.ro) this.ro.disconnect(); live.delete(this); this.cv.remove(); }
   }

@@ -13,11 +13,6 @@
 /* Comodin: su lienzo lo coloca js/comodin.js al pixel real, con las patas en el suelo de su pantalla */
 .cm-cv { position: absolute; image-rendering: pixelated; pointer-events: none; z-index: 3; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
 .cm-hit { position: absolute; z-index: 4; pointer-events: auto; cursor: pointer; }   /* lo que se toca: solo la caja de su cuerpo, nunca el margen transparente del lienzo */
-/* LA PAUSA CONGELADA (js/dealer.js): el crupier, quieto a mitad de gesto como un video en pausa, con su banda de imagen y las dos barras de pausa.
-   Sin destellos ni desenfoques: bandas lisas a pixel entero */
-.dealer.vhs .dl-face { position: relative; }
-.dealer.vhs .dl-face::after { content: ""; position: absolute; left: 6%; right: 6%; top: 46%; height: 6px; background: rgb(243 240 250 / .22); box-shadow: 0 9px 0 rgb(243 240 250 / .12); pointer-events: none; }
-.dealer.vhs .dl-face::before { content: ""; position: absolute; left: 10%; top: 8%; width: 6px; height: 18px; background: #f3f0fa; box-shadow: 10px 0 0 #f3f0fa, 0 0 0 2px #16241c, 10px 0 0 2px #16241c; z-index: 2; pointer-events: none; }
 .cm-host { position: absolute; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 100005; }   /* por encima de la portada y del apagon, por debajo de las trastadas y del crupier */
 
 /* la capa de las trastadas: por encima del juego y por debajo del crupier (.dealer, 100010) */
