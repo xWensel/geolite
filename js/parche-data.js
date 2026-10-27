@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.231",
+      name: L("Granadino", "Granadino", "Granadino", "Granadino", "Granadino", "Granadino", "", "Granadino", "Granadino", "Granadino", "Granadino", "Granadino"),
+      date: "2026-10-27",
+      summary: L("Una mesa nueva para el mapa: el azulejo blanco y azul con granadas de una cocina de verdad.", "A new map table: the white-and-blue pomegranate tile of a real kitchen.", "Une nouvelle table pour la carte : le carreau blanc et bleu aux grenades d'une vraie cuisine.", "Uma mesa nova para o mapa: o azulejo branco e azul com romãs de uma cozinha de verdade.", "Ein neuer Kartentisch: die weiß-blaue Granatapfel-Fliese einer echten Küche.", "Un nuovo tavolo per la mappa: la piastrella bianca e blu con le melagrane di una vera cucina.", "", "地图新增一张牌桌：真实厨房里带石榴图案的蓝白瓷砖。", "지도에 새 테이블이 생겼습니다. 진짜 부엌에서 가져온 석류 무늬 청백 타일입니다.", "マップに新しいテーブル。本物のキッチンにある、ザクロ柄の青と白のタイルです。", "Новый стол для карты: бело-синяя плитка с гранатами из настоящей кухни.", "Nowy stół dla mapy: biało-niebieski kafel z granatami z prawdziwej kuchni."),
+      chapters: [
+        { id: "mesas", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新增", "신규", "新規", "Новое", "Nowe"),
+          title: L("Mesas del mapa", "Map tables", "Tables de la carte", "Mesas do mapa", "Kartentische", "Tavoli della mappa", "", "地图牌桌", "지도 테이블", "マップのテーブル", "Столы карты", "Stoły mapy"),
+          entries: [
+            E(L("Granadino", "Granadino", "Granadino", "Granadino", "Granadino", "Granadino", "", "Granadino", "Granadino", "Granadino", "Granadino", "Granadino"), "new", "0.3.231", [
+              L("**Granadino**: baldosas blancas con la greca azul de eslabones y, de cinco en cinco, una granada con su red de rombos; los países, en azul de porcelana. Mesa rara: 150 fichas de oro en La tienda.", "**Granadino**: white tiles with the blue chain border and, every fifth tile, a pomegranate with its diamond net; countries in porcelain blue. Rare table: 150 gold chips in the shop.", "**Granadino** : des carreaux blancs à la greca bleue en maillons et, un sur cinq, une grenade à filet de losanges ; les pays en bleu porcelaine. Table rare : 150 jetons d'or à la boutique.", "**Granadino**: azulejos brancos com a greca azul de elos e, de cinco em cinco, uma romã com sua rede de losangos; os países em azul-porcelana. Mesa rara: 150 fichas de ouro na boutique.", "**Granadino**: weiße Fliesen mit blauer Gliederborte und auf jeder fünften ein Granatapfel mit Rautennetz; die Länder in Porzellanblau. Seltener Tisch: 150 goldene Chips in der Boutique.", "**Granadino**: piastrelle bianche con la greca blu a maglie e, una ogni cinque, una melagrana con la sua rete di rombi; i paesi in blu porcellana. Tavolo raro: 150 fiche d'oro in boutique.", "", "**Granadino**：白色瓷砖配蓝色链环花边，每五块砖有一颗带菱形网纹的石榴；国家为瓷青色。稀有牌桌：商店售价150金筹码。", "**Granadino**: 흰 타일에 파란 사슬 무늬 띠가 둘리고, 다섯 장마다 마름모 그물무늬 석류가 그려집니다. 나라는 도자기 파랑. 희귀 테이블: 상점에서 금 칩 150개.", "**Granadino**：白いタイルに青い鎖模様の縁取り、5枚ごとに菱形の網目のザクロ。国々は磁器の青。レアなテーブル：ショップで金チップ150枚。", "**Granadino**: белая плитка с синим бордюром из звеньев и гранатом с ромбовой сеткой на каждой пятой; страны — фарфорово-синие. Редкий стол: 150 золотых фишек в магазине.", "**Granadino**: białe kafle z niebieskim szlakiem z ogniw i granatem z rombową siatką co piąty; kraje w porcelanowym błękicie. Rzadki stół: 150 złotych żetonów w sklepie.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.230",
       name: L("El catálogo del Campamento", "The Camp catalogue", "Le catalogue du Campement", "O catálogo do Acampamento", "Der Katalog des Lagers", "Il catalogo dell'Accampamento", "", "营地图鉴", "캠프 도감", "キャンプのカタログ", "Каталог лагеря", "Katalog obozu"),
       date: "2026-10-27",

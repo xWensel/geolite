@@ -155,6 +155,8 @@ window.AIQ = window.AIQ || {};
     land: ["#f6f2ff", "#f2eeff", "#faf4ff", "#eef2ff", "#f4f0ff", "#f8f4ff", "#ffffff"], line: [0.1, 0.05, 0.2, 0.95], shadow: { off: [3, -4], col: [0.05, 0, 0.1, 0.5] }, gridA: 0 });
   A.MAPSTYLES.hiperespacio = MS({ mat: 52, animated: true, oceanTop: "#050a22", oceanBot: "#02051a", shallow: "#050a22", mc1: "#6a3aa8", mc2: "#cfe0ff", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#2a3a5a", "#324468", "#26364e", "#3a4c74", "#2c3e5e", "#34486c", "#243248"], line: [0.6, 0.8, 1, 0.9], shadow: null, gridA: 0 });
+  A.MAPSTYLES.granadino = MS({ mat: 41, oceanTop: "#f4f2ec", oceanBot: "#e9e6dd", shallow: "#dde5f4", mc1: "#212a7c", mc2: "#b4b1aa", mp: [72, 0, 0, 2], felt: [0, 0.1, 0.3, 0.03],
+    land: ["#b9cbec", "#a4bae4", "#cdd9f0", "#94acdc", "#aebfe6", "#c2d1ee", "#869fd2"], line: [0.09, 0.11, 0.4, 0.95], lineW: 2.0, shadow: { off: [3, -4], col: [0.08, 0.1, 0.3, 0.3] }, gridA: 0 });
   A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, mat: 54, animated: true, remolino: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
     land: ["#c84c0c", "#d8641c", "#b84410", "#e07a2a", "#c05818", "#d06a20", "#e8a050"], line: [0.25, 0.08, 0.02, 0.95], grid: "#8fb8ff", gridA: 0.08, tropic: "#ffd98a" };
 
@@ -289,6 +291,8 @@ window.AIQ = window.AIQ || {};
         "Estrellas que se mueven con el mapa.|Stars that move with the map.|Étoiles qui bougent avec la carte.|Estrelas que se movem com o mapa.|Sterne, die mit der Karte wandern.|Stelle che si muovono con la mappa.||随地图移动的星星。|지도와 함께 움직이는 별.|マップと一緒に動く星々。|Звёзды, плывущие вместе с картой.|Gwiazdy poruszające się z mapą."],
       ["plataformas", "l", "Plataformas|Platformer|Plateformes|Plataformas|Plattformen|Piattaforme||平台跳跃|플랫포머|プラットフォーマー|Платформы|Platformówka",
         "Humo azul de fondo y países de ladrillo.|Blue smoke and brick countries.|Fumée bleue et pays en briques.|Fumaça azul e países de tijolo.|Blauer Rauch und Ziegel-Länder.|Fumo blu e paesi di mattoni.||蓝色烟雾与砖块国家。|푸른 연기와 벽돌 나라들.|青い煙とレンガの国々。|Синий дым и страны из кирпича.|Niebieski dym i kraje z cegieł."],
+      ["granadino", "r", "Granadino|Granada tile|Carreaux de Grenade|Granadino|Granada-Kachel|Granadino||石榴瓷砖|그라나다 타일|グラナダのタイル|Гранада|Granadino",
+        "Azulejo blanco, greca azul y granadas.|White tile, blue chain border, pomegranates.|Carreaux blancs, greca bleue et grenades.|Azulejo branco, greca azul e romãs.|Weiße Fliesen, blaue Borte, Granatäpfel.|Piastrelle bianche, greca blu e melagrane.||白瓷砖、蓝色花边与石榴。|흰 타일, 파란 띠, 석류.|白いタイルに青い縁取りとザクロ。|Белая плитка, синий бордюр, гранаты.|Białe kafle, niebieski szlak i granaty."],
     ].map(([id, r, n, d]) => ({ id, shop: r, n, d, own: P => !!(P.mesas && P.mesas.own && P.mesas.own[id]) })),
   ];
   const prof = () => A.profile.get();

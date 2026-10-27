@@ -182,6 +182,23 @@ float rumbo(vec2 wp, vec2 C){                                    // rosa de los 
   float a=atan(v.y,v.x), stp=6.2831853/16.0, da=mod(a+stp*0.5,stp)-stp*0.5, k=floor(mod((a+stp*0.5)/stp,16.0));
   return lineAlpha(abs(sin(da))*length(v))*(0.45+0.55*(1.0-mod(k,2.0)))*smoothstep(0.04,0.1,Lw)*(1.0-smoothstep(1.6,2.4,Lw));
 }
+float eslabones(float a, float d){               // greca de eslabones: anillos que se solapan a lo largo de la banda (a = coordenada a lo largo, d = distancia a la junta)
+  float m=0.0; for(int k=-1;k<=1;k++){ float cc=(floor(a/6.0)+float(k)+0.5)*6.0; float r=length(vec2(a-cc,d)); m=max(m,step(1.9,r)*(1.0-step(3.7,r))); } return m;
+}
+float hoja(vec2 u, vec2 a, vec2 b, float R){                    // hoja: una lenteja a lo largo del segmento a-b
+  vec2 ab=b-a; float t=clamp(dot(u-a,ab)/dot(ab,ab),0.0,1.0); return 1.0-step(R*sin(3.14159265*t)+0.5,length(u-(a+ab*t)));
+}
+float granada(vec2 u){                                           // la granada de la baldosa: cuerpo, corona de tres puntas, red de rombos blanca, tallo y hojas. Se dibuja a pixel de arte (la forma se muestrea a 1/1.7, sin ampliar pixeles); u = pixel respecto al centro
+  vec2 v=u/1.7, g=vec2(v.x,v.y-2.0);
+  float body=1.0-step(1.0,pow(g.x/8.0,2.0)+pow(g.y/7.2,2.0));
+  float crown=0.0; for(int k=-1;k<=1;k++){ float h=k==0?11.5:10.0; crown=max(crown,step(6.0,g.y)*(1.0-step(h,g.y))*(1.0-step(1.7-(g.y-6.0)*0.2,abs(g.x-float(k)*2.9)))); }
+  crown=max(crown,step(6.0,g.y)*(1.0-step(8.0,g.y))*(1.0-step(4.6,abs(g.x))));
+  vec2 pu=vec2(u.x,u.y-3.0); float lin=max(1.0-step(0.5,mod(pu.x+pu.y,6.0)),1.0-step(0.5,mod(pu.x-pu.y,6.0)));
+  float net=(1.0-step(9.0,length(pu)))*lin*body;
+  float stem=(1.0-step(2.0,abs(u.x)))*step(-13.0,v.y)*(1.0-step(-4.0,v.y));
+  float leaves=max(max(hoja(v,vec2(0.0,-8.0),vec2(10.0,-5.0),1.6),hoja(v,vec2(0.0,-8.0),vec2(-10.0,-6.5),1.5)),max(hoja(v,vec2(0.0,-11.5),vec2(-8.5,-15.0),1.7),hoja(v,vec2(0.0,-11.5),vec2(7.0,-14.5),1.4)));
+  return max(max(max(body,crown),max(stem,leaves))-net,0.0);
+}
 vec3 mesa(vec3 b, vec2 q, vec2 frag, vec2 wp, float n, float w, float x){
   if(u_mat==1){                                                  // madera: tablas con veta (u_mp = alto de tabla, largo, contraste)
     float H=u_mp.x, row=floor(q.y/H), yy=q.y-row*H, jx=q.x+hash(vec2(row,3.7))*977.0, col=floor(jx/u_mp.y), xx=jx-col*u_mp.y, k=hash(vec2(row,col));
@@ -489,6 +506,19 @@ vec3 mesa(vec3 b, vec2 q, vec2 frag, vec2 wp, float n, float w, float x){
     for(int k=0;k<4;k++){ float tt=t*(1.0-(3.5/float(k+1))); i=p+vec2(cos(tt-i.x)+sin(tt+i.y),sin(tt-i.y)+cos(tt+i.x)); c+=1.0/length(vec2(p.x/(sin(i.x+tt)/0.005),p.y/(cos(i.y+tt)/0.005))); }
     c/=4.0; c=1.17-pow(c,1.4); float v=floor(clamp(pow(abs(c),5.0)+lit*0.25,0.0,1.0)*4.0)/4.0;
     return mix(b,u_mc1,v*0.55);
+  }
+  if(u_mat==41){                                                 // granadino: azulejo blanco con greca de eslabones azul y granadas (u_mp.x = lado de la baldosa, multiplo de 6)
+    float T=u_mp.x; vec2 cid=floor(q/T), p=mod(q,T)+0.5, u=p-T*0.5;
+    vec2 uv=frag/u_res; float sh=exp(-pow((uv.y-0.55+0.4*(uv.x-0.5))*2.4,2.0));
+    vec3 c=b*(0.975+0.03*hash(cid)+0.035*floor(sh*3.0)/2.0);                                  // esmalte: cada baldosa un punto distinta y un reflejo ancho a bandas
+    float dx=min(p.x,T-p.x), dy=min(p.y,T-p.y), cd=length(vec2(dx,dy));
+    float m=max(eslabones(p.x,dy),eslabones(p.y,dx));
+    if(cd<5.0) m=max(1.0-step(1.1,cd),step(2.3,cd)*(1.0-step(4.6,cd)));                      // cruce de bandas: rosetón
+    float ink=1.0-step(T*0.5-4.6,max(abs(u.x),abs(u.y)));
+    if(mod(cid.x+2.0*cid.y,5.0)<0.5) m=max(m,granada(u)*ink);                                 // una baldosa de cada cinco, en salto de caballo
+    c=mix(c,u_mc2,(1.0-step(1.0,min(dx,dy)))*0.85*(1.0-m));                                   // junta
+    m*=1.0-0.55*step(0.955,hash(q*1.37+3.1));                                                 // la tinta del sello falla a ratos
+    return mix(c,u_mc1,m);
   }
   if(u_mat==43){                                                 // mundo de cubos: texeles de cuatro tonos como en un juego de cubos (u_mp.x = lado de la baldosa)
     float S=u_mp.x; vec2 bi=floor(q/S);
