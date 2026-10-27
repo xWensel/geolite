@@ -1325,7 +1325,7 @@ window.AIQ = window.AIQ || {};
         text: `${A.fmt(S.levelScore)} / ${A.fmt(Lv.advance)}`, lines, meter: [S.levelScore, Lv.advance], places: true,
         stats: [[A.T("Puntos de la ronda", "Round points"), S.levelScore], [A.T("Total de la expedición", "Expedition total"), run.score], [A.T("Doblones", "Doubloons"), run.coins]],
         stamp: A.T("SUPERADA", "CLEARED"), stampSub: String(roundNo() + 1).padStart(2, "0"), art: boss && !fin ? "chest" : "win", superada: lt.margin >= 3 ? 3 : lt.margin >= 1 ? 2 : 1,   // el sello, segun el margen: justa, holgada o aplastante (js/celebra.js)
-        buttons: [{ id: "nlBtn", cls: "btn-ink", label: fin ? A.pick6("Continuar|Continue|Continuer|Continuar|Weiter|Continua||继续|계속|続ける|Продолжить|Dalej") : boss ? A.T("Abrir el cofre del jefe", "Open the boss chest") : A.T("Al campamento", "To camp"), arrow: true, primary: true, onclick: () => { if (boss && run.act < 2 && !run.chestStuckDone && Math.random() < 0.6) { run.chestStuckDone = true; persist(); return stuckChest(); } afterVerdict(boss); } }, { id: "vdMenu", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().runMenu(), keep: true }],
+        buttons: [{ id: "nlBtn", cls: "btn-ink", label: fin ? A.pick6("Continuar|Continue|Continuer|Continuar|Weiter|Continua||继续|계속|続ける|Продолжить|Dalej") : boss ? A.T("Abrir el cofre del jefe", "Open the boss chest") : A.T("Al campamento", "To camp"), arrow: true, primary: true, onclick: () => { if (boss && !fin) return openChest(lt.margin >= 3 ? 3 : lt.margin >= 1 ? 2 : 1); afterVerdict(boss); } }, { id: "vdMenu", cls: "btn-line", label: A.T("Menú", "Menu"), onclick: () => C().runMenu(), keep: true }],
       });
       relicPay(lines.filter(l => l[2] && !l[3]).map(l => l[2]));
       const wb = { big: lt.margin >= 3, c: got, p: pctOf(S.levelScore - Lv.advance, Lv.advance), rn: roundNo() + 1, close: S.levelScore - Lv.advance < Lv.advance * 0.05 ? S.levelScore - Lv.advance : null };   // close: por los pelos   // aplastar la meta (+50 %) tiene sus propias frases
@@ -1371,12 +1371,13 @@ window.AIQ = window.AIQ || {};
   const H_HEART = L6("+1 provisión|+1 provision|+1 provision|+1 provisão|+1 Proviant|+1 provvista||+1 补给|식량 +1|+1 食料|+1 запас|+1 zapas"), H_IN = L6("dentro: {n}|inside: {n}|dedans : {n}|dentro: {n}|drin: {n}|dentro: {n}||里面：{n}|안에: {n}|中身：{n}|внутри: {n}|w środku: {n}"), H_FREE = L6("gratis|free|gratuit|grátis|gratis|gratis||免费|무료|無料|бесплатно|za darmo");
   const SAVED_PERK = "¡La red te salva (una vez por acto): no pierdes provisión! |The safety net catches you (once per act): no provision lost! |Le filet te rattrape (une fois par acte) : aucune provision perdue ! |A rede te segura (uma vez por ato): nenhuma provisão perdida! |Das Sicherheitsnetz fängt dich auf (einmal pro Akt): kein Proviant verloren! |La rete ti salva (una volta per atto): nessuna provvista persa! ||安全网接住了你（每幕一次）：补给不减！|안전망이 받아 줬어요 (막마다 한 번): 식량을 잃지 않았어요! |ネットが受け止めた（各幕に1回）：食料は失わない！|Сетка тебя поймала (раз за акт): запас не потерян! |Siatka cię łapie (raz na akt): nie tracisz zapasu! ";   // tanda 9: la Red de seguridad (antes, el Seguro)
   const SAVED_SUP = "¡El Seguro de ronda te cubre: no pierdes provisión! |Round insurance covers you: no provision lost! |L'Assurance de manche te couvre : aucune provision perdue ! |O Seguro de rodada te cobre: nenhuma provisão perdida! |Die Rundenversicherung springt ein: kein Proviant verloren! |L'Assicurazione del round ti copre: nessuna provvista persa! ||回合保险为你兜底：补给不减！ |라운드 보험이 지켜 줬습니다: 식량 손실 없음! |ラウンド保険でカバー：食料は失われなかった！ |Страховка раунда покрыла провал: ни один запас не потерян! |Ubezpieczenie rundy cię kryje: żaden zapas nie przepada! ";
-  /* el primer clic en "Abrir el cofre" no lo abre: el cofre (la medalla) tiembla y el crupier confiesa que lo esta sujetando; el segundo ya lo abre */
-  function stuckChest() {
-    const m = document.querySelector(".gx-vd-medal"), b = $("nlBtn"), S = C().S, reduced = (S && S.reduce);
-    A.sfx.deny();
-    if (!reduced) [m, b].forEach(e => e && e.animate([{ transform: "none" }, { transform: "translateX(-6px) rotate(-4deg)" }, { transform: "translateX(5px) rotate(3deg)" }, { transform: "translateX(-3px) rotate(-2deg)" }, { transform: "none" }], { duration: 420, easing: "ease-out" }));
-    if (A.dealer.chestStuck) A.dealer.chestStuck();
+  /* "Abrir el cofre del jefe": el telon del cofre (js/cofre.js). El primer clic se atasca (60 %, una vez por expedicion: el crupier lo sujeta) y el
+     segundo lo abre; la apertura crece con el margen de la ronda (1 justa, 2 holgada, 3 aplastante) y al acabar se pasa al Campamento */
+  function openChest(tier) {
+    run.cofreKey = run.chalKey; persist();                               // el cofre del jefe que acabas de abrir: el chip del Campamento lo lleva
+    const stuck = run.act < 2 && !run.chestStuckDone && Math.random() < 0.6;
+    A.cofre.open({ key: run.chalKey, tier, stuck, onStuck: () => { run.chestStuckDone = true; persist(); },
+      tag: `${A.tx(actInfo(run.act).n)} · ${A.T("Jefe", "Boss")}`, name: run.chalName ? A.tx(run.chalName) : "", then: () => afterVerdict(true) });
   }
   function afterVerdict(boss) { if (boss && run.act + 1 === 3 && !run.won) return winScreen(); nextStep(boss); }
   function nextStep(boss) {
@@ -1693,7 +1694,7 @@ window.AIQ = window.AIQ || {};
     /* antes del jefe, el crupier te reescribe el boton (funciona igual) */
     const doom = !chest && !!cf.boss, DOOM = A.pick6("Ir al matadero|To the slaughter|À l'abattoir|Pro matadouro|Zur Schlachtbank|Al macello||去送死|도살장으로|処刑台へ|На убой|Na rzeź");
     const nd = defAt(r), TN = TOPIC_NAMES[nd.topic], topic = A.tx(TN[Math.min(nd.tier, TN.length - 1)]);
-    const chip = chest ? ic("chest") : A.blind(cf.boss ? "boss" : run.round === 0 ? "small" : "big", cf.boss ? BOSS_IC : run.round === 0 ? "s_pin" : "s_compass");
+    const chip = chest ? (run.cofreKey && A.cofre.has(run.cofreKey) ? `<img class="ic ic-chest cf-chip" src="${A.cofre.url(run.cofreKey, 5, 0.25)}" alt="" draggable="false">` : ic("chest")) : A.blind(cf.boss ? "boss" : run.round === 0 ? "small" : "big", cf.boss ? BOSS_IC : run.round === 0 ? "s_pin" : "s_compass");
     const goB = chest ? A.T("Continuar sin elegir", "Continue without picking") : doom ? DOOM : A.T("Siguiente ronda", "Next round");
     const goI = chest ? `${A.pick6(TAKE)} ${CN()}+${gain(chestSkip())}` : cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + (run.round + 1);   // v0.3.48: el tema y el nombre del jefe ya estan en el boleto, justo encima
     /* v0.3.48: Naipe de gala, "el boleto de la ronda" (mesa de diseno, Campamento A). 12 columnas: el fieltro (1-8) con las cartas rectas y del mismo
