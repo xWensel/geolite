@@ -35,9 +35,9 @@
   const total = rows.length;
 
   /* ================= notas, cortes y versiones ================= */
-  let N = {}, SERVER = false, CFG = { w: { sl: 40, v: 30, inl: 20, st: 10 }, t: [34, 67] }, HIST = [];
+  let N = {}, OV = {}, SERVER = false, CFG = { w: { sl: 40, v: 30, inl: 20, st: 10 }, t: [34, 67] }, HIST = [];
   try { N = JSON.parse(localStorage.getItem("mc.notas") || "{}"); } catch (e) {}
-  function loadCfg() { try { Object.assign(CFG, JSON.parse((N["cfg:balanceo"] || {}).nota || "{}")); } catch (e) {} try { HIST = JSON.parse((N["cfg:historial"] || {}).nota || "[]"); } catch (e) { HIST = []; } }
+  function loadCfg() { try { Object.assign(CFG, JSON.parse((N["cfg:balanceo"] || {}).nota || "{}")); } catch (e) {} try { HIST = JSON.parse((N["cfg:historial"] || {}).nota || "[]"); } catch (e) { HIST = []; } try { OV = JSON.parse((N["cfg:dif"] || {}).nota || "{}"); } catch (e) { OV = {}; } }
   loadCfg();
   /* ---- guardado: servidor local (notas-contenido.json) o portal (api/contenido + Redis, con la clave de la mesa) ---- */
   const REMOTE = !/^(localhost|127\.0\.0\.1)$/.test(location.hostname), API = REMOTE ? "/api/contenido" : "/api/notas";
@@ -64,6 +64,7 @@
   let VER = 0;
   function saveN() { VER++; try { localStorage.setItem("mc.notas", JSON.stringify(N)); } catch (e) {} pushN(); }
   function saveCfg() { N["cfg:balanceo"] = { v: "cfg", nota: JSON.stringify(CFG), t: Date.now() }; N["cfg:historial"] = { v: "cfg", nota: JSON.stringify(HIST), t: Date.now() }; saveN(); }
+  function saveOv() { N["cfg:dif"] = { v: "cfg", nota: JSON.stringify(OV), t: Date.now() }; VER++; saveN(); }
   const userNotes = () => Object.keys(N).filter(k => !k.startsWith("cfg:"));
   if (REMOTE && !KEY) door(); else loadNotes(true);
   if (REMOTE) setInterval(() => { if (KEY && !document.hidden && !$(".ov")) loadNotes(false); }, 25000);
@@ -80,13 +81,13 @@
   const scoreOf = (k, val) => { const a = ANC[k]; if (!a || val == null) return null; const f = k === "sl" || k === "st" ? val : Math.log10(val + 1); return cl01(100 * (f - a[0]) / (a[1] - a[0])); };
   function famaOf(id) { const a = SN[id]; if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; }
   const zoneOf = d => (d < CFG.t[0] ? 0 : d < CFG.t[1] ? 1 : 2);
-  function reindex() { rows.forEach(r => { const f = famaOf(r.wid); r.fama = f; r.dif2 = f == null ? null : 100 - f; r.zone = r.dif2 == null ? null : zoneOf(r.dif2); r.zoneHoy = zoneOf(r.d); }); }
+  function reindex() { rows.forEach(r => { const f = famaOf(r.wid); r.fama = f; r.dif2 = OV[r.key] != null ? OV[r.key] : f == null ? null : 100 - f; r.zone = r.dif2 == null ? null : zoneOf(r.dif2); r.zoneHoy = zoneOf(r.d); }); }
   /* escenario: "hoy" o "con mis decisiones" (propuestas en Bien entran, filas en No salen) */
   let SCEN = false; try { SCEN = localStorage.getItem("mc.scen") === "1"; } catch (e) {}
   const SUGSIG = A.SUGSIG || {};
   const famaArr = a => { if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; };
   const sugTopic = x => (x.cat === "persona" ? "character" : x.sub === "animal" ? "nature" : "culture");
-  const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
+  const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
   const sgRows = () => SG.map(sugRow).filter(r => r.dif2 != null);
   function cohort() { return SCEN ? rows.filter(r => !(N[r.key] && N[r.key].v === "no")).concat(sgRows().filter(r => N[r.key] && N[r.key].v === "ok")) : rows; }
   const isHand = r => !!r.hand, langOk = id => { const c = LC[id]; return c ? c.l.filter(x => x > 0).length : 0; };
@@ -96,7 +97,8 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"]]], ["Balancear", [["plan", "Mi receta de balanceo"], ["balanceo", "Balanceo"], ["rondas", "Simulador de rondas"]]], ["Contenido", [["preguntas", "Preguntas"], ["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"]]], ["Decidir", [["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Saber", [["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["rondas", "Probar las rondas"]]], ["Decidir", [["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
     if (o.nav !== false) CURLIST = list.map(r => r.key || (r.id ? (r.cat ? "sug:" + r.id : r.id) : r)).slice(0, 3000);
@@ -119,47 +121,32 @@
   /* ================= INICIO ================= */
   function pendingRem() { const g = remGroups(); return Object.values(g).reduce((s, x) => s + x.rows.filter(r => !N[r.key]).length, 0); }
   VIEWS.inicio = () => {
-    reindex(); const R = cohort().filter(r => r.dif2 != null), cnt = [0, 1, 2].map(k => R.filter(r => r.zone === k).length), g = remGroups();
-    const limpias = SG.filter(x => !x.avisos.length && x.seguridad === "alta" && !N[SGKEY(x)]).length, pend = SG.filter(x => !N[SGKEY(x)]).length;
-    const nPaisNo = rows.filter(r => !r.ctry).length, idi = Object.keys(LC).filter(i => LC[i].l.some(x => x === 0)).length, hasP = new Set(rows.filter(r => r.topic === "character").map(r => r.ctry)), sinP = COUNTRIES.filter(c => !hasP.has(c)).length;
-    const grid = simGrid("nuevo"), pocas = grid.flat().filter(x => x < 15).length, fotos = IMGD ? Object.keys(LC).filter(i => !IMGD[i] || !IMGD[i + "~h"] || !IMGD[i + "~k"]).length : null;
-    const tasks = [
-      [limpias, "Aprueba las sugerencias limpias", "Personajes y Sello del país de seguridad alta y sin avisos. Un botón las acepta todas.", "sugerencias", { sg: "limpias" }],
-      [pend - limpias, "Revisa el resto de sugerencias", "Las que tienen avisos, pocas ediciones o dudas de origen.", "sugerencias", { sg: "" }],
-      [g.marcas.rows.length + g.disputados.rows.length + g.pastas.rows.length, "Quita marcas, orígenes disputados y pastas repetidas", "Tus criterios: nada de marcas, nada de origen disputado.", "quitar", {}],
-      [g.irrelevantes.rows.length, "Mira los posibles irrelevantes", "Lo menos conocido del juego: ¿merece estar?", "quitar", {}],
-      [nPaisNo, "Asigna país a preguntas sin país", "Sobre todo monumentos y ciudades del banco del Duelo.", "preguntas", { ctry: "∅" }],
-      [sinP, "Países sin ningún personaje", "Mira qué propone la pestaña Para añadir para cada uno.", "paises", { falta: "sin personaje" }],
-      [pocas, "Rondas con tramos casi vacíos", "Combinaciones de ronda y Ascensión con menos de 15 preguntas útiles.", "rondas", {}],
-      [idi, "Fichas con algún idioma sin texto", "Se quedan sin ficha en ese idioma.", "enciclopedia", { x: "idi" }],
-      [fotos == null ? "…" : fotos, "Fichas con alguna foto de capítulo sin cubrir", "Portada, Historia o Dato clave.", "enciclopedia", { x: "foto" }],
-    ].filter(t => t[0] === "…" || t[0] > 0);
-    return `<div class="hero"><h1>La mesa de contenido</h1><p>${total} preguntas con nivel · ${Object.keys(LC).length} fichas de Enciclopedia · ${COUNTRIES.length} países · ${SG.length} propuestas nuevas. Aquí ves qué hay, decides qué entra y qué sale, y yo lo aplico.</p></div>
-      <div class="kpis"><div class="kpi go" data-go="preguntas"><b>${total}</b><span>preguntas</span></div>${[0, 1, 2].map(k => `<div class="kpi go" data-go="balanceo" data-f='{"bz":${k}}' style="box-shadow:inset 0 -5px 0 ${ZC[k]}"><b>${cnt[k]}</b><span>${ZN[k]} (${pct(cnt[k], R.length)})</span></div>`).join("")}<div class="kpi go" data-go="notas"><b>${userNotes().length}</b><span>opiniones tuyas</span></div><div class="kpi go" data-go="sugerencias"><b>${pend}</b><span>sugerencias sin mirar</span></div></div>
-      <div class="pl"><h2>Qué te recomiendo hacer ahora <small>ordenado por impacto</small></h2><div class="bars" style="gap:6px">${tasks.map((t, i) => `<div class="task"><span class="num">${t[0]}</span><div><b>${t[1]}</b><span>${t[2]}</span></div><button class="btn" data-go="${t[3]}" data-f='${JSON.stringify(t[4])}'>Abrir</button></div>`).join("")}</div></div>
-      ${basePanel()}<div class="grid2"><div class="pl"><h2>Cómo se usa <small>30 segundos</small></h2><div class="bars" style="gap:6px;font-size:23px"><div>• <b>Bien</b> = que entre o se quede · <b>No</b> = fuera · <b>Cambiar…</b> = me escribes qué quieres.</div><div>• Pincha en cualquier nombre: se abre su ficha con el texto de Wikipedia en 11 idiomas.</div><div>• En la ficha: <span class="keys"><kbd>←</kbd> <kbd>→</kbd> cambian de elemento · <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>Esc</kbd> cierra</span></div><div>• <span class="keys"><kbd>/</kbd></span> o <span class="keys"><kbd>Ctrl K</kbd></span> busca cualquier cosa.</div><div>• Nada cambia en el juego hasta que tú me lo digas.</div></div></div>
-      <div class="pl"><h2>Estado del balanceo <small>${ZN.map((z, k) => z + " " + cnt[k]).join(" · ")}</small></h2><div class="bars">${Object.keys(CATS).map(t => { const a = R.filter(r => r.topic === t); return `<div class="br"><span class="l">${CATS[t]}</span>${zstack(a)}<span class="n">${a.length}</span></div>`; }).join("")}</div><p class="note" style="margin:0">Cortes actuales: ${CFG.t[0]} y ${CFG.t[1]}. <span class="nm" data-go="balanceo">Ajustarlos →</span></p></div></div>`;
+    reindex(); const R = cohort().filter(r => r.dif2 != null), cnt = [0, 1, 2].map(k => R.filter(r => r.zone === k).length), pend = SG.filter(x => !N[SGKEY(x)]).length, g = remGroups(), quitar = Object.values(g).reduce((n, x) => n + x.rows.filter(r => !N[r.key]).length, 0);
+    return `<div class="hero"><h1>La mesa de contenido</h1><p>Aquí decides qué hay en Geolite. Tres pasos. Tú decides, yo lo aplico al juego cuando me lo digas: nada cambia antes.</p></div>
+      <div class="pl"><div class="bars" style="gap:10px">
+        <div class="task"><span class="num">1</span><div><b>Pon la dificultad</b><span>Una sola línea de 0 a 100 para TODO el juego (Aventura, Clásico y Duelo). Dos cortes la parten en Fácil, Medio y Difícil: ${cnt[0]} · ${cnt[1]} · ${cnt[2]} preguntas.</span></div><button class="btn" data-go="balanceo">Abrir la línea</button></div>
+        <div class="task"><span class="num">2</span><div><b>Decide qué entra</b><span>${SG.length} propuestas nuevas de personajes y de Sello del país. Quedan ${pend} sin mirar.</span></div><button class="btn" data-go="sugerencias">Para añadir</button></div>
+        <div class="task"><span class="num">3</span><div><b>Decide qué sale</b><span>Marcas, orígenes disputados, repetidas y lo menos conocido. Quedan ${quitar} sin mirar.</span></div><button class="btn" data-go="quitar">Para quitar</button></div></div></div>
+      <div class="pl"><h2>Cómo se usa <small>30 segundos</small></h2><div class="bars" style="gap:6px;font-size:23px"><div>• <b>Bien</b> = que entre o se quede · <b>No</b> = fuera · <b>Cambiar…</b> = me escribes qué quieres.</div><div>• Pincha en cualquier nombre: se abre su ficha con sus fotos, su dificultad y el texto.</div><div>• En la ficha: <span class="keys"><kbd>←</kbd> <kbd>→</kbd> cambian de elemento · <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>Esc</kbd> cierra</span></div><div>• <span class="keys"><kbd>/</kbd></span> o <span class="keys"><kbd>Ctrl K</kbd></span> busca cualquier cosa.</div><div>• Tus ${userNotes().length} opiniones se guardan solas. Mira «Mis notas» para repasarlas.</div></div></div>`;
   };
 
   /* ================= BALANCEO ================= */
   VIEWS.balanceo = () => {
-    reindex(); const f = ff("balanceo"), R = cohort().filter(r => r.dif2 != null), cnt = [0, 1, 2].map(k => R.filter(r => r.zone === k).length), N0 = R.length;
-    const bins = Array(50).fill(0); R.forEach(r => bins[Math.min(49, Math.floor(r.dif2 / 2))]++); const mx = Math.max(...bins), same = R.filter(r => !r.sug && r.zone === r.zoneHoy).length;
-    const cmp = f.cmp !== undefined && f.cmp !== "" ? HIST[+f.cmp] : null, cz = cmp ? cmp.z : null;
-    let L = R.filter(r => !r.sug && (f.bz === "" || f.bz == null || r.zone == f.bz) && (!f.cat || r.topic === f.cat) && (!f.q || (r.name + r.key + r.ctry).toLowerCase().includes(f.q.toLowerCase())) && (!f.x || (f.x === "dis" ? r.zone !== r.zoneHoy : f.x === "gen" ? !isHand(r) : f.x === "idi" ? langOk(r.wid) < 11 : true)));
-    if (cmp) { const idx = new Map(rows.map((r, i) => [r.key, i])); L = L.filter(r => cz[idx.get(r.key)] !== String(r.zone)); }
-    const hist = HIST.map((h, i) => { const sameN = cz && i === +f.cmp; return `<tr><td>${esc(h.name)}</td><td>${new Date(h.t).toLocaleString("es")}</td><td>${h.cuts[0]} / ${h.cuts[1]}</td><td>${h.counts.join(" · ")}</td><td class="act"><button class="chipb ${sameN ? "on" : ""}" data-act="cmp" data-i="${i}">Comparar con ahora</button> <button class="chipb" data-act="restore" data-i="${i}">Restaurar</button> <button class="chipb red" data-act="delhist" data-i="${i}">Borrar</button></td></tr>`; }).join("");
-    let cmpHtml = ""; if (cmp) { const idx = rows.map((r, i) => [r, i]).filter(([r]) => r.zone != null), m = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; idx.forEach(([r, i]) => { const a = cz[i]; if (a !== "-") m[+a][r.zone]++; }); cmpHtml = `<div class="alert" style="display:block;padding:10px 12px;background:var(--panel2)"><b>«${esc(cmp.name)}» → ahora:</b> ${m.map((row, a) => ZN[a] + " → " + row.map((n, b) => (a !== b && n ? ZN[b] + " " + n : "")).filter(Boolean).join(", ")).filter(s => s.includes("→ ") && /\d/.test(s)).join(" · ") || "sin cambios"}</div>`; }
-    return `<div class="pl"><h2>Balanceo de dificultad <small>un solo índice de FAMA (0 = lo sabe todo el mundo · 100 = casi nadie) y dos cortes que tú mueves</small></h2>
-      ${SCEN ? `<p class="note" style="margin:0;color:var(--gold)">Estás viendo el escenario <b>con tus decisiones</b>: +${R.filter(r => r.sug).length} propuestas aceptadas, −${rows.filter(r => N[r.key] && N[r.key].v === "no").length} marcadas «No». Quita el escenario arriba para ver solo lo de hoy.</p>` : ""}<div class="zones">${[0, 1, 2].map(k => `<div class="zone z${k} ${f.bz == k && f.bz !== "" && f.bz != null ? "on" : ""}" data-zone="${k}"><h3>${ZN[k]}</h3><b>${cnt[k]}</b><span>${pct(cnt[k], N0)} · ${ZS[k]}</span><span class="lbl">${k === 0 ? "índice 0 a " + CFG.t[0] : k === 1 ? "índice " + CFG.t[0] + " a " + CFG.t[1] : "índice " + CFG.t[1] + " a 100"}</span></div>`).join("")}</div>
-      <div class="hist2">${bins.map((n, i) => `<i style="height:${100 * n / mx}%;background:${ZC[zoneOf(i * 2 + 1)]}" title="${i * 2}-${i * 2 + 2}: ${n}"></i>`).join("")}<span class="cut" style="left:calc(6px + (100% - 12px) * ${CFG.t[0] / 100})"></span><span class="cut" style="left:calc(6px + (100% - 12px) * ${CFG.t[1] / 100})"></span></div>
-      <div class="dual"><input type="range" id="b1" min="1" max="98" value="${CFG.t[0]}"><input type="range" id="b2" min="2" max="99" value="${CFG.t[1]}"></div><div class="scale"><span>0 · famoso</span><span>fácil/medio: ${CFG.t[0]}</span><span>medio/difícil: ${CFG.t[1]}</span><span>100 · casi nadie</span></div>
-      <div class="row"><button class="btn" data-act="savehist">Guardar esta versión de los cortes</button><span class="note" style="margin:0">Acuerdo con la dificultad de hoy: <b>${pct(same, N0)}</b></span></div></div>
-    <div class="grid2"><div class="pl"><h2>Qué cuenta en el índice <small>pesos que puedes mover</small></h2><div class="bars" style="gap:8px">${SIG.map(([k, l, d]) => `<div><div class="sl">${l} <input type="range" data-w="${k}" min="0" max="100" value="${CFG.w[k]}"> <b>${CFG.w[k]}</b></div><span class="note" style="margin:0 0 0 2px;font-size:18px!important">${d}</span></div>`).join("")}</div><p class="note">Cada señal se pasa a 0-100 con una escala fija (2.000 visitas = 0, 5 millones = 100…): añadir contenido nuevo no mueve al resto. Google no entra: no tiene datos fiables ni estables; las visitas de Wikipedia hacen ese papel.</p></div>
-    <div class="pl"><h2>Por categoría <small>cómo queda cada una</small></h2><div class="bars" style="gap:8px">${Object.keys(CATS).map(t => { const a = R.filter(r => r.topic === t), c = [0, 1, 2].map(k => a.filter(r => r.zone === k).length); return `<div class="br" style="grid-template-columns:190px minmax(0,1fr) 170px"><span class="l nm" data-go="balanceo" data-f='{"cat":"${t}"}'>${CATS[t]}</span>${zstack(a)}<span class="n">${c.join(" / ")} · ${a.length}</span></div>`; }).join("")}</div><p class="note">Una categoría sin verde o sin rojo no puede dar rondas fáciles o difíciles: ahí falta contenido.</p></div></div>
-    ${HIST.length ? `<div class="pl"><h2>Versiones guardadas <small>para comparar cortes y volver atrás</small></h2><div class="tw" style="max-height:none"><table><tr><th>Nombre</th><th>Fecha</th><th>Cortes</th><th>Fácil · Medio · Difícil</th><th></th></tr>${hist}</table></div>${cmpHtml}</div>` : ""}
-    <div class="pl"><h2>Todo lo que hay <small>${L.length}${cmp ? " (solo lo que cambia de zona respecto a la versión)" : ""} · pincha en un nombre</small></h2><div class="tools">${inp("balanceo", "q", "buscar")}${sel("balanceo", "cat", Object.entries(CATS), "Todas las categorías")}${sel("balanceo", "x", [["dis", "Cambia de zona respecto a hoy"], ["gen", "Generado (no curado a mano)"], ["idi", "Falta texto en algún idioma"]], "Sin filtro extra")}<button class="chipb" data-act="clrbal">Limpiar</button></div>
-      ${T("bal", [{ h: "Nombre", f: nmc, v: r => r.name }, { h: "Categoría", f: r => CATS[r.topic], v: r => r.topic }, { h: "País", f: r => esc(r.ctry || "—"), v: r => r.ctry }, { h: "Dificultad nueva", f: zbar, v: r => r.dif2 }, { h: "Zona hoy → nueva", f: zmove }, { h: "Idiomas", n: 1, f: r => (SN[r.wid] || [])[0] ?? "—", v: r => (SN[r.wid] || [])[0] || 0 }, { h: "Visitas", n: 1, f: r => ((SN[r.wid] || [])[1] || 0).toLocaleString("es"), v: r => (SN[r.wid] || [])[1] || 0 }, { h: "Origen", f: r => (isHand(r) ? '<span class="bdg gold">a mano</span>' : '<span class="bdg">auto</span>') }, { h: "Textos", f: r => (langOk(r.wid) >= 11 ? '<span class="bdg ok">11/11</span>' : `<span class="bdg bad">${langOk(r.wid)}/11</span>`) }, { h: "Opinión", a: 1, f: r => vb(r.key) }], L, { s: 3, d: -1 })}</div>`;
+    reindex(); const f = ff("balanceo"), C = cohort(), R = C.filter(r => r.dif2 != null), cnt = [0, 1, 2].map(k => R.filter(r => r.zone === k).length), N0 = R.length;
+    const bins = Array(50).fill(0); R.forEach(r => bins[Math.min(49, Math.floor(r.dif2 / 2))]++); const mx = Math.max(1, ...bins), nSin = C.length - R.length, nMano = C.filter(r => OV[r.key] != null).length;
+    const L = C.filter(r => (f.bz === "" || f.bz == null || r.zone == f.bz) && (!f.cat || r.topic === f.cat) && (!f.ctry || (f.ctry === "∅" ? !r.ctry : r.ctry === f.ctry)) && (!f.q || (r.name + " " + r.key + " " + (r.ctry || "")).toLowerCase().includes(f.q.toLowerCase())) && (!f.x || (f.x === "mano" ? OV[r.key] != null : f.x === "sin" ? r.dif2 == null : true)));
+    const hist = HIST.map((h, i) => `<tr><td>${esc(h.name)}</td><td>${new Date(h.t).toLocaleString("es")}</td><td>${h.cuts[0]} / ${h.cuts[1]}</td><td>${h.counts.join(" · ")}</td><td class="act"><button class="chipb" data-act="restore" data-i="${i}">Volver a estos cortes</button> <button class="chipb red" data-act="delhist" data-i="${i}">Borrar</button></td></tr>`).join("");
+    const dif = r => `<input class="dn" type="number" min="0" max="100" data-dk="${esc(r.key)}" value="${r.dif2 == null ? "" : Math.round(r.dif2)}" placeholder="—" title="Escribe un número de 0 a 100 y pulsa Intro">`;
+    return `<div class="pl"><h2>La línea de dificultad <small>una sola para todo el juego: 0 = la sabe cualquiera · 100 = casi nadie</small></h2>
+      <p class="note" style="margin:0">Cada pregunta tiene UN número. Los dos cortes (las barras doradas) parten la línea en tres grupos y esos grupos valen igual en Aventura, Clásico y Duelo. El número de partida sale de la fama del lugar (Wikipedia); <b>tú lo cambias a mano</b> en la tabla o en la ficha. ${SCEN ? `<span style="color:var(--gold)">Estás viendo «con tus decisiones».</span>` : ""}</p>
+      <div class="zones">${[0, 1, 2].map(k => `<div class="zone z${k} ${f.bz == k && f.bz !== "" && f.bz != null ? "on" : ""}" data-zone="${k}"><h3>${ZN[k]}</h3><b>${cnt[k]}</b><span>${pct(cnt[k], N0)} · ${ZS[k]}</span><span class="lbl">${k === 0 ? "de 0 a " + CFG.t[0] : k === 1 ? "de " + CFG.t[0] + " a " + CFG.t[1] : "de " + CFG.t[1] + " a 100"}</span></div>`).join("")}</div>
+      <div class="hist2" style="height:110px">${bins.map((n, i) => `<i style="height:${100 * n / mx}%;background:${ZC[zoneOf(i * 2 + 1)]}" title="${i * 2}-${i * 2 + 2}: ${n}"></i>`).join("")}<span class="cut" style="left:calc(6px + (100% - 12px) * ${CFG.t[0] / 100})"></span><span class="cut" style="left:calc(6px + (100% - 12px) * ${CFG.t[1] / 100})"></span></div>
+      <div class="dual"><input type="range" id="b1" min="1" max="98" value="${CFG.t[0]}"><input type="range" id="b2" min="2" max="99" value="${CFG.t[1]}"></div><div class="scale"><span>0 · famoso</span><span>corte Fácil/Medio: ${CFG.t[0]}</span><span>corte Medio/Difícil: ${CFG.t[1]}</span><span>100 · casi nadie</span></div>
+      <div class="row"><button class="btn" data-act="savehist">Guardar estos cortes</button><span class="note" style="margin:0">${nMano} preguntas con el número puesto por ti${nSin ? ` · <b>${nSin}</b> sin número (ponles uno tú)` : ""}</span></div>
+      <details><summary class="note" style="cursor:pointer">Cómo se calcula el número de partida (opcional)</summary><div class="bars" style="gap:8px;margin-top:8px">${SIG.map(([k, l, d]) => `<div><div class="sl">${l} <input type="range" data-w="${k}" min="0" max="100" value="${CFG.w[k]}"> <b>${CFG.w[k]}</b></div><span class="note" style="margin:0 0 0 2px;font-size:18px!important">${d}</span></div>`).join("")}<p class="note">Cada señal se pasa a 0-100 con una escala fija: añadir contenido nuevo no mueve al resto. Lo que pongas a mano no cambia al mover estos pesos.</p></div></details>
+      ${HIST.length ? `<details><summary class="note" style="cursor:pointer">Cortes guardados (${HIST.length})</summary><div class="tw" style="max-height:none"><table><tr><th>Nombre</th><th>Fecha</th><th>Cortes</th><th>Fácil · Medio · Difícil</th><th></th></tr>${hist}</table></div></details>` : ""}</div>
+    <div class="pl"><h2>Todo el juego, en orden <small>${L.length} de ${C.length} · de la más fácil a la más difícil · pincha en un nombre para ver su ficha</small></h2><div class="tools">${inp("balanceo", "q", "buscar")}${sel("balanceo", "cat", Object.entries(CATS), "Todas las categorías")}${sel("balanceo", "ctry", [["∅", "(sin país)"]].concat(COUNTRIES.map(c => [c, c])), "Todos los países")}${sel("balanceo", "bz", [[0, "Fácil"], [1, "Medio"], [2, "Difícil"]], "Todos los grupos")}${sel("balanceo", "x", [["mano", "Con número puesto por mí"], ["sin", "Sin número"]], "Sin filtro extra")}<button class="chipb" data-act="clrbal">Limpiar</button></div>
+      ${T("bal", [{ h: "Pregunta", f: nmc, v: r => r.name }, { h: "Categoría", f: r => CATS[r.topic] || r.topic, v: r => r.topic }, { h: "País", f: r => esc(r.ctry || "—"), v: r => r.ctry }, { h: "Línea", f: zbar, v: r => (r.dif2 == null ? 101 : r.dif2) }, { h: "Número (0-100)", a: 1, f: dif }, { h: "Grupo", f: r => (r.zone == null ? "—" : `<b style="font-weight:400;color:${ZC[r.zone]}">${ZN[r.zone]}</b>`) + (OV[r.key] != null ? ' <span class="pill">a mano</span>' : ""), v: r => (r.zone == null ? 9 : r.zone) }, { h: "Opinión", a: 1, f: r => vb(r.key) }], L, { s: 3, d: 1 })}</div>`;
   };
 
   /* ================= SIMULADOR DE RONDAS ================= */
@@ -267,7 +254,7 @@
     return `<div class="pl"><h2>Para añadir <small>${SG.length} propuestas verificadas contra Wikidata · nada entra hasta que tú digas</small></h2><div class="kpis"><div class="kpi"><b>${per.length}</b><span>personajes</span></div><div class="kpi"><b>${sel2.length}</b><span>Sello del país</span></div><div class="kpi"><b>${new Set(per.map(x => x.pais).filter(c => !hasP.has(c))).size}</b><span>países ganan 1.er personaje</span></div><div class="kpi"><b>${new Set(sel2.map(x => x.pais).filter(c => !hasC.has(c))).size}</b><span>países ganan 1.er Sello</span></div><div class="kpi"><b>${per.filter(x => x.mujer).length}</b><span>mujeres entre los nuevos</span></div><div class="kpi"><b>${SG.filter(x => !N[SGKEY(x)]).length}</b><span>sin mirar</span></div></div>
       <div class="tools">${inp("sugerencias", "q", "buscar")}${sel("sugerencias", "cat", [["persona", "Personajes"], ["sello", "Sello del país"]], "Personajes y Sello")}${sel("sugerencias", "sub", [...new Set(SG.map(x => x.sub))].sort().map(x => [x, x]), "Todas las subcategorías")}${sel("sugerencias", "pais", [...new Set(SG.map(x => x.pais))].sort().map(x => [x, x]), "Todos los países")}${sel("sugerencias", "sg", [["pend", "Sin mirar"], ["limpias", "Limpias (seguridad alta, sin aviso)"], ["aviso", "Con aviso"], ["media", "Seguridad media"]], "Toda seguridad")}${sel("sugerencias", "w", [["m", "Solo mujeres"], ["h", "Solo hombres"]], "Hombres y mujeres")}<button class="chipb" data-act="clrf" data-v="sugerencias">Limpiar</button></div>
       <div class="row"><button class="btn" data-act="oklimpias">Bien a las ${limp} limpias de esta lista</button><button class="btn ghost" data-act="nolist">No a las ${L.filter(x => !N[SGKEY(x)]).length} sin mirar de esta lista</button></div></div>
-      <div class="pl">${T("sug", [{ h: "Propuesta", f: x => `<span class="nm" data-open="${esc(SGKEY(x))}">${esc(x.es)}</span>`, v: x => x.es }, { h: "Tipo", f: x => (x.cat === "persona" ? "Personaje" : "Sello") + ` <span class="pill">${esc(x.sub)}</span>`, v: x => x.cat + x.sub }, { h: "País", f: x => esc(x.pais), v: x => x.pais }, { h: "Nació en", f: x => esc(x.nacWD || x.nac || "—") }, { h: "Idiomas", n: 1, f: x => x.idiomas, v: x => x.idiomas }, { h: "Nivel", f: x => (x.cat === "persona" ? nivPers(x) : "—") }, { h: "Por qué", w: 1, f: x => esc(x.por_que) }, { h: "Avisos", w: 1, f: x => x.avisos.map(a => `<span class="pill bad">${esc(a)}</span>`).join("") + (x.seguridad === "media" ? '<span class="pill warn">dudosa</span>' : "") }, { h: "Opinión", a: 1, f: x => vb(SGKEY(x)) }], L, { s: 4, d: -1, lim: 60 })}
+      <div class="pl">${T("sug", [{ h: "Propuesta", f: x => `<span class="nm" data-open="${esc(SGKEY(x))}">${esc(x.es)}</span>`, v: x => x.es }, { h: "Tipo", f: x => (x.cat === "persona" ? "Personaje" : "Sello") + ` <span class="pill">${esc(x.sub)}</span>`, v: x => x.cat + x.sub }, { h: "País", f: x => esc(x.pais), v: x => x.pais }, { h: "Nació en", f: x => esc(x.nacWD || x.nac || "—") }, { h: "Idiomas", n: 1, f: x => x.idiomas, v: x => x.idiomas }, { h: "Línea", f: x => zbar(sugRow(x)), v: x => { const d = sugRow(x).dif2; return d == null ? 101 : d; } }, { h: "Por qué", w: 1, f: x => esc(x.por_que) }, { h: "Avisos", w: 1, f: x => x.avisos.map(a => `<span class="pill bad">${esc(a)}</span>`).join("") + (x.seguridad === "media" ? '<span class="pill warn">dudosa</span>' : "") }, { h: "Opinión", a: 1, f: x => vb(SGKEY(x)) }], L, { s: 4, d: -1, lim: 60 })}
       ${(A.SUG.sinCandidatos || []).length ? `<p class="note" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none" title="${esc(A.SUG.sinCandidatos.map(([c, n]) => c + (n ? " (" + n + ")" : "")).join("; "))}">Sin candidato válido según los documentalistas: ${A.SUG.sinCandidatos.length} países (pasa el ratón para verlos).</p>` : ""}</div>`;
   };
 
@@ -321,10 +308,19 @@
   const loadLang = lg => (TXT[lg] ? Promise.resolve(TXT[lg]) : fetch("../data/wiki/" + lg + ".json").then(r => r.json()).then(j => (TXT[lg] = j)));
   const loadShort = lg => (TXT["s" + lg] ? Promise.resolve(TXT["s" + lg]) : fetch("../data/wiki/" + lg + "-s.json").then(r => r.json()).then(j => (TXT["s" + lg] = j)).catch(() => ({})));
   const dr = () => $("#drawer"); let DKEY = null;
-  function closeDrawer() { dr().style.display = "none"; $("#shade").style.display = "none"; DKEY = null; }
+  function closeDrawer() { dr().style.display = "none"; $("#shade").style.display = "none"; DKEY = null; if (DIRTY) { DIRTY = false; draw(); } }
   function refreshDrawerVotes() { const e = $("#dvotes"); if (e && DKEY) e.innerHTML = vb(DKEY); }
   function head(key) { const i = CURLIST.indexOf(key); return `<div class="dh"><button class="chipb" data-act="prev">← Anterior</button><button class="chipb" data-act="next">Siguiente →</button><span class="pos">${i >= 0 ? i + 1 + " de " + CURLIST.length : ""}</span><span class="sp"></span><button class="chipb" data-act="closed">Cerrar ✕</button></div>`; }
   /* las tres fotos de la ficha (portada, Historia, Dato clave) tal cual las ve el jugador; si falta una, un hueco rojo */
+  /* caja de dificultad de la ficha: un numero unico 0-100, deslizador, +-1/+-5 y quitar el ajuste (lo puesto a mano manda sobre el calculado) */
+  let DIRTY = false, DID = null;
+  const effOfKey = (key, id) => { if (OV[key] != null) return OV[key]; const fm = key.startsWith("sug:") ? famaArr(SUGSIG[key.slice(4)]) : famaOf(id); return fm == null ? null : 100 - fm; };
+  function difHtml(key, id) { DID = id; const v = effOfKey(key, id), z = v == null ? null : zoneOf(v), e = esc(key), col = z == null ? "var(--sub)" : ZC[z];
+    return `<div class="dbx"><b class="dnum" style="color:${col}">${v == null ? "—" : Math.round(v)}</b><span class="dgrp" style="color:${col}">${z == null ? "sin número" : ZN[z]}</span>${OV[key] != null ? '<span class="pill">a mano</span>' : '<span class="pill warn">calculado</span>'}</div>
+      <input type="range" class="dsl" min="0" max="100" value="${v == null ? 50 : Math.round(v)}" data-dr="${e}" style="width:100%"><div class="scale"><span>0 · la sabe cualquiera</span><span>corte ${CFG.t[0]}</span><span>corte ${CFG.t[1]}</span><span>100 · casi nadie</span></div>
+      <div class="row">${[-5, -1, 1, 5].map(d => `<button class="chipb" data-act="dnudge" data-d="${d}" data-k="${e}">${d > 0 ? "+" + d : d}</button>`).join("")}${OV[key] != null ? `<button class="chipb red" data-act="dreset" data-k="${e}">Quitar mi número</button>` : ""}</div>`; }
+  function setDif(key, v) { if (v == null) delete OV[key]; else OV[key] = Math.max(0, Math.min(100, Math.round(v))); saveOv(); DIRTY = true; const b = $("#dbox"); if (b) b.innerHTML = difHtml(key, DID); }
+
   const photos = (id, IM) => `<div class="tri">${[["", "_", "Portada"], ["~h", "_h", "Historia"], ["~k", "_k", "Dato clave"]].map(([k, f, l]) => IM[id + k] ? `<figure><img src="../assets/wiki/card/${esc(String(id).replace(/[^A-Za-z0-9._-]/g, "_"))}${f === "_" ? "" : f}.webp" alt="${l}" onerror="this.parentNode.classList.add('miss');this.remove()"><figcaption>${l}</figcaption></figure>` : `<figure class="miss"><figcaption>${l} · falta</figcaption></figure>`).join("")}</div>`;
   function open(key, lang) {
     DKEY = key; dr().style.display = "block"; $("#shade").style.display = "block"; reindex();
@@ -338,7 +334,7 @@
       const credit = ["", "~h", "~k"].map(k => (IM[id + k] ? esc((IM[id + k][3] || []).slice(0, 2).join(" · ")) : "")).filter(Boolean);
       dr().innerHTML = head(key) + `<h1>${esc(w[0] || (rr && rr.name) || id)}</h1><p class="note" style="margin:0">${esc(w[1] || "")}</p>
         <div style="margin-top:10px">${rr ? `<span class="bdg">${CATS[rr.topic]}</span><span class="bdg">${esc(rr.ctry || "sin país")}</span>` : ""}${hand ? '<span class="bdg gold">curado a mano</span>' : '<span class="bdg">automático · Wikipedia/Wikidata</span>'}${c ? (langOk(id) >= 11 ? '<span class="bdg ok">texto en los 11 idiomas</span>' : `<span class="bdg bad">texto en ${langOk(id)}/11 idiomas</span>`) : ""}${c && c.b ? '<span class="bdg bad">restos de Wikipedia</span>' : ""}${(rr && rr.tags || []).map(t => `<span class="bdg bad">${t}</span>`).join("")}</div>
-        <h3>Dificultad</h3><div class="zones" style="grid-template-columns:repeat(3,1fr)"><div class="zone z${z == null ? 1 : z}" style="cursor:default"><h3>${z == null ? "—" : ZN[z]}</h3><b style="font-size:50px">${dif == null ? "—" : Math.round(dif)}</b><span>índice nuevo</span></div><div class="zone" style="--zc:#8a8fa8;cursor:default"><h3 style="font-size:28px">Hoy</h3><b style="font-size:50px">${rr ? Math.round(rr.d) : "—"}</b><span>${rr ? "nivel " + rr.lvl + (rr.round >= 0 ? " · R" + (rr.round + 1) : "") : ""}</span></div><div class="zone" style="--zc:#8a8fa8;cursor:default"><h3 style="font-size:28px">Liga</h3><b style="font-size:50px">${rr && rr.saco != null ? ["Br", "Pl", "Or"][rr.saco] : "—"}</b><span>del Duelo</span></div></div>
+        <h3>Dificultad en la línea</h3><div id="dbox">${difHtml(rr ? rr.key : key, id)}</div>
         <table style="margin-top:8px">${SIG.map(([k, l], i) => { const sc = scoreOf(k, a[i]); return `<tr><td>${l}</td><td class="num">${a[i] == null ? "—" : a[i].toLocaleString("es")}</td><td style="width:38%"><span class="bar3" style="height:12px"><i style="width:${sc || 0}%;background:var(--blue)"></i></span></td><td class="num">${sc == null ? "" : Math.round(sc)}</td></tr>`; }).join("")}</table>
         <h3>Las tres entradas · fotos</h3><div>${ph("")}${ph("~h")}${ph("~k")}</div>${photos(id, IM)}${credit.length ? `<p class="note">${credit.join("<br>")}</p>` : ""}
         <h3>Texto de Wikipedia · idioma (rojo = vacío, dorado = restos)</h3><div class="langs">${LANGS.map((l, i) => `<button class="lg ${l === lg ? "on" : ""} ${c && c.l[i] === 0 ? "no" : ""} ${c && c.b & (1 << i) ? "bd" : ""}" data-lang="${l}" title="${c ? c.l[i] * 10 + " caracteres" : ""}">${LGN[l] || l}${c ? " · " + c.l[i] * 10 : ""}</button>`).join("")}</div>
@@ -352,7 +348,7 @@
     return `<p class="note">${c ? (langOk(id) >= 11 ? '<span class="bdg ok">escrita en los 11 idiomas</span>' : `<span class="bdg bad">escrita en ${langOk(id)}/11 idiomas</span>`) : '<span class="bdg bad">sin texto</span>'}</p>${IMGD ? photos(id, IMGD) : ""}`; }
   function openSug(key) { const x = sgByKey[key]; dr().innerHTML = head(key) + `<h1>${esc(x.es)}</h1><p class="note" style="margin:0">${esc(x.en)} · propuesta nueva</p>
     <div style="margin-top:10px"><span class="bdg gold">${x.cat === "persona" ? "Personaje" : "Sello del país"}</span><span class="bdg">${esc(x.sub)}</span><span class="bdg">${esc(x.pais)}</span>${x.mujer ? '<span class="bdg">mujer</span>' : ""}<span class="bdg ${x.seguridad === "alta" ? "ok" : "bad"}">seguridad ${x.seguridad}</span>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>
-    <h3>Su entrada en la Enciclopedia</h3>${sugEntry(x)}<h3>Por qué entra</h3><div class="txt" style="max-height:none">${esc(x.por_que)}</div><h3>Datos verificados en Wikidata</h3><table><tr><td>Idiomas de Wikipedia</td><td class="num">${x.idiomas}</td></tr>${x.cat === "persona" ? `<tr><td>Nació en</td><td class="num">${esc(x.nacWD || x.nac || "—")}</td></tr><tr><td>Nivel que le tocaría</td><td class="num">${nivPers(x)}</td></tr><tr><td>Años</td><td class="num">${x.nacio || "?"} – ${x.murio || "vivo"}</td></tr>` : ""}</table>
+    <h3>Su entrada en la Enciclopedia</h3>${sugEntry(x)}<h3>Por qué entra</h3><div class="txt" style="max-height:none">${esc(x.por_que)}</div><h3>Dificultad en la línea</h3><div id="dbox">${difHtml(key, null)}</div><h3>Datos verificados en Wikidata</h3><table><tr><td>Idiomas de Wikipedia</td><td class="num">${x.idiomas}</td></tr>${x.cat === "persona" ? `<tr><td>Nació en</td><td class="num">${esc(x.nacWD || x.nac || "—")}</td></tr><tr><td>Años</td><td class="num">${x.nacio || "?"} – ${x.murio || "vivo"}</td></tr>` : ""}</table>
     <p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(x.wiki.replace(/ /g, "_"))}" target="_blank" rel="noopener">Abrir en Wikipedia ↗</a></p><h3>Tu opinión</h3><div id="dvotes">${vb(key)}</div>`; }
   function openPais(c) { const R = rows.filter(r => r.ctry === c || (r.ctrys || []).includes(c)), g = countBy(R, r => r.topic), S2 = SG.filter(x => x.pais === c), fl = falta(c);
     dr().innerHTML = head("pais:" + c) + `<h1>${esc(c)}</h1><p class="note" style="margin:0">${R.length} preguntas · ${pct(R.length, rows.filter(r => r.ctry).length)} del banco · ${S2.length} propuestas</p>
@@ -374,8 +370,8 @@
     const place = (w, before) => { v.insertBefore(w, before || null); };
     const clean = () => v.querySelectorAll(".grid2").forEach(g => { if (!g.children.length) g.remove(); });
     const kids = [...v.children];
-    if (cur === "inicio") { const w = mk([[v.querySelector(".hero"), v.querySelector(".kpis"), pl("Qué te recomiendo")], [pl("Cambios en vivo"), pl("Cómo se usa"), pl("Estado del balanceo")]]); v.appendChild(w); clean(); }
-    else if (cur === "balanceo") { const main = pl("Balanceo de dificultad"), list = pl("Todo lo que hay"); const w = mk([[main], [pl("Qué cuenta"), pl("Versiones guardadas")], [pl("Por categoría")]], "auto"); v.insertBefore(w, list); clean(); }
+    if (cur === "inicio") { /* sin columnas */ }
+    else if (cur === "balanceo") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 2) v.appendChild(mk([[ps[0]], [ps[1]]])); }
     else if (cur === "rondas") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 2) { v.appendChild(mk([[ps[0]], [ps[1]]])); } }
     else if (cur === "plan") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 5) v.appendChild(mk([[ps[0], ps[1]], [ps[2]], [ps[3], ps[4]]])); }
     else if (cur === "personajes") { const ps = [...v.querySelectorAll(".pl")]; if (ps.length >= 3) { v.appendChild(mk([[ps[0], ps[1]], [ps[2]]])); clean(); } }
@@ -408,7 +404,7 @@
 
   /* ================= eventos ================= */
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-view],[data-go],[data-open],[data-vote],[data-note],[data-zone],[data-more],[data-sort],[data-lang],[data-act],[data-sim],[data-fopen]"); if (!t) { if (e.target.id === "shade") closeDrawer(); return; }
+    const t = e.target.closest("[data-view],[data-go],[data-open],[data-vote],[data-note],[data-zone],[data-more],[data-pg],[data-sort],[data-lang],[data-act],[data-sim],[data-fopen]"); if (!t) { if (e.target.id === "shade") closeDrawer(); return; }
     if (t.tagName === "INPUT" || t.tagName === "SELECT") return;
     const d = t.dataset;
     if (d.view) return go(d.view);
@@ -437,6 +433,8 @@
       case "copynotes": { const out = userNotes().map(k => ({ cosa: nameOfKey(k), id: k, veredicto: N[k].v, nota: N[k].nota })); navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(out, null, 1)); return toast("Copiado: pégamelo"); }
       case "setbase": setBase(); toast("Línea base fijada"); return draw();
       case "scen": SCEN = !SCEN; try { localStorage.setItem("mc.scen", SCEN ? "1" : "0"); } catch (e) {} return draw();
+      case "dnudge": { const k = d.k, v = effOfKey(k, DID); return setDif(k, (v == null ? 50 : Math.round(v)) + +d.d); }
+      case "dreset": return setDif(d.k, null);
       case "reload": return location.reload();
       case "clearnotes": if (t.dataset.sure) { userNotes().forEach(k => delete N[k]); saveN(); return draw(); } t.dataset.sure = 1; t.textContent = "Pulsa otra vez para vaciar"; return;
     }
@@ -444,6 +442,9 @@
   function sgVisible(x) { const f = ff("sugerencias"); return (!f.cat || x.cat === f.cat) && (!f.sub || x.sub === f.sub) && (!f.pais || x.pais === f.pais) && (!f.sg || (f.sg === "aviso" ? x.avisos.length : f.sg === "limpias" ? !x.avisos.length && x.seguridad === "alta" : f.sg === "pend" ? !N[SGKEY(x)] : x.seguridad === f.sg)) && (!f.w || (f.w === "m" ? x.mujer : !x.mujer)) && (!f.q || (x.es + x.en + x.pais).toLowerCase().includes(f.q.toLowerCase())); }
   function onField(e) { const t = e.target; if (!t.dataset || !t.dataset.f) return; const [v, k] = t.dataset.f.split("."); ff(v)[k] = t.value; Object.keys(ST).forEach(k => (ST[k].page = 0)); draw(); }
   document.addEventListener("input", e => { if (e.target.tagName === "INPUT" && e.target.dataset.f) onField(e); });
+  document.addEventListener("input", e => { const t = e.target; if (t.dataset && t.dataset.dr) { const v = +t.value, z = zoneOf(v), n = $(".dnum"), g = $(".dgrp"); if (n) { n.textContent = v; n.style.color = ZC[z]; } if (g) { g.textContent = ZN[z]; g.style.color = ZC[z]; } } });
+  document.addEventListener("change", e => { const t = e.target; if (t.dataset && t.dataset.dr) return setDif(t.dataset.dr, +t.value); if (t.dataset && t.dataset.dk) { const k = t.dataset.dk; if (t.value.trim() === "") delete OV[k]; else OV[k] = Math.max(0, Math.min(100, Math.round(+t.value))); saveOv(); draw(); } });
+
   document.addEventListener("change", e => { if (e.target.tagName === "SELECT" && e.target.dataset.f) onField(e); });
   document.addEventListener("keydown", e => {
     const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
@@ -453,12 +454,12 @@
     if (!DKEY || typing) return;
     if (e.key === "Escape") closeDrawer(); else if (e.key === "ArrowRight") navDrawer(1); else if (e.key === "ArrowLeft") navDrawer(-1); else if (e.key.toLowerCase() === "b") vote(DKEY, "ok"); else if (e.key.toLowerCase() === "n") vote(DKEY, "no"); else if (e.key.toLowerCase() === "c") note(DKEY);
   });
-  window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h && VIEWS[h] && h !== cur) { cur = h; draw(); } });
+  window.addEventListener("hashchange", () => { const h0 = location.hash.slice(1), h = ALIAS[h0] || h0; if (h && VIEWS[h] && h !== cur) { cur = h; draw(); } });
   $("#find").onclick = openFinder;
   let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { fitN = 0; fit(); }, 200); });
 
   /* ================= arranque ================= */
-  if (!VIEWS[cur]) cur = "inicio";
+  cur = ALIAS[cur] || cur; if (!VIEWS[cur]) cur = "inicio";
   reindex(); draw(); setNet();
   if (!readBase()) { setTimeout(() => { if (!readBase()) setBase(); }, 1500); }
   try { const es = REMOTE ? null : new EventSource("/api/live"); if (!es) throw 0; es.onmessage = () => { const b = $("#livebar"); b.style.display = "flex"; }; } catch (e) {}
