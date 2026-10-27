@@ -618,3 +618,6 @@ html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class
 #topHud > .adv-bar { max-width: min(300px, 100%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 14px; }
 #topHud > .adv-bar .ab-top { flex: 0 0 100%; }
 #topHud > .adv-bar .ab-perks, #topHud > .adv-bar .ab-wind { flex: 0 1 auto; }
+
+/* Fogonazo (reliquia): el lugar parpadea un instante en el mapa. Un cuadrado dorado de pixel con contorno indigo, sin brillo ni sombra difusa */
+#map .fl-blip { position: absolute; z-index: 9; width: 14px; height: 14px; margin: -7px 0 0 -7px; pointer-events: none; background: #fdd742; box-shadow: 0 0 0 3px #1d0a3d, 0 0 0 5px #f5a623; }

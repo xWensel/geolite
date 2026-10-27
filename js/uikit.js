@@ -99,7 +99,7 @@
   }
 
   /* ------------------------------------------------------------------ tooltips */
-  let tipsOn = true, tip, cur = null, timer = 0, shown = false, mx = 0, my = 0, lastHide = 0;
+  let tipsOn = true, tip, cur = null, timer = 0, shown = false, mx = 0, my = 0, lastHide = 0, pinned = false;
   const find = t => {
     for (let e = t; e && e.nodeType === 1 && e !== document.documentElement; e = e.parentElement) {
       if (e.hasAttribute("data-th") || e.hasAttribute("data-tt") || e.hasAttribute("data-tip") || e.hasAttribute("data-tf")) return e;
@@ -112,19 +112,21 @@
     const k = el.getAttribute("data-tip"); if (k && !el.hasAttribute("data-tt")) { const pb = PADKEY[el.dataset.key]; return `<b>${esc(A.t ? A.t(k) : k)}${el.dataset.key ? `<span class="tt-k k-kb">${esc(el.dataset.key)}</span>` : ""}${pb ? `<i class="gl tt-gl" data-gl="${pb}"></i>` : ""}</b>`; }
     let raw = el.getAttribute("data-tt"); const f = el.getAttribute("data-tf");
     if (raw == null && f && A.tips[f]) { try { raw = A.tips[f](el); } catch (e) { raw = ""; } }     // tips por funcion: se calculan al pasar el puntero (idioma y numeros al dia)
+    if (raw && String(raw).charAt(0) === "<") return String(raw);   // HTML ya montado (el ticket de los doblones)
     const [t, ...r] = String(raw || "").split("\n"); if (!t) return "";
     return `<b>${esc(t)}</b>${r.length ? `<span>${esc(r.join("\n"))}</span>` : ""}`;
   };
   function place() {
+    if (pinned) return;   // fijado con un clic: se queda donde esta
     const r = tip.getBoundingClientRect(); let x = mx + 16, y = my + 22;
     if (x + r.width > innerWidth - 8) x = Math.max(8, mx - r.width - 14);
     if (y + r.height > innerHeight - 8) y = Math.max(8, my - r.height - 14);
     tip.style.transform = `translate(${Math.round(x)}px,${Math.round(y)}px)`;
   }
-  function hide() { clearTimeout(timer); if (shown) { shown = false; lastHide = Date.now(); tip.classList.remove("on"); } }
+  function hide(force) { if (pinned && force !== true) return; clearTimeout(timer); if (shown) { shown = false; lastHide = Date.now(); tip.classList.remove("on"); } }
   function show() {
     if (!tipsOn || !cur || !cur.isConnected) return; const h = html(cur); if (!h) return;
-    tip.innerHTML = h; shown = true; tip.classList.add("on"); place();
+    tip.innerHTML = h; shown = true; tip.classList.toggle("rich", h.indexOf('class="tk') >= 0); tip.classList.add("on"); place();
   }
   function arm(el) {
     hide(); cur = el; if (!el) return;
@@ -163,7 +165,13 @@
       const g = ghostAt(), d = disabledAt() || g; if (d) { if (d !== cur) arm(d); ghostEl = d === g ? g : null; } else if (cur && (cur.disabled || cur === ghostEl)) { ghostEl = null; arm(null); }
       ghostFade();
     }, { capture: true, passive: true });
-    ["pointerdown", "wheel", "keydown", "blur", "scroll"].forEach(k => window.addEventListener(k, hide, true));
+    ["pointerdown", "wheel", "keydown", "blur", "scroll"].forEach(k => window.addEventListener(k, () => hide(), true));
+    const unpin = () => { pinned = false; if (tip) tip.classList.remove("pin"); hide(true); };
+    document.addEventListener("click", e => {   // los doblones: un clic fija el ticket y otro lo suelta
+      const el = e.target.closest && e.target.closest("[data-pin]");
+      if (el && !pinned) { cur = el; show(); if (shown) { pinned = true; tip.classList.add("pin"); } } else if (pinned) unpin();
+    }, true);
+    window.addEventListener("keydown", e => { if (pinned && (e.key === "Escape" || e.key === "Esc")) { e.stopPropagation(); unpin(); } }, true);
     document.addEventListener("pointerout", e => { if (!e.relatedTarget) { hide(); cur = null; } }, true);
     setInterval(() => { if (cur && !cur.isConnected) { hide(); cur = null; } }, 400);
   }

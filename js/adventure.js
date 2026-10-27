@@ -13,7 +13,9 @@ window.AIQ = window.AIQ || {};
   const L6 = A.L6;
   const suitRed = s => s === "s_pin" || s === "s_compass" || s === "heart";
   const ixs = () => "";                                              // las cartas ya no llevan indices (A K Q J, numeros ni palos)
-  const R_NAMES = [L6("Común|Common|Commune|Comum|Gewöhnlich|Comune||普通|일반|コモン|Обычная|Zwykła"), L6("Poco común|Uncommon|Peu commune|Incomum|Ungewöhnlich|Non comune||不常见|고급|アンコモン|Необычная|Niepospolita"), L6("Rara|Rare|Rare|Rara|Selten|Rara||稀有|희귀|レア|Редкая|Rzadka"), L6("Legendaria|Legendary|Légendaire|Lendária|Legendär|Leggendaria||传说|전설|レジェンダリー|Легендарная|Legendarna")];
+  const R_NAMES = [L6("Común|Common|Commune|Comum|Gewöhnlich|Comune||普通|일반|コモン|Обычная|Zwykła"), L6("Rara|Rare|Rare|Rara|Selten|Rara||稀有|희귀|レア|Редкая|Rzadka"), L6("Épica|Epic|Épique|Épica|Episch|Epica||史诗|영웅|エピック|Эпическая|Epicka"), L6("Legendaria|Legendary|Légendaire|Lendária|Legendär|Leggendaria||传说|전설|レジェンダリー|Легендарная|Legendarna")];
+  const PIP = '<svg class="pip" viewBox="0 0 5 5" aria-hidden="true"><path d="M2 0h1v1H2zM1 1h3v1H1zM0 2h5v1H0zM1 3h3v1H1zM2 4h1v1H2z"/></svg>';
+  const rarTag = r => `${A.tx(R_NAMES[r])}<span class="pips">${PIP.repeat(r + 1)}</span>`;   // rarezas por color: la rareza son 1-4 rombos ademas del color (daltonismo, pantallas pequenas)
 
   /* ------------------------------------------------------------------ actos */
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -209,13 +211,14 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ herramientas (activas, cargas por ronda) */
   const TOOLS = {
-    sonar: { ico: "sonar", uses: 2, cost: 5, r: 1, n: L("Sonar", "Sonar"), d: L6("Toca un punto del mapa: te dice a cuántos km está el objetivo (±6 %) y dibuja el anillo.|Click a point on the map: it tells you how far the target is (±6%) and draws the ring.|Touche un point : il indique la distance à la cible (±6 %) et trace l'anneau.|Toque num ponto: diz a que distância está o alvo (±6%) e desenha o anel.|Klick auf einen Punkt der Karte: zeigt, wie weit das Ziel entfernt ist (±6 %), und zeichnet den Ring.|Clicca su un punto: indica la distanza dal bersaglio (±6%) e disegna l'anello.||点击一个点：显示目标的距离（±6%）并画出圆环。|지도에서 한 지점을 고르면 목표까지의 거리(±6%)를 알려 주고 원을 그립니다.|地点をクリックすると目標までの距離（±6%）が分かり、輪が描かれる。|Коснись точки: покажет расстояние до цели (±6%) и нарисует кольцо.|Kliknij punkt na mapie: pokaże, ile km dzieli go od celu (±6%), i narysuje okrąg."), kind: "probe" },
+    sonar: { ico: "sonar", uses: 2, cost: 6, r: 1, n: L("Sonar", "Sonar"), d: L6("Toca un punto del mapa: te dice a cuántos km está el objetivo (±6 %) y dibuja el anillo.|Click a point on the map: it tells you how far the target is (±6%) and draws the ring.|Touche un point : il indique la distance à la cible (±6 %) et trace l'anneau.|Toque num ponto: diz a que distância está o alvo (±6%) e desenha o anel.|Klick auf einen Punkt der Karte: zeigt, wie weit das Ziel entfernt ist (±6 %), und zeichnet den Ring.|Clicca su un punto: indica la distanza dal bersaglio (±6%) e disegna l'anello.||点击一个点：显示目标的距离（±6%）并画出圆环。|지도에서 한 지점을 고르면 목표까지의 거리(±6%)를 알려 주고 원을 그립니다.|地点をクリックすると目標までの距離（±6%）が分かり、輪が描かれる。|Коснись точки: покажет расстояние до цели (±6%) и нарисует кольцо.|Kliknij punkt na mapie: pokaże, ile km dzieli go od celu (±6%), i narysuje okrąg."), kind: "probe" },
     compass: { ico: "compass", uses: 3, cost: 4, r: 0, n: L("Brújula", "Compass"), d: L("Toca un punto: una flecha señala el rumbo (8 direcciones) hacia el objetivo.", "Tap a point: an arrow shows the heading (8 directions) to the target."), kind: "probe" },
-    passport: { ico: "passport", uses: 1, cost: 7, r: 1, n: L("Pase VIP", "VIP pass"), d: L6("Tres fichas caen en el mapa: solo una marca el lugar.|Three chips drop onto the map: only one marks the place.|Trois jetons tombent sur la carte : un seul marque le lieu.|Três fichas caem no mapa: só uma marca o lugar.|Drei Chips fallen auf die Karte: Nur einer markiert den Ort.|Tre fiche cadono sulla mappa: solo una segna il luogo.||三枚筹码落在地图上：只有一枚标出了地点。|칩 세 개가 지도에 떨어집니다: 하나만 장소를 가리킵니다.|3枚のチップが地図に落ちる。場所を示すのは1枚だけ。|Три фишки падают на карту: только одна отмечает место.|Trzy żetony spadają na mapę: tylko jeden oznacza miejsce."), kind: "instant" },   // como revealCountry: en banderas, paises y pistas solo el continente
-    journal: { ico: "journal", uses: 1, cost: 4, r: 0, n: L("Nota del crupier", "Dealer's note"), d: L6("Lee la nota de campo (en banderas, la región; en pistas, inicial y continente).|Read the field note (flags: the region; clues: initial and continent).|Lis la note de terrain (drapeaux : la région ; indices : initiale et continent).|Leia a nota de campo (bandeiras: a região; pistas: inicial e continente).|Lies die Feldnotiz (Flaggen: Region; Hinweise: Anfangsbuchstabe und Kontinent).|Leggi la nota di campo (bandiere: la regione; indizi: iniziale e continente).||阅读实地笔记（国旗给地区，线索给首字和大洲）。|야외 일지를 읽어 보세요(국기는 지역, 단서는 첫 글자와 대륙).|フィールドノートを読もう（国旗は地域、ヒントは頭文字と大陸）。|Прочитай полевую заметку (флаги — регион, подсказки — первая буква и континент).|Przeczytaj notatkę terenową (flagi: region; wskazówki: pierwsza litera i kontynent)."), kind: "instant" },
+    passport: { ico: "passport", uses: 1, cost: 6, r: 1, n: L("Pase VIP", "VIP pass"), d: L6("Tres fichas caen en el mapa: solo una marca el lugar.|Three chips drop onto the map: only one marks the place.|Trois jetons tombent sur la carte : un seul marque le lieu.|Três fichas caem no mapa: só uma marca o lugar.|Drei Chips fallen auf die Karte: Nur einer markiert den Ort.|Tre fiche cadono sulla mappa: solo una segna il luogo.||三枚筹码落在地图上：只有一枚标出了地点。|칩 세 개가 지도에 떨어집니다: 하나만 장소를 가리킵니다.|3枚のチップが地図に落ちる。場所を示すのは1枚だけ。|Три фишки падают на карту: только одна отмечает место.|Trzy żetony spadają na mapę: tylko jeden oznacza miejsce."), kind: "instant" },   // como revealCountry: en banderas, paises y pistas solo el continente
+    journal: { ico: "journal", uses: 1, cost: 4, r: 0, n: L("Nota del crupier", "Dealer's note"), d: L6("Te dice en qué cuadrante del mundo está el lugar (norte o sur, este u oeste).|Tells you which quadrant of the world the place is in (north or south, east or west).|Te dit dans quel quadrant du monde se trouve le lieu (nord ou sud, est ou ouest).|Diz em que quadrante do mundo está o lugar (norte ou sul, leste ou oeste).|Sagt dir, in welchem Quadranten der Welt der Ort liegt (Nord oder Süd, Ost oder West).|Ti dice in quale quadrante del mondo si trova il luogo (nord o sud, est o ovest).||告诉你地点位于世界的哪个象限（南北、东西）。|장소가 세계의 어느 구역(북/남, 동/서)에 있는지 알려줍니다.|場所が世界のどの区画（北か南、東か西）にあるかを教える。|Говорит, в каком квадранте мира место (север или юг, восток или запад).|Mówi, w której ćwiartce świata leży miejsce (północ lub południe, wschód lub zachód)."), kind: "instant" },
+    chalk: { ico: "chalk", uses: 2, cost: 6, r: 1, n: L6("Tiza|Chalk|Craie|Giz|Kreide|Gesso||粉笔|분필|チョーク|Мел|Kreda"), d: L6("Toca un punto: dibuja un círculo de 2.000 km y te dice si el lugar está dentro (sí o no).|Tap a point: draws a 2,000 km circle and tells you whether the place is inside (yes or no).|Touche un point : trace un cercle de 2 000 km et dit si le lieu est dedans (oui ou non).|Toque num ponto: desenha um círculo de 2.000 km e diz se o lugar está dentro (sim ou não).|Tippe auf einen Punkt: zeichnet einen Kreis mit 2.000 km Radius und sagt dir, ob der Ort darin liegt (ja oder nein).|Tocca un punto: disegna un cerchio di 2.000 km e dice se il luogo è dentro (sì o no).||点一个点：画一个 2000 公里的圈，告诉你地点在不在圈内（是或否）。|한 지점을 누르세요: 2,000km 원을 그리고 장소가 안에 있는지 (예/아니요) 알려줘요.|1点をタップ：半径2000kmの円を描き、場所が中にあるか（はい／いいえ）を教える。|Коснись точки: рисует круг в 2000 км и говорит, внутри ли место (да или нет).|Dotknij punktu: rysuje okrąg o promieniu 2000 km i mówi, czy miejsce jest w środku (tak lub nie)."), kind: "probe" },
     hourglass: { ico: "hourglass", uses: 2, cost: 4, r: 0, n: L("Reloj de arena", "Hourglass"), d: L("+6 segundos en la pregunta actual.", "+6 seconds on the current question."), kind: "instant" },
-    interruptor: { ico: "interruptor", uses: 1, cost: 8, r: 2, n: L("Interruptor", "Master switch"), d: L6("Apaga todos los retos durante esta pregunta, salvo el tiempo que ya quitó la Tormenta. Con Silencio no se puede usar.|Switches every challenge off for this question, except the time the Storm already took. It can't be used under Silence.|Désactive tous les défis pour cette question, sauf le temps déjà pris par la Tempête. Inutilisable sous Silence.|Desliga todos os desafios nesta pergunta, exceto o tempo que a Tempestade já tirou. Não pode ser usado com Silêncio.|Schaltet alle Herausforderungen für diese Frage aus, außer der Zeit, die der Sturm schon genommen hat. Bei Stille nicht nutzbar.|Spegne tutte le sfide per questa domanda, tranne il tempo già tolto dalla Tempesta. Non si può usare con il Silenzio.||关闭本题的所有挑战，但“风暴”已扣掉的时间不会返还。“沉默”时无法使用。|이 문제의 모든 도전을 끕니다. 단, 폭풍이 이미 줄인 시간은 돌아오지 않습니다. 침묵 중에는 사용할 수 없습니다.|この問題のチャレンジをすべてオフにする。ただし嵐で減った時間は戻らない。静寂の間は使えない。|Отключает все испытания для этого вопроса, кроме времени, уже отнятого «Бурей». При «Тишине» не работает.|Wyłącza wszystkie wyzwania w tym pytaniu, poza czasem zabranym już przez Burzę. Nie działa podczas Ciszy."), sn: L6("Interruptor|Master switch|Interrupteur|Interruptor|Schalter|Interruttore|Interruptor|总开关|메인 스위치|マスタースイッチ|Выключатель|Wyłącznik"), kind: "instant" },
-    swapcard: { ico: "swapcard", uses: 1, cost: 9, r: 1, n: L("Descarte", "Discard"),   // tanda 9: antes Carta de cambio (es lo que mas rinde por doblon)
+    interruptor: { ico: "interruptor", uses: 1, cost: 9, r: 2, n: L("Interruptor", "Master switch"), d: L6("Apaga todos los retos durante esta pregunta, salvo el tiempo que ya quitó la Tormenta. Con Silencio no se puede usar.|Switches every challenge off for this question, except the time the Storm already took. It can't be used under Silence.|Désactive tous les défis pour cette question, sauf le temps déjà pris par la Tempête. Inutilisable sous Silence.|Desliga todos os desafios nesta pergunta, exceto o tempo que a Tempestade já tirou. Não pode ser usado com Silêncio.|Schaltet alle Herausforderungen für diese Frage aus, außer der Zeit, die der Sturm schon genommen hat. Bei Stille nicht nutzbar.|Spegne tutte le sfide per questa domanda, tranne il tempo già tolto dalla Tempesta. Non si può usare con il Silenzio.||关闭本题的所有挑战，但“风暴”已扣掉的时间不会返还。“沉默”时无法使用。|이 문제의 모든 도전을 끕니다. 단, 폭풍이 이미 줄인 시간은 돌아오지 않습니다. 침묵 중에는 사용할 수 없습니다.|この問題のチャレンジをすべてオフにする。ただし嵐で減った時間は戻らない。静寂の間は使えない。|Отключает все испытания для этого вопроса, кроме времени, уже отнятого «Бурей». При «Тишине» не работает.|Wyłącza wszystkie wyzwania w tym pytaniu, poza czasem zabranym już przez Burzę. Nie działa podczas Ciszy."), sn: L6("Interruptor|Master switch|Interrupteur|Interruptor|Schalter|Interruttore|Interruptor|总开关|메인 스위치|マスタースイッチ|Выключатель|Wyłącznik"), kind: "instant" },
+    swapcard: { ico: "swapcard", uses: 1, cost: 9, r: 2, n: L("Descarte", "Discard"),   // tanda 9: antes Carta de cambio (es lo que mas rinde por doblon)
       d: L("Cambia esta pregunta por otro lugar de la ronda.", "Swaps this question for another place from the round."), kind: "instant" },
   };
   const BOSSES = {};                                                 // los jefes ahora son combinaciones de retos (js/challenges.js)
@@ -291,6 +294,7 @@ window.AIQ = window.AIQ || {};
   const isBoss = () => run.round === 3;
   const perkList = () => run.perks.map(id => A.RELICS[id]).filter(Boolean);
   const baseSlots = () => 5 + ascFx(run.asc).pack;                   // tanda 17 (A5): 4 huecos de base en Ascension 5
+  const loseLife = () => { if (run.lives <= 1 && has("lastHand") && !run.lastHandUsed) { run.lastHandUsed = 1; setTimeout(() => A.adv.flash("lasthand", 2, "♥"), 300); return; } run.lives--; run.livesLostAct++; };   // Ultima mano: una vez por expedicion, la ultima provision se queda
   const maxPerks = () => baseSlots() + perkList().reduce((n, p) => n + (p.slot || 0), 0);   // tanda 13 (S7): huecos de la mochila
   /* 0.2.23: el Pacto no ocupa hueco (antes ocupaba el que daba y no servia de nada): la mochila cuenta todo lo demas; el Pacto se ve como un lacre junto al contador */
   const isPact = id => !!(A.RELICS[id] && A.RELICS[id].pact), bag = () => run.perks.filter(id => !isPact(id)), bagN = () => bag().length;
@@ -324,7 +328,9 @@ window.AIQ = window.AIQ || {};
   const OTRA = L6("¡Otra!|One more!|Encore !|De novo!|Noch mal!|Ancora!||再来！|한 번 더!|もう一回！|Ещё!|Jeszcze!"), BEST5 = L6("5 mejores|best 5|5 meilleures|5 melhores|beste 5|5 migliori||取前5|상위 5개|上位5つ|5 лучших|5 najlepszych");
   const NULLED = L6("Anulado|Voided|Annulé|Anulado|Annulliert|Annullato||已作废|무효|無効|Отменён|Anulowane"), SAVED_BY = L6("te ha salvado|saved you|t'a sauvé|te salvou|hat dich gerettet|ti ha salvato|te salvó|救了你|덕분에 살았어요|に救われた|спас тебя|cię uratował");
   const gain = n => Math.round(n * (sumFlag("coinX") || 1));
-  const chestSkip = () => Math.round(2.5 * inflation());                // dejar el cofre del jefe sin abrir: 3 doblones al empezar el acto II, 4 al empezar el III (el Toque de Midas los duplica, como todo lo que ganas)
+  const shopRates = r => { const e = Math.round(3 + (19 / 11) * (r - 1)), ra = Math.round(28 + (12 / 11) * (r - 1)); return [100 - e - ra, ra, e]; };   // tasas de la tienda en la ronda r (1-12): comun / rara / epica; suben poco a poco
+  A.adv.rates = shopRates;
+  const chestSkip = () => Math.round(2.5 * inflation()) + (sumFlag("chestSkip") || 0);                // dejar el cofre del jefe sin abrir: 3 doblones al empezar el acto II, 4 al empezar el III (el Toque de Midas los duplica, como todo lo que ganas)
   /* retos de la ronda r tras aplicar perks (Llave maestra, Talisman, inmunidades); pl: otra mano de perks (la tienda valora cada reliquia sin contarla a ella) */
   /* tanda 6b: el plan de la ronda r (barajada si la barajaste), con el historial del plan base de la expedicion */
   const planOf = r => A.chal.plan(run.seed + ((run.salt && run.salt[r]) ? ":" + run.salt[r] : ""), r, run.asc, defAt(r).topic, run.cjk, { base: run.seed, topics: x => defAt(x).topic, first: !!run.first });
@@ -334,7 +340,7 @@ window.AIQ = window.AIQ || {};
     const bribed = (run.bribed && run.bribed[r]) || [], paid = list.filter(c => bribed.includes(c.id)).map(c => c.id); if (bribed.length) list = list.filter(c => !bribed.includes(c.id));   // sobornados en el Campamento (paid: los que estaban en esta tirada; barajar no borra los sobornos)
     const sum = f => pl.reduce((n, p) => n + (p[f] || 0), 0), nulled = [];
     for (let k = sum("skipHardest"); k > 0 && list.length; k--) { const RK = { map: 5, wall: 4, ptr: 3, rule: 2 }, w = c => (c.lv || 1) * 10 + (RK[A.CHAL[c.id].kind] || 1); const top = list.reduce((a, c) => (w(c) > w(a) ? c : a)); nulled.push(top.id); list = list.filter(c => c !== top); }   // Comodin: fuera el reto mas fuerte
-    if (boss) { let soft = sum("softenBoss"); list = list.map((c, i) => (i < soft ? { ...c, lv: 1 } : c)); }
+    if (boss) { for (let k = sum("bossLess"); k > 0 && list.length > 1; k--) { const w = c => (c.lv || 1) * 10, low = list.reduce((a, c) => (w(c) < w(a) ? c : a)); list = list.filter(c => c !== low); } let soft = sum("softenBoss"); list = list.map((c, i) => (i < soft ? { ...c, lv: 1 } : c)); }
     list = list.filter(c => !pl.some(p => (p.immune || []).includes(c.id)));
     if (run.board) list = list.map(c => (c.id === "trap" && (c.lv || 1) > 2 ? { ...c, lv: 2 } : c));   // tanda 15: la Pregunta trampa, en el Reto diario, como mucho a nivel 2
     for (const bet of run.inf ? [] : [run.bets && run.bets[r], casOf(r)])      // tanda 11: los de las apuestas (la lateral y Rojo o negro), sellados (si fallas, la revancha va sin ellos)
@@ -429,10 +435,11 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------- botin de ronda: superar el objetivo paga 2 (jefe 4) y cada escalon de margen suma 1; fallar paga 1 por cada tercio del objetivo ----------------
      Calibrado con dev/bot.js sobre partidas reales: pasar justo cobra lo mismo que antes y todo lo que se gana de mas sale del margen (+55-75 % por expedicion). */
-  const CLEAR = [2, 4], STEPS = [1.1, 1.25, 1.5, 2];                // escalones: +10 %, +25 %, +50 % y el doble del objetivo
+  const CLEAR = [2, 4], STEPS = [1.1, 1.25, 1.5, 2];
+  const clearBase = boss => CLEAR[boss ? 1 : 0] * (boss && has("bossPay") ? sumFlag("bossPay") : 1);   // Cazarrecompensas: el jefe paga el doble                // escalones: +10 %, +25 %, +50 % y el doble del objetivo
   const marginOf = q => STEPS.filter(s => q >= s).length;
   const consoOf = q => clamp(Math.floor(q * 3), 0, 2);              // un tercio -> 1, dos tercios -> 2: nunca mas que superarla
-  const loot = (s, t, boss) => { const q = s / Math.max(1, t), m = marginOf(q); return { q, base: CLEAR[boss ? 1 : 0], margin: m, next: m < STEPS.length ? Math.ceil(t * STEPS[m] - 1e-7) : 0 }; };   // -1e-7: 2100 x 1,1 da 2310,0000000000005 y el marcador pedia 2.311
+  const loot = (s, t, boss) => { const q = s / Math.max(1, t), m = marginOf(q); return { q, base: clearBase(boss), margin: m, next: m < STEPS.length ? Math.ceil(t * STEPS[m] - 1e-7) : 0 }; };   // -1e-7: 2100 x 1,1 da 2310,0000000000005 y el marcador pedia 2.311
   const pctOf = (s, t) => Math.floor((s * 100) / Math.max(1, t));   // % entero exacto (floor((q - 1) * 100) daba 13 % con 5.700 de 5.000)
   A.adv.loot = loot;
   /* textos nuevos de la economia (es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl) */
@@ -617,6 +624,8 @@ window.AIQ = window.AIQ || {};
         if (hi >= 0) { const t = []; takeFrom(B.bands[2], 1, A.rng(`${run.seed}:alt:${pos}:${run.attempt || 0}`), t, ctxOf(pos, run.used, B.topic), B.tail); if (t[0]) run.split = { key: tgtKey(), qi: hi, alt: t[0].cid[0], used: false }; }
       }
     }
+    run.hardQi = null;
+    if ((has("split") || has("hardHint") || has("hardFlash")) && !run.inf) { const pos = roundNo(), B = bandsOf(slotOf(pos), pos), hi = qs.reduce((m, q, i) => (i < 5 && B.pct(q) != null && (m < 0 || B.pct(q) > B.pct(qs[m])) ? i : m), -1); if (hi >= 0) run.hardQi = hi; }   // catalogo: la misma pregunta que elige Dividir
     return {
       name: `${A.tx(info.n)} · ${boss ? A.T("Jefe", "Boss") : A.tf("Ronda {n}/3", "Round {n}/3", { n: run.round + 1 })}`, topicName: tn, topic: def.topic, kind: "adventure", boss: !!boss,
       seconds: ctx.seconds, advance: roundTarget(), maxPerQ: 1400, bonus: false, plainName: true, questions: () => qs,
@@ -626,7 +635,7 @@ window.AIQ = window.AIQ || {};
   function startRound(keep) {
     run.phase = "round"; ticket(); if (A.coverMap) A.coverMap("camp", false);   // sales del Campamento: el mapa vuelve a dibujarse al instante
     A.casa.acto(run.act);                                              // la noche avanza con los actos (js/casa.js)
-    if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = 0; run.calmOn = false; refillTools(); }
+    if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = Math.max(run.streak || 0, sumFlag("streakMin") || 0, run.sup && run.sup.tonic ? 2 : 0); run.calmOn = false; refillTools(); }   // catalogo: la racha PASA de una ronda a otra (antes se ponia a 0)
     const Lv = roundLevel(keep), S = C().S;
     S.run = run; S.camp = { id: "adv", mode: "adventure", title: { es: "Aventura", en: "Adventure" }, home: { lat: 20, lon: 10, zoom: 1 }, levels: [Lv] };
     S.runTotal = run.score; S.runMax = 0; C().map.setHome(S.camp.home); C().map.setStyle(mapStyleFor());
@@ -815,14 +824,15 @@ window.AIQ = window.AIQ || {};
     const time = km == null ? 0 : Math.round(400 * Math.max(0, left / limit) * (0.3 + 0.7 * dist / 1000));
     c.dist = dist; c.time = time; c.chips = dist + time;
     /* acierto (racha, bandera): dentro de los 300 km de la Enciclopedia (x2 en mares y naturaleza), el anillo exterior; no un porcentaje de los puntos */
-    const lim0 = (A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid }) : [300, 150, 75])[0];
+    const lim0 = (A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid }) : [300, 150, 75])[0] * (sumFlag("hitMul") || 1);
     c.hit = km != null && c.km <= lim0;
     const manga = has("sleeve") && !run.inf && run.qi === 5; let streak = c.hit ? S.streak + 1 : 0, guarded = false;
     if (manga) streak = S.streak;                                     // As en la manga: la 6.a ni alarga ni corta la racha
     const gN = sumFlag("guard");                                       // Guardarrachas: los 2 primeros fallos de la ronda no cortan la racha (tampoco el tiempo agotado)
     if (!c.hit && !manga && S.streak > 0 && gN && !run.inf && (+run.guardUsed || 0) < gN) { streak = S.streak; guarded = true; if (!noSide) { run.guardUsed = (+run.guardUsed || 0) + 1; setTimeout(() => A.adv.flash("streakguard", 2, "✓"), 450); } c.lines.push(["streakguard", A.tx(A.RELICS.streakguard.n), "✓"]); }
     if (!noSide && !run.inf && streak === 2 && S.streak === 1 && has("calm") && run.qi < (run.qn || 5) - 1 && (run.chal || []).some(c2 => (perkList().find(p => p.calm) || {}).calm.includes((A.CHAL[c2.id] || {}).fam))) setTimeout(() => { A.adv.flash("coolhead", 1, "❄"); if (A.sfx.ice) A.sfx.ice(); }, 500);   // Sangre fria: la siguiente, en frio
-    c.streak = streak; c.mult = guarded || manga ? 1 : 1 + (streak >= 2 ? Math.min(1.5, c.streakStep * (streak - 1)) : 0);   // la respuesta salvada puntua x1
+    { const sf = perkList().find(p => p.streakFloor); if (sf && !manga && !run.inf) { if (streak >= sf.streakFloor[0] && !noSide) run.fuseOn = 1; if (run.fuseOn) streak = Math.max(streak, sf.streakFloor[1]); } }   // Mecha eterna
+    c.streak = streak; c.mult = guarded || manga || !c.hit ? 1 : 1 + (streak >= 2 ? Math.min(1.5, c.streakStep * (streak - 1)) : 0);   // la respuesta salvada puntua x1
     c.qi = run.qi;
     if (km != null) perkList().forEach(p => { if (!p.post) return; const tx = p.post(c, run); if (tx) { c.lines.push([p.ico, A.tx(p.n), tx]); if (!noSide) A.adv.flash(p.id, 0, tx); } });
     c.total = km == null ? 0 : Math.round(c.chips * c.mult * c.xmult);
@@ -854,7 +864,7 @@ window.AIQ = window.AIQ || {};
       const failed = res.km == null || res.dist < 400;
       if (failed) {
         const insured = !!(run.sup && run.sup.seguro), shielded = insured || (has("shieldAct") && run.shieldAct !== run.act);
-        if (shielded && !insured) run.shieldAct = run.act; else { run.lives--; run.livesLostAct++; }
+        if (shielded && !insured) run.shieldAct = run.act; else loseLife();
         if (run.lives <= 0) run.infOver = true;                                     // se acaban las provisiones: la siguiente pantalla cobra la expedicion
       }
     }
@@ -886,6 +896,22 @@ window.AIQ = window.AIQ || {};
     if (!NE_BY_EN) { NE_BY_EN = {}; (A.PLACES || []).forEach(r => { if (r[1] === "country") NE_BY_EN[r[6].en] = r[0].slice(2); }); }
     const ne = NE_BY_EN[nameEn] || (A.CODEX_COUNTRY || {})[nameEn]; return ne && W[ne] ? ne : null;
   };
+  const anchorOf = o => {   // un punto del lugar: el propio punto, o uno dentro del poligono mayor del pais o la masa de agua
+    if (o.lat != null) return [o.lon, o.lat];
+    const f = featOf(o); if (!f || !f.polys || !f.polys.length) return null;
+    let best = f.polys[0], ba = -1; for (const q of f.polys) { const b = q.bbox, a = (b[2] - b[0]) * (b[3] - b[1]); if (a > ba) { ba = a; best = q; } }
+    try { return A.geo.innerPoint(best); } catch (e) { return null; }
+  };
+  /* Fogonazo: el lugar parpadea un instante en el mapa (un cuadradito dorado de pixel, sin brillo) */
+  function blipAt(o, ms) {
+    try {
+      const pt = anchorOf(o);
+      const m = C().map, host = $("map"); if (!pt || !m || !m.lonLatToScreen || !host) return;
+      const q = m.lonLatToScreen(pt[0], pt[1], m.lastCt), el = document.createElement("div");
+      el.className = "fl-blip"; el.style.left = q[0] + "px"; el.style.top = q[1] + "px"; host.appendChild(el);
+      setTimeout(() => el.remove(), ms || 400);
+    } catch (e) { /* el fogonazo es un adorno de ayuda: si el mapa no responde, no pasa nada */ }
+  }
   function revealCountry(o) {
     if (o.t === "c") { noteH(A.T("Continente: ", "Continent: ") + continentName(o), "passport"); return; }
     const ne = o.clue ? null : (o.cEn && o.cEn.length ? o.cEn : [o.sub && o.sub.en]).map(neOf).find(Boolean);   // lugares con dos paises: el primero que exista en el mapa; en las pistas, solo el continente (como antes)
@@ -966,7 +992,8 @@ window.AIQ = window.AIQ || {};
     const calmF = (perkList().find(p => p.calm) || {}).calm, calm = calmF && !run.inf && (run.streak || 0) >= 2 && (run.chal || []).some(c => calmF.includes((A.CHAL[c.id] || {}).fam)) ? calmF : null;   // Sangre fria (tanda 9)
     if (!!calm !== !!run.calmOn) { if (calm) A.adv.flash("coolhead", 0, "❄"); else A.adv.flash("coolhead", 0, "✕", () => A.sfx.chip(0.3)); }   // entra en frio / se le quiebra el halo
     const calmWas = !!run.calmOn; run.calmOn = !!calm; if (calmWas !== run.calmOn) renderBars();   // las fichas que apaga, heladas
-    const fx = A.chal.fx(amuPerks()); A.chal.question(o, run.qi, { calm });
+    const fx = A.chal.fx(amuPerks()), graceLv = sumFlag("graceLv"), grace = !!(graceLv && !run.inf && (run.streak || 0) >= graceLv); if (grace !== !!run.graceOn) { run.graceOn = grace; if (grace) A.adv.flash("grace", 1, "−1"); }   // Estado de gracia (catalogo)
+    A.chal.question(o, run.qi, { calm, grace });
     if (run.intQ === qKey()) { A.chal.suspend(); run.windOff = true; }   // el Interruptor ya estaba gastado en esta pregunta: Descarte, Dividir o recargar no lo deshacen
     showSplit();
     if (kept) { C().map.avoid = hudRects(); C().map.setProbes(kept); renderBars(); }
@@ -979,6 +1006,11 @@ window.AIQ = window.AIQ || {};
       /* cuando queden `sec` segundos del reloj de la pregunta: se recalcula en cada espera (la pausa y el Reloj de arena mueven el momento; antes una pausa lo perdia) */
       later: (sec, fn) => { const tick = () => { if (S.phase !== "asking") return; const left = S.limit - (performance.now() - S.t0 - S.pausedAcc) / 1000; if (!S.paused && left <= sec) return fn(); timers.push(setTimeout(tick, S.paused ? 250 : Math.max(50, (left - sec) * 1000))); }; tick(); },
     };
+    { const rh = sumFlag("rhythm"); if (rh && !run.inf && (run.streak || 0) > 0) S.limit += Math.min(rh, run.streak); }   // Ritmo: +1 s por punto de racha
+    if (!run.inf && run.hardQi != null && run.hardQi === S.qi) {   // Faro y Fogonazo: solo en la pregunta mas dificil
+      if (has("hardHint")) { revealCountry(o); A.adv.flash("beacon", 1); }
+      if (has("hardFlash")) { A.adv.flash("flashbulb", 1); blipAt(o, sumFlag("hardFlash")); }
+    }
     /* las pistas gratis se lucen la primera vez que dan algo en cada ronda (tambien las que esperan a mitad de tiempo) */
     const rk = run.act + ":" + run.round + ":" + run.attempt;
     perkList().forEach(p => {
@@ -1016,6 +1048,9 @@ window.AIQ = window.AIQ || {};
   };
 
   /* ---------------- herramientas ---------------- */
+  const QUAD = { NE: L6("Cuadrante noreste|Northeast quadrant|Quadrant nord-est|Quadrante nordeste|Nordost-Quadrant|Quadrante nord-est||东北象限|북동 구역|北東エリア|Северо-восточный квадрант|Ćwiartka północno-wschodnia"), NW: L6("Cuadrante noroeste|Northwest quadrant|Quadrant nord-ouest|Quadrante noroeste|Nordwest-Quadrant|Quadrante nord-ovest||西北象限|북서 구역|北西エリア|Северо-западный квадрант|Ćwiartka północno-zachodnia"), SE: L6("Cuadrante sureste|Southeast quadrant|Quadrant sud-est|Quadrante sudeste|Südost-Quadrant|Quadrante sud-est||东南象限|남동 구역|南東エリア|Юго-восточный квадрант|Ćwiartka południowo-wschodnia"), SW: L6("Cuadrante suroeste|Southwest quadrant|Quadrant sud-ouest|Quadrante sudoeste|Südwest-Quadrant|Quadrante sud-ovest||西南象限|남서 구역|南西エリア|Юго-западный квадрант|Ćwiartka południowo-zachodnia") };
+  const quadrantNote = o => { const pt = anchorOf(o); return pt ? A.tx(QUAD[(pt[1] >= 0 ? "N" : "S") + (pt[0] >= 0 ? "E" : "W")]) : A.T("Sin notas para este lugar.", "No notes for this place."); };
+  const CHALK_YES = L6("¡Sí!|Yes!|Oui !|Sim!|Ja!|Sì!||是！|예!|はい！|Да!|Tak!"), CHALK_NO = L6("No|No|Non|Não|Nein|No||否|아니요|いいえ|Нет|Nie");
   A.adv.useTool = function (id) {
     const S = C().S; if (!run || S.phase !== "asking" || S.paused) return;
     const t = run.tools[id], def = TOOLS[id]; if (!t) return;
@@ -1030,7 +1065,7 @@ window.AIQ = window.AIQ || {};
     if (id === "hourglass") { S.limit += 6; noteH(A.T("+6 segundos", "+6 seconds")); }
     else if (id === "interruptor") { A.chal.suspend(); run.windOff = true; run.intQ = qKey(); A.sfx.restore(); noteH(A.T("Retos apagados en esta pregunta", "Challenges off for this question")); A.dealer.react("counter"); }
     else if (id === "swapcard") { if (!swapQuestion()) { t.left++; run.qTools--; run.rTools--; A.sfx.deny(); return; } }
-    else if (id === "journal") { const txt = o.clue ? A.tf("Empieza por «{l}» y está en {c}.", "Starts with “{l}” and lies in {c}.", { l: A.tx(o.answer).trim()[0], c: continentName(o) }) : fieldNote(o) || A.T("Sin notas para este lugar.", "No notes for this place."); noteH(txt, "journal"); }
+    else if (id === "journal") noteH(quadrantNote(o), "journal");   // catalogo: ahora da el cuadrante (norte o sur, este u oeste)
     else if (id === "passport") trile(o);                                // tanda 10: el Pase VIP es un trile
     persist(); renderBars();
   };
@@ -1093,6 +1128,7 @@ window.AIQ = window.AIQ || {};
     const list = (run.probes = run.probes || []), P = { lon, lat, ct: map.pickCt };   // ct: marco del mapa deformado donde tocaste (la sonda se dibuja entera alli)
     run.probesK = qKey() + ":" + o.cid[0];
     if (f ? km === 0 : km < 5) { P.inside = true; P.label = f ? (o.area ? A.T("¡Dentro!", "Inside!") : A.T("¡Dentro del país!", "Inside the country!")) : A.T("¡Aquí mismo!", "Right here!"); A.sfx.sonar(1); }   // encima del objetivo: ni anillo ni flecha
+    else if (id === "chalk") { P.km = 2000; const inn = km <= 2000; P.label = A.tx(inn ? CHALK_YES : CHALK_NO); A.sfx.sonar(inn ? 0.9 : 0.3); }   // Tiza: un circulo de 2.000 km, si o no
     else if (id === "sonar") {
       const fz = (A.rng(run.seed + ":sn:" + roundNo() + ":" + S.qi + ":" + list.length)() - 0.5) * (has("sonarErr") ? 0.04 : 0.12);
       P.km = Math.min(20015, km * (1 + fz)); P.label = approx(P.km);   // nunca mas de media vuelta al mundo
@@ -1162,12 +1198,58 @@ window.AIQ = window.AIQ || {};
     sell: L6("Vender una carta devuelve la mitad de lo que pagaste (entera si la vendes en la misma visita).|Selling a card gives back half of what you paid (all of it if you sell it during the same visit).|Vendre une carte rend la moitié du prix payé (tout si tu la vends pendant la même visite).|Vender uma carta devolve metade do que pagou (tudo se vender na mesma visita).|Eine Karte zu verkaufen bringt die Hälfte des Preises zurück (alles, wenn du sie im selben Besuch verkaufst).|Vendere una carta restituisce metà di quanto hai pagato (tutto se la vendi nella stessa visita).||卖出卡牌退还一半价格（同一次访问内卖出则全额退还）。|카드를 팔면 낸 금액의 절반을 돌려받습니다 (같은 방문 중에는 전액).|カードを売ると支払額の半分が戻る（同じ訪問中なら全額）。|Продажа карты возвращает половину цены (всю — если продаёшь в тот же визит).|Sprzedaż karty zwraca połowę ceny (całość, jeśli sprzedasz ją podczas tej samej wizyty)."),
     bet: L6("Los juegos de la Barra pagan al momento lo que ganes.|The Bar games pay out whatever you win at once.|Les jeux du Bar paient tes gains tout de suite.|Os jogos do Bar pagam o que você ganhar na hora.|Die Spiele der Bar zahlen deinen Gewinn sofort aus.|I giochi del Bar pagano subito le tue vincite.||酒吧游戏会立即支付你的奖金。|바 게임은 딴 돈을 즉시 지급합니다.|バーのゲームは勝ち分をすぐ支払う。|Игры бара платят выигрыш сразу.|Gry w barze wypłacają wygraną od razu.")
   };
-  if (A.tips) A.tips.coins = () => {
+  const ecoLegacy = () => {
     if (!run) return "";
-    const boss = isBoss(), mh = has("marginHalf"), base = CLEAR[boss ? 1 : 0], a = gain(base), b = gain(base + (mh ? Math.floor(STEPS.length / 2) : STEPS.length)), c = gain(2);
-    const cap = sumFlag("interest") || 2, interest = Math.min(cap, Math.floor(run.coins / 10)), lp = run.lastPay, f = (k, p) => A.tx(ECO[k]).replace(/\{(\w+)\}/g, (m, x) => (p && p[x] != null ? p[x] : m));
+    const boss = isBoss(), mh = has("marginHalf"), base = clearBase(boss), a = gain(base), b = gain(base + (mh ? Math.floor(STEPS.length / 2) : STEPS.length)), c = gain(2);
+    const cap = sumFlag("interest") || 2, interest = Math.min(cap, Math.floor(run.coins / (sumFlag("interestDiv") || 10))), lp = run.lastPay, f = (k, p) => A.tx(ECO[k]).replace(/\{(\w+)\}/g, (m, x) => (p && p[x] != null ? p[x] : m));
     return [A.tx(ECO.t), f("now", { n: run.coins }), lp ? f(lp.ok ? "ok" : "ko", { r: lp.r, n: lp.got }) : A.tx(ECO.none), run.inf ? "" : f("next", { a, b, c }), run.inf ? "" : f("int", { n: interest, m: cap }), A.tx(ECO.sell), A.tx(ECO.bet)].filter(Boolean).join("\n");
   };
+
+  /* el ticket de los doblones (catalogo): lo que cobras, lo que vas a ver en la tienda y lo que cuesta. Se abre al pasar el raton y se fija con un clic */
+  const ETK = {
+    t: L6("Tus doblones|Your doubloons|Tes doublons|Seus dobrões|Deine Dublonen|I tuoi dobloni||你的金币|내 금화|所持コイン|Твои дублоны|Twoje dublony"),
+    round: L6("Esta ronda|This round|Cette manche|Esta rodada|Diese Runde|Questo round||本回合|이번 라운드|このラウンド|Этот раунд|Ta runda"),
+    boss: L6("jefe|boss|boss|chefe|Boss|boss||首领|보스|ボス|босс|boss"),
+    act: L6("Acto|Act|Acte|Ato|Akt|Atto||幕|막|幕|Акт|Akt"),
+    clear: L6("Superar|Clear|Réussir|Superar|Schaffen|Superare||通关|통과|クリア|Пройти|Zaliczyć"),
+    upto: L6("con margen hasta|with margin up to|avec marge jusqu'à|com margem até|mit Vorsprung bis|con margine fino a||有超额最多|초과 달성 시 최대|上乗せで最大|с перевесом до|z nadwyżką do"),
+    fail: L6("Si fallas|If you fail|Si tu rates|Se falhar|Bei Misserfolg|Se fallisci||失败时|실패하면|失敗すると|При провале|Przy porażce"),
+    failD: L6("1 por cada tercio (máx. 2)|1 per third (max 2)|1 par tiers (max 2)|1 por terço (máx. 2)|1 pro Drittel (max. 2)|1 ogni terzo (max 2)||每三分之一 1 个（最多 2）|3분의 1마다 1 (최대 2)|3分の1ごとに1（最大2）|1 за треть (макс. 2)|1 za trzecią część (maks. 2)"),
+    int: L6("Interés al cerrar|Interest at close|Intérêts à la fin|Juros ao fechar|Zinsen am Ende|Interesse a fine round||结算利息|종료 이자|終了時の利息|Проценты в конце|Odsetki na koniec"),
+    per: L6("1 por {d}, máx. {m}|1 per {d}, max {m}|1 par {d}, max {m}|1 por {d}, máx. {m}|1 pro {d}, max. {m}|1 ogni {d}, max {m}||每 {d} 个 1 个，最多 {m}|{d}개당 1, 최대 {m}|{d}枚ごとに1、最大{m}|1 за {d}, макс. {m}|1 za {d}, maks. {m}"),
+    shop: L6("Tienda de esta ronda|This round's shop|Boutique de cette manche|Loja desta rodada|Shop dieser Runde|Negozio di questo round||本回合商店|이번 라운드 상점|このラウンドのショップ|Магазин этого раунда|Sklep tej rundy"),
+    slot: L6("por hueco de reliquia|per relic slot|par emplacement de relique|por espaço de relíquia|pro Reliktplatz|per posto reliquia||每个遗物位|유물 칸마다|レリックの枠ごと|на ячейку реликвии|na miejsce relikwii"),
+    chest: L6("Cofre del jefe|Boss chest|Coffre du boss|Baú do chefe|Boss-Truhe|Scrigno del boss||首领宝箱|보스 상자|ボスの宝箱|Сундук босса|Skrzynia bossa"),
+    vit: L6("Vitrina legendaria|Legendary showcase|Vitrine légendaire|Vitrine lendária|Legendäre Vitrine|Vetrina leggendaria||传说展柜|전설 진열장|レジェンダリーの陳列棚|Легендарная витрина|Legendarna gablota"),
+    vitOn: L6("hay una|there is one|il y en a une|há uma|es gibt eine|ce n'è una||有一件|하나 있어요|1つある|есть одна|jest jedna"),
+    vitOff: L6("desde el acto II|from act II|dès l'acte II|a partir do ato II|ab Akt II|dall'atto II||第二幕起|2막부터|第2幕から|со II акта|od aktu II"),
+    prices: L6("Precios ahora|Prices now|Prix actuels|Preços agora|Preise jetzt|Prezzi ora||当前价格|현재 가격|現在の価格|Цены сейчас|Ceny teraz"),
+    prov: L6("Provisión|Provision|Provision|Provisão|Proviant|Provviste||补给|식량|食料|Запас|Zapas"),
+    swap: L6("Cambiar cartas|Swap cards|Changer les cartes|Trocar cartas|Karten tauschen|Cambia carte||换牌|카드 교체|カード交換|Замена карт|Wymiana kart"),
+    free: L6("gratis|free|gratuit|grátis|gratis|gratis||免费|무료|無料|бесплатно|za darmo"),
+    path: L6("Cómo cambia la tienda|How the shop changes|Comment la boutique change|Como a loja muda|Wie sich der Shop ändert|Come cambia il negozio||商店如何变化|상점이 변하는 방식|ショップの変化|Как меняется магазин|Jak zmienia się sklep"),
+    sell: L6("Vender devuelve la mitad de lo pagado.|Selling gives back half of what you paid.|Vendre rend la moitié du prix payé.|Vender devolve metade do que pagou.|Verkaufen bringt die Hälfte des Preises zurück.|Vendere restituisce metà di quanto hai pagato.||卖出退还一半价格。|팔면 낸 금액의 절반을 돌려받아요.|売ると支払額の半分が戻る。|Продажа возвращает половину цены.|Sprzedaż zwraca połowę ceny.")
+  };
+  const ecoTicket = () => {
+    const r = roundNo() + 1, boss = isBoss(), act = run.act, tx = k => A.tx(ETK[k]);
+    const base = clearBase(boss), a = gain(base), b = gain(base + STEPS.length), cap = sumFlag("interest") || 2, div = sumFlag("interestDiv") || 10, intr = Math.min(cap, Math.floor(run.coins / div));
+    const rt = shopRates(r), legDone = !!(run.legAct && run.legAct[act]), steps = ["+10 %", "+25 %", "+50 %", "×2"];
+    const rc = rerollCost(), rcol = ["#b7bfc4", "#4f9bff", "#c78bf0", "#ffd95a"], rn = k => A.tx(R_NAMES[k]);
+    let strip = ""; for (let q = 1; q <= 12; q++) { const t = shopRates(q); strip += `<span class="${q === r ? "now " : ""}${q % 4 === 0 ? "bs" : ""}"><i class="c" style="height:${Math.round(t[0] * 0.4)}px"></i><i class="r" style="height:${Math.round(t[1] * 0.4)}px"></i><i class="e" style="height:${Math.round(t[2] * 1.1)}px"></i></span>`; }
+    return `<div class="tk"><h4><span>${tx("t")}</span><b>${run.coins}</b></h4>`
+      + `<div class="sc"><div class="st"><span>${tx("round")} · R${r}${boss ? " · " + tx("boss") : ""}</span><em>${tx("act")} ${["I", "II", "III"][Math.min(2, act)]}</em></div>`
+      + `<div class="ln"><span>${tx("clear")}</span><span><b>+${a}</b> · ${tx("upto")} <b>+${b}</b></span></div>`
+      + `<div class="stp">${steps.map(s => `<span><b>+1</b>${s}</span>`).join("")}</div>`
+      + `<div class="ln"><span>${tx("fail")}</span><span>${tx("failD")}</span></div>`
+      + `<div class="ln"><span>${tx("int")}</span><span><b>+${intr}</b> · ${tx("per").replace("{d}", div).replace("{m}", cap)}</span></div></div>`
+      + `<div class="sc"><div class="st"><span>${tx("shop")}</span><em>${tx("slot")}</em></div><div class="rt">${rt.map((v, i) => `<b class="s${i}" style="flex:${v}">${v >= 5 ? v + "%" : ""}</b>`).join("")}</div>`
+      + `<div class="lg">${[0, 1, 2].map(i => `<span><i style="background:${rcol[i]}"></i>${rn(i)}</span>`).join("")}</div>`
+      + `<div class="ln"><span>${tx("chest")}</span><span>55 / 35 / 10 %</span></div><div class="ln"><span>${tx("vit")}</span><span>${act >= 1 && !legDone ? tx("vitOn") : tx("vitOff")}</span></div></div>`
+      + `<div class="sc"><div class="st"><span>${tx("prices")}</span><em>${run.asc ? "A" + run.asc + " · " : ""}${tx("act")} ${["I", "II", "III"][Math.min(2, act)]}</em></div><div class="pr4">${[4, 6, 9, 14].map((c, i) => `<span style="--c:${rcol[i]}"><small>${rn(i)}</small>${price(c)}</span>`).join("")}</div>`
+      + `<div class="ln"><span>${tx("prov")} <b>${lifePrice()}</b></span><span>${tx("swap")} <b>${rc === 0 ? tx("free") : rc}</b></span></div></div>`
+      + `<div class="sc"><div class="st"><span>${tx("path")}</span><em>R1 · R12</em></div><div class="strip">${strip}</div><div class="fine">${tx("sell")}</div></div></div>`;
+  };
+  if (A.tips) A.tips.coins = A.tips.abcoins = () => (run && !run.inf ? ecoTicket() : ecoLegacy());
   /* ---------------- lucirse (tanda 2): cuando una reliquia TUYA actua, su icono salta en la barra, suena y, si es un premio, tiembla.
      Antes de comprar no cambia nada (ni cartas, ni panel de proxima ronda, ni fichas de reto). lv 0 = aviso (brinco y ficha, sin temblor:
      tambien mientras respondes), 1 = premio flojo (brillo y moneda), 2 = premio medio (brillo, dos fichas y temblor 1, nunca mientras respondes).
@@ -1225,7 +1307,7 @@ window.AIQ = window.AIQ || {};
     const S = C().S, o = S.qs[S.qi]; if (!o) return false;
     const key = roundNo() + ":" + (run.attempt || 0); run.ballN = run.ballN || {}; if ((run.ballN[key] || 0) >= sumFlag("reball")) return false;
     const f = featOf(o), km = f ? A.geo.distToFeature(lon, lat, f) : A.geo.haversine(lat, lon, o.lat, o.lon);
-    const lim0 = (A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid }) : [300, 150, 75])[0]; if (km <= lim0) return false;   // la misma diana que la racha (antes el 60 % de los puntos: de 300 a ~770 km no habia segundo tiro)
+    const lim0 = (A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid }) : [300, 150, 75])[0] * (sumFlag("hitMul") || 1); if (km <= lim0) return false;   // la misma diana que la racha (antes el 60 % de los puntos: de 300 a ~770 km no habia segundo tiro)
     run.ballN[key] = (run.ballN[key] || 0) + 1; (run.ballSaved = run.ballSaved || {})[qKey()] = 1;
     run.probes = run.probes || []; run.probes.push({ lon, lat, ct: C().map.pickCt, cold: true, label: A.tx(OTRA) }); run.probesK = qKey() + ":" + o.cid[0];
     C().map.avoid = hudRects(); C().map.setProbes(run.probes); renderBars();
@@ -1240,7 +1322,7 @@ window.AIQ = window.AIQ || {};
     const left = plan.filter(c => !bribed.includes(c.id)), pl = perkList();
     pl.forEach(p => {
       if (p.skipHardest && left.length) A.adv.flash(p.id, 0);
-      if (p.softenBoss && r % 4 === 3 && left.length) A.adv.flash(p.id, 0);
+      if ((p.softenBoss || p.bossLess) && r % 4 === 3 && left.length) A.adv.flash(p.id, 0);
       if ((p.immune || []).some(id => left.some(c => c.id === id))) A.adv.flash(p.id, 0);
       if (p.toolBonus && Object.keys(run.tools).length) A.adv.flash(p.id, 0, "+" + p.toolBonus);
       if (p.round) { const x = { seconds: 0 }; p.round(x, run); if (x.seconds) A.adv.flash(p.id, 0, "+" + x.seconds + " s"); }
@@ -1263,7 +1345,7 @@ window.AIQ = window.AIQ || {};
     if (!run || !C().S.camp || C().S.camp.mode !== "adventure" || ["title", "levelEnd", "shop"].includes(C().S.phase)) { bar.classList.add("hidden"); tb.classList.add("hidden"); cb.classList.add("hidden"); return; }
     const info = actInfo(run.act), silenced = (run.boss || []).includes("silence");
     bar.classList.remove("hidden");
-    bar.innerHTML = `<div class="ab-top"><span class="ab-act" data-tf="abact">${A.tx(info.n)}</span><span class="ab-coins" id="abCoins" data-tf="abcoins">${CN()}<b>${run.coins}</b></span><span class="ab-hearts" data-tf="abhearts">${hearts()}</span></div>
+    bar.innerHTML = `<div class="ab-top"><span class="ab-act" data-tf="abact">${A.tx(info.n)}</span><span class="ab-coins" id="abCoins" data-tf="abcoins" data-pin="1">${CN()}<b>${run.coins}</b></span><span class="ab-hearts" data-tf="abhearts">${hearts()}</span></div>
       <div class="ab-perks">${run.perks.map(id => `<span class="ab-perk" data-id="${id}">${ic(id)}${id === "hoard" && run.hucha ? `<b class="hc-n">${run.hucha}</b>` : ""}</span>`).join("")}</div>
       ${A.jefes ? A.jefes.riseHtml() : ""}
       ${run.wind ? `<div class="ab-wind"><svg viewBox="-12 -12 24 24" style="transform:rotate(${run.wind.brg}deg)"><path d="M0 -9 L6 4 L0 1 L-6 4 Z"/></svg><span>${dirName(run.wind.brg)} · ${A.fmtDist(run.wind.km)}</span></div>` : ""}`;
@@ -1272,7 +1354,7 @@ window.AIQ = window.AIQ || {};
     cb.classList.toggle("hidden", !cb.firstChild); centerIcons(cb);
     const ids = Object.keys(run.tools);
     tb.classList.toggle("hidden", !ids.length || C().S.phase !== "asking");
-    const aim = id => (id === "sonar" ? A.T("Toca el mapa para lanzar una sonda…", "Tap the map to send a probe…") : A.T("Toca el mapa para orientar la brújula…", "Tap the map to aim the compass…"));
+    const aim = id => (id === "chalk" ? A.T("Toca el mapa para dibujar el círculo…", "Tap the map to draw the circle…") : id === "sonar" ? A.T("Toca el mapa para lanzar una sonda…", "Tap the map to send a probe…") : A.T("Toca el mapa para orientar la brújula…", "Tap the map to aim the compass…"));
     const res = !C().S.tool && (run.probes || []).length ? `<i class="tl-res">${run.probes.map(p => p.label).join("  ·  ")}</i>` : "";   // lo que han dicho las sondas de esta pregunta
     tb.innerHTML = res + ids.map((id, i) => { const t = run.tools[id], on = C().S.tool === id, off = t.left <= 0 || silenced; return `<button class="tool pc-hand${on ? " on" : ""}${off ? " off" : ""}" data-tool="${id}" style="--r:${((i - (ids.length - 1) / 2) * 6).toFixed(1)}deg" title="${A.tx(TOOLS[id].n)} — ${A.tx(TOOLS[id].d)}">${on && TOOLS[id].kind === "probe" ? `<i class="tl-aim">${aim(id)}</i>` : ""}<span class="tl-ico felt">${ic(TOOLS[id].ico)}</span><b class="tl-n">${A.tx(TOOLS[id].sn || TOOLS[id].n)}</b><span class="tl-pips">${Array.from({ length: toolMax(id) }, (_, k) => `<i class="${k < t.left ? "on" : ""}"></i>`).join("")}</span><kbd class="k-kb">${i + 1}</kbd></button>`; }).join("");
     tb.querySelectorAll(".tool").forEach(b => (b.onclick = () => A.adv.useTool(b.dataset.tool)));
@@ -1300,7 +1382,7 @@ window.AIQ = window.AIQ || {};
       if (lt.margin) lines.push([et("margin", { p: pctOf(S.levelScore - tb, tb) }) + (mh ? " · ½" : ""), "+" + mg, mh ? "minbet" : null, mh ? "half" : null]);   // la Mesa de minimos paga la mitad del margen
       if (mh && S.levelScore < tb) lines.push([A.tx(A.RELICS.minbet.n) + " · " + A.tx(SAVED_BY), "", "minbet"]);
       if (has("midas") && !mh && S.levelScore < tb) { lines.push([A.tx(A.RELICS.philosopher.n) + " · " + A.tx(SAVED_BY), "", "philosopher"]); setTimeout(() => A.casa.premio(2), 1100); }   // tanda 12: Midas te ha salvado   // ha decidido la ronda   // cuanto mas por encima del objetivo, mas doblones
-      const cap = sumFlag("interest") || 2, interest = Math.min(cap, Math.floor(run.coins / 10));
+      const cap = sumFlag("interest") || 2, interest = Math.min(cap, Math.floor(run.coins / (sumFlag("interestDiv") || 10)));
       if (interest) { x.coins += interest; lines.push([A.T("Interés (1 por cada 10)", "Interest (1 per 10)"), "+" + interest, interest > 2 ? (perkList().find(p => p.interest) || {}).id : null]); }   // por encima de 2, es el Banquero
       perkList().forEach(p => { if (p.clear) { const y = { coins: 0 }, tx = p.clear(y, run); if (y.coins) { x.coins += y.coins; lines.push([A.tx(p.n), tx || "+" + y.coins, p.id]); } } });
       if (has("bank")) { const b = gain(sumFlag("bank")); run.hucha = (run.hucha || 0) + b; lines.push([A.tx(A.RELICS.hoard.n) + " · " + A.tx(H_IN).replace("{n}", run.hucha), "+" + b, "hoard"]); }   // tanda 9: la Hucha guarda, no paga
@@ -1332,7 +1414,7 @@ window.AIQ = window.AIQ || {};
       setTimeout(() => { if (!(boss && bossSay(true))) A.dealer.react("roundWin", wb); }, 700);   // el crupier protesta (antes estas frases nunca se decian); en un jefe, la del jefe
     } else {
       const insured = !!(run.sup && run.sup.seguro), shielded = insured || (has("shieldAct") && run.shieldAct !== run.act);
-      if (shielded && !insured) run.shieldAct = run.act; else if (!shielded) { run.lives--; run.livesLostAct++; }
+      if (shielded && !insured) run.shieldAct = run.act; else if (!shielded) loseLife();
       const lb = (run.bets || {})[roundNo()], betLost = [];   // tanda 11: la apuesta del jefe se pierde al fallarlo (Doble o nada: lo apostado)
       if (lb && (lb.id === "double" || lb.id === "final") && !lb.done) { lb.done = 1; delete run.bets[roundNo()]; betLost.push([A.tx(BETS[lb.id].n), lb.id === "double" ? "−" + lb.stake : "—", null, "bet lost"]); setTimeout(() => A.dealer.say(A.dealer.line("betLose"), { mood: "laugh", hold: 2400 }), 1200); }
       if (insured) run.segN = (run.segN || 0) + 1;                       // el Seguro de ronda se ha gastado: el siguiente cuesta 2 mas (superar la ronda no lo encarece)
@@ -1411,13 +1493,15 @@ window.AIQ = window.AIQ || {};
     const bag = Object.keys(R).filter(id => !owned(id) && (chest ? !(R[id].r === 3 && legDone) : R[id].r < 3) && useful(id));   // 0.2.5: los amuletos ya no tienen recarga: el tuyo no vuelve a salir
     const cur = chalFor(roundNo()).list, up = new Set(); cur.forEach(c => (A.CHAL[c.id].counters || []).forEach(id => up.add(id)));
     const reach = {}; bag.forEach(id => { if (ctrOf(id)) reach[id] = helpRounds(id).length; });
-    const wt = id => { const r = R[id].r; return (chest ? [0, 50, 40, 10][r] : [60, 30 + run.act * 4, 10 + run.act * 5][r]) * (up.has(id) ? 2.6 : 1) * (reach[id] ? 0.7 + 0.3 * Math.min(4, reach[id]) : 1) * (R[id].amulet && run.act === 0 ? 0.5 : 1) * (R[id].ventaja && !perkList().some(p => p.ventaja) ? 2 : 1); };   // sin Ventaja, pesan el doble   // acto I: los amuletos pesan la mitad (que no llenen la mochila)
-    const draw = (pool = bag) => { const tot = pool.reduce((n, id) => n + wt(id), 0); let x = rr() * tot, pick = pool[pool.length - 1]; for (const id of pool) { x -= wt(id); if (x <= 0) { pick = id; break; } } bag.splice(bag.indexOf(pick), 1); return pick; };
+    const TW = chest ? [0, 55, 35, 10] : shopRates(roundNo() + 1).concat(0);   // rarezas por color: se sortea primero la RAREZA (comun / rara / epica / legendaria) y luego la reliquia dentro de ella: antes pesaba cada reliquia y las 10 comunes tapaban a las 4 epicas
+    const wt = id => 1 * (up.has(id) ? 2.6 : 1) * (reach[id] ? 0.7 + 0.3 * Math.min(4, reach[id]) : 1) * (R[id].amulet && run.act === 0 ? 0.5 : 1) * (R[id].ventaja && !perkList().some(p => p.ventaja) ? 2 : 1);   // sin Ventaja, pesan el doble   // acto I: los amuletos pesan la mitad (que no llenen la mochila)
+    const draw = (pool = bag, tiered = true) => { if (tiered) { const ts = [0, 1, 2, 3].filter(t => TW[t] > 0 && pool.some(id => R[id].r === t)); if (ts.length) { let y = rr() * ts.reduce((n, t) => n + TW[t], 0), tier = ts[ts.length - 1]; for (const t of ts) { y -= TW[t]; if (y <= 0) { tier = t; break; } } pool = pool.filter(id => R[id].r === tier); } }
+      const tot = pool.reduce((n, id) => n + wt(id), 0); let x = rr() * tot, pick = pool[pool.length - 1]; for (const id of pool) { x -= wt(id); if (x <= 0) { pick = id; break; } } bag.splice(bag.indexOf(pick), 1); return pick; };
     const canTool = id => !!run.tools[id] || Object.keys(run.tools).length < 4;   // con 4 herramientas distintas solo sirven cargas de las tuyas
     const slots = chest ? 3 : shopCtx().slots;
     if (!chest && run.attempt > 0 && cur.length && run.fixUsed !== `${roundNo()}:${run.attempt}`) {   // la carta de la revancha va a mitad de precio (fix: ver cardCost); una sola por revancha aunque cambies cartas
       const fix = bag.filter(id => up.has(id));
-      if (fix.length) out.push({ k: "perk", id: draw(fix), fix: true });
+      if (fix.length) out.push({ k: "perk", id: draw(fix, false), fix: true });
       else if (canTool("interruptor")) out.push({ k: "tool", id: "interruptor", fix: true });
     }
     while (out.length < slots) {
@@ -1534,7 +1618,7 @@ window.AIQ = window.AIQ || {};
     renderShop(run.phase === "chest");
   }
   const routeHtml = () => A.adv.road({ size: "bar", route: run.route, cur: roundNo() });   // siempre las 12 rondas y el infinito (antes, una ventana de 12 que se corria)
-  const rerollCost = () => { const sx = shopCtx(); return run.freeUsed < sx.freeReroll ? 0 : price(3 + run.rerolls); };
+  const rerollCost = () => { const sx = shopCtx(); return run.freeUsed < sx.freeReroll ? 0 : Math.max(1, price(3 + run.rerolls) - (sx.rerollOff || 0)); };
   /* precio de una carta de la tienda: la de la revancha (s.fix) va a mitad de precio */
   const cardCost = s => { const full = s.vit ? price(18) : price(s.k === "perk" ? A.RELICS[s.id].cost : TOOLS[s.id].cost); return s.fix ? Math.max(1, Math.ceil(full / 2)) : full; };   // la vitrina: 23 en el acto II y 27 en el III (A0)
   const costHtml = s => (s.vit ? CN() + cardCost(s) : s.fix ? `${CN()}<s class="of-was">${price(s.k === "perk" ? A.RELICS[s.id].cost : TOOLS[s.id].cost)}</s>${cardCost(s)}` : CN() + cardCost(s));
@@ -1617,7 +1701,7 @@ window.AIQ = window.AIQ || {};
     const bought = run.bought.includes(i);
     if (s.k === "perk") {
       const p = A.RELICS[s.id];                                           // la carta solo cuenta lo que hace: contra que truco sirve lo descubre el jugador leyendo
-      return `<div class="offer pc r${p.r}${s.vit ? " vit" : ""}${bought ? " sold" : ""}" data-ix="${i}" data-suit="${suitRed(p.suit) ? "red" : "blk"}">${p.r === 3 && !bought ? GLINT : ""}${ixs(p.cost, p.suit)}<span class="of-r">${s.vit ? A.tx(VIT_TAG) + " · " : ""}${p.amulet ? A.tx(AMU_TAG) : p.ventaja ? A.tx(VTG_TAG) + (perkList().some(q => q.ventaja && q.id !== s.id) ? " · " + A.tx(VTG_SWAP) : "") : A.tx(R_NAMES[p.r])}</span><div class="of-ico felt">${ic(p.ico)}</div><b class="of-n">${A.tx(p.n)}</b><p>${A.tx(p.d)}</p><button class="buy${chest ? " sq-fit" : ""}" ${bought ? "disabled" : ""}>${bought ? A.T("Comprado", "Owned") : chest ? A.T("Elegir gratis", "Take for free") : costHtml(s)}</button></div>`;   // sq-fit: "Elegir gratis" en una linea en todos los idiomas
+      return `<div class="offer pc r${p.r}${s.vit ? " vit" : ""}${bought ? " sold" : ""}" data-ix="${i}" data-suit="${suitRed(p.suit) ? "red" : "blk"}">${p.r === 3 && !bought ? GLINT : ""}${ixs(p.cost, p.suit)}<span class="of-r">${s.vit ? A.tx(VIT_TAG) + " · " : ""}${rarTag(p.r)}</span><div class="of-ico felt">${ic(p.ico)}</div><b class="of-n">${A.tx(p.n)}${p.amulet ? `<em>${A.tx(AMU_TAG)}</em>` : p.ventaja ? `<em>${A.tx(VTG_TAG)}</em>` : ""}</b><p>${A.tx(p.d)}</p><button class="buy${chest ? " sq-fit" : ""}" ${bought ? "disabled" : ""}>${bought ? A.T("Comprado", "Owned") : chest ? A.T("Elegir gratis", "Take for free") : costHtml(s)}</button></div>`;   // sq-fit: "Elegir gratis" en una linea en todos los idiomas
     }
     if (s.k === "tool") {
       const t = TOOLS[s.id], have = run.tools[s.id];
@@ -1647,10 +1731,10 @@ window.AIQ = window.AIQ || {};
   const PK_IN = L6("dentro|inside|dedans|dentro|drin|dentro||在里面|들어 있음|入っている|внутри|w środku"), PK_USES = L6("{n} usos por ronda|{n} uses per round|{n} utilisations par manche|{n} usos por rodada|{n} Anwendungen pro Runde|{n} usi per round||每回合 {n} 次|라운드당 {n}회|1ラウンド{n}回|{n} исп. за раунд|Użycia na rundę: {n}"),
     PK_TOOL = L6("Herramienta|Tool|Outil|Ferramenta|Werkzeug|Strumento||工具|도구|道具|Инструмент|Narzędzie");
   let shopChest = false;                                                // si la mochila que se ve es la del cofre del jefe (para vender desde la carta grande)
-  const pkCard = (o, tag, meta, btn) => `<span class="pk-tag">${tag}</span><div class="pk-felt felt">${o.r === 3 ? `<span class="pk-gold"></span>` : ""}${ic(o.ico || o.id)}</div><b class="pk-n">${A.tx(o.n)}</b><p class="pk-d">${A.tx(o.d)}</p>${meta ? `<p class="pk-meta">${meta}</p>` : ""}${btn || ""}`;
+  const pkCard = (o, tag, meta, btn) => `<span class="pk-tag">${tag}</span><div class="pk-felt felt">${o.r === 3 ? `<span class="pk-gold"></span>` : ""}${ic(o.ico || o.id)}</div><b class="pk-n">${A.tx(o.n)}</b>${o.amulet ? `<em class="pk-ty">${A.tx(AMU_TAG)}</em>` : o.ventaja ? `<em class="pk-ty">${A.tx(VTG_TAG)}</em>` : ""}<p class="pk-d">${A.tx(o.d)}</p>${meta ? `<p class="pk-meta">${meta}</p>` : ""}${btn || ""}`;
   function peekRelic(id, camp) {
     const p = A.RELICS[id]; if (!p || !run) return null;
-    const tag = p.amulet ? A.tx(AMU_TAG) : p.ventaja ? A.tx(VTG_TAG) : A.tx(R_NAMES[p.r]), meta = id === "hoard" && run.hucha ? `${CN()}<b>${run.hucha}</b> ${A.tx(PK_IN)}` : "";
+    const tag = rarTag(p.r), meta = id === "hoard" && run.hucha ? `${CN()}<b>${run.hucha}</b> ${A.tx(PK_IN)}` : "";
     const pact = isPact(id) && bagN() > baseSlots(), mode = !camp ? "" : legOn ? "busy" : pact ? "pact" : swapIx != null && !isPact(id) ? "swap" : "sell";
     const btn = mode === "sell" || mode === "swap" ? `<button class="pk-act sell" type="button"><span>${A.pick6(SELL)}</span><em>${CN()}+${sellValue(id)}</em></button>`   // con la mochila llena tambien se vende: la carta elegida entra en su hueco
       : mode === "pact" ? `<button class="pk-act off" type="button" disabled><span>${A.tx(PACT_FIRST)}</span></button>` : "";
@@ -1704,7 +1788,7 @@ window.AIQ = window.AIQ || {};
     const ascChip = ascI ? `<span class="tb-asc" ${A.ttAttr(A.T("Ascensión", "Ascension") + " " + run.asc + " · " + ascI.n, ascI.d + (ascI.k ? " " + ascI.k : ""))}>${ic(ASC_CHIP[run.asc])}<em>${run.asc}</em></span>` : "";
     C().dialog(`<div class="table mesa gx-camp${chest ? " chest" : ""}${again ? " again" : ""}">
       <header class="tb-head"><div class="tb-title"><span class="gx-eyb tag">${A.tx(info.n)} · ${actSub(info)}</span><span class="tb-trow"><h2 class="gx-t-m">${chest ? A.T("Cofre del jefe", "Boss chest") : A.T("Campamento", "Camp")}</h2>${ascChip}</span></div>
-        ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins" data-tf="coins">${CN()}<b>${run.coins}</b></div></div></header>
+        ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins" data-tf="coins" data-pin="1">${CN()}<b>${run.coins}</b></div></div></header>
       <section class="tb-shop gx-pnl">${note ? `<p class="tb-note">${note}</p>` : ""}<section class="offers" style="--n:${Math.max(1, run.stock.length)}">${cards}${chest ? "" : `<div class="tb-actions"><button class="tb-deck" id="rerollBtn" type="button"><span class="tb-dk">${ic("dice")}</span><span>${A.T("Cambiar cartas", "New cards")}</span><em>${rc ? CN() + rc : A.T("gratis", "free")}</em></button></div>`}</section></section>
       ${chest ? "" : supHtml()}
       <footer class="tb-tray gx-pnl">
@@ -1789,7 +1873,7 @@ window.AIQ = window.AIQ || {};
     casOf(r);                                                             // mueve a su sitio un Rojo o negro de una partida vieja
     const rr = A.rng(`${run.seed}:barra:${r}`), b = (run.bets || {})[r], open = betsOpen() && !run.inf;   // aun sin apuestas abiertas (antes de tu primer jefe): solo los suministros
     const sd = open ? (b ? b.id : sideRound(r)) : null, bet = sd && sideOk(sd, r) ? sd : null;
-    const sup = rr.shuffle(["seguro", "cafe"]).sort((x, y) => (run.sup && run.sup[y] ? 1 : 0) - (run.sup && run.sup[x] ? 1 : 0));   // a la izquierda, un suministro (el que ya tengas activo, primero)
+    const sup = rr.shuffle(["seguro", "cafe", "tonic"]).sort((x, y) => (run.sup && run.sup[y] ? 1 : 0) - (run.sup && run.sup[x] ? 1 : 0));   // a la izquierda, un suministro (el que ya tengas activo, primero)
     const s = [sup[0], bet];                                                // derecha: SIEMPRE una apuesta (o hueco si esa ronda no toca ninguna)
     run.bar = { key, s }; return s;
   }
@@ -2543,8 +2627,9 @@ window.AIQ = window.AIQ || {};
   };
   A.adv.casino = { add(def) { CASINO_EXT[def.id] = def; BETS[def.id] = def.bet; if (!CASINO.includes(def.id)) CASINO.push(def.id); }, ids: () => CASINO.slice() };                                         // solo para pruebas (dev/)
   const SUPS = [
-    { id: "cafe", cost: 4, ico: "sup_cafe", n: A.L("Café doble", "Double espresso"), d: A.L("+4 s por pregunta en la próxima ronda", "+4 s per question next round") },
+    { id: "cafe", cost: 3, ico: "sup_cafe", n: A.L("Café doble", "Double espresso"), d: A.L("+4 s por pregunta en la próxima ronda", "+4 s per question next round") },
     { id: "seguro", cost: 8, ico: "sup_seguro", n: A.L("Seguro de ronda", "Round insurance"), d: A.L("Si fallas la próxima ronda, no pierdes provisión", "If you fail next round, you keep your provision") },
+    { id: "tonic", cost: 4, ico: "tonic", n: L6("Tónico de racha|Streak tonic|Tonique de série|Tônico de sequência|Serientonikum|Tonico di serie||连击补剂|연속 기록 강장제|連続正解の薬|Тоник серии|Tonik serii"), d: L6("Empiezas la próxima ronda con racha 2.|You start next round with a streak of 2.|Tu commences la prochaine manche avec une série de 2.|Você começa a próxima rodada com sequência 2.|Du startest die nächste Runde mit Serie 2.|Inizi il prossimo round con serie 2.||下一回合以连击 2 开始。|다음 라운드를 연속 기록 2로 시작해요.|次のラウンドを連続正解2で始める。|Следующий раунд начинаешь с серией 2.|Następną rundę zaczynasz z serią 2.") },
   ];
   const supCost = s => price(s.cost + (s.id === "seguro" ? 2 * (run.segN || 0) : 0));   // cada Seguro de ronda gastado (el que te salva al fallar; ver roundEnd) encarece el siguiente: no se puede fallar gratis para siempre
   let supFresh = null;                                                 // el suministro recien comprado: solo a ese le cae el sello
@@ -2559,7 +2644,7 @@ window.AIQ = window.AIQ || {};
     document.querySelectorAll("[data-sup]").forEach(b => (b.onclick = () => {
       const s = SUPS.find(x => x.id === b.dataset.sup), c = supCost(s); run.sup = run.sup || {};
       if (run.sup[s.id]) { run.coins += typeof run.sup[s.id] === "number" ? run.sup[s.id] : run.sup[s.id] === "gift" ? 0 : c; run.sup[s.id] = false; A.sfx.sell(); }   // devuelve lo que pagaste (vender el Vale entre medias ya no regala 1)
-      else { if (run.coins < c) { A.sfx.deny(); shake(b); return; } run.coins -= c; run.sup[s.id] = c; supFresh = s.id; run.visitBuys = (run.visitBuys || 0) + 1; A.sfx.buy(); if (SUPS.every(x => run.sup[x.id])) A.ach.emit("adv", { kind: "supplies" }); }
+      else { if (run.coins < c) { A.sfx.deny(); shake(b); return; } run.coins -= c; run.sup[s.id] = c; supFresh = s.id; run.visitBuys = (run.visitBuys || 0) + 1; A.sfx.buy(); if (SUPS.filter(x => x.id !== "tonic").every(x => run.sup[x.id])) A.ach.emit("adv", { kind: "supplies" }); }
       persist(); renderShop(false);
     }));
   }
@@ -2600,7 +2685,7 @@ window.AIQ = window.AIQ || {};
     if (s.k === "perk") {
       const p = A.RELICS[s.id], c = chest ? 0 : cardCost(s);
       if (owned(s.id)) return;                                            // 0.2.5: un amuleto no se compra dos veces (tiendas guardadas de antes, con su recarga)
-      const swapV = p.ventaja ? perkList().find(q => q.ventaja && q.id !== s.id) : null;
+      const swapV = null;   // catalogo: las Ventajas ya no se venden entre si: solo las limita la mochila
       if (!swapV && !p.pact && bagN() >= maxPerks()) {                // tanda 9 (S10): mochila llena: eliges cual vendes y la carta entra en su hueco, en un gesto
         if (run.coins + Math.max(...bag().map(sellValue)) < c) return noFunds(el);
         swapIx = i; document.querySelectorAll("#dlg .tr-relic:not(.tr-pact)").forEach(x => { x.classList.add("swap-pick"); x.dataset.sv = "+" + sellValue(x.dataset.relic); }); document.querySelectorAll("#dlg .offer").forEach(x => x.classList.toggle("swap-src", x === el)); A.sfx.card(); flash(A.tx(SWAP_PICK)); return;   // 0.2.21: cada reliquia ensena lo que te dan por venderla (antes una flecha de cambio)

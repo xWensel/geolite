@@ -116,7 +116,7 @@ window.AIQ = window.AIQ || {};
     wrongborders: "mentiras", noborders: "mentiras", decoys: "mentiras", flaghue: "mentiras", flaggray: "mentiras", fakepass: "mentiras",
     wind: "reglas", storm: "reglas", silence: "reglas", trap: "reglas",
   };
-  const AMULET = { letras: "dictionary", luz: "miner", vista: "divingmask", sitio: "plates", puntero: "steadyhand", pantalla: "protector" };
+  const AMULET = { letras: "dictionary", luz: "miner", vista: "divingmask", sitio: "plates", puntero: "steadyhand", pantalla: "protector", mentiras: "hawkeye" };
   /* tanda 6: FUSIONES. Los retos gemelos se funden en uno con tres niveles que se notan; los absorbidos (SUB) quedan como efectos internos: ya no
      salen en el sorteo ni tienen ficha. EXPAND dice que efectos de verdad pone cada reto en cada nivel (a veces los de sus gemelos de antes) */
   const SUB = { dance: "shaky", novowels: "missing", swap: "anagram", upside: "mirror", negative: "noborders", mirrorx: "flip", blindspot: "myopia", drift: "quake", dizzy: "tremble", blink: "ghost", cblur: "ghost", smudge: "crack", flaginvert: "flaggray", pangea: "spread", deal: "spread", scroll: "shaky" };
@@ -291,7 +291,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ mitigaciones (suma de los `fx` de las reliquias) */
   A.chal.fx = perks => {
-    const fx = { textShakeMul: 1, ptrShakeMul: 1, ptrBlurMul: 1, glassBlurMul: 1, batteryMul: 1, unmirrorText: false, unmirrorMap: false, unmirrorPtr: false, shakeMul: 1, textMul: 1, colorMul: 1, blurMul: 1, plateMul: 1, blackoutMul: 1, cloudMul: 1, focusMul: 1, lagMul: 1, quakeMul: 1, mosaicMul: 1, rainMul: 1, ghostMul: 1, darkR: 1, darkDim: 0, lensR: 0, trueR: 0, peekR: 0, missingRate: 0, unswapMs: 0, decodeMs: 0, riddleMs: 0, unmirror: false, keepName: false, halo: false, flickerWarn: false, windPreview: false, windMul: 1, coords: false, guides: false, mag: false, country: false, thermo: false, beacon: false, noBabel: false, noMarquee: false, noNegative: false, noFlash: false, trapGhost: false, cloudClear: 0, glassMul: 1, hangAuto: 0, ids: perks.map(p => p.id) };
+    const fx = { textShakeMul: 1, ptrShakeMul: 1, ptrBlurMul: 1, glassBlurMul: 1, batteryMul: 1, unmirrorText: false, unmirrorMap: false, unmirrorPtr: false, shakeMul: 1, textMul: 1, colorMul: 1, blurMul: 1, plateMul: 1, liesMul: 1, blackoutMul: 1, cloudMul: 1, focusMul: 1, lagMul: 1, quakeMul: 1, mosaicMul: 1, rainMul: 1, ghostMul: 1, darkR: 1, darkDim: 0, lensR: 0, trueR: 0, peekR: 0, missingRate: 0, unswapMs: 0, decodeMs: 0, riddleMs: 0, unmirror: false, keepName: false, halo: false, flickerWarn: false, windPreview: false, windMul: 1, coords: false, guides: false, mag: false, country: false, thermo: false, beacon: false, noBabel: false, noMarquee: false, noNegative: false, noFlash: false, trapGhost: false, cloudClear: 0, glassMul: 1, hangAuto: 0, ids: perks.map(p => p.id) };
     for (const p of perks) {
       const f = p.fx; if (!f) continue;
       for (const k in f) {
@@ -327,7 +327,7 @@ window.AIQ = window.AIQ || {};
     case "dark": return { r: V([230, 170, 120], i) * fx.darkR / Math.max(0.5, h), a: V([0.975, 0.988, 0.997], i) * (1 - fx.darkDim) };
     case "flicker": return { iv: V([[4, 6], [2.5, 4], [1.5, 3]], i), len: V([250, 450, 700], i) * fx.blackoutMul * h };   // tanda 6: mas cortes
     case "lightning": return { iv: V([[3.5, 4.5], [2.2, 2.8], [1.3, 1.7]], i), shade: V([800, 1100, 1400], i) };   // tanda 6: un rayo cada 4 / 2,5 / 1,5 s
-    case "wrongborders": return { amp: V([0.014, 0.024, 0.038], i) * h };
+    case "wrongborders": return { amp: V([0.014, 0.024, 0.038], i) * h * fx.liesMul };
     case "pangea": return { k: V([0.6, 0.8, 1], i) * fx.plateMul * h };                    // v0.48: antes 0,9/0,95/1 y los niveles 2 y 3 salian casi iguales
     case "deal": return { k: V([0.6, 0.85, 1], i) * fx.plateMul * h };                      // < 0,7: una pareja; < 0,95: cuatro; si no, los seis en la mesa (el Nivel de crupier deja una pareja)
     case "spread": return { k: V([0.5, 0.8, 1], i) * fx.plateMul * h };
@@ -340,7 +340,7 @@ window.AIQ = window.AIQ || {};
     case "quake": return { px: V([3, 6, 8], i) * fx.quakeMul * h };
     case "drift": return { px: V([22, 36, 54], i) * fx.quakeMul * h };
     case "spin": return { amp: V([0.28, 0.45, 0.7], i) * fx.quakeMul * h };
-    case "decoys": return { n: V([30, 52, 80], i) };   // tanda 7: llueven del cielo (v0.2.16: muchas mas, antes 8 / 14 / 22)
+    case "decoys": return { n: Math.max(4, Math.round(V([30, 52, 80], i) * fx.liesMul)) };   // tanda 7: llueven del cielo (v0.2.16: muchas mas, antes 8 / 14 / 22)
     case "tremble": return { px: V([7, 10, 12], i) * fx.ptrShakeMul * h };
     case "blink": return { period: V([0.55, 0.42, 0.3], i), duty: 0.45 };
     case "ghost": return { every: V([5, 4.2, 4], i), off: V([1, 1.4, 1.5], i) * fx.ghostMul };
@@ -358,7 +358,7 @@ window.AIQ = window.AIQ || {};
     case "battery": return { dim: Math.min(0.85, V([0.55, 0.68, 0.8], i) * h * fx.batteryMul) };   // el Foco la deja casi en nada
     /* tanda 14 */
     case "ticker": return { gap: V([100, 150, 215], i), cap: V([2300, 3300, 5200], i), lead: V([450, 650, 900], i), cover: i >= 1, rnd: i >= 2, churn: i >= 2 };   // ms entre una letra y la siguiente; el pais tapado hasta que acaba; a tope: en desorden y se sueltan
-    case "fakepass": return { n: i + 1 };
+    case "fakepass": return { n: Math.max(1, Math.round((i + 1) * fx.liesMul)) };
     case "flagpuzzle": return { cols: V([2, 3, 4], i), rows: V([2, 2, 3], i), pair: i === 0, gray: i === 2 ? 2 : 0 };
     case "flagwind": return { amp: V([3, 5, 7], i), T: V([1.9, 1.3, 1.1], i), sh: V([0.2, 0.55, 0.62], i), gust: i === 2 };
     case "flagback": return {};
@@ -667,7 +667,7 @@ window.AIQ = window.AIQ || {};
       if (kind === "mix") { spec.smooth = true; spec.ms = 1800; spec.deal = true; }   // como cartas: se encogen en su sitio y aparecen en el nuevo (sin cruzarse ni pasarse de largo)
     }
     const wb = get("wrongborders"); if (wb) { spec.wob = par(wb).amp; any = true; }
-    const nb = get("noborders"); if (nb) { spec.lineA = 0; spec.flat = [0.55, 1, 1][lvi(nb)]; any = true; }   // tanda 6: a nivel 1 aun se adivinan los colores de cada pais
+    const nb = get("noborders"); if (nb) { spec.lineA = S.fx.liesMul < 1 ? 0.7 : 0; spec.flat = [0.55, 1, 1][lvi(nb)]; any = true; }   // tanda 6: a nivel 1 aun se adivinan los colores de cada pais
     const fl = get("flip"); if (fl && !S.fx.unmirrorMap) { spec.orient = { rot: Math.PI, mx: fl.lv >= 3 ? 1 : 0 }; any = true; }   // el Espejo del ilusionista tambien endereza el Sur arriba
     if (has("mirrorx") && !S.fx.unmirrorMap) { spec.orient = { rot: 0, mx: 1 }; any = true; }
     const sp = get("spin"); if (sp) { spec.spin = { amp: par(sp).amp, speed: 0.55 }; any = true; }
@@ -1167,7 +1167,8 @@ window.AIQ = window.AIQ || {};
     question(o, qi = 0, opt = {}) {
       const map = S.map = (A.core && A.core.map) || S.map; if (!map || !S.on) return; S.q = qi; S.suspended = false; clearTimers(); ensureOverlay(map); S.bl = S.bk ? bossQ(qi) : null;
       decorate(o); trapMark(o);
-      S.calm = opt.calm || null; if (S.calm) S.qlist = cur().filter(c => !S.calm.includes(D[c.id].fam));   // tanda 9: Sangre fria apaga en esta pregunta los retos de puntero y pantalla
+      S.calm = opt.calm || null; if (S.calm) S.qlist = cur().filter(c => !S.calm.includes(D[c.id].fam));
+      S.grace = !!opt.grace; if (S.grace) S.qlist = cur().map(c => ((c.lv || 1) > 1 ? { ...c, lv: c.lv - 1 } : c));   // Estado de gracia: un nivel menos en esta pregunta   // tanda 9: Sangre fria apaga en esta pregunta los retos de puntero y pantalla
       const keep = !!opt.keepMap, spec = !keep && map.setDistort ? mapSpec(map, o, null, qi) : null, app = $("app");   // keepMap (la mesa, A.chal.live): el mapa ya esta colocado como toca y no se vuelve a repartir
       if (keep) { /* se queda como esta */ } else if (spec) { map.setDistort(spec, spec.ms || 900); say("chal"); } else if (map.clearDistort) map.clearDistort(300);
       if (spec && spec.deal && A.core && A.core.S) A.core.S.limit += spec.ms / 1000;   // mientras se reparten las cartas no se puede responder: ese tiempo se devuelve
@@ -1208,7 +1209,7 @@ window.AIQ = window.AIQ || {};
       const was = mapSig(cur());
       S.pub = list.map(canon); S.list = expand(S.pub); S.mg = S.list.some(c => c.mesa && GLOB.has(c.id)); S.qlist = null; S.qsub = null; S.fpSet = null;
       const cs = A.core && A.core.S, o = cs && cs.qs && cs.qs[cs.qi];
-      if (o && cs.phase === "asking" && !S.suspended) this.question(o, S.q, { calm: S.calm, keepMap: mapSig(cur()) === was });   // si lo que mueve el mapa no cambia, no se vuelve a repartir
+      if (o && cs.phase === "asking" && !S.suspended) this.question(o, S.q, { calm: S.calm, grace: S.grace, keepMap: mapSig(cur()) === was });   // si lo que mueve el mapa no cambia, no se vuelve a repartir
     },
     upright() { const map = S.map; if (map && map.setOrient) map.setOrient(false, 900); },
     end() {

@@ -7,7 +7,9 @@
 .pk-card { --rc: #b7bfc4; --tg: #4a6b5a; position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 7px; width: 238px; padding: 22px 15px 15px;
   font-family: var(--serif); text-align: center; color: #16241c; background: #f6efdc; border-radius: 16px;
   box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px var(--rc), inset 0 0 0 7px #16241c, inset 0 -8px 0 rgba(22, 36, 28, .08), 0 14px 0 3px rgba(0, 0, 0, .42), 0 26px 46px rgba(0, 0, 0, .5); }
-.pk-card.r1 { --rc: #4fb6a0; --tg: #2f7f6e; } .pk-card.r2 { --rc: #c78bf0; --tg: #8a3fc0; } .pk-card.pk-tool { --rc: #6c8cff; --tg: #3d5bd1; }
+.pk-card.r1 { --rc: #4f9bff; --tg: #2a5fb8; } .pk-card.r2 { --rc: #c78bf0; --tg: #8a3fc0; } .pk-card.pk-tool { --rc: #4fb6a0; --tg: #2f7f6e; }
+/* rarezas por color: el marco crece con la rareza: doble filete en rara y epica; las cantoneras de la epica van en ::before */
+.pk-card.r1, .pk-card.r2 { box-shadow: 0 0 0 3px #16241c, inset 0 0 0 4px var(--rc), inset 0 0 0 6px #16241c, inset 0 0 0 8px var(--rc), inset 0 0 0 10px #16241c, inset 0 -8px 0 rgba(22, 36, 28, .08), 0 14px 0 3px rgba(0, 0, 0, .42), 0 26px 46px rgba(0, 0, 0, .5); }
 .pk-card.r3 { --rc: #ffd95a; --tg: #c46a1b;
   box-shadow: 0 0 0 3px #16241c, inset 3px 3px 0 0 #fff6c8, inset -3px -3px 0 0 #c46a1b, inset 0 0 0 6px #ffd95a, inset 0 0 0 8px #16241c, 0 14px 0 3px rgba(0, 0, 0, .42), 0 0 0 7px rgba(255, 217, 90, .28), 0 26px 46px rgba(0, 0, 0, .5); }
 .pk.pinned .pk-card { box-shadow: 0 0 0 3px #16241c, inset 0 0 0 5px var(--rc), inset 0 0 0 7px #16241c, 0 0 0 6px #ffd98a, 0 0 30px 6px rgba(255, 208, 107, .45), 0 14px 0 3px rgba(0, 0, 0, .42), 0 26px 46px rgba(0, 0, 0, .5); }
@@ -21,7 +23,8 @@
   font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; line-height: 1; color: var(--rc); background: #16241c;
   box-shadow: inset 0 0 0 2px var(--rc), 0 3px 0 rgba(0, 0, 0, .35); }
 .pk-card.r0 .pk-tag { color: #e9ece4; }
-.pk-card.amu .pk-tag { color: #ffd98a; box-shadow: inset 0 0 0 2px #ffd98a, 0 3px 0 rgba(0, 0, 0, .35); }
+.pk-tag .pips { display: inline-flex; gap: 2px; margin-left: 7px; vertical-align: -1px; } .pk-tag .pip { width: 10px; height: 10px; display: block; fill: currentColor; shape-rendering: crispEdges; }
+.pk-ty { display: block; margin-top: -3px; font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #5b6b60; }
 /* el tapete con el dibujo */
 .pk-felt { position: relative; display: grid; place-items: center; height: 128px; overflow: hidden; border: 3px solid #16241c; border-radius: 10px; background-color: #17553a;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .12), inset 0 -12px 20px rgba(0, 0, 0, .32); }
