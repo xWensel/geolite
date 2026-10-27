@@ -35,7 +35,7 @@
   const total = rows.length;
 
   /* ================= notas, cortes y versiones ================= */
-  let N = {}, OV = {}, SERVER = false, CFG = { w: { sl: 40, v: 30, inl: 20, st: 10 }, t: [34, 67] }, HIST = [];
+  let N = {}, OV = {}, SERVER = false, CFG = { w: { sl: 40, v: 30, inl: 20, st: 10 }, t: [34, 67], mw: 30 }, HIST = [];
   try { N = JSON.parse(localStorage.getItem("mc.notas") || "{}"); } catch (e) {}
   function loadCfg() { try { Object.assign(CFG, JSON.parse((N["cfg:balanceo"] || {}).nota || "{}")); } catch (e) {} try { HIST = JSON.parse((N["cfg:historial"] || {}).nota || "[]"); } catch (e) { HIST = []; } try { OV = JSON.parse((N["cfg:dif"] || {}).nota || "{}"); } catch (e) { OV = {}; } }
   loadCfg();
@@ -111,7 +111,7 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
   const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
@@ -169,6 +169,24 @@
       ${HIST.length ? `<details><summary class="note" style="cursor:pointer">Cortes guardados (${HIST.length})</summary><div class="tw" style="max-height:none"><table><tr><th>Nombre</th><th>Fecha</th><th>Cortes</th><th>Fácil · Medio · Difícil</th><th></th></tr>${hist}</table></div></details>` : ""}</div>
     <div class="pl"><h2>Todo el juego, en orden <small>${L.length} de ${C.length} · de la más fácil a la más difícil · pincha en un nombre para ver su ficha</small></h2><div class="tools">${inp("balanceo", "q", "buscar")}${sel("balanceo", "cat", Object.entries(CATS), "Todas las categorías")}${sel("balanceo", "ctry", [["∅", "(sin país)"]].concat(COUNTRIES.map(c => [c, c])), "Todos los países")}${sel("balanceo", "bz", [[0, "Fácil"], [1, "Medio"], [2, "Difícil"]], "Todos los grupos")}${sel("balanceo", "x", [["mano", "Con número puesto por mí"], ["sin", "Sin número"]], "Sin filtro extra")}<button class="chipb" data-act="clrbal">Limpiar</button></div>
       ${T("bal", [{ h: "Pregunta", f: nmc, v: r => r.name }, { h: "Categoría", f: r => CATS[r.topic] || r.topic, v: r => r.topic }, { h: "País", f: r => esc(r.ctry || "—"), v: r => r.ctry }, { h: "Línea", f: zbar, v: r => (r.dif2 == null ? 101 : r.dif2) }, { h: "Número (0-100)", a: 1, f: dif }, { h: "Grupo", f: r => (r.zone == null ? "—" : `<b style="font-weight:400;color:${ZC[r.zone]}">${ZN[r.zone]}</b>`) + (OV[r.key] != null ? ' <span class="pill">a mano</span>' : ""), v: r => (r.zone == null ? 9 : r.zone) }, { h: "Opinión", a: 1, f: r => vb(r.key) }], L, { s: 3, d: 1 })}</div>`;
+  };
+
+  /* ================= MARGENES POR NIVEL ================= */
+  /* nivel n (1-10) de cada categoria = una VENTANA de la linea, no una tajada: centro 10n-5 y ancho mw (por defecto 30): 1 = 0-20, 2 = 0-30, 3 = 10-40... */
+  const winOf = n => [Math.max(0, 10 * n - 5 - CFG.mw / 2), Math.min(100, 10 * n - 5 + CFG.mw / 2)];
+  VIEWS.margenes = () => {
+    reindex(); const f = ff("margenes"), R = cohort().filter(r => r.dif2 != null), cats = Object.keys(CATS), LV = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const inWin = (r, n) => { const [a, b] = winOf(n); return r.dif2 >= a && (r.dif2 <= b); };
+    const col = n => (n >= 40 ? "#5ee07a" : n >= 15 ? "#ffd24a" : "#ff6b78");
+    const grid = cats.map(t => { const a = R.filter(r => r.topic === t); return { t, n: a.length, c: LV.map(l => a.filter(r => inWin(r, l)).length) }; });
+    const sel2 = f.c && f.l ? R.filter(r => r.topic === f.c && inWin(r, +f.l)) : [];
+    const poor = grid.reduce((s2, g) => s2 + g.c.filter(n => n < 15).length, 0), amb = grid.reduce((s2, g) => s2 + g.c.filter(n => n >= 15 && n < 40).length, 0);
+    const win = l => { const [a, b] = winOf(l); return Math.round(a) + "–" + Math.round(b); };
+    return `<div class="pl"><h2>Márgenes por nivel <small>cada nivel 1-10 de una categoría coge un tramo de la línea, con solape, no una tajada exacta</small></h2>
+      <p class="note" style="margin:0">Nivel 1 = el tramo 0–${Math.round(winOf(1)[1])}, nivel 2 = 0–${Math.round(winOf(2)[1])}, nivel 3 = ${Math.round(winOf(3)[0])}–${Math.round(winOf(3)[1])}… Cada casilla dice <b>cuántas preguntas caben</b>. Verde: 40 o más · ámbar: 15-39 · rojo: menos de 15 (ese nivel se quedaría corto en esa categoría y habría que añadir contenido de ese tramo). Pincha una casilla para ver sus preguntas.</p>
+      <div class="sl">Ancho del margen <input type="range" id="mw" min="10" max="50" step="5" value="${CFG.mw}"> <b>${CFG.mw}</b> puntos · ${poor} casillas rojas · ${amb} ámbar</div>
+      <div class="tw" style="max-height:none"><table><tr><th>Categoría</th><th class="num">Total</th>${LV.map(l => `<th class="num" title="tramo ${win(l)}">N${l}<br><small>${win(l)}</small></th>`).join("")}</tr>${grid.map(g => `<tr><td>${CATS[g.t]}</td><td class="num">${g.n}</td>${g.c.map((n, i) => `<td class="num" style="padding:2px"><button class="chipb ${f.c === g.t && +f.l === i + 1 ? "on" : ""}" data-mg="${g.t}:${i + 1}" style="width:100%;background:${col(n)};color:#14102a;box-shadow:none">${n}</button></td>`).join("")}</tr>`).join("")}</table></div></div>
+      <div class="pl"><h2>${f.c && f.l ? CATS[f.c] + " · nivel " + f.l + " (" + win(+f.l) + ")" : "Elige una casilla"} <small>${f.c && f.l ? sel2.length + " preguntas" : "arriba, pincha un número"}</small></h2>${f.c && f.l ? T("mg", [{ h: "Pregunta", f: nmc, v: r => r.name }, { h: "País", f: r => esc(r.ctry || "—"), v: r => r.ctry }, { h: "Línea", f: zbar, v: r => r.dif2 }, { h: "Grupo", f: r => `<b style="font-weight:400;color:${ZC[r.zone]}">${ZN[r.zone]}</b>`, v: r => r.zone }, { h: "Opinión", a: 1, f: r => vb(r.key) }], sel2, { s: 2, d: 1 }) : '<p class="none">Aquí saldrán las preguntas del nivel que elijas.</p>'}</div>`;
   };
 
   /* ================= SIMULADOR DE RONDAS ================= */
@@ -421,12 +439,13 @@
   }
   function bindRanges() { const b1 = $("#b1"), b2 = $("#b2");
     if (b1 && b2) { const mv = () => { let a = +b1.value, b = +b2.value; if (a >= b) { if (document.activeElement === b1) a = b - 1; else b = a + 1; } CFG.t = [a, b]; draw(); }; b1.oninput = b2.oninput = mv; b1.onchange = b2.onchange = () => saveCfg(); }
+    const mw = $("#mw"); if (mw) { mw.oninput = () => { const b = mw.parentNode.querySelector("b"); if (b) b.textContent = mw.value; }; mw.onchange = () => { CFG.mw = +mw.value; saveCfg(); draw(); }; }
     $$("input[data-w]").forEach(el => { el.oninput = () => { CFG.w[el.dataset.w] = +el.value; draw(); }; el.onchange = () => saveCfg(); });
     $$("input[data-sim]").forEach(el => { el.oninput = () => { const k = el.dataset.sim; if (k === "meta") ff("sello").meta = +el.value; if (k === "irr") ff("quitar").irr = +el.value; draw(); }; }); }
 
   /* ================= eventos ================= */
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-view],[data-go],[data-open],[data-vote],[data-note],[data-zone],[data-more],[data-pg],[data-sort],[data-lang],[data-act],[data-sim],[data-fopen]"); if (!t) { if (e.target.id === "shade") closeDrawer(); return; }
+    const t = e.target.closest("[data-view],[data-go],[data-open],[data-vote],[data-note],[data-zone],[data-more],[data-pg],[data-mg],[data-sort],[data-lang],[data-act],[data-sim],[data-fopen]"); if (!t) { if (e.target.id === "shade") closeDrawer(); return; }
     if (t.tagName === "INPUT" || t.tagName === "SELECT") return;
     const d = t.dataset;
     if (d.view) return go(d.view);
@@ -436,6 +455,7 @@
     if (d.vote) return vote(d.k, d.vote);
     if (d.note) return note(d.k);
     if (d.zone != null) { const f = ff("balanceo"); f.bz = f.bz == d.zone ? "" : d.zone; return draw(); }
+    if (d.mg) { const [c, l] = d.mg.split(":"), f = ff("margenes"); if (f.c === c && f.l == l) { f.c = f.l = ""; } else { f.c = c; f.l = l; } if (ST.mg) ST.mg.page = 0; return draw(); }
     if (d.pg) { const [id, k] = d.pg.split(":"), st = ST[id]; if (k === "first") st.page = 0; else if (k === "last") st.page = 1e9; else st.page += +k; return draw(); }
     if (d.sort) { const [id, i] = d.sort.split(":"), s = ST[id]; if (s.s === +i) s.d = -s.d; else { s.s = +i; s.d = 1; } s.page = 0; return draw(); }
     if (d.lang) { return open(DKEY, d.lang); }
