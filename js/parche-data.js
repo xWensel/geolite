@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.232",
+      name: L("La muestra de Granadino", "Granadino's preview", "L'aperçu de Granadino", "A amostra do Granadino", "Die Vorschau von Granadino", "L'anteprima di Granadino", "", "Granadino 预览", "Granadino 미리보기", "Granadinoのプレビュー", "Превью Granadino", "Podgląd Granadino"),
+      date: "2026-10-27",
+      summary: L("La muestra de Granadino en La tienda usa ahora el mismo encuadre que las demás mesas (Atlántico, Europa y África).", "Granadino's shop preview now uses the same framing as the other tables (Atlantic, Europe and Africa).", "L'aperçu de Granadino à la boutique reprend désormais le même cadrage que les autres tables (Atlantique, Europe et Afrique).", "A amostra do Granadino na boutique agora usa o mesmo enquadramento das outras mesas (Atlântico, Europa e África).", "Die Vorschau von Granadino in der Boutique nutzt jetzt denselben Ausschnitt wie die anderen Tische (Atlantik, Europa und Afrika).", "L'anteprima di Granadino in boutique usa ora la stessa inquadratura degli altri tavoli (Atlantico, Europa e Africa).", "", "商店里Granadino的预览现在与其他牌桌取景一致（大西洋、欧洲与非洲）。", "상점의 Granadino 미리보기가 다른 테이블과 같은 구도(대서양, 유럽, 아프리카)로 바뀌었습니다.", "ショップのGranadinoのプレビューを、他のテーブルと同じ構図（大西洋・ヨーロッパ・アフリカ）にしました。", "Превью Granadino в магазине теперь с тем же кадром, что у других столов (Атлантика, Европа и Африка).", "Podgląd Granadino w sklepie ma teraz to samo ujęcie co inne stoły (Atlantyk, Europa i Afryka)."),
+      chapters: [
+        { id: "mesas", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新增", "신규", "新規", "Новое", "Nowe"),
+          title: L("Mesas del mapa", "Map tables", "Tables de la carte", "Mesas do mapa", "Kartentische", "Tavoli della mappa", "", "地图牌桌", "지도 테이블", "マップのテーブル", "Столы карты", "Stoły mapy"),
+          entries: [
+            E(L("La muestra de Granadino", "Granadino's preview", "L'aperçu de Granadino", "A amostra do Granadino", "Die Vorschau von Granadino", "L'anteprima di Granadino", "", "Granadino 预览", "Granadino 미리보기", "Granadinoのプレビュー", "Превью Granadino", "Podgląd Granadino"), "fix", "0.3.232", [
+              L("La muestra de Granadino en La tienda usa ahora el mismo encuadre que las demás mesas (Atlántico, Europa y África).", "Granadino's shop preview now uses the same framing as the other tables (Atlantic, Europe and Africa).", "L'aperçu de Granadino à la boutique reprend désormais le même cadrage que les autres tables (Atlantique, Europe et Afrique).", "A amostra do Granadino na boutique agora usa o mesmo enquadramento das outras mesas (Atlântico, Europa e África).", "Die Vorschau von Granadino in der Boutique nutzt jetzt denselben Ausschnitt wie die anderen Tische (Atlantik, Europa und Afrika).", "L'anteprima di Granadino in boutique usa ora la stessa inquadratura degli altri tavoli (Atlantico, Europa e Africa).", "", "商店里Granadino的预览现在与其他牌桌取景一致（大西洋、欧洲与非洲）。", "상점의 Granadino 미리보기가 다른 테이블과 같은 구도(대서양, 유럽, 아프리카)로 바뀌었습니다.", "ショップのGranadinoのプレビューを、他のテーブルと同じ構図（大西洋・ヨーロッパ・アフリカ）にしました。", "Превью Granadino в магазине теперь с тем же кадром, что у других столов (Атлантика, Европа и Африка).", "Podgląd Granadino w sklepie ma teraz to samo ujęcie co inne stoły (Atlantyk, Europa i Afryka).")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.231",
       name: L("Granadino", "Granadino", "Granadino", "Granadino", "Granadino", "Granadino", "", "Granadino", "Granadino", "Granadino", "Granadino", "Granadino"),
       date: "2026-10-27",
