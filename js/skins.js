@@ -156,7 +156,7 @@ window.AIQ = window.AIQ || {};
   A.MAPSTYLES.hiperespacio = MS({ mat: 52, animated: true, oceanTop: "#050a22", oceanBot: "#02051a", shallow: "#050a22", mc1: "#6a3aa8", mc2: "#cfe0ff", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#2a3a5a", "#324468", "#26364e", "#3a4c74", "#2c3e5e", "#34486c", "#243248"], line: [0.6, 0.8, 1, 0.9], shadow: null, gridA: 0 });
   A.MAPSTYLES.granadino = MS({ mat: 41, oceanTop: "#f4f2ec", oceanBot: "#e9e6dd", shallow: "#dde5f4", mc1: "#212a7c", mc2: "#b4b1aa", mp: [72, 0, 0, 2], felt: [0, 0.1, 0.3, 0.03],
-    land: ["#b9cbec", "#a4bae4", "#cdd9f0", "#94acdc", "#aebfe6", "#c2d1ee", "#869fd2"], line: [0.09, 0.11, 0.4, 0.95], lineW: 2.0, shadow: { off: [3, -4], col: [0.08, 0.1, 0.3, 0.3] }, gridA: 0 });
+    land: ["#c9a06c", "#d8b886", "#b98d5a", "#e0c79c", "#a8794a", "#d2ae78", "#c19a6b"], line: [0.09, 0.11, 0.4, 0.95], lineW: 2.0, shadow: { off: [3, -4], col: [0.08, 0.1, 0.3, 0.3] }, gridA: 0 });
   A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, mat: 54, animated: true, remolino: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
     land: ["#c84c0c", "#d8641c", "#b84410", "#e07a2a", "#c05818", "#d06a20", "#e8a050"], line: [0.25, 0.08, 0.02, 0.95], grid: "#8fb8ff", gridA: 0.08, tropic: "#ffd98a" };
 

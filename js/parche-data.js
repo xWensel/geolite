@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.233",
+      name: L("Granadino en madera camel", "Granadino in camel wood", "Granadino en bois caramel", "Granadino em madeira caramelo", "Granadino in Karamellholz", "Granadino in legno cammello", "", "焦糖木色的 Granadino", "카멜 우드 Granadino", "キャメルウッドのGranadino", "Granadino в карамельном дереве", "Granadino w karmelowym drewnie"),
+      date: "2026-10-27",
+      summary: L("En Granadino, la tierra y los continentes pasan a una madera camel con veta, con un tono distinto por país; el mar sigue siendo azulejo.", "In Granadino, land and continents become camel-coloured wood with a grain, with a different shade per country; the sea stays tile.", "Dans Granadino, les terres et continents passent à un bois caramel veiné, avec une teinte par pays ; la mer reste en carreaux.", "No Granadino, a terra e os continentes passam a uma madeira caramelo com veios, com um tom por país; o mar continua azulejo.", "In Granadino werden Land und Kontinente zu kamelfarbenem Holz mit Maserung, mit eigenem Ton pro Land; das Meer bleibt Fliese.", "In Granadino terre e continenti diventano legno cammello venato, con una sfumatura per paese; il mare resta piastrella.", "", "在 Granadino 中，陆地与大陆换成带木纹的焦糖色木头，每个国家一种色调；海面仍是瓷砖。", "Granadino에서 육지와 대륙이 결이 있는 카멜 빛 나무로 바뀌고 나라마다 다른 색조를 띱니다. 바다는 그대로 타일입니다.", "Granadinoの陸地と大陸を、木目のあるキャメル色の木にし、国ごとに色合いを変えました。海は今までどおりタイルです。", "В Granadino суша и материки стали карамельным деревом с текстурой, у каждой страны свой оттенок; море осталось плиткой.", "W Granadino lądy i kontynenty to teraz karmelowe drewno z usłojeniem, w innym odcieniu dla każdego kraju; morze zostaje kafelkami."),
+      chapters: [
+        { id: "mesas", kicker: L("Nuevo", "New", "Nouveau", "Novo", "Neu", "Novità", "", "新增", "신규", "新規", "Новое", "Nowe"),
+          title: L("Mesas del mapa", "Map tables", "Tables de la carte", "Mesas do mapa", "Kartentische", "Tavoli della mappa", "", "地图牌桌", "지도 테이블", "マップのテーブル", "Столы карты", "Stoły mapy"),
+          entries: [
+            E(L("Granadino en madera camel", "Granadino in camel wood", "Granadino en bois caramel", "Granadino em madeira caramelo", "Granadino in Karamellholz", "Granadino in legno cammello", "", "焦糖木色的 Granadino", "카멜 우드 Granadino", "キャメルウッドのGranadino", "Granadino в карамельном дереве", "Granadino w karmelowym drewnie"), "change", "0.3.233", [
+              L("En Granadino, la tierra y los continentes pasan a una madera camel con veta, con un tono distinto por país; el mar sigue siendo azulejo.", "In Granadino, land and continents become camel-coloured wood with a grain, with a different shade per country; the sea stays tile.", "Dans Granadino, les terres et continents passent à un bois caramel veiné, avec une teinte par pays ; la mer reste en carreaux.", "No Granadino, a terra e os continentes passam a uma madeira caramelo com veios, com um tom por país; o mar continua azulejo.", "In Granadino werden Land und Kontinente zu kamelfarbenem Holz mit Maserung, mit eigenem Ton pro Land; das Meer bleibt Fliese.", "In Granadino terre e continenti diventano legno cammello venato, con una sfumatura per paese; il mare resta piastrella.", "", "在 Granadino 中，陆地与大陆换成带木纹的焦糖色木头，每个国家一种色调；海面仍是瓷砖。", "Granadino에서 육지와 대륙이 결이 있는 카멜 빛 나무로 바뀌고 나라마다 다른 색조를 띱니다. 바다는 그대로 타일입니다.", "Granadinoの陸地と大陸を、木目のあるキャメル色の木にし、国ごとに色合いを変えました。海は今までどおりタイルです。", "В Granadino суша и материки стали карамельным деревом с текстурой, у каждой страны свой оттенок; море осталось плиткой.", "W Granadino lądy i kontynenty to teraz karmelowe drewno z usłojeniem, w innym odcieniu dla każdego kraju; morze zostaje kafelkami.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.232",
       name: L("La muestra de Granadino", "Granadino's preview", "L'aperçu de Granadino", "A amostra do Granadino", "Die Vorschau von Granadino", "L'anteprima di Granadino", "", "Granadino 预览", "Granadino 미리보기", "Granadinoのプレビュー", "Превью Granadino", "Podgląd Granadino"),
       date: "2026-10-27",

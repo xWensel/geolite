@@ -108,6 +108,7 @@ void main(){
     else if(u_mat==32){ vec2 t=mod(P,6.0)-2.5; float r=length(t), stud=1.0-step(2.0,r), lit=step(0.0,-(t.x+t.y)); c=mix(c,c*mix(0.8,1.14,lit),stud); }
     else if(u_mat==33){ float dt=1.0-step(0.95,length(mod(P,2.0)-1.0)); c=mix(vec3(0.95,0.92,0.84),c,0.6+0.4*dt); }
     else if(u_mat==43){ c*=0.78+0.12*floor(hash(P)*4.0); }
+    else if(u_mat==41){ float g=sin(P.y*0.9+fbm(P*vec2(0.02,0.08))*9.0); c*=1.0-0.07*step(0.55,g); }
     else if(u_mat==54){ vec2 t=vec2(mod(P.x+mod(floor(P.y/3.0),2.0)*3.0,6.0),mod(P.y,3.0)); c*=1.0-0.28*(1.0-step(1.0,min(t.x,t.y))); }
     else if(u_mat==22){ float rim=1.0-smoothstep(0.5,0.78,n); c*=(1.0-0.14*floor(rim*3.0)/3.0)*(0.97+0.05*floor(fbm(P*0.01)*3.0)/2.0); }
   }
