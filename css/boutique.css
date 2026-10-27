@@ -240,7 +240,7 @@ html.reduce-motion .bq-say { transition: opacity .2s; transform: none; }
 .bq-clock { font-family: var(--mono); font-size: 16px; letter-spacing: .04em; color: #fff3d6; background: var(--gx-red-lo); padding: 5px 8px 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .bq-items.hoy { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .bq-hth { position: relative; display: grid; place-items: center; aspect-ratio: 2.6 / 1; overflow: hidden; background: radial-gradient(62% 58% at 50% 46%, #3d8a5f 0, #23633f 55%, #123b25 100%); box-shadow: 0 0 0 2px var(--gx-o), 0 4px 0 2px rgba(22, 36, 28, .3); }
-.bq-hth.m img { width: 100%; height: 100%; object-fit: cover; }
+.bq-hth.m img { width: 100%; height: 100%; object-fit: none; object-position: 50% 50%; image-rendering: pixelated; }   /* la muestra al pixel real, como en las tarjetas de Mesas: nada de cover (suavizaba) */
 .bq-hth canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 .bq-hth img.bq-hv { image-rendering: pixelated; }
 .bq-hth.t { padding: 0 8px; }

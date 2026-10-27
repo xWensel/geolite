@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.228",
+      name: L("Muestras nítidas en la tienda", "Sharp swatches in the shop", "Échantillons nets dans la boutique", "Amostras nítidas na loja", "Scharfe Muster im Laden", "Campioni nitidi nel negozio", "", "商店里清晰的样本", "상점의 또렷한 견본", "ショップのくっきりした見本", "Чёткие образцы в магазине", "Wyraźne próbki w sklepie"),
+      date: "2026-10-27",
+      summary: L("Las muestras de las mesas de la tienda se ven al píxel, sin el emborronado de antes.", "The table swatches in the shop now show every pixel, without the old blur.", "Les échantillons des tables de la boutique s'affichent au pixel près, sans l'ancien flou.", "As amostras das mesas da loja mostram cada pixel, sem o borrão de antes.", "Die Tischmuster im Laden zeigen jetzt jeden Pixel, ohne die alte Unschärfe.", "I campioni dei tavoli del negozio mostrano ogni pixel, senza la vecchia sfocatura.", "", "商店里的牌桌样本现在逐像素清晰显示，不再模糊。", "상점의 테이블 견본이 이제 픽셀 단위로 또렷하게 보입니다.", "ショップのテーブル見本が、ぼやけずにピクセル単位でくっきり表示されます。", "Образцы столов в магазине теперь показаны по пикселям, без прежней размытости.", "Próbki stołów w sklepie pokazują teraz każdy piksel, bez dawnego rozmycia."),
+      chapters: [
+        { id: "tienda", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("La tienda", "The shop", "La boutique", "A loja", "Der Laden", "Il negozio", "", "商店", "상점", "ショップ", "Магазин", "Sklep"),
+          entries: [
+            E(L("Las mesas, sin emborronar", "Tables, no more blur", "Les tables, sans flou", "As mesas, sem borrão", "Tische ohne Unschärfe", "I tavoli, senza sfocatura", "", "牌桌不再模糊", "테이블이 더 이상 흐릿하지 않습니다", "テーブルのぼやけを解消", "Столы без размытости", "Stoły bez rozmycia"), "fix", "0.3.228", [
+              L("Las 56 muestras de mesa de la tienda estaban reducidas con suavizado y se veían borrosas. Ahora son un trozo del mapa al píxel real, sin reducir, y se ven nítidas en las tarjetas, en la ficha y en la oferta de la casa.", "The 56 table swatches in the shop had been downscaled with smoothing and looked blurry. They are now a piece of the map at its real pixels, not downscaled, and look sharp on the cards, the detail panel and the house offer.", "Les 56 échantillons de table de la boutique étaient réduits avec lissage et paraissaient flous. Ce sont maintenant un morceau de la carte à ses vrais pixels, sans réduction, et ils sont nets sur les cartes, la fiche et l'offre de la maison.", "As 56 amostras de mesa da loja estavam reduzidas com suavização e pareciam borradas. Agora são um pedaço do mapa nos pixels reais, sem redução, e ficam nítidas nos cartões, na ficha e na oferta da casa.", "Die 56 Tischmuster im Laden waren geglättet verkleinert und wirkten unscharf. Jetzt sind sie ein Kartenausschnitt in echten Pixeln, ohne Verkleinerung, und wirken scharf auf den Karten, im Detail und im Angebot des Hauses.", "I 56 campioni di tavolo del negozio erano ridotti con smussatura e apparivano sfocati. Ora sono un pezzo di mappa ai pixel reali, senza riduzione, e risultano nitidi nelle carte, nella scheda e nell'offerta della casa.", "", "商店里的 56 个牌桌样本之前经过平滑缩小，看起来很模糊。现在它们是按真实像素截取的地图一角，不再缩小，在卡片、详情和店家特惠中都很清晰。", "상점의 테이블 견본 56개가 부드럽게 축소되어 흐릿했습니다. 이제 축소 없이 실제 픽셀 그대로의 지도 한 조각이라 카드, 상세 화면, 하우스 특가에서 또렷하게 보입니다.", "ショップの56枚のテーブル見本は滑らかに縮小されてぼやけていました。今は縮小せず実際のピクセルのままの地図の一部なので、カード、詳細、店のおすすめでくっきり見えます。", "56 образцов столов в магазине были уменьшены со сглаживанием и выглядели размытыми. Теперь это кусок карты в реальных пикселях, без уменьшения, и они чёткие на карточках, в описании и в предложении дома.", "56 próbek stołów w sklepie było zmniejszonych z wygładzaniem i wyglądało na rozmyte. Teraz to fragment mapy w prawdziwych pikselach, bez zmniejszania, wyraźny na kartach, w opisie i w ofercie domu.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.227",
       name: L("El cofre del jefe", "The boss chest", "Le coffre du boss", "O baú do chefe", "Die Boss-Truhe", "Il forziere del boss", "", "首领宝箱", "보스 상자", "ボスの宝箱", "Сундук босса", "Skrzynia bossa"),
       date: "2026-10-27",
