@@ -123,3 +123,10 @@ tr:hover td { background: #2b2147; }
 @media (min-width: 1500px) { .cols td { white-space: normal; } .cols td.num, .cols td.act { white-space: nowrap; } }
 /* pantallas anchas pero bajas (1920x1080): un poco mas compacto para que siga sin scroll */
 @media (min-width: 1500px) and (max-height: 1150px) { html { zoom: .85; } .app, .side, .main { height: calc(100vh / .85); } }
+
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}
+.tri figure{margin:0;background:var(--panel2);border:2px solid #0006;min-height:90px;display:flex;flex-direction:column}
+.tri img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block}
+.tri figcaption{font-size:18px;padding:4px 6px;color:var(--sub)}
+.tri .miss{border-color:#ff6b78;justify-content:center;text-align:center}
+.tri .miss figcaption{color:#ff9aa4}
