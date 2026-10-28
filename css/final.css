@@ -92,6 +92,7 @@
   font-size: calc(108px * var(--dll, 1)); line-height: .8; color: var(--brass); letter-spacing: .04em; text-shadow: 0 6px 0 #6b3f0a, 0 12px 0 #000, 0 0 40px rgba(248, 180, 73, .35); }
 .fin-end.fin .fin-word { animation: fin-stamp .42s cubic-bezier(.5, 0, .8, .5) forwards; }
 @keyframes fin-stamp { 0% { opacity: 0; transform: translateX(-50%) scale(2.6); } 70% { opacity: 1; transform: translateX(-50%) scale(.94); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
+.fin-end.nodealer .fin-stage, .fin-end.nodealer .fin-plate { display: none; }   /* v0.3.236: los creditos desde Ajustes, sin crupier jubilado: solo el FIN */
 .fin-end-in.shake { animation: fin-shake .34s steps(2); }
 @keyframes fin-shake { 25% { transform: translate(4px, calc(-4vh - 3px)); } 50% { transform: translate(-4px, calc(-4vh + 2px)); } 75% { transform: translate(2px, calc(-4vh + 3px)); } }
 

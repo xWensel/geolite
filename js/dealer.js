@@ -1223,6 +1223,13 @@ window.AIQ = window.AIQ || {};
       "Pero nadie se va de mi casino sin sus créditos. Ni siquiera yo.|But nobody leaves my casino without their credits. Not even me.|Mais personne ne quitte mon casino sans son générique. Pas même moi.|Mas ninguém sai do meu cassino sem os créditos. Nem eu.|Aber niemand verlässt mein Casino ohne Abspann. Nicht mal ich.|Ma nessuno lascia il mio casinò senza i titoli di coda. Nemmeno io.||但谁也别想不看片尾字幕就离开我的赌场。我也不例外。|하지만 내 카지노에선 아무도 엔딩 크레딧 없이 못 나가. 나조차도.|だが、エンドロールなしで私のカジノを出る者はいない。私でもな。|Но из моего казино никто не уходит без титров. Даже я.|Ale nikt nie wychodzi z mojego kasyna bez napisów końcowych. Nawet ja.",
       "Hoy cierro yo. Apaga tú la luz… no, mejor la apago yo.|Today I'm closing up. You switch off the light… no, I'd better do it.|Aujourd'hui, c'est moi qui ferme. Éteins la lumière… non, je vais le faire moi-même.|Hoje quem fecha sou eu. Apaga a luz… não, melhor eu apagar.|Heute schließe ich ab. Mach du das Licht aus… nein, besser ich.|Oggi chiudo io. Spegni tu la luce… no, meglio che la spenga io.||今天我来关门。你来关灯……不，还是我来吧。|오늘은 내가 문 닫을게. 불은 네가 꺼… 아니, 내가 끌게.|今日は私が店を閉める。明かりを消して……いや、私が消そう。|Сегодня закрываю я. Выключи свет… нет, лучше я сам.|Dziś ja zamykam. Zgaś światło… nie, lepiej ja."
     ],
+    /* v0.3.236: EL SEGUNDO FINAL, el Clasico entero (12 campanas ganadas). Sustituyen a las tres primeras de arriba; de la cuarta en adelante (me jubilo,
+       los creditos, apaga la luz) son las mismas. {c} = campanas del Clasico ganadas */
+    retireClassic: [
+      "Quieto. No toques nada. ¿Las doce campañas del Clásico? ¿Todas?|Freeze. Don't touch anything. All twelve Classic campaigns? Every one?|Stop. Ne touche à rien. Les douze campagnes du Classique ? Toutes ?|Parado. Não toque em nada. As doze campanhas do Clássico? Todas?|Halt. Nichts anfassen. Alle zwölf Klassisch-Kampagnen? Alle?|Fermo. Non toccare niente. Tutte e dodici le campagne del Classico? Tutte?||别动。什么都别碰。经典模式的十二场战役？全部？|멈춰. 아무것도 만지지 마. 클래식 캠페인 열두 개를? 전부?|動くな。何も触るな。クラシックの12のキャンペーンを？全部？|Стоп. Ничего не трогай. Все двенадцать кампаний Классики? Все?|Stój. Niczego nie dotykaj. Wszystkie dwanaście kampanii Klasycznych? Wszystkie?",
+      "Te conocí el {d}. Desde entonces, {t} de partida y {c} campañas del Clásico ganadas. Lo tengo todo apuntado.|We met on {d}. Since then: {t} at my table and {c} Classic campaigns won. I wrote it all down.|On s'est rencontrés le {d}. Depuis : {t} de jeu et {c} campagnes du Classique gagnées. J'ai tout noté.|Te conheci em {d}. Desde então, {t} de jogo e {c} campanhas do Clássico vencidas. Anotei tudo.|Kennengelernt haben wir uns am {d}. Seitdem: {t} am Tisch und {c} gewonnene Klassisch-Kampagnen. Ich habe alles notiert.|Ci siamo conosciuti il {d}. Da allora, {t} di gioco e {c} campagne del Classico vinte. Ho annotato tutto.||我们第一次见面是{d}。从那以后，{t}的牌局，赢下{c}场经典战役。我全都记着。|우리 처음 만난 게 {d}였지. 그 뒤로 게임 {t}, 클래식 캠페인 {c}개 승리. 전부 적어 뒀어.|初めて会ったのは{d}だった。それからプレイ時間{t}、クラシックのキャンペーン{c}勝。全部メモしてある。|Мы познакомились {d}. С тех пор за столом: {t}, выиграно кампаний Классики: {c}. У меня всё записано.|Poznaliśmy się {d}. Od tamtej pory przy stole: {t}, wygranych kampanii Klasycznych: {c}. Wszystko zapisałem.",
+      "El Clásico no tiene crupier. Ni luces. Ni gracia. Y aun así lo has acabado entero.|Classic has no dealer. No lights. No fun. And you still finished all of it.|Le Classique n'a pas de croupier. Ni lumières. Ni charme. Et tu l'as quand même fini en entier.|O Clássico não tem crupiê. Nem luzes. Nem graça. E mesmo assim você terminou tudo.|Klassisch hat keinen Croupier. Keine Lichter. Kein Vergnügen. Und du hast es trotzdem ganz geschafft.|Il Classico non ha croupier. Niente luci. Niente fascino. Eppure l'hai finito tutto.||经典模式没有荷官，没有灯光，也没有乐趣。你却把它全部通关了。|클래식엔 딜러도 없고 조명도 없고 재미도 없어. 그런데도 끝까지 다 했네.|クラシックにディーラーはいない。照明も、楽しさもない。それでも君は全部やり切った。|В Классике нет крупье. Ни света, ни веселья. И всё равно ты прошёл её целиком.|Klasyczny nie ma krupiera. Ani świateł, ani frajdy. A ty i tak przeszedłeś go w całości.",
+    ],
     /* al final de los creditos (js/final.js), bajo su foco con la placa de jubilado */
     retireEnd: [
       "Ha sido un placer perder contigo.|It's been a pleasure losing to you.|Ce fut un plaisir de perdre contre toi.|Foi um prazer perder para você.|Es war mir ein Vergnügen, gegen dich zu verlieren.|È stato un piacere perdere con te.||输给你，是我的荣幸。|너한테 져서 영광이었어.|君に負けられて光栄だった。|Проиграть тебе было удовольствием.|Przegrać z tobą to była przyjemność.",
@@ -3851,25 +3858,65 @@ window.AIQ = window.AIQ || {};
     try { return new Intl.ListFormat(loc, { type: "conjunction" }).format([u(h, "hour"), u(mm, "minute")]); } catch (e) { return u(h, "hour") + " " + u(mm, "minute"); }
   }
   function dateTxt(ts, year) { try { return new Date(ts).toLocaleDateString(locOf(), year || new Date(ts).getFullYear() !== new Date().getFullYear() ? { day: "numeric", month: "long", year: "numeric" } : { day: "numeric", month: "long" }); } catch (e) { return ""; } }
-  function retireRun(demo) {
-    const R0 = demo ? null : DS.retired;
-    if (R0) { R0.n++; saveStore(); const t = say1("retireAgain"); if (t) D.say(t, { mood: "shock", hold: holdFor(t) }); return !!t; }
-    const P = (A.profile && A.profile.get()) || {}, s = P.stats || {}, a = P.adv || {}, first = DS.first || Date.now(), now = Date.now();
-    const d = { d: dateTxt(first), n: A.fmt(advRuns()), t: longDur(DS.playMs || 0) };
-    const F = [["shock", "freeze"], ["sad", "pocket_watch"], ["sad", "hat_chest"], ["bow", "hat_off_bow"], ["sly", "twirl_moustache"], ["wink", "snap"]];
-    const items = F.map(([face, gesture], i) => ({ t: nth("retire", i, d), mood: i === 0 ? "shock" : "sly", face, gesture })).filter(x => x.t);
-    const T6 = x => A.pick6(x);
-    const stats = [
+  /* v0.3.236: la hoja de servicios de los creditos (js/final.js), con datos reales: la usan la jubilacion y los creditos de Ajustes (D.creditsView) */
+  function serviceStats() {
+    const P = (A.profile && A.profile.get()) || {}, s = P.stats || {}, a = P.adv || {}, first = DS.first || Date.now();
+    const T6 = x => A.pick6(x), cw = A.profile && A.profile.classicWon ? A.profile.classicWon() : 0;
+    return [
       [T6("Primera visita|First visit|Première visite|Primeira visita|Erster Besuch|Prima visita||首次光临|첫 방문|初来店|Первый визит|Pierwsza wizyta"), dateTxt(first, true)],
       [T6("Visitas|Visits|Visites|Visitas|Besuche|Visite||光临次数|방문|来店回数|Визиты|Wizyty"), A.fmt(DS.visits || 1)],
       [T6("Tiempo en la mesa|Time at the table|Temps à la table|Tempo na mesa|Zeit am Tisch|Tempo al tavolo||牌桌时间|테이블에서 보낸 시간|テーブルにいた時間|Время за столом|Czas przy stole"), longDur(DS.playMs || 0)],
       [T6("Expediciones|Expeditions|Expéditions|Expedições|Expeditionen|Spedizioni||远征|원정|遠征|Экспедиции|Wyprawy"), A.fmt(a.runs || 0)],
       [T6("Expediciones ganadas|Expeditions won|Expéditions gagnées|Expedições vencidas|Gewonnene Expeditionen|Spedizioni vinte||远征胜利|승리한 원정|勝った遠征|Выигранные экспедиции|Wygrane wyprawy"), A.fmt(a.wins || 0)],
+      ...(cw ? [[T6("Campañas del Clásico|Classic campaigns|Campagnes du Classique|Campanhas do Clássico|Klassisch-Kampagnen|Campagne del Classico||经典战役|클래식 캠페인|クラシックのキャンペーン|Кампании Классики|Kampanie Klasyczne"), A.fmt(cw) + " / " + A.fmt(A.profile.classicTotal())]] : []),
       [A.T("Preguntas", "Questions"), A.fmt(s.questions || 0)],
       [A.T("Dianas", "Bullseyes"), A.fmt(s.bulls || 0)],
     ];
+  }
+  /* la mesa de la hoja de servicios: el final por el que se jubilo ("Clasico" o "Ascension V") */
+  const tableName = classic => classic ? A.pick6("Clásico|Classic|Classique|Clássico|Klassisch|Classico||经典|클래식|クラシック|Классика|Klasyczny")
+    : A.pick6("Ascensión V|Ascension V|Ascension V|Ascensão V|Aufstieg V|Ascensione V||进阶五|어센션 5|アセンション5|Восхождение V|Wniebowstąpienie V");
+  /* v0.3.236: los creditos finales cuando quieras (Ajustes > Datos > «Ver los creditos») y, si ya se jubilo, tambien al completar el segundo final.
+     No jubilan a nadie ni cierran el juego. Si el crupier ya se jubilo alguna vez, sale bajo su foco con su placa y sus dos frases; si no, solo el
+     rodillo y el FIN (sin foco, sin placa, sin el reparto de quien lo jubilo). done: al apagarse la sala (devuelve la musica en quien llama) */
+  D.creditsView = done => {
+    if (!A.final || A.final.active()) return false;
+    const ret = DS.retired, retired = !!ret;
+    const prevTrack = A.music && A.music.index ? A.music.index() : -1;          // los creditos ponen su vals (pista 06): al acabar vuelve la que sonaba
+    D.hold(true); if (retired) ensureShown();
+    A.final.play({ name: who(), stats: serviceStats(), date: dateTxt(retired ? ret.ts : Date.now(), true), retired, replay: true,
+      table: retired ? tableName(ret.via === "classic") : "",
+      finale: retired ? (stage, next) => { D.dock(stage); let k = 0; const ends = [nth("retireEnd", 0), nth("retireEnd", 1)];
+        const one = () => { if (k >= ends.length) { const bb = el && el.querySelector(".dl-bubble"); if (bb) bb.classList.remove("on"); return next(); }
+          const i = k++; D.say(ends[i], { mood: "sly", face: i ? "wink" : "bow", gesture: i ? "hat_tip" : "hat_off_bow", hold: 0, force: true, done: () => setTimeout(one, 900) }); };
+        one(); } : null,
+      done: () => { if (retired) { D.dock(null); D.release(); hideIfOff(); } D.hold(false); setTimeout(() => (prevTrack >= 0 ? A.music.go(prevTrack, true) : A.music.start()), 300); if (done) done(); } });
+    return true;
+  };
+  /* v0.3.236: EL SEGUNDO FINAL, el Clasico entero (las 12 campanas ganadas, js/game.js endScreen). La primera vez se jubila (misma escena, sus frases
+     hablan del Clasico y se cierra el juego igual que con la Ascension V); si ya se habia jubilado por la otra via, solo los creditos (sin volver a
+     jubilarlo). Devuelve true si ha lanzado algo */
+  D.endGame = kind => (kind === "classic" ? retireRun(false, "classic") : false);
+  /* en el Clasico el crupier esta apagado (D.on = false, oculto): para su escena sale, y al acabar vuelve a esconderse */
+  function ensureShown() { ensure(); el.classList.remove("hidden"); }
+  const hideIfOff = () => { if (!D.on && el) el.classList.add("hidden"); };
+  /* LA JUBILACION (y, desde v0.3.236, el segundo final: el Clasico entero). kind: "asc5" (ganas en Ascension 5) | "classic" (las 12 campanas del Clasico) */
+  function retireRun(demo, kind) {
+    const R0 = demo ? null : DS.retired, now = Date.now(), classic = kind === "classic";
+    if (R0) {
+      /* ya se jubilo: la primera vez que llegas al OTRO final (Clasico entero tras la Ascension V, o al reves) son los creditos, sin volver a jubilarlo; despues, su guino de siempre */
+      if ((R0.via || "asc5") !== (classic ? "classic" : "asc5") && !R0.second) { R0.second = 1; saveStore(); return D.creditsView(); }
+      R0.n++; saveStore(); const t = say1("retireAgain"); if (t) D.say(t, { mood: "shock", hold: holdFor(t) }); return !!t;
+    }
+    ensureShown();
+    const first = DS.first || now;
+    const d = { d: dateTxt(first), n: A.fmt(advRuns()), t: longDur(DS.playMs || 0), c: A.fmt(A.profile && A.profile.classicWon ? A.profile.classicWon() : 0) };
+    const F = [["shock", "freeze"], ["sad", "pocket_watch"], ["sad", "hat_chest"], ["bow", "hat_off_bow"], ["sly", "twirl_moustache"], ["wink", "snap"]];
+    /* Clasico entero: las tres primeras frases hablan de el (no de la Ascension V ni de sus expediciones); de la cuarta en adelante son las de siempre */
+    const items = F.map(([face, gesture], i) => ({ t: nth(classic && i < 3 ? "retireClassic" : "retire", i, d), mood: i === 0 ? "shock" : "sly", face, gesture })).filter(x => x.t);
+    const stats = serviceStats();
     const catPick = Math.random() < 0.5 ? "left" : "took";                              // bloque D: deja a Comodin a cargo de la mesa o se lo lleva (y lo recuerda a la vuelta)
-    if (!demo) { DS.retired = { n: 1, ts: now, cat: catPick }; DS.retireBack = 1; saveStore(); }   // la demo (Ajustes) no jubila de verdad
+    if (!demo) { DS.retired = { n: 1, ts: now, cat: catPick, via: classic ? "classic" : "asc5" }; DS.retireBack = 1; saveStore(); }   // la demo (mesa del autor) no jubila de verdad
     return spotScene(items, fin0 => {
       /* antes del chasquido, bajo el foco: Comodin aparece a su lado y el decide (salta: la mesa es tuya; anda: se viene conmigo) */
       const r0 = $("qxs"), cm = A.comodin && A.COMODIN_DATA ? A.comodin : null, cl = cm && say1(catPick === "left" ? "retireCat" : "retireCatTake");
@@ -3890,8 +3937,8 @@ window.AIQ = window.AIQ || {};
       const tv = A.salir && A.salir.tv;
       setTimeout(() => {
         const credits = () => A.final ? A.final.play({
-          name: who(), stats, date: dateTxt(now, true),
-          table: A.pick6("Ascensión V|Ascension V|Ascension V|Ascensão V|Aufstieg V|Ascensione V||进阶五|어센션 5|アセンション5|Восхождение V|Wniebowstąpienie V"),
+          name: who(), stats, date: dateTxt(now, true), replay: false,
+          table: tableName(classic),
           finale: (stage, next) => {                                    // vuelve bajo su foco, con su placa: sus dos ultimas frases
             D.dock(stage); let k = 0;
             const G = [["bow", "hat_off_bow"], ["wink", "hat_tip"]], ends = [nth("retireEnd", 0), nth("retireEnd", 1)];
@@ -3905,7 +3952,7 @@ window.AIQ = window.AIQ || {};
           done: () => {                                                 // la sala ya esta a oscuras: el juego se cierra; en la web, la portada (alli vuelve con su cartel)
             if (!demo) saveStore(); const h = window.geoliteHost;
             if (!demo && h && h.quit) { setTimeout(() => h.quit(), 350); return; }
-            D.dock(null); fin(); if (A.core && A.core.showHub) A.core.showHub();
+            D.dock(null); fin(); hideIfOff(); if (A.core && A.core.showHub) A.core.showHub();
             setTimeout(() => (tv ? tv.on(() => A.music.start()) : A.music.start()), 600);
           },
         }) : (tv ? tv.on(fin) : fin());

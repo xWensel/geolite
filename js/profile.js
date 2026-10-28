@@ -41,6 +41,8 @@ window.AIQ = window.AIQ || {};
   const clean = n => [...String(n || "").normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1")].slice(0, NAME_MAX).join("");
   A.profile = {
     get: () => P, save, NAME_MAX, clean,
+    /* v0.3.236: el Clasico entero (las 12 campanas ganadas): el segundo final del juego (js/game.js, endScreen; js/dealer.js, endGame) */
+    classicWon: () => classicIds().filter(won).length, classicTotal: () => classicIds().length, classicDone: () => classicIds().length > 0 && classicIds().every(won),
     /* guarda el nombre y lo apunta en P.nameLog (los que ya has usado: el crupier "ya te conoce" si vuelves a uno) */
     setName(n) {
       P.name = clean(n).trim();

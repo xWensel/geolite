@@ -243,6 +243,13 @@
     h.steamCloud().then(c => put(!c ? "local" : c.account && c.app ? "on" : "off")).catch(() => put("local"));
   }
   /* creditos y licencias (credits.html, tools/build-credits.mjs): pagina aparte, en el navegador del sistema en Electron (main.js abre los http externos alli) */
+  /* v0.3.236: «Ver los creditos»: el rodillo final (js/final.js) cuando quieras, sin jubilar a nadie ni cerrar el juego. Cierra Ajustes, apaga la musica de
+     la partida (los creditos ponen su vals) y, al acabar, el juego sigue donde estaba y la musica vuelve (A.dealer.creditsView). En plena pregunta no hay Ajustes */
+  $("playCredits").onclick = () => {
+    if (!A.dealer || !A.dealer.creditsView || (A.final && A.final.active())) return;
+    A.sfx.ui(); openSettings(false);
+    setTimeout(() => { if (!A.dealer.creditsView()) openSettings(true); }, 350);
+  };
   $("openCredits").onclick = () => { A.sfx.ui(); A.creditos.open(); };   // v0.2.33: dentro del juego (js/creditos.js); antes, el navegador del sistema
   /* restablecer la Enciclopedia: hay que pulsar dos veces (la primera arma el boton) */
   { const rc = $("resetCodex"); let tm = 0;
@@ -1122,7 +1129,9 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   function endScreen(win, iq) {
     const L = lv(), tier = A.iqTier(iq), tierName = A.t("tier." + tier);
     const shown = win ? S.runTotal : S.runTotal + S.levelScore;
+    let classicFinale = false;
     if (S.camp.mode === "classic") {
+      classicFinale = win && !A.profile.classicDone();                  // v0.3.236: antes de registrar esta victoria el Clasico no estaba entero: si esta es la que lo completa, es el segundo final del juego
       if (win && A.clubRetos) A.clubRetos.ev("camp");
       if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
@@ -1149,6 +1158,19 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       stamp: win ? A.t("stamp.win") : A.t("stamp.no"), stampSub: win ? A.icon("u_star", "st") : pad2(S.level + 1), iq, tier, tierName, buttons: btns,
     });
     if (A.nombre) A.nombre.maybeAsk({ won: win });                          // v0.37: fin de tu primera partida sin nombre: el crupier te lo pregunta
+    /* v0.3.236: EL SEGUNDO FINAL DEL JUEGO. Completas la ultima campana que te faltaba del Clasico: tras ver tu veredicto (2,6 s), el crupier se jubila y
+       salen los creditos, igual que al ganar en Ascension V (js/dealer.js, D.endGame). Solo la victoria que lo completa; despues, el Clasico es el de siempre.
+       Si no sigues en este veredicto (volviste al menu, empezaste otra) o el nombre aun se esta preguntando, no se lanza */
+    if (classicFinale && A.profile.classicDone() && A.dealer && A.dealer.endGame) {
+      const camp = S.camp.id;
+      const busy = () => S.settingsOpen || (A.nombre && A.nombre.open()) || !!document.querySelector("#qxs.on");   // Ajustes, la pregunta del nombre u otra escena del crupier
+      const go = n => {
+        if (S.phase !== "levelEnd" || !S.camp || S.camp.id !== camp) return;                            // ya no sigues en este veredicto: no se lanza
+        if (busy() && n < 12) return setTimeout(() => go(n + 1), 2500);                                 // se espera su turno, 30 s como mucho
+        if (!busy()) A.dealer.endGame("classic");
+      };
+      setTimeout(() => go(0), 2600);
+    }
   }
 
   /* ------------------------------------------------------------ pausa y reloj */

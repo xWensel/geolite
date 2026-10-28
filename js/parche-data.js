@@ -34,6 +34,28 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.236",
+      name: ["Los créditos, cuando quieras", "The credits, whenever you like"],
+      date: "2026-10-28",
+      summary: ["Los créditos finales se pueden ver desde Ajustes, y completar el Clásico entero es también un final del juego.", "The end credits can be watched from Settings, and finishing all of Classic is now an ending of the game too."],
+      chapters: [
+        { id: "finales", kicker: ["Nuevo", "New"],
+          title: ["Dos finales y un botón", "Two endings and a button"],
+          entries: [
+            E(["«Ver los créditos» en Ajustes", "“Watch the credits” in Settings"], "new", "0.3.236", [
+              ["El rodillo final de los créditos se abre desde Ajustes > Datos, sin jubilar al crupier ni cerrar el juego. Si el crupier ya se jubiló, sale bajo su foco con su placa y sus dos frases; si no, solo el rodillo y el FIN.", "The end credits roll opens from Settings > Data, without retiring the dealer or closing the game. If the dealer has already retired, he appears under his spotlight with his plaque and his two lines; if not, just the roll and THE END."]
+            ]),
+            E(["El segundo final: el Clásico entero", "The second ending: all of Classic"], "new", "0.3.236", [
+              ["Completar las 12 campañas del Clásico jubila al crupier y lanza los créditos, igual que ganar en Ascensión V: con sus frases, su despedida y el cierre del juego.", "Finishing all 12 Classic campaigns retires the dealer and rolls the credits, just like winning on Ascension V: his lines, his farewell and the game closing."],
+              ["Si ya se jubiló por la Ascensión V, completar el Clásico muestra solo los créditos. Y si ya habías completado el Clásico, la Ascensión V sigue siendo su final de siempre.", "If he already retired through Ascension V, finishing Classic just shows the credits. And if you had already finished Classic, Ascension V remains its usual ending."]
+            ]),
+            E(["La hoja de servicios cuenta el Clásico", "The service record counts Classic"], "change", "0.3.236", [
+              ["La hoja de servicios de los créditos suma también tus campañas del Clásico ganadas.", "The credits' service record now also counts your Classic campaigns won."]
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.235",
       name: L("La casa, más ligera", "A lighter house", "La maison, plus légère", "A casa, mais leve", "Das Haus, leichter", "La casa, più leggera", "", "更轻盈的房子", "더 가벼워진 집", "より軽くなったハウス", "Дом полегче", "Lżejszy dom"),
       date: "2026-10-28",

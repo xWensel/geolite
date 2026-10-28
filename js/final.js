@@ -55,6 +55,7 @@ window.AIQ = window.AIQ || {};
     hold: "Mantén|Hold|Maintiens|Segure|Halten|Tieni premuto||按住|길게|長押し|Держи|Przytrzymaj",
     fast: "acelerar|speed up|accélérer|acelerar|vorspulen|accelera||加速|빨리 감기|早送り|ускорить|przyspiesz",
     skip: "saltar|skip|passer|pular|überspringen|salta||跳过|건너뛰기|スキップ|пропустить|pomiń",
+    back: "Pulsa para volver|Press to go back|Appuie pour revenir|Toque para voltar|Drücken, um zurückzukehren|Premi per tornare||按任意键返回|눌러서 돌아가기|押して戻る|Нажми, чтобы вернуться|Naciśnij, aby wrócić",
     close: "Pulsa para cerrar el casino|Press to close the casino|Appuie pour fermer le casino|Toque para fechar o cassino|Drücken, um das Casino zu schließen|Premi per chiudere il casinò||按任意键打烊|눌러서 카지노 문 닫기|押してカジノを閉める|Нажми, чтобы закрыть казино|Naciśnij, aby zamknąć kasyno",
   };
 
@@ -97,6 +98,7 @@ window.AIQ = window.AIQ || {};
     const sec = (h, body, cls = "") => `<section class="${cls}"><i class="fin-pip"></i>${h ? `<h3>${P6(h)}</h3>` : ""}${body}</section>`;
     const n = t => `<p class="fin-n">${t}</p>`, s = t => `<p class="fin-s">${t}</p>`;
     const mug = A.crupier && A.crupier.still ? A.crupier.still("smug", 1, "head") : "";   // la cabeza (64x64 a 1:1)
+    const ret = o.retired !== false;                                   // v0.3.236: desde Ajustes, sin haber jubilado nunca al crupier, no se cuenta su jubilacion (ni reparto, ni sello, ni placa)
     const rows = (o.stats || []).map(([k, v]) => `<div class="fin-tk-r"><span>${esc(k)}</span><i></i><b>${esc(v)}</b></div>`).join("");
     let when = ""; try { when = new Date().toLocaleString(locale(), { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }); } catch (e) { /* formato */ }
     return [
@@ -105,11 +107,11 @@ window.AIQ = window.AIQ || {};
       sec(TX.ost, n("Álvaro Cano")),
       sec(TX.cast, `<div class="fin-cast">
         <div class="fin-row"><span class="fin-mug">${mug ? `<img src="${mug}" alt="">` : ""}</span><b>${P6(TX.name)}</b><i></i><em>${P6(TX.himself)}</em></div>
-        <div class="fin-row"><span class="fin-mug q">?</span><b>${P6(TX.who)}</b><i></i><em>${esc(o.name || P6(TX.you))}</em></div></div>`),
+        ${ret ? `<div class="fin-row"><span class="fin-mug q">?</span><b>${P6(TX.who)}</b><i></i><em>${esc(o.name || P6(TX.you))}</em></div>` : ""}</div>`),
       sec(TX.sheet, `<div class="fin-tk">
         <div class="fin-tk-h"><b>Geolite · Casino</b>${P6(TX.settle)}<small>${esc(o.table || "")}${when ? " · " + esc(when) : ""}</small></div><hr>${rows}<hr>
-        <div class="fin-tk-r red"><span>${P6(TX.retired)}</span><i></i><b>1</b></div>
-        <span class="fin-tk-stamp">${P6(TX.stamp)}</span><p class="fin-tk-foot">${P6(TX.thanksVisit)}</p></div>`),
+        ${ret ? `<div class="fin-tk-r red"><span>${P6(TX.retired)}</span><i></i><b>1</b></div>
+        <span class="fin-tk-stamp">${P6(TX.stamp)}</span>` : ""}<p class="fin-tk-foot">${P6(TX.thanksVisit)}</p></div>`),
       sec(TX.wikiH, n(P6(TX.wiki)) + s(P6(TX.lic))),
       sec(TX.photosH, n(P6(TX.photos)) + s(esc(P6(TX.photosS).replace("{c}", A.t("set.credits"))))),
       sec(TX.fontsH, n("Silkscreen · Pixelify Sans") + n("Jersey 15 · Tiny5") + n("Fusion Pixel Font") + s(P6(TX.fontsS))),
@@ -134,7 +136,9 @@ window.AIQ = window.AIQ || {};
   function play(o = {}) {
     mount(); if (st) stop();
     st = { o, T: [], phase: "roll", y: 0, end: 0, speed: 0, hold: 4.5, fast: false, raf: 0, last: 0 };
-    root.className = "fin on"; root.style.opacity = ""; $("finEnd").className = "fin-end"; $("finBack").className = "fin-back"; $("finBack").textContent = P6(TX.close);
+    /* v0.3.236: o.retired === false (los creditos vistos desde Ajustes sin haber jubilado nunca al crupier): sin su foco ni su placa. o.replay: desde Ajustes
+       o el segundo final: el juego no se cierra, asi que el aviso final dice "volver" y no "cerrar el casino" */
+    root.className = "fin on"; root.style.opacity = ""; $("finEnd").className = "fin-end" + (o.retired === false ? " nodealer" : ""); $("finBack").className = "fin-back"; $("finBack").textContent = P6(o.replay ? TX.back : TX.close);
     $("finHint").className = "fin-hint"; $("finHint").innerHTML = `<span><kbd>${P6(TX.hold)}</kbd>${P6(TX.fast)}</span><span><kbd>Esc</kbd>${P6(TX.skip)}</span>`;
     $("finPlateN").textContent = P6(TX.name); $("finPlateD").textContent = P6(TX.plate).replace("{d}", o.date || "");
     $("finWord").textContent = P6(TX.fin);
@@ -172,7 +176,7 @@ window.AIQ = window.AIQ || {};
     const r = $("finRoll"), e = $("finEnd");
     root.classList.add("wide");                                         // las cortinas se abren del todo: sitio para su globo
     r.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: "forwards" }).onfinish = () => { r.style.visibility = "hidden"; };
-    later(() => { if (A.sfx.spot) A.sfx.spot(); e.classList.add("lit"); }, 500);
+    later(() => { if (A.sfx.spot && !e.classList.contains("nodealer")) A.sfx.spot(); e.classList.add("lit"); }, 500);
     later(() => e.classList.add("plated"), 1400);
     later(() => {
       const next = () => later(() => {
