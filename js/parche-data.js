@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.234",
+      name: L("La casa, por dentro", "Inside the house", "La maison, de l'intérieur", "A casa por dentro", "Das Haus von innen", "La casa, dentro", "", "房子内部", "집 안쪽", "ハウスの内側", "Дом изнутри", "Dom od środka"),
+      date: "2026-10-28",
+      summary: L("La casa se refuerza por dentro: seguridad y estabilidad del juego, sin que nada cambie en la pantalla ni en las reglas.", "The house is reinforced from within: security and stability for the game, with nothing changing on screen or in the rules.", "La maison se renforce de l'intérieur : sécurité et stabilité du jeu, sans que rien ne change à l'écran ni dans les règles.", "A casa se reforça por dentro: segurança e estabilidade do jogo, sem que nada mude na tela nem nas regras.", "Das Haus wird von innen verstärkt: Sicherheit und Stabilität des Spiels, ohne dass sich am Bildschirm oder an den Regeln etwas ändert.", "La casa si rinforza all'interno: sicurezza e stabilità del gioco, senza che cambi nulla sullo schermo o nelle regole.", "", "房子由内加固：游戏的安全性与稳定性提升，屏幕和规则没有任何变化。", "집이 안쪽에서 튼튼해집니다. 화면이나 규칙은 그대로, 게임의 보안과 안정성만 좋아집니다.", "ハウスを内側から補強しました。画面やルールは変わらず、ゲームの安全性と安定性が向上します。", "Дом укрепляется изнутри: безопасность и стабильность игры, ничего не меняется на экране и в правилах.", "Dom wzmacnia się od środka: bezpieczeństwo i stabilność gry, bez zmian na ekranie i w zasadach."),
+      chapters: [
+        { id: "seguridad", kicker: L("Arreglo", "Fix", "Correctif", "Correção", "Behebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Seguridad de la casa", "House security", "Sécurité de la maison", "Segurança da casa", "Sicherheit des Hauses", "Sicurezza della casa", "", "房子安全", "집 보안", "ハウスのセキュリティ", "Безопасность дома", "Bezpieczeństwo domu"),
+          entries: [
+            E(L("Refuerzos internos", "Internal reinforcements", "Renforts internes", "Reforços internos", "Interne Verstärkungen", "Rinforzi interni", "", "内部加固", "내부 보강", "内部補強", "Внутреннее укрепление", "Wzmocnienia wewnętrzne"), "fix", "0.3.234", [
+              L("La casa revisa sus llaves y cerraduras: refuerzos internos de seguridad y estabilidad que no cambian nada de lo que ves al jugar.", "The house checks its keys and locks: internal security and stability reinforcements that change nothing you see while playing.", "La maison vérifie ses clés et ses serrures : des renforts internes de sécurité et de stabilité qui ne changent rien à ce que tu vois en jouant.", "A casa revisa suas chaves e fechaduras: reforços internos de segurança e estabilidade que não mudam nada do que você vê ao jogar.", "Das Haus prüft seine Schlüssel und Schlösser: interne Sicherheits- und Stabilitätsverstärkungen, die nichts an dem ändern, was du beim Spielen siehst.", "La casa controlla chiavi e serrature: rinforzi interni di sicurezza e stabilità che non cambiano nulla di ciò che vedi giocando.", "", "房子检查了自己的钥匙和锁：内部安全与稳定性加固，游戏中的一切所见不变。", "집이 열쇠와 자물쇠를 점검합니다. 게임에서 보이는 건 그대로, 내부 보안과 안정성만 강화됩니다.", "ハウスが鍵と錠を見直しました。プレイ中に見えるものは変わらず、内部の安全性と安定性だけを強化しています。", "Дом проверяет свои ключи и замки: внутреннее укрепление безопасности и стабильности, ничего из видимого в игре не меняется.", "Dom sprawdza swoje klucze i zamki: wewnętrzne wzmocnienia bezpieczeństwa i stabilności, które nic nie zmieniają w tym, co widzisz w grze.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.233",
       name: L("Granadino en madera camel", "Granadino in camel wood", "Granadino en bois caramel", "Granadino em madeira caramelo", "Granadino in Karamellholz", "Granadino in legno cammello", "", "焦糖木色的 Granadino", "카멜 우드 Granadino", "キャメルウッドのGranadino", "Granadino в карамельном дереве", "Granadino w karmelowym drewnie"),
       date: "2026-10-27",
