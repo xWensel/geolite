@@ -30,9 +30,10 @@ try {
 /* sabor del build: steam-flavor.json ({"demo":true}) lo escribe tools/steam-pack.mjs --demo; sin el fichero es el juego completo */
 let flavor = {}; try { flavor = JSON.parse(fs.readFileSync(path.join(__dirname, "steam-flavor.json"), "utf8")); } catch (e) { /* juego completo */ }
 ipcMain.on("host:demo", (e) => { e.returnValue = !!flavor.demo; });
-/* el truco de pruebas (js/truco.js, 7 x 7 = todo desbloqueado): solo en Electron de desarrollo con --truco o
-   GEOLITE_TRUCO=1. Las builds empaquetadas (Steam) y la web lo tienen siempre apagado. */
-ipcMain.on("host:truco", (e) => { e.returnValue = !app.isPackaged && (process.env.GEOLITE_TRUCO === "1" || process.argv.includes("--truco")); });
+/* el truco de pruebas (js/truco.js, 7 x 7 = todo desbloqueado): devuelto el 28-oct ENCENDIDO en el Electron de
+   desarrollo (sin flags, para probar: aun no se empaqueta para Steam). Las builds empaquetadas (app.isPackaged,
+   la de Steam) y la web lo tienen SIEMPRE apagado. tools/steam-pack.mjs avisa si esto se toca. */
+ipcMain.on("host:truco", (e) => { e.returnValue = !app.isPackaged; });
 /* Steam Deck (v0.2.29): iconos de mando y modo mando desde el primer fotograma (el navegador no ve el mando hasta la primera pulsacion) */
 const onDeck = (() => { try { if (steamClient && steamClient.utils.isSteamRunningOnSteamDeck()) return true; } catch (e) { /* steamworks sin utils */ } return process.env.SteamDeck === "1"; })();
 ipcMain.on("host:device", (e) => { e.returnValue = onDeck ? "deck" : "pc"; });

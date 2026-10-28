@@ -5,10 +5,11 @@
  *   Otra vez 7 x 7 y todo vuelve a como estaba antes del truco (se guarda una copia de la partida al activarlo).
  * Nada sale del ordenador: los logros NO se envian a Steam (P.truco: js/profile.js no los manda ni al ganarlos ni al arrancar) y no se toca
  * nada de las clasificaciones. Tampoco suena ni salta nada por cada cosa: se escribe directamente y se avisa una vez.
- * ON: el interruptor. Vale true SOLO en Electron de desarrollo lanzado con --truco (o GEOLITE_TRUCO=1): main.js
- *   (host:truco) lo niega en las builds empaquetadas (app.isPackaged) y en la web no existe geoliteHost, asi que
- *   queda apagado. Apagado de fabrica: en Steam y en la web el 7 x 7 no desbloquea nada (solo deshace un truco
- *   que haya quedado activo de una version anterior). tools/steam-pack.mjs avisa si esta encendido a la fuerza.
+ * ON: el interruptor. Vale true en Electron de desarrollo (main.js, host:truco: devuelto sin flags el 28-oct, a
+ *   peticion del autor, mientras no se empaquete para Steam). En las builds empaquetadas main.js lo niega
+ *   (app.isPackaged) y en la web no existe geoliteHost, asi que queda apagado: en Steam y en la web el 7 x 7 no
+ *   desbloquea nada (solo deshace un truco que haya quedado activo de una version anterior).
+ *   tools/steam-pack.mjs avisa si esta encendido a la fuerza.
  * Va justo despues de js/support.js: al volver a como estaba, la copia se escribe ANTES de que el perfil, el crupier y la Enciclopedia lean
  * sus datos (si se escribiera antes de recargar, el pagehide del crupier la pisaria).
  */

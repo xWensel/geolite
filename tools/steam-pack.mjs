@@ -19,11 +19,13 @@ const DEMO = args.has("--demo"), LITE = DEMO || args.has("--lite"), LINUX = args
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
 const OUT = path.join(ROOT, "dist");
 
-/* el truco de pruebas (js/truco.js, 7 x 7 en la portada = todo desbloqueado): en las builds empaquetadas queda
-   apagado por main.js (host:truco exige !app.isPackaged), pero avisa si alguien lo ha encendido a la fuerza */
+/* el truco de pruebas (js/truco.js, 7 x 7 en la portada = todo desbloqueado): encendido en el Electron de
+   desarrollo (main.js: host:truco responde !app.isPackaged) y apagado en las builds empaquetadas; avisa si
+   alguien lo enciende a la fuerza o si main.js deja de negarlo en la build (asi la de Steam nunca lo lleva) */
 const trucoSrc = fs.readFileSync(path.join(ROOT, "js", "truco.js"), "utf8");
-if (/const ON = true;/.test(trucoSrc) || !/geoliteHost\.truco/.test(trucoSrc))
-  console.warn("\n  AVISO: revisa js/truco.js: el truco debe ir apagado por defecto (geoliteHost.truco). En la build empaquetada se apaga solo, pero no deberia estar encendido a la fuerza.\n");
+const mainSrc = fs.readFileSync(path.join(ROOT, "main.js"), "utf8");
+if (/const ON = true;/.test(trucoSrc) || !/geoliteHost\.truco/.test(trucoSrc) || !/host:truco[\s\S]{0,80}!app\.isPackaged/.test(mainSrc))
+  console.warn("\n  AVISO: revisa el truco de pruebas (js/truco.js y main.js): en la build empaquetada debe quedar apagado (host:truco con !app.isPackaged).\n");
 
 /* solo lo que el juego necesita en ejecucion (rutas relativas con "/", empezando por "/") */
 const KEEP_TOP = new Set(["index.html", "credits.html", "main.js", "preload.js", "package.json", "steam-flavor.json", "js", "css", "fonts", "data", "assets", "node_modules"]);
