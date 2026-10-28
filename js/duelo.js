@@ -363,7 +363,8 @@ window.AIQ = window.AIQ || {};
   const sel = { table: "plata", level: null, door: "liga", msg: "" };
   const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."],
     ver: ["Tu amigo y tú tenéis versiones distintas del juego.", "You and your friend are on different versions of the game."], closed: ["La sala se ha cerrado.", "The room was closed."],
-    short: ["El código tiene 5 letras o números.", "The code has 5 letters or digits."], net: ["No se ha podido conectar con la sala. Inténtalo otra vez.", "Couldn't reach the room. Try again."] };
+    short: ["El código tiene 5 letras o números.", "The code has 5 letters or digits."], net: ["No se ha podido conectar con la sala. Inténtalo otra vez.", "Couldn't reach the room. Try again."],
+    rate: ["Demasiadas salas seguidas. Espera un minuto.", "Too many rooms in a row. Wait a minute."] };   // v0.3.235: el limite por red de api/duelo.js (new / join)
   const whyTxt = w => { const a = WHY[w] || WHY.net; return T(a[0], a[1]); };
   const salaMsg = (t, bad) => { const e = $("duAmgTx"); if (!e) return; e.textContent = t || T("¿Tu amigo ya tiene sala? Escribe su código.", "Does your friend already have a room? Type their code."); e.classList.toggle("bad", !!bad); };
   const lvOf = () => (sel.level == null ? tableOf(sel.table).level : sel.level);

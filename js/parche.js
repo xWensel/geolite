@@ -56,6 +56,17 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ lo leido (en el perfil, como el resto del juego) */
   const list = () => A.PATCHES || [];
+  /* v0.3.235: js/parche-data.js (2,4 MB, el 19 % del JS del juego) ya no se carga con la portada: se pide la primera vez que se abren las notas
+     (o un poco despues de arrancar, en un hueco libre, para que el punto rojo de "sin leer" salga sin esperar). Una sola carga; si falla, se reintenta
+     la proxima vez. Mientras no hay datos, el boton de la portada sale sin punto y open() espera a tenerlos */
+  let loading = null;
+  const load = () => A.PATCHES ? Promise.resolve(true) : loading || (loading = new Promise(res => {
+    const s = document.createElement("script"); s.src = "js/parche-data.js"; s.async = true;
+    s.onload = () => res(!!A.PATCHES); s.onerror = () => { loading = null; s.remove(); res(false); };
+    document.head.appendChild(s);
+  }));
+  const idle = typeof requestIdleCallback === "function" ? f => requestIdleCallback(f, { timeout: 8000 }) : f => setTimeout(f, 3000);
+  addEventListener("load", () => idle(() => load().then(ok => { if (ok && A.core && A.core.S && A.core.S.phase === "title" && A.core.S.hub === "home" && $("patchBtn") && !$("patchBtn").classList.contains("has-new") && hasNew()) { const b = $("patchBtn"); b.classList.add("has-new"); if (!b.querySelector(".pt-dot")) b.insertAdjacentHTML("beforeend", `<i class="pt-dot" aria-hidden="true"></i>`); } })));   // el punto rojo, si la portada ya estaba pintada sin los datos
   const seenMap = () => { const P = A.profile.get(); if (!P.patchSeen || typeof P.patchSeen !== "object") P.patchSeen = {}; return P.patchSeen; };
   const isNew = p => !seenMap()[p.id];
   const hasNew = () => list().some(isNew);
@@ -63,7 +74,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ el icono de la portada */
   const button = () => {
-    if (!list().length) return "";
+    if (A.PATCHES && !list().length) return "";                            // con los datos cargados y vacios, nada; sin cargar aun, el boton sale (los datos llegan despues)
     const n = hasNew(), lbl = t("title") + (n ? " · " + t("unread") : "");
     return `<button class="menu-gear menu-patch${n ? " has-new" : ""}" id="patchBtn" type="button" aria-label="${esc(lbl)}" ${A.ttAttr(t("title"), n ? t("unread") + ". " + t("tipd") : t("tipd"))}>${A.icon("m_patch")}${n ? `<i class="pt-dot" aria-hidden="true"></i>` : ""}</button>`;
   };
@@ -103,6 +114,7 @@ window.AIQ = window.AIQ || {};
   const find = id => list().find(p => p.id === id) || list()[0];
 
   function open(id) {
+    if (!A.PATCHES) { load().then(ok => { if (ok && C() && C().S.hub === "patch") open(id); else if (!ok) A.hub.screen("home"); }); return; }   // los datos aun no estan: se piden y se vuelve aqui (si sigues en esta pantalla)
     const ps = list(); if (!ps.length) return A.hub.screen("home");
     const c = C();
     /* la primera vez que se abren, solo el ultimo es "nuevo" (antes los 51); despues, los que salgan desde tu ultima visita */

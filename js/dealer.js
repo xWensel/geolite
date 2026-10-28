@@ -3983,7 +3983,7 @@ window.AIQ = window.AIQ || {};
 
   /* ME CAMBIAS LA VENTANA (Ajustes o F): ventana, sin bordes o pantalla completa. Sin bordes recarga el juego, asi que se apunta y lo dice
      al llegar (en la apertura o en el siguiente asomo); una vez por sesion. Tampoco cuenta como "has cambiado el tamaño" */
-  D.demoCredits = () => retireRun(true);                                                  // botón temporal de Ajustes: los créditos de la Ascensión V, sin jubilar ni cerrar
+  D.demoCredits = () => retireRun(true);                                                  // los créditos de la Ascensión V, sin jubilar ni cerrar: solo desde la mesa del autor (js/vivo.js, trastada "creditos"; v0.3.235: antes un botón temporal de Ajustes)
   D.noteWindow = v => { fsAt = Date.now(); if (once.win || !/^(window|full|border)$/.test(v)) return; DS.winPend = { v, at: Date.now() }; saveStore(); };
   function winNote() {
     const w = DS.winPend; if (!w || once.win) return null; DS.winPend = null; saveStore();

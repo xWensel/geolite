@@ -5,6 +5,11 @@ const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TO
 exports.configured = !!(URL_ && TOKEN);
 /* la IP de quien envia, cifrada con el token de Redis como sal (secreto del servidor): sirve para vetar a un tramposo sin guardar IPs en claro */
 exports.ipTag = ip => require("crypto").createHmac("sha256", String(TOKEN || "x")).update("ip:" + ip).digest("hex").slice(0, 16);
+/* la IP de la peticion (la primera de x-forwarded-for, que pone Vercel) y su tag: TODAS las claves de Redis que se cuentan por red usan el tag, nunca la IP */
+exports.ip = req => String((req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "x").slice(0, 45);
+/* limite de peticiones por red y minuto (v0.3.235): devuelve true si esta red ya paso de `max` en este minuto. El contador caduca siempre a los 2 min,
+   pase lo que pase despues (antes, en api/submit.js, iba dentro de la misma pipeline que el resto; aqui va solo, para que duelo y vivo lo compartan) */
+exports.limited = async (tag, max, name) => { const k = "rl:" + (name || "") + tag + ":" + Math.floor(Date.now() / 60000); const [n] = await exports.pipeline([["INCR", k], ["EXPIRE", k, 120]]); return n > max; };
 exports.pipeline = async cmds => {
   const r = await fetch(URL_ + "/pipeline", { method: "POST", headers: { Authorization: "Bearer " + TOKEN, "content-type": "application/json" }, body: JSON.stringify(cmds), signal: AbortSignal.timeout(4000) });   // Redis colgado: 502 en vez de dejar la funcion esperando
   if (!r.ok) throw new Error("kv " + r.status);

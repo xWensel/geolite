@@ -28,7 +28,7 @@ const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "
 const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier (la mesa nueva ya no lo manda: tiene su sitio fijo en cada pantalla; se acepta por las mesas viejas)
 const HUMOR = ["contento", "tenso", "picado", "aburrido", "admirado"];
 const CAT = ["espera", "levanta", "anda", "salta", "zarpa", "caricia", "regana", "duerme", "despierta"];   // A.comodin.act
-const TRAS = ["mapa", "apagon", "ventana", "guante", "sello", "ticket", "cartas", "telon", "moneda", "ficha", "siesta", "desfile"];   // A.trastadas.run
+const TRAS = ["mapa", "apagon", "ventana", "guante", "sello", "ticket", "cartas", "telon", "moneda", "ficha", "siesta", "desfile", "creditos"];   // A.trastadas.run; creditos (v0.3.235): los creditos de la Ascension V sin jubilar (antes, un boton temporal en Ajustes)
 const SLOT = /^[a-z_]{1,16}$/;
 /* lo que llega en una accion, ya validado (o undefined si no vale) */
 function actVal(a, v) {
@@ -52,7 +52,7 @@ const same = (a, b) => { const h = x => crypto.createHash("sha256").update(Strin
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store"); res.setHeader("X-Robots-Tag", "noindex");
   if (!KEY || KEY.length < 12 || !kv.configured) return res.status(503).json({ ok: false, reason: "off" });
-  const ip = String((req.headers["x-forwarded-for"] || "").split(",")[0] || "x").slice(0, 45), bad = "mesa:bad:" + ip;
+  const bad = "mesa:bad:" + kv.ipTag(kv.ip(req));   // v0.3.235: las claves malas se cuentan por el tag de la red, no por la IP en claro
   try {
     const [nb] = await kv.pipeline([["GET", bad]]);
     if (+nb >= 10) return res.status(429).json({ ok: false, reason: "rate" });

@@ -6,8 +6,12 @@ window.AIQ = window.AIQ || {};
 (function (A) {
   const KEY = "atlasiq.profile.v1";
 
+  /* el id del jugador es su unica llave en la clasificacion (api/submit.js: con el se cambia su nombre en todas las tablas). v0.3.235: 20 letras y
+     cifras del generador criptografico (~103 bits), como el sid de js/vivo.js; antes Math.random + la hora (16, adivinable). Los perfiles que ya
+     existen conservan su id (sus filas en las tablas van con el); a-z0-9 y hasta 24, lo que acepta el servidor */
+  const newId = () => { const AB = "abcdefghijklmnopqrstuvwxyz0123456789", b = new Uint8Array(20); try { crypto.getRandomValues(b); } catch (e) { for (let i = 0; i < 20; i++) b[i] = Math.random() * 256; } return [...b].map(x => AB[x % 36]).join(""); };
   const defaults = () => ({
-    v: 1, id: Math.random().toString(36).slice(2, 10) + Date.now().toString(36), name: "", created: Date.now(),
+    v: 1, id: newId(), name: "", created: Date.now(),
     stats: { plays: 0, questions: 0, km: 0, hits: 0, bulls: 0, bestStreak: 0, perfectRounds: 0, timeouts: 0, seconds: 0, inside: 0 },
     records: {}, ach: {}, boards: {}, daily: {}, nameLog: [], nameAsk: 0,
     adv: { runs: 0, wins: 0, bestScore: 0, bestRound: 0, coins: 0, asc: 0, boss: 0, decks: { explorer: 1 }, deckWins: {}, seen: {} },

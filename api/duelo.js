@@ -61,10 +61,13 @@ module.exports = async (req, res) => {
   if (!b || typeof b !== "object" || !PID.test(String(b.pid || ""))) return res.status(400).json({ ok: false });
   const pid = b.pid, a = String(b.a || ""), now = Date.now(), ver = VER.test(String(b.ver || "")) ? String(b.ver) : "", send = o => res.status(200).json(o);
   try {
+    /* v0.3.235: abrir o sentarse en una sala, como mucho 20 veces por red y minuto (el resto de acciones son del duelo en marcha: sin limite,
+       la sala caduca sola). Antes cualquiera podia abrir salas sin parar (cada una vive 1 h en Redis) */
+    if ((a === "new" || a === "join") && await kv.limited(kv.ipTag(kv.ip(req)), 20, "duelo:")) return res.status(429).json({ ok: false, why: "rate" });
     if (a === "new") {
       const t = TABLE.test(String(b.t || "")) ? b.t : "plata";
       for (let i = 0; i < 4; i++) {
-        const code = rnd(5), got = await run([["HSETNX", key(code), "h", pid], ["EXPIRE", key(code), TTL]]);
+        const code = rnd(5), got = await run([["HSETNX", key(code), "h", pid]]);   // el EXPIRE va en write(): si el codigo ya es de otra sala viva, no se le renueva la caducidad
         if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "hn", clean(b.name), "hc", cos(b.c), "hk", kv.style(b.k), "hs", now, "hr", 1, "st", "lobby", "n", 0, "t", t, "ver", ver]]), code, "h", now));
       }
       return res.status(503).json({ ok: false, why: "busy" });

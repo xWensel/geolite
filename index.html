@@ -2,6 +2,11 @@
 <html lang="es" data-skin="casino">
 <head>
 <meta charset="utf-8">
+<!-- v0.3.235: Content-Security-Policy. Scripts solo de la propia web (nada en linea: js/boot.js sustituye a los dos <script> que habia); los hilos
+     aparte de js/casa.js y js/vestuario.js van por blob:; estilos en linea si (el juego los escribe por JS); fotos de la Enciclopedia de GitHub Pages;
+     la API, la clasificacion y la mesa en la web del juego (connect-src; la camara WebRTC de la mesa no pasa por la CSP). En Electron vale la misma
+     etiqueta (la pagina es la misma). frame-ancestors no se puede poner en <meta>: va por cabecera en vercel.json. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://xwensel.github.io; media-src 'self' blob: https://xwensel.github.io; font-src 'self'; connect-src 'self' blob: https://geolite-game.vercel.app https://xwensel.github.io; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f3b3a">
 <title>Geolite</title>
@@ -12,7 +17,7 @@
 <meta property="og:description" content="Roguelike de geografía: haz clic lo más cerca posible del lugar que te piden. Casino pixel art, 12 idiomas.">
 <meta property="og:image" content="https://geolite-game.vercel.app/assets/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:url" content="https://geolite-game.vercel.app/">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Geolite · ¿Sabes dónde queda?"><meta name="twitter:image" content="https://geolite-game.vercel.app/assets/og.png">
-<link rel="preload" as="image" href="assets/logo.png"><link rel="preload" as="image" href="assets/logo/tierra.png"><link rel="preload" as="image" href="assets/logo/rotulo.png">
+<link rel="preload" as="image" href="assets/logo.png"><!-- v0.3.235: tierra.png y rotulo.png ya no se precargan aqui: con el service worker activo Chromium descartaba el preload ("cross-world service worker resource mismatch") y los pedia dos veces; js/geologo.js los carga y el SW los tiene en cache -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="css/style.css">
@@ -57,7 +62,7 @@
 <link rel="stylesheet" href="css/legible.css">
 <link rel="stylesheet" href="css/relieve.css">
 <link rel="stylesheet" href="css/celebra.css">
-<script>/* Steam Deck (v0.2.32): la marca antes de pintar nada (css/deck.css sube la letra pequena) */ try { if (window.geoliteHost && window.geoliteHost.device === "deck") document.documentElement.dataset.dev = "deck"; } catch (e) {}</script>
+<script src="js/boot.js"></script>
 <style>
 /* pantalla de carga: negro puro, sin nada. Lo primero que se ve al abrir el juego es la intro del estudio (Cousins Studios, tambien sobre negro):
    mientras se descargan los datos y se construye el mapa la pantalla solo esta a oscuras, y al quitarla el logo sale sin costuras */
@@ -67,7 +72,6 @@
 </head>
 <body>
 <div id="splash" aria-hidden="true"></div>
-<script>setTimeout(function(){var e=document.getElementById("splash");if(e)e.remove()},20000)</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 </svg>
 
@@ -298,10 +302,6 @@
             <p class="set-note" data-i="set.credits.d"></p>
           </div>
           <div class="set-card">
-            <button class="row-btn" id="demoCredits" type="button"><span>Demo: créditos de Ascensión V</span></button>
-            <p class="set-note">Botón temporal para demostraciones: lanza los créditos finales sin jubilar al crupier ni cerrar el juego.</p>
-          </div>
-          <div class="set-card">
             <button class="row-btn danger" id="resetSet" type="button"></button>
             <p class="set-note" id="resetSetNote"></p>
           </div>
@@ -376,123 +376,122 @@
   </defs>
 </svg>
 
-<script src="js/vendor/topojson-client.min.js"></script>
-<script src="data/world.js"></script>
-<script src="data/classic.js"></script>
-<script src="data/locations.js"></script>
-<script src="data/history.js"></script>
-<script src="data/codex.js"></script>
-<script src="data/places.js"></script>
-<script src="data/pistas.js"></script>
-<script src="data/paises-lugares.js"></script>
-<script src="data/aguas.js"></script>
-<script src="data/dificultad.js"></script>
-<script src="data/niveles.js"></script>
-<script src="data/carretes.js"></script>
-<script src="data/flags.js"></script>
-<script src="data/classic-tr.js"></script>
-<script src="data/campaigns.js"></script>
-<script src="js/geo.js"></script>
-<script src="js/aguas.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/logo.js"></script>
-<script src="js/support.js"></script>
-<script src="js/truco.js"></script>
-<script src="js/geologo.js"></script>
-<script src="js/teclas.js"></script>
-<script src="js/i18n2.js"></script>
-<script src="js/i18n3.js"></script>
-<script src="js/i18n4.js"></script>
-<script src="js/i18n5.js"></script>
-<script src="js/i18n6.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/vendor/earcut.min.js"></script>
-<script src="js/map2d.js"></script>
-<script src="js/map.js"></script>
-<script src="js/ficha.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/art.js"></script>
-<script src="js/skins.js"></script>
-<script src="js/steam.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/club.js"></script>
-<script src="js/socio.js"></script>
-<script src="js/escaparate.js"></script>
-<script src="js/camino.js"></script>
-<script src="js/punteros.js"></script>
-<script src="js/rank.js"></script>
-<script src="js/relics.js"></script>
-<script src="js/challenges.js"></script>
-<script src="js/chfx.js"></script>
-<script src="js/humo.js"></script>
-<script src="js/crupier-data.js"></script>
-<script src="js/crupier-partes.js"></script>
-<script src="js/crupier-pluma.js"></script>
-<script src="js/crupier-veneciano.js"></script>
-<script src="js/crupier-guinos.js"></script>
-<script src="js/crupier.js"></script>
-<script src="js/comodin-data.js"></script>
-<script src="js/comodin.js"></script>
-<script src="js/vestuario.js"></script>
-<script src="js/dealer.js"></script>
-<script src="js/trastadas.js"></script>
-<script src="js/cofre.js"></script>
-<script src="js/pointer.js"></script>
-<script src="js/uikit.js"></script>
-<script src="js/tips.js"></script>
-<script src="js/peek.js"></script>
-<script src="js/tour.js"></script>
-<script src="js/jukebox.js"></script>
-<script src="js/casino-ctl.js"></script>
-<script src="js/adventure.js"></script>
-<script src="js/casino-dados-textos.js"></script>
-<script src="js/casino-dados.js"></script>
-<script src="js/casino-plinko-tablas.js"></script>
-<script src="js/casino-plinko-textos.js"></script>
-<script src="js/casino-plinko.js"></script>
-<script src="js/casino-globo-textos.js"></script>
-<script src="js/casino-globo.js"></script>
-<script src="js/casino-rasca-arte.js"></script>
-<script src="js/casino-rasca-textos.js"></script>
-<script src="js/casino-rasca.js"></script>
-<script src="js/jefes.js"></script>
-<script src="js/hub.js"></script>
-<script src="js/parche-data.js"></script>
-<script src="js/parche.js"></script>
-<script src="js/podio.js"></script>
-<script src="js/otrodia.js"></script>
-<script src="js/wiki.js"></script>
-<script src="js/codex.js"></script>
-<script src="js/marcador.js"></script>
-<script src="js/nombre.js"></script>
-<script src="js/salir.js"></script>
-<script src="js/final.js"></script>
-<script src="js/gala.js"></script>
-<script src="js/casa.js"></script>
-<script src="js/relieve.js"></script>
-<script src="js/juguetes.js"></script>
-<script src="js/celebra.js"></script>
-<script src="js/escena.js"></script>
-<script src="js/mesas.js"></script>
-<script src="js/periodico.js"></script>
-<script src="js/boutique.js"></script>
-<script src="js/club-retos.js"></script>
-<script src="data/duelo-niveles.js"></script>
-<script src="data/duelo-personas.js"></script>
-<script src="data/duelo-nacimientos.js"></script>
-<script src="data/duelo-extra.js"></script>
-<script src="data/media2.js"></script>
-<script src="js/game.js"></script>
-<script src="js/duelo-textos.js"></script>
-<script src="js/duelo-red.js"></script>
-<script src="js/duelo.js"></script>
-<script src="js/glifos-data.js"></script>
-<script src="js/mando-textos.js"></script>
-<script src="js/mando.js"></script>
-<script src="js/controles.js"></script>
-<script src="js/teclado.js"></script>
-<script src="js/creditos.js"></script>
-<script src="js/perf.js"></script>
-<script src="js/vivo.js"></script>
+<script src="js/vendor/topojson-client.min.js" defer></script>
+<script src="data/world.js" defer></script>
+<script src="data/classic.js" defer></script>
+<script src="data/locations.js" defer></script>
+<script src="data/history.js" defer></script>
+<script src="data/codex.js" defer></script>
+<script src="data/places.js" defer></script>
+<script src="data/pistas.js" defer></script>
+<script src="data/paises-lugares.js" defer></script>
+<script src="data/aguas.js" defer></script>
+<script src="data/dificultad.js" defer></script>
+<script src="data/niveles.js" defer></script>
+<script src="data/carretes.js" defer></script>
+<script src="data/flags.js" defer></script>
+<script src="data/classic-tr.js" defer></script>
+<script src="data/campaigns.js" defer></script>
+<script src="js/geo.js" defer></script>
+<script src="js/aguas.js" defer></script>
+<script src="js/i18n.js" defer></script>
+<script src="js/logo.js" defer></script>
+<script src="js/support.js" defer></script>
+<script src="js/truco.js" defer></script>
+<script src="js/geologo.js" defer></script>
+<script src="js/teclas.js" defer></script>
+<script src="js/i18n2.js" defer></script>
+<script src="js/i18n3.js" defer></script>
+<script src="js/i18n4.js" defer></script>
+<script src="js/i18n5.js" defer></script>
+<script src="js/i18n6.js" defer></script>
+<script src="js/audio.js" defer></script>
+<script src="js/vendor/earcut.min.js" defer></script>
+<script src="js/map2d.js" defer></script>
+<script src="js/map.js" defer></script>
+<script src="js/ficha.js" defer></script>
+<script src="js/icons.js" defer></script>
+<script src="js/art.js" defer></script>
+<script src="js/skins.js" defer></script>
+<script src="js/steam.js" defer></script>
+<script src="js/profile.js" defer></script>
+<script src="js/club.js" defer></script>
+<script src="js/socio.js" defer></script>
+<script src="js/escaparate.js" defer></script>
+<script src="js/camino.js" defer></script>
+<script src="js/punteros.js" defer></script>
+<script src="js/rank.js" defer></script>
+<script src="js/relics.js" defer></script>
+<script src="js/challenges.js" defer></script>
+<script src="js/chfx.js" defer></script>
+<script src="js/humo.js" defer></script>
+<script src="js/crupier-data.js" defer></script>
+<script src="js/crupier-partes.js" defer></script>
+<script src="js/crupier-pluma.js" defer></script>
+<script src="js/crupier-veneciano.js" defer></script>
+<script src="js/crupier-guinos.js" defer></script>
+<script src="js/crupier.js" defer></script>
+<script src="js/comodin-data.js" defer></script>
+<script src="js/comodin.js" defer></script>
+<script src="js/vestuario.js" defer></script>
+<script src="js/dealer.js" defer></script>
+<script src="js/trastadas.js" defer></script>
+<script src="js/cofre.js" defer></script>
+<script src="js/pointer.js" defer></script>
+<script src="js/uikit.js" defer></script>
+<script src="js/tips.js" defer></script>
+<script src="js/peek.js" defer></script>
+<script src="js/tour.js" defer></script>
+<script src="js/jukebox.js" defer></script>
+<script src="js/casino-ctl.js" defer></script>
+<script src="js/adventure.js" defer></script>
+<script src="js/casino-dados-textos.js" defer></script>
+<script src="js/casino-dados.js" defer></script>
+<script src="js/casino-plinko-tablas.js" defer></script>
+<script src="js/casino-plinko-textos.js" defer></script>
+<script src="js/casino-plinko.js" defer></script>
+<script src="js/casino-globo-textos.js" defer></script>
+<script src="js/casino-globo.js" defer></script>
+<script src="js/casino-rasca-arte.js" defer></script>
+<script src="js/casino-rasca-textos.js" defer></script>
+<script src="js/casino-rasca.js" defer></script>
+<script src="js/jefes.js" defer></script>
+<script src="js/hub.js" defer></script>
+<script src="js/parche.js" defer></script>
+<script src="js/podio.js" defer></script>
+<script src="js/otrodia.js" defer></script>
+<script src="js/wiki.js" defer></script>
+<script src="js/codex.js" defer></script>
+<script src="js/marcador.js" defer></script>
+<script src="js/nombre.js" defer></script>
+<script src="js/salir.js" defer></script>
+<script src="js/final.js" defer></script>
+<script src="js/gala.js" defer></script>
+<script src="js/casa.js" defer></script>
+<script src="js/relieve.js" defer></script>
+<script src="js/juguetes.js" defer></script>
+<script src="js/celebra.js" defer></script>
+<script src="js/escena.js" defer></script>
+<script src="js/mesas.js" defer></script>
+<script src="js/periodico.js" defer></script>
+<script src="js/boutique.js" defer></script>
+<script src="js/club-retos.js" defer></script>
+<script src="data/duelo-niveles.js" defer></script>
+<script src="data/duelo-personas.js" defer></script>
+<script src="data/duelo-nacimientos.js" defer></script>
+<script src="data/duelo-extra.js" defer></script>
+<script src="data/media2.js" defer></script>
+<script src="js/game.js" defer></script>
+<script src="js/duelo-textos.js" defer></script>
+<script src="js/duelo-red.js" defer></script>
+<script src="js/duelo.js" defer></script>
+<script src="js/glifos-data.js" defer></script>
+<script src="js/mando-textos.js" defer></script>
+<script src="js/mando.js" defer></script>
+<script src="js/controles.js" defer></script>
+<script src="js/teclado.js" defer></script>
+<script src="js/creditos.js" defer></script>
+<script src="js/perf.js" defer></script>
+<script src="js/vivo.js" defer></script>
 </body>
 </html>

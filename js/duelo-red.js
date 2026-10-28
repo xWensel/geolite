@@ -10,8 +10,7 @@
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  const SITE = "https://geolite-game.vercel.app", KEY = "atlasiq.duelo.api";
-  const LOCAL = typeof location === "undefined" || !/^https?:$/.test(location.protocol) || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const SITE = A.SITE, LOCAL = A.LOCAL, KEY = "atlasiq.duelo.api";               // v0.3.235: la web publica y "en local" viven en js/support.js
   const url = () => { let u = ""; try { u = localStorage.getItem(KEY) || ""; } catch (e) { /* sin almacenamiento */ } return u || (LOCAL ? SITE : "") + "/api/duelo"; };
   const pid = (() => { const AB = "abcdefghijklmnopqrstuvwxyz0123456789", b = new Uint8Array(16); crypto.getRandomValues(b); return [...b].map(x => AB[x % 36]).join(""); })();
   let off = 0, best = Infinity;

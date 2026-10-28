@@ -2,7 +2,7 @@
   "name": "Geolite",
   "short_name": "Geolite",
   "description": "Juego de geografía: haz clic lo más cerca posible del lugar que te piden.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",

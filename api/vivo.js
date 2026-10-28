@@ -27,6 +27,9 @@ module.exports = async (req, res) => {
   if (!b || typeof b !== "object" || !SID.test(String(b.sid || ""))) return res.status(400).json({ ok: false });
   const sid = b.sid;
   try {
+    /* v0.3.235: 90 latidos por red y minuto (una partida mirada por la mesa da 30; caben tres en la misma casa). Antes no habia tope y cualquier web
+       podia llenar vivo:idx con sids inventados (la mesa solo lista 200) */
+    if (await kv.limited(kv.ipTag(kv.ip(req)), 90, "vivo:")) return res.status(429).json({ ok: false });
     if (b.bye) { await kv.pipeline([["ZREM", "vivo:idx", sid], ["DEL", "vivo:s:" + sid]]); return res.status(200).json({ ok: true }); }
     if (b.rtc) {                                                       // la camara: la oferta de conexion del juego para la mesa (api/mesa.js la recoge)
       const r = b.rtc, sdp = typeof r.sdp === "string" ? r.sdp : "";

@@ -224,7 +224,6 @@
     for (const k in st) { const el = document.querySelector('.sw[data-sw="' + k + '"]'); if (el) el.setAttribute("aria-checked", !!st[k]); }
     const sg = document.querySelector('.sw[data-sw="songs"]'); if (sg) sg.closest(".row-sw").classList.toggle("off", !A.audio.musicOn);
     $("rowCursor").classList.toggle("hidden", !A.cursor.available);
-    { const dc = $("demoCredits"), cd = dc && dc.closest(".set-card"); if (cd) cd.classList.toggle("hidden", !(A.truco && A.truco.activo && A.truco.activo())); }   // el boton temporal de los creditos (solo en espanol): solo con el truco de pruebas (7x7)
     setTab(S.setTab, true); if (A.jukebox) A.jukebox.sync();
     const rs = $("resetSet"); if (rs && !rs.classList.contains("armed")) rs.textContent = A.t("set.reset"); $("resetSetNote").textContent = A.t("set.reset.d");
     const ra = $("resetAll"); if (ra && !ra.classList.contains("armed")) ra.textContent = A.pick6("Borrar todos mis datos y empezar de cero|Delete all my data and start over|Effacer toutes mes données et repartir de zéro|Apagar todos os meus dados e começar do zero|Alle meine Daten löschen und neu anfangen|Cancella tutti i miei dati e ricomincia da zero|Borrar todos mis datos y empezar de cero|删除我的全部数据，从头开始|내 데이터를 모두 지우고 처음부터 시작|すべてのデータを消して最初から始める|Удалить все мои данные и начать заново|Usuń wszystkie moje dane i zacznij od nowa");   // antes "(desarrollo)": es un borrado completo para cualquier jugador, con doble confirmacion
@@ -244,7 +243,6 @@
     h.steamCloud().then(c => put(!c ? "local" : c.account && c.app ? "on" : "off")).catch(() => put("local"));
   }
   /* creditos y licencias (credits.html, tools/build-credits.mjs): pagina aparte, en el navegador del sistema en Electron (main.js abre los http externos alli) */
-  $("demoCredits").onclick = () => { A.sfx.ui(); openSettings(false); setTimeout(() => { if (A.dealer && A.dealer.demoCredits) A.dealer.demoCredits(); }, 500); };   // TEMPORAL (demos): los creditos de Ascension V sin jubilar
   $("openCredits").onclick = () => { A.sfx.ui(); A.creditos.open(); };   // v0.2.33: dentro del juego (js/creditos.js); antes, el navegador del sistema
   /* restablecer la Enciclopedia: hay que pulsar dos veces (la primera arma el boton) */
   { const rc = $("resetCodex"); let tm = 0;

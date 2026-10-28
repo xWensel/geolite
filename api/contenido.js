@@ -19,7 +19,7 @@ function clean(n) {   // solo forma: claves cortas, veredicto de la lista, nota 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store"); res.setHeader("X-Robots-Tag", "noindex");
   if (!KEY || KEY.length < 12 || !kv.configured) return res.status(503).json({ ok: false, reason: "off" });
-  const ip = String((req.headers["x-forwarded-for"] || "").split(",")[0] || "x").slice(0, 45), bad = "mesa:bad:" + ip;
+  const bad = "mesa:bad:" + kv.ipTag(kv.ip(req));   // v0.3.235: el mismo contador que api/mesa.js, por el tag de la red (sin IP en claro)
   try {
     const [nb] = await kv.pipeline([["GET", bad]]);
     if (+nb >= 10) return res.status(429).json({ ok: false, reason: "rate" });

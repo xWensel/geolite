@@ -6,7 +6,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const $ = id => document.getElementById(id);
-  const KEY = "atlasiq.vivo", SITE = "https://geolite-game.vercel.app";
+  const KEY = "atlasiq.vivo", SITE = A.SITE;                                       // v0.3.235: la web publica vive en js/support.js
   const sid = Array.from(crypto.getRandomValues(new Uint8Array(9)), b => (b % 36).toString(36)).join("") + Date.now().toString(36).slice(-4);
   const t0 = Date.now();
   const host = window.geoliteHost;
@@ -109,7 +109,7 @@ window.AIQ = window.AIQ || {};
       else if (a === "humor") { if (D && D.humor) { D.humor(v || null); mesaSet.humor = !!v; } }
       else if (a === "cat") { if (!A.comodin || !A.comodin.act) return; if (!A.comodin.on() && D && D.catVisit && D.catVisit(40000)) setTimeout(() => A.comodin.act(String(v || "")), 2600); else A.comodin.act(String(v || "")); }   // bloque D: el gato ya no esta siempre: si no esta (en la portada), primero viene
       else if (a === "vest") { if (A.vestuario && A.vestuario.preview) { const o = v && typeof v === "object" ? v : null; A.vestuario.preview(o); mesaSet.vest = !!o; } }
-      else if (a === "tras") { if (A.trastadas && A.trastadas.run) A.trastadas.run(String(v || "")); }
+      else if (a === "tras") { if (v === "creditos") { if (D && D.demoCredits) D.demoCredits(); } else if (A.trastadas && A.trastadas.run) A.trastadas.run(String(v || "")); }   // v0.3.235: "creditos" = los creditos de la Ascension V sin jubilar (solo desde la mesa; antes un boton temporal en Ajustes)
     } catch (e) { /* una accion que no sale no rompe el latido */ }
   }
   function actOff() {

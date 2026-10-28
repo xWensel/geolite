@@ -145,5 +145,5 @@
   const scan = () => { pend = false; for (let i = 0; i < live.length; i++) if (!live[i]._fx) see(live[i]); };
   A.ficha.see = see;
   A.ficha.soon = () => { if (ok && !pend) { pend = true; queueMicrotask(scan); } };
-  A.ficha.attr = id => ok && COL[id] && id.startsWith("blank_") ? ' onload="AIQ.ficha.see(this)"' : "";
+  A.ficha.attr = id => ok && COL[id] && id.startsWith("blank_") ? " data-fx" : "";   // v0.3.235: el onload="" de antes lo hace un oyente de load en captura (js/icons.js): la CSP no deja manejadores en linea
 })(typeof window !== "undefined" ? window : globalThis);

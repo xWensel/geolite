@@ -5,3 +5,15 @@ tools
 assets_stage
 assets/wiki
 node_modules
+# v0.3.235: lo que es del escritorio / Steam y no de la web (un `vercel deploy` desde local no intenta subir los 4,7 GB de dist/)
+dist
+steam-output
+steam
+steam-flavor.json
+steam_appid.txt
+docs
+*.bat
+*.md
+.claude
+.github
+.vercel

@@ -14,9 +14,13 @@ window.AIQ = window.AIQ || {};
     const fx = A.ficha ? A.ficha.attr(id) : "";   // ficha lisa: se dibuja al pixel real de la pantalla (js/ficha.js)
     if (fx) A.ficha.soon();
     const def = `assets/icons/${id}.webp`, viste = VISTE[id] && A.crupierArt;
-    return `<img class="ic ic-${id} ${fx ? "ic-fx " : ""}${cls}" src="${viste ? A.crupierArt(id, def) : def}"${VISTE[id] ? ` data-cart="${id}" data-cdef="${def}"` : ""} alt="" draggable="false" decoding="${fx ? "sync" : "async"}" onerror="AIQ._icErr(this)"${fx}>`;
+    return `<img class="ic ic-${id} ${fx ? "ic-fx " : ""}${cls}" src="${viste ? A.crupierArt(id, def) : def}"${VISTE[id] ? ` data-cart="${id}" data-cdef="${def}"` : ""} alt="" draggable="false" decoding="${fx ? "sync" : "async"}"${fx}>`;
   };
   A._icErr = im => { im.style.visibility = "hidden"; };
+  /* v0.3.235: sin onerror="..." en el HTML (la Content-Security-Policy no deja manejadores en linea): un solo oyente en captura (error y load de
+     <img> no burbujean, pero si pasan por la fase de captura) para todos los iconos, los de ahora y los que se inserten despues */
+  document.addEventListener("error", e => { const im = e.target; if (im && im.tagName === "IMG" && im.classList.contains("ic")) A._icErr(im); }, true);
+  document.addEventListener("load", e => { const im = e.target; if (im && im.tagName === "IMG" && im.classList.contains("ic-fx") && A.ficha && A.ficha.see) A.ficha.see(im); }, true);   // la ficha lisa se dibuja al pixel real (js/ficha.js; antes onload="")
 
   /* pinta los iconos declarados en el HTML: <i data-ic="u_plus"></i> */
   A.iconize = (root = document) => root.querySelectorAll("[data-ic]").forEach(el => { if (!el.firstChild) el.innerHTML = A.icon(el.dataset.ic); });

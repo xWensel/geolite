@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
   let b; try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch (e) { return res.status(400).json({ ok: false, reason: "json" }); }
   if (!b || typeof b !== "object") b = {};                             // "null", un numero...: se rechaza abajo como invalido (antes b.board reventaba)
   const id = String(b.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 24);
-  const ip = String((req.headers["x-forwarded-for"] || "").split(",")[0] || "x").slice(0, 45), h = kv.ipTag(ip), rl = "rl:" + ip + ":" + Math.floor(Date.now() / 60000);
+  const h = kv.ipTag(kv.ip(req)), rl = "rl:" + h + ":" + Math.floor(Date.now() / 60000);   // v0.3.235: el contador por red lleva el tag, no la IP (antes "rl:<ip>:..." la guardaba en claro 2 min)
   if (b.op === "run") {                                                // boleto de una expedicion nueva (o de una guardada que aun no lo tenia)
     if (!id) return res.status(400).json({ ok: false, reason: "invalid" });
     const rk = "rk:" + h + ":" + Math.floor(Date.now() / 3600000);
@@ -62,10 +62,10 @@ module.exports = async (req, res) => {
     } catch (e) { return res.status(502).json({ ok: false, reason: "kv" }); }
   }
   const board = String(b.board || ""), daily = /^daily-/.test(board), dayB = /^(day|advd)-/.test(board);
-  const name = [...String(b.name || "").normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1").trim()].slice(0, 16).join("").trim() || "Anonymous";   // el mismo filtro que A.profile.clean (hasta 16)
+  const name = [...String(b.name || "").normalize("NFC").replace(/[ᅟᅠㅤﾠ]/g, "").replace(/[^\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Nd} _.'\-ー]/gu, "").replace(/\s+/g, " ").replace(/^[ _.'\-ー]+/, "").replace(/([_.'\-])\1+/g, "$1").trim()].slice(0, 16).join("").trim();   // el mismo filtro que A.profile.clean (hasta 16). v0.3.235: sin nombre se rechaza (abajo), ya no se inventa "Anonymous": el juego manda siempre el suyo o "Anonimo" en su idioma (js/rank.js, R.name)
   const tries = daily ? (Array.isArray(b.tries) ? b.tries : [b.score]).slice(0, 3).map(v => Math.floor(+v)) : [];
   const score = daily ? 0 : Math.floor(+b.score);
-  if (!kv.BOARD.test(board) || !id) return res.status(400).json({ ok: false, reason: "invalid" });
+  if (!kv.BOARD.test(board) || !id || !name) return res.status(400).json({ ok: false, reason: "invalid" });
   if (daily ? !tries.length || tries.some(v => !Number.isFinite(v) || v < 0 || v > 2e6) : !Number.isFinite(score) || score < 0 || score > 5e6) return res.status(400).json({ ok: false, reason: "invalid" });
   if (daily || dayB) {                                                 // Reto diario y "Hoy/Ayer" van por fecha local: se acepta el dia de hoy (UTC) +-1
     const d = new Date(), ymd = x => x.getUTCFullYear() * 10000 + (x.getUTCMonth() + 1) * 100 + x.getUTCDate(), v = +board.replace(/^\D+-/, "");
