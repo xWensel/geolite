@@ -9,6 +9,9 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("geoliteHost", {
   /* true en el build de la demo de Steam (tools/steam-pack.mjs --demo); el juego lo usa para limitar contenido */
   demo: ipcRenderer.sendSync("host:demo"),
+  /* truco de pruebas (7 x 7): true solo en Electron de desarrollo lanzado con --truco / GEOLITE_TRUCO=1 (main.js);
+     en la web esta API no existe y el truco queda apagado */
+  truco: () => ipcRenderer.sendSync("host:truco"),
   /* "deck" en una Steam Deck, "pc" en el resto (js/mando.js: iconos y modo mando de entrada) */
   device: ipcRenderer.sendSync("host:device"),
   /* panel de rendimiento (js/perf.js): arranque encendido (GEOLITE_PERF=1 o --perf) y guardado de su informe */

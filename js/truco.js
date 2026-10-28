@@ -5,19 +5,22 @@
  *   Otra vez 7 x 7 y todo vuelve a como estaba antes del truco (se guarda una copia de la partida al activarlo).
  * Nada sale del ordenador: los logros NO se envian a Steam (P.truco: js/profile.js no los manda ni al ganarlos ni al arrancar) y no se toca
  * nada de las clasificaciones. Tampoco suena ni salta nada por cada cosa: se escribe directamente y se avisa una vez.
- * ON: el interruptor. APAGARLO (false) ANTES DE PUBLICAR EN STEAM: tools/steam-pack.mjs avisa si sigue encendido.
+ * ON: el interruptor. Vale true SOLO en Electron de desarrollo lanzado con --truco (o GEOLITE_TRUCO=1): main.js
+ *   (host:truco) lo niega en las builds empaquetadas (app.isPackaged) y en la web no existe geoliteHost, asi que
+ *   queda apagado. Apagado de fabrica: en Steam y en la web el 7 x 7 no desbloquea nada (solo deshace un truco
+ *   que haya quedado activo de una version anterior). tools/steam-pack.mjs avisa si esta encendido a la fuerza.
  * Va justo despues de js/support.js: al volver a como estaba, la copia se escribe ANTES de que el perfil, el crupier y la Enciclopedia lean
  * sus datos (si se escribiera antes de recargar, el pagehide del crupier la pisaria).
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  const ON = true;
+  /* el truco vive en Electron (preload.js: geoliteHost.truco); en la web no hay geoliteHost y queda apagado */
+  const ON = !!(typeof window !== "undefined" && window.geoliteHost && typeof window.geoliteHost.truco === "function" && window.geoliteHost.truco());
   const KEYS = ["atlasiq.profile.v1", "atlasiq.v2", "atlasiq.codex.v1", "atlasiq.dealer.v1"];   // lo que el truco cambia
   const COPIA = "atlasiq.truco.copia", VOLVER = "atlasiq.truco.volver", AVISO = "atlasiq.truco.aviso";
   A.truco = { on: ON };
-  if (!ON) return;
-
-  /* ---------------------------------------------------------------- volver a como estaba (al arrancar, antes que nadie) */
+  /* ---------------------------------------------------------------- volver a como estaba (al arrancar, antes que nadie):
+     corre SIEMPRE, tambien con el truco apagado, para que quien lo activo en una version anterior pueda deshacerlo */
   try {
     const v = localStorage.getItem(VOLVER);
     if (v) {
@@ -27,6 +30,22 @@ window.AIQ = window.AIQ || {};
       sessionStorage.setItem(AVISO, "off");
     }
   } catch (e) { /* sin almacenamiento */ }
+
+  if (!ON) {
+    /* apagado (web y builds de Steam): el 7 x 7 solo DESHACE si el truco quedo activo de una version anterior; nunca desbloquea nada nuevo */
+    let n = 0, last = 0;
+    addEventListener("keydown", e => {
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if (e.key !== "7" || !enPortada()) { n = 0; return; }
+      const now = performance.now(); n = now - last < 1600 ? n + 1 : 1; last = now;
+      if (n < 7) return;
+      n = 0;
+      const P = A.profile && A.profile.get();
+      if (P && P.truco) volver();
+    });
+    return;
+  }
 
   const P6 = s => A.pick6(s), $ = id => document.getElementById(id);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);

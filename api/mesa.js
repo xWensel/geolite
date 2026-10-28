@@ -137,7 +137,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, live: !!st });
     }
     if (b.op === "say") {
-      const t = [...String(b.t || "").normalize("NFC").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim()].slice(0, 160).join("");
+      const t = [...String(b.t || "").normalize("NFC").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/[<>]/g, "").replace(/\s+/g, " ").trim()].slice(0, 160).join("");
       const e = WORD.test(b.e || "") ? b.e || "" : "", g = GEST.test(b.g || "") ? b.g : "", s = STY.includes(b.s) ? b.s : "", p = POS.includes(b.p) ? b.p : "";
       if (!t) return res.status(400).json({ ok: false });
       const msg = JSON.stringify({ t, e, g, s, p, at: now }), ik = "vivo:in:" + sid;
