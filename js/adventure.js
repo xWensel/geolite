@@ -1854,6 +1854,10 @@ window.AIQ = window.AIQ || {};
     if (A.coverMap) A.coverMap("camp", true, () => !!document.querySelector("#dlg .table.mesa") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse mientras compras
     A.casa.acto(run.act); musica(false);                               // en el Campamento, la cancion del acto que viene (si sonaba la del jefe, se va)
     Gold.mount($("dlg"));                                                // el brillo de oro de las legendarias (mesa y mochila)
+    if (A.campFx) {                                                      // Probador, Campamento (Extrema): la lampara sigue a tus doblones, el contador cuenta con rodillos de laton y las cartas llegan boca abajo
+      const tbx = document.querySelector("#dlg .table.mesa.gx-camp");
+      try { A.campFx.saldo(tbx, run.coins, run.shopKey); A.campFx.rodillos($("shopCoins"), run.shopKey); if (deal && !chest) A.campFx.sobre(tbx); } catch (e) { console.error(e); }
+    }
     document.querySelectorAll(".offer").forEach((el, i) => { const btn = el.querySelector(".buy"); if (btn) btn.onclick = () => buy(el, chest); if (!chest) el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && A.dealer.campHover) A.dealer.campHover(i); }); });
     /* la mochila: pasar el raton abre la carta grande (con su boton de vender); un clic la deja fija. Con una carta de la mesa esperando
        hueco, el clic en la reliquia la vende y entra esa. Tambien en el cofre del jefe: con la mochila llena, vendes una y eliges gratis */
@@ -2010,7 +2014,7 @@ window.AIQ = window.AIQ || {};
         run.reds = run.reds || {}; run.reds[r] = { id: "coin", pick, out, win: win || out === "edge", att, stake, pay };
         persist(); A.sfx.rouBet(pick === "heads" ? 0 : 1); if (A.haptic) A.haptic([10]);
         { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins - pay; }
-        spinCoin({ pick, out, win, pay, stake }, () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
+        spinCoin({ pick, out, win, pay, stake, purse: run.coins - pay + stake }, () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
       }));
       return;
     }
@@ -2026,7 +2030,7 @@ window.AIQ = window.AIQ || {};
         const rec = (run.reds[r] = { id: "cups", att, stake, coin: coinId, joke, pick: null, win: false, pay: 0 });   // la ficha ya esta pagada: recargar a mitad del baile = el crupier se la queda
         persist(); A.sfx.rouBet(1); if (A.haptic) A.haptic([10]);
         const upd = () => { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins; }; upd();
-        spinCups({ stake, tier, coinId, joke, seq: cupsMoves(`${run.seed}:trile:baile:${r}:${att}`, tier),
+        spinCups({ stake, purse: run.coins + stake, tier, coinId, joke, seq: cupsMoves(`${run.seed}:trile:baile:${r}:${att}`, tier),
           onPick(id) { rec.pick = id; rec.win = !joke && id === coinId; rec.pay = rec.win ? stake * 2 : 0; if (rec.pay) { run.coins += rec.pay; run.stats.coinsEarned += rec.pay - stake; } persist(); upd(); return rec; },   // se decide y se guarda ANTES de la revelacion
           onError() { if (rec.pick == null) { run.coins += stake; if (run.reds && run.reds[r] === rec) delete run.reds[r]; persist(); upd(); } } },   // un fallo de la pantalla no se come la ficha
           () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
@@ -2042,7 +2046,7 @@ window.AIQ = window.AIQ || {};
         const info = applyPrize(PRIZES[w], rec, r); run.bar = null;       // el premio puede ser un suministro: la Barra se vuelve a montar
         persist(); A.sfx.rouBet(2); if (A.haptic) A.haptic([10]);
         { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = afterFee; }
-        spinWheel({ w, info }, () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
+        spinWheel({ w, info, stake: c, purse: afterFee + c }, () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); });
       };
       return;
     }
@@ -2061,7 +2065,7 @@ window.AIQ = window.AIQ || {};
         persist();
         A.sfx.rouBet(pick === "green" ? 2 : pick === "red" ? 0 : 1); if (A.haptic) A.haptic([10]);   // la ficha cae al instante: el clic nunca se queda mudo
         { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins - pay; }   // la ficha cae ya; el premio se suma al acabar de girar
-        spinRoulette({ pick, n, skip, last: skip === "final", extra: extra.length > 0 }, () => { if (!run || C().S.phase !== "shop") return; if (skip) openShop(false); else if (run.stock) renderShop(false); });
+        spinRoulette({ pick, n, skip, last: skip === "final", extra: extra.length > 0, stake: c, purse: run.coins - pay + c }, () => { if (!run || C().S.phase !== "shop") return; if (skip) openShop(false); else if (run.stock) renderShop(false); });
       }));
       return;
     }
@@ -2174,6 +2178,7 @@ window.AIQ = window.AIQ || {};
     const block = e => { e.preventDefault(); e.stopPropagation(); };                                // mientras gira, ni el teclado llega al Campamento de detras
     addEventListener("keydown", block, true);
     let closed = false, revealed = false, t0 = 0, last = S0, lastT = 0, lastTick = 0, cur = -1, fast = false, evI = 0;
+    const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => { const r = ptr.getBoundingClientRect(), b = band.getBoundingClientRect(), x = r.left + r.width / 2; return [new DOMRect(x - cw / 2, b.top, cw, b.height), ov.querySelector(".rou-pick")]; } }) : null;   // Probador: el instante decisivo (js/decisivo.js)
     const hk = {}, ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, hk) : null;                       // v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js); hk.close = salir ya con el resultado (v0.3.69)
     const cleanup = () => { if (ctl) ctl.destroy(); removeEventListener("keydown", block, true); rouOpen = false; tableOn(false); };
     const close = () => {
@@ -2191,7 +2196,7 @@ window.AIQ = window.AIQ || {};
       kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
     };
     const reveal = () => {
-      if (revealed) return; revealed = true; if (ctl) ctl.outcome(); else if (A.casCtl) A.casCtl.armEnd(ov, close); place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
+      if (revealed) return; revealed = true; if (dec) dec.fin(); if (ctl) ctl.outcome(); else if (A.casCtl) A.casCtl.armEnd(ov, close); place(SEND); ov.classList.remove("spin", "fast", "crawl", "hush"); ov.classList.add("done", "is-" + out);
       if (cur >= 0 && kids[cur]) kids[cur].classList.remove("cur"); kids[SF].classList.add("hit");
       A.sfx.rouStop(); if (A.haptic) A.haptic([zero ? 60 : 30]);
       hit(K.hit || 8);
@@ -2228,6 +2233,7 @@ window.AIQ = window.AIQ || {};
             }
           }
           last = s; lastT = now;
+          if (dec && t > 0) dec.falta(END - t);
           if (t >= END) return reveal();
           requestAnimationFrame(frame);
         } catch (e) { bail(e); }
@@ -2370,8 +2376,9 @@ window.AIQ = window.AIQ || {};
     const P = COIN_REEL[kind].plan(END, edge), DUR = Math.max(P.L.t, P.total || 0);
     const frameAt = deg => ((Math.round((sg * deg) / (360 / NF)) % NF) + NF) % NF, put = i => { spr.style.backgroundPositionX = -i * fw + "px"; };
     put(0); if (P.sky && !sh.reduced) arc.style.visibility = shadow.style.visibility = "hidden";   // el que cae del cielo no se ve antes de soltarlo
+    const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => { const a = ov.querySelector(".cn-air").getBoundingClientRect(), c = arc.getBoundingClientRect(); return [new DOMRect(c.left - 6, a.top, c.width + 12, a.height), ov.querySelector(".rou-pick")]; } }) : null;   // Probador: el instante decisivo
     const reveal = () => {
-      if (sh.revealed) return; sh.revealed = true; sh.outcome(); put(frameAt(END)); ov.classList.remove("spin"); ov.classList.add("done", "is-coin", edge ? "is-edge" : win ? "is-win" : "is-lose");
+      if (sh.revealed) return; sh.revealed = true; if (dec) dec.fin(); sh.outcome(); put(frameAt(END)); ov.classList.remove("spin"); ov.classList.add("done", "is-coin", edge ? "is-edge" : win ? "is-win" : "is-lose");
       if (A.haptic) A.haptic([edge ? 60 : 30]);
       setTimeout(() => {
         A.dealer.enable(true);
@@ -2400,6 +2407,7 @@ window.AIQ = window.AIQ || {};
         requestAnimationFrame(frame);
         P.L.hits.forEach(([t, kk]) => setTimeout(() => { if (!sh.closed && !sh.revealed) { if (kk < 0) A.sfx.coinTink(); else A.sfx.coinLand(kk); } }, t));   // cada golpe contra la mesa
         setTimeout(() => { if (!sh.closed) reveal(); }, DUR + 60);
+        if (dec) setTimeout(() => { if (!sh.closed && !sh.revealed) dec.ya(); }, Math.max(0, DUR + 60 - A.decisivo.W * 1000));   // los ultimos 550 ms de la moneda
       }, T_IN);
     } catch (e) { sh.bail(e); }
   }
@@ -2435,8 +2443,9 @@ window.AIQ = window.AIQ || {};
       stop: () => { ov.classList.add("hush"); A.sfx.rouStop(); if (A.haptic) A.haptic([30]); },   // falso final: suena y apaga las bombillas igual que el de verdad
       kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
     };
+    const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => { const p = ptr.getBoundingClientRect(), d = discEl.getBoundingClientRect(), x = p.left + p.width / 2, cw = d.width * 0.27; return [new DOMRect(x - cw / 2, p.top, cw, d.top + d.height * 0.34 - p.top), ov.querySelector(".rou-pick")]; } }) : null;   // Probador: la cuna bajo el puntero
     const reveal = () => {
-      if (sh.revealed) return; sh.revealed = true; sh.outcome(); put(TH); ov.classList.remove("spin", "crawl", "hush"); ov.classList.add("done", "is-" + info.tone);
+      if (sh.revealed) return; sh.revealed = true; if (dec) dec.fin(); sh.outcome(); put(TH); ov.classList.remove("spin", "crawl", "hush"); ov.classList.add("done", "is-" + info.tone);
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
@@ -2467,6 +2476,7 @@ window.AIQ = window.AIQ || {};
             }
           }
           last = a; lastT = now;
+          if (dec && t > 0) dec.falta(END - t);
           if (t >= END) return reveal();
           requestAnimationFrame(frame);
         } catch (e) { sh.bail(e); }
@@ -2634,7 +2644,9 @@ window.AIQ = window.AIQ || {};
         const rec = o.onPick(pickId), win = rec.win;                                           // la tirada se decide y se guarda AQUI, antes de la revelacion
         // 4. revelacion
         hint(null); ov.classList.add("hush"); bubble.classList.remove("on"); A.sfx.cupDrum(900); await sleep(950);
-        attach(gloves[0], pickId); await sleep(180); A.sfx.cupLift(); await lift(pickId, 1, 420); A.sfx.rouStop();
+        const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => [cups[pickId].el, ov.querySelector(".rou-pick")] }) : null;   // Probador: el instante decisivo, mientras sube tu cubilete
+        if (dec) dec.ya(0.6);
+        attach(gloves[0], pickId); await sleep(180); A.sfx.cupLift(); await lift(pickId, 1, 420); if (dec) dec.fin(); A.sfx.rouStop();
         if (win) {
           coin.cup = pickId; coin.show = true; await sleep(300); face("angry"); body("r_gana_casino"); A.casa.premio(1); ov.classList.add("win", "flash");
           const c = cups[pickId], x = c.x - 96, y0 = GY - 150; spinEl.style.display = "block"; let f = 0;                      // la doblon del juego (24 fotogramas) sale hacia el espectador y cae
@@ -2732,7 +2744,7 @@ window.AIQ = window.AIQ || {};
   function buy(el, chest) {
     if (legOn) return;
     const i = +el.dataset.ix, s = run.stock[i]; if (!s || run.bought.includes(i)) return;   // data-ix (no data-i: cambiar de idioma reescribe todo [data-i] con A.t)
-    const qf = !chest && A.celebra && A.celebra.antesDeComprar ? A.celebra.antesDeComprar(el, i) : null;   // v0.3.203: lo que cambia se quema en oro al repintar (js/celebra.js)
+    const qf = !chest && A.celebra && A.celebra.antesDeComprar ? A.celebra.antesDeComprar(el, i, { n: run.visitBuys || 0 }) : null;   // v0.3.203: lo que cambia se quema en oro al repintar (js/celebra.js)
     if (s.k === "life") { const c = lifePrice(); if (run.lives >= run.maxLives) { A.sfx.deny(); shake(el); return; } if (run.coins < c) return noFunds(el); run.coins -= c; run.lives++; run.lifeBuys = (run.lifeBuys || 0) + 1; run.bought.push(i); A.sfx.buy(); persist(); renderShop(chest); if (qf) qf(); return; }
     if (s.k === "perk") {
       const p = A.RELICS[s.id], c = chest ? 0 : cardCost(s);
@@ -2858,7 +2870,8 @@ window.AIQ = window.AIQ || {};
   }
   A.adv.busy = () => legOn !== 0;                                        // la legendaria del cofre se esta luciendo (js/game.js: Esc no abre el menu)
   function sell(id, chest) { const k = run.perks.indexOf(id); if (k < 0 || (isPact(id) && bagN() > baseSlots())) return; const v = sellValue(id); if (id === "hoard" && run.hucha) { const t = run.hucha >= 20 ? 3 : run.hucha >= 10 ? 2 : 1; A.casa.premio(t); run.hucha = 0; }   // se rompe: llueven monedas
-    run.perks.splice(k, 1); run.coins += v; if (run.paid) delete run.paid[id]; if (A.RELICS[id].sell) A.RELICS[id].sell(run); A.sfx.sell(); persist(); renderShop(!!chest); }   // sell: lo que la reliquia dio al comprarla se va con ella (Corazon de explorador)
+    const qv = A.celebra && A.celebra.antesDeVender ? A.celebra.antesDeVender(id) : null;   // Probador: la mini carta se consume con un filo oscuro
+    run.perks.splice(k, 1); run.coins += v; if (run.paid) delete run.paid[id]; if (A.RELICS[id].sell) A.RELICS[id].sell(run); A.sfx.sell(); persist(); renderShop(!!chest); if (qv) qv(); }   // sell: lo que la reliquia dio al comprarla se va con ella (Corazon de explorador)
   function flash(t) { const n = document.querySelector("#dlg .tb-shop"); if (!n) return; n.querySelectorAll(".shop-flash").forEach(x => x.remove()); const m = document.createElement("p"); m.className = "shop-flash"; m.textContent = t; n.appendChild(m); setTimeout(() => m.remove(), 2200); }   // flotando sobre las cartas: no empuja nada
 
   /* ---------------- fin de la expedicion ---------------- */

@@ -230,6 +230,7 @@ window.AIQ = window.AIQ || {};
       for (let r = 0; r < NR; r++) {
         if (plan.slow != null && r === plan.slow) { ST.ts = 2.4; Q(".pk-vig").classList.add("on"); board.classList.add("crawl"); }              // camara lenta: siempre las ultimas filas (no delata nada)
         const x0 = xs(P[r]), y0 = ys(r), last = r === NR - 1;
+        if (last && A.decisivo && !ST.dec) { ST.dec = A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(res.stake || 1, run.coins - res.coins + (res.stake || 0)), keep: () => [slots[res.slot], chipEl, Q(".rou-pick")] }); ST.dec.ya(); }   // Probador: el ultimo rebote, sin color salvo su casilla y la ficha
         if (plan.bal && plan.bal.r === r) {                                                                                                       // en equilibrio: tiembla sobre la clavija antes de decidirse
           const ms = plan.bal.ms, dir = W.bits[r] ? 1 : -1; let k = 0;
           await run1(ms, p => { const a = (1 - p) * 10 * Math.sin(p * 19) + (p > 0.8 ? (p - 0.8) * 5 * 12 * dir : 0); if (Math.floor(p * 9) !== k) { k = Math.floor(p * 9); A.sfx.plkTick(); lightPeg(r, P[r], 160, false); } place(x0 + a, y0 - Math.abs(Math.sin(p * 9)) * 2); });
@@ -254,6 +255,7 @@ window.AIQ = window.AIQ || {};
         }
         if (!last) hitPeg(r + 1, P[r + 1], W.bits[r]);
       }
+      if (ST.dec) { ST.dec.fin(); ST.dec = null; }
       const sx = xs(P[NR]); await arc(sx, SLOT_Y, sx, SLOT_Y, 230, 22, null); await arc(sx, SLOT_Y, sx, SLOT_Y, 170, 9, null);                         // la casilla: dos rebotes pequenos y se asienta
       setFrame(0); ST.ts = 1; board.classList.remove("crawl"); Q(".pk-vig").classList.remove("on");
     }

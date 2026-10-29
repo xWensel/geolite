@@ -251,8 +251,9 @@ void main(){
   const apaga = (el, f) => { const s = el.style; s.webkitMaskImage = s.maskImage = ""; ["--qc", "--qz", "--qs", "--qm", "--qp"].forEach(n => s.removeProperty(n)); if (f) f.remove(); };
   const anima = (el, de, a, ms, done, easing = "linear") => { const an = el.animate([{ "--qp": de }, { "--qp": a }], { duration: Math.max(1, ms), easing, fill: "forwards" }); an.onfinish = () => { if (done) done(an); }; return an; };
   /* el halo: la luz del fuego sobre la mesa, detras de la pieza (screen), sube y se va con la quema */
-  function halo(el, ms, k = 0.75) {
+  function halo(el, ms, k = 0.75, col) {
     if (!el.offsetParent) return; const h = document.createElement("i"); h.className = "qm-halo"; h.setAttribute("aria-hidden", "true");
+    if (col === "") return; if (col) h.style.setProperty("--qh", col);
     const w = el.offsetWidth, hg = el.offsetHeight; Object.assign(h.style, { left: el.offsetLeft - w * 0.25 + "px", top: el.offsetTop - hg * 0.2 + "px", width: w * 1.5 + "px", height: hg * 1.4 + "px" });
     el.parentNode.insertBefore(h, el); const a = k * Math.min(1, K / 1.2) * (suave() ? 0.5 : 1);
     h.animate([{ opacity: 0 }, { opacity: a, offset: 0.5 }, { opacity: 0 }], { duration: ms, easing: "ease-in-out" }).onfinish = () => h.remove();
@@ -275,18 +276,32 @@ void main(){
     return true;
   }
 
-  /* la compra: antes de repintar la mesa se copian las piezas que van a cambiar; despues, cada copia se pone encima de la nueva y se quema */
-  function antesDeComprar(card, ix) {
+  /* v0.3.24x (Probador, Campamento «Quema por rareza», en Extrema): la carta y su hueco de la mochila arden con el color de su rareza (ceniza gris la
+     comun, filo azul la rara, violeta con chispas de una celda la epica, oro ancho la legendaria), 0,95 s y con un filo de 5 celdas (la comun 4, la
+     legendaria 7). La venta consume la mini carta de la mochila con un filo oscuro, sin luz. El contador ya no se quema: cuenta con sus rodillos */
+  const RZ = { comun: { k: 1, w: 4 / 3, h: "rgba(201, 205, 224, .35)" }, rara: { k: 2, w: 5 / 3, h: "rgba(122, 200, 255, .7)" }, epica: { k: 3, w: 5 / 3, h: "rgba(156, 124, 230, .75)" },
+    legendaria: { k: 4, w: 7 / 3, h: "rgba(253, 215, 66, .8)" }, venta: { k: 5, w: 4 / 3, h: "" } };
+  const rarezaDe = el => { const c = el && el.classList; if (!c || c.contains("otool") || c.contains("life")) return "comun"; return c.contains("r3") ? "legendaria" : c.contains("r2") ? "epica" : c.contains("r1") ? "rara" : "comun"; };
+  function color(el, rz, chispas) {
+    const z = RZ[rz] || RZ.comun, s = el.style; s.setProperty("--qk", String(z.k)); s.setProperty("--qw", z.w.toFixed(3));
+    if (chispas && !H().contains("soft-flash")) s.setProperty("--qx", quieto() ? "2" : "1"); else s.removeProperty("--qx");
+  }
+  const sinColor = el => ["--qk", "--qw", "--qx"].forEach(n => el.style.removeProperty(n));
+  /* la compra: antes de repintar la mesa se copian las piezas que van a cambiar; despues, cada copia se pone encima de la nueva y se quema.
+     o.n: cuantas compras llevas en esta visita (el sonido sube un grado con cada una) */
+  function antesDeComprar(card, ix, o = {}) {
     if (!QM) return null;
+    const rz = rarezaDe(card), lvl = rz === "legendaria" ? 3 : rz === "epica" ? 2 : rz === "rara" ? 1 : 0;
     const dlg = document.getElementById("dlg"); if (!dlg) return null;
     const row = dlg.querySelector(".tr-relics .tray-row"), slot = row ? row.querySelector(":scope > .tr-slot:not(.pact)") : null, si = slot ? [...row.children].indexOf(slot) : -1;
     /* la copia conserva clases e ids (sus estilos dependen de ellos) y va DESPUES de la pieza nueva: quien busque la pieza encuentra la de verdad */
     const copia = el => { if (!el) return null; const c = el.cloneNode(true);
       const src = el.querySelectorAll("canvas"), dst = c.querySelectorAll("canvas"); src.forEach((cv, i) => { try { dst[i].width = cv.width; dst[i].height = cv.height; dst[i].getContext("2d").drawImage(cv, 0, 0); } catch (e) { /* sin copia del brillo */ } });
       return c; };
+    const rod = A.campFx && A.campFx.rodillosOn && A.campFx.rodillosOn();
     const P = [
-      ["carta", copia(card), () => dlg.querySelector(`.offer[data-ix="${ix}"]`), 0, 820],
-      ["cuenta", copia(document.getElementById("shopCoins")), () => document.getElementById("shopCoins"), 180, 380],
+      ["carta", copia(card), () => dlg.querySelector(`.offer[data-ix="${ix}"]`), 0, 950],
+      ["cuenta", rod ? null : copia(document.getElementById("shopCoins")), () => document.getElementById("shopCoins"), 180, 380],
       ["hueco", si >= 0 ? copia(slot) : null, () => { const r = dlg.querySelector(".tr-relics .tray-row"); return r && si >= 0 ? r.children[si] : null; }, 420, 620],
       ["etiqueta", copia(dlg.querySelector(".tr-relics h4 b")), () => dlg.querySelector(".tr-relics h4 b"), 507, 443],
     ];
@@ -300,12 +315,19 @@ void main(){
         Object.assign(s, { position: "absolute", left: nu.offsetLeft + "px", top: nu.offsetTop + "px", width: nu.offsetWidth + "px", height: nu.offsetHeight + "px", margin: "0", boxSizing: "border-box", pointerEvents: "none", zIndex: "6", transition: "none", animation: "none" });
         c.classList.add("qm-copia"); c.setAttribute("aria-hidden", "true"); nu.parentNode.insertBefore(c, nu.nextSibling);   // mismo padre: mismos estilos y mismo bloque de referencia
         /* la vieja se quema y la nueva aparece por el mismo frente: mascaras complementarias (misma semilla, misma rejilla), nunca las dos a la vez */
+        const pinta = n === "carta" || n === "hueco";                                                    // la carta y su hueco, del color de su rareza; contador y etiqueta, en oro
+        if (pinta) { color(c, rz, rz === "epica"); color(nu, rz, false); }
         enciende(c, 0, seed + at); mascara(nu, 1, seed + at);
-        if (n === "carta") halo(nu, ms * f);
-        const fin = () => { c.remove(); if (nu._qmA) { nu._qmA.cancel(); nu._qmA = null; } apaga(nu); };
+        if (n === "carta") halo(nu, ms * f, 0.75, RZ[rz].h);
+        const fin = () => { c.remove(); if (nu._qmA) { nu._qmA.cancel(); nu._qmA = null; } apaga(nu); sinColor(nu); };
         setTimeout(() => {
           if (!c.isConnected || !nu.isConnected) { fin(); return; }
           if (n === "cuenta") son("coin", 0.4);
+          if (n === "carta") {                                                                         // lo caro se siente caro: la rareza suena (y pesa) en el clic
+            son("camQuema", lvl, o.n || 0);
+            if (lvl >= 2 && A.casa && A.casa.impacto) A.casa.impacto(lvl - 1);
+            if (A.haptic && A.haptic.dual) { if (lvl === 3) A.haptic.dual(0.6, 0.4, 320); else if (lvl === 2) A.haptic.dual(0.2, 0.25, 160); }
+          }
           nu._qmA = anima(nu, 0, 1, ms * f);
           anima(c, 0, 1, ms * f, () => { fin(); if (n === "hueco") son("coin", 0.7); });
         }, at * f);
@@ -313,9 +335,26 @@ void main(){
     };
   }
 
+  /* la venta: antes de repintar se copia la mini carta de la mochila; despues, encima de lo que haya en su hueco, se consume con el filo oscuro (sin luz ni halo) */
+  function antesDeVender(id) {
+    if (!QM) return null;
+    const row = document.querySelector("#dlg .tr-relics .tray-row"), el = row && row.querySelector(`:scope > .tr-relic[data-relic="${id}"]`); if (!el) return null;
+    const si = [...row.children].indexOf(el), c = el.cloneNode(true);
+    return () => {
+      const r = document.querySelector("#dlg .tr-relics .tray-row"), nu = r && r.children[si]; if (!nu || !nu.offsetParent) return;
+      const ms = (quieto() ? 0.6 : 1) * 950, seed = Math.round(Math.random() * 4000) / 100;
+      Object.assign(c.style, { position: "absolute", left: nu.offsetLeft + "px", top: nu.offsetTop + "px", width: nu.offsetWidth + "px", height: nu.offsetHeight + "px", margin: "0", boxSizing: "border-box", pointerEvents: "none", zIndex: "6", transition: "none", animation: "none" });
+      c.classList.add("qm-copia"); c.setAttribute("aria-hidden", "true"); nu.parentNode.insertBefore(c, nu.nextSibling);
+      color(c, "venta", false); color(nu, "venta", false); enciende(c, 0, seed); mascara(nu, 1, seed);
+      son("camVende");
+      const fin = () => { c.remove(); if (nu._qmA) { nu._qmA.cancel(); nu._qmA = null; } apaga(nu); sinColor(nu); };
+      nu._qmA = anima(nu, 0, 1, ms); anima(c, 0, 1, ms, fin);
+    };
+  }
+
   /* en un rato libre nada mas arrancar: los dos programas compilando en segundo plano */
   { const idle = (fn, ms) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: ms }) : setTimeout(fn, ms));
     addEventListener("load", () => idle(() => { llamasGL(false); tintaGL(false); }, 6000), { once: true }); }
 
-  A.celebra = { acierto, jackpot, racha, superada, logro, logroFuera, antesDeComprar, get quema() { return QM; } };
+  A.celebra = { acierto, jackpot, racha, superada, logro, logroFuera, antesDeComprar, antesDeVender, get quema() { return QM; } };
 })(window.AIQ);

@@ -65,7 +65,7 @@ window.AIQ = window.AIQ || {};
         run.reds = run.reds || {}; run.reds[cx.r] = { id: "dice", att, stake, th: res.throws, win: res.win, tie2: res.tie2, level: res.level, pay };
         cx.persist(); A.sfx.rouBet(1); if (A.haptic) A.haptic([10]);
         { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins - pay; }   // el saldo que se ve detras sube cuando acaba el duelo
-        spinDice({ cx, stake, res, pay }, () => { if (!run || A.core.S.phase !== "shop" || !run.stock) return; cx.refresh(); });
+        spinDice({ cx, stake, res, pay, purse: run.coins - pay + stake }, () => { if (!run || A.core.S.phase !== "shop" || !run.stock) return; cx.refresh(); });
       };
     },
   });
@@ -279,7 +279,7 @@ window.AIQ = window.AIQ || {};
     addEventListener("pointerup", onUp); addEventListener("pointercancel", onUp); addEventListener("blur", onUp); addEventListener("keydown", onKey, true); addEventListener("keyup", onKeyUp, true);
 
     /* ---- una tirada de un lado ---- */
-    async function throwSide(S, vals, isP) {
+    async function throwSide(S, vals, isP, ultima) {
       const rest = pickRests(S), yaws = rnd() < 0.5 ? [0, 1] : [1, 2], y2 = rnd() < 0.5 ? yaws : [yaws[1], yaws[0]];
       S.dice.forEach((d, i) => { d.n = vals[i]; d.yaw = y2[i]; d.el.style.backgroundImage = `url(assets/dados/dice_${S.mat}_${d.yaw}.png)`; d.mode = "hidden"; d.alpha = 1; d.key = ""; d.aShown = -1; d.tf = ""; });
       let f = 1;
@@ -290,7 +290,10 @@ window.AIQ = window.AIQ || {};
       const id = reduced ? "deslizada" : (isP ? TST.pres : TST.dpres) || cx.reelPick("dice", PRES);                  // la presentacion: carrete vivo (_dice.pres / dpres: solo pruebas)
       const P = buildPlan(S, vals, id, f, rest);
       if (isP) A.sfx.cupDrum(Math.min(2600, P.T * 0.8));
-      await runPlan(S, P);
+      /* Probador: el instante decisivo, en los ultimos 550 ms de TU ultima tirada (la que decide); tus dados conservan el color */
+      const dec = isP && ultima && A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => S.dice.map(d => d.el).concat([ov.querySelector(".rou-pick")]) }) : null;
+      if (dec) setTimeout(() => { if (alive()) dec.ya(); }, Math.max(0, P.T - A.decisivo.W * 1000));
+      await runPlan(S, P); if (dec) dec.fin();
       A.sfx.diceTick(); const total = vals[0] + vals[1]; tot(isP ? "P" : "D", total);
       if (vals[0] === 1 && vals[1] === 1) { A.sfx.diceSnake(); say("diceSnake", 3); }                                   // reaccion a la propia tirada: ojos de serpiente, doble seis, el doce de la banca, un siete
       else if (total === 12) { A.sfx.diceBoom(); A.casa.impacto(isP ? 2 : 1); say(isP ? "diceBoxcars" : "diceDealer12", 3); }
@@ -305,7 +308,7 @@ window.AIQ = window.AIQ || {};
         for (let r = 0; r < res.throws.length; r++) {
           const th = res.throws[r];
           if (r > 0) { for (const S of Object.values(SIDES)) S.dice.forEach(d => { d.mode = "hidden"; }); tot("D"); tot("P"); Q(".dd-res").classList.remove("on"); banner(tr(U.retry)); await sleep(1500 * TS + 100); }
-          await throwSide(SIDES.D, th.d, false); await throwSide(SIDES.P, th.p, true);
+          await throwSide(SIDES.D, th.d, false); await throwSide(SIDES.P, th.p, true, r === res.throws.length - 1);
           hint(null); ST.phase = "cmp"; await sleep(700 * TS + 100);
           if (th.pt === th.dt) {
             A.sfx.diceTie(); ov.classList.add("hush");
