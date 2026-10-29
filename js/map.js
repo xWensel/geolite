@@ -84,9 +84,11 @@ flat in float v_ci;
 uniform vec3 u_pal[8]; uniform vec2 u_res; uniform sampler2D u_blurN; uniform vec4 u_fx; uniform int u_style; uniform float u_dpr;
 uniform float u_flat; uniform vec3 u_flatc; uniform vec3 u_lens;   // mapa mudo: todos los paises del mismo color (salvo dentro de la lupa)
 in vec2 v_w; uniform int u_mat; uniform vec3 u_mc1; uniform vec3 u_mc2; uniform vec4 u_mp; uniform float u_scale;
-out vec4 o;
+flat in vec2 v_id;
+layout(location=0) out vec4 o; layout(location=1) out vec4 o1;   // o1: la mascara de la firma de las mesas (js/firma.js): tierra, clase y rotulador, azar del pais
 ${NOISE}
 void main(){
+  { float fm=u_flat; if(u_lens.z>0.5) fm*=smoothstep(u_lens.z-6.0,u_lens.z,length(gl_FragCoord.xy-u_lens.xy)); bool ff=fm>0.5; o1=vec4(1.0,0.0,ff?0.0:v_id.x/255.0,ff?0.0:v_id.y/255.0); }
   vec3 c=u_pal[int(v_ci+0.5)];
   vec2 uv=gl_FragCoord.xy/u_res; vec2 f=gl_FragCoord.xy;
   if(u_flat>0.001){ float fl=u_flat; if(u_lens.z>0.5){ fl*=smoothstep(u_lens.z-6.0,u_lens.z,length(f-u_lens.xy)); } c=mix(c,u_flatc,fl); }
@@ -143,14 +145,18 @@ void main(){
   gl_Position=vec4(p/(0.5*u_res),0.0,1.0);
 }`;
   const FS_LINE = `#version 300 es
-precision highp float; in float v_d; in float v_hw; in float v_brd; uniform vec4 u_col; uniform float u_lineA; uniform vec3 u_lens; uniform float u_lmode; out vec4 o;
+precision highp float; in float v_d; in float v_hw; in float v_brd; uniform vec4 u_col; uniform float u_lineA; uniform vec3 u_lens; uniform float u_lmode; layout(location=0) out vec4 o; layout(location=2) out vec4 o2;
 uniform vec4 u_ccol; uniform float u_lmat; uniform float u_ldpr;
 ${NOISE}
 void main(){ float a=clamp(v_hw-abs(v_d)+0.5,0.0,1.0); float m=1.0; if(u_lmode>0.5){ float inl=1.0-smoothstep(u_lens.z-6.0,u_lens.z,length(gl_FragCoord.xy-u_lens.xy)); m=u_lmode<1.5?1.0-inl:inl; }
   vec3 lc=(u_ccol.a>0.0&&v_brd<0.5)?u_ccol.rgb:u_col.rgb; float la=u_col.a;
   if(u_lmat>0.5&&u_lmat<1.5) la*=0.6+0.4*hash(floor(gl_FragCoord.xy/max(u_ldpr,1.0)));            // tiza
   else if(u_lmat>1.5) lc=mix(lc,vec3(1.0),0.6*clamp(1.0-abs(v_d)/max(v_hw*0.5,0.5),0.0,1.0));     // neon: alma blanca
-  o=vec4(lc,la*a*mix(1.0,u_lineA,v_brd)*m); }`;   // Mapa mudo: solo desaparecen las fronteras interiores (a_brd=1); las costas siempre se ven
+  float cv=a*mix(1.0,u_lineA,v_brd)*m; o=vec4(lc,la*cv); o2=v_brd>0.5?vec4(1.0,0.0,0.0,cv):vec4(0.0); }`;   // Mapa mudo: solo desaparecen las fronteras interiores (a_brd=1); las costas siempre se ven
+
+  /* LA FIRMA DE LAS MESAS (js/firma.js): la tierra lleva el dato de su pais (clase << 4 + rotulador del cuaderno, y su azar) para la mascara */
+  const VS_MSK = VS_FILL.replace("layout(location=2) in float a_ct;", "layout(location=2) in float a_ct; layout(location=3) in vec2 a_id;")
+    .replace("flat out float v_ci;", "flat out float v_ci; flat out vec2 v_id;").replace("v_ci=a_ci;", "v_ci=a_ci; v_id=a_id;");
 
   const VS_FULL = `#version 300 es
 void main(){ vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2)); gl_Position=vec4(p*2.0-1.0,0.0,1.0); }`;
@@ -821,7 +827,7 @@ void main(){
   }
   function buildPrograms(gl) {
     return {
-      sil: compile(gl, VS_FILL, FS_SIL), solid: compile(gl, VS_FILL, FS_SOLID), land: compile(gl, VS_FILL, FS_LAND), hatch: compile(gl, VS_FILL, FS_HATCH),
+      sil: compile(gl, VS_FILL, FS_SIL), solid: compile(gl, VS_FILL, FS_SOLID), land: compile(gl, VS_MSK, FS_LAND), hatch: compile(gl, VS_FILL, FS_HATCH),
       line: compile(gl, VS_LINE, FS_LINE), blur: compile(gl, VS_FULL, FS_BLUR), post: compile(gl, VS_FULL, FS_POST), swirl: compile(gl, VS_FULL, FS_SWIRL),
     };
   }
@@ -1213,7 +1219,8 @@ void main(){
         mat: st.mat || 0, mc1: hex(st.mc1 || "#000000"), mc2: hex(st.mc2 || "#000000"), mp: st.mp || [0, 0, 0, 1], ccol: st.coast || [0, 0, 0, 0], lmat: st.lmat || 0,
       };
     }
-    setStyle(st) { this.sk = st; this.ms = this._prepStyle(st); if (this.T && this.T.swirl) this.T.swirl.ok = false; this._silKey = null; this.dirty = this.fxDirty = true; }
+    setStyle(st) { this.sk = st; this.ms = this._prepStyle(st); if (this.T && this.T.swirl) this.T.swirl.ok = false; this._silKey = null; this.dirty = this.fxDirty = true;
+      if (this.fir) try { this.fir.prep(st); } catch (e) { console.warn("firma:", e); } }   // la firma de la mesa nueva se compila ya, al ponerla
     stopDrift() { clearTimeout(this._dT); this.drift = null; }
     /* una foto del mapa tal como se ve (el estreno de una mesa, js/mesas.js): se pinta y se copia en la misma tarea, antes de que el navegador componga */
     snap() { try { const c = document.createElement("canvas"); c.width = this.cv.width; c.height = this.cv.height; this._drawGL(performance.now()); c.getContext("2d").drawImage(this.cv, 0, 0); return c; } catch (e) { return null; } }
@@ -1223,9 +1230,9 @@ void main(){
     _initGL() {
       const gl = this.gl; this.P = buildPrograms(gl); this._oc = new Map();
       // geometria: triangulos (earcut) y segmentos de frontera
-      const pos = [], ci = [], ct = [], sct = [], idx = [], segs = [];
+      const pos = [], ci = [], ct = [], sct = [], idx = [], segs = [], vfi = [], segF = [];
       this._initContinents();
-      for (const f of this.world.features) {
+      this.world.features.forEach((f, fi) => {
         f.gl = { i0: idx.length, n: 0, s0: segs.length / 4, sn: 0 };
         for (const poly of f.polys) {
           const flat0 = [], holes = []; let off = 0;
@@ -1241,10 +1248,10 @@ void main(){
           const copy = shift => {
             const w = pc < 6 ? Math.round((shift - own) / TWO_PI) : 0, code = pc + 8 * (w + 2);
             const base = pos.length / 2;
-            for (let i = 0; i < flat0.length; i += 2) { pos.push(flat0[i] + shift, flat0[i + 1]); ci.push(f.ci); ct.push(code); }
+            for (let i = 0; i < flat0.length; i += 2) { pos.push(flat0[i] + shift, flat0[i + 1]); ci.push(f.ci); ct.push(code); vfi.push(fi); }
             for (let i = 0; i < tri.length; i++) idx.push(base + tri[i]);
             let o = 0;
-            for (const ring of poly.rings) { for (let i = 0; i < ring.length - 1; i++) { segs.push(flat0[(o + i) * 2] + shift, flat0[(o + i) * 2 + 1], flat0[(o + i + 1) * 2] + shift, flat0[(o + i + 1) * 2 + 1]); sct.push(code); } o += ring.length; }
+            for (const ring of poly.rings) { for (let i = 0; i < ring.length - 1; i++) { segs.push(flat0[(o + i) * 2] + shift, flat0[(o + i) * 2 + 1], flat0[(o + i + 1) * 2] + shift, flat0[(o + i + 1) * 2 + 1]); sct.push(code); segF.push(fi); } o += ring.length; }
           };
           const shifts = [0]; if (poly.bbox[2] > 180) shifts.push(-TWO_PI); if (poly.bbox[0] < -180) shifts.push(TWO_PI);
           if (!shifts.includes(own)) shifts.push(own);                    // la propia cae fuera del mundo en reposo (no se ve hasta que el continente se mueve)
@@ -1252,7 +1259,7 @@ void main(){
           shifts.forEach(copy);
         }
         f.gl.n = idx.length - f.gl.i0; f.gl.sn = segs.length / 4 - f.gl.s0;
-      }
+      });
       this.idxCount = idx.length; this.segCount = segs.length / 4;
       if (!this.masks) this._buildMasks(pos, ct, idx);
       const buf = (target, data, usage = gl.STATIC_DRAW) => { const b = gl.createBuffer(); gl.bindBuffer(target, b); gl.bufferData(target, data, usage); return b; };
@@ -1261,6 +1268,8 @@ void main(){
       buf(gl.ARRAY_BUFFER, new Float32Array(pos)); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       buf(gl.ARRAY_BUFFER, new Uint8Array(ci)); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 1, gl.UNSIGNED_BYTE, false, 0, 0);
       buf(gl.ARRAY_BUFFER, new Uint8Array(ct)); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+      { const id = this._paisIds(segs, segF), ib = new Uint8Array(vfi.length * 2); for (let i = 0; i < vfi.length; i++) { ib[i * 2] = id.cls[vfi[i]]; ib[i * 2 + 1] = id.rnd[vfi[i]]; }
+        buf(gl.ARRAY_BUFFER, ib); gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 2, gl.UNSIGNED_BYTE, false, 0, 0); }   // la firma (js/firma.js): clase y rotulador del pais, y su azar
       buf(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(idx));
       // VAO de lineas (instanciadas)
       this.vaoLine = gl.createVertexArray(); gl.bindVertexArray(this.vaoLine);
@@ -1272,6 +1281,20 @@ void main(){
       this.vaoEmpty = gl.createVertexArray();
       this.T = {}; // objetivos de render
       this.debx = null;   // el pase de los debufos (js/debufos.js) vive en ESTE contexto: con uno nuevo se rehace
+      this.fir = null; this._mrtC = null;   // y el de la firma de las mesas (js/firma.js)
+    }
+    /* la firma de las mesas (js/firma.js): vecinos de cada pais (los que comparten un tramo de frontera) y su coloreado (una vez por mapa) */
+    _paisIds(segs, segF) {
+      if (this._pid) return this._pid;
+      const F = this.world.features, n = F.length, adj = F.map(() => new Set()), seen = new Map(), q = v => Math.round(v * 3000);
+      for (let i = 0; i < segF.length; i++) {
+        let ax = q(segs[i * 4]), ay = q(segs[i * 4 + 1]), bx = q(segs[i * 4 + 2]), by = q(segs[i * 4 + 3]);
+        if (ax > bx || (ax === bx && ay > by)) { [ax, bx] = [bx, ax]; [ay, by] = [by, ay]; }
+        const k = ax + "," + ay + "," + bx + "," + by, o = seen.get(k), f = segF[i];
+        if (o === undefined) seen.set(k, f); else if (o !== f) { adj[o].add(f); adj[f].add(o); }
+      }
+      const feats = F.map(f => ({ ci: f.ci | 0, area: f.gl ? f.gl.n : 0 }));
+      return (this._pid = A.firma ? A.firma.colorear(feats, adj) : { cls: new Uint8Array(n).map((x, i) => (feats[i].ci & 15) << 4), rnd: new Uint8Array(n).map((x, i) => (i * 37) & 255) });
     }
     /* 1 = frontera entre dos paises (el segmento aparece dos veces), 0 = costa (una sola vez). Las costas no se deforman nunca. */
     _borderFlags(segs) {
@@ -1912,6 +1935,7 @@ void main(){
       if (this.lastCt != null) { const w = this._toWorld(px, py)[0], f = this._dispFwd(x, y, this.lastCt)[0]; this.pickCt = this.lastCt + 8 * (Math.round((w - f) / TWO_PI) + 2); }   // y en la copia del mundo que tocaste: junto al borde (la curva CRT ensena algo mas del mundo) se ven las dos y la chincheta salia en la otra
       /* para el crupier (js/dealer.js): donde estaba tu raton de verdad y donde habrias clicado en el mapa sin girar ni mover continentes */
       try { const v = this.viewJ || this.view; this.lastTap = { raw: ef ? this.screenToLonLat(rx, ry) : [lon, lat], plain: unproject(wrapCx(v.cx + (px - this.W / 2) / v.s), v.cy - (py - this.H / 2) / v.s), at: performance.now() }; } catch (e) { this.lastTap = null; }
+      if (this.fir) { try { this.fir.clic(x, y); } catch (e) { /* sin huella */ } this.dirty = true; }   // la huella del clic en la mesa (js/firma.js), en el mapa sin deformar
       this.onPick(lon, lat);
     }
 
@@ -1982,6 +2006,7 @@ void main(){
       if (m.guess || m.answer || (this.pickEnabled && this.mouse && !this.hideReticle)) this.fxDirty = true;
       if (m.highlight && now - m.t0 < 700) this.dirty = true;
       if (this._it && this._livingMat() && now - this._it.t < 6000) this.dirty = true;                       // la salpicadura dura seis segundos
+      if (this.fir && (this.fir.anim(now) || this.fir.pend())) this.dirty = true;                           // la firma: barrido, huella, gotas, ondas, neon (y mientras compila)
       if (this.sk.animated && this.fxOn !== false && !this.pointers.size && now - this._lastDraw >= this.idleMs) this.dirty = true;   // fondo animado: ~25 fps en reposo
       if (this.dirty) { this.dirty = false; this._drawGL(now); if (this.onView) this.onView(this.view); }
       else if ((this.ondas || this.debCfg || (m.guess && this._parVivo(now))) && this._sceneT) this._post(now);            // la onda del acierto (y la chincheta del revelado, js/revelado.js): solo el ultimo pase
@@ -2021,6 +2046,7 @@ void main(){
       const sil = this._target("sil", silW, silH), bA = this._target("bA", silW, silH), bN = this._target("bN", silW, silH), bW = this._target("bW", silW, silH);
       const bX = st.wide ? this._target("bX", silW, silH) : null;
       const scene = this._target("scene", sw, sh, mos < 0.999 ? gl.NEAREST : gl.LINEAR);
+      const FIR = this._firOn();                                         // la firma de las mesas (js/firma.js): lista o no (mientras compila, la mesa de antes)
       gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST);
 
       // 0) fondo animado (remolino) a baja resolucion, ~24 fps
@@ -2058,8 +2084,12 @@ void main(){
       this._silKey = key; this._silTex = bW.tex;
       }
 
-      // 3) escena: oceano + reticula, tierra, fronteras, resalte
-      gl.bindFramebuffer(gl.FRAMEBUFFER, scene.fbo); gl.viewport(0, 0, sw, sh);
+      // 3) escena: oceano + reticula, tierra, fronteras, resalte. Con la firma, la tierra y las fronteras escriben a la vez su mascara (MRT)
+      const C0 = gl.COLOR_ATTACHMENT0, C1 = gl.COLOR_ATTACHMENT1, C2 = gl.COLOR_ATTACHMENT2, NO = gl.NONE;
+      let mrt = null, msk = null, brd = null;
+      if (FIR) { msk = this._target("msk", sw, sh, gl.NEAREST); brd = this._target("brd", sw, sh, gl.NEAREST); mrt = this._mrt(scene, msk, brd); }
+      const DB = (a, b, c) => { if (mrt) gl.drawBuffers([a, b, c]); };
+      gl.bindFramebuffer(gl.FRAMEBUFFER, mrt ? mrt.fbo : scene.fbo); gl.viewport(0, 0, sw, sh); DB(C0, NO, NO);
       const sc = scale(sw), gp = this._gridParams();
       const PO = oceanProg(gl, this._oc || (this._oc = new Map()), st.style || 0, ms.mat || 0);   // la version del oceano de esta mesa (se compila una vez)
       gl.useProgram(PO); gl.bindVertexArray(this.vaoEmpty);
@@ -2070,7 +2100,7 @@ void main(){
        this._u(PO, "u_mc1", ...ms.mc1); this._u(PO, "u_mc2", ...ms.mc2); this._u(PO, "u_mp", ...ms.mp);
       this._u(PO, "u_center", cw, v.cy); this._u(PO, "u_scale", sc); this._u(PO, "u_res", sw, sh); this._u(PO, "u_dpr", dpr * RS); this._setDist(PO);
       this._u(PO, "u_oTop", ...ms.oTop); this._u(PO, "u_oBot", ...ms.oBot); this._u(PO, "u_shallow", ...ms.shallow); this._u(PO, "u_grid", ...ms.grid); this._u(PO, "u_tropic", ...ms.tropic);
-      this._u(PO, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(PO, "u_felt", f[0], f[1], f[2], f[3]); }
+      this._u(PO, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(PO, "u_felt", f[0], f[1], f[2], FIR ? 0 : f[3]); }   // con la firma, la lampara es la comun (no una segunda)
       this._u(PO, "u_time", this.fxOn === false ? 0 : now / 1000); 
       { const it = this._it, hv = this.mouse, live = this._livingMat(), age = it && live ? (now - it.t) / 1000 : -1;
         this._u(PO, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
@@ -2089,12 +2119,13 @@ void main(){
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       gl.bindVertexArray(this.vaoFill);
-      if (st.shadow) {                                               // sombra dura de "pegatina" bajo la tierra
+      if (st.shadow && !FIR) {                                       // sombra dura de "pegatina" bajo la tierra (con la firma, la sombra blanda de la lampara)
         gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.useProgram(P.solid); this._setDist(P.solid);
         this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
         this._u(P.solid, "u_off", st.shadow.off[0] * dpr * RS, st.shadow.off[1] * dpr * RS); this._u(P.solid, "u_col", ...st.shadow.col);
         for (const cc of cxs) { this._u(P.solid, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); } gl.disable(gl.BLEND);
       }
+      if (mrt) { DB(NO, C1, C2); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.clearColor(0, 0, 0, 1); DB(C0, C1, NO); }
       gl.useProgram(P.land); this._setDist(P.land); this._u(P.land, "u_off", 0, 0);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(P.land.u.u_blurN, 0);
       gl.uniform1i(P.land.u.u_style, st.style || 0); this._u(P.land, "u_dpr", dpr * RS);
@@ -2104,14 +2135,18 @@ void main(){
       if (this._palFor !== ms) { this._palFor = ms; this._pal = new Float32Array(24); ms.pal.forEach((c, i) => this._pal.set(c, i * 3)); } gl.uniform3fv(P.land.u.u_pal, this._pal);
       for (const cc of cxs) { this._u(P.land, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); }
 
+      DB(C0, NO, NO);
       gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      const hl = this.marks.highlight && this.world.byName[this.marks.highlight];
+      /* tintes por pais (la Enciclopedia): en la escena, bajo las fronteras (con la firma tambien: la luz los coge como al resto de la mesa) */
       if (this.paint) {                                                  // tintes por pais (setPaint): encima de la tierra y debajo del resalte y las fronteras
         gl.useProgram(P.solid); this._setDist(P.solid); this._u(P.solid, "u_off", 0, 0);
         this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
         for (const cc of cxs) { this._u(P.solid, "u_center", cc, v.cy);
           for (const f of this.world.features) { const c = this.paint[f.name]; if (c && f.gl && f.gl.n) { this._u(P.solid, "u_col", c[0], c[1], c[2], c[3]); gl.drawElements(gl.TRIANGLES, f.gl.n, gl.UNSIGNED_INT, f.gl.i0 * 4); } } }
       }
-      const hl = this.marks.highlight && this.world.byName[this.marks.highlight];
+      /* el resalte rayado y su contorno: con la firma se pintan despues, sobre la mesa ya iluminada */
+      const capas = () => {
       if (hl) {
         const k = Math.min(1, (now - this.marks.t0) / 500);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.useProgram(P.hatch); this._setDist(P.hatch); this._u(P.hatch, "u_off", 0, 0);
@@ -2119,6 +2154,18 @@ void main(){
         for (const cc of cxs) { this._u(P.hatch, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, hl.gl.n, gl.UNSIGNED_INT, hl.gl.i0 * 4); }
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       }
+      };
+      const hlLin = () => {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, hl.gl.s0 * 16);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, hl.gl.s0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, hl.gl.s0);   // ct y borde de los segmentos del resaltado
+        this._u(P.line, "u_width", 3.2 * dpr * RS); this._u(P.line, "u_col", ...ms.hl, 1); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, hl.gl.sn);
+        this._u(P.line, "u_width", 1.1 * dpr * RS); this._u(P.line, "u_col", ...hex(st.paper), 1); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, hl.gl.sn);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+      };
+      if (!FIR) capas();
       // fronteras
       gl.useProgram(P.line); gl.bindVertexArray(this.vaoLine); this._setDist(P.line);
       { const e = this._eff(); this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_wt", now / 1400); this._u(P.line, "u_lineA", e.lineA); }
@@ -2128,9 +2175,11 @@ void main(){
       for (const cc of cxs) {                                           // una vez por copia del mundo visible
       this._u(P.line, "u_center", cc, v.cy);
       if (st.lineOff && (st.lineOff[0] || st.lineOff[1])) {           // desregistro (impresion): segunda capa desplazada
+        DB(C0, NO, NO);
         this._u(P.line, "u_width", lw); this._u(P.line, "u_off", st.lineOff[0] * dpr * RS, st.lineOff[1] * dpr * RS); this._u(P.line, "u_col", st.lineOffCol[0], st.lineOffCol[1], st.lineOffCol[2], st.lineOffCol[3] * lcov);
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount);
       }
+      DB(C0, NO, C2);
       this._u(P.line, "u_width", lw); this._u(P.line, "u_off", 0, 0); this._u(P.line, "u_col", st.line[0], st.line[1], st.line[2], st.line[3] * lcov);
       this._u(P.line, "u_ccol", ...ms.ccol); this._u(P.line, "u_lmat", ms.lmat); this._u(P.line, "u_ldpr", dpr * RS * 2);
       const lensOn = this.lens && this.lens.r > 0 && this.dist.spec && (this._eff().wob > 0.002 || this._eff().lineA < 0.98);
@@ -2142,22 +2191,53 @@ void main(){
         this._u(P.line, "u_lmode", 0); this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_lineA", e.lineA);
       } else { this._u(P.line, "u_lmode", 0); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount); }
       this._u(P.line, "u_ccol", 0, 0, 0, 0); this._u(P.line, "u_lmat", 0);
-      if (hl && hl.gl.sn) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, hl.gl.s0 * 16);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, hl.gl.s0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, hl.gl.s0);   // ct y borde de los segmentos del resaltado
-        this._u(P.line, "u_width", 3.2 * dpr * RS); this._u(P.line, "u_col", ...ms.hl, 1); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, hl.gl.sn);
-        this._u(P.line, "u_width", 1.1 * dpr * RS); this._u(P.line, "u_col", ...hex(st.paper), 1); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, hl.gl.sn);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+      if (hl && hl.gl.sn && !FIR) hlLin();
       }
-      }
+      DB(C0, NO, NO);
       gl.disable(gl.BLEND);
 
+      /* 3b) LA FIRMA DE LAS MESAS (js/firma.js): mascara, tierra suavizada, material y la lampara comun; encima, tintes y resalte */
+      let out = scene;
+      if (FIR) {
+        /* mismo encuadre, misma mesa y nada que se mueva en la escena: la firma no rehornea (solo recompone su luz) */
+        const fk = [v.cx, v.cy, v.s, sw, sh].join(","), same = !st.animated && !this.dist.spec && !this.lens && !this.paint && !(this.marks.highlight && now - this.marks.t0 < 700) && this._firKey === fk && this._firSk === st;
+        this._firKey = fk; this._firSk = st;
+        let lit = null; try { lit = FIR.run(scene, msk, brd, v, now, same); } catch (e) { console.warn("firma:", e); A.firmaOff = true; this.fir = null; }
+        if (lit) {
+          out = lit; gl.bindFramebuffer(gl.FRAMEBUFFER, lit.fbo); gl.viewport(0, 0, lit.w, lit.h); gl.activeTexture(gl.TEXTURE0);
+          gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.bindVertexArray(this.vaoFill); capas();
+          if (hl && hl.gl.sn) {
+            gl.useProgram(P.line); gl.bindVertexArray(this.vaoLine); this._setDist(P.line); const e = this._eff();
+            this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_wt", now / 1400); this._u(P.line, "u_lineA", e.lineA); this._u(P.line, "u_lmode", 0); this._u(P.line, "u_off", 0, 0);
+            this._u(P.line, "u_scale", sc); this._u(P.line, "u_res", sw, sh); this._u(P.line, "u_ccol", 0, 0, 0, 0); this._u(P.line, "u_lmat", 0);
+            for (const cc of cxs) { this._u(P.line, "u_center", cc, v.cy); hlLin(); }
+          }
+          gl.disable(gl.BLEND);
+        }
+      }
+
       // 4) post-proceso a pantalla: desenfoque radial y aberracion segun velocidad de zoom, viñeta y grano
-      this._sceneT = scene; this._sceneGen = (this._sceneGen || 0) + 1; this._post(now);
+      this._sceneT = out; this._sceneGen = (this._sceneGen || 0) + 1; this._post(now);
     }
+    /* la firma de las mesas (js/firma.js): el pase existe y sus programas estan listos (compilan al poner la mesa) */
+    _firOn() {
+      if (!A.firma || A.firmaOff) return null;
+      if (!this.fir) { try { this.fir = A.firma.forMap(this); this.fir.prep(this.sk); } catch (e) { console.warn("firma:", e); A.firmaOff = true; this.fir = null; return null; } }
+      return this.fir.ok() ? this.fir : null;
+    }
+    /* la escena con la mascara de la firma: tres salidas en un solo objetivo (se cambia solo si cambian las texturas) */
+    _mrt(scene, msk, brd) {
+      const gl = this.gl, m = this._mrtC;
+      if (m && m.s === scene.tex && m.m === msk.tex && m.b === brd.tex) return m;
+      if (m) gl.deleteFramebuffer(m.fbo);
+      const fbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, scene.tex, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, msk.tex, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, brd.tex, 0);
+      return (this._mrtC = { fbo, s: scene.tex, m: msk.tex, b: brd.tex });
+    }
+    /* el premio de la casa (js/casa.js, A.casa.premio): la lampara barre la mesa, 1-2-3 pasadas */
+    firmaPremio(n) { if (this.fir) { this.fir.premio(n); this.dirty = true; } }
     /* los debufos de materia (js/debufos.js): un pase entre la escena y el ultimo pase, solo mientras hay alguno (cfg null = fuera) */
     setDeb(cfg) {
       if (!cfg && this.debCfg && !this.debCfg.out) { this.debCfg = Object.assign({}, this.debCfg, { out: performance.now() }); this.dirty = true; return; }   // se va con un fundido corto

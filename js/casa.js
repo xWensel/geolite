@@ -366,6 +366,8 @@ onmessage = e => { const p = e.data, out = paint(p), glo = tint(out, p.glow);
     /* con cada golpe la lampara sube un punto mas; tras el tercero, el barrido de luz */
     const golpe = k => { const lvl = k === n ? top : k; shake(lvl); luz(LZ[k - 1], 380 + k * 120); destello(k); brilla(); if (k === 3) { setTimeout(barrido, 60); } };   // el premio gordo: barrido de luz
     for (let k = 1; k <= n; k++) { if (k === 1) golpe(1); else setTimeout(() => golpe(k), (k - 1) * g); }
+    /* la firma de las mesas (js/firma.js): la lampara de la mesa barre su material, una pasada por golpe (nada con Movimiento minimo) */
+    const m = core().map; if (m && m.firmaPremio && fuerza()) m.firmaPremio(top);
   }
   /* perdida: la apuesta que se va. Sonido de perder (o el que traiga quien llama), un temblor seco y la lampara que baja */
   function perdida(o = {}) { if (!o.mudo && A.sfx && A.sfx.lose) A.sfx.lose(); shake(o.fuerza || 1); baja(1); if (A.haptic) A.haptic([40, 20, 40]); }

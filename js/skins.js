@@ -192,7 +192,7 @@ window.AIQ = window.AIQ || {};
     /* v0.3.132: las de la boutique (js/boutique.js): se compran con fichas de oro. shop: r = rara (quieta) o l = legendaria (viva) */
     ...[
       ["ruleta", "r", "Caoba|Mahogany|Acajou|Mogno|Mahagoni|Mogano||桃花心木|마호가니|マホガニー|Красное дерево|Mahoń",
-        "Madera de caoba y piezas de marfil.|Mahogany and ivory pieces.|Acajou et pièces d'ivoire.|Mogno e peças de marfim.|Mahagoni und Elfenbeinsteine.|Mogano e pezzi d'avorio.||桃花心木与象牙棋子。|마호가니와 상아 말.|マホガニーと象牙の駒。|Красное дерево и слоновая кость.|Mahoń i kość słoniowa."],
+        "Caoba con marquetería de maderas.|Mahogany with wood marquetry.|Acajou et marqueterie de bois.|Mogno com marchetaria de madeiras.|Mahagoni mit Holzintarsien.|Mogano con intarsi di legno.||桃花心木与木料镶嵌。|마호가니와 나무 상감.|マホガニーと木の象嵌。|Красное дерево с маркетри.|Mahoń z intarsją drewna."],
       ["tablero", "r", "Tablero|Game board|Plateau de jeu|Tabuleiro|Spielbrett|Tavoliere||棋盘|게임판|盤面|Игровая доска|Plansza",
         "Madera clara y países lacados.|Light wood and lacquered countries.|Bois clair et pays laqués.|Madeira clara e países laqueados.|Helles Holz, lackierte Länder.|Legno chiaro e paesi laccati.||浅色木板与亮漆国家。|밝은 원목과 칠한 나라들.|明るい木と漆塗りの国々。|Светлое дерево и лакированные страны.|Jasne drewno i lakierowane kraje."],
       ["carrara", "r", "Carrara|Carrara|Carrare|Carrara|Carrara|Carrara||卡拉拉|카라라|カラーラ|Каррара|Carrara",
