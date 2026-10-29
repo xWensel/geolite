@@ -250,6 +250,12 @@ window.AIQ = window.AIQ || {};
     }));
     g.connect(lp); lp.connect(bus); send(lp, 0.5);
   }
+  /* Acuñar: un parcial suelto (la campana de la prensa, la de la caja) con su paso bajo opcional */
+  function acTono(to, f, t, v, dur, type = "sine", lp = 0) {
+    const os = ctx.createOscillator(), g = ctx.createGain(); os.type = type; os.frequency.value = Math.min(16000, f);
+    let n = os; if (lp) { const l = ctx.createBiquadFilter(); l.type = "lowpass"; l.frequency.value = lp; os.connect(l); n = l; }
+    n.connect(g).connect(to); env(g, t, 0.004, v, dur); os.start(t); os.stop(t + dur + 0.05);
+  }
   /* pitido arcade de onda cuadrada */
   function chirp(m, t, vol = 0.025, dur = 0.09) {
     const os = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
@@ -612,7 +618,8 @@ window.AIQ = window.AIQ || {};
     tick: -11.5, streak: -7.0, streakBreak: -25.5, flag: -14.0, coin: -19.2, jackpot1: -13.2, jackpot2: -13.0, jackpot3: -14.5, barrido: -6.6, goal: -14.5,
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
     boss: -23.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
-    clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
+    clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,
+    acPrensa: -16, acSello: -17, acCaja: -19, acTic: -21, acCorte: -21, acRodillo: -19, acBrillo: -19, acLlena: -25, acGrave: -17,   // Acuñar (js/acunar.js): la prensa, el sello, la caja y el papel     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
   };
   /* la regla: escalon de cada efecto sin version nueva (dB de su tira; ver LEG_OBJ en la herramienta de medida) y paso bajo propio si 4,2 kHz no basta */
   const LEG = {
@@ -762,6 +769,23 @@ window.AIQ = window.AIQ || {};
     }),
     /* un rodillo encaja: el reten (tic) y un golpe pequeno de madera; i = la fila (sube un poco) */
     encaja: go((t, i = 0) => { const b = bus("encaja", 0.04); felt(b, t, { v: 0.05, f: 3000 + i * 140, dur: 0.014 }); sub(b, t, { v: 0.035, f0: 260 + i * 12, f1: 120, dur: 0.04 }); }),
+    /* ACUÑAR (js/acunar.js): la prensa del Club, la caja de la tienda y el papel. Cada golpe se desafina un poco: nunca suena igual */
+    acPrensa: go((t, n = 1, k = 1) => {
+      const b = bus("acPrensa", 0.16), J = (v, q = 0.06) => v * (1 + (R() - 0.5) * q);
+      sub(b, t, { v: (0.22 + 0.05 * n) * k, f0: J(62), f1: 34, dur: 0.38 });
+      felt(b, t, { v: 0.22 * k, f: J(1500), dur: 0.05 }); felt(b, t, { v: 0.12 * k, f: 220, dur: 0.18 });
+      const f0 = J([260, 330, 392][n - 1] || 330, 0.04);
+      [1, 2.76, 5.4, 8.93].forEach((r, i) => acTono(b, f0 * r, t + 0.004, (0.05 * k) / (i + 1), 0.35 + 0.25 * n - i * 0.06));
+      if (n >= 3) [0, 4, 7, 12].forEach((st, i) => acTono(b, J(1046.5 * Math.pow(2, st / 12), 0.01), t + 0.07 + i * 0.055, 0.035 * k, 0.45, "triangle"));
+    }),
+    acSello: go((t, n = 1) => { const b = bus("acSello", 0.1); sub(b, t, { v: 0.2 + 0.05 * n, f0: 95 * (0.97 + 0.06 * R()), f1: 55, dur: 0.22 }); felt(b, t, { v: 0.2, f: 600, dur: 0.07 }); felt(b, t + 0.003, { v: 0.08, f: 2600, dur: 0.05 }); if (n >= 3) sub(b, t + 0.01, { v: 0.16, f0: 58, f1: 38, dur: 0.3 }); }),
+    acCaja: go((t, n = 1) => { const b = bus("acCaja", 0.2), k = 0.7 + 0.15 * n; felt(b, t, { v: 0.18 * k, f: 900, dur: 0.04 }); acTono(b, 180, t, 0.04 * k, 0.08, "square", 900); acTono(b, 2093 * (0.99 + 0.02 * R()), t + 0.06, 0.07 * k, 0.5); acTono(b, 2637 * (0.99 + 0.02 * R()), t + 0.1, 0.05 * k, 0.6); if (n >= 2) for (let i = 0; i < (n === 3 ? 5 : 2); i++) felt(b, t + 0.12 + i * 0.05, { v: 0.05, f: 3400 + R() * 800, dur: 0.02 }); }),
+    acTic: go(t => { const b = bus("acTic", 0.02); felt(b, t, { v: 0.06, f: 3400 * (0.9 + 0.2 * R()), dur: 0.018 }); felt(b, t, { v: 0.05, f: 700 * (0.9 + 0.2 * R()), dur: 0.03 }); }),
+    acCorte: go(t => { const b = bus("acCorte", 0.04); felt(b, t, { v: 0.12, f: 2400 * (0.9 + 0.2 * R()), dur: 0.06 }); }),
+    acRodillo: go((t, v = 0) => { const b = bus("acRodillo", 0.02); felt(b, t, { v: 0.05, f: (2600 + 1600 * v) * (0.95 + 0.1 * R()), dur: 0.012 }); }),
+    acBrillo: go((t, n = 1) => { const b = bus("acBrillo", 0.35); [0, 4, 7].slice(0, n).forEach((st, i) => vibes(b, 84 + st, t + i * 0.06, { v: 0.04, dur: 0.5, trem: false })); }),
+    acLlena: go(t => { const b = bus("acLlena", 0.1); const os = ctx.createOscillator(), g = ctx.createGain(); os.type = "sine"; os.frequency.setValueAtTime(660, t); os.frequency.exponentialRampToValueAtTime(990, t + 0.6); os.connect(g).connect(b); env(g, t, 0.02, 0.025, 0.6); os.start(t); os.stop(t + 0.7); }),
+    acGrave: go((t, n = 1) => { const b = bus("acGrave", 0.12); sub(b, t, { v: 0.16 + 0.05 * n, f0: 80, f1: 34, dur: 0.4 + 0.1 * n }); }),
     /* los ultimos segundos: el tic de madera, mas agudo cuanto menos queda */
     tick: go((t, n = 3) => { const b = bus("tick", 0.04); felt(b, t, { v: 0.05, f: 1800 - n * 200, dur: 0.02 }); rhodes(b, deg(6 - n, 60), t, { v: 0.025, dur: 0.15, idx: 1 }); }),
     /* racha: el vibrafono sube un escalon por nivel; desde 4, el pellizco de 8 bits */

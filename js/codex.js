@@ -254,7 +254,9 @@ window.AIQ = window.AIQ || {};
     if (km == null || !q.cid) return out;
     const first = q.cid.map(c => E[c]).find(Boolean), sc = (first && SCALE[first.type]) || 1;   // las pistas llevan antes su propio id ("clue:<id>") y luego el del lugar
     const level = km <= LIM[2] * sc ? 3 : km <= LIM[1] * sc ? 2 : km <= LIM[0] * sc ? 1 : 0;
-    out.level = level; if (!level) return out;
+    /* tu mejor distancia por lugar (km de verdad, sin la escala de las zonas enormes): el «anillo casi» de la ficha la usa (js/acunar.js) */
+    const B = store.best || (store.best = {}); let mejor = 0; for (const cid of q.cid) if (E[cid] && !E[cid].parent && (B[cid] == null || km < B[cid])) { B[cid] = Math.round(km * 10) / 10; mejor = 1; }
+    out.level = level; if (!level) { if (mejor) save(); return out; }
     const lateral = x => (E[x].type === "event" || E[x].type === "battle") ? 2 : 3;
     for (const cid of q.cid) {
       const e = E[cid]; if (!e) continue;
@@ -265,6 +267,7 @@ window.AIQ = window.AIQ || {};
       for (const x of (chain[cid] || []).concat(e.country ? chain["c:" + e.country] || [] : [])) if (level >= lateral(x)) unlockOne(x, level, out.added);
     }
     if (out.added.length) { save(); dirty(); listeners.forEach(f => f(out.added)); prefetch(out.added); emitStats(); }
+    else if (mejor) save();                                                // solo mejoraste tu distancia: se guarda igual (una sola escritura)
     return out;
   };
   const byType = () => { const cnt = {}; order.forEach(id => { const e = E[id], c = cnt[e.type] || (cnt[e.type] = [0, 0]); c[1]++; if (isUnlocked(id)) c[0]++; }); return cnt; };
@@ -935,6 +938,15 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------- despues de pintar: fotos perezosas, siluetas, mapas ---------------- */
   let io = null;
+  /* paquete «club» del Probador: el anillo casi. Si tu mejor distancia se quedo a menos del 15 % de la medalla que te falta, su aro casi se cierra y
+     se agrieta en el hueco (la primera vez que lo ves tras mejorar; despues, quieto). Sin oro en la Enciclopedia: el aro es de plata */
+  function anilloCasi(id) {
+    if (!A.acunar || !tiered(id)) return;
+    const m = medOf(id), best = store.best && store.best[id]; if (m >= 3 || best == null) return;
+    const L = limits(id), lim = L[m], prev = m ? L[m - 1] : lim * 1.15, host = document.querySelectorAll("#cxMain .cx-dmeds > span")[m]; if (!host) return;
+    const seen = store.ring || (store.ring = {});
+    A.acunar.anillo(host, { best, lim, prev: Math.max(prev, best + 1), fresh: seen[id] !== best, seen: () => { if (seen[id] !== best) { seen[id] = best; save(); } } });
+  }
   function after(v) {
     const m = $("cxMain");
     if (v.k === "detail") A.genFill(m);
@@ -947,6 +959,7 @@ window.AIQ = window.AIQ || {};
       if (U(v.id)) {
         let ch = 0; idsOf(v.id).forEach(x => { if (U(x) && !store.seen[x]) { store.seen[x] = 1; ch = 1; } }); if (ch) { save(); dirty(); }          // solo lo desbloqueado: mirar una bloqueada no gasta su "Nueva"
         fillText(v.id);
+        anilloCasi(v.id);
         if (!stageOn() && e.lat != null && map && $("cxMini")) setTimeout(() => requestAnimationFrame(() => { const cv = $("cxMini"); if (cv && ui.cur === v.id) try { map.drawThumb(cv, { lat: e.lat, lon: e.lon, zoom: e.type === "water" ? 3.5 : 9 }); } catch (x) { /* sin miniatura */ } }), 140);
       }
     }

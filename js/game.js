@@ -1186,14 +1186,15 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   function endScreen(win, iq) {
     const L = lv(), tier = A.iqTier(iq), tierName = A.t("tier." + tier);
     const shown = win ? S.runTotal : S.runTotal + S.levelScore;
-    let classicFinale = false;
+    let classicFinale = false, acu = null;                                  // acu: la medalla que se acuña delante de ti (js/acunar.js) antes del veredicto
     if (S.camp.mode === "classic") {
       classicFinale = win && !A.profile.classicDone();                  // v0.3.236: antes de registrar esta victoria el Clasico no estaba entero: si esta es la que lo completa, es el segundo final del juego
       if (win && A.clubRetos) A.clubRetos.ev("camp");
-      if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); }
+      if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); acu = { pct: r * 100, metal: r >= 0.85 ? "oro" : r >= 0.7 ? "plata" : "bronce", camp: A.tx(S.camp.title) }; }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }
-    if (win) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
+    if (acu && !A.acunar) acu = null;
+    if (win && !acu) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
     const btns = [];
     if (!win) btns.push({ id: "retryBtn", cls: "btn-ink", label: A.t("btn.retry"), arrow: true, primary: true, onclick: () => { S.runMax = S.runMax0 || 0; startLevel_(S.level); } });   // el intento fallido deja de contar en el maximo: el IQ y la medalla miden la pasada buena (S.clean sigue en false: Sin red exige no fallar ninguno)
     btns.push({ id: "newBtn", cls: win ? "btn-ink" : "btn-line", label: A.t("btn.newGame"), primary: win, onclick: () => { S.startLevel = 0; showTitle(); } });
@@ -1208,6 +1209,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       const cv = await A.makeBadge(iq, tierName, `${A.tx(S.camp.title)} · ${A.fmt(shown)} ${A.t("pts")} · ${S.completed}/${S.camp.levels.length}`);
       const a = document.createElement("a"); a.download = `geolite-${iq}.png`; a.href = cv.toDataURL("image/png"); a.click();
     } });
+    const show = () => {
     verdict({
       kind: win ? "win" : "", level: S.level + 1, title: win ? A.t("v.win") : A.t("v.no"),
       text: win ? A.t("win.p", { s: A.fmt(shown) }) : A.t("lf.p", { a: A.fmt(L.advance), s: A.fmt(S.levelScore) }),
@@ -1228,6 +1230,9 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       };
       setTimeout(() => go(0), 2600);
     }
+    };
+    /* paquete «club» del Probador: ganas la campaña y, antes del veredicto, la prensa acuña tu medalla (bronce; al pasar el 70 % plata; al 85 % oro) */
+    if (acu) A.acunar.medalla(acu, () => { A.sfx.victory(); show(); }); else show();
   }
 
   /* ------------------------------------------------------------ pausa y reloj */
