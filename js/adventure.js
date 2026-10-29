@@ -745,6 +745,7 @@ window.AIQ = window.AIQ || {};
     const tok = ++introTok, alive = () => tok === introTok && host.isConnected && C().S.phase === "intro";
     const talk = () => { if (alive()) D.sequence(seq, talked); else if (talked) talked(); };
     const quiet = reduceMotion(), boss = !!Lv.boss && !run.inf;
+    if (!boss && A.telon && A.telon.calienta) setTimeout(() => A.telon.calienta(), 1500);   // el telon del jefe ya compilado cuando llegue (una vez; no hace nada si ya lo esta)
     if (boss) {
       const gm = quiet ? 300 : gestMs("e_jefe"), tier = Math.min(3, run.act + 1);
       /* (Probador, paquete del veredicto, Extrema): el telon de terciopelo de verdad (js/telon.js) y, al abrirse, el foco que le busca */

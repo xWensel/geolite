@@ -16,7 +16,7 @@
  *                    Tambien acepta los nombres de la sesion del veredicto: after (= onClosed), onOpen (ya abierto), lados + quitar(ms) (queda
  *                    recogido a los lados hasta quitar), minimo: "fundido" (en Minimo, telon quieto que entra y sale fundido) y fallback(after)
  *                    (sin WebGL: el telon de siempre). Devuelve { skip(), quitar(ms) }.
- *   A.telon.busy()   true mientras hay un telon en pantalla.
+ *   A.telon.busy()   true mientras hay un telon en pantalla.  A.telon.calienta(): compila el shader de antemano (una vez).
  *   A.telon.FS(o), A.telon.COLORES, A.telon.borla(k): las piezas, por si otra escena las necesita.
  */
 window.AIQ = window.AIQ || {};
@@ -322,5 +322,21 @@ void main(){
     return cur;
   }
 
-  A.telon = { play, busy: () => !!cur, FS, COLORES, borla };
+  /* precalentamiento: compila el shader una vez en un lienzo de 1 px (la cache de programas de la GPU lo guarda) para que el primer telon
+     no pare el clic (~60 ms de mas la primera vez). Lo llama la puerta mientras espera (js/puerta.js) */
+  let caliente = false;
+  function calienta() {
+    if (caliente) return; caliente = true;
+    try {
+      const c = document.createElement("canvas"); c.width = c.height = 1; const gl = c.getContext("webgl2"); if (!gl) return;
+      const sh = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; };
+      const p = gl.createProgram();
+      gl.attachShader(p, sh(gl.VERTEX_SHADER, "#version 300 es\nvoid main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p * 2. - 1., 0., 1.); }"));
+      gl.attachShader(p, sh(gl.FRAGMENT_SHADER, FS())); gl.linkProgram(p); gl.getProgramParameter(p, gl.LINK_STATUS);
+      gl.useProgram(p); gl.bindVertexArray(gl.createVertexArray()); gl.drawArrays(gl.TRIANGLES, 0, 3);
+      const x = gl.getExtension("WEBGL_lose_context"); if (x) x.loseContext();
+    } catch (e) { /* sin WebGL: el telon ya corta directo */ }
+  }
+
+  A.telon = { play, busy: () => !!cur, calienta, FS, COLORES, borla };
 })(window.AIQ);
