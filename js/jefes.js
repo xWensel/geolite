@@ -4,7 +4,6 @@
  *   - la barra de escalada (5 muescas que se encienden) y el pulso rojo del borde al subir de tono
  *   - La siesta del crupier: duerme en su esquina; el ruido (zoom, arrastre, herramientas y segundos de duda) lo despierta y salta el Apagon
  *   - Rompe la cuarta pared: el Salvapantallas (el primer clic solo lo despierta) y el Pantallazo azul falso (el tiempo se devuelve)
- *   - El coleccionista: su album, con un golpe de sello en cada bandera
  *   - Rueda de la fortuna: gira antes de cada pregunta (el tiempo se devuelve) y cae en una familia de retos
  * Respeta "reducir movimiento" (sin temblores ni destellos) y el ajuste Vibracion. Todo lo que gira o se mueve va con transform/opacity.
  *
@@ -127,15 +126,6 @@ window.AIQ = window.AIQ || {};
     poll(() => { if (fired || !phaseOk()) return; if (elapsed() >= at) { fired = true; fn(); } }, 120);
   }
 
-  /* ------------------------------------------------------------------ EL COLECCIONISTA: el album y el golpe de sello */
-  function albumShow(qi, e) {
-    const st = CS(), order = st.pub.filter(c => c.wh != null).sort((a, b) => a.wh - b.wh), D = A.CHAL; let box = $("albumFx"); if (box) box.remove();
-    box = document.createElement("div"); box.id = "albumFx";
-    const slot = c => c.wh < qi ? `<span class="al-s done">${A.icon(D[c.id].ico, "sm")}</span>` : c.wh === qi ? `<span class="al-s cur">${A.icon(D[c.id].ico)}</span>` : `<span class="al-s back">${A.icon("boss_hat", "sm")}</span>`;
-    box.innerHTML = `<h4>${esc(tl("ui_album"))} ${qi + 1}/5</h4><div class="al-row">${order.map(slot).join("")}</div><p class="al-n">${esc(A.tx(D[e.of || e.id].n))}</p>`;
-    document.body.appendChild(box); say("albumStamp", qi); later(() => gone(box), 2800);
-  }
-
   /* ------------------------------------------------------------------ RUEDA DE LA FORTUNA */
   const WF = ["letras", "saber", "luz", "tormenta", "vista", "sitio", "puntero", "pantalla", "mentiras", "clima"], WI = { clima: "ch_rain", letras: "ch_shaky", saber: "ch_riddle", luz: "ch_dark", tormenta: "ch_lightning", vista: "ch_blur", sitio: "ch_spread", puntero: "ch_tremble", pantalla: "ch_crack", mentiras: "ch_wrongborders" };
   const WC = ["#c9a3ff", "#ffd95a", "#4a4d72", "#4cb4ff", "#4ee3c1", "#ff9f4a", "#ff6bb5", "#a8ecff", "#ff5a55", "#7ac8ff"];
@@ -160,12 +150,11 @@ window.AIQ = window.AIQ || {};
     if (A.chal.get("screensaver")) armAfter(0.3, 0.55, ssShow);
     if (A.chal.get("bsod")) armAfter(0.28, 0.45, bsodShow);
     const tw = (st.bl || []).find(c => c.tw);
-    if (st.bk === "collector" && tw) later(() => albumShow(qi, tw), qi ? 250 : 900);
     if (st.bk === "wheel" && tw) wheelShow(tw);
   };
   function cleanup() {
     stopAll(); napStop(); if (SS) { cancelAnimationFrame(SS.raf); SS.el.remove(); SS = null; } if (BS) { clearInterval(BS.iv); BS.el.remove(); BS = null; }
-    for (const id of ["albumFx", "wheelFx"]) { const e = $(id); if (e) e.remove(); }
+    for (const id of ["wheelFx"]) { const e = $(id); if (e) e.remove(); }
   }
   J.reveal = () => { const was = Nap.on; cleanup(); if (was && A.dealer.release) A.dealer.release(); };
   J.end = () => { const was = Nap.on; cleanup(); if (was && A.dealer.release) A.dealer.release(); const e = $("bossPulse"); if (e) e.remove(); };

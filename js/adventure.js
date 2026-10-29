@@ -714,7 +714,7 @@ window.AIQ = window.AIQ || {};
     /* territorio nuevo: una ronda mas alla de tu mejor ronda de siempre (desde la 2.a expedicion, una vez por expedicion): sello "Nuevo" y el crupier lo dice */
     const Pv = A.profile.get(); run._virgin = !run.attempt && (Pv.adv.runs || 0) >= 2 && roundNo() + 1 > (Pv.adv.bestRound || 0) && !run.virginShown; if (run._virgin) run.virginShown = true;
     const NEW = A.pick6("Nuevo|New|Nouveau|Novo|Neu|Nuovo||新领域|새 영역|未踏|Впервые|Nowe");
-    const chips = list.map(c => { if (c.hid && !c.up) return `<div class="adv-debuff k-rule"><span>${ic(BOSS_IC)}</span><div><b>${A.tx(A.chal.tl("ui_faceDown"))}</b><i>${A.tx(A.chal.tl(run.chalKey === "collector" ? "ui_faceDownColl" : "ui_faceDownWheel"))}</i></div></div>`; const d = A.CHAL[c.id]; return `<div class="adv-debuff k-${d.kind}"><span>${ic(d.ico)}</span><div><b>${A.tx(d.n)}${c.isNew ? ` <span class="ch-new">${A.tx(A.chal.NEW_TAG)}</span>` : ""} <i class="ch-lv">${"●".repeat(c.lv || 1)}</i></b><i>${A.tx(d.d)}</i>${c.id === "wind" && run.wind ? `<em>${A.T("Viento hacia", "Wind toward")} ${dirName(run.wind.brg)} · ${A.fmtDist(run.wind.km)}</em>` : ""}</div></div>`; }).join("");
+    const chips = list.map(c => { if (c.hid && !c.up) return `<div class="adv-debuff k-rule"><span>${ic(BOSS_IC)}</span><div><b>${A.tx(A.chal.tl("ui_faceDown"))}</b><i>${A.tx(A.chal.tl("ui_faceDownWheel"))}</i></div></div>`; const d = A.CHAL[c.id]; return `<div class="adv-debuff k-${d.kind}"><span>${ic(d.ico)}</span><div><b>${A.tx(d.n)}${c.isNew ? ` <span class="ch-new">${A.tx(A.chal.NEW_TAG)}</span>` : ""} <i class="ch-lv">${"●".repeat(c.lv || 1)}</i></b><i>${A.tx(d.d)}</i>${c.id === "wind" && run.wind ? `<em>${A.T("Viento hacia", "Wind toward")} ${dirName(run.wind.brg)} · ${A.fmtDist(run.wind.km)}</em>` : ""}</div></div>`; }).join("");
     const kind = Lv.boss ? "boss" : run.round === 0 ? "small" : "big", inner = Lv.boss ? BOSS_IC : run.round === 0 ? "s_pin" : "s_compass";
     return `<div class="intro-in adv${Lv.boss ? " is-boss" : ""}" data-topic="${def.topic}"><div class="intro-left"><div class="intro-num blind">${A.blind(kind, inner)}</div><div class="intro-body">
       <span class="tag">${A.tx(info.n)} · ${actSub(info)}</span><h2>${A.tx(Lv.topicName)}</h2>
@@ -746,8 +746,10 @@ window.AIQ = window.AIQ || {};
     const talk = () => { if (alive()) D.sequence(seq, talked); else if (talked) talked(); };
     const quiet = reduceMotion(), boss = !!Lv.boss && !run.inf;
     if (boss) {
-      const gm = quiet ? 300 : gestMs("e_jefe");
-      if (telon(host, () => { if (!alive()) return; host.style.visibility = ""; if (D.face) D.face("dare", quiet ? null : "e_jefe"); setTimeout(talk, gm); })) return lines + 950 + gm;
+      const gm = quiet ? 300 : gestMs("e_jefe"), tier = Math.min(3, run.act + 1);
+      /* (Probador, paquete del veredicto, Extrema): el telon de terciopelo de verdad (js/telon.js) y, al abrirse, el foco que le busca */
+      const ms = telon(host, () => { if (!alive()) return; host.style.visibility = ""; if (D.face) D.face("dare", quiet ? null : "e_jefe"); setTimeout(talk, gm); setTimeout(() => { if (alive() && A.foco) A.foco.start($("intro"), { tier }); }, quiet ? 0 : 450); }, tier, alive);   // el foco, cuando el telon empieza a abrirse
+      if (ms != null) return lines + ms + gm;
     } else if (!quiet && D.face && gestMs("e_reparte")) {
       D.face("sly", "e_reparte"); dealCard(host, tok); setTimeout(talk, gestMs("e_reparte")); return lines + gestMs("e_reparte");
     }
@@ -758,17 +760,27 @@ window.AIQ = window.AIQ || {};
   const gestMs = id => { const g = A.CRUPIER_DATA && A.CRUPIER_DATA.gest[id]; return g ? g.frames.length * 100 : 0; };   // los gestos nuevos van a 100 ms por fotograma (js/crupier.js)
   /* EL TELON DEL JEFE (js/trastadas.js, "telon"): se cierra (0,35 s), a los 0,95 s llama a after (la escena cambia detras) y se abre. Con Minimo, el
      terciopelo aparece y se va en un fundido. Cuenta como la trastada de la ronda (y respeta el tutorial y la mesa en directo) */
-  let telonReg = false;
+  let telonReg = false, telonCur = null;
   function telonHook() {
     if (telonReg || !A.trastadas) return; telonReg = true;
-    A.trastadas.registra("telon", ctx => { const after = ctx && ctx.after; if (reduceMotion()) telonFade(after); else A.trastadas.fx.telon(after); return true; });
+    A.trastadas.registra("telon", ctx => {
+      const after = ctx && ctx.after;
+      if (A.telon) {                                                                     // el telon de terciopelo (js/telon.js): pesa segun el acto y se queda recogido a los lados mientras dura la intro
+        const tier = ctx.tier || 1;
+        telonCur = A.telon.play({ after, tier, lados: true, minimo: "fundido", fallback: a => (reduceMotion() ? telonFade(a) : A.trastadas.fx.telon(a)) });
+        ctx.ms = reduceMotion() ? 280 : Math.round(750 * [1, 1.12, 1.25][tier - 1]); return true;
+      }
+      if (reduceMotion()) telonFade(after); else A.trastadas.fx.telon(after); return true;
+    });
   }
-  function telon(host, after) {
-    if (!A.trastadas || !A.trastadas.lanza) return false; telonHook();
+  /* devuelve los ms hasta que se abre (null: no hubo telon) */
+  function telon(host, after, tier, alive) {
+    if (!A.trastadas || !A.trastadas.lanza) return null; telonHook();
     host.style.visibility = "hidden";                                                    // detras del telon: aun no se le ve
-    const ok = A.trastadas.lanza("telon", { after });
+    const ctx = { after, tier, alive, ms: 950 };
+    const ok = A.trastadas.lanza("telon", ctx);
     if (!ok) host.style.visibility = "";
-    return ok;
+    return ok ? ctx.ms : null;
   }
   function telonFade(after) {
     const k = (A.dealer.k && A.dealer.k()) || 3, u = k / (window.devicePixelRatio || 1), v = document.createElement("div");
@@ -809,7 +821,7 @@ window.AIQ = window.AIQ || {};
       requestAnimationFrame(step);
     }, 1080);
   }
-  A.adv.introEnd = () => { A.dealer.dock(null); A.dealer.release(); };   // si saltas la intro a media frase, la termina en la esquina y se va (sin decir el resto)
+  A.adv.introEnd = () => { A.dealer.dock(null); A.dealer.release(); if (A.foco) A.foco.stop(); if (telonCur) { telonCur.quitar(350); telonCur = null; } };   // si saltas la intro a media frase, la termina en la esquina y se va (sin decir el resto)
 
   /* ---------------- puntuacion de una pregunta ---------------- */
   A.adv.score = function (o, km, left, noSide) {
@@ -1434,7 +1446,7 @@ window.AIQ = window.AIQ || {};
       if (bet && bet.id === "final" && !bet.done) { bet.done = 1; if (first) { run.maxLives += 2; run.lives += 2; lines.push([A.tx(BETS.final.n), A.tx(BT.lives2), null, "bet"]); setTimeout(() => A.casa.premio(3), 1100); } }   // +2 provisiones para el modo infinito
       if (!run.practice && A.clubRetos) A.clubRetos.ev("round", { n: roundNo() + 1, boss });   // entrega 3 del Club: rondas y jefes para los retos
       A.ach.emit("adv", { kind: "clear", tools: run.rTools, bulls: run.rBulls || 0 }); if (boss) { A.ach.emit("adv", { kind: "boss", lives: run.lives }); if (!run.practice) A.profile.get().adv.boss++; }
-      A.sfx.stamp(); setTimeout(A.sfx.clear, 300); if (A.publico) A.publico("ronda", 300);   // v0.3.201: la sala aplaude la ronda superada
+      if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.clear, 300); if (A.publico) A.publico("ronda", 300);   // v0.3.201: la sala aplaude la ronda superada
       if (boss) A.music.moment(run.act + 1 === 3 && !run.won ? "win" : run.inf ? "inf" : "a" + Math.min(3, run.act + 2));   // jefe derrotado: su tema se va; entra la cancion del acto que viene (o la de la victoria)
       const actDone = boss, winAct = actDone ? run.act + 1 : 0;
       if (actDone) { const flawless = run.livesLostAct === 0; A.ach.emit("adv", { kind: "act", act: winAct, flawless, asc: run.asc, daily: !!run.board }); run.livesLostAct = 0; if (!run.practice) A.profile.get().adv.bestAct = Math.max(A.profile.get().adv.bestAct || 0, winAct); }
@@ -1464,7 +1476,7 @@ window.AIQ = window.AIQ || {};
       if (conso) { run.coins += conso; run.stats.coinsEarned += conso; }
       run.lastPay = { r: roundNo() + 1, got: conso, ok: 0 };
       persist();
-      A.sfx.stamp(); setTimeout(A.sfx.lose, 300);
+      if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.lose, 300);
       if (run.lives <= 0) return endRun(false);
       C().verdict({
         kind: "", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: A.T("No llegaste al objetivo", "Target missed"),
@@ -1589,7 +1601,7 @@ window.AIQ = window.AIQ || {};
       const kickF = [A.T("Después", "Then"), cf.boss ? A.T("Jefe del acto", "Act boss") : A.T("Ronda", "Round") + " " + ((rr % 4) + 1)].join(dot);   // v0.3.48: en una linea (el tema del jefe, en su globo)
       if (!main) return `<div class="nr far${cf.boss ? " boss" : ""}"${named ? ` data-tt="${topic.replace(/"/g, "&quot;")}"` : ""}>${badge}<span class="nr-ttl"><span class="nr-k">${kickF}</span><b class="nr-name">${name}</b></span><span class="nr-chips">${n ? cf.list.map(c => A.chal.chip(c, true)).join("") : count}</span></div>`;   // v0.3.23: sus fichas ya dicen cuantos retos trae
       const shuffle = n ? `<button class="gx-btn gho sm nr-shuffle" id="chalReroll" type="button" data-tt="${A.T("Barajar: el crupier elige otros retos para la próxima ronda", "Reshuffle: the dealer picks other challenges for the next round")}">${ic("dice")}<span>${A.T("Barajar", "Reshuffle")}</span>${freeShuf() ? `<em class="nr-free">${ic("spyhole")}${A.tx(H_FREE)}</em>` : `<em>${CN()}${chalRerollCost()}</em>`}</button>` : "";
-      const lis = cf.list.map(c => { const hd = c.hid && !c.up, dd = hd ? { kind: "rule", ico: BOSS_IC, n: A.chal.tl("ui_faceDown"), d: A.chal.tl(cf.combo && cf.combo.k === "collector" ? "ui_faceDownColl" : "ui_faceDownWheel") } : A.CHAL[c.id];
+      const lis = cf.list.map(c => { const hd = c.hid && !c.up, dd = hd ? { kind: "rule", ico: BOSS_IC, n: A.chal.tl("ui_faceDown"), d: A.chal.tl("ui_faceDownWheel") } : A.CHAL[c.id];
         return `<li class="nr-row k-${dd.kind}"><span class="nr-ic">${ic(dd.ico)}</span><b class="nr-rn">${A.tx(dd.n)}${c.isNew ? ` <span class="ch-new">${A.tx(A.chal.NEW_TAG)}</span>` : ""} <i class="ch-lv">${"●".repeat(c.lv || 1)}</i></b>${c.sealed ? `<em class="nr-have nr-seal">${A.tx(c.sealBy === "pact" ? BT.pact : c.sealBy === "offer" ? BT.sold : BT.seal)}</em>` : ""}<button class="nr-buy${c.sealed ? " hidden" : ""}" type="button" data-r="${rr}" data-id="${c.id}" data-tt="${A.T("Sobornar al crupier: quita este reto de la próxima ronda. Cada soborno encarece los siguientes.", "Bribe the dealer: removes this challenge from the next round. Each bribe makes the next ones pricier.")}"><span>${A.T("Sobornar", "Bribe")}</span><em class="nr-p">${CN()}${bribePrice(c, cf.boss)}</em></button><p>${A.tx(dd.d)}</p></li>`; }).join("")
         + done.map(id => `<li class="nr-row done"><span class="nr-ic">${ic(A.CHAL[id].ico)}</span><b class="nr-rn">${A.tx(A.CHAL[id].n)}</b><em class="nr-have">${A.T("Sobornado", "Bribed")}</em></li>`).join("")
         + (cf.nulled || []).map(id => `<li class="nr-row done"><span class="nr-ic">${ic(A.CHAL[id].ico)}</span><b class="nr-rn">${A.tx(A.CHAL[id].n)}</b><em class="nr-have">${A.tx(NULLED)}</em></li>`).join("");   // los que quita tu Comodin
@@ -2855,7 +2867,7 @@ window.AIQ = window.AIQ || {};
     run = null; persist(); C().S.run = null; A.chal.end(); A.dealer.enable(true);
     const fell = { r: r.cleared + 1, won: !!r.won, record: false, daily: true, retire: false };
     A.dealer.noteRun(fell); setTimeout(() => A.dealer.react(win ? "runWin" : "runLose", fell), 900);
-    A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.lose, 300);
+    if (!A.veredicto) A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.lose, 300);
     const loc = (A.LANGS.find(l => l.code === A.lang) || A.LANGS[0]).loc, d = DY.date(board).toLocaleDateString(loc, { day: "numeric", month: "long" }), sp = /^(zh|ja)$/.test(A.lang) ? "" : " ";
     const P6 = s => A.pick6(s), fill = s => s.replace("{d}", d).replace("{k}", k).replace("{s}", A.fmt(was || 0));
     const toBoard = () => C().showHub("daily"), again = n => () => { A.sfx.depart(); C().S.ranked = null; C().prepareRun(); A.adv.beginPractice(board, n); };
@@ -2906,7 +2918,7 @@ window.AIQ = window.AIQ || {};
     /* v0.37: si aun no sabe tu nombre, te lo pregunta bajo un foco (js/nombre.js) y despues solo te invita a jugar otra */
     const asks = A.nombre && A.nombre.maybeAsk({ won: !!win, after: () => A.dealer.tempt({ ...fell, won: !!win }) });
     if (!asks) setTimeout(() => A.dealer.react(win ? "runWin" : "runLose", fell), 900);
-    A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.lose, 300);
+    if (!A.veredicto) A.sfx.stamp(); setTimeout(win ? A.sfx.victory : A.sfx.lose, 300);
     const summary = (r.won ? A.tf("Superaste {r} rondas y conquistaste los tres actos. Puntos: {p} + bonus {b}.", "You cleared {r} rounds and conquered all three acts. Points: {p} + bonus {b}.", { r: r.cleared, p: A.fmt(r.score), b: A.fmt(bonus) })
       : r.cleared === 1 ? A.tf("Superaste {r} ronda y llegaste al {act}. Puntos: {p} + bonus {b}.", "You cleared {r} round and reached {act}. Points: {p} + bonus {b}.", { r: r.cleared, act: A.tx(actInfo(r.act).n), p: A.fmt(r.score), b: A.fmt(bonus) })
       : A.tf("Superaste {r} rondas y llegaste al {act}. Puntos: {p} + bonus {b}.", "You cleared {r} rounds and reached {act}. Points: {p} + bonus {b}.", { r: r.cleared, act: A.tx(actInfo(r.act).n), p: A.fmt(r.score), b: A.fmt(bonus) })) + (r.asc > 0 ? " " + A.pick6("Ascensión {a}: ×{m} al total.|Ascension {a}: ×{m} on the total.|Ascension {a} : ×{m} sur le total.|Ascensão {a}: ×{m} no total.|Aufstieg {a}: ×{m} auf die Summe.|Ascensione {a}: ×{m} sul totale.||进阶 {a}：总分 ×{m}。|어센션 {a}: 총점 ×{m}.|アセンション{a}：合計に×{m}。|Восхождение {a}: ×{m} к итогу.|Wniebowstąpienie {a}: ×{m} do sumy.").replace("{a}", r.asc).replace("{m}", mulTxt(ascMult(r.asc))) : "") + (rec ? A.T(" ¡Nuevo récord personal!", " New personal best!") : "");

@@ -137,6 +137,19 @@ window.AIQ = window.AIQ || {};
     const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = nb; bp.type = "bandpass"; bp.frequency.value = f * (0.85 + 0.3 * R()); bp.Q.value = 0.9;
     s.connect(bp).connect(g).connect(to); env(g, t, 0.003, v, dur); s.start(t, R() * 0.8); s.stop(t + dur + 0.05);
   }
+  /* ruido filtrado con su caida (la maqueta del Probador: "burst"); nunca igual: frecuencia y punto del ruido al azar */
+  function soplo(to, t, o = {}) {
+    const { dur = 0.06, f = 2400, q = 2, v = 0.1, type = "bandpass" } = o;
+    const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); const buf = noiseBuf || nb; s.buffer = buf; fl.type = type; fl.frequency.value = f * (0.88 + 0.24 * R()); fl.Q.value = q;
+    s.connect(fl).connect(g).connect(to); env(g, t, 0.002, v, Math.max(0.01, dur)); s.start(t, R() * Math.max(0, buf.duration - dur - 0.1)); s.stop(t + dur + 0.05);
+  }
+  /* un tono corto (opcional: paso bajo y caida de altura) */
+  function tono(to, t, o = {}) {
+    const { f = 440, dur = 0.12, type = "sine", v = 0.05, lp = 0, f1 = 0 } = o, os = ctx.createOscillator(), g = ctx.createGain();
+    os.type = type; os.frequency.setValueAtTime(f * (0.985 + 0.03 * R()), t); if (f1) os.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    let n = os; if (lp) { const l = ctx.createBiquadFilter(); l.type = "lowpass"; l.frequency.value = lp; os.connect(l); n = l; }
+    n.connect(g).connect(to); env(g, t, 0.003, v, dur); os.start(t); os.stop(t + dur + 0.05);
+  }
   /* donde esta cada sonido de assets/sfx/sala.mp3: [inicio, duracion] en segundos (el archivo se monto con 90 ms de silencio entre sonidos) */
   const SALA = { chip: [[0.09, 0.256], [0.436, 0.227], [0.753, 0.256], [1.099, 0.213], [1.401, 0.285], [1.776, 0.17], [2.036, 0.371], [2.496, 0.227], [2.814, 0.184], [3.088, 0.208], [3.385, 0.17], [3.645, 0.227], [3.962, 0.266]],
     mano: [[4.317, 0.616], [5.024, 0.546], [5.66, 0.227], [5.977, 0.356], [6.423, 0.834], [7.347, 0.46]], carta: [[7.897, 0.601], [8.588, 0.584], [9.262, 0.598], [9.95, 0.457], [10.497, 0.689], [11.276, 0.456], [11.822, 0.766]], baraja: [[12.678, 0.721], [13.489, 3.063]] };
@@ -613,10 +626,11 @@ window.AIQ = window.AIQ || {};
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
     boss: -23.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
     clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
+    foco: -11, caja: -8, llama: -10,                                            // Veredicto, jefe y cofre (js/foco.js, js/veredicto.js)
   };
   /* la regla: escalon de cada efecto sin version nueva (dB de su tira; ver LEG_OBJ en la herramienta de medida) y paso bajo propio si 4,2 kHz no basta */
   const LEG = {
-    albumStamp: -20.1, bankPin: -21.6, boardDone: -21, bossRise: -20.1, bsodOn: -19.9, buzz: -15.9, cartel: -20.1, chal: -23.3, charge: -20.9, chip: -21.3, coinLand: -27.2,
+    bankPin: -21.6, boardDone: -21, bossRise: -20.1, bsodOn: -19.9, buzz: -15.9, cartel: -20.1, chal: -23.3, charge: -20.9, chip: -21.3, coinLand: -27.2,
     coinTink: -29, coinToss: -27.4, counter: -21.5, cupClack: -24.4, cupDrum: -25.2, cupLift: -23.5, cupWink: -28.1, dark: -20, depart: -20.5, devOff: -20.1,
     devOn: -19.7, diceBoom: -26, diceClack: -24.9, diceLand: -24.6, diceRail: -25.4, diceRattle: -20.4, diceSlam: -25.8, diceSnake: -21.1, diceTick: -10.5, diceTie: -26.4,
     ding: -20.8, fail: -24.6, feed: -19.6, flagFlip: -20.1, flapRoll: -1.3, flapSet: -19.3, gbEngine: -26.3, gbNoise: -18.9, gbTone: -27.1, glass: -24.5, gust: -15.3,
@@ -759,6 +773,34 @@ window.AIQ = window.AIQ || {};
     raja: go((t, v = 1) => {
       const b = bus("raja", 0.12); for (let i = 0; i < 5; i++) felt(b, t + i * (0.012 + R() * 0.014), { v: 0.07 * v, f: 2400 + R() * 1200, dur: 0.02 });
       vibes(b, deg(-2, 72), t, { v: 0.03 * v, dur: 0.18, trem: false });
+    }),
+    /* VEREDICTO, JEFE Y COFRE (paquete del Probador, Extrema). Ruido con su caida (el soplo, el papel, la tela) y tonos cortos: lo de la maqueta */
+    /* el foco de seguimiento: k = "on" (el clac del interruptor) | "posa" (se posa en el jefe: golpe de timbal) */
+    foco: go((t, k = "on", tier = 1) => {
+      const b = bus("foco", 0.2);
+      if (k === "on") { soplo(b, t, { dur: 0.02, f: 2400, q: 3, v: 0.16 }); tono(b, t, { f: 140, dur: 0.08, type: "square", v: 0.025, lp: 900 }); }
+      else { sub(b, t, { v: 0.18 + 0.04 * tier, f0: 92, f1: 60, dur: 0.55 }); soplo(b, t, { dur: 0.25, f: 180, q: 0.7, v: 0.1 + 0.03 * tier, type: "lowpass" }); }
+    }),
+    /* la caja registradora: k = "papel" (avanza una linea) | "clac" (un rodillo encaja) | "tic" | "timbre" (n: 1 un timbre, 2 dos, 3 dos y el cajon que se abre con fichas)
+       | "corte" (se arranca el papel) | "ficha" (una ficha a la barra; n 1 = la ultima, mas grave) */
+    caja: go((t, k = "clac", n = 1) => {
+      const b = bus("caja", k === "timbre" ? 0.25 : 0.06);
+      if (k === "papel") { soplo(b, t, { dur: 0.05, f: 1500, q: 1.1, v: 0.045 * n }); soplo(b, t + 0.03, { dur: 0.02, f: 4200, q: 3, v: 0.02 * n }); }
+      else if (k === "clac") { soplo(b, t, { dur: 0.02, f: 3600, q: 6, v: 0.15 * n }); tono(b, t, { f: 1150, dur: 0.035, type: "square", v: 0.022 * n, lp: 2800 }); soplo(b, t + 0.006, { dur: 0.03, f: 700, q: 1.4, v: 0.06 * n }); }
+      else if (k === "tic") { soplo(b, t, { dur: 0.012, f: 5200, q: 9, v: 0.07 * n }); tono(b, t, { f: 2200, dur: 0.02, type: "triangle", v: 0.015 * n }); }
+      else if (k === "timbre") {
+        const f = 2349 * (1 + (R() - 0.5) * 0.01), ding = (a, v) => { [[1, 1, 1.1], [2.756, 0.28, 0.5], [5.404, 0.1, 0.22]].forEach(([r, g, d]) => tono(b, t + a, { f: f * r, dur: d, type: "sine", v: v * g })); soplo(b, t + a, { dur: 0.008, f: 6000, q: 4, v: v * 0.6 }); };
+        ding(0, 0.05 + 0.015 * n); if (n >= 2) ding(0.13, 0.04 + 0.01 * n);
+        if (n >= 3) { sub(b, t + 0.06, { v: 0.12, f0: 70, f1: 42, dur: 0.5 }); soplo(b, t + 0.06, { dur: 0.14, f: 380, q: 1, v: 0.14, type: "lowpass" }); for (let i = 0; i < 3; i++) rec(b, "chip", t + 0.12 + i * 0.05, { lp: 3200, v: 0.35, len: 0.12 }); }
+      } else if (k === "corte") { soplo(b, t, { dur: 0.13, f: 2600, q: 0.7, v: 0.07 }); soplo(b, t + 0.06, { dur: 0.05, f: 5200, q: 1.5, v: 0.03 }); }
+      else if (k === "ficha") { rec(b, "chip", t, { lp: 2600, v: n === 1 ? 0.5 : 0.35, len: 0.12, rate: n === 1 ? 0.85 : 1 }); felt(b, t, { v: 0.03, f: 900, dur: 0.02 }); }
+    }),
+    /* la llama de la racha se aviva (paso 1-3): un soplo que sube de tono, la nota del escalon y chasquidos de brasa */
+    llama: go((t, paso = 1) => {
+      const b = bus("llama", 0.15), f = 1 + paso * 0.18;
+      soplo(b, t, { dur: 0.32 + paso * 0.08, f: 420 * f, q: 0.7, v: 0.07 + 0.035 * paso, type: "lowpass" });
+      tono(b, t, { f: 196 * Math.pow(2, [0, 4, 7][paso - 1] / 12), dur: 0.2, type: "triangle", v: 0.05, lp: 1800 });
+      for (let i = 0; i < 2 + paso; i++) soplo(b, t + 0.04 + R() * 0.3, { dur: 0.012, f: 2200 + R() * 2600, q: 3, v: 0.035 });
     }),
     /* un rodillo encaja: el reten (tic) y un golpe pequeno de madera; i = la fila (sube un poco) */
     encaja: go((t, i = 0) => { const b = bus("encaja", 0.04); felt(b, t, { v: 0.05, f: 3000 + i * 140, dur: 0.014 }); sub(b, t, { v: 0.035, f0: 260 + i * 12, f1: 120, dur: 0.04 }); }),
@@ -1041,7 +1083,6 @@ window.AIQ = window.AIQ || {};
     ssBounce: old("ssBounce", t => { pluck(88 + Math.floor(Math.random() * 4) * 2, t, { vol: 0.02, dur: 0.1, bright: 3, rev: 0.1 }); }),
     ssWake: old("ssWake", t => { noise(t, 0.2, { lp: 400, sweepTo: 4000, vol: 0.035, type: "bandpass", q: 1 }); pluck(84, t + 0.05, { vol: 0.04, dur: 0.2, rev: 0.2 }); }),
     bsodOn: old("bsodOn", t => { noise(t, 0.04, { hp: 3000, vol: 0.06 }); thump(t, { vol: 0.2, f0: 120, f1: 50, dur: 0.15 }); const os = ctx.createOscillator(), g = ctx.createGain(); os.type = "square"; os.frequency.setValueAtTime(440, t + 0.05); os.connect(g).connect(lb); env(g, t + 0.05, 0.005, 0.02, 0.16); os.start(t + 0.05); os.stop(t + 0.3); }),
-    albumStamp: old("albumStamp", (t, q = 0) => { thump(t, { vol: 0.2, f0: 150, f1: 46, dur: 0.14 }); noise(t, 0.04, { lp: 1600, vol: 0.08 }); bell(58 + q * 2, t + 0.03, { vol: 0.05, dur: 0.6, rev: 0.4 }); pluck(84 + q * 2, t + 0.12, { vol: 0.04, dur: 0.3, rev: 0.3 }); }),
     wheelTick: old("wheelTick", (t, a = 0.5) => { pluck(90 + Math.round(a * 6), t, { vol: 0.025, dur: 0.05, bright: 3, rev: 0.05 }); noise(t, 0.008, { hp: 4000, vol: 0.02 }); }),
     wheelLand: old("wheelLand", t => { thump(t, { vol: 0.14, f0: 160, f1: 60, dur: 0.1 }); bell(84, t, { vol: 0.06, dur: 0.7, rev: 0.4 }); bell(91, t + 0.07, { vol: 0.05, dur: 0.9, rev: 0.5 }); }),
     bankPin: old("bankPin", t => { thump(t, { vol: 0.12, f0: 340, f1: 130, dur: 0.05 }); bell(88, t + 0.02, { vol: 0.06, dur: 0.5, rev: 0.4 }); bell(95, t + 0.1, { vol: 0.05, dur: 0.7, rev: 0.4 }); }),
