@@ -194,9 +194,11 @@
   }
   /* cinta de racha del marcador: aciertos seguidos y, en la Aventura y el Reto, su multiplicador de verdad ("Racha 3 · ×1,4"; hasta la 0.2.14
      decia "Racha ×3" y parecia un x3). En el Clasico la racha no multiplica: solo el numero */
+  /* la racha multiplica en la Aventura y en el Clasico (x1,2 por acierto seguido desde el 2.o, hasta x2,5); el Duelo y la practica, no */
+  const rachaMult = () => !!S.run || !!(S.camp && S.camp.mode === "classic");
   function setStreak() {
     const c = $("streakChip");
-    if (S.streak >= 2) { c.innerHTML = `<span>${A.t("res.streak")} ${S.streak}</span>` + (S.run ? `<i> · </i><span>×${A.fmt1(1 + Math.min(1.5, 0.2 * (S.streak - 1)))}</span>` : ""); c.classList.remove("hidden", "pop"); A.restyle(c); c.classList.add("pop"); }   // en ventana estrecha, en dos lineas (css/marcador.css)
+    if (S.streak >= 2) { c.innerHTML = `<span>${A.t("res.streak")} ${S.streak}</span>` + (rachaMult() ? `<i> · </i><span>×${A.fmt1(1 + Math.min(1.5, 0.2 * (S.streak - 1)))}</span>` : ""); c.classList.remove("hidden", "pop"); A.restyle(c); c.classList.add("pop"); }   // en ventana estrecha, en dos lineas (css/marcador.css)
     else c.classList.add("hidden");
   }
 
@@ -893,7 +895,7 @@
       S.streak = guess && km <= lim[0] ? S.streak + 1 : 0;
       /* el Clasico tiene su propia puntuacion (data/campaigns.js) */
       chips = sc.dist + sc.time;
-      mult = 1;
+      mult = rachaMult() && S.streak >= 2 ? 1 + Math.min(1.5, 0.2 * (S.streak - 1)) : 1;   // como en la Aventura: la respuesta que hace racha puntua x mult
       total = Math.round(chips * mult);
     }
     const ratio = sc.dist / sc.distMax;
@@ -980,16 +982,16 @@
     if (adv && adv.coins) coinFx(adv.coins, !!par);
     /* la caja de la racha (Aventura y Reto diario): "on" se enciende o sube de nivel, "broken" se agrieta (perdiste una racha de 2 o mas), "off" se queda
        apagada a x1. En el Clasico la racha no multiplica: solo cuenta (fila RACHA) */
-    const eq = S.run ? (mult > 1 ? "on" : prevStreak >= 2 && !S.streak ? "broken" : "off") : null;
-    const broke = eq === "broken" || (!S.run && prevStreak >= 2 && !S.streak);
+    const eq = rachaMult() ? (mult > 1 ? "on" : prevStreak >= 2 && !S.streak ? "broken" : "off") : null;
+    const broke = eq === "broken" || (!rachaMult() && prevStreak >= 2 && !S.streak);
     /* v0.3.24x (Probador, «Silencios»): la racha rota frena la cinta. La cancion cae dos octavas en 450 ms y se calla justo cuando se agrieta la
        ficha (T_SLAM); el mando lo nota por el motor grave mientras frena */
     if (broke) later(() => { if (still() && A.music.freno && A.music.freno(450) && A.haptic && A.haptic.pat) A.haptic.pat([{ t: 0, d: 450, lo: 0.3, hi: 0 }], { movil: false }); }, T_SLAM - 480);   // v0.3.203: el fuego de la racha detras de la caja roja
     later(() => {
       if (!still()) { if (S.phase === "asking") setStreak(); return; }
-      if ((eq === "on" || (!S.run && S.streak >= 2)) && S.streak >= 3 && A.haptic && A.haptic.esc) A.haptic.esc(S.streak >= 5 ? "racha5" : "racha3");   // la pila de fichas, tambien en la mano
+      if ((eq === "on" || (!rachaMult() && S.streak >= 2)) && S.streak >= 3 && A.haptic && A.haptic.esc) A.haptic.esc(S.streak >= 5 ? "racha5" : "racha3");   // la pila de fichas, tambien en la mano
       if (broke && A.haptic && A.haptic.esc) A.haptic.esc("rota");
-      if (eq === "on" || (!S.run && S.streak >= 2)) { A.sfx.streak(S.streak); if (eq === "on") A.casa.luz(0.4, 520); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
+      if (eq === "on" || (!rachaMult() && S.streak >= 2)) { A.sfx.streak(S.streak); if (eq === "on") A.casa.luz(0.4, 520); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
       else if (broke) { if (A.sfx.streakBreak) A.sfx.streakBreak(); if (eq) shards(); }
       setStreak();
     }, T_SLAM);
@@ -1017,7 +1019,7 @@
         <div class="mw">${from.lit ? fire("f0", from.lv) : ""}${to.lit ? fire("f1", to.lv) : ""}<div class="m"><span>${sw(from.lb, to.lb)}</span><b>${sw(from.v, to.v)}</b>${eq === "broken" ? `<small>${A.t("res.was2", { m: A.fmt1(sm(prevStreak)) })}</small><i class="crk"></i>` : ""}</div></div>
       </div>`;
     }
-    const srow = !S.run && (S.streak >= 2 || broke) ? `<div class="tk-srow${broke ? " off" : ""}" style="--i:2"><dt>${A.t("res.streak")}</dt><i></i><dd>${broke ? `<s>${prevStreak}</s> 0` : S.streak}</dd></div>` : "";
+    const srow = !rachaMult() && (S.streak >= 2 || broke) ? `<div class="tk-srow${broke ? " off" : ""}" style="--i:2"><dt>${A.t("res.streak")}</dt><i></i><dd>${broke ? `<s>${prevStreak}</s> 0` : S.streak}</dd></div>` : "";
     const tkHtml = `<div class="sheet ticket tk2${up ? " tk-up" : ""}${eq ? " tk-eqon" : ""}">
       <div class="tk-band"><span>${S.run && A.adv.isInfinite && A.adv.isInfinite() ? A.t("ask.inf", { n: pad2(S.qi + 1) }) : A.t("ask.no", { n: pad2(S.qi + 1), m: pad2(S.qs.length) })}</span><span class="tag">${A.t("kind." + (o.clue ? "clue" : o.kind || L.kind))}</span></div>
       <div class="tk-head${fl.length ? "" : " nf"}">${flagSlot}<div class="tk-id"><div class="tk-title">${title}</div><div class="tk-place">${o.clue ? `<span>${A.t("res.was")}</span>` : ""}<b>${pName}</b>${pSub ? `<em>${pSub}</em>` : ""}</div></div></div>
