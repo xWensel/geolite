@@ -77,14 +77,14 @@ window.AIQ = window.AIQ || {};
   function open() {
     const layer = $("layer"); if (!layer || isOpen() || !document.querySelector(".hh")) return;
     mode = "adv"; per = "all"; back = document.activeElement;
-    if (A.rank.style) A.rank.style().then(ch => { if (ch && isOpen()) load(); });   // v0.3.174: tu carta, como la llevas ahora
+    if (A.rank.style) A.rank.style().then(ch => { if (ch && isOpen()) { const b = $("pdBody"); if (b) b.dataset.fresh = "1"; load(); } });   // v0.3.174: tu carta, como la llevas ahora
     const btn = $("rankBtn"); if (btn) btn.setAttribute("aria-expanded", "true");
     layer.insertAdjacentHTML("beforeend", `<div class="pd-wrap" id="pdWrap"><div class="gx-veil"></div>
       <section class="pd-screen gx-stage" id="podio" role="dialog" aria-modal="true" aria-labelledby="pdH" tabindex="-1">
         <header class="pd-head"><button type="button" class="gx-btn sm pd-x" id="pdX">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l" id="pdH"><span class="pd-ic">${A.icon("m_rank")}</span>${TITLE()}</h2>
           <div class="pd-tabset" id="pdTabs">${tabsHtml()}</div></header>
-        <div class="pd-body wait" id="pdBody">${body(null, true)}</div>
+        <div class="pd-body wait" id="pdBody" data-fresh="1">${body(null, true)}</div>
       </section></div>`);
     /* como con Ajustes: el crupier del inicio se aparta mientras miras la tabla y vuelve al cerrarla */
     if (A.dealer && A.dealer.homeTease) { dealerWas = !!A.dealer.onHome; if (dealerWas) A.dealer.homeTease(false); }
@@ -198,7 +198,8 @@ window.AIQ = window.AIQ || {};
     const el = $("pdBody"); if (!el) return;
     const n = ++seq, t = tab(); sfxT.forEach(clearTimeout); sfxT = [];
     page = 0; pages = 1; first = null;
-    el.classList.add("wait"); el.innerHTML = body(null);
+    /* recien abierto, el cuerpo de espera ya esta dibujado (con su entrada en curso): rehacerlo la reiniciaba y todo pestaneaba */
+    if (el.dataset.fresh) delete el.dataset.fresh; else { el.classList.add("wait"); el.innerHTML = body(null); }
     const res = await A.rank.topC(boardOf(mode, per), ROWS);
     if (n !== seq || t !== tab() || !$("pdBody")) return;
     first = res; pages = Math.max(1, Math.ceil(((res.count || (res.rows || []).length) - 3) / PER));
