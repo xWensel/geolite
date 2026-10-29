@@ -247,12 +247,13 @@ window.AIQ = window.AIQ || {};
     if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqHBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqHBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
+    const full0 = isLote ? ES().lotePrice().full : ES().full(k);       // el precio sin la rebaja de hoy, antes de que sea tuyo (para el ticket)
     if (!(isLote ? ES().buyLote() : ES().buy(k))) return;
     if (!isLote && ES().kindOf(k) === "m") { const id = k.split(":")[1]; M().seen([id]); M().use(id); }
-    repaint();
+    repaint(); caja(p, full0, have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(isLote ? 3 : 2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(isLote ? 3 : 2);
-    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.sfx && A.sfx.stamp && !A.acunar) setTimeout(() => A.sfx.stamp(), 120);   // con la caja, el golpe es el del sello PAGADO
     if (A.haptic) A.haptic(isLote ? [30, 60, 40] : [24]);
     const wl = $("bqWal"), to = A.club.fichas(), n = 10;
     for (let i = 1; i <= n; i++) setTimeout(() => { if (wl && wl.isConnected) wl.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
@@ -553,10 +554,10 @@ window.AIQ = window.AIQ || {};
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
     if (!PU().buy(s, id)) return;
-    repaint("#bqPTry");
+    repaint("#bqPTry"); caja(p, PU().full ? PU().full(s, id) : p, have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(2);
-    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.sfx && A.sfx.stamp && !A.acunar) setTimeout(() => A.sfx.stamp(), 120);   // con la caja, el golpe es el del sello PAGADO
     if (A.haptic) A.haptic([24]);
     const w = $("bqWal"), to = A.club.fichas(), n = 10;
     for (let i = 1; i <= n; i++) setTimeout(() => { if (w && w.isConnected) w.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
@@ -703,10 +704,10 @@ window.AIQ = window.AIQ || {};
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
     if (!(w === "m" ? SO().buyMarco(id) : w === "t" ? SO().buyTitle(id) : SO().buyIcon(id))) return;
-    repaint();
+    repaint(); caja(p, p, have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(2);
-    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.sfx && A.sfx.stamp && !A.acunar) setTimeout(() => A.sfx.stamp(), 120);   // con la caja, el golpe es el del sello PAGADO
     if (A.haptic) A.haptic([24]);
     const wl = $("bqWal"), to = A.club.fichas(), n = 10;
     for (let i = 1; i <= n; i++) setTimeout(() => { if (wl && wl.isConnected) wl.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
@@ -836,16 +837,26 @@ window.AIQ = window.AIQ || {};
     ST.armed = null;
     if (!V().buy(id)) return;
     const leg = V().get(id).r === "l";
-    repaint("#bqOff");
+    repaint("#bqOff"); caja(p, V().full(id), have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(leg ? 3 : 2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(leg ? 3 : 2);
-    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.sfx && A.sfx.stamp && !A.acunar) setTimeout(() => A.sfx.stamp(), 120);   // con la caja, el golpe es el del sello PAGADO
     if (A.haptic) A.haptic(leg ? [30, 60, 40] : [24]);
     const w = $("bqWal"), to = A.club.fichas(), n = 10;
     for (let i = 1; i <= n; i++) setTimeout(() => { if (w && w.isConnected) w.textContent = A.fmt(Math.round(have + ((to - have) * i) / n)); if (i % 3 === 0 && A.sfx && A.sfx.coin) A.sfx.coin(); }, 160 + i * 55);
     const card = document.querySelector(`#dlg .bq-vit[data-vid="${id}"]`), det = $("bqDet");
     if (card) card.classList.add("bq-sold"); if (det) det.classList.add("bq-sold");
     setTimeout(() => vBought(id), 260);                                  // bloque D: el desfile (o su reaccion de compra) y su frase
+  }
+
+  /* paquete «club» del Probador: al pagar, la caja imprime el ticket con la pieza tal cual se ve en el panel, el precio y el saldo, y cae el
+     sello PAGADO (js/acunar.js). Se llama con el panel ya repintado (la pieza es la misma) */
+  function caja(price, full, from) {
+    if (!A.acunar || !A.acunar.ticket) return;
+    const det = $("bqDet"); if (!det) return;
+    const dn = det.querySelector(".bq-dn"), name = dn ? (dn.firstChild && dn.firstChild.nodeType === 3 ? dn.firstChild.textContent : dn.textContent) : "";
+    const tier = det.querySelector(".bq-tier"), pz = det.querySelector(".bq-dth canvas.sc-cv, .bq-dth canvas, .bq-dth img"), lv = A.club && A.club.levelOf ? A.club.levelOf(A.club.xp()).lvl : 0;
+    A.acunar.ticket({ host: det, name: (name || "").trim(), kind: tier ? tier.textContent.trim() : "", price, full, from, to: A.club ? A.club.fichas() : from - price, lvl: lv ? P6(A.club.tx.lvS).replace("{n}", lv) : "", pieza: pz });
   }
 
   /* comprar: primero se arma (rojo, «¿Seguro?»); la segunda pulsacion paga. Si te faltan fichas, nada (zumbido) */
@@ -859,11 +870,12 @@ window.AIQ = window.AIQ || {};
     if (!M().buy(id)) return;
     M().seen([id]); M().use(id);                                          // queda puesta ya, sin salir de la tienda: el estreno con cartel es solo de las que se ganan jugando
     repaint("#bqTry");                                                  // ya es tuya: la ficha y la rejilla lo dicen al momento
+    caja(p, M().full(id), from);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(from); }    // y el monedero baja moneda a moneda desde lo que tenias
     const leg = M().tier(id) === "l";
     const card = document.querySelector(`#dlg .bq-it[data-id="${id}"]`), det = $("bqDet");
     if (A.casa && A.casa.premio) A.casa.premio(leg ? 3 : 2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(leg ? 3 : 2);
-    if (A.sfx && A.sfx.stamp) setTimeout(() => A.sfx.stamp(), 120);
+    if (A.sfx && A.sfx.stamp && !A.acunar) setTimeout(() => A.sfx.stamp(), 120);   // con la caja, el golpe es el del sello PAGADO
     if (A.haptic) A.haptic(leg ? [30, 60, 40] : [24]);
     /* las fichas se van: el monedero cuenta hacia abajo, moneda a moneda */
     const w = $("bqWal"), to = A.club.fichas(), n = 10;
@@ -925,7 +937,7 @@ window.AIQ = window.AIQ || {};
     if ((ST.cat === "vest" || ST.cat === "hoy") && V()) V().ready(draw); else draw();
   }
   /* si se sale de la boutique a mitad de una prueba, el mapa vuelve a tu mesa */
-  const leave = () => { if (ST.trying) tryOff(true); if (ST.ptry) pTryOff(true); ST.armed = null; vLeave(); dropProb(); };
+  const leave = () => { if (A.acunar) A.acunar.quitaTicket(true); if (ST.trying) tryOff(true); if (ST.ptry) pTryOff(true); ST.armed = null; vLeave(); dropProb(); };
 
   A.boutique = { open, leave, tally: () => { let n = 0, t = 0; ["mesas", "vest", "punt", "carta"].forEach(k => { if ((k === "vest" && !V()) || (k === "punt" && !PU()) || (k === "carta" && !SO())) return; const r = stat(k); n += r[0]; t += r[1]; }); return [n, t]; }, want: id => { ST.next = id; }, cat: k => { ST.cat = k; }, icon: id => { ST.keepC = true; ST.cat = "carta"; ST.ctab = "logro"; ST.csel = "i:" + id; const i = cOf("logro").findIndex(x => x.k === ST.csel); ST.cpage = i >= 0 ? Math.floor(i / cPer()) : 0; }, get trying() { return ST.trying; } };
 })(window.AIQ);

@@ -210,17 +210,26 @@ window.AIQ = window.AIQ || {};
         <b class="cm-rv-sl">${esc(P6(C().tx.lvS).replace("{n}", L))}</b></div>
       <div class="cm-rv-loot">${chips.map(([kk, t]) => `<span class="cm-b ${kk}">${kk === "f" ? fi("sm") : ""}${esc(t)}</span>`).join("")}</div></div>`;
     app.appendChild(r); insFill(r);
-    S().mount($("cmRvCard"), { w: 288, carta: L, mat: S().sOf(L), nobar: true });
+    const AC = A.acunar;                                                  // paquete «club» del Probador: el mazo, la vuelta y la prensa que sella (js/acunar.js)
+    S().mount($("cmRvCard"), { w: AC ? AC.nivelW() : 288, carta: L, mat: S().sOf(L), nobar: true });
     const host = $("cmRvCard"), bk = $("cmRvBack"); S().back(bk);
     const sizeBack = () => { bk.style.width = host.style.width; bk.style.height = parseFloat(host.style.width) * 128 / 96 + "px"; };
     sizeBack();
     r.querySelectorAll(".cm-rv-pv").forEach(cv => { S().back(cv); cv.style.width = host.style.width; cv.style.height = parseFloat(host.style.width) * 128 / 96 + "px"; });
-    let done = false;
-    const close = () => { if (done) return; done = true; r.classList.add("out"); document.removeEventListener("keydown", onKey, true); setTimeout(() => { r.remove(); if (o.done) o.done(); }, rm ? 0 : 320); };   // o.done: lo que esperaba a que se cerrara la carta (la frase del crupier)
-    const onKey = e => { e.preventDefault(); e.stopPropagation(); close(); };
-    r.addEventListener("pointerdown", close);
+    let done = false, nv = null;
+    const close = () => { if (done) return; done = true; if (nv) nv.stop(); r.classList.add("out"); document.removeEventListener("keydown", onKey, true); setTimeout(() => { r.remove(); if (o.done) o.done(); }, rm ? 0 : 320); };   // o.done: lo que esperaba a que se cerrara la carta (la frase del crupier)
+    const onKey = e => { e.preventDefault(); e.stopPropagation(); if (nv && nv.saltar()) return; close(); };   // el primer toque salta al sello; el siguiente cierra
+    r.addEventListener("pointerdown", () => { if (nv && nv.saltar()) return; close(); });
     setTimeout(() => document.addEventListener("keydown", onKey, true), 400);
     const T = (fn, ms) => setTimeout(() => { if (!done) fn(); }, rm ? Math.min(ms, 30) : ms);
+    if (AC) {
+      A.restyle ? A.restyle(r) : void r.offsetWidth;
+      r.classList.add("on", "in", "open", "seal");
+      const bs = r.querySelectorAll(".cm-rv-loot .cm-b");
+      nv = AC.nivel(r, { L, k, loot: () => bs.forEach((b, i) => T(() => { b.classList.add("on"); if (A.sfx && A.sfx.coin) A.sfx.coin(i); }, i * 220)) });
+      setTimeout(() => { if (!done) close(); }, rm ? 3200 : nv.dur * 1000 + 2000 + chips.length * 220 + 400 * (k - 1));   // en Mínimo, la carta sellada se queda quieta un rato (no se cierra al instante)
+      return;
+    }
     A.restyle ? A.restyle(r) : void r.offsetWidth;
     r.classList.add("on");
     T(() => { r.classList.add("in"); if (A.sfx && A.sfx.card) A.sfx.card(); }, 60);

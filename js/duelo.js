@@ -699,6 +699,15 @@ window.AIQ = window.AIQ || {};
 
   /* ================================================================== 5 · EL VEREDICTO: titular, la cuenta ronda a ronda, las dos pilas sobre la tarima y las tarjetas nuevas */
   function finish() {
+    /* paquete «club» del Probador: por KO, antes del veredicto, la chapa del que cae se raja como cristal y su pila se viene abajo (js/acunar.js).
+       Pila de 10, 16 o 22 fichas segun lo rapido del KO. Si algo llama a finish mientras tanto (la red), el veredicto manda y la escena se va */
+    if (st.over && st.over.ko && !st._acu && A.acunar) {
+      const s0 = st, rn = st.over.rounds || st.k || 9; st._acu = 1; st.phase = "ko"; timers.forEach(clearTimeout); timers = [];
+      $("plate").classList.add("hidden");
+      A.acunar.ko({ win: !!st.over.win, me: (A.profile && A.profile.get().name) || ME(), foe: foeRaw(), tier: rn <= 4 ? 3 : rn <= 7 ? 2 : 1 }, () => { if (st === s0 && st.phase === "ko") finish(); });
+      return;
+    }
+    if (st._acu && A.acunar) A.acunar.cerrar();
     const c = C(), S = c.S, map = c.map, o = st.over, tb = st.table, s = st, win = !!o.win, nt = st.net; st.phase = "end"; S.phase = "levelEnd"; timers.forEach(clearTimeout); timers = [];
     if (nt && veiled() && !S.settingsOpen) c.runMenu();                    // entre jugadores el menu no para nada: si estaba abierto, se cierra para ver el veredicto
     map.clearMarks(); map.setDecoys([]); map.animateTo(map.home(), 900); map.setPick(false); pinsSet([]);

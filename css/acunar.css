@@ -1,0 +1,38 @@
+/* ACUÑAR (js/acunar.js): la medalla del Clásico, la carta nueva sellada, el ticket de la tienda, el anillo casi de la Enciclopedia y el KO del Duelo.
+   La escena va encima de todo menos del crupier (su capa, z 100010); lienzos a pixeles reales, sin suavizar */
+.acu { position: fixed; inset: 0; z-index: 9000; pointer-events: auto; cursor: pointer; }
+.acu-cv { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; will-change: transform; }
+.acu-tx { position: absolute; inset: 0; pointer-events: none; }
+.acu-l { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; translate: -50% 0; text-shadow: 2px 2px 0 #0a0a0c; line-height: 1; }
+.acu-l.on { opacity: 1; }
+.acu-ey { font-family: var(--mono); font-size: max(16px, calc(16px * var(--acuk, 1))); color: #f5a623; letter-spacing: .04em; text-transform: uppercase; }
+.acu-lab { font-family: var(--mono); font-size: 16px; color: #6b747d; text-transform: uppercase; }
+.acu-lab.m1.on2 { color: #d07f45; } .acu-lab.m2.on2 { color: #f4f4f8; } .acu-lab.m3.on2 { color: #fdd742; }
+.acu-big { font-family: var(--serif); font-size: 45px; } .acu-big.oro { color: #fdd742; } .acu-big.plata { color: #f3f0fa; } .acu-big.bronce { color: #f2a07c; }
+.acu-nm { font-family: var(--serif); font-size: 30px; color: #f5a623; }
+.acu-zero { font-family: var(--mono); font-size: 16px; color: #ff6b5e; text-transform: uppercase; }
+.acu-ko-t { font-family: var(--serif); font-size: 90px; text-shadow: 3px 3px 0 #0a0a0c; } .acu-ko-t.win { color: #fdd742; } .acu-ko-t.lose { color: #ff6b5e; }
+@media (max-height: 860px) { .acu-big { font-size: 34px; } .acu-ko-t { font-size: 64px; } .acu-nm { font-size: 24px; } }
+
+/* la carta nueva sellada: el mazo y la vuelta los mueve el lienzo (sin la vuelta en 3D de antes) */
+.cm-rv.acu-nv .cm-rv-dim { display: none; }
+.cm-rv.acu-nv .acu-nv-bg { z-index: 0; } .cm-rv.acu-nv .cm-rv-in { z-index: 1; } .cm-rv.acu-nv .acu-nv-fx { z-index: 2; }
+.cm-rv.acu-nv .cm-rv-flip { transform: none; transition: none; transform-style: flat; will-change: transform; }
+.cm-rv.acu-nv .cm-rv-f { backface-visibility: visible; -webkit-backface-visibility: visible; }
+.cm-rv.acu-nv .cm-rv-f.bk { transform: none; }
+.cm-rv.acu-nv .cm-rv-f.fr { visibility: hidden; } .cm-rv.acu-nv.up .cm-rv-f.fr { visibility: visible; } .cm-rv.acu-nv.up .cm-rv-f.bk { visibility: hidden; }
+.cm-rv.acu-nv .cm-rv-sl, .cm-rv.acu-nv .cm-rv-pv { display: none; }
+.cm-rv.acu-nv .sc-shadow { display: none; }
+
+/* el ticket de la tienda: sale de la ranura bajo el monedero, sobre el panel de la pieza; no bloquea nada */
+.acu-tk { position: fixed; z-index: 70; pointer-events: none; transition: opacity .25s; will-change: transform; contain: strict; }   /* su propia capa: repintarlo mientras tiembla la pantalla no repinta la tienda entera */
+.acu-tk canvas { display: block; image-rendering: pixelated; }
+.acu-tk.out { opacity: 0; }
+
+/* el anillo casi: el aro alrededor de la medalla que falta y cuánto te falta debajo */
+.cx-dmeds > span.acu-rh { position: relative; overflow: visible; }
+.acu-ring { position: absolute; pointer-events: none; image-rendering: pixelated; z-index: 0; }
+.cx-dmeds > span.acu-rh .cx-md, .cx-dmeds > span.acu-rh em { position: relative; z-index: 1; }
+.cx-dmeds > span.acu-rh em { margin-top: 4px; text-shadow: 2px 2px 0 #0a0a0c; }   /* el aro no pisa la etiqueta */
+.acu-falta { position: absolute; left: 50%; top: 100%; translate: -50% 4px; font-family: var(--mono); font-size: 16px; font-style: normal; color: #c9cde0; white-space: nowrap; text-shadow: 2px 2px 0 #0a0a0c; opacity: 0; pointer-events: none; z-index: 2; }
+.acu-falta.on { opacity: 1; }
