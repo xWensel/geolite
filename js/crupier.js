@@ -318,6 +318,7 @@ window.AIQ = window.AIQ || {};
           if (G.i === G.stop && !G.rel) break;
           G.at += fr[G.i][1]; G.i++;
           if (G.hit && fr[G.i] && fr[G.i][0] === G.x.hit) { try { G.hit(); } catch (e) { /* nada */ } }   // el toque del gesto (p. ej. suena la palmada)
+          if (A.crupier.onFrame && fr[G.i] && G.x.pm) { try { A.crupier.onFrame(this, G, G.i); } catch (e) { /* nada */ } }   // v0.3.24x: sus gestos suenan en el fotograma del contacto (js/son-casa.js)
         }
         if (G.i >= fr.length) { const d = G.done; this.gest = null; this.fidgetAt = 0; if (d) setTimeout(d, 0); return this.pose(now); }
         const f = fr[G.i];

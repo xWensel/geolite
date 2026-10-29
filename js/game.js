@@ -954,10 +954,12 @@
       if (!still()) return; A.sfx.reveal(tier);
       if (A.celebra && guess && tier >= 1 && tier <= 4) A.celebra.acierto(tier);                 // v0.3.203: la onda de choque en el mapa, bajo tu chincheta (js/celebra.js)
       if (SIL) {                                                                                  // ...y luego el golpe: el del jackpot 3, los aros de oro y la vibracion mas larga
-        A.sfx.impacto(); jpShake(3); A.casa.luz(0.9, 900); A.casa.destello(3); if (A.haptic && A.haptic.dual) A.haptic.dual(1, 0.9, 520); else if (A.haptic) A.haptic([300]);
+        A.sfx.impacto(); jpShake(3); A.casa.luz(0.9, 900); A.casa.destello(3); if (A.haptic && A.haptic.esc) A.haptic.esc("diana", { k: 1.5 }); else if (A.haptic && A.haptic.dual) A.haptic.dual(1, 0.9, 520); else if (A.haptic) A.haptic([300]);
         if (map.marks.rings && par.vivo) map.marks.rings.oro = performance.now();   // con Movimiento Minimo ya estan encendidos, quietos
       }
       else if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); A.casa.destello(2); }          // la diana pega: golpe grave, un temblor y la lampara que sube
+      /* v0.3.24x (la escalera del mando, Extrema): cada resultado vibra con su patron; los fallos, solo por el motor grave y cayendo */
+      if (A.haptic && A.haptic.esc && guess !== undefined) { const k = tier === 4 && guess ? (SIL ? null : "diana") : tier === 3 ? "muybien" : tier === 2 ? "acierto" : tier === 0 || tier === 5 ? "fallo" : null; if (k) A.haptic.esc(k); }
       else if (tier === 0 || tier === 5) A.casa.baja(tier === 0 && prevStreak >= 2 ? 1 : 0.7);    // fallo: la lampara baja un momento
       /* v0.3.201 (Bloque F, paso 4): el mundo responde a tu racha (la sala, la musica y la pila de fichas: js/casa.js) y el publico de la sala
          reacciona (js/audio.js): aplauso en la diana, «oooh» si te quedas a nada, vitores al llegar a racha 5 y un «ooow» si se rompe una de 3 o mas */
@@ -980,9 +982,14 @@
        apagada a x1. En el Clasico la racha no multiplica: solo cuenta (fila RACHA) */
     const eq = S.run ? (mult > 1 ? "on" : prevStreak >= 2 && !S.streak ? "broken" : "off") : null;
     const broke = eq === "broken" || (!S.run && prevStreak >= 2 && !S.streak);
-    if (A.celebra) A.celebra.racha({ antes: prevStreak, ahora: S.streak || 0, eq, slam: T_SLAM - M0 });   // v0.3.203: el fuego de la racha detras de la caja roja
+    if (A.celebra) A.celebra.racha({ antes: prevStreak, ahora: S.streak || 0, eq, slam: T_SLAM - M0 });
+    /* v0.3.24x (Probador, «Silencios»): la racha rota frena la cinta. La cancion cae dos octavas en 450 ms y se calla justo cuando se agrieta la
+       ficha (T_SLAM); el mando lo nota por el motor grave mientras frena */
+    if (broke) later(() => { if (still() && A.music.freno && A.music.freno(450) && A.haptic && A.haptic.pat) A.haptic.pat([{ t: 0, d: 450, lo: 0.3, hi: 0 }], { movil: false }); }, T_SLAM - 480);   // v0.3.203: el fuego de la racha detras de la caja roja
     later(() => {
       if (!still()) { if (S.phase === "asking") setStreak(); return; }
+      if ((eq === "on" || (!S.run && S.streak >= 2)) && S.streak >= 3 && A.haptic && A.haptic.esc) A.haptic.esc(S.streak >= 5 ? "racha5" : "racha3");   // la pila de fichas, tambien en la mano
+      if (broke && A.haptic && A.haptic.esc) A.haptic.esc("rota");
       if (eq === "on" || (!S.run && S.streak >= 2)) { A.sfx.streak(S.streak); if (eq === "on") A.casa.luz(0.4, 520); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
       else if (broke) { if (A.sfx.streakBreak) A.sfx.streakBreak(); if (eq) shards(); }
       setStreak();
