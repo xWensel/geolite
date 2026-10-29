@@ -1185,6 +1185,15 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     p.best = Math.max(p.best, shown); p.bestIq = Math.max(p.bestIq, iq); save();
     if (pass && S.level === S.camp.levels.length - 1) return endScreen(true, iq);
     if (pass) {
+      const medalAt = S.camp.mode === "classic" ? (S.level === 2 ? "bronze" : S.level === 5 ? "silver" : null) : null;   // 3.º nivel superado = bronce, 6.º = plata
+      const prevMedal = medalAt && A.profile.get().medals[S.camp.id];
+      if (medalAt) A.profile.medal(S.camp.id, medalAt);
+      const acuNew = medalAt && A.acunar && prevMedal !== medalAt && !(prevMedal === "gold" || (prevMedal === "silver" && medalAt === "bronze"));
+      if (acuNew) { const pend = () => levelVerdict(); return A.acunar.medalla({ pct: medalAt === "silver" ? 75 : 50, metal: medalAt === "silver" ? "plata" : "bronce", camp: A.tx(S.camp.title) }, () => { A.sfx.victory(); pend(); }); }
+      return levelVerdict();
+    }
+    if (!pass) { if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.fail, 380); return endScreen(false, iq); }
+    function levelVerdict() {
       if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.win, 380);
       verdict({
         kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
@@ -1192,7 +1201,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
         buttons: [{ id: "menuBtn", cls: "btn-line", label: A.t("btn.newGame"), onclick: () => { S.startLevel = 0; showTitle(); } },   // salir al menu sin tener que rendirse en la pausa (el progreso ya esta guardado arriba)
           { id: "nlBtn", cls: "btn-ink", label: A.t("btn.nextLevel"), arrow: true, primary: true, onclick: () => startLevel_(S.level + 1) }],
       });
-    } else { if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.fail, 380); endScreen(false, iq); }
+    }
   }
 
   function endScreen(win, iq) {
@@ -1202,7 +1211,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (S.camp.mode === "classic") {
       classicFinale = win && !A.profile.classicDone();                  // v0.3.236: antes de registrar esta victoria el Clasico no estaba entero: si esta es la que lo completa, es el segundo final del juego
       if (win && A.clubRetos) A.clubRetos.ev("camp");
-      if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); acu = { pct: r * 100, metal: r >= 0.85 ? "oro" : r >= 0.7 ? "plata" : "bronce", camp: A.tx(S.camp.title) }; }
+      if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); A.profile.medal(S.camp.id, "gold"); A.ach.emit("classic", { win: true, clean: !!S.clean }); acu = { pct: 100, metal: "oro", camp: A.tx(S.camp.title) }; }   // la medalla va por niveles: bronce al 3.º, plata al 6.º, oro al terminar la campaña
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }
     if (acu && !A.acunar) acu = null;
