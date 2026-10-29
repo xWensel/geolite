@@ -64,7 +64,7 @@ window.AIQ = window.AIQ || {};
       ]
     },
     {
-      id: "0.3.246",
+      id: "0.3.247",
       name: L("Clasificación sin parpadeo", "Leaderboard without flicker", "Classement sans clignotement", "Placar sem piscar", "Rangliste ohne Flackern", "Classifica senza sfarfallio", "", "排行榜不再闪烁", "순위표 깜빡임 없음", "ランキングのちらつきなし", "Таблица без мерцания", "Tabela bez migotania"),
       date: "2026-10-30",
       summary: L("Al volver a entrar en la Clasificación ya no se dibuja dos veces.", "Reopening the leaderboard no longer redraws it twice.", "Rouvrir le classement ne le redessine plus deux fois.", "Ao reabrir o placar, ele já não é desenhado duas vezes.", "Beim erneuten Öffnen wird die Rangliste nicht mehr doppelt gezeichnet.", "Riaprendo la classifica non viene più ridisegnata due volte.", "", "重新打开排行榜时不再绘制两次。", "순위표를 다시 열어도 두 번 그려지지 않아요.", "ランキングを開き直しても二重に描画されません。", "При повторном открытии таблица больше не рисуется дважды.", "Ponowne otwarcie tabeli nie rysuje jej już dwa razy."),
@@ -72,7 +72,7 @@ window.AIQ = window.AIQ || {};
         { id: "clasif", kicker: L("Arreglo", "Fix", "Correctif", "Correção", "Fehlerbehebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
           title: L("Clasificación", "Leaderboard", "Classement", "Placar", "Rangliste", "Classifica", "", "排行榜", "순위표", "ランキング", "Таблица", "Tabela"),
           entries: [
-            E(L("Sin pestañeo al entrar", "No flicker on entry", "Plus de clignotement à l'ouverture", "Sem piscar ao entrar", "Kein Flackern beim Öffnen", "Niente sfarfallio all'apertura", "", "打开时不再闪烁", "열 때 깜빡임 없음", "開くときのちらつきなし", "Без мерцания при входе", "Bez migotania przy wejściu"), "fix", "0.3.246", [
+            E(L("Sin pestañeo al entrar", "No flicker on entry", "Plus de clignotement à l'ouverture", "Sem piscar ao entrar", "Kein Flackern beim Öffnen", "Niente sfarfallio all'apertura", "", "打开时不再闪烁", "열 때 깜빡임 없음", "開くときのちらつきなし", "Без мерцания при входе", "Bez migotania przy wejściu"), "fix", "0.3.247", [
               L("La pantalla se dibujaba dos veces al abrirse y la animación de entrada se reiniciaba. Ahora se dibuja una vez y los datos se rellenan encima.", "The screen was drawn twice on opening and the entry animation restarted. It is now drawn once and the data fills in on top.", "L'écran était dessiné deux fois à l'ouverture et l'animation d'entrée repartait. Il est désormais dessiné une fois et les données s'y ajoutent.", "A tela era desenhada duas vezes ao abrir e a animação de entrada reiniciava. Agora é desenhada uma vez e os dados preenchem por cima.", "Der Bildschirm wurde beim Öffnen doppelt gezeichnet und die Einblendung startete neu. Jetzt wird er einmal gezeichnet und die Daten füllen ihn auf.", "La schermata veniva disegnata due volte all'apertura e l'animazione d'ingresso ripartiva. Ora viene disegnata una volta sola e i dati si riempiono sopra.", "", "打开时画面会绘制两次，入场动画也会重新开始。现在只绘制一次，数据直接填入。", "열 때 화면이 두 번 그려지고 입장 애니메이션이 다시 시작됐어요. 이제 한 번만 그려지고 데이터가 그 위에 채워져요.", "При открытии экран рисовался дважды, а анимация входа начиналась заново. Теперь он рисуется один раз, а данные заполняются поверх.", "Ekran rysował się dwa razy przy otwarciu, a animacja wejścia startowała od nowa. Teraz rysuje się raz, a dane wypełniają go od góry."),
             ]),
           ] },
