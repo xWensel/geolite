@@ -1,0 +1,39 @@
+/* v0.3.24x (Probador, «Campamento y casino», Extrema): EL CAMPAMENTO SE SIENTE (js/campamento-fx.js) y EL INSTANTE DECISIVO (js/decisivo.js).
+   Todo sobre las piezas: nada salta ni flota, ninguna luz alrededor de los botones, el pixel art a escala entera */
+
+/* ---------------------------------------------------------------- el sobre: las cartas llegan boca abajo y se voltean en cadena */
+.gx-camp.sb-on .offers > .offer.pc { animation: none; transition: none; }                 /* el reparto lo lleva el sobre */
+.gx-camp .offer.pc.sb-down > :not(.sb-dorso):not(.sb-luz) { visibility: hidden; }        /* boca abajo: solo el dorso */
+.gx-camp .offer.pc.sb-down { box-shadow: none; background: none; }
+.gx-camp .offer.pc.sb-down::before, .gx-camp .offer.pc.sb-down::after { visibility: hidden; }
+.gx-camp .offer.pc.sb-gira, .gx-camp .offer.pc.sb-down { z-index: 5; }
+.gx-camp .sb-dorso { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: block; }
+.gx-camp .sb-dorso { background: no-repeat 0 0 / 100% 100%; image-rendering: pixelated; }   /* el dorso, a la medida exacta en pixeles del dispositivo */
+/* la luz de la lampara que cruza la cara al girar (y, en la mejor carta, con algo de su color) */
+.gx-camp .sb-luz { position: absolute; inset: 0; z-index: 11; pointer-events: none; opacity: 0; overflow: hidden; }
+.gx-camp .sb-luz::before { content: ""; position: absolute; top: 0; bottom: 0; left: -100%; width: 300%; transform: translateX(-25%); will-change: transform;
+  background: linear-gradient(100deg, transparent 38%, color-mix(in srgb, color-mix(in srgb, var(--sbc, #fff5dc) 55%, #fff5dc) 70%, transparent) 50%, transparent 62%); }
+/* la mejor carta: su canto se enciende de su color y se apaga */
+.gx-camp .sb-canto { position: absolute; inset: 0; z-index: 9; pointer-events: none; opacity: 0;
+  box-shadow: inset 0 0 0 4px var(--sb2), inset 0 0 0 6px color-mix(in srgb, var(--sb1) 70%, transparent), inset 0 0 24px 10px color-mix(in srgb, var(--sb2) 55%, transparent); }   /* todo en mezcla normal: los modos de mezcla cuestan fotogramas en el Campamento (medido) */
+/* la epica y la legendaria: su luz sobre el tapete, detras de la carta */
+.gx-camp .sb-charco { position: absolute; z-index: 0; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 90px 46px color-mix(in srgb, var(--sb2) 60%, transparent), 0 0 28px 14px color-mix(in srgb, var(--sb2) 70%, transparent); background: color-mix(in srgb, var(--sb2) 40%, transparent); }
+
+/* ---------------------------------------------------------------- los rodillos de laton del contador */
+.gx-camp .tb-coins.rd-on > b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.gx-camp .tb-coins .rd-cv { display: block; flex: none; image-rendering: pixelated; }
+
+/* ---------------------------------------------------------------- la lampara del saldo */
+#layer > .sl-luz { position: absolute; inset: 0; z-index: 40; display: none; pointer-events: none; }   /* una sola capa, en #layer, que se queda entre repintados */
+#layer:not(.hidden):has(> #dlg .table.mesa.gx-camp) > .sl-luz { display: block; }
+/* el brillo del laton: solo en la banda de laton del marco (de 2 a 6 px del borde de los paneles; de 2 a 5 en el contador) */
+.gx-camp .sl-laton { position: absolute; inset: 2px; z-index: 3; padding: 4px; pointer-events: none; opacity: 0; image-rendering: pixelated;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.gx-camp .sl-laton.c { padding: 3px; }
+
+/* ---------------------------------------------------------------- el instante decisivo: la sala sin color salvo la pieza que decide */
+.dcv { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; opacity: 0; -webkit-backdrop-filter: grayscale(1) brightness(.55); backdrop-filter: grayscale(1) brightness(.55);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.dcv-luz { position: fixed; z-index: 2147483001; pointer-events: none; opacity: 0; -webkit-backdrop-filter: brightness(1.08); backdrop-filter: brightness(1.08); }
+html.reduce-motion .dcv, html.reduce-motion .dcv-luz { display: none; }

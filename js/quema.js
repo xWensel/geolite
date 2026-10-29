@@ -5,6 +5,9 @@
  * que sube desde abajo.
  *   --qp  avance 0-1            --qs  semilla             --qc  celda (px locales)        --qz  px a 1080p por px local
  *   --qm  0 mascara: lo que queda de lo viejo   1 mascara: lo que ya aparecio   2 filo (lo viejo se quema)   3 filo (aparece)   4 filo oscuro (se va)
+ *   v0.3.24x (Probador, Campamento «Quema por rareza»): --qk el color del filo (0 oro de siempre, 1 comun: ceniza gris, 2 rara: azul, 3 epica: violeta,
+ *   4 legendaria: oro ancho, 5 venta: filo oscuro sin luz), --qw el ancho del filo (x1 el de siempre) y --qx las chispas de una celda dentro del filo
+ *   (1 vivas, 2 quietas con Movimiento minimo). Todas las rampas son de geolite40, de fuera hacia el corazon del fuego.
  */
 /* global registerPaint */
 const fr = v => v - Math.floor(v);
@@ -27,12 +30,16 @@ function campo(cw, ch, c, z, seed) {
   CACHE.set(key, f); return f;
 }
 const num = (p, k, d) => { const v = parseFloat(String(p.get(k))); return isFinite(v) ? v : d; };
-const W = 0.055;                                                        // el ancho del filo (en unidades de ruido)
+const W0 = 0.055;                                                       // el ancho del filo de siempre (en unidades de ruido)
 const ORO = ["#f5a623", "#fdd742", "#fff3b0"], OSCURO = ["#a8142e", "#c46a1b", "#f5a623"];   // geolite40: del borde al corazon del fuego
+/* las rarezas (--qk): las rampas de geolite40 de la maqueta; la venta se consume sin luz */
+const RAREZA = [ORO, ["#5c565b", "#8a8fa8", "#c9cde0"], ["#0c60d3", "#7ac8ff", "#f3f0fa"], ["#4a1d96", "#9c7ce6", "#f3f0fa"], ["#c46a1b", "#fdd742", "#fff3b0"], ["#0a0a0c", "#1d0a3d", "#301252"]];
+const CHISPA = "#f3f0fa";
 registerPaint("quema", class {
-  static get inputProperties() { return ["--qp", "--qs", "--qc", "--qz", "--qm"]; }
+  static get inputProperties() { return ["--qp", "--qs", "--qc", "--qz", "--qm", "--qk", "--qw", "--qx"]; }
   paint(g, size, p) {
     const P = num(p, "--qp", 0), seed = num(p, "--qs", 7), c = Math.max(1, num(p, "--qc", 2)), z = num(p, "--qz", 1.5), m = num(p, "--qm", 0) | 0;
+    const qk = num(p, "--qk", 0) | 0, W = W0 * Math.max(0.5, Math.min(3, num(p, "--qw", 1))), qx = num(p, "--qx", 0) | 0;
     const cw = Math.ceil(size.width / c), ch = Math.ceil(size.height / c); if (!cw || !ch) return;
     const f = campo(cw, ch, c, Math.round(z * 100) / 100, Math.round(seed * 100) / 100), th = P * 1.25 - 0.12, vivo = P > 0.001 && P < 0.999;
     if (m === 0 || m === 1) {                                            // la mascara: tramos seguidos de cada fila
@@ -48,7 +55,7 @@ registerPaint("quema", class {
     }
     if (!vivo) return;
     /* cada celda del filo, en su banda de color (tramos seguidos de la misma banda en un solo rectangulo); delante, lo que se tuesta */
-    const pal = m === 4 ? OSCURO : ORO, TOSTADO = ["rgba(40, 20, 8, 0.36)", "rgba(40, 20, 8, 0.22)", "rgba(40, 20, 8, 0.1)"];
+    const pal = qk > 0 && qk < RAREZA.length ? RAREZA[qk] : m === 4 ? OSCURO : ORO, TOSTADO = ["rgba(40, 20, 8, 0.36)", "rgba(40, 20, 8, 0.22)", "rgba(40, 20, 8, 0.1)"];
     const banda = d => (d < 0 || d >= W * 3 ? -1 : d < W ? (d < W / 3 ? 2 : d < W * 2 / 3 ? 1 : 0) : m === 2 ? 3 + Math.min(2, Math.floor((d - W) / (W * 2 / 3))) : -1);
     for (let j = 0; j < ch; j++) {
       let i0 = 0, b0 = banda(f[j * cw] - th);
@@ -57,6 +64,14 @@ registerPaint("quema", class {
         if (b === b0) continue;
         if (b0 >= 0) { g.fillStyle = b0 < 3 ? pal[b0] : TOSTADO[b0 - 3]; g.fillRect(i0 * c, j * c, (i - i0) * c, c); }
         i0 = i; b0 = b;
+      }
+    }
+    /* las chispas de la epica: celdas sueltas que se encienden DENTRO del filo (nada salta ni flota); vivas cambian con el avance, quietas no */
+    if (qx) {
+      const k = qx === 2 ? 0 : Math.floor(P * 40), um = qx === 2 ? 0.93 : 0.86; g.fillStyle = CHISPA;
+      for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) {
+        const d = f[j * cw + i] - th; if (d < 0 || d >= W * 0.7) continue;
+        if (h21(i + k * 3.1 + seed, j + seed * 0.7) > um) g.fillRect(i * c, j * c, c, c);
       }
     }
   }

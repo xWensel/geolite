@@ -627,6 +627,7 @@ window.AIQ = window.AIQ || {};
     spark: -5.1, spot: -22.5, ssBounce: -20.9, ssOn: -20.5, ssWake: -21.1, studio: -28.4, sweep: -19.6, tear: -19.7, thunder: -23.8, trapStamp: -20, victory: -17.8,
     warn: -21.2, wheelLand: -20.8, wheelTick: -20.9, wipe: -20.7, zUndo: -19.8, zumbido: -20,
     debFrost: -20, debSand: -21, debTiles: -21, debFilm: -20, debSignal: -21, debCard: -20, debCardOff: -21, debDrops: -21, debWipe: -22, debWipeEnd: -21,   // v0.3.238 los debufos de materia (js/debufos.js)
+    camVuelta: -22, camRaro: -18, camQuema: -20, camVende: -22, camTic: -21, camAsienta: -22, decisivo: -19,   // v0.3.24x el Campamento y el instante decisivo (js/campamento-fx.js, js/decisivo.js)
     otro: -14,
   };
   const LEG_LP = { diceRattle: 3000, diceSnake: 3000, diceTick: 3000, flapRoll: 3000, gbNoise: 3000, ice: 3000, plkTick: 3600, rain: 3600, rcNoise: 3000, rcScratch: 3000, spark: 2600 };
@@ -990,6 +991,31 @@ window.AIQ = window.AIQ || {};
     debDrops: old("debDrops", t => { for (let i = 0; i < 3; i++) { const at = t + i * (0.12 + Math.random() * 0.1), os = ctx.createOscillator(), g = ctx.createGain(); os.type = "sine"; os.frequency.setValueAtTime(900 + Math.random() * 900, at); os.frequency.exponentialRampToValueAtTime(300 + Math.random() * 200, at + 0.1); os.connect(g).connect(lb); g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(0.07, at + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.12); os.start(at); os.stop(at + 0.15); noise(at, 0.05, { lp: 1200, vol: 0.04 }); } }),
     debWipe: old("debWipe", t => { noise(t, 0.35, { lp: 1700, vol: 0.07 }); const os = ctx.createOscillator(), g = ctx.createGain(); os.type = "sine"; os.frequency.setValueAtTime(1500 + Math.random() * 500, t); os.frequency.linearRampToValueAtTime(2300 + Math.random() * 600, t + 0.18); os.connect(g).connect(lb); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.02, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); os.start(t); os.stop(t + 0.22); }),
     debWipeEnd: old("debWipeEnd", t => { bell(98 + Math.round(Math.random() * 2), t, { vol: 0.05, dur: 0.6, rev: 0.5 }); bell(105, t + 0.04, { vol: 0.025, dur: 0.5, rev: 0.5 }); }),
+    /* v0.3.24x el Campamento (js/campamento-fx.js) y el instante decisivo (js/decisivo.js). Nunca iguales: altura, filtro y fuerza al azar en su margen */
+    camVuelta: old("camVuelta", (t, star = 0, k = 0) => { noise(t, 0.05, { hp: (star ? 1800 : 2500) + Math.random() * 500, vol: 0.11 }); thump(t, { vol: 0.1, f0: 230 - k * 14 + Math.random() * 30, f1: 110, dur: 0.06 });
+      if (star) { const os = ctx.createOscillator(), g = ctx.createGain(); os.type = "sine"; os.frequency.setValueAtTime(196 * (0.98 + Math.random() * 0.04), t); os.frequency.exponentialRampToValueAtTime(262, t + 0.3); os.connect(g).connect(lb); env(g, t, 0.02, 0.05, 0.33); os.start(t); os.stop(t + 0.4); } }),
+    camRaro: old("camRaro", (t, lv = 1) => {
+      const j = () => Math.round((Math.random() - 0.5) * 2);
+      if (lv <= 1) { bell(91 + j(), t, { vol: 0.06, dur: 0.6, rev: 0.4 }); bell(96, t + 0.03, { vol: 0.04, dur: 0.7, rev: 0.45 }); bell(103, t + 0.05, { vol: 0.014, dur: 0.45, rev: 0.4 }); return; }
+      if (lv === 2) { [0, 4, 7, 11].forEach((st, i) => pluck(67 + st, t + i * 0.035, { vol: 0.07, dur: 0.7, bright: 4, rev: 0.35 })); bell(98 + j(), t + 0.1, { vol: 0.05, dur: 0.7, rev: 0.45 }); bell(103, t + 0.13, { vol: 0.03, dur: 0.6, rev: 0.45 }); return; }
+      thump(t, { vol: 0.3, f0: 98, f1: 60, dur: 0.6 }); [0, 4, 7, 12, 16].forEach((st, i) => bell(79 + st, t + 0.04 + i * 0.05, { vol: 0.05 - i * 0.006, dur: 1, rev: 0.5 })); }),
+    camQuema: old("camQuema", (t, lv = 0, n = 0) => {
+      const up = [0, 2, 4, 5, 7, 9][Math.min(5, n | 0)];                    // cada compra de la visita sube un grado
+      noise(t, 0.5, { lp: 1400 + Math.random() * 300, vol: 0.06, sweepTo: 700 }); noise(t + 0.08, 0.25, { hp: 3800, vol: 0.025 });
+      if (lv >= 1) [0, 4, 7].forEach((st, i) => pluck(72 + up + st, t + 0.1 + i * 0.07, { vol: 0.05, dur: 0.25, bright: 3, rev: 0.3 }));
+      if (lv === 1) bell(91 + up, t + 0.12, { vol: 0.04, dur: 0.5, rev: 0.4 });
+      if (lv === 2) [0, 4, 7, 11].forEach((st, i) => pluck(67 + up + st, t + 0.14 + i * 0.035, { vol: 0.05, dur: 0.6, bright: 4, rev: 0.35 }));
+      if (lv === 3) { thump(t + 0.05, { vol: 0.3, f0: 98, f1: 60, dur: 0.55 }); [0, 4, 7, 12].forEach((st, i) => bell(84 + up + st, t + 0.15 + i * 0.05, { vol: 0.045, dur: 0.9, rev: 0.5 })); } }),
+    camVende: old("camVende", t => { noise(t, 0.4, { lp: 500 + Math.random() * 120, vol: 0.09 }); const os = ctx.createOscillator(), g = ctx.createGain(), l = ctx.createBiquadFilter(); os.type = "triangle"; os.frequency.setValueAtTime(330 * (0.97 + Math.random() * 0.06), t); os.frequency.exponentialRampToValueAtTime(220, t + 0.25); l.type = "lowpass"; l.frequency.value = 1500; os.connect(l).connect(g).connect(lb); env(g, t, 0.01, 0.05, 0.26); os.start(t); os.stop(t + 0.35); }),
+    camTic: old("camTic", (t, sign = 1, i = 0, v = 1) => { const D = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24], m = Math.max(57, Math.min(96, 81 + (sign > 0 ? 1 : -1) * D[Math.min(10, Math.floor(i / 2))]));
+      pluck(m, t, { vol: 0.05 * v, dur: 0.05, bright: 3.6, rev: 0.08 }); noise(t, 0.012, { hp: 4000 + Math.random() * 400, vol: 0.06 * v }); }),
+    camAsienta: old("camAsienta", t => { thump(t, { vol: 0.16, f0: 150 * (0.95 + Math.random() * 0.1), f1: 90, dur: 0.12 }); noise(t, 0.04, { lp: 700, vol: 0.14 }); }),
+    decisivo: old("decisivo", (t, win = 0.55, tier = 1, k = 1) => {
+      const up = Math.pow(2, (3 + tier * 2) / 12), d = win + 0.05;
+      [[82, "sine", 0.1, 0], [164, "triangle", 0.025, 900]].forEach(([f, ty, v, lp]) => { const os = ctx.createOscillator(), g = ctx.createGain(); os.type = ty; os.frequency.setValueAtTime(f, t); os.frequency.exponentialRampToValueAtTime(f * up, t + d);
+        let n = os; if (lp) { const l = ctx.createBiquadFilter(); l.type = "lowpass"; l.frequency.value = lp; os.connect(l); n = l; } n.connect(g).connect(lb);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v * k, t + 0.05); g.gain.setValueAtTime(v * k, t + d - 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.06); os.start(t); os.stop(t + d + 0.1); });
+      if (tier === 3) { thump(t, { vol: 0.28 * k, f0: 70, f1: 34, dur: 0.18 }); thump(t + Math.min(0.32, win * 0.55), { vol: 0.22 * k, f0: 66, f1: 32, dur: 0.2 }); } }),
     ding: old("ding", t => { bell(81, t, { vol: 0.09, dur: 0.6, rev: 0.25 }); bell(76, t + 0.09, { vol: 0.08, dur: 0.8, rev: 0.3 }); }),
     lowbat: old("lowbat", t => { [0, 0.16].forEach((d, i) => { const os = ctx.createOscillator(), g = ctx.createGain(); os.type = "square"; os.frequency.value = i ? 660 : 880; os.connect(g).connect(lb); env(g, t + d, 0.004, 0.035, 0.12); os.start(t + d); os.stop(t + d + 0.16); }); }),
     charge: old("charge", t => { [72, 79, 84].forEach((m, i) => pluck(m, t + i * 0.07, { vol: 0.07, dur: 0.3, bright: 3, rev: 0.3 })); noise(t, 0.3, { hp: 800, sweepTo: 6000, vol: 0.025, type: "highpass" }); }),
