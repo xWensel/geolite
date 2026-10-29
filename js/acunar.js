@@ -238,6 +238,10 @@ window.AIQ = window.AIQ || {};
     const f = Math.max(0, Math.min(100, Math.floor(o.pct))), fin = o.metal || (f >= 85 ? "oro" : f >= 70 ? "plata" : "bronce"), r = XM.ritmo;
     /* guion: golpes (bronce; plata al pasar el 70; oro al pasar el 85), tramos de la cuenta, cinta y brillo */
     const ev = [], seg = []; let t = 0.3 * r, v = Math.min(50, f);
+    /* el bronce no tiene tramo propio (la cuenta arrancaba ya en 50 y el odometro se quedaba clavado): el odometro corre de 0 a 50 con el disco liso
+       y la prensa golpea al llegar, como la plata y el oro golpean al cruzar su marca */
+    const v0 = fin === "bronce" ? 0 : v;
+    if (v0 < v) { const d = (0.25 + v * 0.02) * r; seg.push({ t0: t, t1: t + d, v0, v1: v }); t += d; }
     t += 0.2 * r; ev.push({ t, m: "bronce", n: 1 }); t += 0.3 * r;
     for (const [u, m, n] of [[70, "plata", 2], [85, "oro", 3]]) {
       if (nDe(fin) < n) break;
@@ -300,12 +304,12 @@ window.AIQ = window.AIQ || {};
       frame(S, Ev, dt) {
         const g = S.g, W = S.W, H = S.H, d = dpr(), k = kk(), Sx = Math.max(2, Math.round(XM.escala * k * d)), red = S.red;
         let metal = "bronce", liso = true; for (const e of ev) if (Ev >= e.t) { metal = e.m; liso = false; }
-        let vv = Math.min(50, f);
+        let vv = v0;
         for (const s of seg) { if (Ev >= s.t1) vv = s.v1; else if (Ev > s.t0) { let q = (Ev - s.t0) / (s.t1 - s.t0); q = s.slow ? E.inout(q) : E.out3(q); vv = s.v0 + (s.v1 - s.v0) * q; break; } }
         if (red || Ev >= tFin) vv = f;
         if (!red) {
           for (const e of ev) if (Ev >= e.t && !S.fired.has(e)) { S.fired.add(e); if (Ev - e.t < 0.2) { son("acPrensa", e.n); tiembla(Math.min(XM.temblor, e.n)); vibra(0.3 + 0.22 * e.n, 0.12 + 0.25 * (e.n - 1), 110 + 70 * e.n); otImp = 0; ampImp = XM.onda * (0.55 + 0.25 * e.n); } }
-          const vi = Math.floor(vv), now = performance.now(); if (vi !== lastV && lastV >= 0 && now - lastTick > 34 && Ev < tFin) { son("acRodillo", (vi - 50) / 50); lastTick = now; } lastV = vi;
+          const vi = Math.floor(vv), now = performance.now(); if (vi !== lastV && lastV >= 0 && now - lastTick > 34 && Ev < tFin) { son("acRodillo", Math.max(0, (vi - 50) / 50)); lastTick = now; } lastV = vi;
           if (Ev >= tCinta && !S.fired.has("c")) { S.fired.add("c"); son("card"); }
           if (Ev >= tBrillo && !S.fired.has("b")) { S.fired.add("b"); son("acBrillo", nDe(fin)); }
         }

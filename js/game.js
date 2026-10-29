@@ -53,7 +53,21 @@
   const fmtKm = A.fmtDist;
 
   /* ------------------------------------------------------------ arranque */
-  load(); A.wiki.loadShort(A.wlang());                                    // es-419 usa las notas de es (no hay es-419-s.json)
+  /* medallas de las fases ya pasadas: el bronce (3.er nivel) y la plata (6.º) se daban solo al superarlos en directo; quien ya los habia pasado antes
+     de que existieran se quedaba sin ellas. Aqui se reconcilia el progreso guardado (niveles superados = unlocked - 1) y las victorias; solo sube, nunca baja */
+  function retroMedals() {
+    try {
+      const pr = A.profile, P = pr && pr.get(); if (!P || !A.CAMPAIGNS) return;
+      for (const c of A.CAMPAIGNS) {
+        if (c.mode !== "classic") continue;
+        const u = (S.prog[c.id] && S.prog[c.id].unlocked) || 1;
+        if (P.records["classic:" + c.id + ":win"]) pr.medal(c.id, "gold");
+        else if (u >= 7) pr.medal(c.id, "silver");
+        else if (u >= 4) pr.medal(c.id, "bronze");
+      }
+    } catch (e) { /* sin perfil aun */ }
+  }
+  load(); retroMedals(); A.wiki.loadShort(A.wlang());                                   // es-419 usa las notas de es (no hay es-419-s.json)
   const world = A.geo.buildWorld();
   { const col = $("leftCol"), pl = document.querySelector(".plate-sh"); if (col && pl) col.appendChild(pl); }        // columna izquierda: placa, marcador de partida y logros (el mapa queda libre)
   const map = A.createMap($("map"), world, onPick);
