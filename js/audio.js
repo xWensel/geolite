@@ -436,6 +436,19 @@ window.AIQ = window.AIQ || {};
       musBus.gain.setTargetAtTime(base * level, t, 0.05); musBus.gain.setTargetAtTime(base, t + ms / 1000, 0.4);
     },
     muffle(on) { muf = !!on; tone(); },
+    /* La pregunta y el revelado (js/revelado.js): la sala contiene el aliento (la musica baja a su fondo con un paso bajo) y lo suelta; y el silencio
+       de la diana perfecta: la casa se calla en seco ms milisegundos y vuelve */
+    aliento(on) {
+      if (!ctx || cur < 0) return; const t = ctx.currentTime;
+      if (!on) { tone(); return; }
+      musFilter.frequency.cancelScheduledValues(t); musFilter.frequency.setTargetAtTime(Math.min(fcut(), 260), t, 0.12);
+      musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel() * 0.55, t, 0.12);
+    },
+    calla(ms = 700) {
+      if (!ctx || cur < 0) return; const t = ctx.currentTime;
+      musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(0, t, 0.012);
+      musFilter.frequency.cancelScheduledValues(t); musFilter.frequency.setTargetAtTime(fcut(), t + ms / 1000, 0.05); musBus.gain.setTargetAtTime(musLevel(), t + ms / 1000, 0.05);
+    },
     /* v0.3.201 (Bloque F, paso 4): la musica sigue tu racha. energia(on): con racha de 3 o mas entra la capa de tension de la cancion (la de los
        ultimos segundos) en el siguiente pulso, sin cortar, y se queda mientras dure la racha; las de antes, sin capas, se abren un punto.
        enfria(): un fallo le quita los agudos un momento y vuelve. Solo se llaman al revelar: mientras contestas, la musica no cambia */
@@ -599,6 +612,7 @@ window.AIQ = window.AIQ || {};
     tick: -11.5, streak: -7.0, streakBreak: -25.5, flag: -14.0, coin: -19.2, jackpot1: -13.2, jackpot2: -13.0, jackpot3: -14.5, barrido: -6.6, goal: -14.5,
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
     boss: -23.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
+    clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
   };
   /* la regla: escalon de cada efecto sin version nueva (dB de su tira; ver LEG_OBJ en la herramienta de medida) y paso bajo propio si 4,2 kHz no basta */
   const LEG = {
@@ -718,6 +732,35 @@ window.AIQ = window.AIQ || {};
     /* contador de puntos: sube por la escala, como una maquinita */
     count: go((t, k = 0) => { const b = bus("count", 0.03); felt(b, t, { v: 0.02, f: 1500 + 900 * k, dur: 0.012 }); vibes(b, deg(Math.floor(k * 9), 72), t, { v: 0.008, dur: 0.07, trem: false }); }),
     countEnd: go(t => { const b = bus("countEnd", 0.18), d = avanza(t); vibes(b, techo(deg(d, 64)), t, { v: 0.04, dur: 0.7 }); vibes(b, techo(deg(d + 2, 64)), t + 0.05, { v: 0.025, dur: 0.7 }); }),
+    /* LA PREGUNTA Y EL REVELADO (js/revelado.js, preset Extrema de la maqueta del Probador). peso 1-3 = tu racha al clavar (no delata el resultado) */
+    /* la chincheta se clava: la punta entra (tic seco), el cuerpo del golpe en el tablero y el fieltro; con peso 3, un grave mas. x: su lado */
+    clava: go((t, peso = 1, x = 0) => {
+      const b = bus("clava", 0.08, x * 0.35), w = [0.6, 0.85, 1.1][peso - 1] || 0.85;
+      felt(b, t, { v: 0.06 * (0.8 + 0.5 * w), f: 2100, dur: 0.03 }); sub(b, t, { v: 0.2 * w, f0: 150 - peso * 18, f1: 62, dur: 0.12 + peso * 0.05 });
+      felt(b, t + 0.004, { v: 0.09 * w, f: 1000 - peso * 160, dur: 0.05 }); if (peso === 3) sub(b, t + 0.005, { v: 0.2, f0: 58, f1: 40, dur: 0.28 });
+    }),
+    /* la sala contiene el aliento: un latido grave, lub-dub, el segundo mas suave (nunca igual: altura y hueco al azar dentro de su margen) */
+    aliento: go(t => {
+      const b = bus("aliento", 0.05), f = 56 + R() * 6, gap = 0.16 + R() * 0.03;
+      sub(b, t, { v: 0.34, f0: f, f1: 40, dur: 0.2 }); felt(b, t, { v: 0.05, f: 110, dur: 0.1 }); sub(b, t + gap, { v: 0.21, f0: f - 4, f1: 38, dur: 0.18 });
+    }),
+    /* el casi: una nota que intenta subir una cuarta y se queda un semitono y pico corta, temblando */
+    queda: go(t => {
+      const b = bus("queda", 0.2), f0 = mtof(deg(5, 60)) * (0.99 + R() * 0.02), meta = f0 * Math.pow(2, 5 / 12), os = ctx.createOscillator(), g = ctx.createGain(), l = ctx.createBiquadFilter(), lf = ctx.createOscillator(), lg = ctx.createGain();
+      os.type = "triangle"; os.frequency.setValueAtTime(f0, t); os.frequency.setTargetAtTime(meta * Math.pow(2, -1.3 / 12), t + 0.05, 0.12);
+      lf.frequency.value = 5.5; lg.gain.value = 0; lg.gain.setValueAtTime(0, t + 0.35); lg.gain.linearRampToValueAtTime(6, t + 0.6); lf.connect(lg).connect(os.frequency);
+      l.type = "lowpass"; l.frequency.value = 2400; os.connect(l).connect(g).connect(b);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.1, t + 0.01); g.gain.setValueAtTime(0.1, t + 0.45); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.0);
+      os.start(t); os.stop(t + 1.05); lf.start(t); lf.stop(t + 1.05);
+      sub(b, t, { v: 0.05, f0: f0 / 2, f1: f0 / 2.1, dur: 0.9 });
+    }),
+    /* el aro se raja: crujido seco de esmalte en rafagas cortas (bandas medias: nada que chille) y una nota que se cae */
+    raja: go((t, v = 1) => {
+      const b = bus("raja", 0.12); for (let i = 0; i < 5; i++) felt(b, t + i * (0.012 + R() * 0.014), { v: 0.07 * v, f: 2400 + R() * 1200, dur: 0.02 });
+      vibes(b, deg(-2, 72), t, { v: 0.03 * v, dur: 0.18, trem: false });
+    }),
+    /* un rodillo encaja: el reten (tic) y un golpe pequeno de madera; i = la fila (sube un poco) */
+    encaja: go((t, i = 0) => { const b = bus("encaja", 0.04); felt(b, t, { v: 0.05, f: 3000 + i * 140, dur: 0.014 }); sub(b, t, { v: 0.035, f0: 260 + i * 12, f1: 120, dur: 0.04 }); }),
     /* los ultimos segundos: el tic de madera, mas agudo cuanto menos queda */
     tick: go((t, n = 3) => { const b = bus("tick", 0.04); felt(b, t, { v: 0.05, f: 1800 - n * 200, dur: 0.02 }); rhodes(b, deg(6 - n, 60), t, { v: 0.025, dur: 0.15, idx: 1 }); }),
     /* racha: el vibrafono sube un escalon por nivel; desde 4, el pellizco de 8 bits */

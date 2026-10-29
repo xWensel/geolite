@@ -53,6 +53,13 @@ kbd { font-family: var(--mono); font-size: .85em; }
 .odo .col { display: block; transform: translateY(calc(var(--d, 0) * -1em)); transition: transform var(--t, 1s) cubic-bezier(.16, .9, .2, 1) calc(var(--dl, 0ms) + var(--i, 0) * 55ms); }
 .odo .col i { display: block; height: 1em; font-style: normal; text-align: center; }
 .odo .sep { display: inline-block; height: 1em; }
+/* rodillos de la cuenta del revelado (js/revelado.js): un tambor limpio, cifras que suben a saltos de pixel con recorte duro. .odp: celdas mas altas
+   que la letra (la pixel de las filas DISTANCIA y VELOCIDAD pinta mas de 1em y asomaba la cifra vecina); el alto de la fila no cambia */
+.odo.odp { --odp: 1.4em; }
+.odo.odp .dg { height: var(--odp); margin: calc((1em - var(--odp)) / 2) 0; }
+.odo.odp .col i { height: var(--odp); line-height: var(--odp); }
+.odo.odp .col { transform: translateY(calc(var(--d, 0) * -1 * var(--odp))); }
+.tk-rows dd .odo i { flex: none; border: 0; transform: none; }          /* las celdas del rodillo no son la linea de puntos de la fila (.tk-rows i) */
 
 /* ------------------------------------------------ HUD */
 #hud { position: absolute; top: 14px; left: 14px; right: 14px; display: grid; grid-template-columns: 1fr minmax(0, auto) 1fr; gap: 14px; align-items: start; pointer-events: none; }

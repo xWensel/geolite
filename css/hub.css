@@ -66,8 +66,6 @@
 .ping i { position: absolute; left: -10px; top: -10px; width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--paper); opacity: 0; animation: ping-ring .7s cubic-bezier(.1, .8, .3, 1) both; }
 .ping i:nth-child(2) { border-color: var(--red); animation-delay: .07s; } .ping i:nth-child(3) { border-color: var(--brass); animation-delay: .14s; border-width: 2px; }
 .ping.probe i { border-color: var(--brass); } @keyframes ping-ring { 0% { transform: scale(.3); opacity: 1; } 100% { transform: scale(5.5); opacity: 0; } }
-.ping u { position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; background: var(--brass); border-radius: 1px; text-decoration: none; animation: ping-spark .7s cubic-bezier(.1, .8, .3, 1) both; } .ping u:nth-of-type(3n) { background: var(--red); } .ping u:nth-of-type(3n+1) { background: var(--paper); }
-@keyframes ping-spark { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(.4); opacity: 0; } }
 .coin-fly { position: absolute; z-index: 31; pointer-events: none; font-family: var(--mono); font-weight: 700; font-size: 26px; color: var(--brass); text-shadow: 0 3px 0 rgba(0, 0, 0, .5); animation: coin-fly .72s cubic-bezier(.5, -.2, .6, 1) both; }
 @keyframes coin-fly { 0% { transform: translate(0, 0) scale(.5); opacity: 0; } 15% { transform: translate(0, -30px) scale(1.2); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.7); opacity: .9; } }
 

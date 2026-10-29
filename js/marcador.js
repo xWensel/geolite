@@ -222,7 +222,7 @@ window.AIQ = window.AIQ || {};
         pl.style.left = num.offsetLeft + num.offsetWidth + 10 + "px"; pl.style.top = num.offsetTop + Math.round(num.offsetHeight * 0.12) + "px";
         led.appendChild(pl); setTimeout(() => pl.remove(), 1400);
       }, delay);
-      chips(Math.max(3, Math.min(14, Math.round(total / 140))), delay + 40, Math.min(620, ms * 0.55));
+      if (!o.roll) chips(Math.max(3, Math.min(14, Math.round(total / 140))), delay + 40, Math.min(620, ms * 0.55));   // con los rodillos del revelado (js/revelado.js) no vuelan fichas: el marcador cuenta en su sitio
       /* golpe final cuando las cifras terminan de rodar */
       later(() => num.animate([{ transform: "scale(1)" }, { transform: "scale(1.16)", color: "#2f7bf5", offset: 0.3 }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.3, 1.5, .5, 1)" }), delay + ms);
     }

@@ -268,7 +268,15 @@ window.AIQ = window.AIQ || {};
   /* Probar (Ajustes): un golpe medio a la intensidad elegida */
   M.testRumble = () => { try { const gp = pad(), va = gp && gp.vibrationActuator, g = PS.rumble / 100; if (va && g > 0) va.playEffect("dual-rumble", { duration: 260, strongMagnitude: 0.55 * g, weakMagnitude: 0.75 * g }).catch(() => {}); return !!va; } catch (e) { return false; } };
   if (haptic0) A.haptic.on = haptic0.on;
-  if (haptic0 && haptic0.jackpot) A.haptic.jackpot = haptic0.jackpot;   // la escalera de jackpots (js/audio.js) sigue existiendo: sin ella, cada jackpot (legendaria, medalla) lanzaba un error y cortaba lo de detras
+  if (haptic0 && haptic0.jackpot) A.haptic.jackpot = haptic0.jackpot;
+  /* un golpe con forma propia (js/revelado.js: el clavado, el latido, el pulso que se corta del casi): motor fuerte, debil y ms; en el movil, un pulso de ms */
+  A.haptic.dual = (strong, weak, ms) => {
+    if (A.haptic.on === false) return;
+    if (haptic0) haptic0(Math.round(ms * 0.6));
+    if (!M.on || !(PS.rumble > 0)) return;
+    try { const gp = pad(), va = gp && gp.vibrationActuator; if (!va) return; const g = PS.rumble / 100, j = 0.9 + Math.random() * 0.2;
+      va.playEffect("dual-rumble", { duration: Math.min(600, ms), strongMagnitude: Math.min(1, strong * j * g), weakMagnitude: Math.min(1, weak * j * g) }).catch(() => {}); } catch (e) { /* mando sin vibracion */ }
+  };   // la escalera de jackpots (js/audio.js) sigue existiendo: sin ella, cada jackpot (legendaria, medalla) lanzaba un error y cortaba lo de detras
   Object.defineProperty(A.haptic, "on", { get: () => haptic0 ? haptic0.on : true, set: v => { if (haptic0) haptic0.on = v; } });
 
   /* ---------- lectura del mando ---------- */

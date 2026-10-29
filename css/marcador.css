@@ -122,6 +122,10 @@ html body .tk2 .tk-km { margin-top: 6px; }
 .tk-pin { font-size: 15px; line-height: 1.2; color: var(--ink-2); margin-top: 1px; animation: rise .45s var(--spring) .62s both; }
 .tk-pin b { font-weight: inherit; color: var(--ink); }
 .tk-pin.ok b { color: #1d6b42; } .tk-pin.bad b { color: var(--red); } .tk-pin.sea b { color: #2d6f8a; }
+/* el casi (js/revelado.js): «¡A 10 km de la plata!» bajo los km. Ocupa su sitio desde el principio (el ticket no salta) y aparece cuando el aro se raja */
+.tk-casi { font-size: 16px; line-height: 1.2; color: var(--red); margin-top: 2px; visibility: hidden; }
+.tk-casi.on { visibility: visible; animation: rise .32s var(--spring) both; }
+html.reduce-motion .tk-casi.on { animation: none; }
 /* Clasico: la racha solo cuenta (no multiplica) */
 .tk-rows .tk-srow dt, .tk-rows .tk-srow dd { color: var(--red); }
 /* v0.3.54, la cuenta por golpes: el sumando que cuenta ahora recibe una pasada de rotulador (solo transform y opacidad) */

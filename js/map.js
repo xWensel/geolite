@@ -664,8 +664,15 @@ precision highp float;
 uniform sampler2D u_scene; uniform vec2 u_res; uniform vec2 u_zc; uniform float u_zv; uniform vec2 u_pv; uniform float u_vig; uniform float u_grain; uniform vec3 u_tint; uniform float u_time;
 uniform float u_crt; uniform float u_dpr; uniform float u_lite; uniform vec4 u_fx2;
 uniform vec4 u_ring[4]; uniform vec4 u_rw[4]; uniform vec4 u_glow; uniform float u_nr; uniform float u_ab;
+uniform float u_par; uniform vec4 u_pa; uniform vec4 u_pb; uniform vec4 u_pc; uniform vec4 u_pd; uniform vec4 u_pe;
 out vec4 o;
 ${NOISE}
+/* La pregunta y el revelado (js/revelado.js): la onda del fieltro donde se clava la chincheta. l px del pin, t s desde el clavado, v px/s, a px, k escala */
+float ondaP(float l, float t, float v, float a, float k){
+  if(t<0.0) return 0.0;
+  float x=l-t*v, kk=k*k;
+  return a*sin(x/(9.0*k))*exp(-x*x/(1800.0*kk))*exp(-t*2.6)*smoothstep(0.0,30.0*k,l);
+}
 void main(){
   vec2 frag=gl_FragCoord.xy; vec2 uv=frag/u_res;
   if(u_crt>0.5){ vec2 q=uv*2.0-1.0; q*=1.0+dot(q,q)*${CRT_K}; uv=q*0.5+0.5; }
@@ -680,6 +687,21 @@ void main(){
     for(int i=0;i<4;i++){ vec4 r=u_ring[i]; if(r.w<=0.0&&u_rw[i].y<=0.0) continue; vec2 d=fr-r.xy; float L=length(d)+0.001; float x=(L-r.z)/u_rw[i].x; float prof=exp(-x*x); woff-=d/L*r.w*x*prof*1.6; wl+=prof*u_rw[i].y; }
     vec2 sf=fr+woff; if(u_crt<0.5) sf=floor(sf)+0.5; suv=sf/u_res;
   }
+  /* La pregunta y el revelado (js/revelado.js, preset Extrema de la maqueta): la chincheta hunde el fieltro (hoyuelo con relieve, los hilos tiran
+     hacia la punta) y corre una onda; la camara cierra el foco sobre el punto (bokeh de disco: los claros florecen); la sala contiene el aliento
+     (penumbra que se cierra sobre el pin) o se calla (la diana perfecta); la luz vuelve al revelar. Solo el mapa: las piezas van encima, intactas.
+     u_pa: pin (px), foco (px), CoC max (px) · u_pb: flor, penumbra, radio, silencio · u_pc: hoyuelo, radio, t de la onda, amplitud · u_pd: luz, destello, frio, k · u_pe: sigma de la luz */
+  float pk=u_pd.w, pl=0.0, pdh=0.0, pdent=0.0, px2=0.0; vec2 pn=vec2(0.0);
+  if(u_par>0.5){
+    vec2 pq=fr-u_pa.xy; pl=length(pq); pn=pq/max(pl,0.001);
+    if(u_pc.x>0.0||u_pc.z>=0.0){
+      float x=pl/max(u_pc.y,0.5), g=exp(-x*x); px2=x;
+      float w=ondaP(pl,u_pc.z,520.0*pk,u_pc.w,pk), w2=ondaP(pl+pk,u_pc.z,520.0*pk,u_pc.w,pk);
+      float pull=u_pc.x*2.6*pk*x*g;
+      suv+=pn*(pull-w)/u_res;
+      pdent=u_pc.x; pdh=u_pc.x*2.4*2.0*x*g*1.5+(w2-w)*0.45;
+    }
+  }
   vec2 toC=(u_zc-fr);
   float zvA=clamp(u_zv,-4.0,4.0);
   vec2 off=toC*zvA*0.018+u_pv*0.004;                            // estela de movimiento sutil (antes era tan fuerte que parecia lag)
@@ -692,12 +714,22 @@ void main(){
     for(int i=0;i<N;i++){ float t=float(i)/float(N-1)-0.5; col+=texture(u_scene,suv+off*t/u_res).rgb; }
     col/=float(N);
   }
-  float ca=min(lenPx,12.0)*0.00035+u_crt*0.0007*(1.0-u_lite);
+
+  float ca=u_par>0.5?u_crt*0.0007*(1.0-u_lite):min(lenPx,12.0)*0.00035+u_crt*0.0007*(1.0-u_lite);   // con el revelado (js/revelado.js) la camara no separa colores: sin ribetes rosa y verde
   if(ca>0.0005){
     vec2 dir=normalize(toC+vec2(0.0001)); vec2 cav=dir*ca*u_res.y/u_res*0.5;
     col.r=texture(u_scene,suv+cav).r; col.b=texture(u_scene,suv-cav).b;
   }
-  if(u_nr>0.5&&u_ab>0.0){ vec2 ua=woff*u_ab/u_res; col.r=texture(u_scene,suv+ua).r; col.b=texture(u_scene,suv-ua).b; }
+  if(u_nr>0.5&&u_ab>0.0&&u_par<0.5){ vec2 ua=woff*u_ab/u_res; col.r=texture(u_scene,suv+ua).r; col.b=texture(u_scene,suv-ua).b; }
+  if(u_par>0.5&&u_pa.w>0.0){                                    // el foco se cierra: disco de confusion que crece fuera del radio nitido (espiral aurea, 40 muestras)
+    float r=u_pa.w*smoothstep(u_pa.z,u_pa.z+520.0*pk,pl);
+    if(r>0.6){
+      vec3 s=vec3(0.0); float ws=0.0;
+      for(int i=0;i<40;i++){ float fi=float(i)+0.5, rr=sqrt(fi/40.0)*r, a=fi*2.39996; vec3 t=texture(u_scene,suv+vec2(cos(a),sin(a))*rr/u_res).rgb;
+        float w=1.0+u_pb.x*pow(dot(t,vec3(0.299,0.587,0.114)),4.0)*6.0; s+=t*w; ws+=w; }
+      col=s/ws;
+    }
+  }
   if(u_crt>0.5){
     float sl=0.5+0.5*sin(fr.y*3.14159265/(1.5*u_dpr));
     col*=0.95+0.05*sl;                                          // lineas de barrido
@@ -744,6 +776,22 @@ void main(){
     float g=clamp(u_glow.w*exp(-dot(fr-u_glow.xy,fr-u_glow.xy)/(u_glow.z*u_glow.z)),0.0,0.85);
     col=mix(col,col*vec3(1.22,1.06,0.78)+vec3(0.07,0.045,0.0),g);          // luz de lampara calida sobre la tierra (no la quema a blanco)
     col+=vec3(1.0,0.9,0.7)*clamp(wl,0.0,0.6)*0.22;                          // el frente de la onda coge un poco de luz
+  }
+  if(u_par>0.5){
+    if(pdent>0.0||u_pc.z>=0.0){                                 // relieve con direccion: la lampara arriba a la izquierda (y hacia arriba en el lienzo GL)
+      float lam=dot(pn,vec2(-0.81,0.59));
+      col*=1.0-clamp(pdh*lam,-0.22,0.3);
+      col*=1.0-0.14*pdent*exp(-px2*px2*0.6);
+    }
+    if(u_pb.y>0.0){ float pv=smoothstep(u_pb.z,u_pb.z+560.0*pk,pl); col*=(1.0-u_pb.y*pv*0.9)*(1.0+u_pb.y*(1.0-pv)*0.07); }
+    if(u_pb.w>0.0){ float lu=dot(col,vec3(0.299,0.587,0.114)); col=mix(col,mix(vec3(lu),col,0.7),u_pb.w*0.6)*(1.0-0.42*u_pb.w); }
+    if(u_pd.x>0.0||u_pd.y>0.0){                                 // la luz que vuelve, con tope: lo claro (la tierra) apenas sube, nada se quema a blanco ni pierde su color
+      float lu=dot(col,vec3(0.299,0.587,0.114)), room=1.0-smoothstep(0.45,0.85,lu);
+      float L=u_pd.x*exp(-pl*pl/(2.0*u_pe.x*u_pe.x));
+      col+=(col*(L*0.5+u_pd.y*0.22)+L*vec3(0.09,0.06,0.015))*room;
+    }
+    if(u_pd.z>0.0){ float lu=dot(col,vec3(0.299,0.587,0.114)); col=mix(col,mix(vec3(lu),col,0.55)*vec3(0.94,0.98,1.04),u_pd.z); }
+    col+=(hash(frag+17.3)-0.5)/255.0;                            // tramado de 1/255: sin bandas en la penumbra
   }
   vec2 q2=uv-0.5; float v=1.0-u_vig*smoothstep(0.30,0.95,length(q2*vec2(1.05,1.0))+min(abs(zvA)*0.01,0.04));
   col*=v*u_tint;
@@ -1249,7 +1297,7 @@ void main(){
 
     /* ---------- tamano / camara ---------- */
     _emptyMarks() { return { guess: null, answer: null, highlight: null, area: null, label: null, labelAt: null, dist: "", pop: null, t0: 0 }; }
-    setMarks(m) { const hl = m.highlight && this.world.byName[m.highlight]; this.marks = { ...this._emptyMarks(), gct: m.guess ? this.pickCt : null, act: hl ? hl.ct : null, ...m, t0: performance.now() }; this.fxDirty = this.dirty = true; }
+    setMarks(m) { const hl = m.highlight && this.world.byName[m.highlight]; this.marks = { ...this._emptyMarks(), gct: m.guess ? this.pickCt : null, act: hl ? hl.ct : null, ...m, t0: m.t0 != null ? m.t0 : performance.now() }; this.fxDirty = this.dirty = true; }
     clearMarks() { this.marks = this._emptyMarks(); this.probes = []; this.fxDirty = this.dirty = true; }
     /* paises tenidos por encima de la tierra ({ "Spain": [r, g, b, a] }, 0-1): la Enciclopedia pinta asi lo que llevas descubierto. null = nada */
     setPaint(p) { this.paint = p || null; this.dirty = this.fxDirty = true; }
@@ -1317,7 +1365,9 @@ void main(){
       const from = { ...this.view };
       t.cx += TWO_PI * Math.round((from.cx - t.cx) / TWO_PI);          // el mundo da la vuelta: se va por el camino corto (cruzando el antimeridiano si hace falta)
       const far = Math.min(1, Math.hypot(t.cx - from.cx, t.cy - from.cy) * Math.min(from.s, t.s) / Math.max(this.W, this.H));
-      this.anim = { from, to: t, t0: performance.now(), ms, dip: 0.5 * far };
+      /* tras el acercamiento del revelado (dolly, js/revelado.js) la camara se lanza directa al encuadre: sin alejarse a medio camino */
+      const dip = this._dolly && performance.now() - this._dolly < 2500 ? 0 : 0.5 * far; this._dolly = 0;
+      this.anim = { from, to: t, t0: performance.now(), ms, dip };
     }
     fitPoints(pts, pad = { l: 60, r: 60, t: 160, b: 120 }, ms = 900) {
       const ps = pts.map(([lo, la]) => project(lo, la));
@@ -1725,6 +1775,46 @@ void main(){
       gl.uniform4fv(P.u.u_ring, R); gl.uniform4fv(P.u.u_rw, Rw);
       this._u(P, "u_glow", cx, cy, g ? g.r * g.sc * dpr : 1, gk); this._u(P, "u_nr", 1); this._u(P, "u_ab", 0.22);
     }
+    /* La pregunta y el revelado (js/revelado.js): la chincheta que se clava (m.clava: { t0, ms, h, peso, hunde, onda }), el hoyuelo y la onda del
+       fieltro, el foco, la penumbra, el silencio y la luz del revelado. Todo en el ultimo pase (FS_POST), centrado en tu chincheta (si la vista se
+       mueve, va con ella). A.par.post(now) da lo de la camara y la sala en px de diseno (1080p); aqui se pasa a px del lienzo */
+    _parVivo(now) {
+      const c = this.marks.clava, p = A.par && A.par.post ? A.par.post(now) : null;
+      return !!p || !!(c && now - (c.t0 + c.ms) < 1400);
+    }
+    _parU(now) {
+      const P = this.P.post, m = this.marks, c = m.clava, p = A.par && A.par.post ? A.par.post(now) : null;
+      if (!m.guess || (!c && !p)) { this._u(P, "u_par", 0); return; }
+      const dpr = this.cdpr, H = this.H, k = (Math.min(this.W / 1920, this.H / 1080) || 1) * dpr;
+      let ref; if (m.answer) { this.lonLatToScreen(m.answer[0], m.answer[1]); ref = this._lwx; }
+      const G = this.lonLatToScreen(m.guess[0], m.guess[1], m.gct, undefined, ref), [gx, gy] = this._crt(G[0], G[1]);
+      let dent = 0, rad = 1, rel = -1, amp = 0;
+      if (c) {
+        const tt = (now - c.t0 - c.ms) / 1000, w = [0.6, 0.85, 1.1][c.peso - 1] || 0.85;
+        if (tt >= 0 || c.ms <= 0) {
+          const q = c.ms <= 0 ? 1 : tt;
+          dent = c.hunde * w * (c.ms <= 0 ? 1 : clamp(q / 0.035, 0, 1) * (1 + 0.35 * Math.exp(-q * 14)) / 1.35);
+          if (c.ms > 0 && tt < 1.4) { rel = tt; amp = c.onda * 3.8 * w * dpr; }
+        }
+        rad = (3.5 + 1.5 * c.peso) * dpr;                                 // la chincheta mide lo mismo en px CSS a cualquier tamano: su hoyuelo tambien
+      }
+      const q = p || {};
+      this._u(P, "u_par", 1);
+      this._u(P, "u_pa", gx * dpr, (H - gy) * dpr, (q.foc || 4000) * k, (q.coc || 0) * k);
+      this._u(P, "u_pb", q.flor || 0, q.pen || 0, (q.penR || 900) * k, q.dim || 0);
+      this._u(P, "u_pc", dent, rad, rel, amp);
+      this._u(P, "u_pd", q.luz || 0, q.flash || 0, q.frio || 0, k);
+      this._u(P, "u_pe", (q.sigma || 260) * k, 0, 0, 0);
+    }
+    /* el acercamiento de la camara (js/revelado.js): z veces hacia el punto de pantalla (x, y), que no se mueve, en ms */
+    dolly(x, y, z, ms) {
+      if (!(z > 1.001) || !(ms > 0)) return;
+      const v = { ...this.view }, [px, py] = this._outToScene(x, y);
+      const wx = v.cx + (px - this.W / 2) / v.s, wy = v.cy - (py - this.H / 2) / v.s;
+      clearTimeout(this._dT); this.drift = null; this.tv = null; this.inertia = null;
+      this.anim = { from: v, to: { ...v, s: clamp(v.s * z, this.minS, this.maxS) }, t0: performance.now(), ms, dip: 0, pin: [wx, wy] };
+      this.zc = [x, y]; this._dolly = performance.now() + ms;
+    }
     quakeKick(amp, jolt) { const a = Math.random() * Math.PI * 2; this._qk = { t0: performance.now(), ms: 750, amp, jx: Math.cos(a) * jolt, jy: Math.sin(a) * jolt, done: 0 }; this.dirty = this.fxDirty = true; }
     distorted() { return !!(this.dist.spec && this.dist.k > 0.01); }
     /* uniformes de deformacion para un programa */
@@ -1857,7 +1947,8 @@ void main(){
       { const sp = this.dist.spec; if (sp && sp.spin && (this.dist.kk || 0) > 0.001) this.dirty = this.fxDirty = true; }   // Ruleta: el giro es continuo, cada fotograma (a 25 fps se veia a saltos y las chinchetas se quedaban atras)
       if (this.anim) {
         const a = this.anim, k = Math.min(1, (now - a.t0) / a.ms), e = easeIO(k), dip = 1 - a.dip * Math.sin(Math.PI * e);
-        this.view = { cx: a.from.cx + (a.to.cx - a.from.cx) * e, cy: a.from.cy + (a.to.cy - a.from.cy) * e, s: Math.max(this.minS, a.from.s * Math.pow(a.to.s / a.from.s, e) * dip) };
+        if (a.pin) { const s = a.from.s * Math.pow(a.to.s / a.from.s, e), f = a.from.s / s; this.view = { s, cx: a.pin[0] - (a.pin[0] - a.from.cx) * f, cy: a.pin[1] - (a.pin[1] - a.from.cy) * f }; }   // el acercamiento del revelado: el pin no se mueve
+        else this.view = { cx: a.from.cx + (a.to.cx - a.from.cx) * e, cy: a.from.cy + (a.to.cy - a.from.cy) * e, s: Math.max(this.minS, a.from.s * Math.pow(a.to.s / a.from.s, e) * dip) };
         this.view.cx = wrapCx(this.view.cx); if (k >= 1) this.anim = null; this.dirty = this.fxDirty = true;
       } else if (this.tv) {
         const k = 1 - Math.exp(-dt * 13), v = this.view, t = this.tv;
@@ -1892,7 +1983,7 @@ void main(){
       if (this._it && this._livingMat() && now - this._it.t < 6000) this.dirty = true;                       // la salpicadura dura seis segundos
       if (this.sk.animated && this.fxOn !== false && !this.pointers.size && now - this._lastDraw >= this.idleMs) this.dirty = true;   // fondo animado: ~25 fps en reposo
       if (this.dirty) { this.dirty = false; this._drawGL(now); if (this.onView) this.onView(this.view); }
-      else if (this.ondas && this._sceneT) this._post(now);                                                 // la onda del acierto: solo el ultimo pase
+      else if ((this.ondas || (m.guess && this._parVivo(now))) && this._sceneT) this._post(now);            // la onda del acierto (y la chincheta del revelado, js/revelado.js): solo el ultimo pase
       if (this.fxDirty) { this.fxDirty = false; this._drawFx(now); }
     }
 
@@ -2072,7 +2163,7 @@ void main(){
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, this.cv.width, this.cv.height);
       gl.useProgram(P.post); gl.bindVertexArray(this.vaoEmpty);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, scene.tex); gl.uniform1i(P.post.u.u_scene, 0);
-      this._ondaU(now);
+      this._ondaU(now); this._parU(now);
       const zc = this.zc || [W / 2, H / 2];
       this._u(P.post, "u_res", this.cv.width, this.cv.height); this._u(P.post, "u_zc", zc[0] * dpr, (H - zc[1]) * dpr);
       const fxk = this.blurOn === false ? 0 : 1;
@@ -2148,7 +2239,7 @@ void main(){
           }
           if (!fl) this._pin(c, Aa[0], Aa[1], sk.red, sk.paper, age - 480, k);
         }
-        if (G) this._myPin(c, G[0], G[1], age, m);
+        if (G) this._myPin(c, G[0], G[1], m.clava ? now - m.clava.t0 : age, m);
         const at = Aa || (m.labelAt && this.lonLatToScreen(m.labelAt[0], m.labelAt[1], m.act));
         if (fl && at) this._flagPole(c, fl, at[0], at[1], age, now);      // encima de tu chincheta: la bandera es el premio
         if (dia !== "casa" && age > 480) A.punteros.diana(c, Aa[0], Aa[1], ((age - 480) % 1900) / 1000, dia, m._dp || (m._dp = A.punteros.parts(Math.round(Aa[0] * 7 + Aa[1]))), { dpr: this.dpr });
@@ -2267,7 +2358,13 @@ void main(){
       if (!key || R.key !== key) { R.key = key; R.xy = R.ll.map(L => { const o = new Float32Array(L.length); for (let j = 0; j < L.length; j += 2) { const q = this.lonLatToScreen(L[j], L[j + 1], R.ct, this._rk); o[j] = q[0]; o[j + 1] = q[1]; } return o; }); }
       const grow = easeIO(clamp((age - T0) / 560, 0, 1)), sc = 0.55 + 0.45 * grow, fade = 1 - clamp((age - END) / 900, 0, 1), sk = this.sk, MED = ["#c98a4b", "#dfe6ec", "#f8c64a"];
       c.save(); c.lineJoin = "round";
+      const now = this._tNow || performance.now(), oro = R.oro && now >= R.oro ? (now - R.oro) / 1000 : -1;
       for (let i = 0; i < 3; i++) {
+        if (R.casi && R.casi.i === i && R.casi.v != null) { this._ringCasi(c, R, A0, sc, fade, MED[i], now); continue; }
+        if (oro >= 0) {                                                  // el golpe de la diana perfecta: los aros se encienden de oro, de dentro afuera, y un brillo los recorre
+          const on = clamp((oro - 0.04 - (2 - i) * 0.07) / 0.06, 0, 1);
+          if (on > 0) { this._ringOro(c, R.xy[i], A0, sc, fade * on, MED[i], oro, i); continue; }
+        }
         const on = R.n > i && age >= R.at[i], f = on ? clamp((age - R.at[i]) / 260, 0, 1) : 0, P = R.xy[i];
         c.beginPath();
         for (let j = 0; j < P.length; j += 2) { const px = A0[0] + (P[j] - A0[0]) * sc, py = A0[1] + (P[j + 1] - A0[1]) * sc; j ? c.lineTo(px, py) : c.moveTo(px, py); }   // al crecer, a escala desde el objetivo
@@ -2277,9 +2374,61 @@ void main(){
       }
       c.restore();
     }
+    /* el aro de oro de la diana perfecta (js/revelado.js, «el silencio»): el mismo trazo del aro encendido, su metal tirando a oro y un brillo que lo recorre */
+    _ringOro(c, P, A0, sc, a, med, t, i) {
+      const pth = () => { c.beginPath(); for (let j = 0; j < P.length; j += 2) { const px = A0[0] + (P[j] - A0[0]) * sc, py = A0[1] + (P[j + 1] - A0[1]) * sc; j ? c.lineTo(px, py) : c.moveTo(px, py); } c.closePath(); };
+      const [r1, g1, b1] = hex(med), mix = 0.55, col = `rgb(${Math.round((r1 * (1 - mix) + 0.973 * mix) * 255)},${Math.round((g1 * (1 - mix) + 0.776 * mix) * 255)},${Math.round((b1 * (1 - mix) + 0.29 * mix) * 255)})`;
+      c.globalAlpha = a; pth(); c.lineWidth = 6; c.strokeStyle = this._rgba(this.sk.ink, 0.85); c.stroke(); c.lineWidth = 3; c.strokeStyle = col; c.stroke();
+      if (t > 0.3 && t < 2.2) {                                          // el brillo: un tramo corto que da la vuelta (cada aro a su ritmo)
+        const n = P.length / 2, g = ((t - 0.3) * 0.7 * (1.2 + i * 0.3)) % 1, j0 = Math.floor(g * (n - 1)), len = Math.max(3, Math.round(n * 0.06));
+        c.beginPath(); for (let k = 0; k <= len; k++) { const j = ((j0 - k) % (n - 1) + (n - 1)) % (n - 1), px = A0[0] + (P[2 * j] - A0[0]) * sc, py = A0[1] + (P[2 * j + 1] - A0[1]) * sc; k ? c.lineTo(px, py) : c.moveTo(px, py); }
+        c.lineWidth = 3; c.lineCap = "round"; c.strokeStyle = "rgba(255,246,214,.95)"; c.stroke(); c.lineCap = "butt";
+      }
+    }
+    /* el casi (js/revelado.js): te quedas justo fuera de este aro. Mientras la cuenta de km pasa del umbral, el aro se va cerrando y se estira hacia tu
+       chincheta como una goma; cuando la cuenta vuelve atras, vuelve de golpe, se raja en ocho trozos y tiembla; se queda rajado y mate en su sitio.
+       R.casi: { i, v (km que marca la cuenta), r, m (lo mas hondo), fase (0 bajando, 1 vuelve), tv (cuando volvio), ck/of (las grietas) } */
+    _ringCasi(c, R, A0, sc, fade, med, now) {
+      const K = R.casi, P = R.xy[K.i], n = P.length / 2, m = this.marks;
+      const G = m.guess && this.lonLatToScreen(m.guess[0], m.guess[1], m.gct, undefined, this._lwx), phi = G ? Math.atan2(G[1] - A0[1], G[0] - A0[0]) : 0, dp = G ? Math.hypot(G[0] - A0[0], G[1] - A0[1]) : 0;
+      const top = K.top || 0.946, hope = clamp((1.3 * K.r - K.v) / Math.max(1, 1.3 * K.r - K.m), 0, 1), eo = 1 - Math.pow(1 - hope, 3);
+      let s, draw, broke = 0, trem = 0, dim = 0, glow = 0;
+      if (!K.fase) { s = eo; draw = top * eo; glow = hope > 0.6 ? 0.6 : 0; }
+      else {
+        const u = (now - K.tv) / 1000; s = Math.exp(-u * 7) * Math.cos(u * 22); draw = u < 0.1 ? top : 1;
+        const u2 = u - 0.1; if (u2 >= 0) { broke = clamp(u2 / 0.05, 0, 1) * (K.raja == null ? 1 : K.raja); trem = 2.4 * Math.exp(-u2 * 9) * (K.quieto ? 0 : 1); dim = clamp(u2 / 0.35, 0, 1); }
+        if (K.quieto) { s = 0; draw = 1; broke = 1; trem = 0; dim = 1; }
+      }
+      if (draw <= 0.002) return;
+      const pt = f => {                                                  // el punto f (0..1, desde el norte en el sentido del reloj) del aro, estirado hacia la chincheta
+        const x = f * (n - 1), j = Math.min(n - 2, Math.floor(x)), q = x - j;
+        const px = A0[0] + ((P[2 * j] + (P[2 * j + 2] - P[2 * j]) * q) - A0[0]) * sc, py = A0[1] + ((P[2 * j + 1] + (P[2 * j + 3] - P[2 * j + 1]) * q) - A0[1]) * sc;
+        const dx = px - A0[0], dy = py - A0[1], r = Math.hypot(dx, dy) || 1, cs = Math.cos(Math.atan2(dy, dx) - phi), b = cs > 0 ? Math.pow(cs, 4) : 0;
+        const rr = r + s * (Math.max(0, dp - r) + 7) * b;                // la goma llega hasta tu chincheta y un poco mas (a cualquier zoom se ve)
+        return [A0[0] + dx / r * rr, A0[1] + dy / r * rr, dx / r, dy / r];
+      };
+      const [r1, g1, b1] = hex(med), dk = 1 - 0.12 * dim, lt = 1 + 0.3 * glow;
+      const col = `rgb(${Math.min(255, Math.round(r1 * dk * lt * 255))},${Math.min(255, Math.round(g1 * dk * lt * 255))},${Math.min(255, Math.round(b1 * dk * lt * 255))})`;
+      const tramo = (f0, f1, off) => {
+        if (f1 - f0 < 0.002) return; const N = Math.max(2, Math.ceil((f1 - f0) * 120)); c.beginPath();
+        for (let k = 0; k <= N; k++) { const p = pt(f0 + (f1 - f0) * k / N), x = p[0] + p[2] * off, y = p[1] + p[3] * off; k ? c.lineTo(x, y) : c.moveTo(x, y); }
+        c.lineWidth = 6; c.strokeStyle = this._rgba(this.sk.ink, 0.8); c.stroke(); c.lineWidth = 3; c.strokeStyle = col; c.stroke();
+      };
+      c.save(); c.globalAlpha = fade; c.lineJoin = "round";
+      if (broke <= 0) tramo(0, draw, 0);
+      else {
+        const rp = Math.max(12, Math.hypot(P[0] - A0[0], P[1] - A0[1]) * sc), gap = 1.1 * broke / (Math.PI * 2 * rp), ck = K.ck, t = now / 1000;   // hueco de ~2 px por grieta
+        for (let i = 0; i < ck.length; i++) {
+          const a = ck[i] + gap, b = (i + 1 < ck.length ? ck[i + 1] : ck[0] + 1) - gap, off = K.of[i] * broke + trem * Math.sin(t * 71 + i * 2.3);
+          if (b > 1) { tramo(a, 1, off); tramo(0, b - 1, off); } else tramo(a, b, off);
+        }
+      }
+      c.restore();
+    }
     /* tu chincheta: la de la tienda (js/punteros.js, al pixel a x2 con la punta en el sitio) o la de siempre; cae igual, con su rebote */
     _myPin(c, x, y, age, m) {
       const id = A.punteros ? (m && m.skin && m.skin.pin) || A.punteros.current("pin") : "casa", pc = id !== "casa" && A.punteros.pinCanvas(id);
+      if (m && m.clava) return this._pinClava(c, x, y, age, m.clava, pc, id);
       if (!pc) return this._pin(c, x, y, this.sk.ink, this.sk.paper, age, 1);
       if (age < 0) return;
       const k = Math.min(1, age / 520), drop = (1 - easeOutBounce(k)) * -90;
@@ -2287,6 +2436,49 @@ void main(){
       /* a escala entera de la pantalla y en pixeles enteros, con el centro de la columna 8 (la de la punta) sobre x y la punta sobre y */
       const dp = this.dpr || 1, kk = Math.max(2, Math.round(2 * dp)), w = (16 * kk) / dp, h = (24 * kk) / dp;
       c.imageSmoothingEnabled = false; c.drawImage(pc, Math.round((x - (8.5 * kk) / dp) * dp) / dp, Math.round((y - h + drop) * dp) / dp, w, h); c.restore();
+    }
+    /* La pregunta y el revelado (js/revelado.js, «la chincheta se clava»): tu chincheta de siempre (o la de la tienda) cae recta y corta, acelerando,
+       su sombra proyectada (la lampara arriba a la izquierda) corre hacia la punta y se aprieta, y se clava: la punta entra 1 px en el pano (2 con
+       peso 3) y el fieltro se hunde alrededor (el hoyuelo lo pinta FS_POST). Sin rebote, una sola vez. cl: { ms, h (px CSS), peso } */
+    _pinSil(pc, id, dpr) {
+      const key = id + "|" + dpr + "|" + this.sk.ink; if (this._sil && this._sil.key === key) return this._sil;
+      let cv, tx, ty;
+      if (pc) { const kk = Math.max(2, Math.round(2 * dpr)); cv = document.createElement("canvas"); cv.width = 16 * kk; cv.height = 24 * kk; const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(pc, 0, 0, cv.width, cv.height); tx = 8.5 * kk; ty = 24 * kk; }
+      else { cv = document.createElement("canvas"); cv.width = Math.ceil(32 * dpr); cv.height = Math.ceil(48 * dpr); tx = 16 * dpr; ty = 42 * dpr; const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, tx, ty); this._pin(g, 0, 0, "#000", "#000", 2000, 1, true); }
+      const g = cv.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-in"; g.fillStyle = "#0c061c"; g.fillRect(0, 0, cv.width, cv.height);
+      return (this._sil = { key, cv, tx, ty, posada: null });
+    }
+    _pinClava(c, x, y, age, cl, pc, id) {
+      if (age < 0) return;
+      const dpr = this.dpr, u = cl.ms > 0 ? clamp(age / cl.ms, 0, 1) : 1, hy = Math.round((1 - u * u) * cl.h * dpr) / dpr;   // cae acelerando, a pixel entero
+      const tt = age - cl.ms, sink = hy > 0 ? 0 : cl.peso === 3 && tt >= 45 ? 2 : 1;
+      const X = Math.round(x * dpr), Y = Math.round(y * dpr), sil = this._pinSil(pc, id, dpr), hyd = hy * dpr;
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+      /* la sombra: cada punto a altura z cae z·(0,45 ; 0,3) abajo a la derecha; en el aire se abre, se aclara y se desplaza; posada, converge en la punta */
+      const sombra = (g, ox, oy, h) => {
+        g.save(); g.globalAlpha = 0.56 / (1 + h / dpr * 0.012); g.filter = `blur(${((1.2 + h / dpr * 0.045) * dpr).toFixed(1)}px)`; g.imageSmoothingEnabled = false;
+        g.setTransform(1, 0, -0.45, -0.3, ox - sil.tx + 0.45 * sil.ty + 0.45 * h, oy + 0.3 * sil.ty + 0.3 * h); g.drawImage(sil.cv, 0, 0); g.restore();
+      };
+      if (hy > 0) {                                                    // en el aire: en un lienzo aparte (el filtro con la transformacion sesgada no pinta en la capa grande)
+        const pad = Math.ceil(10 * dpr + hyd * 0.1), w = Math.ceil(sil.cv.width + 0.45 * (sil.ty + hyd)) + 2 * pad, h = Math.ceil(0.3 * (sil.ty + hyd)) + 2 * pad;
+        const cv = this._silAir || (this._silAir = document.createElement("canvas")); if (cv.width < w || cv.height < h) { cv.width = Math.max(cv.width, w); cv.height = Math.max(cv.height, h); }
+        const g = cv.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height);
+        const ox = pad + sil.tx, oy = pad; sombra(g, ox, oy, hyd); c.drawImage(cv, X - ox, Y - oy);
+      } else {
+        if (!sil.posada) {                                             // posada no cambia: se pinta una vez (con su penumbra de contacto) y se copia
+          const pad = Math.ceil(8 * dpr), w = Math.ceil(sil.cv.width + 0.45 * sil.ty) + 2 * pad, h = Math.ceil(0.3 * sil.ty) + 2 * pad, cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+          const g = cv.getContext("2d"), ox = pad + sil.tx, oy = pad; sombra(g, ox, oy, 0);
+          g.fillStyle = "rgba(12,6,28,.42)"; g.filter = `blur(${(0.6 * dpr).toFixed(1)}px)`; g.beginPath(); g.ellipse(ox + 0.5 * dpr, oy + 0.25 * dpr, 2.4 * dpr, 1 * dpr, 0, 0, Math.PI * 2); g.fill();
+          sil.posada = { cv, ox, oy };
+        }
+        c.drawImage(sil.posada.cv, X - sil.posada.ox, Y - sil.posada.oy);
+      }
+      /* la chincheta: posada, sus ultimas filas quedan dentro del pano (recorte en la linea del tapete) */
+      if (hy <= 0) { c.beginPath(); c.rect(0, 0, this.fx.width, Y); c.clip(); }
+      const yy = Y - hyd + sink * Math.max(1, Math.round(dpr));
+      if (pc) { const kk = Math.max(2, Math.round(2 * dpr)); c.imageSmoothingEnabled = false; c.drawImage(pc, X - Math.round(8.5 * kk), Math.round(yy - 24 * kk), 16 * kk, 24 * kk); }
+      else { c.setTransform(dpr, 0, 0, dpr, X, yy); this._pin(c, 0, 0, this.sk.ink, this.sk.paper, 2000, 1, true); }
+      c.restore();
     }
     _pin(c, x, y, fill, ring, age, alpha, noShadow) {
       if (age < 0 || alpha <= 0) return;

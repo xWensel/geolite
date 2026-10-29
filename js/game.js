@@ -145,7 +145,8 @@
     const L = lv(), inf = S.run && A.adv.isInfinite && A.adv.isInfinite();
     $("lvlText").textContent = S.run ? A.adv.hudTitle() : A.t("lvl", { n: S.level + 1, m: S.camp.levels.length, name: levelTitle(L) });
     if (S.run) A.adv.refresh();
-    odoSet($("scLevel"), S.levelScore, cash ? { ms: cash.ms, delay: cash.delay } : { ms: 900 });
+    if (cash && cash.roll && A.par) A.par.rueda($("scLevel"), S.levelScore, { from: cash.from, ms: cash.ms, delay: Math.max(0, cash.delay), row: 5, clic: false });   // el marcador cuenta con los rodillos del ticket
+    else odoSet($("scLevel"), S.levelScore, cash ? { ms: cash.ms, delay: cash.delay } : { ms: 900 });
     $("scTotal").textContent = A.fmt(S.runTotal + S.levelScore);
     { const dh = S.run && A.adv.duelHud ? A.adv.duelHud() : null, lb = $("scNeed").parentNode.firstElementChild;   // tanda 16: Duelo con la banca (la meta es su puntuacion, que sube con cada respuesta suya)
       if (dh) { lb.textContent = A.tx(A.chal.tl("ui_bank")); $("scNeed").textContent = A.fmt(dh.bank); $("scMark").style.right = (100 - dh.pct) + "%"; S.duelOn = true; }
@@ -734,7 +735,7 @@
   function pingFx(x, y, kind) {
     if (S.reduce) return; const el = document.createElement("div"); el.className = "ping " + (kind || "");
     el.style.left = x + "px"; el.style.top = y + "px";
-    let h = "<i></i><i></i><i></i>"; for (let k = 0; k < 10; k++) { const a = (k / 10) * Math.PI * 2 + Math.random() * 0.4, d = 34 + Math.random() * 46; h += `<u style="--x:${Math.cos(a) * d}px;--y:${Math.sin(a) * d}px;--r:${Math.random() * 360}deg"></u>`; }
+    const h = "<i></i><i></i><i></i>";                                     // el destello pegado al punto (sin trocitos que salgan volando: regla «nada que salte o flote»)
     el.innerHTML = h; $("app").appendChild(el); setTimeout(() => el.remove(), 900);
   }
   /* la pantalla entera tiembla con cada jackpot de la Enciclopedia, de menos a mas: 1 flojo (<=300 km), 2 mas (<=150), 3 bastante mas (<=75).
@@ -761,7 +762,8 @@
     if (jpAnim) jpAnim.cancel();
     jpAnim = document.documentElement.animate(frames, { duration: P.ms * rnd(0.92, 1.1) });
   }
-  function coinFx(n) {
+  function coinFx(n, quieto) {
+    if (quieto && n) { for (let k = 0; k < Math.min(n, 8); k++) setTimeout(() => A.sfx.coin(k / 6), 900 + 720 + k * 90); return; }   // con el revelado nuevo: el doblon suena, pero no sale volando (nada que salte o flote)
     if (S.reduce || !n) return; const to = $("abCoins") && $("abCoins").getBoundingClientRect(); if (!to) return;
     for (let k = 0; k < Math.min(n, 8); k++) setTimeout(() => {
       const c = document.createElement("div"); c.className = "coin-fly"; c.innerHTML = A.icon("coin"); c.style.left = lastPtr.x + "px"; c.style.top = lastPtr.y + "px";
@@ -777,7 +779,8 @@
     if (S.run && S.tool) { pingFx(at.x, at.y, "probe"); A.adv.probe(lon, lat); return; }
     if (S.run && !ef) ({ lon, lat } = A.adv.adjust(lon, lat));   // con puntero propio, el viento ya lo ha movido
     if (S.run && A.adv.reBall && A.adv.reBall(lon, lat)) { pingFx(at.x, at.y, "probe"); return; }   // Segunda bola: este clic no cuenta
-    pingFx(at.x, at.y); A.sfx.pin(S.streak, A.audio.side(at.x));   // la chincheta es una ficha que se planta, en su lado de la pantalla
+    S.pinSide = A.audio.side(at.x);
+    pingFx(at.x, at.y); if (!(A.par && map.dolly && !S.reduce && !S.duel)) A.sfx.pin(S.streak, S.pinSide);   // la chincheta es una ficha que se planta, en su lado de la pantalla (con el anticipo suena al clavarse: js/revelado.js)
     reveal({ lon, lat }, Math.max(0, S.limit - (performance.now() - S.t0 - S.pausedAcc) / 1000));
   }
   /* pista de la Enciclopedia en el ticket: los umbrales de ESTA pregunta (x2 en mares, naturaleza y estrechos) y en millas si toca;
@@ -906,8 +909,13 @@
        mas cerca) y vibra el movil, y las casillas del ticket se encienden al mismo ritmo. Si ya has pasado a la siguiente pregunta, no empiezan */
     /* v0.3.54, la pausa de impacto: en la diana, 90 ms de silencio (la musica se agacha) y luego el golpe. El compas entero del revelado
        (sonido, bandera, cuenta, racha y jackpots) se retrasa esos 90 ms; nada se congela en pantalla */
-    const HS = tier === 4 && guess ? 90 : 0;
-    const JP_AT = 1850 + HS, JP_MS = Math.round(A.audio.jpGap * 1000), jpTok = S.jpTok = (S.jpTok || 0) + 1, jpAt = i => JP_AT + i * JP_MS + "ms";
+    /* La pregunta y el revelado (js/revelado.js, aprobado del Probador, en Extrema): el plan de esta respuesta. pre = el anticipo (la chincheta cae y
+       se clava, la camara se acerca, la sala contiene el aliento); con el, todo el compas de hoy se corre SH ms y el ticket sale al revelar (M0 ms
+       despues del instante de hoy). La diana perfecta (0-5 km) cambia la pausa de 90 ms por su silencio (sil). RD: los rodillos cuentan x1,4 */
+    const par = A.par && map.dolly && !S.duel ? A.par.plan({ guess, km, isC, lim, streak: prevStreak, gl: true }) : null;
+    const PRE = par ? par.pre : 0, SH = PRE ? PRE - 300 : 0, M0 = PRE ? 300 : 0, RD = par && par.vivo ? A.par.X.dur : 1, SIL = par && par.sil && guess ? par.sil : 0;
+    const HS = SIL || (tier === 4 && guess ? 90 : 0);
+    const JP_AT = 700 + HS + Math.round(1100 * RD) + 50, JP_MS = Math.round(A.audio.jpGap * 1000), jpTok = S.jpTok = (S.jpTok || 0) + 1, jpAt = i => JP_AT + i * JP_MS - M0 + "ms";   // (para el CSS del ticket, que sale M0 ms despues)
     const still = () => S.jpTok === jpTok && S.phase === "reveal";          // sigue en pantalla este ticket (si ya has pasado, sus sonidos no pisan la pregunta siguiente)
     /* v0.2.15: acierto = la misma regla que la racha (<= 300 km, el anillo exterior). Te llevas la bandera: en el mapa se iza en el sitio
        (FLAG_AT, con su corneta) y en el ticket va junto al nombre; si fallas, el mastil se queda vacio. T_SLAM: golpe de la caja de la racha */
@@ -920,45 +928,60 @@
     const label = o.clue ? A.tx(o.answer) : A.tx(o.name);
     /* tu chincheta, por el camino corto: si cruza el antimeridiano (Fiyi y Samoa) se dibuja en la copia del mundo junto al objetivo */
     const refLon = ans ? ans[0] : labelAt ? labelAt[0] : null, gLon = guess ? (refLon == null ? guess.lon : guess.lon + 360 * Math.round((refLon - guess.lon) / 360)) : null;
-    map.setMarks({
+    /* el anticipo: tu chincheta cae y se clava YA (una sola vez: el revelado la conserva con su hora), la camara y la sala, y al revelar, show() */
+    const clava = par && guess ? A.par.clava(par.peso, par.vivo) : null;
+    if (par) { A.par.nuevo(); if (clava) map.setMarks({ guess: [gLon, guess.lat], gct: map.pickCt, clava }); $("factText").textContent = factLine(o); $("plate").classList.remove("hurry"); }   // la nota de campo, como siempre, en el clic (si no, su caja crece vacia durante el anticipo)
+    /* el casi: la cuenta de km pasa el umbral del aro y vuelve atras, y el aro se estira hacia ti y se raja (js/map.js _ringCasi) */
+    const casi = par && par.casi ? (() => { const ck = [0]; for (let i = 1; i < 8; i++) ck.push((i + (Math.random() - 0.5) * 0.7) / 8);
+      return { ...par.casi, v: par.vivo ? null : par.casi.F, fase: par.vivo ? 0 : 1, quieto: !par.vivo, top: 0.82 + 0.14 * (A.par.X.hondo / 20), raja: A.par.X.raja,
+        ck: ck.map(x => (x + 0.03) % 1).sort((a, b) => a - b), of: ck.map(() => Math.round((Math.random() - 0.5) * 3.4)) }; })() : null;
+    const show = () => {
+    const later = (fn, ms) => setTimeout(fn, Math.max(0, ms - M0));       // el compas de hoy, medido desde su instante (el ticket sale M0 ms despues)
+    if (par) A.par.nivel(tier);
+    map.setMarks({ t0: performance.now() - M0, clava, gct: guess ? map.pickCt : null,
       guess: guess ? [gLon, guess.lat] : null, answer: ans, highlight: isC && !af ? o.key : null, area: af || null, label, labelAt,
       dist: guess && km > 0 ? fmtKm(km) : "", pop: total ? "+" + A.fmt(total) : null, bull: !!guess && tier === 4,   // bull: con «¡Diana!» la diana de la tienda (js/punteros.js) sustituye a los anillos
       flags: up ? fl.map(flagImg) : null,
-      rings: guess && !isC ? { r: lim, n: cxr.level, at: [0, 1, 2].map(i => JP_AT + i * JP_MS) } : null,   // anillos 300/150/75 km: se encienden con los jackpots
+      rings: guess && !isC ? { r: lim, n: cxr.level, at: [0, 1, 2].map(i => JP_AT + i * JP_MS), casi, oro: SIL && !par.vivo ? 1 : 0 } : null,   // anillos 300/150/75 km: se encienden con los jackpots
     });
-    if (adv && adv.bank && adv.bank.pt) { const bq = S.qi; map.setDecoys([{ lon: adv.bank.pt[0], lat: adv.bank.pt[1], bank: adv.bank.s, bankLabel: A.tx(A.chal.tl("ui_bank")).toUpperCase() + " +" + A.fmt(adv.bank.s), t0: performance.now() + 900, a: 1 }]); setTimeout(() => { if (S.phase === "reveal" && S.qi === bq && A.sfx.bankPin) A.sfx.bankPin(); }, 1500); }   // la chincheta de la banca cae despues de la tuya
+    if (adv && adv.bank && adv.bank.pt) { const bq = S.qi; map.setDecoys([{ lon: adv.bank.pt[0], lat: adv.bank.pt[1], bank: adv.bank.s, bankLabel: A.tx(A.chal.tl("ui_bank")).toUpperCase() + " +" + A.fmt(adv.bank.s), t0: performance.now() + 900 - M0, a: 1 }]); later(() => { if (S.phase === "reveal" && S.qi === bq && A.sfx.bankPin) A.sfx.bankPin(); }, 1500); }   // la chincheta de la banca cae despues de la tuya
     const fC = isC ? world.byName[o.key] : null;
     const fpts = (isC ? span.slice(0, 2).map(p => [p[0], p[1], fC && fC.ct]) : [[ans[0], ans[1]]]).concat(span.slice(isC ? 2 : 1).map(p => [p[0], p[1]]), guess ? [[gLon, guess.lat, map.pickCt]] : []);
 
-    if (HS) setTimeout(() => { if (still()) A.music.duck(0.12, 260); }, 480 - 30);
-    setTimeout(() => {
+    if (SIL) later(() => { if (still()) A.par.silencio(HS); }, 480);       // la diana perfecta: la casa entera se calla (musica cortada en seco, la sala baja la luz)...
+    else if (HS) later(() => { if (still()) A.music.duck(0.12, 260); }, 480 - 30);
+    later(() => {
       if (!still()) return; A.sfx.reveal(tier);
       if (A.celebra && guess && tier >= 1 && tier <= 4) A.celebra.acierto(tier);                 // v0.3.203: la onda de choque en el mapa, bajo tu chincheta (js/celebra.js)
-      if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); A.casa.destello(2); }          // la diana pega: golpe grave, un temblor y la lampara que sube
+      if (SIL) {                                                                                  // ...y luego el golpe: el del jackpot 3, los aros de oro y la vibracion mas larga
+        A.sfx.impacto(); jpShake(3); A.casa.luz(0.9, 900); A.casa.destello(3); if (A.haptic && A.haptic.dual) A.haptic.dual(1, 0.9, 520); else if (A.haptic) A.haptic([300]);
+        if (map.marks.rings && par.vivo) map.marks.rings.oro = performance.now();   // con Movimiento Minimo ya estan encendidos, quietos
+      }
+      else if (tier === 4 && guess) { A.sfx.impacto(); jpShake(1); A.casa.luz(0.62, 700); A.casa.destello(2); }          // la diana pega: golpe grave, un temblor y la lampara que sube
       else if (tier === 0 || tier === 5) A.casa.baja(tier === 0 && prevStreak >= 2 ? 1 : 0.7);    // fallo: la lampara baja un momento
       /* v0.3.201 (Bloque F, paso 4): el mundo responde a tu racha (la sala, la musica y la pila de fichas: js/casa.js) y el publico de la sala
          reacciona (js/audio.js): aplauso en la diana, «oooh» si te quedas a nada, vitores al llegar a racha 5 y un «ooow» si se rompe una de 3 o mas */
       A.casa.racha(S.streak || 0, { fallo: !hit, antes: prevStreak });
       if (A.publico) {
-        if (tier === 4 && guess && cxr.level !== 3) A.publico("diana", 120); else if (tier === 3) A.publico("porpoco", 80);   // con el premio gordo, la sala aplaude una vez, al final
+        if (tier === 4 && guess && cxr.level !== 3) A.publico("diana", 120); else if (tier === 3 && !casi) A.publico("porpoco", 80);   // con el premio gordo, la sala aplaude una vez, al final; con el casi, el «oooh» va cuando el aro se raja
         if (hit && S.streak === 5) A.publico("racha5", 900);
         if (!hit && prevStreak >= 3) A.publico("rota", 250);
       }
     }, 480 + HS);
-    if (up) setTimeout(() => { if (still() && A.sfx.flag) A.sfx.flag(fl.length); }, FLAG_AT);
-    if (cxr.level) setTimeout(() => {
+    if (up) later(() => { if (still() && A.sfx.flag) A.sfx.flag(fl.length); }, FLAG_AT);
+    if (cxr.level) later(() => {
       if (!still()) return;
       A.casa.premio(cxr.level);                                                  // la casa: jackpots, un temblor por golpe que crece y la vibracion (js/casa.js)
       if (A.celebra) for (let k = 1; k <= cxr.level; k++) setTimeout(() => { if (still()) A.celebra.jackpot(k); }, (k - 1) * JP_MS);   // y con cada golpe, otra onda
       if (cxr.level === 3 && A.publico) A.publico("jackpot", 2 * JP_MS + 600);     // el premio gordo: la sala aplaude y vitorea tras el tercer golpe
     }, JP_AT);
-    if (adv && adv.coins) coinFx(adv.coins);
+    if (adv && adv.coins) coinFx(adv.coins, !!par);
     /* la caja de la racha (Aventura y Reto diario): "on" se enciende o sube de nivel, "broken" se agrieta (perdiste una racha de 2 o mas), "off" se queda
        apagada a x1. En el Clasico la racha no multiplica: solo cuenta (fila RACHA) */
     const eq = S.run ? (mult > 1 ? "on" : prevStreak >= 2 && !S.streak ? "broken" : "off") : null;
     const broke = eq === "broken" || (!S.run && prevStreak >= 2 && !S.streak);
-    if (A.celebra) A.celebra.racha({ antes: prevStreak, ahora: S.streak || 0, eq, slam: T_SLAM });   // v0.3.203: el fuego de la racha detras de la caja roja
-    setTimeout(() => {
+    if (A.celebra) A.celebra.racha({ antes: prevStreak, ahora: S.streak || 0, eq, slam: T_SLAM - M0 });   // v0.3.203: el fuego de la racha detras de la caja roja
+    later(() => {
       if (!still()) { if (S.phase === "asking") setStreak(); return; }
       if (eq === "on" || (!S.run && S.streak >= 2)) { A.sfx.streak(S.streak); if (eq === "on") A.casa.luz(0.4, 520); if (mult > 1 && !S.reduce && S.shake) { const ap = $("app"); ap.classList.remove("shake"); A.restyle(ap); ap.classList.add("shake"); } }
       else if (broke) { if (A.sfx.streakBreak) A.sfx.streakBreak(); if (eq) shards(); }
@@ -969,7 +992,7 @@
     const showKm = guess && !(isC && km === 0);
     /* cabecera: la bandera (o el mastil vacio), el veredicto y el lugar como en la placa de la pregunta (nombre y, en verde, su pais) */
     const cn = (o.cEn || []).map(locCountry).join(" · "), pName = o.clue ? A.tx(o.answer) : A.tx(o.name), pSub = isC ? "" : o.clue ? cn : A.tx(o.sub) || cn;   // en las pistas, o.sub son las casillas de la respuesta
-    const flagSlot = fl.length ? `<div class="tk-flag${up ? " up" : ""}${fl.length > 1 ? " two" : ""}" style="--fh:${FLAG_AT}ms">${fl.map((en, i) => `<i style="--fi:${i}"><img class="p" src="${flagSrc(en)}" alt="" draggable="false">${up ? `<img class="c" src="${flagSrc(en)}" alt="" draggable="false">` : `<img class="h" src="assets/flags/p/_hueco.webp" alt="" draggable="false">`}</i>`).join("")}</div>` : "";
+    const flagSlot = fl.length ? `<div class="tk-flag${up ? " up" : ""}${fl.length > 1 ? " two" : ""}" style="--fh:${FLAG_AT - M0}ms">${fl.map((en, i) => `<i style="--fi:${i}"><img class="p" src="${flagSrc(en)}" alt="" draggable="false">${up ? `<img class="c" src="${flagSrc(en)}" alt="" draggable="false">` : `<img class="h" src="assets/flags/p/_hueco.webp" alt="" draggable="false">`}</i>`).join("")}</div>` : "";
     /* rumbo del fallo ("Demasiado al oeste") y el pais donde cayo tu chincheta: en verde si es el bueno, en rojo si no */
     const dirTxt = showKm && km >= 10 ? A.t("res.dir").split("|")[dirOf(o, guess, af || (o.t === "c" && world.byName[o.key]))] || "" : "";
     const pinF = showKm && A.pointer.featureAt ? A.pointer.featureAt(guess.lon, guess.lat) : null;
@@ -983,7 +1006,7 @@
       const from = prevStreak >= 2 && eq !== "off" ? { lit: 1, lb: lb(prevStreak), v: "×" + A.fmt1(sm(prevStreak)), lv: lvOf(prevStreak) } : { lit: 0, lb: lb(eq === "on" ? prevStreak : S.streak), v: "×1" };
       const to = eq === "on" ? { lit: 1, lb: lb(S.streak), v: "×" + A.fmt1(mult), lv: lvOf(S.streak) } : eq === "broken" ? { lit: 0, lb: A.t("res.broken"), v: "×1" } : from;
       const two = to !== from, lg = t => (String(t).length > 12 ? " lg" : ""), sw = (a, b) => (two ? `<em class="a${lg(a)}">${a}</em><em class="b${lg(b)}">${b}</em>` : `<em class="${lg(b)}">${b}</em>`);   // lg: etiqueta larga ("Sequência quebrada"): a dos lineas
-      eqHtml = `<div class="tk-eq e-${eq}${from.lit ? " f-lit" : ""}${to.lit ? " t-lit" : ""}" style="--sl:${T_SLAM}ms">
+      eqHtml = `<div class="tk-eq e-${eq}${from.lit ? " f-lit" : ""}${to.lit ? " t-lit" : ""}" style="--sl:${T_SLAM - M0}ms">
         <div class="c"><span>${A.t("res.chips")}</span><b class="odo" id="eqChips"></b></div><i class="x">×</i>
         <div class="mw">${from.lit ? fire("f0", from.lv) : ""}${to.lit ? fire("f1", to.lv) : ""}<div class="m"><span>${sw(from.lb, to.lb)}</span><b>${sw(from.v, to.v)}</b>${eq === "broken" ? `<small>${A.t("res.was2", { m: A.fmt1(sm(prevStreak)) })}</small><i class="crk"></i>` : ""}</div></div>
       </div>`;
@@ -993,12 +1016,13 @@
       <div class="tk-band"><span>${S.run && A.adv.isInfinite && A.adv.isInfinite() ? A.t("ask.inf", { n: pad2(S.qi + 1) }) : A.t("ask.no", { n: pad2(S.qi + 1), m: pad2(S.qs.length) })}</span><span class="tag">${A.t("kind." + (o.clue ? "clue" : o.kind || L.kind))}</span></div>
       <div class="tk-head${fl.length ? "" : " nf"}">${flagSlot}<div class="tk-id"><div class="tk-title">${title}</div><div class="tk-place">${o.clue ? `<span>${A.t("res.was")}</span>` : ""}<b>${pName}</b>${pSub ? `<em>${pSub}</em>` : ""}</div></div></div>
       ${showKm ? `<div class="tk-km"><span class="odo" id="kmNum"></span><span>${S.units === "mi" ? "mi" : "km"}</span></div>` : ""}
+      ${casi ? `<div class="tk-casi${casi.quieto ? " on" : ""}" id="tkCasi">${casiTxt(casi.i, (() => { const mi = S.units === "mi", g = Math.max(1, Math.round((casi.F - casi.r) / (mi ? 1.609344 : 1))); return A.fmt(g) + " " + (mi ? "mi" : "km"); })())}</div>` : ""}
       <div class="tk-from">${[dirTxt, guess ? A.t("res.clicked", { t: A.fmt1(S.limit - left) }) : ""].filter(Boolean).join(" · ")}</div>
       ${pinTxt ? `<div class="tk-pin ${pinCls}">${pinTxt}</div>` : ""}
       <div class="tk-perf"></div>
       <dl class="tk-rows">
-        <div style="--i:0" data-b="d"><dt>${A.t("res.dist")}</dt><i></i><dd>+${A.fmt(sc.dist)}</dd></div>
-        <div style="--i:1" data-b="t"><dt>${A.t("res.speed")}</dt><i></i><dd>+${A.fmt(sc.time)}</dd></div>
+        <div style="--i:0" data-b="d"><dt>${A.t("res.dist")}</dt><i></i><dd>${par ? `+<span class="odo odp" id="tkD"></span>` : "+" + A.fmt(sc.dist)}</dd></div>
+        <div style="--i:1" data-b="t"><dt>${A.t("res.speed")}</dt><i></i><dd>${par ? `+<span class="odo odp" id="tkT"></span>` : "+" + A.fmt(sc.time)}</dd></div>
         ${srow}
       </dl>
       ${adv && adv.lines.length ? `<div class="tk-perks">${adv.lines.map(l => `<div><span>${A.icon(l[0])}</span><i>${l[1]}</i><b>${l[2]}</b></div>`).join("")}</div>` : ""}
@@ -1013,33 +1037,54 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     $("plate").classList.remove("hurry");
     /* el cobro: los puntos del ticket suben al marcador al compas de su TOTAL (700 + 1100 ms); la barra llega en 450 ms y, si cruza la meta
        o un escalon de botin, lo celebra (js/marcador.js) */
-    const cash = { from: S.levelScore - total, to: S.levelScore, total, delay: 700 + HS, ms: 1100, gauge: 450 };
+    const cash = { from: S.levelScore - total, to: S.levelScore, total, delay: 700 + HS - M0, ms: Math.round(1100 * RD), gauge: 450, roll: !!par };
     /* v0.2.15: el ticket se monta en el fotograma siguiente. La puntuacion, las marcas y los sonidos van en esta tarea y el ticket (maquetarlo es lo mas
        caro) en la otra: asi ninguna se come un fotograma entero (con la CPU a x4 el revelado era una sola tarea de ~50 ms) */
     requestAnimationFrame(() => {
       if (!still()) return;
       dialog(tkHtml, "side");
-      if (showKm) { const kmEl = $("kmNum"); odoNow(kmEl, 0); requestAnimationFrame(() => odoSet(kmEl, Math.round(S.units === "mi" ? km / 1.609344 : km), { ms: 1100, delay: 560 + HS })); }
+      if (showKm && par) {                                                     /* rodillos: los km aterrizan bajando (desde 9...9 con las mismas cifras); con el casi, pasan del umbral, dudan y vuelven */
+        const kmEl = $("kmNum"), U = v => (S.units === "mi" ? v / 1.609344 : v), F = Math.round(U(km)), top = Math.pow(10, String(F).length) - 1;
+        A.par.fin(kmEl, F);
+        if (casi && par.vivo) {
+          const X = A.par.X, rC = casi, d1 = Math.round(770 * RD / 1.4), d2 = X.espera, d3 = Math.round(480 * RD / 1.4), t0 = 560 + HS - M0;
+          later(() => { if (still()) A.sfx.queda(); }, 560 + HS + d1 - 220);
+          A.par.rueda(kmEl, F, { from: Math.max(top, F), delay: t0, row: 0, tick: true, path: [{ to: Math.round(U(rC.m)), ms: d1, e: "out" }, { to: Math.round(U(rC.m)), ms: d2, e: "lin" }, { to: F, ms: d3, e: "io" }],
+            onV: v => { rC.v = S.units === "mi" ? v * 1.609344 : v; },
+            onSeg: sg => { if (sg !== 2 || !still()) return; rC.fase = 1; rC.tv = performance.now();
+              setTimeout(() => { if (!still()) return; A.sfx.raja(0.6 + 0.4 * X.raja); jpShake(X.raja > 0.85 ? 2 : 1); if (A.haptic && A.haptic.dual) A.haptic.dual(0.25, 0.55 * X.raja + 0.1, 110);
+                if (A.publico) A.publico("porpoco", 60); const ct = $("tkCasi"); if (ct) ct.classList.add("on"); }, 100); } });
+        } else A.par.rueda(kmEl, F, { from: Math.max(top, F), ms: Math.round(1100 * RD), delay: 560 + HS - M0, row: 0, tick: true });
+      } else if (showKm) { const kmEl = $("kmNum"); odoNow(kmEl, 0); requestAnimationFrame(() => odoSet(kmEl, Math.round(S.units === "mi" ? km / 1.609344 : km), { ms: 1100, delay: 560 + HS })); }
       /* el total: con racha, primero cuenta los PUNTOS y, con el golpe de la caja roja, sube por el multiplicador (como en Balatro); sin ella, de una vez.
          Las cifras del marcador van aparte, al mismo compas de siempre (700 + 1100 ms) */
-      const totEl = $("totNum"), eqC = $("eqChips"); odoNow(totEl, 0); if (eqC) odoNow(eqC, 0);
+      const totEl = $("totNum"), eqC = $("eqChips"), rD = $("tkD"), rT = $("tkT");
+      /* con el paquete del revelado las cifras son rodillos (js/revelado.js); sin el (Duelo), las de siempre */
+      const roll = (el, v, op = {}) => (par ? A.par.rueda(el, v, { ...op, ms: Math.round((op.ms || 1000) * RD), delay: op.delay ? Math.max(0, op.delay) : 0 }) : odoSet(el, v, op));
+      if (par) { A.par.rueda(totEl, 0, { instant: true, from: 0 }); if (eqC) A.par.rueda(eqC, 0, { instant: true, from: 0 }); A.par.fin(totEl, total); if (eqC) A.par.fin(eqC, chips);
+        if (rD) { A.par.rueda(rD, 0, { instant: true, from: 0 }); A.par.fin(rD, sc.dist); } if (rT) { A.par.rueda(rT, 0, { instant: true, from: 0 }); A.par.fin(rT, sc.time); }
+        A.par.fin($("scLevel"), S.levelScore);
+        const sh0 = totEl.closest(".sheet"); if (sh0) sh0.addEventListener("pointerdown", e => { if (!e.target.closest("button")) A.par.cortar(); });   // un clic en el ticket: todo encaja de golpe
+      } else { odoNow(totEl, 0); if (eqC) odoNow(eqC, 0); }
       /* v0.3.54, la cuenta por golpes: cada sumando (distancia, velocidad) da el suyo, uno tras otro y un peldano mas agudo; su fila se marca,
          PUNTOS salta a la suma y da un respingo. Despues, como siempre: el golpe de la racha y el TOTAL. El ritmo entre golpes se sortea un poco
          (aleatorio dentro del orden) y nunca llega al golpe de la racha */
       const sheet = totEl.closest(".sheet"), beats = [["d", Math.min(sc.dist, chips)], ["t", chips]].filter((b, i, a) => b[1] > (i ? a[i - 1][1] : 0));
       const gap = beats.length > 1 ? Math.min(170 + Math.round(Math.random() * 40), Math.floor(430 / (beats.length - 1))) : 0, T0 = 700 + HS, lastAt = T0 + gap * Math.max(0, beats.length - 1);
+      if (par) { if (rD && !beats.some(b => b[0] === "d")) A.par.rueda(rD, sc.dist, { instant: true }); if (rT && !beats.some(b => b[0] === "t")) A.par.rueda(rT, sc.time, { instant: true }); }
       const jump = el => { if (el && !S.reduce) el.animate([{ transform: "scale(1.3)" }, { transform: "none" }], { duration: 190, easing: "ease-out" }); };
-      beats.forEach(([key, val], i) => setTimeout(() => {
+      beats.forEach(([key, val], i) => later(() => {
         if (!still() || !totEl.isConnected) return;
         const row = sheet && sheet.querySelector(`.tk-rows [data-b="${key}"]`); if (row) row.classList.add("beat");
-        if (eqC) { odoSet(eqC, val, { ms: 130 }); jump(eqC); }
-        if (eq === "on") odoSet(totEl, val, { ms: 130 }); else if (i === beats.length - 1) odoSet(totEl, total, { ms: 420, tick: total > 0 }); else { odoSet(totEl, val, { ms: 130 }); jump(totEl); }
+        const rr = key === "d" ? rD : rT; if (rr) roll(rr, key === "d" ? sc.dist : sc.time, { ms: 260, row: i + 1, tick: true });   // DISTANCIA y VELOCIDAD suben en su golpe
+        if (eqC) { roll(eqC, val, { ms: 130, row: 3 }); jump(eqC); }
+        if (eq === "on") roll(totEl, val, { ms: 130, row: 4 }); else if (i === beats.length - 1) roll(totEl, total, { ms: 420, tick: total > 0, row: 4 }); else { roll(totEl, val, { ms: 130, row: 4 }); jump(totEl); }
         A.sfx.golpe(i);
       }, T0 + i * gap));
-      if (!beats.length) requestAnimationFrame(() => odoSet(totEl, total, { ms: 1100, delay: T0, tick: total > 0 }));
+      if (!beats.length) requestAnimationFrame(() => roll(totEl, total, { ms: 1100, delay: T0 - M0, tick: total > 0, row: 4 }));
       if (eq === "on") {
-        if (beats.length) setTimeout(() => { if (still() && totEl.isConnected) A.sfx.countEnd(); }, lastAt + 200);
-        setTimeout(() => { if (still() && totEl.isConnected) { odoSet(totEl, total, { ms: 470, delay: 30, tick: true }); jump(totEl); } }, T_SLAM);
+        if (beats.length) later(() => { if (still() && totEl.isConnected) A.sfx.countEnd(); }, lastAt + 200);
+        later(() => { if (still() && totEl.isConnected) { roll(totEl, total, { ms: 470, delay: 30, tick: true, row: 4 }); jump(totEl); } }, T_SLAM);
       }
       $("nextBtn").onclick = () => { last ? finishLevel() : (S.qi++, nextQuestion()); };
       updateHud(cash);
@@ -1053,7 +1098,18 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
         else map.fitPoints(fpts.map(p => [p[0], p[1]]), padForDialog(), 1100);
       });
     });
+    };
+    if (!par) return show();
+    let xy = null; try { if (guess) xy = map.lonLatToScreen(gLon, guess.lat, map.pickCt); } catch (e) { xy = null; }
+    A.par.start({ map, plan: par, xy, streak: prevStreak, side: S.pinSide || 0, onR: () => { if (S.phase === "reveal" && S.jpTok === jpTok) show(); } });
   }
+  /* el casi en el ticket: «¡A 10 km de la plata!» (i: 0 bronce, 1 plata, 2 oro) */
+  const CASI_TXT = [
+    "¡A {n} del bronce!|{n} short of bronze!|À {n} du bronze !|A {n} do bronze!|{n} am Bronze vorbei!|A {n} dal bronzo!||离铜环只差{n}！|브론즈까지 {n} 모자라!|ブロンズまであと{n}！|До бронзы {n}!|Do brązu zabrakło {n}!",
+    "¡A {n} de la plata!|{n} short of silver!|À {n} de l’argent !|A {n} da prata!|{n} am Silber vorbei!|A {n} dall’argento!||离银环只差{n}！|실버까지 {n} 모자라!|シルバーまであと{n}！|До серебра {n}!|Do srebra zabrakło {n}!",
+    "¡A {n} del oro!|{n} short of gold!|À {n} de l’or !|A {n} do ouro!|{n} am Gold vorbei!|A {n} dall’oro!||离金环只差{n}！|골드까지 {n} 모자라!|ゴールドまであと{n}！|До золота {n}!|Do złota zabrakło {n}!",
+  ];
+  const casiTxt = (i, n) => A.pick6(CASI_TXT[i]).replace("{n}", n);
 
   /* ------------------------------------------------------------ veredictos (v0.3.37, Naipe de gala: css/gala.css)
      Una sola pantalla para todos (ronda superada o fallida, jefe, nivel del Clasico, fin de expedicion, Reto diario): a la izquierda el titular,
@@ -1300,6 +1356,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     else if (act === "ok" && (e.code !== "Space" || document.activeElement === document.body)) {
       if (e.repeat) { e.preventDefault(); return; }                         // dejar Intro pulsado no se salta el veredicto ni la intro siguientes
       if (S.phase === "intro" && S.skipIntro) { e.preventDefault(); S.skipIntro(); return; }
+      if (S.phase === "reveal" && A.par && A.par.saltar()) { e.preventDefault(); return; }   // durante el anticipo del revelado: se revela ya
       const b = document.querySelector("#veil:not(.hidden) [data-primary]") || document.querySelector("#layer:not(.hidden) [data-primary]") || A.marcador.primary();   // la pausa va encima de todo: antes Intro pulsaba el ticket o el veredicto de debajo
       if (b && document.activeElement !== b) { e.preventDefault(); b.click(); }
     }
