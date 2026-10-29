@@ -1205,9 +1205,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); acu = { pct: r * 100, metal: r >= 0.85 ? "oro" : r >= 0.7 ? "plata" : "bronce", camp: A.tx(S.camp.title) }; }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }
-    if (win) { if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
     if (acu && !A.acunar) acu = null;
-    if (win && !acu) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
+    if (win && !acu) { if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }   // el veredicto (js/veredicto.js) y la medalla (js/acunar.js) traen su propio golpe
     const btns = [];
     if (!win) btns.push({ id: "retryBtn", cls: "btn-ink", label: A.t("btn.retry"), arrow: true, primary: true, onclick: () => { S.runMax = S.runMax0 || 0; startLevel_(S.level); } });   // el intento fallido deja de contar en el maximo: el IQ y la medalla miden la pasada buena (S.clean sigue en false: Sin red exige no fallar ninguno)
     btns.push({ id: "newBtn", cls: win ? "btn-ink" : "btn-line", label: A.t("btn.newGame"), primary: win, onclick: () => { S.startLevel = 0; showTitle(); } });
