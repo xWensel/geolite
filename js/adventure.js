@@ -1158,22 +1158,61 @@ window.AIQ = window.AIQ || {};
   /* v0.3.103: cada ilustracion trae su propio margen interior y se veia descuadrada en su casilla: se mide donde esta su contenido real (una vez por imagen)
      y se desplaza, a pixel entero, para que quede centrada en el cuadrado */
   const icBox = {};
+  /* v0.3.238: la tira de retos a ESCALA ENTERA y centrada al pixel fisico. Cada icono se pinta a un multiplo entero de su rejilla nativa (48 px los
+     de siempre, 64 los de las reglas) en pixeles de la pantalla, compensando el zoom (--k) de la barra y la densidad; la casilla mide icono + 8 px
+     fisicos por lado, el hueco entre casillas es un entero de pixeles fisicos y la tira entera se corre la fraccion que le sobre para caer en la
+     rejilla de la pantalla. Encima, cada icono se centra por su dibujo (no por su lienzo), en pixeles de arte enteros */
   function centerIcons(root) {
-    root.querySelectorAll(".ch-chip > .ic").forEach(im => {
-      const src = im.currentSrc || im.src, put = b => { if (!b) return; const w = im.offsetWidth || 24, k = w / b.w, dx = Math.round((b.w / 2 - b.cx) * k), dy = Math.round((b.h / 2 - b.cy) * k); im.style.translate = dx || dy ? `${dx}px ${dy}px` : ""; };
-      if (icBox[src] !== undefined) return put(icBox[src]);
-      const m = new Image(); m.onload = () => {
-        try {
-          const cv = document.createElement("canvas"); cv.width = m.naturalWidth; cv.height = m.naturalHeight; const g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(m, 0, 0);
-          const d = g.getImageData(0, 0, cv.width, cv.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
-          for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (d[(y * cv.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-          icBox[src] = x1 < 0 ? null : { w: cv.width, h: cv.height, cx: (x0 + x1 + 1) / 2, cy: (y0 + y1 + 1) / 2 };
-        } catch (e) { icBox[src] = null; }
-        put(icBox[src]);
-      }; m.onerror = () => { icBox[src] = null; }; m.src = src;
-    });
+    const host = root.closest("#topHud") || root, k = parseFloat(getComputedStyle(host).zoom) || 1, dpr = devicePixelRatio || 1, ph = k * dpr;
+    const n = Math.max(1, Math.round((0.72 * 42 * ph) / 48));
+    /* los px CSS se maquetan en 1/64: se busca, cerca de lo pedido, un numero de pixeles fisicos que en CSS caiga exacto (si no, la tira se corre) */
+    const exact = (want, lo) => { for (const d of [0, 1, -1, 2, -2, 3, -3]) { const p_ = Math.max(lo, Math.round(want) + d), c = (p_ / ph) * 64; if (Math.abs(c - Math.round(c)) < 1e-6) return p_ / ph; } return Math.round(want) / ph; };
+    /* todas las casillas a la medida de la mayor rejilla (64, los iconos de las reglas): el de 48 se queda a su escala entera y centrado dentro */
+    const fit0 = w => { for (let w2 = w; w2 < w + 8; w2++) { const c = (w2 / ph) * 64; if (Math.abs(c - Math.round(c)) < 1e-6) return w2; } return w; }, B = fit0(64 * n), pad = exact(6, 5) * ph, wide = (() => { for (const d of [0, 1, -1, 2, -2, 3, -3]) { const p_ = Math.round(pad) + d, c = ((B + 2 * p_) / ph) * 64; if (p_ >= 5 && Math.abs(c - Math.round(c)) < 1e-6) return p_; } return Math.round(pad); })();
+    root.style.setProperty("--icp", (wide / ph).toFixed(4) + "px"); root.style.setProperty("--icg", exact(4 * ph, 4) + "px"); root.style.setProperty("--icbw", ((B + 2 * wide) / ph).toFixed(4) + "px"); const mt = fit0(Math.round(5 * ph)), hd = fit0(5); root.style.setProperty("--icmt", (mt / ph).toFixed(4) + "px"); root.style.setProperty("--icbh", ((B + 2 * wide + mt + hd) / ph).toFixed(4) + "px");   // misma altura en todas, todo en pixeles fisicos enteros: hueco del icono, separacion y puntos
+    /* un tamano en pixeles fisicos que en CSS caiga exacto (a 1,5: multiplos de 3): lo que sobra va de margen transparente dentro del lienzo */
+    const fit = w => { for (let w2 = w; w2 < w + 8; w2++) { const c = (w2 / ph) * 64; if (Math.abs(c - Math.round(c)) < 1e-6) return w2; } return w; };
+    /* el icono cuyo tamano no cae exacto (64 px a 1,5) se pinta en un lienzo a 1 pixel de arte x n = n pixeles fisicos, con su margen: sin remuestreo */
+    const toCanvas = im => {
+      const g = Math.round(im.naturalWidth / 8), s_ = g * n, W2 = fit(s_); if (W2 === s_) return im;
+      const cv = document.createElement("canvas"); cv.width = cv.height = W2; cv.className = im.className; cv.dataset.src = im.currentSrc || im.src; cv.dataset.g = g; cv.dataset.pad = (W2 - s_) >> 1;
+      const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.drawImage(im, cv.dataset.pad | 0, cv.dataset.pad | 0, s_, s_); im.replaceWith(cv); return cv;
+    };
+    let ims = [...root.querySelectorAll(".ch-chip > .ic")];
+    const size = im => { const g = im.dataset.g ? +im.dataset.g : im.naturalWidth ? Math.round(im.naturalWidth / 8) : 48, W2 = im.tagName === "CANVAS" ? im.width : g * n, w = W2 / ph, mv = (B - W2) / 2 / ph; im.style.width = im.style.height = w.toFixed(4) + "px"; im.style.margin = `${mv.toFixed(4)}px 0`; im.dataset.g = g; };
+    const prep = im => { const c = im.tagName === "IMG" && im.naturalWidth ? toCanvas(im) : im; size(c); return c; };
+    ims = ims.map(im => { if (im.tagName === "IMG" && !im.complete) { size(im); im.addEventListener("load", () => { const c = prep(im); ims = ims.map(x => (x === im ? c : x)); snap(); }, { once: true }); return im; } return prep(im); });
+    const snap = () => {
+      root.style.translate = ""; const r = root.getBoundingClientRect(), fx = Math.round(r.left * dpr) - r.left * dpr, fy = Math.round(r.top * dpr) - r.top * dpr;
+      root.style.translate = fx || fy ? `${(fx / ph).toFixed(4)}px ${(fy / ph).toFixed(4)}px` : "";
+      /* los puntos de nivel, de pixel: una tira de N puntos de 5 x 5 (esquinas recortadas, 2 de hueco) pintada a 1 pixel de arte = 1 fisico */
+      root.querySelectorAll(".ch-chip > .ch-lv").forEach(lv => {
+        if (!lv.querySelector("canvas")) {
+          const nn = [...(lv.textContent || "")].length || 1, col = getComputedStyle(lv).color;
+          const w0 = nn * 7 - 2, W2 = fit(w0), H2 = fit(5), c = document.createElement("canvas"); c.width = W2; c.height = H2; const g = c.getContext("2d"), ox = (W2 - w0) >> 1, oy = (H2 - 5) >> 1; g.fillStyle = col;
+          for (let i = 0; i < nn; i++) { g.fillRect(ox + i * 7, oy + 1, 5, 3); g.fillRect(ox + i * 7 + 1, oy, 3, 5); }
+          c.style.width = (W2 / ph).toFixed(4) + "px"; c.style.height = (H2 / ph).toFixed(4) + "px"; c.className = "ch-lvd"; lv.textContent = ""; lv.appendChild(c);
+        }
+      });
+      ims.forEach(im => {
+        im.style.translate = ""; const q = im.getBoundingClientRect(), ex = Math.round(q.left * dpr) - q.left * dpr, ey = Math.round(q.top * dpr) - q.top * dpr;   // lo que le falte a ESTE icono para caer en la rejilla de la pantalla
+        const src = im.dataset.src || im.currentSrc || im.src, put = b => { const g = +im.dataset.g || 48, a = b ? b.w / g : 1, dx = b ? Math.round((b.w / 2 - b.cx) / a) : 0, dy = b ? Math.round((b.h / 2 - b.cy) / a) : 0, tx = (dx * n + ex) / ph, ty = (dy * n + ey) / ph; im.style.translate = Math.abs(tx) > 1e-4 || Math.abs(ty) > 1e-4 ? `${tx.toFixed(4)}px ${ty.toFixed(4)}px` : ""; };
+        if (icBox[src] !== undefined) return put(icBox[src]);
+        const m = new Image(); m.onload = () => {
+          try {
+            const cv = document.createElement("canvas"); cv.width = m.naturalWidth; cv.height = m.naturalHeight; const g = cv.getContext("2d", { willReadFrequently: true }); g.drawImage(m, 0, 0);
+            const d = g.getImageData(0, 0, cv.width, cv.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+            for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (d[(y * cv.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+            icBox[src] = x1 < 0 ? null : { w: cv.width, h: cv.height, cx: (x0 + x1 + 1) / 2, cy: (y0 + y1 + 1) / 2 };
+          } catch (e) { icBox[src] = null; }
+          put(icBox[src]);
+        }; m.onerror = () => { icBox[src] = null; }; m.src = src;
+      });
+    };
+    snap();
   }
   A.adv.centerIcons = centerIcons;
+  addEventListener("resize", () => { const cb = $("chalBar"); if (cb && cb.firstChild && !cb.classList.contains("hidden")) requestAnimationFrame(() => centerIcons(cb)); }, { passive: true });   // otro --k u otra densidad: otra escala entera
   function hearts() { let h = ""; for (let i = 0; i < run.maxLives; i++) h += `<i class="hp ${i < run.lives ? "on" : ""}">${ic(i < run.lives ? "heart" : "heart_empty")}</i>`; return h; }
   /* botin en vivo en el marcador: en cuanto superas el objetivo, cuanto cobrarias ya y a cuantos puntos esta el siguiente doblon */
   function renderLoot() {

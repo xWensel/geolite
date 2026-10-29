@@ -47,28 +47,43 @@ void main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)
   const FS = `#version 300 es
 precision highp float;
 uniform vec2 uR, uP; uniform float uK, uT, uFlash; uniform vec4 uDark, uSpot, uSmoke, uCut, uNight; uniform sampler2D uMask; uniform vec3 uPush;
+uniform sampler2D uFog; uniform vec4 uFogA, uFogO; uniform vec2 uFogP;   // v0.3.238: humo con la tecnica de la niebla (A: cobertura, densidad, frente, luz; O: capas x1-x3, haces; P: paralaje)
 out vec4 o;
 const float TAU = 6.2831853;
 float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p), u = f * f * (3. - 2. * f); return mix(mix(h21(i), h21(i + vec2(1., 0.)), u.x), mix(h21(i + vec2(0., 1.)), h21(i + vec2(1., 1.)), u.x), u.y); }
 float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++) { s += a * vn(p); p = mat2(1.6, 1.2, -1.2, 1.6) * p; a *= .5; } return s; }
 vec4 over(vec4 d, vec4 s){ return s + d * (1. - s.a); }
+float fL(vec2 p, float s, float st, vec2 off, float ch){ vec4 t = texture(uFog, vec2(p.x / (s * st), p.y / s) + off); return ch < .5 ? t.r : t.g; }
+float fdens(vec2 p){
+  float vwx = uR.x / uK;
+  float back = fL(p, 1500., 1.8, vec2(uFogO.x - uFogP.x * .006, .31 - uFogP.y * .004 + uFogO.x * .08), 0.);
+  float mid = fL(p, 980., 1.6, vec2(uFogO.y - uFogP.x * .014, .57 - uFogP.y * .01 - uFogO.y * .05), 1.);
+  float front = fL(p, 700., 1.5, vec2(uFogO.z - uFogP.x * .026, .13 - uFogP.y * .02 + uFogO.z * .03), 0.);
+  float big = texture(uFog, p / 3600. + vec2(uFogO.x, .31) * .5).b, c = uFogA.x + (big - .5) * .08;
+  float d = .45 * smoothstep(c - .2, c + .2, back) + .4 * smoothstep(c - .14, c + .22, mid) + .55 * smoothstep(c - .1, c + .2, front);
+  return d * (1. - smoothstep(uFogA.z - .32, uFogA.z, p.x / vwx * .8 + (big - .5) * .35));   // entra rodando desde la izquierda
+}
 void main(){
   vec2 fc = gl_FragCoord.xy, px = vec2(fc.x, uR.y - fc.y) / uK, vw = uR / uK;
   float T = uT; vec4 c = vec4(0.);
-  if (uSmoke.x > 0.) {                                   // humo de puro: ruido con dominio deformado, iluminado por las lamparas de la sala
-    vec2 dp = px - uP, q = (px - uPush.xy * exp(-dot(dp, dp) / 52000.)) / 290. + uSmoke.w * vec2(7.3, 3.1);   // tanda 7: el raton empuja el humo
-    vec2 w = vec2(fbm(q * 1.3 + vec2(T * .045, -T * .02)), fbm(q * 1.3 + vec2(5.2, 1.3) + vec2(-T * .03, T * .035)));
-    vec2 qq = q + 2.2 * w + vec2(T * .06, T * .015);
-    float d = fbm(qq), d2 = fbm(qq + vec2(.11, .15)), wisp = fbm(q * 3.1 + w * 1.4 - vec2(T * .09, 0.));
-    float th = .555 - uSmoke.y * .275, a = smoothstep(th, th + .12, d);          // calibrado: ~cobertura% del mapa tapado (0,18 -> 20 %, 0,4 -> 42 %)
-    float lit = clamp(.55 + (d - d2) * 3.6 + (wisp - .5) * .5, 0., 1.);
-    vec3 col = mix(vec3(.3, .32, .4), vec3(.95, .9, .83), lit * .7 + .2 * d);
-    col = mix(col, vec3(1., .8, .55), .17 * (1. - px.y / vw.y));
-    float haze = .14 * smoothstep(th - .2, th + .08, d) + .1 * smoothstep(.55, .8, wisp) * smoothstep(th - .3, th, d);
-    a = clamp(a * .95 + haze, 0., .965) * uSmoke.x;
-    if (uSmoke.z > 0.) a *= smoothstep(uSmoke.z * .55, uSmoke.z, length(px - uP));
-    a *= 1. - texture(uMask, px / vw).a * .97;                       // tanda 7: lo que has barrido (se cierra solo)
+  if (uSmoke.x > 0.) {                                   // v0.3.238 humo de sala: tres capas con paralaje, la lampara lo atraviesa (autosombra, dispersion y haces), su sombra cae en el tapete; el raton lo aparta
+    vec2 dp = px - uP, pu = uPush.xy * exp(-dot(dp, dp) / 52000.), q = px - pu;
+    float open = texture(uMask, px / vw).a, d = fdens(q), wisp = texture(uFog, q / 520. + uFogO.z * 1.7).g - .5;
+    float op = clamp(open * 1.15 + wisp * .9 * smoothstep(.02, .5, open) * (1. - smoothstep(.85, 1., open)), 0., 1.);
+    float ring = smoothstep(.05, .28, op) * (1. - smoothstep(.3, .62, op));
+    d = d * (1. - smoothstep(.3, .85, op)) + ring * d * .35;
+    if (uSmoke.z > 0.) d *= smoothstep(uSmoke.z * .55, uSmoke.z, length(px - uP));
+    vec2 lamp = vec2(vw.x * .5, vw.y * .16), tl = lamp - q;
+    float od = fdens(q + tl * .07) + fdens(q + tl * .16) * .8 + fdens(q + tl * .3) * .6, Tl = exp(-od * .75), dl = length(tl);
+    float ph = 1. / (1. + pow(dl / 640., 2.)), an = atan(tl.y, tl.x);
+    float rays = vn(vec2(an * 34., T * .06)) * .6 + vn(vec2(an * 11. + 4.2, T * .03)) * .55;
+    rays = pow(clamp(rays, 0., 1.), 2.2) * smoothstep(60., 380., dl) * (1. - smoothstep(500., 1500., dl));
+    vec3 lite = vec3(.82, .78, .74), deep = vec3(.21, .19, .24), warm = vec3(1., .86, .64);
+    vec3 col = mix(deep, lite, .35 + .65 * Tl) + warm * (ph * Tl * .38 + rays * Tl * .07 * uFogO.w) * uFogA.w;   // haces mas suaves que en la niebla: el humo no debe deslumbrar
+    float dS = fdens(px - pu - normalize(px - lamp) * 26.);
+    c = over(c, vec4(0., 0., 0., dS * .32 * (1. - smoothstep(.3, .85, op) * .8) * uSmoke.x));
+    float a = min(.9, 1. - exp(-d * 2.3 * uFogA.y)) * uSmoke.x;
     c = over(c, vec4(col * a, a));
   }
   if (uDark.x > 0.) {                                    // apagon: linterna viva (borde que respira), grano en la sombra y motas de polvo en el haz
@@ -118,6 +133,31 @@ void main(){
   if (uFlash > 0.) c = over(c, vec4(vec3(.92, .95, 1.) * uFlash, uFlash));
   o = c;
 }`;
+  /* v0.3.238: la densidad del humo, periodica (1024x512), se hornea una vez por contexto: tres escalas de bancos y hebras */
+  const FOG_BAKE = `#version 300 es
+precision highp float;
+uniform float uSeed; out vec4 o;
+float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float hP(vec2 i, vec2 per){ return h21(mod(i, per) + uSeed); }
+float vnP(vec2 p, vec2 per){ vec2 i = floor(p), f = fract(p), u = f * f * (3. - 2. * f); return mix(mix(hP(i, per), hP(i + vec2(1, 0), per), u.x), mix(hP(i + vec2(0, 1), per), hP(i + vec2(1, 1), per), u.x), u.y); }
+float fbmP(vec2 p, vec2 per){ float s = 0., a = .5; for (int i = 0; i < 6; i++) { s += a * vnP(p, per); p *= 2.; per *= 2.; a *= .5; } return s; }
+void main(){
+  vec2 uv = gl_FragCoord.xy / vec2(1024., 512.), per = vec2(6., 3.), q = uv * per;
+  vec2 w = vec2(fbmP(q, per), fbmP(q + 5.2, per)) - .5; float banks = fbmP(q + w * 1.6, per);
+  vec2 per2 = vec2(10., 5.), q2 = uv * per2, w2 = vec2(fbmP(q2 + 2.1, per2), fbmP(q2 + 8.7, per2)) - .5; float wisps = fbmP(q2 + w2 * 2.2, per2);
+  o = vec4(banks, wisps, fbmP(uv * 3. + 1.3, vec2(3.)), 1.);
+}`;
+  let fogP = null, fogT = null;
+  function fogBake() {
+    if (fogT || !gl || !fogP) return !!fogT;
+    if (psc && !gl.getProgramParameter(fogP, psc.COMPLETION_STATUS_KHR)) return false;
+    if (!gl.getProgramParameter(fogP, gl.LINK_STATUS)) { fogP = null; return false; }
+    const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1024, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+    const fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+    gl.viewport(0, 0, 1024, 512); gl.useProgram(fogP); gl.uniform1f(gl.getUniformLocation(fogP, "uSeed"), Math.random() * 30); gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.deleteFramebuffer(fb); fogT = t; gl.useProgram(prog); gl.viewport(0, 0, glCv.width, glCv.height); return true;
+  }
   function initGL() {
     if (glTried) return gl; glTried = true;
     try {
@@ -129,8 +169,9 @@ void main(){
       psc = gl.getExtension("KHR_parallel_shader_compile");
       const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); shs.push(s); return s; };
       prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
+      fogP = gl.createProgram(); gl.attachShader(fogP, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(fogP, sh(gl.FRAGMENT_SHADER, FOG_BAKE)); gl.linkProgram(fogP); fogT = null;
       gl.bindVertexArray(gl.createVertexArray());
-      glCv.addEventListener("webglcontextlost", e => { e.preventDefault(); gl = prog = psc = null; linked = false; shs.length = 0; SM.tex = null; lostAt = performance.now(); });   // se rehace en tick() (regl), como el mapa (map.js _revive)
+      glCv.addEventListener("webglcontextlost", e => { e.preventDefault(); gl = prog = psc = fogP = fogT = null; linked = false; shs.length = 0; SM.tex = null; lostAt = performance.now(); });   // se rehace en tick() (regl), como el mapa (map.js _revive)
     } catch (e) { console.warn("chfx: sin WebGL2", e); gl = null; }
     return gl;
   }
@@ -139,7 +180,7 @@ void main(){
     if (linked) return true; if (!gl || !prog) return false;
     if (psc && !gl.getProgramParameter(prog, psc.COMPLETION_STATUS_KHR)) return false;
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.warn("chfx: sin WebGL2", gl.getProgramInfoLog(prog), ...shs.map(s => gl.getShaderInfoLog(s))); gl = null; return false; }
-    for (const n of ["uR", "uP", "uK", "uT", "uFlash", "uDark", "uSpot", "uSmoke", "uCut", "uNight", "uMask", "uPush"]) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ["uR", "uP", "uK", "uT", "uFlash", "uDark", "uSpot", "uSmoke", "uCut", "uNight", "uMask", "uPush", "uFog", "uFogA", "uFogO", "uFogP"]) U[n] = gl.getUniformLocation(prog, n);
     return (linked = true);
   }
   /* se deja compilando en un rato libre nada mas arrancar: cuando llegue el primer reto ya esta listo */
@@ -209,6 +250,7 @@ void main(){
     E.puffs = E.puffs.filter(p => now - p.t0 < 700);
     E.trail = E.trail.filter(p => now - p.t < 260);
     if (E.smoke && E.smoke.on) sweepStep(dt, now);
+    if (E.smoke) { const s = E.smoke, red = reduce(); if (s.x1 == null) { s.x1 = rnd(); s.x2 = rnd(); s.x3 = rnd(); s.t0 = now; } if (!red) { s.x1 += dt * 34 * 0.4 / 2700; s.x2 += dt * 34 * 0.7 / 1568; s.x3 += dt * 34 * 1.15 / 1050; } s.front = red ? 1.4 : Math.min(1.4, (now - s.t0) / 2500 * 1.4); }
     if (E.sparks.length) { for (const s of E.sparks) { s.vy += 900 * dt; s.x += s.vx * dt; s.y += s.vy * dt; } E.sparks = E.sparks.filter(s => now - s.t0 < s.life); }
     E.shades = E.shades.filter(s => now - s.t0 < s.ms); E.wipes = E.wipes.filter(w => now - w.t0 < 420);
     if (E.teth && now - E.teth.t > 140) E.teth = null;
@@ -235,6 +277,12 @@ void main(){
     if (!SM.tex) { SM.tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, SM.tex); for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4)); }
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, SM.tex); if (m && SM.cv) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, SM.cv);
     gl.uniform1i(U.uMask, 0); gl.uniform3f(U.uPush, clamp(SM.push[0], -170, 170), clamp(SM.push[1], -170, 170), 0);
+    if (m && fogBake()) {   // humo de sala: cuanto tapa sale de su cobertura de siempre (nivel y amuletos); el preset Extrema de la maqueta a nivel 3
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, fogT); gl.uniform1i(U.uFog, 1); gl.activeTexture(gl.TEXTURE0);
+            const mu = clamp(m.mul || 1, 0.2, 1), lvC = m.cover / mu;   // el nivel (sin el amuleto) fija la cobertura de siempre; el Foco la abre aparte
+      gl.uniform4f(U.uFogA, 0.622 - (lvC - 0.3) * 0.12 + (1 - mu) * 0.3, 1.3 * Math.sqrt(mu), m.front, 1.2);   // calibrado contra el humo de antes: tapa lo mismo en cada nivel (medido)
+      gl.uniform4f(U.uFogO, m.x1, m.x2, m.x3, 1.3); gl.uniform2f(U.uFogP, p.x / Math.max(1, W) - 0.5, p.y / Math.max(1, H) - 0.5);
+    } else if (m) gl.uniform4f(U.uSmoke, 0, 0, 0, 0);
     gl.uniform4f(U.uCut, E.cut.v, E.cut.e, E.cut.b, 0); gl.uniform1f(U.uFlash, E.flash); gl.uniform4f(U.uNight, E.night ? E.night.k : 0, E.night ? E.night.g : 0, 0, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -542,9 +590,28 @@ void main(){
     deadDeck: L6("Se ha ido la luz|The lights went out|Plus de lumière|A luz acabou|Das Licht ist aus|È andata via la luce|Se fue la luz|灯灭了|불이 나갔어요|明かりが消えた|Свет погас|Zgasło światło"),
     plug: L6("Conecta el cargador|Plug in your charger|Branche ton chargeur|Conecte o carregador|Schließ das Ladegerät an|Collega il caricabatterie|Conecta el cargador|请连接充电器|충전기를 연결하세요|充電器を接続してください|Подключи зарядку|Podłącz ładowarkę"),
   };
+  /* v0.3.238: la retroiluminacion no es uniforme (nubes del difusor, mas luz junto a la tira de LED de abajo, sangrado en los bordes): una mascara
+     de 160x90 horneada una vez (se estira suave: es luz, no pixel art) */
+  let backMask = null;
+  function battMask() {
+    if (backMask) return backMask; const w = 160, h = 90, c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d"), id = g.createImageData(w, h);
+    const hh = (x, y) => { const v = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return v - Math.floor(v); };
+    const vn = (x, y) => { const i = Math.floor(x), j = Math.floor(y), f = x - i, k = y - j, u = f * f * (3 - 2 * f), v = k * k * (3 - 2 * k); return (hh(i, j) * (1 - u) + hh(i + 1, j) * u) * (1 - v) + (hh(i, j + 1) * (1 - u) + hh(i + 1, j + 1) * u) * v; };
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let n = 0, a = 0.5, f = 1; for (let o = 0; o < 4; o++) { n += a * vn(x / 28 * f + 4.2, y / 28 * f + 1.3); a *= 0.5; f *= 2; }
+      const u = x / w, v = y / h, led = Math.exp(-(1 - v) * 2.6) * 0.25, ed = Math.min(u * w / h, v, (1 - u) * w / h, 1 - v), bleed = Math.exp(-ed * 38) * 0.5;
+      const al = clamp(0.9 + (n - 0.5) * 0.5 * 1.35 - led * 0.9 + bleed * 0.25, 0.5, 1), i = (y * w + x) * 4;
+      id.data[i] = id.data[i + 1] = id.data[i + 2] = 0; id.data[i + 3] = Math.round(al * 255);
+    }
+    g.putImageData(id, 0, 0); return (backMask = c.toDataURL());
+  }
   function battOn(max, eff) {
-    let dim = document.getElementById("chxDim"), hud = document.getElementById("chxBat");
-    if (!dim) { dim = document.createElement("div"); dim.id = "chxDim"; document.body.appendChild(dim); }
+    const top = !!(eff && eff.top), dimId = top ? "chxDim" : "chxDimR";
+    let dim = document.getElementById(dimId), hud = document.getElementById("chxBat");
+    if (!dim) { dim = document.createElement("div"); dim.id = dimId; dim.className = "chx-dim"; dim.innerHTML = '<i class="cd-roll"></i><i class="cd-glow"></i>'; }
+    if (top) { if (dim.parentNode !== document.body) document.body.appendChild(dim); }
+    else if (ov && dim.parentNode !== ov) ov.appendChild(dim);   // la de la ronda va sobre el mapa y DEBAJO de la placa, el reloj y el marcador (nunca se tapan)
+    dim.style.backgroundImage = `url(${battMask()})`;
     if (!hud) { hud = document.createElement("div"); hud.id = "chxBat"; hud.innerHTML = `<div class="cb-cell"><i class="cb-lvl"></i></div><b class="cb-pct"></b><div class="cb-toast"><b></b><span></span></div>`; document.body.appendChild(hud); }
     const deck = document.documentElement.dataset.dev === "deck";                        // v0.2.34: en la Deck no es "la bateria" (la tiene de verdad): es la luz de la mesa
     hud.querySelector(".cb-toast b").textContent = tx(deck ? BT.lowDeck : BT.low); hud.querySelector(".cb-toast span").textContent = tx(deck ? BT.plugDeck : BT.plug);
@@ -552,7 +619,7 @@ void main(){
     dead.querySelector("b").textContent = tx(deck ? BT.deadDeck : BT.plug); dead.classList.remove("on");
     hud.classList.remove("toast", "crit", "charge", "save"); hud.classList.add("on");
     /* tanda 7: como un movil de verdad: empieza con un 14-26 %, se descarga a saltos (zumbido y parpadeo), avisa al 20, 10 y 5 % y, desde el nivel 2, se apaga un momento al 2 % */
-    E.batt = { on: 1, k: 0, max, pct: -1, toast: false, dim, hud, dead, start: Math.round(14 + R("batt")() * 12), drain: 0, toasts: {}, died: false, flick: 0, nextS: 0, top: !!(eff && eff.top), t0: performance.now() };
+    E.batt = { on: 1, k: 0, sk: 0, stepAt: 0, max, pct: -1, toast: false, dim, hud, dead, start: Math.round(14 + R("batt")() * 12), drain: 0, toasts: {}, died: false, flick: 0, nextS: 0, top: !!(eff && eff.top), t0: performance.now() };
     [dim, hud, dead].forEach((el, i) => { el.style.zIndex = E.batt.top ? String(2147482510 + i) : ""; });   // la de la mesa, por delante de todo (la de los retos, en su sitio de siempre) if (eff && eff.p0 != null) { E.batt.sh = true; E.batt.start = eff.p0; E.batt.p1 = eff.p1; }   // tanda 16: la bateria de Pantallazo, una sola para toda la ronda (p0 -> p1 %)
    
   }
@@ -562,8 +629,14 @@ void main(){
     const tgt = b.on && asking ? (b.sh ? b.max * Math.pow(Math.max(0, (100 - (b.start + (b.p1 - b.start) * pr)) / 95), 1.25) : b.max * (pr * pr * (3 - 2 * pr) * 0.85 + pr * 0.15)) : 0;
     b.k += (tgt - b.k) * (1 - Math.exp(-dt / (b.on ? 0.25 : 0.12)));
     if (b.on && asking) { if (!b.nextS) b.nextS = now + 1500 + R("batt")() * 2500; if (now > b.nextS) { b.nextS = now + 2200 + R("batt")() * 3500; b.drain += 1 + Math.floor(R("batt")() * 3); b.flick = now; say("buzz", 1); } }   // un bajon de carga
-    const fl = now - b.flick < 240 ? (Math.floor((now - b.flick) / 60) % 2 ? 0 : 0.35) : 0;
-    b.dim.style.opacity = Math.min(0.97, b.k + fl).toFixed(3);
+    /* el panel baja a ESCALONES (como mucho uno cada 1,1 s): cada escalon llega con un parpadeo de LCD de 0,25 s y su barrido; sin el, quieto */
+    const red = reduce(), STEP = Math.max(0.06, b.max / 6);
+    if (b.on && Math.abs(b.k - b.sk) >= STEP * 0.98 && now - b.stepAt > 1100) { b.sk = Math.round(b.k / STEP) * STEP; b.stepAt = now; if (!red) { b.flick = now; say("buzz", 2); } }
+    else if (!b.on && b.k < b.sk) b.sk = b.k;
+    const ft = now - b.flick, fl = !red && ft < 250 ? (Math.sin(Math.floor(ft / 29) * 12.9898) * 43758.5 % 1 > 0.45 ? 0.45 : 0) : 0;
+    const op = Math.min(0.97, b.sk + fl);
+    if (op !== b.op) { b.op = op; b.dim.style.opacity = op.toFixed(3); b.dim.style.setProperty("--cg", Math.min(1, b.sk * 1.8).toFixed(3)); }
+    b.dim.classList.toggle("roll", !red && ft < 250);
     if (b.on) {
       const pct = b.sh ? Math.max(1, Math.round(b.start + (b.p1 - b.start) * pr)) : Math.max(1, Math.round(b.start * (1 - pr) - b.drain));
       if (pct !== b.pct) { b.pct = pct; b.hud.querySelector(".cb-pct").textContent = pct + "%"; b.hud.querySelector(".cb-lvl").style.width = Math.max(6, pct * 3.6) + "%"; b.hud.classList.toggle("crit", pct <= 5); b.hud.classList.toggle("save", pct <= 20 && pct > 5); }
@@ -751,12 +824,13 @@ void main(){
     const get = id => list.find(c => c.id === id), gl_ = !!gl, off = n => { if (E[n]) E[n].on = 0; };
     const dk = gl_ && get("dark"); if (dk) { const p = par(dk), boss = !!(A.chal.state && A.chal.state.bk), r0 = dk.slam ? Math.max(W, H, 800) : E.dark && E.dark.k > 0.01 ? E.dark.r : boss && DM.r > 0 ? DM.r : p.r; E.dark = keep(E.dark, { tr: p.r, a: p.a, warm: !!fx.halo, fast: dk.slam ? 0.16 : 0.55 }); E.dark.r = r0; if (boss) DM.r = p.r; } else off("dark");   // tanda 16: el foco se cierra en directo hasta su radio (o salta de golpe, si lo enciende la siesta)
     const bs = gl_ && get("blindspot"); if (bs) E.spot = keep(E.spot, { r: par(bs).r }); else off("spot");
-    const cl = gl_ && get("clouds"); if (cl) { if (!E.smoke || !E.smoke.on) sweepReset(); E.smoke = keep(E.smoke, { cover: par(cl).cover, hole: fx.cloudClear || 0, seed: E.smoke && E.smoke.on ? E.smoke.seed : R("clouds")() }); } else off("smoke");   // Reto diario: los claros de las nubes en el mismo sitio para todos
+    const cl = gl_ && get("clouds"); if (cl) { if (!E.smoke || !E.smoke.on) { sweepReset(); if (E.smoke) E.smoke.x1 = null; } E.smoke = keep(E.smoke, { cover: par(cl).cover, mul: fx.cloudMul || 1, hole: fx.cloudClear || 0, seed: E.smoke && E.smoke.on ? E.smoke.seed : R("clouds")() }); } else off("smoke");   // Reto diario: los claros de las nubes en el mismo sitio para todos
     const rn = get("rain"); if (rn) { if (!(E.rain && E.rain.on)) rainOn(par(rn).dens); } else if (E.rain) { E.rain.on = 0; part("chx-wet").classList.remove("on"); rainSnd(0); }
     if (get("blur") && fx.lensR > 0) E.lens = keep(E.lens, { r: fx.lensR }); else off("lens");
     if ((get("wrongborders") && fx.trueR > 0) || (get("noborders") && fx.peekR > 0)) E.seal = keep(E.seal, { r: 110 }); else off("seal");
-    if (get("negative") && !fx.noNegative) E.film = keep(E.film, {}); else off("film");
-    const ck = get("crack"); if (ck && !(E.crack && E.crack.on)) crackOn(par(ck).n, fx.glassMul || 1);
+    const DS = (A.chal && A.chal.state) || {};   // v0.3.238: con el pase de los debufos del mapa, el negativo es pelicula y el cristal refracta alli
+    if (get("negative") && !fx.noNegative && !DS.debNeg) E.film = keep(E.film, {}); else off("film");
+    const ck = get("crack"); if (ck && !DS.debCrack && !(E.crack && E.crack.on)) crackOn(par(ck).n, fx.glassMul || 1);
     const sm = get("smudge"); if (sm && !(E.prints && E.prints.on)) { const p = par(sm); printsOn(p.n, p.px, fx.glassMul || 1); }
     const hg = get("hang"); if (hg && !E.wins) winsOn(par(hg).n, fx.hangAuto || 0);
     if (get("wind")) { E.wind = E.wind || { k: 0, st: [], gt: 0 }; E.wind.off = false; } else if (E.wind) E.wind.off = true;   // tanda 8: rachas del Vendaval

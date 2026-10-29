@@ -137,8 +137,8 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ RUEDA DE LA FORTUNA */
-  const WF = ["letras", "saber", "luz", "tormenta", "vista", "sitio", "puntero", "pantalla", "mentiras"], WI = { letras: "ch_shaky", saber: "ch_riddle", luz: "ch_dark", tormenta: "ch_lightning", vista: "ch_blur", sitio: "ch_spread", puntero: "ch_tremble", pantalla: "ch_crack", mentiras: "ch_wrongborders" };
-  const WC = ["#c9a3ff", "#ffd95a", "#4a4d72", "#4cb4ff", "#4ee3c1", "#ff9f4a", "#ff6bb5", "#a8ecff", "#ff5a55"];
+  const WF = ["letras", "saber", "luz", "tormenta", "vista", "sitio", "puntero", "pantalla", "mentiras", "clima"], WI = { clima: "ch_rain", letras: "ch_shaky", saber: "ch_riddle", luz: "ch_dark", tormenta: "ch_lightning", vista: "ch_blur", sitio: "ch_spread", puntero: "ch_tremble", pantalla: "ch_crack", mentiras: "ch_wrongborders" };
+  const WC = ["#c9a3ff", "#ffd95a", "#4a4d72", "#4cb4ff", "#4ee3c1", "#ff9f4a", "#ff6bb5", "#a8ecff", "#ff5a55", "#7ac8ff"];
   function wheelShow(e) {
     const fam = A.CHAL[e.of || e.id] && A.CHAL[e.of || e.id].fam, idx = Math.max(0, WF.indexOf(fam)), SL = 360 / WF.length, dur = reduce() ? 500 : 1200; let el = $("wheelFx"); if (el) el.remove();
     el = document.createElement("div"); el.id = "wheelFx";

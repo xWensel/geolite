@@ -1150,7 +1150,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     /* los lugares del recibo, enteros: si un nombre largo (de, ru) no cabe, primero se va su distancia; si aun no, baja a dos lineas (antes, con «…»).
        Antes de pintar: sin saltos */
     requestAnimationFrame(() => document.querySelectorAll("#dlg .gx-vd-rows .gx-lead-row > span").forEach(s => { if (s.scrollWidth > s.clientWidth + 1) { s.classList.add("nokm"); if (s.scrollWidth > s.clientWidth + 1) s.classList.add("wrap"); } }));
-    if (A.trastadas && A.trastadas.veredicto) A.trastadas.veredicto();          // bloque D: si cerraste la ronda con racha, la lluvia de cartas (nunca a media pregunta)
+    if (A.trastadas && A.trastadas.veredicto) A.trastadas.veredicto();
+    if (A.deb && A.deb.veredicto) A.deb.veredicto(kind !== "");                 // v0.3.238: si te rompieron el cristal en la ronda y la superas, su guante lo limpia          // bloque D: si cerraste la ronda con racha, la lluvia de cartas (nunca a media pregunta)
     if (club) A.club.play(club, document.querySelector("#dlg .gx-vd-club"), 1700);
     /* v0.3.203 (Bloque F, paso 6): cuando el sello cae (1,5 s + su golpe), hunde el ticket, la tinta se corre y la lampara sube segun el margen (js/celebra.js) */
     if (superada && stamp && kind === "ok" && A.celebra) { const vd = document.querySelector("#dlg .gx-vd"); setTimeout(() => { if (vd && vd.isConnected) A.celebra.superada(superada, vd); }, 1700); }

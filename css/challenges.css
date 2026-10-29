@@ -621,3 +621,34 @@ html.reduce-motion .dl-bubble[class*="st-"], html.reduce-motion .dl-bubble[class
 
 /* Fogonazo (reliquia): el lugar parpadea un instante en el mapa. Un cuadrado dorado de pixel con contorno indigo, sin brillo ni sombra difusa */
 #map .fl-blip { position: absolute; z-index: 9; width: 14px; height: 14px; margin: -7px 0 0 -7px; pointer-events: none; background: #fdd742; box-shadow: 0 0 0 3px #1d0a3d, 0 0 0 5px #f5a623; }
+/* v0.3.238 · los debufos de materia (js/debufos.js, js/chfx.js) */
+/* Bateria baja: el panel. La retroiluminacion desigual es una mascara horneada (se estira suave: es luz); la de la ronda vive sobre el mapa,
+   debajo de la placa, el reloj y el marcador; la de la mesa (#chxDim) sigue por encima de todo */
+.chx-dim { background: transparent center / 100% 100% no-repeat; pointer-events: none; overflow: hidden; }
+#chOv > #chxDimR { position: absolute; inset: 0; opacity: 0; transition: none; }
+.chx-dim > i { position: absolute; left: 0; right: 0; pointer-events: none; }
+.chx-dim > .cd-glow { inset: 0; opacity: var(--cg, 0); background: radial-gradient(ellipse 38% 46% at 0 0, rgba(34, 48, 108, .7), transparent), radial-gradient(ellipse 38% 46% at 100% 0, rgba(34, 48, 108, .7), transparent), radial-gradient(ellipse 38% 46% at 0 100%, rgba(30, 44, 98, .6), transparent), radial-gradient(ellipse 38% 46% at 100% 100%, rgba(30, 44, 98, .6), transparent); }
+.chx-dim > .cd-roll { top: -20%; height: 20%; display: none; background: linear-gradient(transparent, rgba(255, 255, 255, .07) 45%, rgba(0, 0, 0, .25) 55%, transparent); }
+.chx-dim.roll > .cd-roll { display: block; animation: cd-roll .25s linear; }
+@keyframes cd-roll { to { transform: translateY(600%); } }
+/* La carta que se cuela: su lienzo, sobre el mapa */
+#chOv > .deb-card { opacity: 1; transition: none; image-rendering: pixelated; }
+/* Bandera mojada: la acuarela encima de la bandera, a su medida exacta */
+.deb-flag { position: absolute; left: 0; top: 0; pointer-events: none; }
+.fl-stage:has(> .deb-flag) { position: relative; display: inline-block; }
+/* el guante que limpia el cristal en el veredicto */
+#debWipe { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 99050; pointer-events: none; }
+/* v0.3.238 · la tira de retos a escala entera y centrada al pixel (js/adventure.js centerIcons pone --icp, --icg y el tamano de cada icono):
+   el icono a un multiplo entero de su rejilla en pixeles fisicos, 8 px fisicos de marco por cada lado, el marco de su familia y los puntos centrados */
+#topHud #chalBar { gap: var(--icg, 6px); align-items: center; }
+#topHud #chalBar .ch-chip { width: auto; min-width: 0; padding: var(--icp, 5px) var(--icp, 5px) calc(var(--icp, 5px) - 1px); gap: 3px; align-items: center; }
+#topHud #chalBar .ch-chip > .ic { flex: none; margin: 0; width: 32px; height: 32px; image-rendering: pixelated; }
+:root body #topHud #chalBar .ch-chip .ch-lv { margin: 0; letter-spacing: 1px; text-indent: 1px; line-height: 9px; }
+#topHud #chalBar .ch-chip { width: var(--icbw, 52px); }
+#topHud { max-width: calc(36 * var(--vw)); }   /* cinco casillas en una fila tambien a 1280 (medido: no llega a la placa ni a los puntos) */
+#topHud #chalBar { align-items: flex-start; } #topHud #chalBar .ch-chip { height: var(--icbh, 75px); justify-content: flex-start; }
+/* los puntos de nivel, de pixel (js/adventure.js centerIcons los pinta en una imagen a 1 pixel de arte = 1 fisico): nitidos y a la misma altura */
+:root body #topHud #chalBar .ch-chip .ch-lv { font-size: 0; line-height: 0; letter-spacing: 0; text-indent: 0; flex: none; margin-top: 2px; }
+#topHud #chalBar .ch-chip .ch-lv > canvas { display: block; image-rendering: pixelated; }
+#topHud #chalBar .ch-chip { gap: 0; padding-bottom: 0; } :root body #topHud #chalBar .ch-chip .ch-lv { margin-top: var(--icmt, 5px); }
+#topHud #chalBar .ch-chip > .ic { will-change: transform; }   /* en su propia capa: el compositor lo pinta al pixel (sin ella, Chrome lo remuestreaba al pintar) */

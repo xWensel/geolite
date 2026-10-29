@@ -99,6 +99,13 @@ window.AIQ = window.AIQ || {};
   def("siesta", "wall", "ch_siesta", T16.ch_siesta_n, T16.ch_siesta_d);
   def("screensaver", "wall", "ch_screensaver", T16.ch_ss_n, T16.ch_ss_d);
   def("bsod", "wall", "ch_bsod", T16.ch_bsod_n, T16.ch_bsod_d);
+  /* --- v0.3.238: los debufos de materia (js/debufos.js). Van al final del catalogo: los sorteos de siempre no cambian de orden --- */
+  def("frost", "wall", "ch_frost", "Escarcha|Frost|Givre|Geada|Raureif|Brina||霜花|성에|霜|Иней|Szron", "El cristal se hiela desde los bordes: tu puntero lo despeja y el hielo vuelve si te quedas quieto.|The glass freezes over from the edges: your pointer clears it, and the ice creeps back if you stay still.|La vitre gèle depuis les bords : ton pointeur la dégage et la glace revient si tu restes immobile.|O vidro congela a partir das bordas: o seu cursor o desembaça e o gelo volta se você ficar parado.|Das Glas friert von den Rändern her zu: Dein Zeiger taut es frei, und das Eis kehrt zurück, wenn du stillhältst.|Il vetro gela dai bordi: il tuo puntatore lo libera e il ghiaccio torna se resti fermo.|El vidrio se hiela desde los bordes: tu puntero lo despeja y el hielo vuelve si te quedas quieto.|玻璃从边缘开始结霜：指针经过处会化开，停住不动，冰又会长回来。|유리가 가장자리부터 얼어붙습니다: 포인터로 녹일 수 있지만, 가만히 있으면 얼음이 다시 자랍니다.|ガラスが縁から凍っていく。ポインターで溶かせるが、止まっていると氷が戻ってくる。|Стекло замерзает от краёв: указатель расчищает его, а если замрёшь, лёд вернётся.|Szyba zamarza od krawędzi: kursor ją odmraża, a gdy stoisz w miejscu, lód wraca.", ["protector"]);
+  def("frosted", "map", "ch_frosted", "Cristal esmerilado|Frosted glass|Verre dépoli|Vidro fosco|Milchglas|Vetro smerigliato|Vidrio esmerilado|磨砂玻璃|젖빛 유리|すりガラス|Матовое стекло|Szkło matowe", "Un cristal arenado empaña el mapa; solo ves nítido a través de la ventana pulida que llevas con el puntero.|A sandblasted pane blurs the map; you only see clearly through the polished window you carry with your pointer.|Une vitre sablée brouille la carte ; tu ne vois net qu'à travers la fenêtre polie que porte ton pointeur.|Um vidro jateado embaça o mapa; você só vê nítido pela janela polida que leva com o cursor.|Eine sandgestrahlte Scheibe trübt die Karte; scharf siehst du nur durch das polierte Fenster an deinem Zeiger.|Un vetro sabbiato offusca la mappa; vedi nitido solo attraverso la finestra levigata che porti col puntatore.|Un vidrio arenado empaña el mapa; solo ves nítido a través de la ventana pulida que llevas con el puntero.|一层磨砂玻璃让地图变得模糊，只有指针带着的那扇抛光小窗看得清。|샌드블라스트 유리가 지도를 흐립니다. 포인터에 달린 매끈한 창으로만 또렷이 보입니다.|すりガラスが地図をぼかす。はっきり見えるのはポインターについた磨きの窓だけ。|Пескоструйное стекло размывает карту; чётко видно только через гладкое окошко у указателя.|Piaskowana szyba rozmywa mapę; ostro widzisz tylko przez wypolerowane okienko przy kursorze.", ["divingmask"]);
+  def("tiles", "map", "ch_tiles", "Teselas de vidrio|Glass tiles|Tesselles de verre|Tesselas de vidro|Glasmosaik|Tessere di vetro||玻璃马赛克|유리 타일|ガラスタイル|Стеклянная мозаика|Szklana mozaika", "Ves el mapa a través de teselas biseladas: cada una amplía su centro y tuerce los bordes.|You see the map through bevelled glass tiles: each one magnifies its centre and bends its edges.|Tu vois la carte à travers des tesselles biseautées : chacune grossit son centre et tord ses bords.|Você vê o mapa através de tesselas chanfradas: cada uma amplia o centro e entorta as bordas.|Du siehst die Karte durch geschliffene Glassteine: Jeder vergrößert seine Mitte und verbiegt die Ränder.|Vedi la mappa attraverso tessere smussate: ognuna ingrandisce il centro e piega i bordi.||你透过带斜边的玻璃砖看地图：每一块都会放大中心、扭曲边缘。|비스듬히 깎은 유리 타일 너머로 지도를 봅니다: 타일마다 가운데를 키우고 가장자리를 비틉니다.|面取りしたガラスタイル越しに地図を見る。どのタイルも中心を拡大し、縁をゆがめる。|Ты видишь карту сквозь гранёные стёклышки: каждое увеличивает середину и искривляет края.|Widzisz mapę przez szlifowane szklane płytki: każda powiększa środek i wykrzywia brzegi.", ["plates"]);
+  def("signal", "map", "ch_signal", "Señal rota|Broken signal|Signal brouillé|Sinal quebrado|Gestörtes Signal|Segnale disturbato||信号中断|깨진 신호|乱れた信号|Сбой сигнала|Zerwany sygnał", "Al mover el mapa, la imagen se arrastra por bloques como un vídeo sin señal; quieto, se recompone.|When you move the map, the picture smears in blocks like a video losing signal; hold still and it rebuilds.|Quand tu bouges la carte, l'image bave par blocs comme une vidéo sans signal ; immobile, elle se recompose.|Ao mover o mapa, a imagem se arrasta em blocos como um vídeo sem sinal; parado, ela se recompõe.|Wenn du die Karte bewegst, verschmiert das Bild in Blöcken wie ein Video ohne Signal; hältst du still, setzt es sich wieder zusammen.|Quando muovi la mappa, l'immagine si trascina a blocchi come un video senza segnale; da fermo, si ricompone.|Al mover el mapa, la imagen se arrastra por bloques como un video sin señal; quieto, se recompone.|一移动地图，画面就像信号不良的视频那样成块拖影；停下不动，它会慢慢恢复。|지도를 움직이면 신호가 끊긴 영상처럼 화면이 블록째 끌립니다. 멈추면 다시 맞춰집니다.|地図を動かすと、電波の悪い動画のように映像がブロックごとに引きずられる。止まれば元に戻る。|Когда двигаешь карту, изображение тянется блоками, как видео без сигнала; замри — и оно соберётся.|Gdy ruszasz mapą, obraz ciągnie się blokami jak wideo bez sygnału; gdy stoisz, wraca do porządku.", ["protector"]);
+  def("card", "wall", "ch_card", "La carta que se cuela|The sneaky card|La carte qui se glisse|A carta intrometida|Die eingeschmuggelte Karte|La carta che si infila||溜进来的纸牌|끼어든 카드|紛れ込むカード|Подброшенная карта|Wsunięta karta", "El crupier pega naipes en tu cristal: pasa el puntero rápido por encima para despegarlos.|The dealer sticks cards to your glass: sweep your pointer fast across them to peel them off.|Le croupier colle des cartes sur ta vitre : passe vite ton pointeur dessus pour les décoller.|O crupiê gruda cartas no seu vidro: passe o cursor rápido por cima para descolá-las.|Der Croupier klebt Karten auf dein Glas: Fahr schnell mit dem Zeiger darüber, um sie abzuziehen.|Il croupier attacca carte al tuo vetro: passaci sopra veloce col puntatore per staccarle.|El crupier pega naipes en tu vidrio: pasa el puntero rápido por encima para despegarlos.|荷官把纸牌贴在你的屏幕上：用指针快速划过就能把它们揭下来。|딜러가 화면에 카드를 붙입니다: 포인터로 빠르게 쓸어 떼어내세요.|ディーラーが画面にカードを貼りつける。ポインターを素早く滑らせてはがそう。|Крупье лепит карты на твоё стекло: быстро проведи по ним указателем, чтобы отклеить.|Krupier przykleja karty do twojej szyby: przesuń po nich szybko kursorem, by je oderwać.", ["protector"]);
+  def("flagwet", "flag", "ch_flagwet", "Bandera mojada|Wet flag|Drapeau mouillé|Bandeira molhada|Nasse Flagge|Bandiera bagnata||湿透的国旗|젖은 국기|濡れた国旗|Мокрый флаг|Mokra flaga", "La bandera está pintada a la acuarela y le cae agua: los colores se corren hasta hacerse barro.|The flag is painted in watercolour and it's getting wet: the colours run until they turn to mud.|Le drapeau est peint à l'aquarelle et prend l'eau : les couleurs coulent jusqu'à devenir de la boue.|A bandeira foi pintada em aquarela e está pegando água: as cores escorrem até virar lama.|Die Flagge ist mit Aquarell gemalt und wird nass: Die Farben verlaufen, bis nur Matsch bleibt.|La bandiera è dipinta ad acquerello e si bagna: i colori colano fino a diventare fango.|La bandera está pintada en acuarela y le cae agua: los colores se corren hasta hacerse barro.|国旗是水彩画的，又被水打湿：颜色不断晕开，直到糊成一团泥。|국기는 수채화로 그려졌고 물이 떨어집니다: 색이 번지다 결국 진흙이 됩니다.|国旗は水彩で描かれていて、水がかかる。色がにじんで、やがて泥になる。|Флаг нарисован акварелью, и на него льётся вода: краски растекаются, пока не превратятся в грязь.|Flaga jest namalowana akwarelą i moknie: kolory spływają, aż zamienią się w błoto.", ["divingmask"]);
   D.siesta.boss = D.screensaver.boss = D.bsod.boss = true;
   A.CHAL = D;
   /* tanda 3: FAMILIAS de sensacion (lo que contesta un amuleto). Lo que estorba se conjura: LETRAS, LUZ, VISTA, SITIO, PUNTERO y PANTALLA tienen
@@ -107,16 +114,17 @@ window.AIQ = window.AIQ || {};
   const FAMC = {
     shaky: "letras", missing: "letras", anagram: "letras", runes: "letras", mirror: "letras", memory: "letras", flagpuzzle: "letras",
     riddle: "saber", nocountry: "saber", babel: "saber", ticker: "saber",
-    dark: "luz", battery: "luz", flagdark: "luz", siesta: "luz",
+    dark: "luz", battery: "luz", flagdark: "luz", siesta: "luz", clouds: "luz",
     flicker: "tormenta", lightning: "tormenta", stormnight: "tormenta",
-    blur: "vista", myopia: "vista", mosaic: "vista", clouds: "vista", rain: "vista", flagblur: "vista", flagwind: "vista",
-    spread: "sitio", tilt: "sitio", flip: "sitio", spin: "sitio", quake: "sitio", flagback: "sitio", giants: "sitio",
-    tremble: "puntero", ghost: "puntero", lag: "puntero", cmirror: "puntero",
-    crack: "pantalla", hang: "pantalla", ctrlz: "pantalla", screensaver: "pantalla", bsod: "pantalla",
+    blur: "vista", myopia: "vista", mosaic: "vista", flagblur: "vista", frosted: "vista",
+    rain: "clima", frost: "clima", flagwet: "clima", flagwind: "clima",   // v0.3.238: el Paraguas
+    spread: "sitio", tilt: "sitio", flip: "sitio", spin: "sitio", quake: "sitio", flagback: "sitio", giants: "sitio", tiles: "sitio",
+    tremble: "puntero", ghost: "puntero", lag: "puntero", cmirror: "puntero", signal: "puntero",
+    crack: "pantalla", hang: "pantalla", ctrlz: "pantalla", screensaver: "pantalla", bsod: "pantalla", card: "pantalla",
     wrongborders: "mentiras", noborders: "mentiras", decoys: "mentiras", flaghue: "mentiras", flaggray: "mentiras", fakepass: "mentiras",
     wind: "reglas", storm: "reglas", silence: "reglas", trap: "reglas",
   };
-  const AMULET = { letras: "dictionary", luz: "miner", vista: "divingmask", sitio: "plates", puntero: "steadyhand", pantalla: "protector", mentiras: "hawkeye" };
+  const AMULET = { letras: "dictionary", luz: "miner", vista: "divingmask", sitio: "plates", puntero: "steadyhand", pantalla: "protector", mentiras: "hawkeye", clima: "umbrella" };
   /* tanda 6: FUSIONES. Los retos gemelos se funden en uno con tres niveles que se notan; los absorbidos (SUB) quedan como efectos internos: ya no
      salen en el sorteo ni tienen ficha. EXPAND dice que efectos de verdad pone cada reto en cada nivel (a veces los de sus gemelos de antes) */
   const SUB = { dance: "shaky", novowels: "missing", swap: "anagram", upside: "mirror", negative: "noborders", mirrorx: "flip", blindspot: "myopia", drift: "quake", dizzy: "tremble", blink: "ghost", cblur: "ghost", smudge: "crack", flaginvert: "flaggray", pangea: "spread", deal: "spread", scroll: "shaky" };
@@ -158,7 +166,7 @@ window.AIQ = window.AIQ || {};
   const NOLATIN = () => /^(zh|ja|ko)/.test(A.lang || "");                     // runas y sin vocales no tienen sentido con nombres en chino, japones o coreano
   /* tanda 6b: la LISTA SUAVE de R1-R3 (a nivel 1): estorban sin desorientar. Fuera: Controles invertidos, Mundo del reves, las reglas, lo que
      calla la placa y el Apagon (que solo sale una vez, en R5, R6, R9, R10 u R11). En la ronda de banderas, un reto de bandera */
-  const SOFT = ["shaky", "missing", "noborders", "flicker", "decoys", "blur", "clouds", "rain", "spread", "lag", "crack", "flaghue", "flagblur", "flagdark", "flaggray", "flagback", "flagpuzzle", "flagwind", "ticker"];
+  const SOFT = ["shaky", "missing", "noborders", "flicker", "decoys", "blur", "clouds", "rain", "spread", "lag", "crack", "flaghue", "flagblur", "flagdark", "flaggray", "flagback", "flagpuzzle", "flagwind", "ticker", "frosted", "flagwet", "card"];
   /* retos por ronda fuera de los jefes en A0 (27 por expedicion con los de los jefes: R4 2, R8 3, R12 3). R1 sin reto en tu primera expedicion */
   const COUNT = [1, 1, 1, 0, 2, 2, 3, 0, 3, 3, 3, 0];
   /* parejas que no se juntan en una ronda: las ventanas de No responde y la Bateria baja te hacen perder el nombre de Memoria de pez sin culpa tuya */
@@ -202,7 +210,7 @@ window.AIQ = window.AIQ || {};
   /* el plan de una ronda (determinista por semilla y ronda); ctx.H: lo que ya ha salido en las rondas de antes del plan base */
   /* tanda 16: la Rueda de la fortuna (un reto fijo a nivel 2 y cinco familias distintas a nivel 3, una por pregunta, que la rueda va sacando) y El
      coleccionista (Fronteras falsas fijas y los cinco trucos de bandera en orden sorteado). Entradas con wh = la pregunta en la que salen; hid = boca abajo en el Campamento */
-  const WHEEL_FAMS = ["letras", "saber", "luz", "tormenta", "vista", "sitio", "puntero", "pantalla", "mentiras"], NOWHEEL = ["trap", "storm", "wind", "silence"];
+  const WHEEL_FAMS = ["letras", "saber", "luz", "tormenta", "vista", "sitio", "puntero", "pantalla", "mentiras", "clima"], NOWHEEL = ["trap", "storm", "wind", "silence"];
   function wheelList(seed, act, lv, noop, flagRound, H) {
     const rr = A.rng(`${seed}:wheel:${act}`), cand = f => Object.keys(D).filter(id => D[id].fam === f && !D[id].sub && !D[id].boss && !NOWHEEL.includes(id) && !noop(id) && (D[id].kind === "flag" ? flagRound : true) && !(D[id].kind === "text" && flagRound));
     const w1 = x => 1 / (1 + ((H && H.id && H.id[x]) || 0)), plain = id => ["map", "ptr", "wall"].includes(D[id].kind), fams = rr.shuffle(WHEEL_FAMS.filter(f => cand(f).length));
@@ -291,7 +299,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ mitigaciones (suma de los `fx` de las reliquias) */
   A.chal.fx = perks => {
-    const fx = { textShakeMul: 1, ptrShakeMul: 1, ptrBlurMul: 1, glassBlurMul: 1, batteryMul: 1, unmirrorText: false, unmirrorMap: false, unmirrorPtr: false, shakeMul: 1, textMul: 1, colorMul: 1, blurMul: 1, plateMul: 1, liesMul: 1, blackoutMul: 1, cloudMul: 1, focusMul: 1, lagMul: 1, quakeMul: 1, mosaicMul: 1, rainMul: 1, ghostMul: 1, darkR: 1, darkDim: 0, lensR: 0, trueR: 0, peekR: 0, missingRate: 0, unswapMs: 0, decodeMs: 0, riddleMs: 0, unmirror: false, keepName: false, halo: false, flickerWarn: false, windPreview: false, windMul: 1, coords: false, guides: false, mag: false, country: false, thermo: false, beacon: false, noBabel: false, noMarquee: false, noNegative: false, noFlash: false, trapGhost: false, cloudClear: 0, glassMul: 1, hangAuto: 0, ids: perks.map(p => p.id) };
+    const fx = { textShakeMul: 1, ptrShakeMul: 1, ptrBlurMul: 1, glassBlurMul: 1, batteryMul: 1, unmirrorText: false, unmirrorMap: false, unmirrorPtr: false, shakeMul: 1, textMul: 1, colorMul: 1, blurMul: 1, plateMul: 1, liesMul: 1, blackoutMul: 1, cloudMul: 1, focusMul: 1, lagMul: 1, quakeMul: 1, mosaicMul: 1, rainMul: 1, frostMul: 1, wetMul: 1, flagwindMul: 1, signalMul: 1, ghostMul: 1, darkR: 1, darkDim: 0, lensR: 0, trueR: 0, peekR: 0, missingRate: 0, unswapMs: 0, decodeMs: 0, riddleMs: 0, unmirror: false, keepName: false, halo: false, flickerWarn: false, windPreview: false, windMul: 1, coords: false, guides: false, mag: false, country: false, thermo: false, beacon: false, noBabel: false, noMarquee: false, noNegative: false, noFlash: false, trapGhost: false, cloudClear: 0, glassMul: 1, hangAuto: 0, ids: perks.map(p => p.id) };
     for (const p of perks) {
       const f = p.fx; if (!f) continue;
       for (const k in f) {
@@ -333,7 +341,7 @@ window.AIQ = window.AIQ || {};
     case "spread": return { k: V([0.5, 0.8, 1], i) * fx.plateMul * h };
     case "tilt": return { k: V([0.4, 0.65, 0.9], i) * fx.plateMul * h };
     case "clouds": return { cover: V([0.3, 0.42, 0.55], i) * fx.cloudMul * h };   // tanda 7: mas humo (y se barre con el raton)
-    case "rain": return { dens: V([0.45, 0.75, 1], i) * fx.rainMul * fx.cloudMul * h };
+    case "rain": return { dens: V([0.45, 0.75, 1], i) * fx.rainMul * h };   // v0.3.238: la lluvia es del Paraguas (el humo, del Foco)
     case "myopia": return { r: V([120, 150, 190], i) * fx.focusMul * h };
     case "blindspot": return { r: V([60, 85, 115], i) * fx.focusMul * h };
     case "mosaic": return { res: clamp(V([0.11, 0.08, 0.06], i) + (1 - fx.mosaicMul) * 0.16, 0.05, 0.4) };
@@ -360,12 +368,19 @@ window.AIQ = window.AIQ || {};
     case "ticker": return { gap: V([100, 150, 215], i), cap: V([2300, 3300, 5200], i), lead: V([450, 650, 900], i), cover: i >= 1, rnd: i >= 2, churn: i >= 2 };   // ms entre una letra y la siguiente; el pais tapado hasta que acaba; a tope: en desorden y se sueltan
     case "fakepass": return { n: Math.max(1, Math.round((i + 1) * fx.liesMul)) };
     case "flagpuzzle": return { cols: V([2, 3, 4], i), rows: V([2, 2, 3], i), pair: i === 0, gray: i === 2 ? 2 : 0 };
-    case "flagwind": return { amp: V([3, 5, 7], i), T: V([1.9, 1.3, 1.1], i), sh: V([0.2, 0.55, 0.62], i), gust: i === 2 };
+    case "flagwind": return { amp: V([3, 5, 7], i) * fx.flagwindMul, T: V([1.9, 1.3, 1.1], i) / Math.max(0.5, Math.sqrt(fx.flagwindMul)), sh: V([0.2, 0.55, 0.62], i) * fx.flagwindMul, gust: i === 2 && fx.flagwindMul > 0.9 };   // el Paraguas la calma
     case "flagback": return {};
     /* tanda 15 */
     case "ctrlz": return { every: V([6, 4, 0], i), after: V([0, 0, 1.5], i), half: fx.glassMul < 0.9 };   // cada 6 s / cada 4 s / 1,5 s despues de cada zoom; el Protector la deja a la mitad
     case "stormnight": return { iv: V([1.5, 2.2, 3], i), glow: 900 };                      // un rayo cada 1,5 / 2,2 / 3 s, con un resplandor de 0,9 s
     case "trap": return { med: V([1, 0, 1], i), hard: V([0, 1, 1], i) };                      // 2/2/1 (una facil pasa a media), 2/1/2 (una facil pasa a dificil), 1/2/2 (las dos)
+    /* v0.3.238: los debufos de materia (js/debufos.js); m = lo que deja el amuleto de su familia (1 = entero) */
+    case "frost": return { m: Math.max(0.3, fx.frostMul) * h };
+    case "frosted": return { m: Math.max(0.3, fx.blurMul) * h };
+    case "tiles": return { m: fx.plateMul * h };
+    case "signal": return { m: fx.signalMul * h };
+    case "card": return { n: Math.max(1, Math.round(V([1, 2, 3], i) * h * (fx.glassMul < 0.9 ? 0.6 : 1))), back: fx.glassMul < 0.9 ? 1.8 : 1 };
+    case "flagwet": return { m: Math.max(0.3, fx.wetMul) * h };
     case "giants": return { g: V([1, 1, 1], i), d: V([1, 2, 3], i), big: V([1.5, 1.8, 2.1], i), small: V([0.5, 0.35, 0.25], i), base: V([0.9, 0.85, 0.85], i) };   // cuantos crecen, cuantos se encogen y cuanto; base: lo que se encogen los demas para dejar sitio (medido: gigante 1,3 / 1,6 / 1,8 reales)
     default: return {};
   } };
@@ -1031,8 +1046,9 @@ window.AIQ = window.AIQ || {};
   const fwStill = () => { const w = S.fw; S.fw = null; if (w && w.board.isConnected) w.board.classList.add("still"); };
   /* un solo punto de entrada desde flagClass(): la bandera se mete en su envoltorio y cada reto la transforma */
   function flagNew(el, o) {
-    S.fb = S.fz = S.fw = null; const ids = kindOn("flag").map(c => c.id).filter(id => id === "flagback" || id === "flagpuzzle" || id === "flagwind"); if (!ids.length || !o || !o.name) return;
+    S.fb = S.fz = S.fw = null; const ids = kindOn("flag").map(c => c.id).filter(id => id === "flagback" || id === "flagpuzzle" || id === "flagwind" || id === "flagwet"); if (!ids.length || !o || !o.name) return;
     const F = flagWrap(el, o); if (!F) return;
+    if (has("flagwet") && A.deb && !has("flagpuzzle")) { const c = get("flagwet"); A.deb.flag(F, { lv: lvOf(c), m: par(c).m, ptr: () => S.px }); }   // v0.3.238: la acuarela mojada, sobre la bandera
     if (has("flagpuzzle")) flagPuzzle(F, get("flagpuzzle"), o); else if (has("flagwind")) flagWind(F, get("flagwind"), o);
     if (has("flagback")) flagBack(F, get("flagback"), o);
   }
@@ -1146,11 +1162,28 @@ window.AIQ = window.AIQ || {};
     flagNew(el, o);   // tanda 14: la bandera de espaldas, a trozos o al viento
   }
 
+  /* ------------------------------------------------------------------ v0.3.238: los debufos de materia (js/debufos.js) */
+  /* los del mapa van en un pase dentro del lienzo del mapa (refraccion: necesitan leerlo); la carta, en su lienzo sobre el mapa. Sin WebGL2, los de siempre */
+  function debApply(map) {
+    S.debMap = S.debNeg = S.debCrack = false;
+    if (!map || !map.setDeb || !A.deb) { if (A.deb) A.deb.card(null); return; }
+    const now = performance.now(), ok = A.deb.mapOk(map), cfg = { key: `${S.seed}:${S.round}:${S.q}:${now}`, t0: now, ptr: () => S.px }; let any = false;
+    if (ok) {
+      for (const id of ["frost", "frosted", "tiles", "signal"]) { const c = get(id); if (c) { cfg[id] = Object.assign({ lv: lvOf(c) }, par(c)); any = true; } }
+      if (has("negative") && !S.fx.noNegative) { cfg.negative = { lv: lvOf(get("negative")) }; any = true; S.debNeg = true; }
+      const ck = get("crack"); if (ck) { cfg.crack = { n: par(ck).n, glass: S.fx.glassMul || 1 }; any = true; S.debCrack = true; }
+    }
+    S.debMap = ok && any; map.setDeb(any ? cfg : null);
+    const cd = get("card"); if (cd) { const p = par(cd); A.deb.card({ n: p.n, back: p.back, lv: lvOf(cd), ptr: () => S.px }, ensureOverlay(map)); } else A.deb.card(null);
+  }
+  function debOff(map) { S.debMap = S.debNeg = S.debCrack = false; if (map && map.setDeb) map.setDeb(null); if (A.deb) { A.deb.card(null); A.deb.flag(null); } }
+
   /* ------------------------------------------------------------------ API */
   Object.assign(A.chal, {
     begin(list, fx, ctx = {}) {
       this.end(); S.pub = list.map(canon); S.list = expand(S.pub); S.mg = S.list.some(c => c.mesa && GLOB.has(c.id)); S.qlist = null; S.qsub = null; S.fx = fx || A.chal.fx([]); S.halve = ctx.halve || 1; S.seed = ctx.seed || "s"; S.round = ctx.round || 0; S.on = true; S.suspended = false; S.q = 0; S.fpSet = null; S.bk = ctx.boss || null; S.asc = ctx.asc || 0; S.topic = ctx.topic || null; S.cjk = !!ctx.cjk; S.bl = null; if (A.chfx && A.chfx.reset) A.chfx.reset(); if (A.jefes) A.jefes.begin();   // tanda 6: S.pub, los retos de la ronda; S.list, sus efectos
       S.map = A.core && A.core.map; if (S.map) ensureOverlay(S.map);
+      if (A.deb) { A.deb.roundStart(); A.deb.prep([...new Set(S.list.map(c => c.id).concat(S.bk && BX[S.bk] ? [0, 1, 2, 3, 4].flatMap(q => bossQ(q).map(c => c.id)) : []))], S.map); }   // v0.3.238: lo caro de los debufos, en ratos libres de la intro
       /* retos que mueven continentes: su colocacion se deja calculada mientras se presenta la ronda (con el mapa ya quieto), no al empezar la pregunta */
       const LAYIDS = ["pangea", "spread", "tilt", "deal", "giants"], Ls = S.bk && BX[S.bk] ? [0, 1, 2, 3, 4].map(qi => [qi, bossQ(qi)]).filter(([, l]) => l.some(c => LAYIDS.includes(c.id))) : null;   // un jefe: la colocacion de CADA pregunta se deja calculada en la intro
       if (S.map && S.map.layout && (Ls ? Ls.length : S.list.some(c => LAYIDS.includes(c.id)))) {
@@ -1173,11 +1206,13 @@ window.AIQ = window.AIQ || {};
       if (keep) { /* se queda como esta */ } else if (spec) { map.setDistort(spec, spec.ms || 900); say("chal"); } else if (map.clearDistort) map.clearDistort(300);
       if (spec && spec.deal && A.core && A.core.S) A.core.S.limit += spec.ms / 1000;   // mientras se reparten las cartas no se puede responder: ese tiempo se devuelve
       if (!keep && cur().some(c => D[c.id].kind === "map")) { app.classList.remove("ch-glitch"); A.restyle(app); app.classList.add("ch-glitch"); later(() => app.classList.remove("ch-glitch"), 600); }
-      app.classList.toggle("ch-negative", has("negative") && !S.fx.noNegative);
-      ensureOverlay(map).classList.add("on");
+      ensureOverlay(map).classList.add("on"); debApply(map);
+      app.classList.toggle("ch-negative", has("negative") && !S.fx.noNegative && !S.debNeg);
       const bl = get("blur"), dk = get("dark"), cl = get("clouds"), rn = get("rain"), my = get("myopia"), bs = get("blindspot"), dc = get("decoys");
       const L = layer("blur"), M = layer("myopia"), M2 = layer("myopia2"), K = layer("dark"), H = layer("halo"), Sp = layer("spot"), CX = A.chfx, PX = !!(CX && CX.ok());
-      if (bl) { const p = par(bl); L.style.setProperty("--bl", p.px.toFixed(1) + "px"); L.style.setProperty("--lr", (S.fx.lensR ? S.fx.lensR : -60) + "px"); L.classList.add("on"); } else L.classList.remove("on");
+      const fb = !S.debMap && (get("frosted") || get("frost") || get("tiles"));   // sin el pase del mapa (sin WebGL2): el desenfoque de siempre con su ventana
+      if (bl) { const p = par(bl); L.style.setProperty("--bl", p.px.toFixed(1) + "px"); L.style.setProperty("--lr", (S.fx.lensR ? S.fx.lensR : -60) + "px"); L.classList.add("on"); }
+      else if (fb) { L.style.setProperty("--bl", [5, 8, 11][lvOf(fb) - 1] + "px"); L.style.setProperty("--lr", "115px"); L.classList.add("on"); } else L.classList.remove("on");
       if (my) { const p = par(my); for (const m of [M, M2]) { m.style.setProperty("--mr", p.r + "px"); m.classList.add("on"); } } else { M.classList.remove("on"); M2.classList.remove("on"); }
       if (bs && !PX) { const p = par(bs); Sp.style.setProperty("--sr", p.r + "px"); Sp.classList.add("on"); } else Sp.classList.remove("on");
       if (dk && !PX) { const p = par(dk); app.style.setProperty("--dr", p.r + "px"); app.style.setProperty("--da", p.a.toFixed(3)); K.classList.add("on"); H.classList.add("on"); H.classList.toggle("warm", !!S.fx.halo); } else { K.classList.remove("on"); H.classList.remove("on"); }
@@ -1193,7 +1228,7 @@ window.AIQ = window.AIQ || {};
     },
     reveal(ms = 750) {
       const map = S.map; clearTimers(); { const ap = $("app"); if (ap) ap.classList.remove("ch-glitch", "ch-quaking"); }   // clearTimers cancela el later que las quitaba: si respondias antes quedaban pegadas
-      fxStop(); zzClear(); S.nt = null; if (A.jefes) A.jefes.reveal(); if (A.chfx) A.chfx.clear();
+      fxStop(); zzClear(); S.nt = null; if (A.jefes) A.jefes.reveal(); if (A.chfx) A.chfx.clear(); debOff(map);
       if (S.suspended) boardStop(); else { boardFinal(); passReveal(); fzSolve(); fwStill(); fbReveal(); }   // tanda 14
       if (map && map.clearDistort) { map.clearDistort(ms); if (map.setDecoys) map.setDecoys([]); }
       $("app").classList.remove("ch-negative");
@@ -1213,7 +1248,7 @@ window.AIQ = window.AIQ || {};
     },
     upright() { const map = S.map; if (map && map.setOrient) map.setOrient(false, 900); },
     end() {
-      clearTimers(); { const ap = $("app"); if (ap) ap.classList.remove("ch-glitch", "ch-quaking"); } clearTimeout(S.preT); fxStop(); zzClear(); trapClear(); S.bk = null; S.bl = null; if (A.jefes) A.jefes.end(); S.nt = null; if (A.chfx) A.chfx.clear(); boardStop(); S.on = false; S.list = []; S.pub = []; S.qlist = null; S.qsub = null; const map = S.map || (A.core && A.core.map);
+      clearTimers(); { const ap = $("app"); if (ap) ap.classList.remove("ch-glitch", "ch-quaking"); } clearTimeout(S.preT); fxStop(); zzClear(); trapClear(); S.bk = null; S.bl = null; if (A.jefes) A.jefes.end(); S.nt = null; if (A.chfx) A.chfx.clear(); debOff(S.map || (A.core && A.core.map)); boardStop(); S.on = false; S.list = []; S.pub = []; S.qlist = null; S.qsub = null; const map = S.map || (A.core && A.core.map);
       if (map && map.clearDistort) { map.clearDistort(300); map.setLens && map.setLens(null); map.setDecoys && map.setDecoys([]); }
       const app = $("app"); if (app) app.classList.remove("ch-negative");
       if (S.ov) { S.ov.classList.remove("on"); for (const c of ["blur", "myopia", "myopia2", "dark", "halo", "spot"]) layer(c).classList.remove("on"); layer("flick").style.opacity = 0; layer("flash").style.opacity = 0; layer("night").classList.remove("on"); }
@@ -1223,7 +1258,7 @@ window.AIQ = window.AIQ || {};
     decoAlt: (el, o) => { if (!S.on || S.suspended || !cur().some(c => D[c.id].kind === "text")) { el.textContent = A.tx(o.name); return; } deco(el, o, o.name, null, true); },
     GLOB, parN: c => { const k = S.fx; S.fx = neutralFx(); try { return par(c); } finally { S.fx = k; } },   // parN: los parametros de la mesa, sin amuletos
     decorate, par, get, bossQ, inject, T16, tl: k => L6(T16[k]), hasBX: k => !!BX[k], fxNow: () => S.fx, suspended: () => S.suspended, cjkTail: CJK_TAIL, babelAlt,   // babelAlt y decoys: tambien para las pruebas
-    decoys: (o, n) => decoyList(S.map || (A.core && A.core.map), o, n),
+    decoys: (o, n) => decoyList(S.map || (A.core && A.core.map), o, n), hudPx,
     /* nota del pie (Libro de la casa, Nota del crupier): con la Adivinanza en la placa, la nota sale tapada igual (si no, la resolvia al instante) */
     noteMask: (o, txt) => (txt && o && S.on && !S.suspended && has("riddle") && !o.clue && riddleText(o) ? maskName(o, txt) : txt),
   });

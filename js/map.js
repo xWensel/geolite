@@ -1271,6 +1271,7 @@ void main(){
       gl.bindVertexArray(null);
       this.vaoEmpty = gl.createVertexArray();
       this.T = {}; // objetivos de render
+      this.debx = null;   // el pase de los debufos (js/debufos.js) vive en ESTE contexto: con uno nuevo se rehace
     }
     /* 1 = frontera entre dos paises (el segmento aparece dos veces), 0 = costa (una sola vez). Las costas no se deforman nunca. */
     _borderFlags(segs) {
@@ -1983,7 +1984,7 @@ void main(){
       if (this._it && this._livingMat() && now - this._it.t < 6000) this.dirty = true;                       // la salpicadura dura seis segundos
       if (this.sk.animated && this.fxOn !== false && !this.pointers.size && now - this._lastDraw >= this.idleMs) this.dirty = true;   // fondo animado: ~25 fps en reposo
       if (this.dirty) { this.dirty = false; this._drawGL(now); if (this.onView) this.onView(this.view); }
-      else if ((this.ondas || (m.guess && this._parVivo(now))) && this._sceneT) this._post(now);            // la onda del acierto (y la chincheta del revelado, js/revelado.js): solo el ultimo pase
+      else if ((this.ondas || this.debCfg || (m.guess && this._parVivo(now))) && this._sceneT) this._post(now);            // la onda del acierto (y la chincheta del revelado, js/revelado.js): solo el ultimo pase
       if (this.fxDirty) { this.fxDirty = false; this._drawFx(now); }
     }
 
@@ -2155,14 +2156,21 @@ void main(){
       gl.disable(gl.BLEND);
 
       // 4) post-proceso a pantalla: desenfoque radial y aberracion segun velocidad de zoom, viñeta y grano
-      this._sceneT = scene; this._post(now);
+      this._sceneT = scene; this._sceneGen = (this._sceneGen || 0) + 1; this._post(now);
+    }
+    /* los debufos de materia (js/debufos.js): un pase entre la escena y el ultimo pase, solo mientras hay alguno (cfg null = fuera) */
+    setDeb(cfg) {
+      if (!cfg && this.debCfg && !this.debCfg.out) { this.debCfg = Object.assign({}, this.debCfg, { out: performance.now() }); this.dirty = true; return; }   // se va con un fundido corto
+      this.debCfg = cfg || null; this.dirty = true;
     }
     /* el ultimo pase, aparte: mientras corre la onda del acierto sin que la vista cambie, solo se repite este (la escena ya esta pintada) */
     _post(now) {
       const gl = this.gl, W = this.W, H = this.H, dpr = this.cdpr, P = this.P, st = this.sk, scene = this._sceneT; if (!scene) return;
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, this.cv.width, this.cv.height);
       gl.useProgram(P.post); gl.bindVertexArray(this.vaoEmpty);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, scene.tex); gl.uniform1i(P.post.u.u_scene, 0);
+      let src = scene;
+      if (this.debCfg && A.deb) { try { if (!this.debx) this.debx = A.deb.forMap(this); const t = this.debx.run(scene, now, this._sceneGen || 0); if (t) src = t; } catch (e) { console.warn("debufos:", e); this.debCfg = null; } gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, this.cv.width, this.cv.height); gl.useProgram(P.post); gl.bindVertexArray(this.vaoEmpty); }
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, src.tex); gl.uniform1i(P.post.u.u_scene, 0);
       this._ondaU(now); this._parU(now);
       const zc = this.zc || [W / 2, H / 2];
       this._u(P.post, "u_res", this.cv.width, this.cv.height); this._u(P.post, "u_zc", zc[0] * dpr, (H - zc[1]) * dpr);
