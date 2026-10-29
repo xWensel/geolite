@@ -426,8 +426,11 @@ vec3 piedra(float c, vec2 p, out float fleck){
   if (c < 1.5) { float w = fbm(p / 150.) * 5. + fbm(p / 40.) * .5, bnd = sin(w * 6.2832) * .5 + .5; return mix(vec3(.13, .44, .28), vec3(.05, .26, .16), smoothstep(.75, 1., bnd) * .8 + fbm(p / 30.) * .15); }
   if (c < 2.5) { float n = fbm(p / 26.), v = pow(1. - abs(sin(fbm(p / 80.) * 14.)), 30.); return mix(vec3(.46, .10, .07), vec3(.66, .20, .12), n) * (1. - v * .35); }
   if (c < 3.5) { float bnd = sin(fbm(p / 120.) * 18.) * .5 + .5; return mix(vec3(.62, .40, .17), vec3(.86, .70, .46), smoothstep(.55, 1., bnd) * .8 + fbm(p / 25.) * .1); }
-  float n = fbm(p / 50.), v = pow(1. - abs(sin(fbm(p / 90. + 2.) * 12.)), 40.);
-  return mix(vec3(.74, .55, .25), vec3(.88, .70, .36), n) * (1. - v * .4);
+  if (c < 4.5) { float n = fbm(p / 50.), v = pow(1. - abs(sin(fbm(p / 90. + 2.) * 12.)), 40.);
+    return mix(vec3(.74, .55, .25), vec3(.88, .70, .36), n) * (1. - v * .4); }
+  if (c < 5.5) { float n = fbm(p / 34.), v = pow(1. - abs(sin(fbm(p / 70. + 5.) * 11.)), 36.); return mix(vec3(.74, .40, .46), vec3(.88, .58, .60), n) * (1. - v * .3); }   // cuarzo rosa
+  if (c < 6.5) { float n = fbm(p / 40.), bnd = sin(fbm(p / 100. + 7.) * 16.) * .5 + .5; return mix(vec3(.30, .34, .40), vec3(.46, .52, .58), n * .6 + bnd * .4); }   // pizarra azulada
+  float n = fbm(p / 44.), v = pow(1. - abs(sin(fbm(p / 85. + 9.) * 13.)), 34.); return mix(vec3(.42, .52, .22), vec3(.60, .68, .32), n) * (1. - v * .3);   // jade verde oliva
 }
 void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
   vec2 p = s.p, ps = s.q;
@@ -435,7 +438,7 @@ void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
   vec3 sea = vec3(.925, .918, .895) * (.955 + .055 * nb) + vec3(-.01, 0., .01) * (fbm(ps / 600.) - .5);
   vec2 id = paisId(p);
   float c = s.cls;
-  float k = c < .5 ? (id.x < .3 ? 0. : id.x < .55 ? 1. : id.x < .8 ? 2. : 4.) : c < 1.5 ? 3. : c < 2.5 ? 0. : c < 3.5 ? 1. : c < 4.5 ? 4. : c < 5.5 ? 2. : 3.;
+  float k = mod(floor(s.pid * 255. + .5), 8.);   // la piedra de cada pais: coloreado de vecinos (js/firma.js colorear), dos paises que comparten frontera nunca repiten
   float fleck; vec3 st = piedra(k, p + id * 700., fleck) * (.94 + .12 * id.y);
   st = mix(vec3(luma(st)), st, uPiedra);
   alb = mix(sea, st, s.land);
@@ -1548,8 +1551,22 @@ void main(){ vec2 uv = gl_FragCoord.xy / 512.; o = vec4(pfbm(uv, 4., 1.), pfbm(u
       }
       col[a] = best; used[best] += Math.max(1, feats[a].area);
     }
+    /* las piedras de Carrara: coloreado DSATUR con los menos colores posibles (suelen bastar 4-5; el tope son 8). Vive en los 3 bits bajos del azar del pais. */
+    const stone = new Int8Array(n).fill(-1), su = new Float64Array(8);
+    for (let step = 0; step < n; step++) {
+      let a = -1, bs = -1, bd = -1;
+      for (let i = 0; i < n; i++) {
+        if (stone[i] >= 0) continue;
+        const seen = new Set(); for (const b of adj[i]) if (stone[b] >= 0) seen.add(stone[b]);
+        if (seen.size > bs || (seen.size === bs && adj[i].size > bd)) { a = i; bs = seen.size; bd = adj[i].size; }
+      }
+      const bad = new Set(); for (const b of adj[a]) if (stone[b] >= 0) bad.add(stone[b]);
+      let pick = 0, best = 1e9;
+      for (let c = 0; c < 8; c++) { if (bad.has(c)) continue; const cost = su[c] + hs(a * 17 + c * 5) * 1.5; if (cost < best) { best = cost; pick = c; } }   // de las libres, la menos usada: reparto parejo de las 8 piedras
+      stone[a] = pick; su[pick]++;
+    }
     const cls = new Uint8Array(n), rnd = new Uint8Array(n);
-    for (let i = 0; i < n; i++) { cls[i] = ((feats[i].ci & 15) << 4) | col[i]; rnd[i] = 1 + Math.floor(hs(i * 7 + 3) * 254); }
+    for (let i = 0; i < n; i++) { cls[i] = ((feats[i].ci & 15) << 4) | col[i]; rnd[i] = (1 + Math.floor(hs(i * 7 + 3) * 31)) << 3 | stone[i]; }
     return { cls, rnd };
   }
 
