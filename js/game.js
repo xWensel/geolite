@@ -1143,7 +1143,12 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       <div class="gx-vd-side"><div class="gx-vd-medal ${kind}">${art === "chest" ? `<i class="gx-vd-crown">${A.icon("crown")}</i>` : ""}${A.icon(chip)}</div><div class="gx-vd-dealer" id="vdDealer"></div>${idc}</div>
       <div class="gx-vd-acts"><div class="gx-acts">${order.filter(b => b.ghost).map(btn).join("")}</div><div class="gx-acts">${order.filter(b => !b.ghost).map(btn).join("")}</div></div>
     </div>`, "verdict");
-    stats.forEach((s, i) => { const el = $("vs" + i); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, s[1], { ms: 1300, delay: 700 + i * 120, tick: i === 0 && s[1] > 0 })); });
+    /* (Probador, paquete del veredicto, Extrema): el ticket sale de la caja linea a linea, cada cifra rueda y encaja, el contador de laton
+       suma en el cartel, por los pelos la barra se llena ficha a ficha y, con racha y buen margen, el total arde con la llama de la racha (js/veredicto.js) */
+    const vx = A.veredicto ? A.veredicto.monta({ vd: document.querySelector("#dlg .gx-vd"), kind, meter, stats, superada, streak: S.streak || 0 }) : null;
+    if (!vx || !vx.stats) stats.forEach((s, i) => { const el = $("vs" + i); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, s[1], { ms: 1300, delay: 700 + i * 120, tick: i === 0 && s[1] > 0 })); });
+    const sMs = vx ? vx.selloMs : 1500;
+    if (vx && stamp) setTimeout(() => { const v = document.querySelector("#dlg .gx-vd"); if (v && v.isConnected && v.classList.contains("vdx")) A.sfx.stamp(); }, sMs + 180);   // el golpe del sello, cuando cae
     if (iq != null) { const el = $("iqNum"); odoNow(el, 0); requestAnimationFrame(() => odoSet(el, iq, { ms: 1400, delay: 1000 })); }
     buttons.forEach(b => ($(b.id).onclick = b.onclick));
     if (A.dealer && A.dealer.on) A.dealer.anchor($("vdDealer"));                // el crupier habla dentro del veredicto, sin tapar botones
@@ -1154,7 +1159,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (A.deb && A.deb.veredicto) A.deb.veredicto(kind !== "");                 // v0.3.238: si te rompieron el cristal en la ronda y la superas, su guante lo limpia          // bloque D: si cerraste la ronda con racha, la lluvia de cartas (nunca a media pregunta)
     if (club) A.club.play(club, document.querySelector("#dlg .gx-vd-club"), 1700);
     /* v0.3.203 (Bloque F, paso 6): cuando el sello cae (1,5 s + su golpe), hunde el ticket, la tinta se corre y la lampara sube segun el margen (js/celebra.js) */
-    if (superada && stamp && kind === "ok" && A.celebra) { const vd = document.querySelector("#dlg .gx-vd"); setTimeout(() => { if (vd && vd.isConnected) A.celebra.superada(superada, vd); }, 1700); }
+    if (superada && stamp && kind === "ok" && A.celebra) { const vd = document.querySelector("#dlg .gx-vd"); setTimeout(() => { if (vd && vd.isConnected) A.celebra.superada(superada, vd); }, sMs + 200); }
   }
 
   function finishLevel() {
@@ -1173,14 +1178,14 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     p.best = Math.max(p.best, shown); p.bestIq = Math.max(p.bestIq, iq); save();
     if (pass && S.level === S.camp.levels.length - 1) return endScreen(true, iq);
     if (pass) {
-      A.sfx.stamp(); setTimeout(A.sfx.win, 380);
+      if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.win, 380);
       verdict({
         kind: "ok", level: S.level + 1, title: A.t("v.ok"), text: `${A.tx(L.name)} — ${A.t("lc.p", { s: A.fmt(S.levelScore), a: A.fmt(L.advance) })}`, meter: [S.levelScore, L.advance], places: true,
         stats: [[A.t("v.points"), S.levelScore], [A.t("v.total"), S.runTotal], [A.t("v.iq"), iq]], stamp: A.t("stamp.ok"), stampSub: pad2(S.level + 1), superada: S.levelScore >= L.advance * 1.5 ? 3 : S.levelScore >= L.advance * 1.1 ? 2 : 1,
         buttons: [{ id: "menuBtn", cls: "btn-line", label: A.t("btn.newGame"), onclick: () => { S.startLevel = 0; showTitle(); } },   // salir al menu sin tener que rendirse en la pausa (el progreso ya esta guardado arriba)
           { id: "nlBtn", cls: "btn-ink", label: A.t("btn.nextLevel"), arrow: true, primary: true, onclick: () => startLevel_(S.level + 1) }],
       });
-    } else { A.sfx.stamp(); setTimeout(A.sfx.fail, 380); endScreen(false, iq); }
+    } else { if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.fail, 380); endScreen(false, iq); }
   }
 
   function endScreen(win, iq) {
@@ -1193,7 +1198,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       if (win) { A.profile.record("classic:" + S.camp.id + ":win", 1); const r = shown / Math.max(1, S.runMax); A.profile.medal(S.camp.id, r >= 0.85 ? "gold" : r >= 0.7 ? "silver" : "bronze"); A.ach.emit("classic", { win: true, clean: !!S.clean }); }
       if (S.ranked) A.rank.submit("classic-" + S.camp.id, { score: shown, extra: { win, lv: S.level + 1 } });
     }
-    if (win) { A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
+    if (win) { if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.victory, 380); }
     const btns = [];
     if (!win) btns.push({ id: "retryBtn", cls: "btn-ink", label: A.t("btn.retry"), arrow: true, primary: true, onclick: () => { S.runMax = S.runMax0 || 0; startLevel_(S.level); } });   // el intento fallido deja de contar en el maximo: el IQ y la medalla miden la pasada buena (S.clean sigue en false: Sin red exige no fallar ninguno)
     btns.push({ id: "newBtn", cls: win ? "btn-ink" : "btn-line", label: A.t("btn.newGame"), primary: win, onclick: () => { S.startLevel = 0; showTitle(); } });

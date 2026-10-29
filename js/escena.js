@@ -253,7 +253,7 @@ window.AIQ = window.AIQ || {};
     const lay = $("layer"), dlg = $("dlg"), vd = dlg && dlg.querySelector(".gx-vd"), papel = vd && vd.querySelector(".gx-vd-ticket");
     if (!papel || !luces()) return quitaCaja();
     if (vd.classList.contains("gx-out")) return;                         // el veredicto se esta yendo: la lampara se queda como esta hasta que se vaya con el (nada de volver a medir a mitad de la salida)
-    const r = papel.getBoundingClientRect(), p = px(), M = L.billar; if (r.width < 40 || r.top < 18 * p) return quitaCaja();   // sin sitio ni para media pantalla: mejor sin lampara
+    const mid = papel.closest(".gx-vd-mid.vdx-feed"), r = (mid || papel).getBoundingClientRect(), p = px(), M = L.billar;   // mientras el ticket sale de la caja (js/veredicto.js), su sitio final if (r.width < 40 || r.top < 18 * p) return quitaCaja();   // sin sitio ni para media pantalla: mejor sin lampara
     const cx = Math.round((r.left + r.right) / 2 / p) * p, top = Math.max(Math.round((r.top - 3 * p - M.h * p) / p) * p, Math.ceil((r.top - 2 * p - M.h * p) / p) * p, -24 * p);
     const baja = vd.classList.contains("lose"), key = [cx, top, Math.round(r.top), Math.round(r.width), Math.round(r.height), baja, p].join(), old = lay.querySelector(":scope > .esc-caja");
     if (cj && cj.key === key && old) return;

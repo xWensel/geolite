@@ -491,20 +491,15 @@ html.reduce-motion .dealer.nap2 .dl-face { animation: none; }
 #bsodFx .bs-in { position: absolute; left: 8vw; top: 13vh; max-width: 74vw; } #bsodFx .bs-sad { display: block; font: 700 clamp(70px, 16vh, 170px)/1 var(--mono); margin-bottom: 3vh; } #bsodFx p { margin: 0 0 2.2vh; font-weight: 700; font-size: clamp(16px, 3.2vh, 30px); line-height: 1.25; }
 #bsodFx .bs-c { font-size: clamp(14px, 2.4vh, 22px); } #bsodFx .bs-row { display: flex; align-items: center; gap: 16px; margin-top: 4vh; font-size: clamp(12px, 2vh, 18px); font-weight: 700; } #bsodFx .bs-qr { flex: none; width: clamp(56px, 11vh, 100px); aspect-ratio: 1; background: conic-gradient(#fff 25%, #0a6cc4 0 50%, #fff 0 75%, #0a6cc4 0) 0 0 / 22% 22%; box-shadow: 0 0 0 4px #fff; image-rendering: pixelated; }
 /* El coleccionista: el album */
-#albumFx { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 99020; padding: 8px 14px 10px; background: #fdf5fd; color: #16241c; box-shadow: inset 0 0 0 3px #16241c, 0 6px 0 rgba(0, 0, 0, .4); text-align: center; pointer-events: none; animation: al-in .5s cubic-bezier(.2, 1.4, .4, 1) both; }
-#albumFx h4 { margin: 0 0 5px; font: 700 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; } #albumFx .al-row { display: flex; gap: 6px; justify-content: center; }
-#albumFx .al-s { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 6px; background: #16241c; box-shadow: inset 0 0 0 2px #3b5547; } #albumFx .al-s .ic { width: 32px; height: 32px; } #albumFx .al-s.done { opacity: .75; } #albumFx .al-s.back { opacity: .55; }
-#albumFx .al-s.cur { background: #3b1f6b; box-shadow: inset 0 0 0 2px #ffd95a; animation: al-stamp .5s cubic-bezier(.2, 1.7, .4, 1) .15s both; } #albumFx .al-s.cur .ic { width: 38px; height: 38px; }
-#albumFx .al-n { margin: 6px 0 0; font: 700 15px var(--mono); }
-#albumFx.bye { opacity: 0; transition: opacity .22s; }
-@keyframes al-in { from { transform: translate(-50%, -140%); } to { transform: translate(-50%, 0); } } @keyframes al-stamp { 0% { transform: scale(2.6) rotate(-14deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes al-stamp { 0% { transform: scale(2.6) rotate(-14deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
 /* Rueda de la fortuna */
 #wheelFx { position: fixed; inset: 0; z-index: 99050; display: grid; place-items: center; background: radial-gradient(circle, rgba(6, 13, 9, .55), rgba(6, 13, 9, .2) 70%); animation: ss-in .15s ease both; } #wheelFx.bye { opacity: 0; transition: opacity .22s; }
 #wheelFx .wh-wrap { position: relative; width: 264px; text-align: center; } #wheelFx .wh-pt { position: absolute; left: 50%; top: -14px; width: 0; height: 0; margin-left: -12px; border: 12px solid transparent; border-top: 22px solid #fe5f55; filter: drop-shadow(0 2px 0 #16241c); z-index: 2; }
 #wheelFx .wh-disc { position: relative; width: 264px; height: 264px; border-radius: 50%; box-shadow: 0 0 0 6px #16241c, 0 8px 0 6px rgba(0, 0, 0, .4); will-change: transform; } #wheelFx .wh-i { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; image-rendering: pixelated; }
+body:has(#wheelFx:not(.bye)) #plate { visibility: hidden; }   /* la rueda devuelve el tiempo: mientras gira no se lee la pregunta (sin pausa en la ronda) */
 #wheelFx .wh-hub { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; background: #fdf5fd; box-shadow: 0 0 0 4px #16241c; }
 #wheelFx .wh-t { margin: 18px 0 0; font: 400 34px/1 var(--sans); color: #fdf5fd; text-shadow: 0 3px 0 #16241c; } #wheelFx.land .wh-t { color: #ffd95a; animation: al-stamp .4s cubic-bezier(.2, 1.7, .4, 1); }
-html.reduce-motion #ssFx, html.reduce-motion #albumFx, html.reduce-motion #wheelFx, html.reduce-motion .ch-chip.tw.tw-in, html.reduce-motion .ab-rise i.pop, html.reduce-motion #bossPulse.on { animation: none !important; }
+html.reduce-motion #ssFx, html.reduce-motion #wheelFx, html.reduce-motion .ch-chip.tw.tw-in, html.reduce-motion .ab-rise i.pop, html.reduce-motion #bossPulse.on { animation: none !important; }
 
 /* 0.2.5: el sello del amuleto que frena el reto (ya comprado: se luce). Cae con un golpe al empezar la ronda (A.adv.amuSlam) */
 .ch-chip { position: relative; }
