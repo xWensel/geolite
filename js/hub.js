@@ -135,6 +135,7 @@ window.AIQ = window.AIQ || {};
     wireTools(); A.podio.wire(); if (A.parche) A.parche.wire();                                      // Clasificacion: js/podio.js
     mcFit(); fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
     if (A.relieve) A.relieve.alinea();                                // v0.3.199: las cartas laterales sobre las columnas de sus placas
+    if (A.laton) { const hh = document.querySelector("#dlg .hh"); requestAnimationFrame(() => requestAnimationFrame(() => A.laton.monta(hh))); }   // el filo de laton de las placas, al pixel (js/laton.js), ya a la escala de la portada
     if (A.salir) A.salir.wire();                                      // salir del juego: js/salir.js
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
@@ -148,7 +149,9 @@ window.AIQ = window.AIQ || {};
     if ($("clubRtBtn")) $("clubRtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // los retos del Club: placa de la izquierda (js/club-retos.js)
     document.querySelectorAll(".mcard").forEach(b => (b.onclick = () => { A.sfx.card(); screen(b.dataset.mode); }));
     if ($("homeCont")) A.bulbFit($("homeCont").parentElement);                   // v0.3.96: marquesina al paso de la carta de la Aventura
-    if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // para empezar otra: la carta de la Aventura
+    if ($("homeCont")) $("homeCont").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true, (sm && sm.asc) || 0); };   // para empezar otra: la carta de la Aventura
+    /* paquete «Portada» del Probador (por-record): si vuelves con un record nuevo de la Aventura, su etiqueta se reimprime con un sello (js/record.js) */
+    if (A.record && !saved) A.record.mira(document.querySelector("#dlg .mcard.hero"), adv.bestScore, v => (v ? T("Récord ", "Best ") + A.fmt(v) : T("Nueva", "New")));
     if (A.escena) A.escena.portada();                                 // v0.3.70: los focos de sala y el resplandor del cartel (js/escena.js)
     if (A.mesas && A.mesas.check) A.mesas.check();                    // v0.3.62: si has ganado una mesa del mapa, la casa la estrena (js/mesas.js)
   }
@@ -340,11 +343,20 @@ window.AIQ = window.AIQ || {};
     };
     const confirm2 = (btn, msg, act, onArm) => { let armed = false, tm = 0; const lbl = btn.querySelector(".av-bl") || btn, was = lbl.textContent; btn.addEventListener("click", e => { if (armed) { clearTimeout(tm); return act(); } e.stopImmediatePropagation(); armed = true; if (onArm) onArm(); btn.classList.add("armed"); lbl.textContent = msg; A.sfx.deny(); tm = setTimeout(() => { armed = false; btn.classList.remove("armed"); lbl.textContent = was; }, 4000); }, true); };
     const funeral = () => { if (A.dealer && A.dealer.funeral) A.dealer.funeral(A.adv.summary && A.adv.summary()); };   // el crupier le hace un funeral a tu expedicion guardada
-    if (saved) $("contBtn").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true); };   // descartarla = empezar otra (doble pulsacion y funeral del crupier)
-    $("goBtn").onclick = () => { A.sfx.depart(); if (saved) A.adv.abandon(); enterRun(() => A.adv.begin({ deck: advSel.deck, asc: advSel.asc })); };
+    if (saved) $("contBtn").onclick = () => { A.sfx.depart(); enterRun(() => A.adv.resume(), true, (A.adv.summary() || {}).asc || 0); };   // descartarla = empezar otra (doble pulsacion y funeral del crupier)
+    $("goBtn").onclick = () => { A.sfx.depart(); if (saved) A.adv.abandon(); enterRun(() => A.adv.begin({ deck: advSel.deck, asc: advSel.asc }), false, advSel.asc || 0); };
     if (saved) confirm2($("goBtn"), T("Esto borra tu partida guardada. Pulsa otra vez", "This deletes your saved run. Press again"), () => {}, funeral);
   }
-  function enterRun(fn, resume) { const c = C(); c.S.ranked = null; c.prepareRun(resume); fn(); }   // resume: seguir una partida guardada no es una partida nueva (stats.plays, ver game.js prepareRun)
+  function enterRun(fn, resume, asc) {   // resume: seguir una partida guardada no es una partida nueva (stats.plays, ver game.js prepareRun)
+    const go = () => { const c = C(); c.S.ranked = null; c.prepareRun(resume); fn(); };
+    /* paquete «Portada» del Probador (por-telon): al empezar o continuar una expedicion, el telon de terciopelo de los jefes (js/telon.js). Bajan las
+       luces de sala y la bambalina, el telon se cierra con su peso, detras se monta la partida y al abrirse ya estas en la intro de la ronda.
+       Pesa segun la Ascension (A0-1 ligero, A2-3, A4-5 el del jefe final). Solo con asc (la Aventura); Movimiento Minimo o sin WebGL: corte directo */
+    if (asc == null || !A.telon || busyTelon) { go(); return; }
+    busyTelon = true;
+    A.telon.play({ conCierre: true, sala: true, tier: asc >= 4 ? 3 : asc >= 2 ? 2 : 1, onClosed: go, onDone: () => { busyTelon = false; } });
+  }
+  let busyTelon = false;
 
   /* ------------------------------------------------------------------ Reto diario: una expedicion al azar cada dia, la misma para todo el mundo.
      La MANO DEL DIA (baraja, ascension, regalo y ruta) sale de la semilla del dia; 3 intentos con lugares nuevos que suman la puntuacion global (A.rank.daily) */

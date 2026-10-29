@@ -56,6 +56,10 @@
 .plq:hover { transform: translateY(-7px) rotate(var(--tilt)) scale(1.05); z-index: 2; } .plq:hover::before { filter: brightness(1.08); } .plq:hover::after { transform: translateY(11px); }
 .plq:active { transform: translateY(4px) scale(.98); transition-duration: .08s; } .plq:active::after { transform: translateY(2px); }
 .plq:focus { outline: none; }
+.mcard .mc-stat.rec-on { position: relative; isolation: isolate; }   /* el record recien sellado (js/record.js): la tinta de dentro, debajo de la cifra */
+/* laton repasado (js/laton.js, paquete «Portada» del Probador): el filo y el canto al pixel, en un lienzo por placa encima de su cara y debajo
+   del icono y del texto; 2 px de CSS por fuera de la placa (el contorno de fuera de .plq::before sigue a la vista) */
+.plq > .plq-laton { position: absolute; left: -2px; top: -2px; z-index: 0; pointer-events: none; image-rendering: pixelated; }
 .plq:focus-visible::before, html[data-input="pad"] .plq:focus::before { box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px #fff; }
 @keyframes plq-in { from { opacity: 0; transform: translateY(70px); } }
 

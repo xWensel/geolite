@@ -44,13 +44,17 @@ window.AIQ = window.AIQ || {};
        va DETRAS de la puerta, que es opaca, a opacidad plena, y se retira en cuanto se entra. Si no hay puerta, queda el pintado casi invisible de siempre */
     const gate = document.getElementById("gate"), boot = gate && gate.parentElement, behind = !!(boot && boot.id === "boot" && !gate.classList.contains("hidden"));
     w.style.cssText = behind ? "position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden" : "position:fixed;inset:0;opacity:.004;pointer-events:none;z-index:2147483000";
+    /* la puerta a oscuras (js/puerta.js) ya no es opaca: la muestra va debajo de la oscuridad, casi transparente (2 % bajo un 95 % de negro: no se
+       ve) y con mascara fuera del cono del rotulo (donde hay luz no se pinta nada) */
+    const cono = behind && A.puerta && A.puerta.on() && A.puerta.cono();
+    if (cono) w.style.cssText = `position:absolute;inset:0;z-index:0;opacity:.02;pointer-events:none;overflow:hidden;-webkit-mask:radial-gradient(ellipse ${Math.round(cono.rx * 1.25)}px ${Math.round(cono.ry * 1.25)}px at ${Math.round(cono.x)}px ${Math.round(cono.y)}px, transparent 70%, #000 100%);mask:radial-gradient(ellipse ${Math.round(cono.rx * 1.25)}px ${Math.round(cono.ry * 1.25)}px at ${Math.round(cono.x)}px ${Math.round(cono.y)}px, transparent 70%, #000 100%)`;
     warmEl = w;
     const abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnÑñOoPpQqRrSsTtUuVvWwXxYyZz ÁáÉéÍíÓóÚúÜü¿?¡!·/.,:%+-0123456789";   // los glifos tambien se rasterizan la primera vez, a cada tamano
     w.innerHTML = `<div class="gx-pause gx-layer gx-in"><div class="gx-veil"></div><div class="gx-spot"></div><div class="gx-stage"><div class="gx-grid"><div class="gx-sh gx-railw gx-from-left"><section class="gx-pnl gx-rail">
       <div class="gx-head"><span class="gx-eyb">${abc}</span><h2 class="gx-t-l">${abc}</h2><p class="gx-lead">${abc}</p></div><div class="gx-paper"><div class="gx-lead-row"><span>${abc}</span><s></s><b>0 <small>/ 1</small></b></div><div class="gx-bar"><i style="width:40%"></i></div></div>
       <div class="gx-acts col"><button class="gx-btn pri wide" tabindex="-1">${abc} <span class="gx-k"><kbd class="k-kb">Esc</kbd></span></button><button class="gx-btn wide" tabindex="-1">${abc}</button></div>
       <div class="gx-foot"><div class="gx-hr"></div><div class="gx-acts"><button class="gx-btn gho sm" tabindex="-1">${abc}</button></div><p class="gx-note">${abc}</p></div></section></div></div></div></div>`;
-    if (behind) boot.insertBefore(w, gate); else document.body.appendChild(w);
+    if (cono) gate.insertBefore(w, gate.firstChild); else if (behind) boot.insertBefore(w, gate); else document.body.appendChild(w);   // con la puerta a oscuras: dentro de ella, debajo de su lienzo de luz
     setTimeout(() => w.remove(), 900 + 5 * 400);
     /* v0.3.41: cada pieza en su propio momento (las tres a la vez paraban el fundido de la puerta): el Perfil (fichas, papel grande y su sombra)
        a los 400 ms, Ajustes a los 800 y el Reto diario a los 1.200: cada una en su momento, sin juntar sus parones */

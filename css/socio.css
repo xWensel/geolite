@@ -5,6 +5,7 @@
 .sc-card { position: relative; display: block; }
 .sc-tilt { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .3s cubic-bezier(.2, 1, .3, 1); will-change: transform; }
 .sc-cv { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.sc-foil { position: absolute; pointer-events: none; image-rendering: pixelated; }   /* la lamina por pixel de arte (js/lamina.js), encima del dibujo y debajo de los textos */
 .sc-shadow, .sc-fx, .sc-glare { position: absolute; inset: 0; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 .sc-shadow { transform: translate(calc(var(--sd) * 3px), calc(var(--sd) * 4px)); background: rgba(2, 6, 4, .62); }
 .sc-glare { background: radial-gradient(circle at var(--gx, 30%) var(--gy, 18%), rgba(255, 255, 255, .45) 0, rgba(255, 255, 255, 0) 46%); mix-blend-mode: soft-light; opacity: 0; transition: opacity .25s; }
