@@ -101,7 +101,6 @@ window.AIQ = window.AIQ || {};
     land: ["#e8eef6", "#d4dce8", "#e2e0f0", "#d0e4e0", "#eceae4", "#dce6f4", "#f6f8fc"], line: [0.05, 0.08, 0.16, 0.95], shadow: { off: [3, -4], col: [0, 0, 0.04, 0.6] }, gridA: 0 });
   A.MAPSTYLES.tesoro = MS({ mat: 24, animated: true, oceanTop: "#7a4e10", oceanBot: "#7a4e10", shallow: "#7a4e10", mc1: "#6e440c", mc2: "#ffe08a", mp: [0.006, 0.6, 0, 2], felt: [0, 0.3, 0, 0],
     land: ["#2a2018", "#33251c", "#26241e", "#3a2a22", "#2e2820", "#382c1c", "#40342a"], line: [0.98, 0.84, 0.5, 0.95], coast: [0.98, 0.84, 0.5, 1], shadow: { off: [3, -4], col: [0.2, 0.1, 0, 0.6] }, gridA: 0, ink: "#2a1a0c" });
-  A.MAPSTYLES.neonvivo = { ...A.MAPSTYLES.vegas, animated: true, mp: [0.4, 1, 0, 1] };
   A.MAPSTYLES.recreativa = MS({ mat: 25, animated: true, wide: true, crt: true, oceanTop: "#142a7a", oceanBot: "#0a1448", shallow: "#142a7a", mc1: "#4aa8ff", mc2: "#e8f6ff", mp: [2.0, 0.8, 0, 2], felt: [0, 0, 0, 0],
     land: ["#58c858", "#a8e060", "#e8d870", "#48a848", "#d8b860", "#88d080", "#f0e8a0"], line: [0.04, 0.1, 0.04, 1], shadow: { off: [3, -4], col: [0, 0, 0.1, 0.6] }, gridA: 0 });
   A.MAPSTYLES.tormenta = MS({ mat: 26, animated: true, oceanTop: "#2c3846", oceanBot: "#121820", shallow: "#2c3846", mp: [0.006, 0.5, 0, 2], fx2: [4, 1, 0, 0], felt: [0, 0.25, 0, 0],
@@ -168,7 +167,7 @@ window.AIQ = window.AIQ || {};
   A.MESAS = [
     { id: "casino", own: () => true,
       n: "Casino|Casino|Casino|Cassino|Casino|Casinò||赌场|카지노|カジノ|Казино|Kasyno",
-      d: "El remolino y la pantalla de tubo.|The swirl and the tube screen.|Le tourbillon et l'écran à tube.|O redemoinho e a tela de tubo.|Wirbel und Röhrenbildschirm.|Il vortice e lo schermo a tubo.||漩涡与显像管屏幕。|소용돌이와 브라운관 화면.|渦とブラウン管の画面。|Вихрь и кинескоп.|Wir i ekran kineskopowy.",
+      d: "Paño turquesa con dibujo de moqueta.|Turquoise baize with a carpet pattern.|Tapis turquoise à motif de moquette.|Feltro turquesa com padrão de carpete.|Türkiser Filz mit Teppichmuster.|Panno turchese con motivo a moquette.||带地毯花纹的青绿色台呢。|카펫 무늬의 청록색 펠트.|絨毯柄のターコイズの羅紗。|Бирюзовое сукно с ковровым узором.|Turkusowe sukno ze wzorem dywanu.",
       how: "Desde el principio.|From the start.|Dès le début.|Desde o início.|Von Anfang an.|Dall'inizio.||一开始就有。|처음부터.|最初から。|С самого начала.|Od początku.", won: "" },
     { id: "mesa", own: P => !!P.ach.adv_win || P.adv.asc >= 1,
       n: "La mesa|The table|La table|A mesa|Der Tisch|Il tavolo||绿呢牌桌|그린 테이블|グリーンテーブル|Стол|Stół",
@@ -243,8 +242,6 @@ window.AIQ = window.AIQ || {};
         "Aurora verde y violeta sobre noche polar.|Green and violet aurora over a polar night.|Aurore verte et violette sur la nuit polaire.|Aurora verde e violeta sobre a noite polar.|Grün-violettes Polarlicht über der Polarnacht.|Aurora verde e viola sulla notte polare.||极夜中绿紫色的极光。|극야 위의 초록·보라 오로라.|極夜に揺れる緑と紫のオーロラ。|Зелёно-фиолетовое сияние над полярной ночью.|Zielono-fioletowa zorza nad polarną nocą."],
       ["tesoro", "l", "Tesoro|Treasure|Trésor|Tesouro|Schatz|Tesoro||宝藏|보물|宝物|Сокровище|Skarb",
         "Mar de oro fundido, países de ébano.|A sea of molten gold, ebony countries.|Mer d'or en fusion, pays d'ébène.|Mar de ouro fundido, países de ébano.|Meer aus flüssigem Gold, Länder aus Ebenholz.|Mare d'oro fuso, paesi d'ebano.||熔金之海，乌木色国家。|녹은 황금의 바다, 흑단 나라들.|溶けた金の海と黒檀の国々。|Море расплавленного золота, страны из чёрного дерева.|Morze płynnego złota, kraje z hebanu."],
-      ["neonvivo", "l", "Neón vivo|Live neon|Néon vivant|Neon vivo|Lebendiges Neon|Neon vivo||活力霓虹|살아있는 네온|生きたネオン|Живой неон|Żywy neon",
-        "Las Vegas encendida: el halo late y parpadea.|Las Vegas lit up: the halo pulses and flickers.|Las Vegas allumée : le halo pulse et clignote.|Las Vegas acesa: o halo pulsa e pisca.|Las Vegas an: Der Schein pulsiert und flackert.|Las Vegas accesa: l'alone pulsa e sfarfalla.||点亮的拉斯维加斯：光晕搏动闪烁。|불 켜진 라스베이거스: 후광이 뛰고 깜빡입니다.|灯ったラスベガス。光が脈打ちまたたく。|Лас-Вегас в огнях: ореол пульсирует и мигает.|Rozświetlone Las Vegas: poświata pulsuje i mruga."],
       ["recreativa", "l", "Recreativa|Arcade|Borne d'arcade|Fliperama|Arcade-Automat|Cabinato arcade||街机|아케이드|アーケード|Аркада|Automat arcade",
         "Cristal curvo y olas de 8 bits.|Curved arcade glass and 8-bit waves.|Verre bombé et vagues 8 bits.|Vidro curvo e ondas de 8 bits.|Gewölbtes Glas und 8-Bit-Wellen.|Vetro curvo e onde a 8 bit.||弧面玻璃与8位海浪。|둥근 유리와 8비트 파도.|丸いガラスと8ビットの波。|Выпуклое стекло и 8-битные волны.|Wypukłe szkło i fale 8-bit."],
       ["tormenta", "l", "Tormenta|Storm|Tempête|Tempestade|Gewitter|Tempesta||风暴|폭풍|嵐|Гроза|Burza",
@@ -295,9 +292,15 @@ window.AIQ = window.AIQ || {};
         "Azulejo blanco, greca azul y granadas.|White tile, blue chain border, pomegranates.|Carreaux blancs, greca bleue et grenades.|Azulejo branco, greca azul e romãs.|Weiße Fliesen, blaue Borte, Granatäpfel.|Piastrelle bianche, greca blu e melagrane.||白瓷砖、蓝色花边与石榴。|흰 타일, 파란 띠, 석류.|白いタイルに青い縁取りとザクロ。|Белая плитка, синий бордюр, гранаты.|Białe kafle, niebieski szlak i granaty."],
     ].map(([id, r, n, d]) => ({ id, shop: r, n, d, own: P => !!(P.mesas && P.mesas.own && P.mesas.own[id]) })),
   ];
-  const prof = () => A.profile.get();
+  /* v0.3.240: Neón vivo se fundió en Las Vegas. Quien la tenía se queda con Las Vegas y recupera la diferencia (400 - 150 = 250 fichas de oro; 400 si ya tenía las dos) */
+  const fusion = P => { const m = P && P.mesas; if (!m || typeof m !== "object") return P;
+    if (m.own && m.own.neonvivo && A.club && A.club.give) { delete m.own.neonvivo; const tenia = !!m.own.vegas; m.own.vegas = true; if (m.use === "neonvivo") m.use = "vegas"; A.club.give(tenia ? 400 : 250); A.profile.save(); }
+    else if (m.use === "neonvivo" && !(m.own && m.own.neonvivo)) m.use = "vegas";
+    return P; };
+  const prof = () => fusion(A.profile.get());
   const mem = () => { const P = prof(); if (!P.mesas || typeof P.mesas !== "object" || Array.isArray(P.mesas)) P.mesas = { use: "casino", seen: {} }; if (!P.mesas.seen || typeof P.mesas.seen !== "object") P.mesas.seen = {};
-    if (!P.mesas.own || typeof P.mesas.own !== "object") P.mesas.own = {}; return P.mesas; };
+    if (!P.mesas.own || typeof P.mesas.own !== "object") P.mesas.own = {};
+    return P.mesas; };
   const fill = (s, n) => A.pick6(s).replace("{n}", n);
   /* la boutique: precio en fichas de oro (rara 150, legendaria 400) y la oferta de la casa: una mesa que aun no tienes, -30 %, que cambia cada lunes */
   const PRICE = { r: 150, l: 400 }, OFF = 0.3;

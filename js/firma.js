@@ -99,6 +99,7 @@ float veta(vec2 p, float ang, float freq, float fig){
 }
 float poro(vec2 p, float ang){ vec2 q = rot2(ang) * p; vec2 c = floor(q / vec2(7., 1.)); float h = h21(c + 13.); float x = fract(q.x / 7.); return step(.86, h) * smoothstep(0., .2, x) * smoothstep(1., .6, x); }
 float nubeMarmol(vec2 p){ return fbm(p / 340.) * .6 + fbm(p / 90. + 7.) * .4; }
+float vetaMarmol(vec2 p){ float n = fbm(p / 260. + fbm(p / 140.) * 1.8); return pow(1. - abs(sin(n * 9.)), 18.); }
 float cepillo(vec2 p, float ang){ vec2 q = rot2(ang) * p; return vn(vec2(q.x * .012, q.y * 1.)) * .55 + vn(vec2(q.x * .0025, q.y * .35)) * .3 + h21(vec2(floor(q.y), floor(q.x / 90.))) * .15; }
 float grano(vec2 p, float k){ vec3 v = vor(p / k); return smoothstep(0., .5, v.y - v.x) * (.8 + .2 * v.z); }
 float greca(vec2 p, float per){ vec2 c = p / per * 5.; vec2 i = floor(vec2(mod(c.x, 5.), clamp(c.y, 0., 4.999))); int x = int(i.x), y = int(i.y); int row[5] = int[5](30, 18, 22, 16, 31); return float((row[4 - y] >> (4 - x)) & 1); }
@@ -261,7 +262,7 @@ vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){ vec3 F0 = mix(vec3(.04), gAlb
     azulejo: TILE, granadino: F(4, [0.25, 0, 0.6], [0.3, 0, 0.5], 0.3, 0, [0.5, 0.5]), bloques: F(4, [0.3, 0, 0.5], [0.3, 0, 0.5], 0.3, 0, [0.8, 0.8]),
     minas: F(4, [0.5, 0, 0.25], [0.5, 0, 0.25], 0.3, 0, [0.6, 0.6]), reverso: F(2, [0.5, 0, 0.3], [0.5, 0, 0.3], 0.5, 0, [0.5, 0.5]), seda: F(4, [0.35, 0, 0.35], [0.45, 0, 0.25], 0.3),
     bolsillo: F(4, [0.5, 0, 0.2], [0.5, 0, 0.2], 0.3, 0, [0, 0.3]), tele: F(4, [0.2, 0, 0.55], [0.25, 0, 0.45], 0.2), vhs: F(4, [0.2, 0, 0.5], [0.25, 0, 0.45], 0.2),
-    tormenta: F(4, [0.25, 0, 0.5], [0.7, 0, 0.1], 0.3), neonvivo: F(4, [0.14, 0, 0.85], [0.18, 0, 0.75], 0.3, 1), aurora: F(4, [0.3, 0, 0.3], [0.6, 0, 0.1], 0.3, 1),
+    tormenta: F(4, [0.25, 0, 0.5], [0.7, 0, 0.1], 0.3), aurora: F(4, [0.3, 0, 0.3], [0.6, 0, 0.1], 0.3, 1),
     recreativa: F(4, [0.3, 0, 0.4], [0.4, 0, 0.3], 0.3, 1), radar: GLASS, matrix: GLASS, hiperespacio: GLASS, vitral: F(4, [0.12, 0, 0.7], [0.2, 0, 0.6], 0.3, 0.5, [0.6, 0.6]),
     policroma: F(4, [0.2, 0, 0.6], [0.3, 0, 0.5], 0.3, 0.3), tesoro: F(1, [0.3, 1, 0.4], [0.6, 0, 0.15], 0.3, 0.5), plataformas: F(4, [0.4, 0, 0.3], [0.4, 0, 0.3], 0.3, 0, [0.4, 0.6]),
   };
@@ -943,6 +944,354 @@ vec3 mesaVivo(MS s, vec3 col){
   return mix(water, col, s.land);
 }`,
   };
+
+  /* ---------------------------------------------------------------- EL REWORK DE 7 MESAS DE HOY (probador: fx/mesr-*.js, preset Extrema)
+     Casino, Sala privada, Medianoche, Expedicion, Marmol negro, Banquisa y Jade, a la calidad de las 11 nuevas. La clase del pais sale de la
+     mascara del juego (exacta por poligono): el clsIn() de la maqueta, que arreglaba la orla de otro color en la costa de mapa-datos, aqui no
+     hace falta. Las paletas de cinco clases se extienden a las siete del juego sin que dos vecinos repitan color (clase 0: dos tonos al azar) */
+  const K7 = `float k7(float c, float r){ return c < .5 ? (r < .5 ? 0. : 6.) : c < 5.5 ? c : 0.; }
+`;
+  /* pelo de pano (mesa-pano): fibras cortas en una direccion, a 1:1 */
+  const PELO = `float napF(vec2 p){ return vn(vec2(p.x * .9, p.y * 2.6)) * .55 + vn(p * vec2(2.3, .7) + 17.) * .3 + h21(floor(p)) * .15; }
+`;
+  const HUELLA_PANO = `
+void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
+  float r = length(d), disc = smoothstep(21.5, 19.5, r), rim = exp(-pow((r - 20.5) / 1.4, 2.));
+  float fib = vn(vec2(d.y * .9, d.x * 2.6) + 5.);
+  float felt = 1. - mat.g;
+  alb = mix(alb, alb * (1.16 + .08 * fib), disc * felt);
+  h -= disc * .03 * felt + rim * .14;
+  mat.r = mix(mat.r, mat.r * .7, disc * felt);
+}`;
+  const BARR_PANO = tint => `
+vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){
+  float nap = vn(vec2(s.q.x * .9, s.q.y * 2.6));
+  return col + b * gLc * (gAlb * (.45 + .35 * nap) * (1. - gMat.g) + gMat.g * ${tint} * 1.5);
+}`;
+  const LUZ_R = o => Object.assign({ lmpI: 1.05, lmpZ: 820, lmpK: 0.55, canto: 2.2, sombra: 1, amb: 0.32, ks: 1, env: 1, poolK: 1, abs: true }, o);
+
+  /* CASINO: pano turquesa con pelo y un dibujo de moqueta tejido tono sobre tono; paises de pano pastel, costa de tinta violeta */
+  NUEVAS.casino = {
+    luz: LUZ_R({ lmpI: 1.15 }), seaFar: 16,
+    uni: { uSea: [0x11 / 255, 0x70 / 255, 0x6c / 255], uPelo: 1.35, uMoq: 0.8 },
+    bake: PELO + K7 + `
+uniform vec3 uSea; uniform float uPelo, uMoq;
+float moqueta(vec2 p){
+  const float PER = 44.;
+  vec2 q = rot2(.7853982) * p / PER, f = fract(q) - .5;
+  float r = length(f) * PER, a = atan(f.y, f.x);
+  float petal = smoothstep(1.1, .25, abs(r - (6.4 + 2.6 * cos(4. * a))));
+  float boton = smoothstep(2.0, 1.2, r);
+  vec2 g = abs(f) - .5; float pt = smoothstep(1.7, .9, length(g) * PER);
+  vec2 m = abs(f) - vec2(.5, 0.), m2 = abs(f) - vec2(0., .5);
+  float sem = smoothstep(1.2, .5, min(length(m), length(m2)) * PER);
+  return clamp(petal + boton + pt * .8 + sem * .5, 0., 1.);
+}
+vec3 pastel(float k){
+  return k < .5 ? vec3(.96, .90, .78) : k < 1.5 ? vec3(1., .85, .66) : k < 2.5 ? vec3(.98, .77, .77) : k < 3.5 ? vec3(.79, .91, .76)
+       : k < 4.5 ? vec3(.75, .88, 1.) : k < 5.5 ? vec3(.95, .84, 1.) : vec3(1., .97, .90);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q, pp = mix(ps, p, step(.5, s.land));
+  float nap = napF(pp), big = fbm3(ps / 260.);
+  float mq = moqueta(ps) * uMoq * smoothstep(4., 14., s.sd);               // el dibujo se apaga junto a la costa: nunca toca la tierra ni dibuja islas
+  vec3 sea = uSea * (.88 + .12 * big) * (.94 + .1 * nap * uPelo);
+  sea = mix(sea, sea * 1.17 + vec3(.004, .014, .012), mq * .55);
+  vec2 id = paisId(p);
+  vec3 landc = pastel(k7(s.cls, id.x)) * (.965 + .05 * id.y) * (.9 + .1 * nap * uPelo);
+  alb = mix(sea, landc, s.land);
+  float cw = smoothstep(2.3, .9, abs(s.sd + .5));
+  vec3 ink = vec3(.10, .07, .16);
+  alb = mix(alb, ink, cw * .92);
+  alb = mix(alb, ink, bordAA(p) * .82 * s.land);
+  h = nap * .12 * uPelo + big * .05 + mq * .05 - cw * .05 - s.border * .15;
+  mat = vec3(mix(.93, .8, cw), 0., 0.);
+}`,
+    huella: HUELLA_PANO, barrido: BARR_PANO("vec3(.9, .8, 1.)"),
+  };
+
+  /* SALA PRIVADA: pano granate de bacara con terciopelo aplastado y el filete de oro en la costa; paises de pano crema */
+  NUEVAS.granate = {
+    luz: LUZ_R({ lmpI: 1.15 }), seaFar: 12,
+    uni: { uSea: [0x6a / 255, 0x1a / 255, 0x28 / 255], uPelo: 1.4, uOro: 1 },
+    bake: PELO + K7 + `
+uniform vec3 uSea; uniform float uPelo, uOro;
+vec3 crema(float k){
+  return k < .5 ? vec3(.97, .93, .84) : k < 1.5 ? vec3(.89, .80, .60) : k < 2.5 ? vec3(.96, .82, .77) : k < 3.5 ? vec3(.86, .86, .72)
+       : k < 4.5 ? vec3(.86, .83, .79) : k < 5.5 ? vec3(.94, .86, .66) : vec3(.99, .97, .92);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q, pp = mix(ps, p, step(.5, s.land));
+  float nap = napF(pp), big = fbm3(ps / 260.);
+  float crush = smoothstep(.45, .8, fbm(ps / 420. + 3.));                 // terciopelo aplastado, sin bordes
+  vec3 sea = uSea * (.86 + .14 * big) * (.93 + .12 * nap * uPelo) * (1. - .16 * crush);
+  vec2 id = paisId(p);
+  vec3 landc = crema(k7(s.cls, id.x)) * (.965 + .05 * id.y) * (.9 + .1 * nap * uPelo);
+  alb = mix(sea, landc, s.land);
+  float fil = smoothstep(2.1, .7, abs(s.sd - .1)) * uOro;
+  float ink = smoothstep(1.0, .3, abs(s.sd + 2.2)) * s.land;
+  alb = mix(alb, vec3(.30, .07, .09), ink * .7);
+  alb = mix(alb, vec3(.93, .71, .35) * (.92 + .1 * nap), fil * .92);
+  alb = mix(alb, vec3(.20, .05, .07), bordAA(p) * .82 * s.land);
+  h = nap * .12 * uPelo * (1. - .5 * crush) + big * .05 + fil * .25 - s.border * .15;
+  mat = vec3(mix(.92 - crush * .2, .5, fil), fil * .95, 0.);
+}`,
+    huella: HUELLA_PANO, barrido: BARR_PANO("vec3(1., .78, .42)"),
+  };
+
+  /* MEDIANOCHE: pano azul noche y paises de plata maciza (de ley, pavonada, rosada, platino, vieja), bisel, ranuras y martillado */
+  NUEVAS.medianoche = {
+    luz: LUZ_R({ lmpI: 1.0, lmpK: 0.35, canto: 2.6, amb: 0.30, env: 1.6, ks: 0.6 }), seaFar: 12,
+    uni: { uSea: [0x16 / 255, 0x24 / 255, 0x4f / 255], uBisel: 1.5, uMart: 0.6 },
+    bake: PELO + K7 + `
+uniform vec3 uSea; uniform float uBisel, uMart;
+vec3 plata(float k){
+  return k < .5 ? vec3(.93, .93, .95) : k < 1.5 ? vec3(.74, .80, .92) : k < 2.5 ? vec3(.90, .84, .93) : k < 3.5 ? vec3(.82, .88, .90)
+       : k < 4.5 ? vec3(.86, .84, .80) : k < 5.5 ? vec3(.80, .84, .86) : vec3(.96, .96, .97);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q;
+  float nap = napF(ps);
+  vec3 felt = uSea * (.84 + .3 * nap) * (.9 + .16 * fbm(ps / 300.));
+  vec3 v = vor(p / 6.);
+  float ham = smoothstep(0., .6, v.x) * uMart;
+  float b = bordAA(p);
+  float bev = smoothstep(0., -4.5 * uBisel, s.sd);
+  float bevB = smoothstep(0., 2.5, bordDist(p) - .5);
+  vec2 id = paisId(p);
+  alb = mix(felt, plata(k7(s.cls, id.x)) * (.97 + .02 * v.z + .04 * id.y), s.land);
+  alb = mix(alb, vec3(.05, .06, .10), b * s.land * .85);
+  h = s.land * (sqrt(bev) * min(1., .35 + .65 * bevB) * .9 + ham * .015) + (1. - s.land) * nap * .012;
+  mat = vec3(mix(.93, .32, s.land), s.land * (1. - b * .7), 0.);
+}`,
+    huella: `
+void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
+  float r = length(d), disc = smoothstep(21.5, 19.5, r), rim = exp(-pow((r - 20.5) / 1.4, 2.));
+  float fib = vn(vec2(d.y * .9, d.x * 2.6) + 5.);
+  alb = mix(alb, alb * (1.45 + .3 * fib) + .004, disc * (1. - mat.g));
+  mat.r = mix(mat.r, mat.r * .65, disc * (1. - mat.g));
+  h -= rim * (.04 + .10 * mat.g);
+  mat.r = mix(mat.r, mix(.45, .16, smoothstep(0., 6., age)), disc * mat.g);
+}`,
+    barrido: `
+vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){
+  float edge = clamp(1. - gN.z, 0., 1.) * 8.;
+  return col + b * gLc * gMat.g * gAlb * vec3(.95, .98, 1.08) * (.5 + edge * .8);
+}`,
+  };
+
+  /* EXPEDICION: el atlas de papel como un libro: fibra y ondulacion, tinta de imprenta, el lomo a la izquierda y el canto de las paginas */
+  NUEVAS.expedicion = {
+    luz: LUZ_R({ canto: 0, sombra: 0, amb: 0.38, ks: 0.6 }), seaFar: 12,
+    uni: { uFibra: 1.3, uOnda: 1.5, uTinta: 1.05 },
+    bake: K7 + `
+uniform float uFibra, uOnda, uTinta;
+vec3 tintaPais(float k){
+  return k < .5 ? vec3(.94, .89, .78) : k < 1.5 ? vec3(.90, .83, .66) : k < 2.5 ? vec3(.84, .86, .71) : k < 3.5 ? vec3(.92, .77, .65)
+       : k < 4.5 ? vec3(.86, .80, .72) : k < 5.5 ? vec3(.80, .85, .77) : vec3(.96, .93, .87);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q;                                                   // el papel va quieto en pantalla (la fibra no crece con el zoom)
+  float fib = vn(ps * vec2(1.7, .42) + 3.) * .5 + vn(ps * vec2(.45, 1.6) + 8.) * .35 + h21(floor(ps)) * .15;
+  float mota = step(.9993, h21(floor(ps / 2.) + 5.)) * .5;
+  float onda = fbm3(ps / 520.) * .7 + fbm3(ps / 180. + 4.) * .3;
+  vec3 paper = vec3(.955, .925, .855) * (.985 + .03 * (fib - .5) * uFibra) * (1. - mota * .12) * (.97 + .04 * onda);
+  vec3 inkSea = vec3(.23, .47, .56) * (.96 + .06 * fbm3(ps / 600.));
+  inkSea = mix(vec3(1.), inkSea, uTinta * (.95 + .07 * (fib - .5)));
+  vec2 id = paisId(p);
+  vec3 inkLand = tintaPais(k7(s.cls, id.x)) / vec3(.955, .925, .855);
+  inkLand = mix(vec3(1.), inkLand * (.985 + .03 * id.y), uTinta);
+  vec3 T = mix(inkSea, inkLand, s.land);
+  float coast = smoothstep(1.9, .6, abs(s.sd + .9));
+  float bord = bordAA(p) * s.land;
+  T *= mix(vec3(1.), vec3(.17, .24, .29), coast * .95);
+  T *= mix(vec3(1.), vec3(.30, .34, .37), bord * .8);
+  alb = paper * T;
+  float gut = 1. - smoothstep(0., 90., ps.x);
+  alb *= 1. - .30 * gut * gut;
+  float eR = uR.x - ps.x, eB = uR.y - ps.y, canto = 0.;
+  if (eR < 9. || eB < 7.) {
+    float k = eR < 9. ? eR : eB;
+    float hoja = mod(floor(k), 2.);
+    vec3 ed = vec3(.90, .87, .79) * (.86 + .1 * hoja) * (.93 + .07 * vn(vec2(ps.x + ps.y, k) * vec2(.05, 1.)));
+    float sombra = exp(-(eR < 9. ? 9. - eR : 7. - eB) / 2.);
+    alb = ed * (1. - .35 * sombra);
+    canto = 1.;
+  }
+  h = (fib - .5) * .02 * uFibra + onda * .22 * uOnda + gut * .12 - canto * .25 - coast * .01;
+  mat = vec3(mix(.86, .62, (1. - s.land) * uTinta), 0., (1. - s.land) * .08 * uTinta);
+}`,
+    huella: `
+void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
+  float r = length(d), rim = exp(-pow((r - 20.5) / 1.3, 2.)), disc = smoothstep(21., 19., r);
+  h -= rim * .10 + disc * .015; alb *= 1. - rim * .05;
+}`,
+    barrido: `
+vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){ return col + b * gLc * (gAlb * .32 * (.7 + .6 * clamp(gN.x * 6. + .5, 0., 1.)) + gMat.b * .5); }`,
+  };
+
+  /* MARMOL NEGRO: marmol negro pulido con vetas finas de oro viejo lejos de la costa, paises de marfil con su veta y bisel */
+  NUEVAS.nero = {
+    luz: LUZ_R({ canto: 1.6, sombra: 0.8, amb: 0.34 }), seaFar: 46,
+    uni: { uVeta: 1.2, uPulido: 0.35, uEspejo: 1 },
+    bake: K7 + `
+uniform float uVeta, uPulido;
+vec3 marfil(float k){
+  return k < .5 ? vec3(.93, .89, .80) : k < 1.5 ? vec3(.86, .79, .63) : k < 2.5 ? vec3(.93, .85, .77) : k < 3.5 ? vec3(.84, .82, .73)
+       : k < 4.5 ? vec3(.89, .86, .79) : k < 5.5 ? vec3(.91, .84, .64) : vec3(.97, .95, .90);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q;
+  float nb = nubeMarmol(ps);
+  vec3 sea = vec3(.034, .032, .036) * (.86 + .3 * nb);
+  float vv = vetaMarmol(ps * .8 + 300.), v2 = pow(1. - abs(sin(fbm(ps / 180. + 9.) * 7.)), 40.);
+  float lejos = smoothstep(18., 44., s.sd);                               // a menos de 44 px de la costa no hay vetas
+  float veta = clamp(vv * .9 + v2 * .45, 0., 1.) * lejos * uVeta;
+  sea = mix(sea, vec3(.42, .34, .21) * (.7 + .5 * fbm(ps / 40.)), veta * .55);
+  sea = mix(sea, vec3(.16, .15, .15), smoothstep(.55, 1., fbm(ps / 70. + 2.)) * .18 * lejos * uVeta);
+  vec2 id = paisId(p);
+  vec2 q = rot2(id.x * 6.283) * (p + id * 900.);
+  float grain = vn(vec2(q.x * .015, q.y * .32 + fbm(q / 90.) * 6.)) - .5;
+  vec3 iv = marfil(k7(s.cls, id.x)) * (.97 + .045 * id.y) * (1. + .014 * grain) * (.97 + .05 * fbm(p / 60.));
+  float bev = smoothstep(0., -3.5, s.sd);
+  float b = bordAA(p);
+  alb = mix(sea, iv, s.land);
+  float junta = smoothstep(1.9, .6, abs(s.sd + .9));
+  alb = mix(alb, vec3(.12, .09, .06), max(b * s.land * .85, junta * .6));
+  h = s.land * (sqrt(bev) * .55 + grain * .01) - b * s.land * .08;
+  mat = vec3(mix(.05, .32, s.land), 0., mix(uPulido, .22, s.land));
+}`,
+    vivo: `
+uniform float uEspejo;
+vec3 mesaVivo(MS s, vec3 col){
+  vec2 d = s.q - gLp.xy - vec2(0., 40.);
+  float st = exp(-d.x * d.x / (2. * 260. * 260.) - d.y * d.y / (2. * 200. * 200.));
+  vec3 lc = gLc / max(.001, gFall) * min(gFall, 1.3);
+  return col + (1. - s.land) * gMat.b * uEspejo * uBrillo * lc * st * .07;
+}`,
+    huella: `
+void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
+  float a = atan(d.y, d.x), r = length(d);
+  float rr = 22.5 + 1.2 * vn(vec2(a * 3., 2.)), ring = exp(-pow((r - rr) / 1.5, 2.));
+  float k = ring * .9 + smoothstep(rr, rr - 6., r) * .2;
+  mat.b *= 1. - k * .9; mat.r = mix(mat.r, .5, k); h -= ring * .03;
+  alb = mix(alb, alb + .02, k * (1. - s.land));
+}`,
+    barrido: `
+vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){
+  float sharp = pow(clamp(b / 1.4, 0., 1.), 8.) * .5 * b + b * .04;
+  float oro = smoothstep(.06, .2, gAlb.r - gAlb.b) * (1. - s.land);
+  return col + gLc * (sharp * gMat.b * (1. - s.land) + b * oro * vec3(1., .78, .4) * 1.4 + b * s.land * gAlb * .22);
+}`,
+  };
+
+  /* BANQUISA: agua azul honda con la plataforma turquesa pegada a la costa; placas de hielo translucidas con aire atrapado y grietas finas */
+  NUEVAS.hielo = {
+    luz: LUZ_R({ lmpK: 0.3, canto: 2.4, sombra: 0.9, amb: 0.34 }), seaFar: 12,
+    uni: { uGrieta: 1.15, uTransl: 1 },
+    bake: K7 + `
+uniform float uGrieta, uTransl;
+vec3 tinte(float k){
+  return k < .5 ? vec3(.95, .97, .99) : k < 1.5 ? vec3(.88, .93, .97) : k < 2.5 ? vec3(.93, .92, .98) : k < 3.5 ? vec3(.88, .95, .93)
+       : k < 4.5 ? vec3(.97, .95, .91) : k < 5.5 ? vec3(.90, .93, .99) : vec3(.98, .99, 1.);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q;
+  float dep = smoothstep(0., 6., s.sd);
+  vec3 sea = mix(vec3(.22, .52, .64), vec3(.06, .19, .31), pow(dep, .7)) * (.94 + .08 * fbm3(ps / 420.));
+  float th = smoothstep(0., 16., -s.sd);
+  vec2 id = paisId(p);
+  vec3 nieve = tinte(k7(s.cls, id.x)) * (.955 + .04 * id.y);
+  vec3 fino = vec3(.55, .82, .90);
+  vec3 ice = mix(fino, nieve, mix(1., th, uTransl));
+  float nub = fbm(p / 70. + id * 50.);
+  ice = mix(ice, ice * vec3(.80, .91, .99), smoothstep(.38, .78, nub) * .75 * uTransl * th);
+  ice = mix(ice, vec3(.99, 1., 1.), smoothstep(.62, .85, fbm(p / 26. + id * 90.)) * .35 * th);
+  vec2 w = p + (vec2(fbm(p / 160.), fbm(p / 160. + 7.)) - .5) * 70.;
+  vec3 v1 = vor((w + id * 400.) / 95.);
+  float e1 = (v1.y - v1.x) * 95.;
+  float rota = step(.42, h21(vec2(floor(v1.z * 211.), id.x * 31.)));
+  float g1 = smoothstep(1.1, .25, e1) * rota * (.55 + .45 * vn(w / 30.));
+  vec3 v2 = vor((w + 50.) / 34.);
+  float g2 = smoothstep(.8, .15, (v2.y - v2.x) * 34.) * step(.78, h21(vec2(floor(v2.z * 173.), 3.))) * .5;
+  float dentro = smoothstep(4., 9., -s.sd);
+  float gr = clamp(g1 + g2, 0., 1.) * dentro * uGrieta;                   // grietas solo en el hielo, nunca en el agua
+  ice = mix(ice, vec3(.50, .74, .86), gr * .62);
+  alb = mix(sea, ice, s.land);
+  float b = bordAA(p);
+  alb = mix(alb, vec3(.12, .22, .36), b * s.land * .85);
+  float coast = smoothstep(1.9, .6, abs(s.sd + .9));
+  alb = mix(alb, vec3(.14, .30, .44), coast * .55);
+  float bev = smoothstep(0., -5., s.sd);
+  h = s.land * (sqrt(bev) * .6 - gr * .06 + nub * .02) - b * s.land * .1;
+  mat = vec3(mix(.12, .2 + .2 * th, s.land), 0., mix(.3, .2 - .1 * th, s.land));
+}`,
+    huella: `
+void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
+  float r = length(d), disc = smoothstep(21., 18., r), rim = exp(-pow((r - 20.) / 1.5, 2.));
+  alb = mix(alb, alb * vec3(.82, .92, 1.), disc * s.land * .8);
+  mat.b = mix(mat.b, .6, disc * s.land); mat.r = mix(mat.r, .08, disc * s.land);
+  h -= rim * .06 + disc * .02 * s.land;
+}`,
+    barrido: `
+vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){
+  float fino = s.land * (1. - smoothstep(0., 16., -s.sd));
+  return col + b * gLc * (gAlb * .28 * s.land + fino * vec3(.30, .75, .95) * .55 + (1. - s.land) * gMat.b * .25);
+}`,
+  };
+
+  /* JADE: losa de jade verde con nubes en tres capas y la luz que entra en la piedra; paises de jade blanco tallado */
+  NUEVAS.jade = {
+    luz: LUZ_R({ canto: 2.2, sombra: 0.85, amb: 0.34 }), seaFar: 42,
+    uni: { uNube: 1.2, uPulido: 1, uFondo: 1.25 },
+    bake: K7 + `
+uniform float uNube, uPulido;
+vec3 jadeB(float k){
+  return k < .5 ? vec3(.94, .92, .84) : k < 1.5 ? vec3(.88, .85, .71) : k < 2.5 ? vec3(.93, .89, .81) : k < 3.5 ? vec3(.86, .88, .79)
+       : k < 4.5 ? vec3(.90, .89, .83) : k < 5.5 ? vec3(.91, .86, .66) : vec3(.97, .96, .91);
+}
+void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
+  vec2 p = s.p, ps = s.q;
+  float n1 = fbm(ps / 380.), n2 = fbm(ps / 130. + 5. + n1 * 1.5), n3 = fbm(ps / 48. + 11. + n2);
+  vec3 hondo = vec3(.05, .19, .13), medio = vec3(.15, .37, .26), claro = vec3(.36, .58, .42), leche = vec3(.62, .76, .62);
+  vec3 sea = mix(hondo, medio, smoothstep(.2, .7, n1));
+  sea = mix(sea, claro, smoothstep(.48, .8, n2) * .65 * uNube);
+  sea = mix(sea, leche, smoothstep(.62, .9, n2 * .6 + n3 * .5) * .35 * uNube);
+  sea = mix(sea, hondo * .8, smoothstep(.55, .85, n3) * smoothstep(.5, .3, n2) * .35 * uNube);
+  float mota = smoothstep(.82, .9, fbm(ps / 22. + 40.)) * smoothstep(20., 40., s.sd);
+  sea = mix(sea, vec3(.04, .12, .08), mota * .4 * uNube);
+  vec2 id = paisId(p);
+  float nb = fbm((p + id * 600.) / 80.);
+  vec3 jb = jadeB(k7(s.cls, id.x)) * (.965 + .04 * id.y) * (.95 + .07 * nb);
+  float b = bordAA(p);
+  alb = mix(sea, jb, s.land);
+  alb = mix(alb, vec3(.06, .16, .11), max(b * s.land * .85, smoothstep(1.9, .6, abs(s.sd + .9)) * .6));
+  float bev = smoothstep(0., -5.5, s.sd);
+  h = s.land * (sqrt(bev) * .75 + nb * .02) - b * s.land * .1 + (1. - s.land) * n3 * .004;
+  mat = vec3(mix(.04, .22, s.land), 0., mix(uPulido * .45, .25, s.land));
+}`,
+    vivo: `
+uniform float uFondo;
+vec3 mesaVivo(MS s, vec3 col){
+  vec2 d = s.q - gLp.xy; float r2 = dot(d, d);
+  float k = .55 + .45 * exp(-r2 / (2. * 1100. * 1100.));
+  vec3 lc = gLc / max(.001, gFall) * min(gFall, 1.);
+  return col + (1. - s.land) * uFondo * k * lc * gAlb * vec3(.75, 1., .85) * .16;
+}`,
+    huella: `
+void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
+  float r = length(d), rim = exp(-pow((r - 21.) / 1.6, 2.)), disc = smoothstep(22., 18., r);
+  float k = disc * .5 + rim * .5;
+  mat.b *= 1. - k * .8; mat.r = mix(mat.r, .45, k); h -= rim * .03;
+  alb = mix(alb, alb * 1.06 + .01, k * (1. - s.land));
+}`,
+    barrido: `
+vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){
+  float edge = clamp(1. - gN.z, 0., 1.) * 6.;
+  return col + b * gLc * ((1. - s.land) * (gAlb * vec3(.7, 1.3, .9) * .9 + gMat.b * .12) + s.land * gAlb * (.18 + edge * .3));
+}`,
+  };
+
   /* ruido periodico de la piscina (512 px, se repite sin costura), una vez por contexto */
   const NOISE_FS = `#version 300 es
 precision highp float; out vec4 o;
@@ -1106,7 +1455,7 @@ void main(){ vec2 uv = gl_FragCoord.xy / 512.; o = vec4(pfbm(uv, 4., 1.), pfbm(u
       /* debajo de la lampara la tierra no se quema: las de hoy salen como antes en el centro (1); las nuevas, a lo sumo como un pais a media
          distancia de la lampara en la maqueta (1,15). Fuera, la caida de la maqueta (y la penumbra de la sala, js/casa.js) */
       const f0 = Math.pow(Math.max(0, 1 - Math.hypot(0, H * (0.55 - LAMP_Y)) / (W * 0.82)), 1.6), fc = L.lmpI * (1 + (f0 - 1) * L.poolK);
-      const Lc = L.amb * 0.9 + fc * 0.97 * (0.2126 * lc[0] + 0.7152 * lc[1] + 0.0722 * lc[2]), norm = def ? Math.min(1.3, 1.05 / Lc) : 1 / Lc;
+      const Lc = L.amb * 0.9 + fc * 0.97 * (0.2126 * lc[0] + 0.7152 * lc[1] + 0.0722 * lc[2]), norm = def ? (def.luz.abs ? 1 : Math.min(1.3, 1.05 / Lc)) : 1 / Lc;   // abs: la maqueta ya llevaba la lampara arriba (el rework de las 7): su luz, tal cual
       const hu = this.hue ? (() => { const [x, y] = scr(map, this.hue.wx, this.hue.wy); return [x, y, red ? 9 : (now - this.hue.t0) / 1000, 1]; })() : [0, 0, 0, 0];
       let ba = [-1, 1, 0, 0];
       if (this.barr && !red) { const b = this.barr, e = (now - b.t0) / 1000 / 1.1, i = Math.floor(e / 1.6); if (i < b.n) ba = [e - i * 1.6, b.n - i, b.a + 0.6 * i, 0]; else this.barr = null; }

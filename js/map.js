@@ -2139,12 +2139,13 @@ void main(){
       gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       const hl = this.marks.highlight && this.world.byName[this.marks.highlight];
       /* tintes por pais (la Enciclopedia): en la escena, bajo las fronteras (con la firma tambien: la luz los coge como al resto de la mesa) */
-      if (this.paint) {                                                  // tintes por pais (setPaint): encima de la tierra y debajo del resalte y las fronteras
+      const tintes = () => {
         gl.useProgram(P.solid); this._setDist(P.solid); this._u(P.solid, "u_off", 0, 0);
         this._u(P.solid, "u_scale", sc); this._u(P.solid, "u_res", sw, sh);
         for (const cc of cxs) { this._u(P.solid, "u_center", cc, v.cy);
           for (const f of this.world.features) { const c = this.paint[f.name]; if (c && f.gl && f.gl.n) { this._u(P.solid, "u_col", c[0], c[1], c[2], c[3]); gl.drawElements(gl.TRIANGLES, f.gl.n, gl.UNSIGNED_INT, f.gl.i0 * 4); } } }
-      }
+      };
+      if (this.paint) tintes();                                          // tintes por pais (setPaint): encima de la tierra y debajo del resalte y las fronteras
       /* el resalte rayado y su contorno: con la firma se pintan despues, sobre la mesa ya iluminada */
       const capas = () => {
       if (hl) {
@@ -2205,7 +2206,17 @@ void main(){
         let lit = null; try { lit = FIR.run(scene, msk, brd, v, now, same); } catch (e) { console.warn("firma:", e); A.firmaOff = true; this.fir = null; }
         if (lit) {
           out = lit; gl.bindFramebuffer(gl.FRAMEBUFFER, lit.fbo); gl.viewport(0, 0, lit.w, lit.h); gl.activeTexture(gl.TEXTURE0);
-          gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.bindVertexArray(this.vaoFill); capas();
+          gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.bindVertexArray(this.vaoFill);
+          if (this.paint && FIR.cur && FIR.cur.def) {                     // las mesas de material nuevo no leen la escena: los tintes de la Enciclopedia, encima, y sus fronteras otra vez sobre los tintes
+            tintes();
+            gl.useProgram(P.line); gl.bindVertexArray(this.vaoLine); this._setDist(P.line); const e = this._eff();
+            this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_wt", now / 1400); this._u(P.line, "u_lineA", e.lineA); this._u(P.line, "u_lmode", 0); this._u(P.line, "u_off", 0, 0);
+            this._u(P.line, "u_scale", sc); this._u(P.line, "u_res", sw, sh); this._u(P.line, "u_ccol", 0, 0, 0, 0); this._u(P.line, "u_lmat", 0);
+            this._u(P.line, "u_width", lw); this._u(P.line, "u_col", st.line[0], st.line[1], st.line[2], st.line[3] * lcov);
+            for (const cc of cxs) { this._u(P.line, "u_center", cc, v.cy); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount); }
+            gl.bindVertexArray(this.vaoFill);
+          }
+          capas();
           if (hl && hl.gl.sn) {
             gl.useProgram(P.line); gl.bindVertexArray(this.vaoLine); this._setDist(P.line); const e = this._eff();
             this._u(P.line, "u_wob", e.wob); this._u(P.line, "u_wt", now / 1400); this._u(P.line, "u_lineA", e.lineA); this._u(P.line, "u_lmode", 0); this._u(P.line, "u_off", 0, 0);
