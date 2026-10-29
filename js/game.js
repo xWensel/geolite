@@ -10,7 +10,7 @@
     quality: "auto", settingsOpen: false, lastTimeStr: "", intro: true, reduce: false, booting: true, skin: "casino",
     hub: "home", ranked: null, run: null, tool: null, hits: 0,
     cursor: true, tips: true, songToast: true, setTab: "general",
-    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 100, motion: "full", bgAudio: true, curSize: "n", luces: "full", musica: "banda", sonidos: "lounge",
+    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 85, motion: "full", bgAudio: true, curSize: "n", luces: "full", musica: "banda", sonidos: "lounge",
   };
   /* mientras corre el reloj de una pregunta (phase "asking") no hay pausa: el dock se esconde (body.q-live, css/partida.css) y Esc abre el cartel «El reloj sigue» sin parar nada */
   (() => { let ph = S.phase; Object.defineProperty(S, "phase", { get: () => ph, set: v => { ph = v; document.body.classList.toggle("q-live", v === "asking"); }, enumerable: true }); })();
@@ -19,7 +19,7 @@
     try {
       const raw = localStorage.getItem(KEY); let d; try { d = JSON.parse(raw || "{}"); } catch (e) { try { localStorage.setItem(KEY + ".bad", raw); } catch (e2) { /* sin sitio */ } d = {}; }   // JSON roto: copia de seguridad antes de que el siguiente guardado lo pise
       if (!d || typeof d !== "object") d = {};
-      A.lang = d.lang && A.STR[d.lang] ? d.lang : A.detectLang();
+      A.lang = d.lang && A.STR[d.lang] ? d.lang : "en";   // v0.3.232: sin idioma guardado el juego arranca en ingles, no en el del sistema
       S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = ({ video: "screen", pad: "ctl" })[d.setTab] || (["general", "screen", "sound", "ctl", "a11y", "data"].includes(d.setTab) ? d.setTab : "general");   // v0.3.2: Imagen pasa a Pantalla y Mando a Controles S.skin = "casino";
       A.audio.sfxOn = d.sfx !== false; A.audio.musicOn = d.music !== false;
       if (d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx", "amb"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
@@ -35,8 +35,8 @@
       /* v0.3.2: Movimiento en tres niveles (antes "Reducir movimiento" + "Destellos suaves", que se bloqueaba con el primero) */
       S.motion = ["full", "soft", "min"].includes(d.motion) ? d.motion : d.reduce ? "min" : d.softFlash ? "soft" : "full";
       S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
-      S.uiScale = d.uiScale === 70 || (d.uiScale < 78) ? 70 : d.uiScale === 85 || (d.uiScale < 93) ? 85 : 100;   // v0.3.2: Grande (100) / Media (85) / Compacta (70); antes cualquier % entre 50 y 300
-    } catch (e) { A.lang = A.detectLang(); }
+      S.uiScale = d.uiScale === 70 || (d.uiScale < 78) ? 70 : d.uiScale === 100 || (d.uiScale >= 93) ? 100 : 85;   // v0.3.2: Grande (100) / Original (85, antes «Media»; es la de serie desde la v0.3.232) / Compacta (70)
+    } catch (e) { A.lang = "en"; }
   }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, sonidos: S.sonidos, musica: S.musica, ambiente: S.ambiente, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
@@ -396,7 +396,7 @@
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
       S.quality = "auto"; map.setQuality("auto"); S.luces = "full"; A.casa.set("full"); S.ambiente = "hoy"; A.casa.ambiente("hoy"); S.sonidos = "lounge"; A.audio.setSonidos("lounge"); S.musica = "banda"; A.audio.setMusica("banda"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
-      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 100; setK(); dispatchEvent(new Event("resize"));
+      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 85; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
   /* Pantalla (v0.2.27): Ventana / Pantalla completa y la escala de la interfaz en todos; en el cliente de escritorio (window.geoliteHost.screenInfo)

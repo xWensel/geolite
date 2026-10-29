@@ -292,12 +292,4 @@ window.AIQ = window.AIQ || {};
   };
   A.STR = {};
   A.LANGS.forEach((L, i) => { A.STR[L.code] = {}; for (const k in K) A.STR[L.code][k] = K[k][i]; });
-
-  /* idioma inicial (el guardado lo pone game.js): el primero del navegador que tengamos, si no ingles.
-     Espanol de America (y de EE. UU.) -> es-419 como en CLDR; el resto por su subetiqueta principal (antes "kok" caia en coreano por cortar 2 letras) */
-  A.detectLang = () => {
-    const prefs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || "es"]).map(l => String(l).toLowerCase().replace(/_/g, "-"));
-    const norm = prefs.map(p => (/^es-(419|mx|ar|co|cl|pe|ve|ec|gt|cu|bo|do|hn|py|sv|ni|cr|pa|uy|pr|us|bz|br)(-|$)/.test(p) ? "es-419" : p.split("-")[0]));
-    return norm.find(p => A.STR[p]) || "en";
-  };
 })(window.AIQ);
