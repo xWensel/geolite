@@ -14,9 +14,39 @@
      crupier de la mesa (el mismo sprite del juego). api/mesa.js + js/vivo.js. Privada: pide la clave MESA_KEY y la recuerda en este navegador.
      La clasificacion y la moderacion estan en mesa/moderacion.html. -->
 <style>
-.room { max-width: 1480px; margin: 0 auto; padding: 14px 16px 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 14px; align-items: start; }
-@media (max-width: 1180px) { .room { grid-template-columns: 1fr; } }
-.col { display: grid; gap: 14px; min-width: 0; }
+/* el pupitre: arriba, las partidas y el crupier a la misma altura; debajo, pestañas con un solo panel */
+.room { max-width: 1240px; margin: 0 auto; padding: 14px 16px 40px; display: grid; gap: 12px; align-items: start; }
+.desk { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 12px; align-items: stretch; }
+@media (max-width: 900px) { .desk { grid-template-columns: 1fr; } }
+.col { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.col > .pl { align-content: start; }
+.desk .plist { max-height: 330px; overflow: auto; }
+#who { padding-block: 10px; gap: 8px; }
+#who .facts { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); }
+#who .fact b { font-size: 20px; }
+#who .fact.q { grid-column: span 4; } #who .fact.q b { font-size: 22px; }
+@media (max-width: 640px) { #who .fact.q { grid-column: 1 / -1; } }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; position: sticky; top: 52px; z-index: 20; padding: 4px 0; background: var(--bg); }
+.tab { font-family: var(--mono); font-size: 16px; text-transform: uppercase; padding: 10px 16px; background: var(--panel2); color: var(--sub); box-shadow: inset 0 0 0 1px var(--line); }
+.tab:hover { background: #2e2350; color: var(--ink); }
+.tab[aria-selected="true"] { background: var(--gold); color: var(--inkd); box-shadow: 0 3px 0 rgba(0, 0, 0, .45); }
+.tab small { font-size: 8px; opacity: .7; margin-left: 6px; }
+.pane { display: grid; gap: 12px; align-content: start; min-height: 360px; }
+.pane[hidden] { display: none; }
+.ahora { padding: 10px 14px; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line2); font-size: 20px; color: var(--sub); }
+.ahora b { font-weight: 400; color: var(--gold); }
+.packs { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 6px; }
+.pk { display: grid; gap: 4px; padding: 10px 12px; text-align: left; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line2); }
+.pk:hover:not(:disabled) { background: #2e2350; }
+.pk b { font-weight: 400; font-size: 26px; line-height: 1; color: var(--gold); }
+.pk span { font-size: 18px; color: var(--sub); }
+.pk small { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
+.pk.lit { box-shadow: inset 0 0 0 2px var(--gold); }
+.pk:disabled { filter: grayscale(.85) brightness(.55); }
+.rwarn { padding: 8px 12px; background: rgba(168, 20, 46, .35); box-shadow: inset 0 0 0 1px rgba(232, 40, 58, .6); color: #ffb3b3; font-size: 19px; }
+details.more summary { cursor: pointer; font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--sub); padding: 4px 0; }
+details.more[open] summary { margin-bottom: 8px; }
+.moms { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* las partidas: lista compacta */
 .plist { display: grid; gap: 4px; }
@@ -89,11 +119,16 @@
 .lg em { display: block; font-style: normal; font-size: 17px; color: var(--muted); }
 
 /* el crupier de la mesa: ensayo de cara, gesto, mirada, humor y ropa antes de mandarlos */
-.stagep { grid-template-columns: 224px minmax(0, 1fr); align-items: end; gap: 12px; }
-@media (max-width: 640px) { .stagep { grid-template-columns: 1fr; justify-items: center; } }
-.stagep .cam { background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(253, 215, 66, .08), transparent 70%); }
-.play { position: absolute; right: 2px; bottom: 6px; z-index: 2; }
-.talk { display: grid; gap: 10px; align-content: end; padding-bottom: 6px; min-width: 0; }
+/* cabeza y bocadillo en el mismo eje: misma altura (224), el bocadillo centrado y su cola apuntando a la cara; debajo, escribir y mandar en una sola fila */
+.stagep { grid-template-columns: 224px minmax(0, 1fr); grid-template-rows: 224px auto; align-content: start; align-items: center; gap: 12px 14px; }
+@media (max-width: 640px) { .stagep { grid-template-columns: 1fr; grid-template-rows: auto; justify-items: center; } }
+.stagep .cam { background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(253, 215, 66, .08), transparent 70%), var(--panel2); box-shadow: inset 0 0 0 1px var(--line); }
+.talk { display: grid; gap: 10px; align-content: center; align-self: stretch; min-width: 0; }
+.say { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: stretch; align-self: start; width: 100%; }
+.say textarea { height: 56px; }
+.say .btn { min-height: 56px; display: grid; place-items: center; }
+.say #count { align-self: center; margin: 0; }
+@media (max-width: 640px) { .say { grid-template-columns: 1fr 1fr; } .say textarea { grid-column: 1 / -1; } }
 .whoL { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .whoL .flag { width: 36px; height: 24px; background: #000 center / cover no-repeat; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
 .whoL b { font-weight: 400; font-size: 30px; line-height: 1; color: var(--gold); overflow-wrap: anywhere; }
@@ -101,8 +136,8 @@
 .now { font-family: var(--mono); font-size: 8px; text-transform: uppercase; color: var(--muted); }
 .now b { font-weight: 400; color: var(--sub); }
 /* el bocadillo, tal cual sale en el juego */
-.bub { position: relative; justify-self: start; max-width: 100%; min-width: 200px; padding: 11px 18px 13px 16px; background: var(--paper); color: var(--inkd); font-size: 27px; line-height: 1.12; box-shadow: inset 0 0 0 3px var(--inkd), 0 6px 0 rgba(0, 0, 0, .4);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% + 12px)); margin-bottom: 12px; }
+.bub { position: relative; justify-self: stretch; max-width: 100%; min-width: 200px; padding: 14px 18px 16px 30px; background: var(--paper); color: var(--inkd); font-size: 27px; line-height: 1.12; box-shadow: inset 0 0 0 3px var(--inkd), 0 6px 0 rgba(0, 0, 0, .4);
+  clip-path: polygon(12px 0, 100% 0, 100% 100%, 12px 100%, 12px 58%, 0 50%, 12px 42%); margin-bottom: 0; }
 .bub .lv { display: flex; align-items: center; gap: 7px; margin: 1px 0 6px; font-family: var(--mono); font-size: 16px; line-height: 1; color: #c4152a; text-transform: uppercase; }
 .bub p { margin: 0; min-height: 1.12em; word-break: break-word; text-wrap: balance; }
 .bub p.ph { color: rgba(29, 10, 61, .38); }
@@ -181,62 +216,84 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     <button id="logout" type="button">Salir</button>
   </header>
   <main class="room" id="room">
-    <div class="col">
-      <section class="pl"><h2>Partidas en directo <small id="nList"></small></h2><div class="plist" id="list"></div></section>
-      <section class="pl" id="who"><h2>El jugador</h2><div id="facts"><p class="none">Elige una partida de la lista.</p></div></section>
-      <section class="pl hidden" id="tv">
-        <h2>Su pantalla <small>Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</small></h2>
-        <div class="tvf"><video id="vid" autoplay muted playsinline></video><span class="tvhud"><i class="dot"></i><span id="tvName">Cámara</span></span><button class="chipb tvx" id="tvx" type="button">Colgar</button><div class="tvmsg" id="tvmsg"></div></div>
-      </section>
-      <section class="pl"><h2>Fichas <small>Caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</small></h2><div class="tray" id="tray"></div><span class="hint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></section>
-      <section class="pl"><h2>Retos del juego <small>Los de la Aventura: lo visual cae sobre toda su pantalla; el resto, en su pregunta</small></h2><div class="row" id="rtabs"></div><div class="rgrid" id="rgrid"></div>
-        <div class="row"><span class="hint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo</span><button class="chipb" id="rclear" type="button" disabled>Quitar todos</button></div></section>
-      <section class="pl"><h2>Lo que le has dicho</h2><div class="log" id="log"></div></section>
-    </div>
-
-    <div class="col">
+    <div class="desk">
+      <div class="col">
+        <section class="pl"><h2>Partidas en directo <small id="nList"></small></h2><div class="plist" id="list"></div></section>
+      </div>
       <section class="pl stagep">
-        <div class="cam"><div class="dface" id="face"></div><button class="chipb play" id="play" type="button" title="Ensayar (Ctrl+Intro): cara, gesto y frase tal como le saldrán">Ensayar</button></div>
+        <div class="cam"><div class="dface" id="face"></div></div>
         <div class="talk">
           <div class="bub"><div class="lv"><i class="dot"></i><span id="lvTag">EN DIRECTO</span></div><p id="prev" class="ph">Elige una partida y hablamos.</p></div>
           <div class="whoL" id="whoL"></div>
           <div class="now" id="nowSet"></div>
         </div>
+        <div class="say">
+          <textarea id="txt" maxlength="160" placeholder="Escribe y pulsa Intro… (vacío: solo ensayas)" enterkeyhint="send" disabled></textarea>
+          <span id="count">0 / 160</span>
+          <button class="btn ghost" id="play" type="button" title="Ensayar (Ctrl+Intro): cara, gesto y frase tal como le saldrán">Ensayar</button>
+          <button class="btn red" id="send" type="button" disabled>Decir</button>
+        </div>
       </section>
+    </div>
 
+    <section class="pl" id="who"><h2>El jugador</h2><div id="facts"><p class="none">Elige una partida de la lista.</p></div></section>
+    <div class="ahora" id="ahora"></div>
+
+    <section class="pl hidden" id="tv" style="max-width: 760px">
+      <h2>Su pantalla <small>Clic: el guante da dos toquecitos · Arrastra: el guante le sigue</small></h2>
+      <div class="tvf"><video id="vid" autoplay muted playsinline></video><span class="tvhud"><i class="dot"></i><span id="tvName">Cámara</span></span><button class="chipb tvx" id="tvx" type="button">Colgar</button><div class="tvmsg" id="tvmsg"></div></div>
+    </section>
+
+    <nav class="tabs" id="mtabs" role="tablist" aria-label="Mandos de la mesa"></nav>
+
+    <div class="pane" data-pane="hablar" role="tabpanel">
       <section class="pl">
         <h2>Habla por el crupier</h2>
         <p id="mode"></p>
-        <textarea id="txt" maxlength="160" placeholder="Escribe y pulsa Intro… (vacío: solo ensayas)" enterkeyhint="send" disabled></textarea>
-        <div class="row"><span id="count">0 / 160</span><button class="btn ghost" id="rehBtn" type="button" title="Ensayar (Ctrl+Intro)">Ensayar</button><button class="btn red" id="send" type="button" disabled>Decir</button></div>
         <div class="sub"><span class="lbl">Estilo del bocadillo</span><div class="row" id="styles"></div></div>
-        <div class="sub"><span class="lbl">Cartas · frases rápidas que le llegan en su idioma</span><div class="cards" id="quick"></div></div>
+        <div class="sub"><span class="lbl">Cartas · frases rápidas que le llegan en su idioma</span><div class="moms" id="moms"></div><div class="cards" id="quick"></div></div>
       </section>
+      <section class="pl"><h2>Lo que le has dicho</h2><div class="log" id="log"></div></section>
+    </div>
 
+    <div class="pane" data-pane="retos" role="tabpanel" hidden>
+      <section class="pl">
+        <h2>Retos que sorprenden <small>Los de la Aventura: lo visual cae sobre toda su pantalla; el resto, en su pregunta</small></h2>
+        <div class="rwarn hidden" id="rwarn"></div>
+        <span class="lbl">Paquetes · un clic pone varios a la vez (otro clic los quita)</span>
+        <div class="packs" id="rpacks"></div>
+        <span class="lbl">Selección</span>
+        <div class="rgrid" id="rsel"></div>
+        <div class="row"><span class="hint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo</span><button class="chipb" id="rclear" type="button" disabled>Quitar todos</button></div>
+        <details class="more"><summary id="rmoreS">Todos los demás</summary><div class="row" id="rtabs"></div><div class="rgrid" id="rgrid" style="margin-top: 8px"></div></details>
+      </section>
+    </div>
+
+    <div class="pane" data-pane="fichas" role="tabpanel" hidden>
+      <section class="pl"><h2>Fichas <small>Caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</small></h2><div class="tray" id="tray"></div><span class="hint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic</span></section>
+      <section class="pl"><h2>Debufos gráficos <small>Son los retos visuales de la Aventura hechos ficha: ×1 a ×3 con cada clic. Miopía, borroso, parpadeo, píxeles y batería cubren toda su pantalla; el resto, el mapa de su pregunta</small></h2><div class="tray" id="tray2"></div><div class="rwarn hidden" id="fwarn"></div><span class="hint"><em>Clic</em> subir de nivel · <em>Clic derecho</em> bajarlo · los mismos retos están en la pestaña Retos</span></section>
+    </div>
+
+    <div class="pane" data-pane="gestos" role="tabpanel" hidden>
       <section class="pl">
         <h2>Gesto <small id="gestSel"></small></h2>
         <div class="row" id="gmode"></div>
         <div class="row" id="gtabs"></div>
         <div class="grid" id="ggrid"></div>
       </section>
-
       <section class="pl">
         <h2>Cara <small>va con la frase; o ponérsela ya</small></h2>
         <div class="faces" id="faces"></div>
         <div class="row"><button class="chipb needsel" id="faceNow" type="button">Ponérsela ya</button><button class="chipb" id="faceOff" type="button">Sin cara (la suya)</button></div>
       </section>
-
       <section class="pl">
         <h2>Mirada y humor <small>al momento</small></h2>
         <div class="sub"><span class="lbl">Hacia dónde mira</span><div class="row" id="gaze"></div></div>
         <div class="sub"><span class="lbl">Su humor: cara de reposo y bucles de espera</span><div class="row" id="humor"></div></div>
       </section>
+    </div>
 
-      <section class="pl">
-        <h2>Comodín <small>el gato de la casa, al momento</small></h2>
-        <div class="row" id="cat"></div>
-      </section>
-
+    <div class="pane" data-pane="ropa" role="tabpanel" hidden>
       <section class="pl">
         <h2>Vestuario en directo <small>se lo pones sin comprar nada; al irte, vuelve a lo suyo</small></h2>
         <div class="row" id="vtabs"></div>
@@ -244,17 +301,22 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
         <div class="sub"><span class="lbl">Piezas</span><div class="row" id="vpieces"></div></div>
         <div class="row"><button class="chipb" id="vReset" type="button">Lo suyo (lo que lleva el jugador)</button><button class="chipb" id="vHouse" type="button">Lo de la casa</button></div>
       </section>
-
       <section class="pl">
         <h2>Regalo de la casa <small>fichas de oro para que se pongan guapos: les sale un aviso en la pantalla</small></h2>
         <div class="row gift"><label class="lbl" for="gAmt">Fichas de oro</label><input id="gAmt" type="number" min="1" max="5000" step="50" value="300" inputmode="numeric"></div>
         <div class="row"><button class="btn" id="gOne" type="button" disabled>Regalar al jugador elegido</button><button class="btn red" id="gAll" type="button" disabled>Regalar a todos los conectados</button></div>
         <p class="hint" id="gMsg">Les llega: «El desarrollador te obsequia con 300 fichas de oro para que te puedas poner guapo.» (en su idioma).</p>
       </section>
+    </div>
 
+    <div class="pane" data-pane="trastadas" role="tabpanel" hidden>
       <section class="pl">
         <h2>Trastadas <small>salen ya en su partida (si la pantalla no es la suya, el juego decide)</small></h2>
         <div class="tras" id="tras"></div>
+      </section>
+      <section class="pl">
+        <h2>Comodín <small>el gato de la casa, al momento</small></h2>
+        <div class="row" id="cat"></div>
       </section>
     </div>
   </main>
@@ -279,8 +341,8 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
 
   /* ------------------------------------------------ los nombres de lo que manda el juego (js/vivo.js) */
   const LANG = { es: "español", en: "inglés", fr: "francés", pt: "portugués", de: "alemán", it: "italiano", "es-419": "español de Latinoamérica", zh: "chino", ko: "coreano", ja: "japonés", ru: "ruso", pl: "polaco" };
-  const PLAT = { web: "Web", movil: "Móvil", win: "Windows", linux: "Linux", deck: "Steam Deck", "win-demo": "Demo Win", "linux-demo": "Demo Linux", "deck-demo": "Demo Deck" };
-  const HUB = { home: "En la portada", classic: "Eligiendo campaña", adventure: "Mirando la Aventura", daily: "Mirando el Reto diario", profile: "Mirando su Perfil", patch: "Leyendo las notas del parche" };
+  const PLAT = { web: "Web", movil: "Móvil", win: "Windows", linux: "Linux", deck: "Steam Deck" };
+  const HUB = { home: "En la portada", classic: "Eligiendo campaña", adventure: "Mirando la Aventura", daily: "Mirando el Reto diario", duelo: "Mirando el Duelo", codex: "Mirando la Enciclopedia", profile: "Mirando su Perfil", patch: "Leyendo las notas del parche" };
   const KIND = { clue: "pista", flag: "bandera", country: "país", capital: "capital", city: "ciudad", person: "personaje", event: "suceso" };
   const ASCN = ["", "I", "II", "III", "IV", "V"];
   function where(st) {
@@ -295,17 +357,18 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
 
   /* ------------------------------------------------ cartas (frases rapidas): las lees en espanol y le llegan en SU idioma */
   const ORD = ["es", "en", "fr", "pt", "de", "it", "es-419", "zh", "ko", "ja", "ru", "pl"];
+  /* momento: pregunta, acierto, fallo, portada o espera */
   const QUICK = [
-    ["laugh", "Te estoy viendo.|I can see you.|Je te vois.|Estou te vendo.|Ich sehe dich.|Ti sto guardando.|Te estoy viendo.|我看着你呢。|다 보고 있어.|見てるぞ。|Я тебя вижу.|Widzę cię."],
-    ["wink", "Hola. Sí, soy yo de verdad.|Hello. Yes, it’s really me.|Salut. Oui, c’est vraiment moi.|Olá. Sim, sou eu de verdade.|Hallo. Ja, ich bin’s wirklich.|Ciao. Sì, sono proprio io.|Hola. Sí, soy yo de verdad.|你好。没错，真的是我。|안녕. 그래, 진짜 나야.|やあ。そう、本物の私だ。|Привет. Да, это правда я.|Cześć. Tak, to naprawdę ja."],
-    ["suspicious", "¿Seguro? Piénsalo otra vez.|Sure? Think again.|Sûr ? Réfléchis encore.|Certeza? Pense de novo.|Sicher? Denk noch mal nach.|Sicuro? Pensaci ancora.|¿Seguro? Piénsalo otra vez.|确定吗？再想想。|확실해? 다시 생각해 봐.|本当に？もう一度考えてみな。|Уверен? Подумай ещё.|Na pewno? Pomyśl jeszcze raz."],
-    ["smug", "La casa siempre gana. Casi siempre.|The house always wins. Almost always.|La maison gagne toujours. Presque toujours.|A casa sempre ganha. Quase sempre.|Die Bank gewinnt immer. Fast immer.|Il banco vince sempre. Quasi sempre.|La casa siempre gana. Casi siempre.|庄家总是赢。几乎总是。|하우스는 언제나 이겨. 거의 언제나.|胴元は必ず勝つ。ほぼ必ずな。|Казино всегда выигрывает. Почти всегда.|Kasyno zawsze wygrywa. Prawie zawsze."],
-    ["laugh", "¡Uy! Eso ha estado lejos.|Oof! That was far off.|Aïe ! C’était loin.|Eita! Essa foi longe.|Autsch! Das war weit daneben.|Ahi! Era lontanissimo.|¡Uy! Eso estuvo lejos.|哎呀！差得好远。|아이고! 한참 빗나갔네.|おっと！ずいぶん遠いな。|Ой! Далековато.|Ojej! To było daleko."],
-    ["bow", "Bien jugado. No se lo digas a nadie.|Well played. Don’t tell anyone.|Bien joué. Ne le dis à personne.|Boa jogada. Não conte a ninguém.|Gut gespielt. Sag’s keinem.|Ben giocato. Non dirlo a nessuno.|Bien jugado. No le digas a nadie.|打得好。别告诉别人。|잘했어. 아무한테도 말하지 마.|お見事。誰にも言うなよ。|Хорошо сыграно. Никому не говори.|Dobrze zagrane. Nikomu nie mów."],
-    ["innocent", "¿Una pista? Qué pena, no doy pistas.|A hint? Too bad, I don’t give hints.|Un indice ? Dommage, je n’en donne pas.|Uma dica? Que pena, não dou dicas.|Ein Tipp? Schade, ich gebe keine.|Un indizio? Peccato, non ne do.|¿Una pista? Qué lástima, no doy pistas.|想要提示？可惜，我不给提示。|힌트? 안됐지만 힌트는 없어.|ヒント？残念、ヒントはやらん。|Подсказку? Жаль, я их не даю.|Podpowiedź? Szkoda, nie daję podpowiedzi."],
-    ["dare", "Venga, a por la siguiente.|Come on, next one.|Allez, à la suivante.|Vamos, para a próxima.|Los, die nächste.|Dai, la prossima.|Dale, a la que sigue.|来吧，下一题。|자, 다음 문제.|さあ、次だ。|Давай, следующий.|Dalej, następne."],
-    ["shock", "¿Sigues ahí? Te oigo respirar.|Still there? I can hear you breathing.|Tu es toujours là ? Je t’entends respirer.|Ainda está aí? Ouço você respirar.|Noch da? Ich hör dich atmen.|Ci sei ancora? Ti sento respirare.|¿Sigues ahí? Te oigo respirar.|还在吗？我听见你在呼吸。|아직 거기 있어? 숨소리 들려.|まだいるか？息づかいが聞こえるぞ。|Ты ещё тут? Я слышу, как ты дышишь.|Jesteś tam? Słyszę, jak oddychasz."],
-    ["furious", "¡Otra vez no! Me vas a arruinar la banca.|Not again! You’ll bankrupt the house.|Encore ! Tu vas ruiner la banque.|De novo não! Vai quebrar a banca.|Nicht schon wieder! Du ruinierst die Bank.|Ancora no! Mi rovinerai il banco.|¡Otra vez no! Me vas a quebrar la banca.|又来！你要让庄家破产了。|또야! 하우스 거덜 나겠네.|またか！胴元が破産しちまう。|Опять! Ты разоришь казино.|Znowu! Zrujnujesz kasyno."],
+    ["laugh", "Te estoy viendo.|I can see you.|Je te vois.|Estou te vendo.|Ich sehe dich.|Ti sto guardando.|Te estoy viendo.|我看着你呢。|다 보고 있어.|見てるぞ。|Я тебя вижу.|Widzę cię.", "espera"],
+    ["wink", "Hola. Sí, soy yo de verdad.|Hello. Yes, it’s really me.|Salut. Oui, c’est vraiment moi.|Olá. Sim, sou eu de verdade.|Hallo. Ja, ich bin’s wirklich.|Ciao. Sì, sono proprio io.|Hola. Sí, soy yo de verdad.|你好。没错，真的是我。|안녕. 그래, 진짜 나야.|やあ。そう、本物の私だ。|Привет. Да, это правда я.|Cześć. Tak, to naprawdę ja.", "portada"],
+    ["suspicious", "¿Seguro? Piénsalo otra vez.|Sure? Think again.|Sûr ? Réfléchis encore.|Certeza? Pense de novo.|Sicher? Denk noch mal nach.|Sicuro? Pensaci ancora.|¿Seguro? Piénsalo otra vez.|确定吗？再想想。|확실해? 다시 생각해 봐.|本当に？もう一度考えてみな。|Уверен? Подумай ещё.|Na pewno? Pomyśl jeszcze raz.", "pregunta"],
+    ["smug", "La casa siempre gana. Casi siempre.|The house always wins. Almost always.|La maison gagne toujours. Presque toujours.|A casa sempre ganha. Quase sempre.|Die Bank gewinnt immer. Fast immer.|Il banco vince sempre. Quasi sempre.|La casa siempre gana. Casi siempre.|庄家总是赢。几乎总是。|하우스는 언제나 이겨. 거의 언제나.|胴元は必ず勝つ。ほぼ必ずな。|Казино всегда выигрывает. Почти всегда.|Kasyno zawsze wygrywa. Prawie zawsze.", "portada"],
+    ["laugh", "¡Uy! Eso ha estado lejos.|Oof! That was far off.|Aïe ! C’était loin.|Eita! Essa foi longe.|Autsch! Das war weit daneben.|Ahi! Era lontanissimo.|¡Uy! Eso estuvo lejos.|哎呀！差得好远。|아이고! 한참 빗나갔네.|おっと！ずいぶん遠いな。|Ой! Далековато.|Ojej! To było daleko.", "fallo"],
+    ["bow", "Bien jugado. No se lo digas a nadie.|Well played. Don’t tell anyone.|Bien joué. Ne le dis à personne.|Boa jogada. Não conte a ninguém.|Gut gespielt. Sag’s keinem.|Ben giocato. Non dirlo a nessuno.|Bien jugado. No le digas a nadie.|打得好。别告诉别人。|잘했어. 아무한테도 말하지 마.|お見事。誰にも言うなよ。|Хорошо сыграно. Никому не говори.|Dobrze zagrane. Nikomu nie mów.", "acierto"],
+    ["innocent", "¿Una pista? Qué pena, no doy pistas.|A hint? Too bad, I don’t give hints.|Un indice ? Dommage, je n’en donne pas.|Uma dica? Que pena, não dou dicas.|Ein Tipp? Schade, ich gebe keine.|Un indizio? Peccato, non ne do.|¿Una pista? Qué lástima, no doy pistas.|想要提示？可惜，我不给提示。|힌트? 안됐지만 힌트는 없어.|ヒント？残念、ヒントはやらん。|Подсказку? Жаль, я их не даю.|Podpowiedź? Szkoda, nie daję podpowiedzi.", "pregunta"],
+    ["dare", "Venga, a por la siguiente.|Come on, next one.|Allez, à la suivante.|Vamos, para a próxima.|Los, die nächste.|Dai, la prossima.|Dale, a la que sigue.|来吧，下一题。|자, 다음 문제.|さあ、次だ。|Давай, следующий.|Dalej, następne.", "acierto"],
+    ["shock", "¿Sigues ahí? Te oigo respirar.|Still there? I can hear you breathing.|Tu es toujours là ? Je t’entends respirer.|Ainda está aí? Ouço você respirar.|Noch da? Ich hör dich atmen.|Ci sei ancora? Ti sento respirare.|¿Sigues ahí? Te oigo respirar.|还在吗？我听见你在呼吸。|아직 거기 있어? 숨소리 들려.|まだいるか？息づかいが聞こえるぞ。|Ты ещё тут? Я слышу, как ты дышишь.|Jesteś tam? Słyszę, jak oddychasz.", "espera"],
+    ["furious", "¡Otra vez no! Me vas a arruinar la banca.|Not again! You’ll bankrupt the house.|Encore ! Tu vas ruiner la banque.|De novo não! Vai quebrar a banca.|Nicht schon wieder! Du ruinierst die Bank.|Ancora no! Mi rovinerai il banco.|¡Otra vez no! Me vas a quebrar la banca.|又来！你要让庄家破产了。|또야! 하우스 거덜 나겠네.|またか！胴元が破産しちまう。|Опять! Ты разоришь казино.|Znowu! Zrujnujesz kasyno.", "acierto"],
   ];
   const phrase = (s, l) => { const a = s.split("|"); return a[ORD.indexOf(l)] || a[1] || a[0]; };
   const lang = () => (selSt && selSt.l) || "es";
@@ -314,6 +377,9 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
   /* ------------------------------------------------ fichas: los efectos de los retos del juego y el humo, por encima de toda su pantalla (js/chfx.js, js/humo.js)
      rayo: uno por clic · interruptores: se quedan hasta quitarlos · contadores: x1 a x5, uno a uno */
   const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["humo", "Humo", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
+  /* los debufos graficos (retos de js/challenges.js y js/debufos.js) hechos ficha: id del reto, nombre corto y si cubren toda la pantalla (GLOB) o solo el mapa de la pregunta */
+  const DEB = [["frost", "Escarcha", 0], ["frosted", "Esmerilado", 0], ["tiles", "Teselas", 0], ["signal", "Señal rota", 0], ["card", "Carta", 0], ["myopia", "Miopía", 1], ["blur", "Borroso", 1], ["flicker", "Parpadeo", 1], ["mosaic", "Píxeles", 1], ["battery", "Batería", 1]];
+  $("tray2").innerHTML = DEB.map(([id, n, g]) => `<button class="chip" data-deb="${id}" disabled title="${n}${g ? " · cubre toda su pantalla" : " · sobre el mapa de su pregunta"}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
   const KIND_ = Object.fromEntries(CHIPS.map(c => [c[0], c[2]])), NAME_ = Object.fromEntries(CHIPS.map(c => [c[0], c[1]]));
   $("tray").innerHTML = CHIPS.map(([id, n]) => `<button class="chip" data-fx="${id}" disabled title="${n}"><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b></b></button>`).join("");
   /* lo que tiene puesto cada partida: lo cuenta el propio juego (st.fx = 4 interruptores + 3 contadores + el humo) y la mesa lo adelanta al pulsar */
@@ -322,7 +388,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
   const fxOf = sid => fxs[sid] || (fxs[sid] = { lluvia: false, tormenta: false, apagon: false, terremoto: false, humo: false, cristal: 0, huellas: 0, ventana: 0 });
   function paintChips() {
     const F = sel ? fxOf(sel) : null;
-    document.querySelectorAll(".chip").forEach(c => {
+    document.querySelectorAll(".chip[data-fx]").forEach(c => {
       const id = c.dataset.fx, k = KIND_[id], v = F ? F[id] : null, lit = k === "on" ? !!v : k === "n" ? v > 0 : false;
       c.disabled = !sel; c.classList.toggle("lit", lit); c.classList.toggle("on", k === "on" && !!v);
       c.querySelector("b").textContent = k === "on" ? "ON" : k === "n" && v ? "×" + v : "";
@@ -390,26 +456,64 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
   const RK = [["map", "Mapa"], ["text", "Nombre"], ["ptr", "Puntero"], ["wall", "Pantalla"], ["rule", "Reglas"], ["flag", "Banderas"]];
   const RNOTE = { trap: "cambia las preguntas al repartirlas: se nota desde la ronda siguiente" };
   const RMAP = Object.fromEntries(RETOS.map(r => [r[0], r]));
+  /* la selección: los 16 que más sorprenden al jugador (el resto queda plegado, no borrado) */
+  const SEL = ["ctrlz", "crack", "hang", "battery", "card", "frost", "cmirror", "flip", "stormnight", "clouds", "myopia", "ghost", "spread", "trap", "babel", "signal"];
+  /* paquetes: varios retos con su nivel, de un clic (otro clic los quita) */
+  const PACKS = [
+    ["Cuarta pared", "Cristal roto, No responde, Batería baja y La carta que se cuela.", [["crack", 2], ["hang", 1], ["battery", 1], ["card", 2]]],
+    ["Pesadilla del casino", "Noche de tormenta, Rayos y Terremoto: el mapa se desmorona.", [["stormnight", 1], ["lightning", 1], ["quake", 2]]],
+    ["Resaca", "Miopía, mapa borroso, luces parpadeantes y pulso: nada está quieto.", [["myopia", 2], ["blur", 1], ["flicker", 1], ["tremble", 1]]],
+    ["Mundo al revés", "Mundo del revés, controles invertidos y continentes barajados.", [["flip", 3], ["cmirror", 1], ["spread", 3]]],
+    ["Hielo y humo", "Escarcha, humo de sala y lluvia: hay que limpiar para ver.", [["frost", 2], ["clouds", 1], ["rain", 1]]],
+    ["Espías", "Torre de Babel, pasaporte falso, sin país y pregunta trampa: el nombre miente.", [["babel", 1], ["fakepass", 1], ["nocountry", 1], ["trap", 1]]]
+  ];
   let rtab = "map";
   const chs = {}, chAt = {};
   const parseCh = s => { const o = {}; String(s || "").split(",").forEach(p => { const [i, v] = p.split(":"); if (RMAP[i] && +v > 0) o[i] = +v; }); return o; };
   const chOf = sid => chs[sid] || (chs[sid] = {});
   const pips = n => "●".repeat(n) + "○".repeat(3 - n);
-  function paintRetos() {
-    const C = sel ? chOf(sel) : {}, tabs = $("rtabs"), grid = $("rgrid"); if (!tabs || !grid) return;
-    tabs.innerHTML = RK.map(([k, n]) => { const c = RETOS.filter(r => r[2] === k && C[r[0]]).length; return `<button class="chipb${k === rtab ? " on" : ""}" type="button" data-k="${k}">${n}${c ? ` ×${c}` : ""}</button>`; }).join("");
-    tabs.querySelectorAll(".chipb").forEach(b => b.onclick = () => { rtab = b.dataset.k; paintRetos(); });
-    grid.innerHTML = RETOS.filter(r => r[2] === rtab).map(([id, n, k, ico, d, lv]) => {
-      const v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nAfecta a TODA la pantalla, no solo a la bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
-      return `<button class="rc${v ? " lit" : ""}" type="button" data-id="${id}" title="${esc(tip)}"${sel ? "" : " disabled"}><img src="../assets/icons/${ico}.webp" alt=""><span>${esc(n)}</span><b>${pips(v)}</b></button>`;
-    }).join("");
-    grid.querySelectorAll(".rc").forEach(c => {
+  /* los retos solo existen en la Aventura (y el Reto diario): en Clásico no hacen nada */
+  const noRetos = () => !!selSt && selSt.md === "clasico";
+  const packOn = (C, pk) => pk[2].every(([id, v]) => C[id] === v);
+  function rcHtml(C, r) {
+    const [id, n, k, ico, d, lv] = r, v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nAfecta a TODA la pantalla, no solo a la bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
+    return `<button class="rc${v ? " lit" : ""}" type="button" data-id="${id}" title="${esc(tip)}"${sel && !noRetos() ? "" : " disabled"}><img src="../assets/icons/${ico}.webp" alt=""><span>${esc(n)}</span><b>${pips(v)}</b></button>`;
+  }
+  function wireRc(box) {
+    box.querySelectorAll(".rc").forEach(c => {
       c.onclick = () => { if (c._long) { c._long = false; return; } retoHit(c, +1); };
       c.oncontextmenu = e => { e.preventDefault(); retoHit(c, -1); };
       let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; retoHit(c, -1); }, 480); }, { passive: true });
       c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
     });
-    $("rclear").disabled = !sel || !Object.keys(C).length;
+  }
+  function paintRetos() {
+    const C = sel ? chOf(sel) : {}, tabs = $("rtabs"), grid = $("rgrid"); if (!tabs || !grid) return;
+    const off = !sel || noRetos(), w = $("rwarn");
+    w.classList.toggle("hidden", !noRetos()); w.textContent = noRetos() ? "Está en el Clásico: los retos solo existen en la Aventura. Aquí no harían nada." : "";
+    $("rpacks").innerHTML = PACKS.map((pk, i) => `<button class="pk${sel && packOn(C, pk) ? " lit" : ""}" type="button" data-i="${i}"${off ? " disabled" : ""}><b>${esc(pk[0])}</b><span>${esc(pk[1])}</span><small>${pk[2].length} retos</small></button>`).join("");
+    $("rpacks").querySelectorAll(".pk").forEach(b => b.onclick = () => retoPack(PACKS[+b.dataset.i]));
+    $("rsel").innerHTML = SEL.map(id => rcHtml(C, RMAP[id])).join(""); wireRc($("rsel"));
+    const rest = RETOS.filter(r => !SEL.includes(r[0]));
+    $("rmoreS").textContent = "Todos los demás (" + rest.length + ")" + (rest.some(r => C[r[0]]) ? " · hay puestos" : "");
+    tabs.innerHTML = RK.map(([k, n]) => { const c = rest.filter(r => r[2] === k && C[r[0]]).length; return `<button class="chipb${k === rtab ? " on" : ""}" type="button" data-k="${k}">${n}${c ? ` ×${c}` : ""}</button>`; }).join("");
+    tabs.querySelectorAll(".chipb").forEach(b => b.onclick = () => { rtab = b.dataset.k; paintRetos(); $("rgrid").closest("details").open = true; });
+    grid.innerHTML = rest.filter(r => r[2] === rtab).map(r => rcHtml(C, r)).join(""); wireRc(grid);
+    $("rclear").disabled = off || !Object.keys(C).length; paintDeb(C, off); paintTabs();
+  }
+  function paintDeb(C, off) {
+    document.querySelectorAll("#tray2 .chip").forEach(c => { const v = C[c.dataset.deb] || 0; c.disabled = off; c.classList.toggle("lit", v > 0); c.querySelector("b").textContent = v ? "×" + v : ""; });
+    const w = $("fwarn"); w.classList.toggle("hidden", !noRetos()); w.textContent = noRetos() ? "Está en el Clásico: los debufos solo existen en la Aventura." : "";
+  }
+  async function retoPack(pk) {
+    if (!sel || noRetos()) return; const C = chOf(sel), on = packOn(C, pk);
+    chAt[sel] = Date.now(); clink(); spr.play(on ? "snap" : "magic_pass");
+    for (const [id, v] of pk[2]) C[id] = on ? 0 : v;   // lo pinta al momento; el servidor va retoSet a retoSet
+    pk[2].forEach(([id]) => { if (!C[id]) delete C[id]; }); paintRetos();
+    try {
+      let live = true; for (const [id, v] of pk[2]) { const j = await call("POST", { op: "ch", sid: sel, ch: id, v: on ? 0 : v }); if (!(j.ok && j.live)) live = false; }
+      toast(!live ? "Esa partida ya se ha cerrado." : on ? `${pk[0]}: quitado.` : `${pk[0]}: puesto (${pk[2].length} retos).`, 2000);
+    } catch (e) { toast("Sin conexión: el paquete no ha salido."); }
   }
   async function retoHit(c, d) {
     if (!sel) return; const id = c.dataset.id, r = RMAP[id], C = chOf(sel), n = (C[id] || 0) + d;
@@ -582,13 +686,13 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     gazeV = humorV = null; if (ropa) { ropa = null; dressPrev(); } setupGaze(); setupVest(); nowSet();   // lo que la mesa le puso al anterior se fue con el (js/vivo.js, actOff)
     document.querySelectorAll(".seat").forEach(b => b.classList.toggle("sel", b.dataset.sid === sid));
     $("room").classList.remove("off"); paintChips(); $("txt").disabled = false; $("send").disabled = false;
-    quick = null; $("txt").value = ""; refresh(); paintTras();
+    quick = null; $("txt").value = ""; autoMom(); refresh(); paintTras();
     watch(); renderFacts(); renderLog(); renderCards(); spr.set(face); spr.play("hat_tip"); clink(); clink(.07);
     $("txt").focus({ preventScroll: true });
   }
   async function watch() { clearTimeout(watchT); if (!sel) return; try { await call("POST", { op: "watch", sid: sel }); } catch (e) { /* reintenta */ } watchT = setTimeout(watch, 20000); }
   addEventListener("pagehide", () => { if (sel && key) fetch(API, { method: "POST", keepalive: true, headers: { "x-mesa": key, "content-type": "application/json" }, body: JSON.stringify({ op: "unwatch", sid: sel }) }).catch(() => {}); });
-  function gone() { camStop(true); toast("Ha cerrado la partida."); sel = null; selSt = null; clearTimeout(watchT); $("room").classList.add("off"); $("txt").disabled = true; $("send").disabled = true; paintChips(); paintTras(); renderFacts(); }
+  function gone() { camStop(true); toast("Ha cerrado la partida."); sel = null; selSt = null; clearTimeout(watchT); autoMom(); $("room").classList.add("off"); $("txt").disabled = true; $("send").disabled = true; paintChips(); paintTras(); renderFacts(); }
 
   function setupControls() {
     const tx = $("txt");
@@ -597,17 +701,52 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     $("play").onclick = () => playing ? stop(true) : rehearse();
     tx.oninput = e => { if (e) quick = null; if (playing) stop(false); refresh(); document.querySelectorAll(".card").forEach(c => c.classList.toggle("on", +c.dataset.i === quick)); };   // si tocas el texto, ya es tuyo: llega tal cual
     tx.onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); rehearse(); } else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
-    $("send").onclick = send; $("rehBtn").onclick = () => rehearse();
-    document.querySelectorAll(".chip").forEach(c => {
+    $("send").onclick = send;
+    document.querySelectorAll(".chip[data-fx]").forEach(c => {
       c.onclick = () => { if (c._long) { c._long = false; return; } chipHit(c, +1); };
       c.oncontextmenu = e => { e.preventDefault(); chipHit(c, -1); };
       let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; chipHit(c, -1); }, 480); }, { passive: true });
       c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
     });
-    $("rclear").onclick = retoClear;
+    document.querySelectorAll("#tray2 .chip").forEach(c => {
+      const hit = d => { c.dataset.id = c.dataset.deb; const v = (chOf(sel)[c.dataset.deb] || 0) + d; if (v >= 0 && v <= 3) fly(c, c.dataset.deb, d < 0); retoHit(c, d); };
+      c.onclick = () => { if (c._long) { c._long = false; return; } if (sel && !c.disabled) hit(+1); };
+      c.oncontextmenu = e => { e.preventDefault(); if (sel && !c.disabled) hit(-1); };
+      let lt = 0; c.addEventListener("touchstart", () => { lt = setTimeout(() => { c._long = true; if (sel && !c.disabled) hit(-1); }, 480); }, { passive: true });
+      c.addEventListener("touchend", () => clearTimeout(lt)); c.addEventListener("touchmove", () => clearTimeout(lt), { passive: true });
+    });
+    $("rclear").onclick = retoClear; setupTabs();
     $("room").classList.add("off");
     A.crupier.ready(() => { setupGest(); setupFaces(); });
     setupGaze(); setupCat(); setupVest(); paintTras(); paintRetos(); renderCards(); renderLog(); nowSet();
+  }
+
+  /* ------------------------------------------------ pestañas del pupitre y la barra «ahora encaja» */
+  const MTABS = [["hablar", "Hablar"], ["retos", "Retos"], ["fichas", "Fichas"], ["gestos", "Gestos y caras"], ["ropa", "Ropa y regalo"], ["trastadas", "Trastadas y Comodín"]];
+  let mtab = "hablar"; try { mtab = localStorage.getItem("geolite.mesa.tab") || "hablar"; } catch (e) { /* sin almacenamiento */ } if (!MTABS.some(t => t[0] === mtab)) mtab = "hablar";
+  function paintTabs() {
+    const nCh = sel ? Object.keys(chOf(sel)).length : 0, F = sel ? fxOf(sel) : null, nFx = F ? ["lluvia", "tormenta", "apagon", "terremoto", "humo"].filter(k => F[k]).length + (F.cristal ? 1 : 0) + (F.huellas ? 1 : 0) + (F.ventana ? 1 : 0) : 0;
+    const nDeb = sel ? DEB.filter(d => chOf(sel)[d[0]]).length : 0, bd = { retos: nCh, fichas: nFx + nDeb };
+    $("mtabs").innerHTML = MTABS.map(([k, n]) => `<button class="tab" type="button" role="tab" aria-selected="${k === mtab}" data-k="${k}">${n}${bd[k] ? `<small>×${bd[k]}</small>` : ""}</button>`).join("");
+    $("mtabs").querySelectorAll(".tab").forEach(b => b.onclick = () => showTab(b.dataset.k));
+  }
+  function showTab(k) {
+    mtab = k; try { localStorage.setItem("geolite.mesa.tab", k); } catch (e) { /* nada */ }
+    document.querySelectorAll(".pane").forEach(p => { p.hidden = p.dataset.pane !== k; }); paintTabs();
+  }
+  function setupTabs() { showTab(mtab); }
+  function ahora() {
+    const st = selSt, el = $("ahora"); if (!el) return;
+    if (!st) { el.innerHTML = "<b>Sin partida elegida.</b> Elige una de la lista para mandarle algo; mientras tanto puedes ensayar con el crupier de la mesa."; return; }
+    const b = t => `<b>${t}</b>`, q = st.q ? `«${esc(st.q)}»` : "";
+    let t;
+    if (st.md === "clasico") t = b("Juega el Clásico.") + " Frases, fichas, gestos y trastadas; los retos solo existen en la Aventura.";
+    else if (st.sc === "campamento") t = b("Está en el Campamento.") + " Ropa, regalo de la casa, el desfile y Comodín; los retos esperan a la ronda siguiente.";
+    else if (!st.sc || st.sc.startsWith("menu:")) t = b("Está en los menús.") + " Frases de portada, ropa, regalo, humor, mirada y trastadas como la siesta o la salida.";
+    else if (st.ph === "asking") t = b("Está buscando " + (q || "un sitio") + ".") + " Frases de pregunta, retos, fichas, Ctrl+Z, el apagón con ojos y el guante.";
+    else if (st.ph === "reveal") t = b("Acaba de buscar " + (q || "un sitio") + ".") + " Frases de acierto o fallo, el sello gigante y el gato con su ticket.";
+    else t = b("Está en plena partida.") + " Frases, gestos, fichas y retos.";
+    el.innerHTML = t;
   }
 
   /* ------------------------------------------------ gestos por grupo: van con la frase o salen ya */
@@ -719,7 +858,7 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
   }
 
   function renderFacts() {
-    const st = selSt, F0 = $("facts"), W = $("whoL");
+    const st = selSt, F0 = $("facts"), W = $("whoL"); ahora();
     if (!st) { F0.innerHTML = `<p class="none">Elige una partida de la lista.</p>`; W.innerHTML = ""; refresh(); return; }
     W.innerHTML = `<i class="flag" style="background-image:url(../assets/icons/flag_${esc(st.l)}.webp)"></i><b>${esc(st.n || "Sin nombre")}</b><span class="langTag">Juega en ${esc(LANG[st.l] || st.l)}</span>`;
     $("lvTag").textContent = phrase("EN DIRECTO|LIVE|EN DIRECT|AO VIVO|LIVE|IN DIRETTA|EN VIVO|直播中|생방송|生放送|В ЭФИРЕ|NA ŻYWO", st.l);
@@ -733,9 +872,14 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--gold); }
     const cb = $("camBtn"); if (cb) cb.onclick = () => mpc ? camStop() : camStart();
     refresh();
   }
+  const MOMS = [[null, "Todas"], ["pregunta", "Pregunta"], ["acierto", "Acierto"], ["fallo", "Fallo"], ["portada", "Portada"], ["espera", "Espera"]];
+  let mom = null;
+  const autoMom = () => { const st = selSt; mom = !st || st.md === "clasico" ? null : !st.sc || st.sc.startsWith("menu:") ? "portada" : st.ph === "asking" ? "pregunta" : null; };
   function renderCards() {
     const l = lang();
-    $("quick").innerHTML = QUICK.map(([f, s], i) => `<button class="card${i === quick ? " on" : ""}" data-i="${i}">${esc(phrase(s, "es"))}${sel && !same(l) ? `<small>→ ${esc(LANG[l] || l)}</small>` : ""}</button>`).join("");
+    $("moms").innerHTML = MOMS.map(([k, n]) => `<button class="chipb${k === mom ? " on" : ""}" type="button" data-m="${k || ""}">${n}</button>`).join("");
+    $("moms").querySelectorAll(".chipb").forEach(b => b.onclick = () => { mom = b.dataset.m || null; renderCards(); });
+    $("quick").innerHTML = QUICK.map(([f, s, m], i) => mom && m !== mom ? "" : `<button class="card${i === quick ? " on" : ""}" data-i="${i}">${esc(phrase(s, "es"))}${sel && !same(l) ? `<small>→ ${esc(LANG[l] || l)}</small>` : ""}</button>`).join("");
     $("quick").querySelectorAll(".card").forEach(b => b.onclick = () => {
       if (!sel) { toast("Primero elige una partida."); return; }
       quick = +b.dataset.i; const [f, s] = QUICK[quick]; $("txt").value = phrase(s, "es"); setFace(f); $("txt").oninput(); clink();
