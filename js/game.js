@@ -1393,8 +1393,10 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     const end = () => { if (ended) return; ended = true; st.classList.add("leave"); setTimeout(done, 540); };
     if (!A._holdStudio) setTimeout(end, S.reduce ? 1500 : 3500);   /* animacion obligatoria: no se puede saltar */
   }
-  function finishBoot() {
-    S.booting = false; const boot = $("boot"); boot.classList.add("out"); setTimeout(() => boot.classList.add("hidden"), 850);
+  function finishBoot(abierta) {
+    S.booting = false; const boot = $("boot");
+    if (abierta) { boot.classList.add("hidden"); A.audio.unlock(true); A.music.mode(0); A.music.moment("home"); return; }   // la casa ya abrio sus lamparas sobre la portada (js/puerta.js): nada que fundir
+    boot.classList.add("out"); setTimeout(() => boot.classList.add("hidden"), 850);
     A.audio.unlock(true); showTitle();
   }
   /* aviso de fotosensibilidad (v0.52): una sola vez, la primera vez que se abre el juego, en la propia entrada (antes de cualquier reto) y con el ajuste
@@ -1413,7 +1415,10 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   function runBoot() {
     const boot = $("boot"), gate = $("gate"); boot.classList.remove("hidden");
     let gateAt = 0; const warned = gateWarn();
-    const showGate = () => { $("studio").classList.add("hidden"); gate.classList.remove("hidden"); gateAt = performance.now();
+    let puerta = false;
+    const showGate = () => { $("studio").classList.add("hidden");
+      if (A.puerta) puerta = A.puerta.prepara(gate, showTitle);        // la casa a oscuras: la portada de verdad debajo, un cono sobre el rotulo (js/puerta.js)
+      gate.classList.remove("hidden"); gateAt = performance.now();
       setTimeout(() => { if (!entered && A.gala) A.gala.warm(); }, 1500); };       // v0.3.35: mientras la puerta espera el clic, la GPU prepara la pausa nueva (si no, su primera apertura daba un tiron); v0.3.41: cuando ya ha terminado de aparecer (a los 150 ms paraba su fundido medio segundo)
     let entered = false;
     const enter = () => {
@@ -1421,7 +1426,8 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       if (A.gala && A.gala.cool) A.gala.cool();   // el precalentamiento de la GPU sale antes de fundir la puerta
       if (warned) { S.flashSeen = true; save(); }
       if (gateAt && A.dealer && A.dealer.noteGate) A.dealer.noteGate(performance.now() - gateAt);   // cuanto tardaste en entrar
-      finishBoot();   // la entrada se funde con la portada junto con #boot (ocultarla antes dejaba un fogonazo negro hasta que la portada empezaba a aparecer)
+      if (puerta) A.puerta.abre(() => finishBoot(true));   // las lamparas se encienden una a una (1,2 s; un segundo clic lo salta)
+      else finishBoot();   // la entrada se funde con la portada junto con #boot (ocultarla antes dejaba un fogonazo negro hasta que la portada empezaba a aparecer)
     };
     gate.addEventListener("pointerdown", enter);
     addEventListener("keydown", function k(e) { if (entered) { removeEventListener("keydown", k); return; } if ((e.key === "Enter" || e.key === " ") && !(e.target && e.target.closest && e.target.closest("#gwSw"))) { e.preventDefault(); enter(); } });
@@ -1432,7 +1438,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
 
   applyLang(); syncSettings();
   const start = () => {
-    { const sp = $("splash"); if (sp) { sp.classList.add("out"); setTimeout(() => sp.remove(), 500); } }   // pantalla de carga fuera en cualquier caso
+    if (A.marquesina) A.marquesina.fin(); else { const sp = $("splash"); if (sp) { sp.classList.add("out"); setTimeout(() => sp.remove(), 500); } }   // pantalla de carga fuera en cualquier caso (la marquesina, con su carrera de luz: js/marquesina.js)
     /* las fuentes pequenas que aun no se han usado (variantes latinas, cirilico, nombres de los idiomas) se cargan ya, durante el arranque: la primera vez
        que salian (Ajustes, Perfil...) se cargaban y se buscaban letras de repuesto en ese mismo fotograma (tiron). Las CJK grandes (~600 KB), solo si hacen falta */
     try { document.fonts.forEach(f => { if (f.status === "unloaded" && !/Fusion Pixel/i.test(f.family)) f.load().catch(() => {}); }); } catch (e) { /* sin FontFaceSet */ }

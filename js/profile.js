@@ -308,6 +308,7 @@ window.AIQ = window.AIQ || {};
   let dlW = 0;
   function toast() {
     if (showing || !queue.length) return;
+    if (A.core && A.core.S && A.core.S.booting) { setTimeout(toast, 400); return; }   // con la puerta a oscuras (js/puerta.js) el aviso y su comentario esperan a que la casa abra
     if (A.dealer && A.dealer.asideOn && A.dealer.asideOn() && dlW++ < 20) { setTimeout(toast, 400); return; }   // v0.3.205: el crupier acaba su frase en esa pantalla: el aviso, despues (no encima)
     dlW = 0; showing = true;
     const a = queue.shift(); if (a.fake) return fakeToast(a);

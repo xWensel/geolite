@@ -17,7 +17,7 @@
 <meta property="og:description" content="Roguelike de geografía: haz clic lo más cerca posible del lugar que te piden. Casino pixel art, 12 idiomas.">
 <meta property="og:image" content="https://geolite-game.vercel.app/assets/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:url" content="https://geolite-game.vercel.app/">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Geolite · ¿Sabes dónde queda?"><meta name="twitter:image" content="https://geolite-game.vercel.app/assets/og.png">
-<link rel="preload" as="image" href="assets/logo.png"><!-- v0.3.235: tierra.png y rotulo.png ya no se precargan aqui: con el service worker activo Chromium descartaba el preload ("cross-world service worker resource mismatch") y los pedia dos veces; js/geologo.js los carga y el SW los tiene en cache -->
+<!-- assets/logo.png ya no se precarga aqui: lo pide js/marquesina.js nada mas empezar el <body> (con el service worker activo Chromium descartaba el preload, "cross-world service worker resource mismatch", y lo pedia dos veces). v0.3.235: tierra.png y rotulo.png ya no se precargan aqui: con el service worker activo Chromium descartaba el preload ("cross-world service worker resource mismatch") y los pedia dos veces; js/geologo.js los carga y el SW los tiene en cache -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="css/style.css">
@@ -64,14 +64,15 @@
 <link rel="stylesheet" href="css/celebra.css">
 <script src="js/boot.js"></script>
 <style>
-/* pantalla de carga: negro puro, sin nada. Lo primero que se ve al abrir el juego es la intro del estudio (Cousins Studios, tambien sobre negro):
-   mientras se descargan los datos y se construye el mapa la pantalla solo esta a oscuras, y al quitarla el logo sale sin costuras */
+/* pantalla de carga: negro y, si tarda mas de 0,4 s, la marquesina de la casa con sus bombillas (js/marquesina.js). Lo primero que se ve al abrir
+   el juego es la intro del estudio (Cousins Studios, tambien sobre negro): la marquesina se funde sobre ella sin costuras */
 #splash{position:fixed;inset:0;z-index:99999;background:#000;transition:opacity .45s ease}
 #splash.out{opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"></div>
+<script src="js/marquesina.js"></script><!-- la marquesina de la carga: pinta antes que el resto (no defer) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 </svg>
 
@@ -442,6 +443,11 @@
 <script src="js/vestuario.js" defer></script>
 <script src="js/dealer.js" defer></script>
 <script src="js/trastadas.js" defer></script>
+<script src="js/telon.js" defer></script>
+<script src="js/puerta.js" defer></script>
+<script src="js/laton.js" defer></script>
+<script src="js/record.js" defer></script>
+<script src="js/lamina.js" defer></script>
 <script src="js/cofre.js" defer></script>
 <script src="js/pointer.js" defer></script>
 <script src="js/uikit.js" defer></script>

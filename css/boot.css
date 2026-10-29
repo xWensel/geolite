@@ -20,6 +20,22 @@
 .langgrid button.on { background: var(--paper); border-color: var(--paper); color: var(--ink); }
 .gate-enter { position: relative; font-family: var(--mono); font-size: 15.5px; letter-spacing: .05em; text-transform: uppercase; color: rgba(242, 233, 214, .85); padding: 14px 24px; animation: st-fade 1.2s ease .3s both, breathe 2.4s ease-in-out 1s infinite; }
 @keyframes breathe { 50% { opacity: .35; } }
+/* LA CASA ABRE (js/puerta.js, paquete «Portada» del Probador): la puerta es la portada de verdad a oscuras, con un cono sobre el rotulo. #boot se
+   vuelve transparente y la oscuridad la pone un lienzo (.gate-luz); el logo y el resplandor verdes de la puerta de antes no salen.
+   «Pulsa para entrar» respira en tres escalones (no un fundido liso), a la rejilla de 3 px, dentro del cono bajo el lema */
+#boot:has(> .gate.puerta:not(.hidden)) { background-color: transparent; transition: background-color .9s ease; }   /* del negro del estudio a la sala a oscuras, sin corte */
+.gate.puerta { background: none; }
+.gate.puerta .gate-glow, .gate.puerta .gate-logo { display: none; }
+.gate-luz { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.gate.puerta > :not(.gate-luz) { z-index: 1; }
+.gate.puerta:not(.warn) .gate-enter { position: absolute; left: 0; right: 0; padding: 6px 0; text-align: center; font-size: 24px; letter-spacing: .06em; color: #f3f0fa;
+  text-shadow: 3px 3px 0 #1d0a3d; animation: st-fade .5s ease both, gate-pulsa 1.68s steps(1, end) .5s infinite; }
+@keyframes gate-pulsa { 0% { opacity: 1; } 25% { opacity: .82; } 50% { opacity: .62; } 75% { opacity: .82; } }
+.gate.puerta.abriendo .gate-enter, .gate.puerta.abriendo .gate-warn { visibility: hidden; }
+/* sin WebGL: el cono con un degradado y, al entrar, un fundido corto */
+.gate.puerta.sin-gl { background: radial-gradient(ellipse 26% 22% at 50% 14%, transparent 40%, rgba(4, 10, 10, .9) 100%); transition: opacity .25s ease; }
+.gate.puerta.sin-gl.fuera { opacity: 0; }
+html.reduce-motion .gate.puerta .gate-enter { animation: none; }
 /* aviso de fotosensibilidad (v0.52): solo la primera vez, entre el logo y "pulsa para entrar". Placa de fieltro con marco dorado, quieta a proposito
    (sin bombillas que corran ni brillos: es el aviso de los destellos). Crece con la pantalla como los menus (--k); el logo se encoge para dejarle sitio */
 .gate.warn { gap: clamp(14px, calc(2.6 * var(--vh)), 30px); }

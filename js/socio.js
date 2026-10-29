@@ -185,7 +185,7 @@ window.AIQ = window.AIQ || {};
       outline() { const o = []; for (let y = -m; y < h + m; y++) for (let x = -m; x < w + m; x++) { if (!g.get(x, y)) continue; if (!g.get(x - 1, y) || !g.get(x + 1, y) || !g.get(x, y - 1) || !g.get(x, y + 1)) o.push(x, y); } for (let i = 0; i < o.length; i += 2) g.set(o[i], o[i + 1], INK); },
       ornaments() { orn.forEach((v, k) => { const [x, y] = k.split(",").map(Number); g.set(x, y, v); }); orn.forEach((v, k) => { const [x, y] = k.split(",").map(Number); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([a, b]) => { if (!orn.has((x + a) + "," + (y + b))) g.set(x + a, y + b, INK); }); }); },
       box(x, y, rw, rh, fill) { if (fill !== undefined) g.rect(x, y, rw, rh, fill); for (let i = x; i < x + rw; i++) { g.set(i, y, INK); g.set(i, y + rh - 1, INK); } for (let j = y; j < y + rh; j++) { g.set(x, j, INK); g.set(x + rw - 1, j, INK); } },
-      paint(cv) { cv.width = GW; cv.height = GH; const ctx = cv.getContext("2d"), id = ctx.createImageData(GW, GH);
+      paint(cv) { cv.width = GW; cv.height = GH; const ctx = cv.getContext("2d", { willReadFrequently: true }), id = ctx.createImageData(GW, GH);
         c.forEach((v, i) => { if (!v) return; const n = parseInt(v.slice(1), 16); id.data[i * 4] = n >> 16; id.data[i * 4 + 1] = (n >> 8) & 255; id.data[i * 4 + 2] = n & 255; id.data[i * 4 + 3] = 255; });
         ctx.putImageData(id, 0, 0); return ctx; },
     };
@@ -427,7 +427,9 @@ window.AIQ = window.AIQ || {};
       const probe = document.createElement("span"); probe.className = "sc-cat"; probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-size:${Math.max(18, 9 * d)}px`; probe.textContent = D.cat; host.appendChild(probe);
       const two = probe.scrollWidth > 76 * d && /\s/.test(D.cat.trim()); probe.remove();             // una palabra sola no se parte: se estrecha (squeeze)
       const L = draw(cv, D.card, two, !!tt, mk, D.mt, 0, D.pr);
-      drawIcon(L.ctx, L.win, ic);
+      let lam = null;                                                    // paquete «Portada» del Probador (por-lamina): la lamina por pixel de arte (js/lamina.js)
+      const foil = !!(L.fx && A.lamina);
+      drawIcon(L.ctx, L.win, ic, () => { if (lam) lam.remask(); });
       const px = v => v * d + "px", box = (r, cls, html) => `<span class="${cls}" style="left:${px(r[0])};top:${px(r[1])};width:${px(r[2])};height:${px(r[3])}">${html}</span>`;
       card.style.width = px(96); card.style.height = px(L.H); card.style.setProperty("--sd", d);
       card.style.setProperty("--ink", L.ink);
@@ -435,7 +437,8 @@ window.AIQ = window.AIQ || {};
       const ext = `left:${px(-L.m)};top:${px(-L.m)};right:auto;bottom:auto;width:${px(96 + 2 * L.m)};height:${px(L.H + 2 * L.m)}`;
       cv.style.cssText = ext; tilt.appendChild(cv);
       const mask = `url(${cv.toDataURL()})`;
-      ["sc-shadow", "sc-fx fx-" + (L.fx || "no"), "sc-glare"].forEach((cls, i) => { const m = document.createElement("span"); m.className = cls; m.style.cssText = ext; m.style.webkitMaskImage = m.style.maskImage = mask; (i ? tilt : card).appendChild(m); });
+      (foil ? ["sc-shadow"] : ["sc-shadow", "sc-fx fx-" + (L.fx || "no"), "sc-glare"]).forEach((cls, i) => { const m = document.createElement("span"); m.className = cls; m.style.cssText = ext; m.style.webkitMaskImage = m.style.maskImage = mask; (i ? tilt : card).appendChild(m); });
+      if (foil) lam = A.lamina.monta({ tilt, cv, L, ed: L.fx, ic, card: D.card, sweepAlEstrenar: !o.other && !o.carta && o.t == null });
       tilt.insertAdjacentHTML("beforeend", box(L.cat, "sc-cat" + (two ? " two" : ""), `<span>${esc(D.cat)}</span>`)
         + box(L.name, "sc-name", `<span>${esc(D.name)}</span>`)
         + (L.tit ? box(L.tit, "sc-tit", `<span>${esc(titleName(tt))}</span>`) : "")
@@ -443,7 +446,7 @@ window.AIQ = window.AIQ || {};
       card.appendChild(tilt); host.appendChild(card); host.style.width = px(96); host.style.height = px(L.H);
       /* las cartas vivas (la decima de cada serie): su fondo se mueve despacio (unos 7 fotogramas por segundo, solo los pixeles del fondo y el
          icono encima). Con el movimiento reducido del juego, o la ventana oculta, se queda quieta */
-      if (L.viva && !reduce()) { let tv = 0; host._viva = setInterval(() => { if (!host.isConnected || host._sig !== sig) { clearInterval(host._viva); host._viva = 0; return; } if (document.hidden || reduce()) return; tv += .12; L.redraw(tv); drawIcon(L.ctx, L.win, ic); }, 140); }
+      if (L.viva && !reduce()) { let tv = 0; host._viva = setInterval(() => { if (!host.isConnected || host._sig !== sig) { clearInterval(host._viva); host._viva = 0; return; } if (document.hidden || reduce()) return; tv += .12; L.redraw(tv); drawIcon(L.ctx, L.win, ic); if (lam) lam.refresh(); }, 140); }
       fit(tilt.querySelector(".sc-cat"), two ? 8 : 10, d); fit(tilt.querySelector(".sc-name"), 13, d); squeeze(tilt.querySelector(".sc-name > span"), tilt.querySelector(".sc-name"), .72); squeeze(tilt.querySelector(".sc-cat > span"), tilt.querySelector(".sc-cat"));
       if (L.tit) { fit(tilt.querySelector(".sc-tit"), 9, d); squeeze(tilt.querySelector(".sc-tit > span"), tilt.querySelector(".sc-tit"), .72); }
       /* se inclina hacia el raton; el brillo y el reflejo le siguen */
@@ -451,7 +454,9 @@ window.AIQ = window.AIQ || {};
       tgt.onpointermove = ev => { if (reduce()) return; const r = card.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width - .5, y = (ev.clientY - r.top) / r.height - .5;
         tilt.style.transform = `perspective(${px(420)}) rotateY(${(x * 14).toFixed(2)}deg) rotateX(${(-y * 14).toFixed(2)}deg)`;
         tilt.style.setProperty("--gx", ((x + .5) * 100).toFixed(1) + "%"); tilt.style.setProperty("--gy", ((y + .5) * 100).toFixed(1) + "%"); };
-      tgt.onpointerleave = () => { tilt.style.transform = ""; };
+      tgt.onpointerleave = ev => { tilt.style.transform = ""; if (lam) lam.point(ev.clientX, ev.clientY); };   // la carta se endereza: la lamina, con ella
+      /* con el mando: al enfocarla, la luz la recorre una vez («Pasa la luz») */
+      const bt = host.closest("button"); if (lam && bt) bt.onfocus = () => { if (bt.matches(":focus-visible") || document.documentElement.dataset.input === "pad") lam.barre(); };
     };
     host._build = build; build();
     if (document.fonts && document.fonts.status !== "loaded") document.fonts.ready.then(() => { host._sig = ""; build(); });
