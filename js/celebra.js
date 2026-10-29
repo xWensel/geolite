@@ -5,12 +5,11 @@
  *   acierto(tier)       la onda de choque deforma el mapa bajo tu chincheta (js/map.js, FS_POST). Los anillos 300/150/75 van en la capa de encima:
  *                       la onda pasa por debajo de ellos y siguen intactos
  *   jackpot(i)          cada golpe del premio de la Enciclopedia: otra onda, mayor (el temblor ya lo pone A.casa.premio; nada de oro en la Enciclopedia)
- *   racha(o)            el fuego de la racha, a lo Balatro, detras del recuadro rojo del ticket: calor en la 2, llamas en la 3, incendio en la 5
  *   superada(lvl, vd)   el sello hunde el ticket, la tinta se corre por el papel y la lampara de la caja sube segun el margen (1 justa, 2 holgada, 3 aplastante)
  *   logro(el)           el aviso de logro aparece quemandose con un filo de oro (y se va igual, con el filo oscuro)
  *   compra(...)         la carta comprada, la reliquia en su hueco, el contador y la etiqueta 0/5 pasan a lo nuevo quemandose en oro
  * La quema la pinta js/quema.js (CSS.paintWorklet), celda a celda, en el hilo del pintor. Movimiento Minimo: sin desplazar, hundir ni temblar
- * (la luz, a la mitad; el fuego, quieto). Destellos suaves: la luz a la mitad. Sin WebGL2 o sin pintor de CSS, todo sigue como antes.
+ * (la luz, a la mitad). Destellos suaves: la luz a la mitad. Sin WebGL2 o sin pintor de CSS, todo sigue como antes.
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -70,88 +69,6 @@ float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++) { s += a * 
     if (cv.width !== Wd || cv.height !== Hd) { cv.width = Wd; cv.height = Hd; cv.style.width = Wd / d + "px"; cv.style.height = Hd / d + "px"; }
     const t = `translate(${X / d}px, ${Y / d}px)`; if (cv._t !== t) { cv.style.transform = t; cv._t = t; }
     return [X / d, Y / d];
-  }
-
-  /* ================================================================ 2. el fuego de la racha (Balatro), detras del recuadro rojo del ticket.
-     Llamas de ruido que suben del borde de arriba del recuadro en cuatro bandas de color de geolite40. El lienzo va FUERA del ticket (el ticket lleva
-     su sombra en un filtro: un lienzo vivo dentro lo haria recalcular en cada fotograma) y no pinta dentro del recuadro: queda detras */
-  const FS_LLAMAS = `#version 300 es
-precision highp float;
-uniform vec2 uR; uniform vec4 uBox; uniform float uT, uI, uK;
-out vec4 o;
-${NOISE}
-void main(){
-  vec2 px = vec2(gl_FragCoord.x, uR.y - gl_FragCoord.y) / uK;
-  float x0 = uBox.x, y0 = uBox.y, x1 = uBox.z, y1 = uBox.w;
-  if (px.x > x0 && px.x < x1 && px.y > y0 + 1. && px.y < y1) { o = vec4(0.); return; }   // el recuadro tapa su propio fuego
-  float up = y0 - px.y, side = max(x0 - px.x, px.x - x1), t = uT;
-  float lengua = fbm(vec2(px.x * .045, t * .9));
-  float H = (12. + 92. * uI) * (.35 + 1.15 * lengua * lengua);
-  vec2 q = vec2(px.x * .05 + sin(px.y * .06 + t * 3.) * .25, (px.y + t * 95.) * .032);
-  float n = fbm(q) * .7 + fbm(q * 2.6 + vec2(4.1, t * 1.7)) * .3;
-  float lado = smoothstep(10., -10., side);
-  float f = 0.;
-  if (up > -6.) f = lado * (1.05 - up / (H * (.55 + .9 * n)));
-  f -= (1. - smoothstep(0., 1., n * 1.6)) * .25 * smoothstep(0., 20., up);
-  f = clamp(f, 0., 1.) * (.45 + .55 * min(uI, 1.));
-  vec3 c = vec3(0.); float a = 0.;
-  if (f > .78) { c = vec3(1., .953, .69); a = 1.; }
-  else if (f > .56) { c = vec3(.992, .843, .259); a = 1.; }
-  else if (f > .34) { c = vec3(.961, .651, .137); a = 1.; }
-  else if (f > .14) { c = vec3(.91, .157, .227); a = .92; }
-  else if (f > .05) { c = vec3(.659, .078, .18); a = .55 * smoothstep(.05, .14, f); }
-  float glow = exp(-max(up, 0.) / 18.) * smoothstep(14., 0., side) * .3 * min(uI, 1.);
-  c += vec3(1., .6, .25) * glow * (1. - a); a = max(a, glow);
-  o = vec4(c * a, a);
-}`;
-  const fuerza = n => (n >= 6 ? 1 : n === 5 ? 0.86 : n === 4 ? 0.6 : n === 3 ? 0.38 : n === 2 ? 0.14 : 0);
-  const LL = { cv: null, P: null, m: null, fuego: 0, obj: 0, aviva: 0, raf: 0, last: 0, slamT: 0, iq: -1, r: null, rt: 0, mide: 0 };
-  function llamasGL(poner = true) {
-    if (!LL.P || LL.P.dead || LL.P.gl.isContextLost()) {
-      if (LL.cv) LL.cv.remove();
-      const cv = document.createElement("canvas"); cv.className = "cel-fx cel-llamas"; cv.setAttribute("aria-hidden", "true");
-      LL.cv = cv; LL.P = programa(cv, FS_LLAMAS); if (!LL.P) { LL.cv = null; return null; }
-    }
-    const hud = document.getElementById("hud");
-    if (poner && hud && LL.cv.previousElementSibling !== hud) hud.insertAdjacentElement("afterend", LL.cv);
-    return LL.P;
-  }
-  /* o: { antes, ahora, eq ("on" | "broken" | "off"), slam (ms hasta el golpe de la caja) } */
-  function racha(o) {
-    clearTimeout(LL.slamT);
-    if (!o || !o.eq || !llamasGL()) { LL.obj = 0; return; }
-    const lit0 = o.antes >= 2 && o.eq !== "off";
-    LL.obj = LL.fuego = lit0 ? fuerza(o.antes) : 0; LL.aviva = 0; LL.m = null; LL.iq = -1; LL.r = null; LL.mide = performance.now() + 1000;   // mientras el ticket entra, el recuadro se mide en cada fotograma
-    LL.slamT = setTimeout(() => { LL.obj = o.eq === "on" ? fuerza(o.ahora) : 0; if (o.eq === "on") LL.aviva = 0.35; LL.mide = performance.now() + 600; arde(); }, o.slam || 0);
-    arde();
-  }
-  const arde = () => { if (!LL.raf) { LL.last = 0; LL.raf = requestAnimationFrame(llama); } };
-  function apagaLlamas() { if (LL.cv) LL.cv.style.display = "none"; LL.raf = 0; LL.iq = -1; }
-  function llama(now) {
-    LL.raf = 0;
-    const dt = LL.last ? Math.min(0.05, (now - LL.last) / 1000) : 0.016; LL.last = now;
-    const m = LL.m && LL.m.isConnected ? LL.m : (LL.m = document.querySelector("#hud .tk-eq .m"));
-    if (!m || fase() !== "reveal" || !LL.P || LL.P.dead) { apagaLlamas(); if (fase() !== "reveal") { clearTimeout(LL.slamT); LL.obj = 0; } return; }
-    if (!LL.P.ready()) { LL.raf = requestAnimationFrame(llama); return; }   // aun compilando: sin fuego un momento (el de pixeles sigue)
-    const eq = m.closest(".tk-eq"); if (eq && !eq.classList.contains("ll-on")) eq.classList.add("ll-on");   // el fuego de pixeles de siempre se aparta
-    const q = quieto(), a = 1 - Math.exp(-dt * 3.7);
-    LL.fuego += (LL.obj - LL.fuego) * a; LL.aviva *= 1 - a;
-    const i = clamp((LL.fuego + LL.aviva) * (q ? 0.7 : 1) * Math.min(1.15, 0.65 + K * 0.3), 0, 1.1);
-    if (i < 0.01) { apagaLlamas(); if (LL.obj > 0) arde(); return; }
-    if (!LL.r || now < LL.mide || now - LL.rt > 250) { LL.r = m.getBoundingClientRect(); LL.rt = now; }   // quieto el ticket, basta con mirar cada cuarto de segundo
-    const r = LL.r;
-    if (r.width) {
-      const k = esc(), L = 56 * k, T = 222 * k, B = 22 * k, [x, y] = coloca(LL.cv, r.left - L, r.top - T, r.width + 2 * L, r.height + T + B);
-      const key = q ? [i.toFixed(2), x, y, r.width, r.height].join() : null;
-      if (!q || key !== LL.iq) {                                        // con Movimiento minimo, el fuego quieto: solo se repinta si cambia
-        LL.iq = key; LL.cv.style.display = "block";
-        const { gl, u } = LL.P, d = devicePixelRatio || 1;
-        gl.uniform2f(u("uR"), LL.cv.width, LL.cv.height); gl.uniform1f(u("uK"), k * d);
-        gl.uniform4f(u("uBox"), (r.left - x) / k, (r.top - y) / k, (r.right - x) / k, (r.bottom - y) / k);
-        gl.uniform1f(u("uT"), q ? 3 : now / 1000); gl.uniform1f(u("uI"), i); LL.P.draw();
-      }
-    }
-    LL.raf = requestAnimationFrame(llama);
   }
 
   /* ================================================================ 3. ronda superada: el sello hunde el ticket, la tinta se corre y la lampara sube */
@@ -352,9 +269,9 @@ void main(){
     };
   }
 
-  /* en un rato libre nada mas arrancar: los dos programas compilando en segundo plano */
+  /* en un rato libre nada mas arrancar: el programa compilando en segundo plano */
   { const idle = (fn, ms) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: ms }) : setTimeout(fn, ms));
-    addEventListener("load", () => idle(() => { llamasGL(false); tintaGL(false); }, 6000), { once: true }); }
+    addEventListener("load", () => idle(() => { tintaGL(false); }, 6000), { once: true }); }
 
-  A.celebra = { acierto, jackpot, racha, superada, logro, logroFuera, antesDeComprar, antesDeVender, get quema() { return QM; } };
+  A.celebra = { acierto, jackpot, superada, logro, logroFuera, antesDeComprar, antesDeVender, get quema() { return QM; } };
 })(window.AIQ);

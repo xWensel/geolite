@@ -982,7 +982,6 @@
        apagada a x1. En el Clasico la racha no multiplica: solo cuenta (fila RACHA) */
     const eq = S.run ? (mult > 1 ? "on" : prevStreak >= 2 && !S.streak ? "broken" : "off") : null;
     const broke = eq === "broken" || (!S.run && prevStreak >= 2 && !S.streak);
-    if (A.celebra) A.celebra.racha({ antes: prevStreak, ahora: S.streak || 0, eq, slam: T_SLAM - M0 });
     /* v0.3.24x (Probador, «Silencios»): la racha rota frena la cinta. La cancion cae dos octavas en 450 ms y se calla justo cuando se agrieta la
        ficha (T_SLAM); el mando lo nota por el motor grave mientras frena */
     if (broke) later(() => { if (still() && A.music.freno && A.music.freno(450) && A.haptic && A.haptic.pat) A.haptic.pat([{ t: 0, d: 450, lo: 0.3, hi: 0 }], { movil: false }); }, T_SLAM - 480);   // v0.3.203: el fuego de la racha detras de la caja roja

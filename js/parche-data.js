@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.3.244",
+      name: L("El mismo fuego", "The same fire", "Le même feu", "O mesmo fogo", "Dasselbe Feuer", "Lo stesso fuoco", "", "同一团火", "같은 불꽃", "同じ炎", "Тот же огонь", "Ten sam ogień"),
+      date: "2026-10-30",
+      summary: L("La racha arde en la partida con la misma llama de pixeles que ves en la puntuación.", "Your streak burns in the round with the same pixel flame you see on the score ticket.", "Ta série brûle en partie avec la même flamme en pixels que sur le ticket de score.", "A sua sequência arde na partida com a mesma chama de pixels do bilhete de pontuação.", "Deine Serie brennt in der Runde mit derselben Pixelflamme wie auf dem Punkteticket.", "La tua serie brucia in partita con la stessa fiamma di pixel del biglietto del punteggio.", "", "连胜在对局中燃烧的，是与得分小票上相同的像素火焰。", "연속 정답의 불꽃이 점수 티켓과 같은 픽셀 불꽃으로 타오릅니다.", "連勝の炎が、スコアチケットと同じピクセルの炎で燃えます。", "Серия горит в партии тем же пиксельным пламенем, что и на билете с очками.", "Twoja seria płonie w rundzie tym samym pikselowym płomieniem co na bilecie z wynikiem."),
+      chapters: [
+        { id: "fuego", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Cambio", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("La racha", "The streak", "La série", "A sequência", "Die Serie", "La serie", "", "连胜", "연속 정답", "連勝", "Серия", "Seria"),
+          entries: [
+            E(L("Un solo fuego", "One fire", "Un seul feu", "Um só fogo", "Ein Feuer", "Un solo fuoco", "", "只有一种火", "하나의 불꽃", "炎はひとつ", "Один огонь", "Jeden ogień"), "change", "0.3.244", [
+              L("El ticket de cada pregunta ya no usa el fuego de ruido: enciende la misma llama de pixeles de la puntuación, con 1, 2 o 3 llamas según la racha.", "Each question's ticket no longer uses the noise fire: it lights the same pixel flame as the score ticket, with 1, 2 or 3 flames depending on your streak.", "Le ticket de chaque question n'utilise plus le feu de bruit : il allume la même flamme en pixels que le score, avec 1, 2 ou 3 flammes selon ta série.", "O bilhete de cada pergunta já não usa o fogo de ruído: acende a mesma chama de pixels da pontuação, com 1, 2 ou 3 chamas conforme a sequência.", "Das Ticket jeder Frage nutzt nicht mehr das Rauschfeuer: Es zündet dieselbe Pixelflamme wie die Punktzahl, mit 1, 2 oder 3 Flammen je nach Serie.", "Il biglietto di ogni domanda non usa più il fuoco di rumore: accende la stessa fiamma di pixel del punteggio, con 1, 2 o 3 fiamme secondo la serie.", "", "每道题的小票不再使用噪点火焰，而是点燃与得分页相同的像素火焰，按连胜显示 1、2 或 3 簇。", "각 문제의 티켓은 더 이상 노이즈 불꽃을 쓰지 않고, 점수 화면과 같은 픽셀 불꽃을 연속 정답에 따라 1~3개 피웁니다.", "各問題のチケットはノイズの炎をやめ、スコアと同じピクセルの炎を連勝数に応じて1〜3つ灯します。", "Билет каждого вопроса больше не использует шумовой огонь: он зажигает то же пиксельное пламя, что и итог, — 1, 2 или 3 языка в зависимости от серии.", "Bilet każdego pytania nie używa już ognia z szumu: zapala ten sam pikselowy płomień co wynik, z 1, 2 lub 3 płomieniami zależnie od serii.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.3.243",
       name: L("Arranca en inglés", "Starts in English", "Démarre en anglais", "Começa em inglês", "Startet auf Englisch", "Parte in inglese", "", "默认英语", "영어로 시작", "英語で起動", "Запуск на английском", "Start po angielsku"),
       date: "2026-10-30",

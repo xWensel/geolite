@@ -1,8 +1,6 @@
 /* v0.3.203 (Bloque F, paso 6): LO QUE CELEBRA LA CASA (js/celebra.js). Todo sobre las piezas del juego, nada que flote.
-   Los lienzos (fuego de la racha, tinta del sello) van fijos en pantalla y nunca reciben el raton; el pintor de la quema es js/quema.js */
+   Los lienzos (tinta del sello) van fijos en pantalla y nunca reciben el raton; el pintor de la quema es js/quema.js */
 .cel-fx { position: fixed; left: 0; top: 0; display: none; pointer-events: none; will-change: transform; }
-/* el fuego de la racha: con el de WebGL ardiendo, las llamas de pixeles de siempre se apartan (siguen si no hay WebGL2) */
-.tk-eq.ll-on .fire { visibility: hidden; }
 /* la quema: el filo de fuego encima de la pieza (la mascara la lleva la pieza; el filo, un hijo que la cubre entera) */
 .qm-filo { position: absolute; inset: 0; z-index: 7; pointer-events: none; background: paint(quema); border-radius: inherit; }
 .qm-copia { pointer-events: none !important; }
