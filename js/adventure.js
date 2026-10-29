@@ -809,7 +809,7 @@ window.AIQ = window.AIQ || {};
       requestAnimationFrame(step);
     }, 1080);
   }
-  A.adv.introEnd = () => { A.dealer.dock(null); A.dealer.release(); };   // si saltas la intro a media frase, la termina en la esquina y se va (sin decir el resto)
+  A.adv.introEnd = () => { introTok++; A.dealer.dock(null); if (A.dealer.cutIntro) A.dealer.cutIntro(); else A.dealer.release(); };   // si saltas la intro a media frase, se calla ya (la partida es sagrada) y lo que no dijo de contexto lo dice en el veredicto
 
   /* ---------------- puntuacion de una pregunta ---------------- */
   A.adv.score = function (o, km, left, noSide) {

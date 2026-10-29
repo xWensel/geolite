@@ -407,8 +407,9 @@ window.AIQ = window.AIQ || {};
   /* el timbre de la musica segun donde estes: amortiguada del todo (pausa, tu nombre, salir) o "desde la barra" (Campamento). Las de antes, que no
      tienen capas, abren el filtro en los ultimos segundos y con racha */
   const fcut = () => (muf ? 320 : bar ? 1250 : isCl() && (mode === 2 || en) ? 12500 : 8600);
+  let fren = false, frenoT = 0, frenoR = 0;                           // la cinta frenada (A.music.freno): mientras dura, nadie le devuelve el volumen ni el brillo
   function tone() {
-    if (!ctx) return; const t = ctx.currentTime;
+    if (!ctx || fren) return; const t = ctx.currentTime;
     musFilter.frequency.setTargetAtTime(fcut(), t, muf ? 0.08 : 0.15);
     musBus.gain.cancelScheduledValues(t); musBus.gain.setTargetAtTime(musLevel(), t, 0.15);
   }
@@ -431,7 +432,7 @@ window.AIQ = window.AIQ || {};
     /* 0 portada (en calma), 1 partida (entra la banda), 2 ultimos segundos (entra la tension): las capas entran en el siguiente pulso */
     mode(m) { if (m === mode) return; mode = m; tone(); layers("pulso"); },
     duck(level = 0.3, ms = 1400) {
-      if (!ctx || cur < 0) return;
+      if (!ctx || cur < 0 || fren) return;
       const base = musLevel(), t = ctx.currentTime; musBus.gain.cancelScheduledValues(t);
       musBus.gain.setTargetAtTime(base * level, t, 0.05); musBus.gain.setTargetAtTime(base, t + ms / 1000, 0.4);
     },
@@ -454,8 +455,26 @@ window.AIQ = window.AIQ || {};
        enfria(): un fallo le quita los agudos un momento y vuelve. Solo se llaman al revelar: mientras contestas, la musica no cambia */
     energia(on) { if (en === !!on) return; en = !!on; tone(); layers("pulso"); },
     enfria() {
-      if (!ctx || muf || bar) return; const t = ctx.currentTime, f = musFilter.frequency;
+      if (!ctx || muf || bar || fren) return; const t = ctx.currentTime, f = musFilter.frequency;
       f.cancelScheduledValues(t); f.setValueAtTime(f.value, t); f.setTargetAtTime(900, t, 0.06); f.setTargetAtTime(fcut(), t + 0.7, 0.35);
+    },
+    /* v0.3.24x (Probador, «Silencios», Extrema): LA RACHA ROTA FRENA LA CINTA. Como un tocadiscos que se apaga: la cancion cae dos octavas en ms
+       (la velocidad de los platos de 1 a 0,25 sin conservar el tono), se oscurece y se calla; ahi se agrieta la ficha (A.sfx.streakBreak, quien
+       llama la pone en su sitio). 1,1 s despues vuelve sin agudos y en dos pulsos recupera su brillo. Solo al revelar (nunca mientras contestas) */
+    freno(ms = 450) {
+      const d = di >= 0 ? decks[di] : null; if (!ctx || cur < 0 || !d || d.el.paused || !A.audio.musicOn || !(A.audio.vol.music > 0)) return 0;
+      clearTimeout(frenoT); cancelAnimationFrame(frenoR); fren = true;
+      const t = ctx.currentTime, s = ms / 1000, els = d.els.filter(e => e.getAttribute("src")), set = r => els.forEach(e => { try { e.preservesPitch = r === 1; e.playbackRate = r; } catch (er) { /* sin cambio de velocidad */ } });
+      musFilter.frequency.cancelScheduledValues(t); musFilter.frequency.setValueAtTime(Math.max(400, musFilter.frequency.value), t); musFilter.frequency.exponentialRampToValueAtTime(320, t + s);
+      musBus.gain.cancelScheduledValues(t); musBus.gain.setValueAtTime(musBus.gain.value, t); musBus.gain.setValueAtTime(musBus.gain.value, t + s * 0.55); musBus.gain.exponentialRampToValueAtTime(0.0001, t + s);
+      const t0 = performance.now(), step = () => { const k = Math.min(1, (performance.now() - t0) / ms); set(Math.max(0.25, 1 - 0.75 * Math.pow(k, 1.6))); if (k < 1) frenoR = requestAnimationFrame(step); else { set(1); align(d); } };
+      step();
+      frenoT = setTimeout(() => {                                       // vuelve: sin agudos y a 0,6, y en dos pulsos, la de siempre
+        fren = false; if (!ctx) return; const t1 = ctx.currentTime, beat = 60 / ((isCl() ? BPM_CL : BPM_BA)[cur] || 100);
+        musFilter.frequency.cancelScheduledValues(t1); musFilter.frequency.setValueAtTime(900, t1); musFilter.frequency.setTargetAtTime(fcut(), t1 + 2 * beat, 0.5);
+        musBus.gain.cancelScheduledValues(t1); musBus.gain.setValueAtTime(0.0001, t1); musBus.gain.exponentialRampToValueAtTime(musLevel() * 0.6, t1 + 0.2); musBus.gain.setTargetAtTime(musLevel(), t1 + 2 * beat, 0.4);
+      }, ms + 30 + 1100);
+      return ms;
     },
     /* el Campamento: la misma cancion, como si llegara desde la sala */
     room(on) { if (bar === !!on) return; bar = !!on; tone(); },
@@ -607,7 +626,7 @@ window.AIQ = window.AIQ || {};
   /* escalon de cada efecto en dB sobre la musica (maqueta del Bloque F, version 2, con los votos del 23-oct ya dentro: raton -2, premios +3):
      raton -13, pulsar -4, jugada +3 a +10, diana +13, jackpots +13/+16/+19. Medidos con la sonoridad de pico en 50 ms frente a la mediana de la musica */
   const NIVEL = {
-    hover: -35.4, menuHover: -35.1, ui: -23.6, card: -24.5, felt: -18.0, toggle: -16.6, blip: -15.1, deny: -18.9, pause: -22.1, pin: -20.3,
+    hover: -35.4, menuHover: -35.1, ui: -25.4, card: -24.5, felt: -18.0, toggle: -16.6, blip: -15.1, deny: -18.9, pause: -22.1, pin: -20.3,
     reveal0: -18.8, reveal1: -14.3, reveal2: -12.5, reveal3: -10.1, reveal4: -19.5, reveal5: -14.8, impacto: -25.6, golpe: -15.3, count: -3.0, countEnd: -14.1,
     tick: -11.5, streak: -7.0, streakBreak: -25.5, flag: -14.0, coin: -19.2, jackpot1: -13.2, jackpot2: -13.0, jackpot3: -14.5, barrido: -6.6, goal: -14.5,
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
@@ -632,7 +651,8 @@ window.AIQ = window.AIQ || {};
   const LEG_LP = { diceRattle: 3000, diceSnake: 3000, diceTick: 3000, flapRoll: 3000, gbNoise: 3000, ice: 3000, plkTick: 3600, rain: 3600, rcNoise: 3000, rcScratch: 3000, spark: 2600 };
   /* grado pentatonico de cada boton del menu principal (barrer las cartas suena a arpegio) */
   const HOV_DEG = [7, 8, 9, 6, 8, 10, 7];
-  let hovT = -9, hovLast = -1, landLast = 0, hovStep = 0, hovDir = 1, flagLast = -1;
+  let hovT = -9, hovLast = -1, landLast = 0, hovStep = 0, hovDir = 1, flagLast = -1, uiLast = -1;
+  const UI_NOTA = 0.03;                                                 // fuerza de las dos notas de «confirmar» frente a sus fichas (medida: ver la nota de la entrega)
   A.audio.jpGap = JP_GAP;
   /* vibracion del movil (Android; en iPhone y en escritorio no existe y no hace nada). Va aparte del sonido: tambien vibra con los efectos
      apagados. La apaga el ajuste Vibracion (game.js pone A.haptic.on), el mismo que quita el temblor de pantalla */
@@ -682,7 +702,14 @@ window.AIQ = window.AIQ || {};
       rhodes(b, m, t + 0.006, { v: 0.008 * (0.85 + 0.3 * R()), dur: 0.28, idx: 1.0, lp: 1800 });
     }),
     /* PULSAR: la ficha que se deja en el tapete (boton), la carta que se desliza (pantallas), pulsar el fondo de la portada y el interruptor de madera */
-    ui: go((t, x = 0) => { const b = bus("ui", 0.08, x * 0.4); rec(b, "chip", t, { lp: 2400, v: 0.55, len: 0.16 }); felt(b, t, { v: 0.05, f: 700 }); }),
+    /* v0.3.24x (familias por funcion): CONFIRMAR son dos fichas que se posan una sobre otra y dos notas del piano que suben (un paso o dos, desde
+       una de tres alturas que no repite la anterior): un «si» que se reconoce sin mirar */
+    ui: go((t, x = 0) => {
+      const b = bus("ui", 0.08, x * 0.4), v = 0.88 + 0.24 * R(); let d0; do { d0 = [0, 2, 4][Math.floor(R() * 3)]; } while (d0 === uiLast && R() < 0.9); uiLast = d0;
+      const a = deg(d0, 60), c = deg(d0 + (R() < 0.5 ? 2 : 1), 60);
+      rec(b, "chip", t, { lp: 2400, v: 0.55 * v, len: 0.16 }); rec(b, "chip", t + 0.022 + 0.03 * R(), { lp: 2200, v: 0.42 * v, len: 0.14, rate: 0.96 + 0.08 * R() }); felt(b, t, { v: 0.05, f: 700 });
+      rhodes(b, a, t + 0.01, { v: UI_NOTA * v, dur: 0.35, idx: 1.2, lp: 2400 }); rhodes(b, c, t + 0.075, { v: UI_NOTA * v, dur: 0.55, idx: 1.2, lp: 2400 });
+    }),
     card: go((t, x = 0) => { const b = bus("card", 0.1, x * 0.4); rec(b, "carta", t, { lp: 4000, v: 0.6, len: 0.32 }); }),
     felt: go((t, x = 0) => { const b = bus("felt", 0.06, x * 0.4); felt(b, t, { v: 0.09, f: 420, dur: 0.06 }); sub(b, t, { v: 0.06, f0: 110, f1: 60, dur: 0.07 }); }),
     toggle: go((t, on = true) => { const b = bus("toggle", 0.05); felt(b, t, { v: 0.06, f: on ? 1200 : 800, dur: 0.025 }); sub(b, t, { v: 0.05, f0: on ? 240 : 180, f1: 90, dur: 0.05 }); vibes(b, deg(on ? 9 : 7, 60), t + 0.012, { v: 0.012, dur: 0.18, trem: false }); }),
@@ -1261,6 +1288,124 @@ window.AIQ = window.AIQ || {};
     rouTick: cla("rouTick", (t, v = 0) => { pluck(86 - v * 22, t, { vol: 0.05 + v * 0.05, dur: 0.05 + v * 0.09, bright: 3.5, rev: 0.1 + v * 0.2 }); thump(t, { vol: 0.035 + v * 0.09, f0: 520 - v * 260, f1: 180, dur: 0.035 }); noise(t, 0.01 + v * 0.01, { hp: 3800, vol: 0.03 + v * 0.04 }); }),
     rouStop: cla("rouStop", t => { thump(t, { vol: 0.42, f0: 170, f1: 50, dur: 0.24 }); noise(t, 0.07, { lp: 2600, vol: 0.11 }); noise(t + 0.012, 0.02, { hp: 5000, vol: 0.06 }); bell(79, t + 0.02, { vol: 0.07, dur: 0.7, rev: 0.3 }); }),
   };
+  /* ------------------------------------------------------------------ v0.3.24x · paquete «Sonido, vibracion y el crupier» del Probador (EXTREMA) */
+  /* 1) FAMILIAS POR FUNCION: la interfaz suena en cuatro familias (tocar, confirmar, premio, castigo), cada una con su escalon sobre la musica y su
+     timbre. En Extrema la distancia entre escalones es x1,4: tocar -13 -> -18,2 dB, confirmar -4/-6 -> -5,6/-8,4 dB y el «no se puede» -4 -> -5,6 dB
+     (los premios y los castigos de la jugada no cambian). Vale para los dos estilos (Lounge dorado y Clasicos): es la mezcla, no el timbre */
+  const FAM_OBJ = { hover: -13, menuHover: -13, ui: -4, card: -4, felt: -6, toggle: -6, blip: -6, pause: -6, deny: -4 }, FAM_ESC = 1.4;
+  for (const k in FAM_OBJ) { const d = FAM_OBJ[k] * (FAM_ESC - 1); NIVEL[k] += d; CLA[k] += d; }
+  /* voces de mesa por codigo (las de la maqueta, sin muestras): rafagas de ruido siempre cortas (< 1,1 s; nada de fondos), modos resonantes y parciales */
+  function nz(to, t, o) {
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), dur = Math.min(1.1, o.dur || 0.04);
+    s.buffer = noiseBuf; f.type = o.type || "bandpass"; f.frequency.setValueAtTime(o.f || 1000, t); if (o.f1) f.frequency.exponentialRampToValueAtTime(o.f1, t + dur); f.Q.value = o.q || 1;
+    let n = g; if (o.lp) { const l = ctx.createBiquadFilter(); l.type = "lowpass"; l.frequency.value = o.lp; g.connect(l); n = l; }
+    s.connect(f).connect(g); panTo(n, o.pan || 0).connect(to);
+    env(g, t, o.atk || 0.002, o.v || 0.1, dur); s.start(t, R() * 0.8, dur + 0.05);
+  }
+  const feltS = (to, t, o = {}) => nz(to, t, { f: (o.f || 620) * (0.88 + 0.24 * R()), q: 0.9, v: o.v || 0.06, dur: o.dur || 0.035, atk: 0.003, pan: o.pan });
+  /* ficha de arcilla: un golpe de 4 ms que excita cuatro modos (nunca los mismos: +-4 %) con su paso bajo */
+  function chipS(to, t, o = {}) {
+    const { v = 0.3, lp = 3000, rate = 1, pan = 0 } = o, s = ctx.createBufferSource(); s.buffer = noiseBuf;
+    const ex = ctx.createGain(); ex.gain.setValueAtTime(0, t); ex.gain.linearRampToValueAtTime(1, t + 0.0005); ex.gain.exponentialRampToValueAtTime(0.001, t + 0.004); s.connect(ex);
+    const out = ctx.createGain(), l = ctx.createBiquadFilter(); l.type = "lowpass"; l.frequency.value = lp; l.Q.value = 0.5; out.gain.value = v;
+    const base = 2250 * rate * (0.94 + 0.12 * R());
+    [[1, 1, 18], [1.52, 0.65, 16], [2.13, 0.42, 14], [2.9, 0.26, 12]].forEach(([r, a, q]) => { const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = base * r * (0.97 + 0.06 * R()); bp.Q.value = q; const g = ctx.createGain(); g.gain.value = a * q * 0.55; ex.connect(bp).connect(g).connect(l); });
+    const ck = ctx.createBiquadFilter(), cg = ctx.createGain(); ck.type = "bandpass"; ck.frequency.value = 900 * rate; ck.Q.value = 1.2; cg.gain.value = 0.5; ex.connect(ck).connect(cg).connect(l);
+    l.connect(out); panTo(out, pan).connect(to); s.start(t, R() * 0.8, 0.12);
+  }
+  const flick = (to, t, o = {}) => nz(to, t, { f: Math.min(2600, o.f || 2400) * (0.85 + 0.3 * R()), q: 1.6, v: (o.v || 0.07) * 1.4, dur: 0.011 + 0.006 * R(), atk: 0.0012, lp: 3200, pan: o.pan });
+  const naipe = (to, t, o = {}) => { const d = o.dur || 0.16; nz(to, t, { f: (o.f0 || 2600) * (0.9 + 0.2 * R()), f1: o.f1 || 1200, q: 0.8, v: (o.v || 0.09) * 1.2, dur: d, atk: 0.012, lp: 3000, pan: o.pan }); if (!o.vuela) feltS(to, t + d * 0.85, { v: (o.v || 0.09) * 0.55, f: 900, dur: 0.025, pan: o.pan }); };
+  const paper = (to, t, o = {}) => { const n = 3 + Math.floor(R() * 2); for (let i = 0; i < n; i++) nz(to, t + i * 0.008 + R() * 0.006, { f: (o.f || 1700) * (0.7 + 0.6 * R()), q: 1.1, v: (o.v || 0.05) * (1 - i * 0.15), dur: 0.012 + 0.01 * R(), atk: 0.001, lp: 3400, pan: o.pan }); };
+  /* parciales que se apagan (laton, cristal, moneda): [razon, amplitud, caida relativa] */
+  function partials(to, t, f, P, o) {
+    const g = ctx.createGain(), l = ctx.createBiquadFilter(); l.type = "lowpass"; l.frequency.value = o.lp || 3000; l.Q.value = 0.3; g.gain.value = o.v || 0.05;
+    P.forEach(([r, a, dk]) => { const fr = f * r * (0.995 + 0.01 * R()); if (fr > 11000) return; const os = ctx.createOscillator(), ga = ctx.createGain(); os.frequency.value = fr; ga.gain.setValueAtTime(0.0001, t); ga.gain.exponentialRampToValueAtTime(a, t + 0.0015); ga.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(0.03, (o.dur || 0.3) * dk)); os.connect(ga).connect(g); os.start(t); os.stop(t + (o.dur || 0.3) * dk + 0.05); });
+    g.connect(l); return panTo(l, o.pan || 0);
+  }
+  const laton = (to, t, o = {}) => { partials(to, t, (o.f || 820) * (0.94 + 0.12 * R()), [[1, 1, 1], [2.76, 0.42, 0.55], [5.4, 0.16, 0.3], [8.9, 0.05, 0.16]], { v: o.v || 0.05, dur: o.dur || 0.16, lp: o.lp || 2600, pan: o.pan }).connect(to); feltS(to, t, { v: (o.v || 0.05) * 0.8, f: 1100, dur: 0.012, pan: o.pan }); };
+  const cristal = (to, t, o = {}) => partials(to, t, (o.f || 2300) * (0.93 + 0.14 * R()), [[1, 1, 1], [2.32, 0.34, 0.5], [4.25, 0.1, 0.25]], { v: o.v || 0.03, dur: o.dur || 0.28, lp: o.lp || 4200, pan: o.pan }).connect(to);
+  /* la moneda que gira: cuatro parciales con un tremolo que se acelera (el giro) y se corta al cogerla */
+  function moneda(to, t, o = {}) {
+    const d = o.dur || 0.55, f = (o.f || 1650) * (0.95 + 0.1 * R());
+    const n = partials(to, t, f, [[1, 1, 1], [1.73, 0.5, 0.8], [2.96, 0.22, 0.5], [4.3, 0.08, 0.3]], { v: o.v || 0.04, dur: d * 1.4, lp: 4000, pan: o.pan });
+    const am = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain(); am.gain.value = 0.6; lg.gain.value = 0.4;
+    lfo.frequency.setValueAtTime(5 + 2 * R(), t); lfo.frequency.exponentialRampToValueAtTime(22 + 6 * R(), t + d); lfo.connect(lg).connect(am.gain); lfo.start(t); lfo.stop(t + d + 0.2);
+    const cut = ctx.createGain(); cut.gain.setValueAtTime(1, t); cut.gain.setValueAtTime(1, t + d); cut.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.025);
+    n.connect(am).connect(cut).connect(to);
+  }
+  const palmada = (to, t, o = {}) => { const v = o.v || 0.12; for (let i = 0; i < 3; i++) nz(to, t + i * (0.006 + 0.005 * R()), { f: (o.f || 1150) * (0.85 + 0.3 * R()), q: 1.1, v: v * (1 - i * 0.2), dur: 0.05 + 0.03 * R(), atk: 0.0008, lp: 3800, pan: o.pan }); };
+  const chasquido = (to, t, o = {}) => { const v = o.v || 0.12; nz(to, t, { f: 2400 * (0.9 + 0.2 * R()), q: 1.8, v, dur: 0.018, atk: 0.0006, lp: 4200, pan: o.pan }); sub(to, t, { v: v * 0.5 * (0.88 + 0.24 * R()), f0: 230, f1: 140, dur: 0.035 }); };
+  const selloS = (to, t, p) => { feltS(to, t, { v: 0.09 + 0.03 * p, f: 560 - 40 * p, dur: 0.05 + 0.015 * p }); paper(to, t + 0.004, { v: 0.06 + 0.015 * p, f: 1500 }); sub(to, t, { v: 0.05 + 0.045 * p, f0: 160 - 12 * p, f1: 55, dur: 0.1 + 0.07 * p }); if (p >= 2) chipS(to, t + 0.01, { v: 0.12, lp: 2200, rate: 0.8 }); if (p >= 3) { rhodes(to, deg(0, 48), t + 0.03, { v: 0.04, dur: 0.9, idx: 1.1, lp: 1500 }); rhodes(to, deg(2, 48), t + 0.045, { v: 0.03, dur: 0.9, lp: 1500 }); } };
+  /* niveles: los de la maqueta, donde el bus de los premios es la referencia 0 (la musica aqui; el «bien» del juego va +7 dB sobre ella). Medido
+     con la vara del Bloque F: gestos -8 a -17 dB sobre la musica (sellar -4, 6 dB bajo el sello de la casa); materias al pasar -16 a -21 (como
+     «tocar», -18) y al pulsar -3 a -10 (como «confirmar», -6) */
+  NIVEL.gesto = NIVEL.reveal2 - 9;
+  NIVEL.mat = NIVEL.reveal2 - 7;
+  /* 2) LOS GESTOS DEL CRUPIER SUENAN (js/son-casa.js los dispara en el fotograma del contacto). k: barajar · puente · repartir · naipe · moneda ·
+     palma · sellar · chasquear · palmada. o: { x (px, su lado), n, peso, hasta (s hasta que la moneda cae en la mano), vuela (el naipe no se posa) } */
+  const lastSello = { t: -9 };
+  const GESTO = {
+    /* barajar a la americana: el pulgar dobla las mitades, 24-28 naipes que caen alternos cada vez mas deprisa, el puente y dos golpes para cuadrar */
+    barajar(b, t, o) {
+      nz(b, t, { f: 520, q: 0.8, v: 0.03, dur: 0.08, atk: 0.02, lp: 1600 });
+      let tk = t + 0.07; const n = 24 + Math.floor(R() * 5), p = o.pan || 0;
+      for (let i = 0; i < n; i++) { const k = i / n; flick(b, tk, { f: 2000 + 500 * k, v: 0.12 + 0.06 * Math.sin(k * Math.PI), pan: p + (i % 2 ? 0.28 : -0.28) + (R() - 0.5) * 0.08 }); tk += Math.max(0.008, 0.019 - 0.008 * k + (R() - 0.5) * 0.004); }
+      const br = tk + 0.05; for (let i = 0; i < 9; i++) flick(b, br + i * (0.012 + 0.004 * R()), { f: 1700 + 200 * R(), v: 0.06 * (1 - i / 11), pan: p + (R() - 0.5) * 0.3 });
+      const sq = br + 0.2; feltS(b, sq, { v: 0.22, f: 560, dur: 0.03, pan: p }); feltS(b, sq + 0.085 + 0.02 * R(), { v: 0.16, f: 640, dur: 0.025, pan: p });
+    },
+    /* el puente en cascada (los naipes caen de una mano a otra) y cuadrar */
+    puente(b, t, o) { const p = o.pan || 0, n = 14 + Math.floor(R() * 5); for (let i = 0; i < n; i++) flick(b, t + i * (0.016 + 0.005 * R()), { f: 1800 + 300 * R(), v: 0.09 * (1 - 0.5 * i / n), pan: p + (R() - 0.5) * 0.3 }); feltS(b, t + n * 0.019 + 0.12, { v: 0.2, f: 600, dur: 0.03, pan: p }); },
+    /* repartir: n naipes que salen del mazo y se deslizan, cada uno hacia su sitio */
+    repartir(b, t, o) { const n = o.n || 3; for (let i = 0; i < n; i++) { const pan = Math.max(-0.9, Math.min(0.9, (o.pan || 0) * 0.5 - 0.5 + i / Math.max(1, n - 1))); flick(b, t + i * 0.17, { f: 2400, v: 0.06, pan }); naipe(b, t + i * 0.17 + 0.012, { v: 0.085 * (0.9 + 0.2 * R()), f0: 2600 + 600 * R(), f1: 1100 + 300 * R(), dur: 0.13 + 0.05 * R(), pan }); } },
+    /* un naipe: sale del mazo (el roce) y se desliza; vuela: no se posa aqui (quien lo lanza pone su aterrizaje) */
+    naipe(b, t, o) { flick(b, t, { f: 2400, v: 0.06, pan: o.pan }); naipe(b, t + 0.012, { v: 0.085 * (0.9 + 0.2 * R()), f0: 2600 + 600 * R(), f1: 1100 + 300 * R(), dur: 0.13 + 0.05 * R(), pan: o.pan, vuela: o.vuela }); },
+    /* la moneda: el pulgar (clic seco), el giro en el aire con su «rrring» que se acelera y la palma (piel, fieltro y un toque de laton) */
+    moneda(b, t, o) {
+      const d = Math.max(0.25, Math.min(1, o.hasta || 0.5 + 0.12 * R())), p = o.pan || 0;
+      nz(b, t, { f: 3000, q: 2, v: 0.06, dur: 0.008, atk: 0.0005, lp: 5000, pan: p }); moneda(b, t + 0.004, { v: 0.032, dur: d, pan: p });
+      const tc = t + d + 0.04; nz(b, tc, { f: 900, q: 0.9, v: 0.09, dur: 0.045, atk: 0.001, lp: 3000, pan: p }); laton(b, tc + 0.002, { v: 0.018, f: 1900, dur: 0.06, lp: 3600, pan: p }); sub(b, tc, { v: 0.05, f0: 180, f1: 110, dur: 0.05 });
+    },
+    /* la moneda cae en la palma (sin lanzarla: cuando rueda entre los dedos y la coge) */
+    palma(b, t, o) { const p = o.pan || 0; nz(b, t, { f: 900, q: 0.9, v: 0.07, dur: 0.04, atk: 0.001, lp: 3000, pan: p }); laton(b, t + 0.002, { v: 0.014, f: 1800, dur: 0.06, lp: 3600, pan: p }); },
+    /* sellar en tres pesos (a 0,45: por debajo del sello de la casa, A.sfx.stamp; si ese acaba de sonar, este calla) */
+    sellar(b, t, o) { if (t - lastSello.t < 0.45) return; const g = ctx.createGain(); g.gain.value = 0.45; g.connect(b); selloS(g, t, Math.max(1, Math.min(3, o.peso || 2))); },
+    chasquear(b, t, o) { const n = o.n || 1; for (let i = 0; i < n; i++) chasquido(b, t + i * 0.24, { v: 0.11 * (1 - 0.15 * i), pan: o.pan }); },
+    /* palmadas: una (la de su aplauso lento) o varias, con sorna (3), con ganas (5) o rendido (7 que se aceleran) */
+    palmada(b, t, o) { const n = o.n || 1; let tk = t; for (let i = 0; i < n; i++) { palmada(b, tk, { v: 0.1 * (0.85 + 0.3 * R()), f: 1050 + 250 * R(), pan: o.pan }); tk += n >= 7 ? 0.3 - 0.022 * i : 0.36 + 0.04 * R(); } },
+  };
+  /* 3) FOLEY DE LA CASA: cada materia de la portada suena al pasar (un roce de milisegundos) y al pulsar (el golpe entero). Escalon de cada uno (dB,
+     sobre el bus de los premios, el de la maqueta): pasar -14..-16, pulsar -4..-6. Nunca igual: altura +-6 %, fuerza +-15 %, lado por posicion */
+  const MAT = {
+    laton: { hov: -14, clk: -4, rev: 0.1,
+      pasar: (b, t, o) => laton(b, t, { v: 0.07 * o.v, f: 1500 * o.alt, dur: 0.07, lp: 2400, pan: o.pan }),
+      pulsar: (b, t, o) => { laton(b, t, { v: 0.05 * o.v, f: 760 * o.alt, dur: 0.22, pan: o.pan }); chipS(b, t + 0.003, { v: 0.08 * o.v, lp: 2200, rate: 0.85, pan: o.pan }); } },
+    papel: { hov: -14, clk: -5, rev: 0.1,
+      pasar: (b, t, o) => nz(b, t, { f: 2200 * o.alt, f1: 1500, q: 0.9, v: 0.17 * o.v, dur: 0.05, atk: 0.008, lp: 3200, pan: o.pan }),
+      pulsar: (b, t, o) => { paper(b, t, { v: 0.3 * o.v, f: 1500 * o.alt, pan: o.pan }); feltS(b, t + 0.02, { v: 0.3 * o.v, f: 800, dur: 0.03, pan: o.pan }); flick(b, t, { f: 2400, v: 0.2 * o.v, pan: o.pan }); } },
+    cristal: { hov: -15, clk: -6, rev: 0.22,
+      pasar: (b, t, o) => cristal(b, t, { v: 0.045 * o.v, f: 2600 * o.alt, dur: 0.2, lp: 4000, pan: o.pan }),
+      pulsar: (b, t, o) => { cristal(b, t, { v: 0.055 * o.v, f: 2200 * o.alt, dur: 0.4, pan: o.pan }); cristal(b, t + 0.05 + 0.03 * R(), { v: 0.028 * o.v, f: 3100 * o.alt, dur: 0.3, pan: o.pan + 0.1 }); } },
+    fieltro: { hov: -16, clk: -5, rev: 0.1,
+      pasar: (b, t, o) => feltS(b, t, { v: 0.5 * o.v, f: 560 * o.alt, dur: 0.035, pan: o.pan }),
+      pulsar: (b, t, o) => { feltS(b, t, { v: 0.3 * o.v, f: 460 * o.alt, dur: 0.06, pan: o.pan }); sub(b, t, { v: 0.05 * o.v, f0: 150, f1: 80, dur: 0.08 }); } },
+  };
+  const matLast = {};
+  Object.assign(NW, {
+    gesto: go((t, k, o = {}) => {
+      const f = GESTO[k]; if (!f) return;
+      const pan = o.x != null ? Math.max(-0.85, Math.min(0.85, A.audio.side(o.x) * 0.85)) : 0.6;   // su lado de la pantalla (sin x: a la derecha, donde suele estar)
+      f(bus("gesto", 0.3), t, Object.assign({}, o, { pan }));
+    }),
+    /* m: laton | papel | cristal | fieltro; k: "pasar" | "pulsar"; x: px de pantalla (el lado). Pasar: como mucho uno cada 40 ms (el fieltro, 250 ms) */
+    mat: go((t, m, k = "pasar", x) => {
+      const M = MAT[m]; if (!M || !M[k]) return;
+      if (k === "pasar") { const gap = m === "fieltro" ? 0.25 : 0.04; if (t - (matLast[m] || -9) < gap || t - (matLast._ || -9) < 0.04) return; matLast[m] = matLast._ = t; }
+      const pan = x != null ? Math.max(-0.9, Math.min(0.9, A.audio.side(x) * 0.8)) : 0;
+      const o = { v: (0.85 + 0.3 * R()) * Math.pow(10, (k === "pasar" ? M.hov : M.clk) / 20), alt: (0.94 + 0.12 * R()) * (k === "pulsar" ? 0.96 : 1), pan };
+      M[k](bus("mat", M.rev), t, o);
+    }),
+  });
+  A.audio.selloAt = () => { if (ctx) lastSello.t = ctx.currentTime; };   // el sello de la casa acaba de sonar (el del gesto se calla)
   /* la eleccion (Ajustes > Sonido > Sonidos, la guarda js/game.js): "lounge" (los nuevos) o "clasico" (los de antes) */
   A.audio.sonidos = "lounge";
   A.audio.setSonidos = v => { A.audio.sonidos = v === "clasico" ? "clasico" : "lounge"; };

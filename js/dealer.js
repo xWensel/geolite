@@ -3047,7 +3047,25 @@ window.AIQ = window.AIQ || {};
     el.style.bottom = el.style.top = ""; face.style.width = face.style.height = face.style.display = ""; bubble.style.marginBottom = bubble.style.maxWidth = "";
   };
   /* secuencia de frases: [{line, mood}] */
-  D.sequence = (items, done) => { let k = 0; const next = () => { if (k >= items.length) return done && done(); const it = items[k++]; D.say(it.line, { mood: it.mood, lang: it.lang, hold: 0, done: () => later(next, it.gap || 700) }); }; next(); };
+  /* seqNow: la secuencia en curso (la de la intro de la ronda), para poder cortarla si saltas la intro (D.cutIntro) */
+  let seqNow = null, introMade = null;                                // introMade: la de la intro, preparada (D.introSeq) aunque aun no haya empezado
+  D.sequence = (items, done) => {
+    items._started = true; const s = (seqNow = { items, k: 0, cur: null, alive: true });
+    const next = () => { if (!s.alive) return; s.cur = null; if (s.k >= items.length) { if (seqNow === s) seqNow = null; return done && done(); } const it = items[s.k++]; s.cur = it; D.say(it.line, { mood: it.mood, lang: it.lang, hold: 0, done: () => later(next, it.gap || 700) }); };
+    next();
+  };
+  /* SALTAR LA INTRO NO PISA LA PREGUNTA (v0.3.24x): antes, si saltabas la intro a media frase, el crupier la terminaba en la esquina con el reloj
+     ya corriendo (la primera expedicion: «Tranquilo: la primera vez...» tapaba Sudamerica unos 4 s). La partida es sagrada: se calla al momento y
+     la primera frase de contexto que no llego a acabar (no los trucos, que solo valen antes de la pregunta) la guarda para el veredicto */
+  D.cutIntro = () => {
+    const s = seqNow || (introMade && !introMade._started ? { items: introMade, k: 0, cur: null, alive: true } : null); seqNow = introMade = null;
+    if (s) {
+      s.alive = false;
+      const rest = (s.cur ? [s.cur] : []).concat(s.items.slice(s.k)), keep = rest.find(it => it.ctx);
+      if (keep) obsKeep({ t: keep.line, mood: keep.mood, pri: 1 });
+    }
+    if (el && (D.busy || pend)) { pend = null; leaving = false; clearTimeout(leaveT); D.hide(); }
+  };
   D.line = (key, i) => { const a = LINES[key]; return a ? (i == null ? rand(a) : a[i % a.length]) : null; };
   /* bloque D: frases por clave desde otras pantallas (Duelo, Barra, tienda, salida...): pick = una de la bolsa, traducida y con sus datos
      (sin repetir hasta agotar la clave; las de raton callan con mando); sayKey = decirla ya desde donde este, con su tiempo de lectura */
@@ -4171,7 +4189,7 @@ window.AIQ = window.AIQ || {};
   /* lo que dice al entrar en cada ronda: primero el contexto (primera expedicion, revancha, reto diario, reanudada, reintento, nuevo acto,
      jefe, jefe final, modo infinito), luego si te queda una sola provision, y despues sus trucos. La Aventura le pasa el estado. */
   D.introSeq = o => {
-    const seq = [], add = (t, mood) => { if (t) seq.push({ line: t, mood: mood || "sly" }); }; seqFormula = false;
+    const seq = [], add = (t, mood) => { if (t) seq.push({ line: t, mood: mood || "sly", ctx: true }); }; seqFormula = false;   // ctx: frase de contexto (se puede decir en el veredicto si saltas la intro); los trucos no
     const lr = DS.lastRun, runs = advRuns();
     curDaily = !!o.ranked;
     if (o.fresh || o.resumed) { runN = 0; if (entry === "afterRun" || entry === "left") entry = ""; }   // ya juegas otra: lo de "vuelves al menu tras la anterior" caduca (si la abandonas no te la recuerda)
@@ -4198,8 +4216,9 @@ window.AIQ = window.AIQ || {};
     if (o.boss && !o.inf) { if (o.last) add(say1("finalBoss"), "boss"); if (o.bossKey && LINES["boss_" + o.bossKey]) add(say1("boss_" + o.bossKey), "boss"); else if (!o.last) add(o.bossName && Math.random() < 0.7 ? say1("bossNamed", { j: o.bossName }) : D.line("boss"), "boss"); }
     if (!seq.length) { const k = o.chal.length ? "newHand" : "calm"; if (!once[k]) { once[k] = 1; add(D.line(k)); } }   // una vez por sesion: luego hablan los trucos
     if (o.lives === 1 && !o.inf) { dangerKey = o.act + ":" + o.round + ":" + o.attempt; add(say1("runDanger"), "laugh"); }
-    o.chal.slice(0, seq.length > 1 ? 1 : o.boss ? 3 : 2).forEach((id, k) => { const b = id === "babel" && babelTrick(); if (b) seq.push({ line: b.t, mood: "sly", lang: b.lang }); else add(trickLine(id, o.form && o.form[k], o.isNew && o.isNew[k])); });   // la Torre de Babel la anuncia en otro idioma
+    o.chal.slice(0, seq.length > 1 ? 1 : o.boss ? 3 : 2).forEach((id, k) => { const b = id === "babel" && babelTrick(); if (b) seq.push({ line: b.t, mood: "sly", lang: b.lang }); else { const t = trickLine(id, o.form && o.form[k], o.isNew && o.isNew[k]); if (t) seq.push({ line: t, mood: "sly" }); } });   // la Torre de Babel la anuncia en otro idioma
     if (o.counters && Date.now() - counterAt > 240000) { counterAt = Date.now(); add(pickLine("counter"), "angry"); }
+    introMade = seq;
     return seq;
   };
   /* comentarios sueltos mientras miras el mapa (nunca en la primera pregunta de la ronda, ni durante el tutorial, ni pisando una reaccion) */
@@ -4269,7 +4288,7 @@ window.AIQ = window.AIQ || {};
     if (!D.on || D.host) return; const ph = phase(); if (ph === "shop" || ph === "title" || ph === "intro") return;
     const RX = reaccion(kind, o); if (RX && RX.h) D.mood(RX.h);
     if (sacred()) { const sp = o.place ? answerLine(kind, o) : null; if (sp && !sp.soft) obsKeep(Object.assign({ pri: 2 }, sp)); return; }   // bloque D: la partida es sagrada: le cambia el humor, pero ni sale ni habla (lo que vio, para el veredicto)
-    if ((kind === "roundWin" || kind === "roundFail") && roundObs) { const ob = roundObs; roundObs = null; setTimeout(() => { if (D.on && !sacred()) D.say(ob.t, { mood: ob.mood || "sly", hold: holdFor(ob.t) }); }, 1200); }   // setTimeout: los de later() se borran al empezar su frase del veredicto; D.say la pone a la cola
+    if ((kind === "roundWin" || kind === "roundFail") && roundObs) { const ob = roundObs; roundObs = null; let n = 0; const go = () => { if (!D.on || sacred()) return; if ((D.busy || pend) && ++n < 16) { setTimeout(go, 700); return; } D.say(ob.t, { mood: ob.mood || "sly", hold: holdFor(ob.t) }); }; setTimeout(go, 1200); }   // v0.3.24x: espera su turno (antes otra frase del veredicto la pisaba en la cola y se perdia)   // setTimeout: los de later() se borran al empezar su frase del veredicto; D.say la pone a la cola
     let said = false;
     const sayR = (t, opt) => { said = true; return D.say(t, RX && RX.g && !(opt && opt.gesture) ? Object.assign({ gesture: RX.g }, opt) : opt); };
     const r = reactLine(kind, o, RX, sayR);

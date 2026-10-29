@@ -268,7 +268,7 @@ window.AIQ = window.AIQ || {};
   /* Probar (Ajustes): un golpe medio a la intensidad elegida */
   M.testRumble = () => { try { const gp = pad(), va = gp && gp.vibrationActuator, g = PS.rumble / 100; if (va && g > 0) va.playEffect("dual-rumble", { duration: 260, strongMagnitude: 0.55 * g, weakMagnitude: 0.75 * g }).catch(() => {}); return !!va; } catch (e) { return false; } };
   if (haptic0) A.haptic.on = haptic0.on;
-  if (haptic0 && haptic0.jackpot) A.haptic.jackpot = haptic0.jackpot;
+  /* (A.haptic.jackpot: mas abajo, con la escalera del mando) */
   /* un golpe con forma propia (js/revelado.js: el clavado, el latido, el pulso que se corta del casi): motor fuerte, debil y ms; en el movil, un pulso de ms */
   A.haptic.dual = (strong, weak, ms) => {
     if (A.haptic.on === false) return;
@@ -278,6 +278,49 @@ window.AIQ = window.AIQ || {};
       va.playEffect("dual-rumble", { duration: Math.min(600, ms), strongMagnitude: Math.min(1, strong * j * g), weakMagnitude: Math.min(1, weak * j * g) }).catch(() => {}); } catch (e) { /* mando sin vibracion */ }
   };   // la escalera de jackpots (js/audio.js) sigue existiendo: sin ella, cada jackpot (legendaria, medalla) lanzaba un error y cortaba lo de detras
   Object.defineProperty(A.haptic, "on", { get: () => haptic0 ? haptic0.on : true, set: v => { if (haptic0) haptic0.on = v; } });
+
+  /* ---------- v0.3.24x LA ESCALERA DEL MANDO (Probador, paquete sonido, Extrema) ----------
+     Cada premio vibra con su PATRON de dos motores (grave = izquierdo, agudo = derecho) por tramos a su hora, y crece peldano a peldano en fuerza,
+     duracion y numero de golpes: acierto (dos toques agudos), muy bien (tres que suben), racha 3 y 5 (toques que suben como la pila de fichas),
+     diana (golpe grave y replica), jackpots 1-2-3 (golpes a 460 ms, el tercero con final largo). Los castigos van solo por el grave y caen.
+     Fuerza x1,3 (Extrema) y nunca igual: +-10 % de fuerza y duracion y unos ms de holgura entre tramos. Lo apaga el ajuste Vibracion y lo escala
+     Ajustes > Mando > Vibracion (0-100). En el movil, los mismos tramos con navigator.vibrate (solo los que se notan: 20 ms o mas) */
+  const FUERZA = 1.3, cl = v => Math.max(0, Math.min(1, v));
+  const ESC = {
+    fallo: [{ t: 0, d: 120, lo: 0.42, hi: 0 }, { t: 200, d: 190, lo: 0.24, hi: 0 }],
+    rota: [{ t: 0, d: 110, lo: 0.6, hi: 0.12 }, { t: 150, d: 60, lo: 0.36, hi: 0 }, { t: 260, d: 55, lo: 0.24, hi: 0 }, { t: 390, d: 50, lo: 0.14, hi: 0 }],
+    acierto: [{ t: 0, d: 40, lo: 0, hi: 0.32 }, { t: 100, d: 50, lo: 0, hi: 0.4 }],
+    muybien: [{ t: 0, d: 40, lo: 0.1, hi: 0.4 }, { t: 80, d: 40, lo: 0.1, hi: 0.46 }, { t: 170, d: 120, lo: 0.32, hi: 0.52 }],
+    racha3: [{ t: 0, d: 34, lo: 0.1, hi: 0.3 }, { t: 97, d: 34, lo: 0.15, hi: 0.4 }, { t: 182, d: 150, lo: 0.36, hi: 0.56 }],
+    racha5: [{ t: 0, d: 30, lo: 0.1, hi: 0.3 }, { t: 97, d: 30, lo: 0.14, hi: 0.36 }, { t: 182, d: 30, lo: 0.2, hi: 0.44 }, { t: 257, d: 30, lo: 0.26, hi: 0.52 }, { t: 323, d: 30, lo: 0.32, hi: 0.6 }, { t: 440, d: 220, lo: 0.6, hi: 0.66 }],
+    diana: [{ t: 0, d: 170, lo: 0.9, hi: 0.35 }, { t: 186, d: 110, lo: 0.35, hi: 0.62 }, { t: 316, d: 160, lo: 0.12, hi: 0.4 }],   // desde el golpe (el toque de antes lo da la chincheta al clavarse)
+    jp1: [{ t: 0, d: 220, lo: 0.75, hi: 0.3 }, { t: 160, d: 300, lo: 0.25, hi: 0.55 }],
+    jp2: [{ t: 0, d: 220, lo: 0.75, hi: 0.3 }, { t: 160, d: 220, lo: 0.25, hi: 0.55 }, { t: 460, d: 260, lo: 0.85, hi: 0.4 }, { t: 640, d: 300, lo: 0.3, hi: 0.62 }],
+    jp3: [{ t: 0, d: 220, lo: 0.75, hi: 0.3 }, { t: 160, d: 220, lo: 0.25, hi: 0.55 }, { t: 460, d: 260, lo: 0.85, hi: 0.4 }, { t: 640, d: 220, lo: 0.3, hi: 0.6 }, { t: 920, d: 300, lo: 1, hi: 0.55 }, { t: 1140, d: 320, lo: 0.7, hi: 0.85 }, { t: 1460, d: 260, lo: 0.36, hi: 0.5 }, { t: 1720, d: 220, lo: 0.16, hi: 0.24 }],
+  };
+  const vibOf = pat => { const v = []; let end = 0; pat.slice().sort((a, b) => a.t - b.t).forEach(s => { if (s.d < 20) return; const gap = s.t - end; if (!v.length) { if (gap > 0) v.push(0, gap); } else v.push(Math.max(0, gap)); const d = Math.max(0, s.t + s.d - Math.max(end, s.t)); v.push(d); end = Math.max(end, s.t + s.d); }); return v.length > 1 || (v[0] || 0) > 0 ? v : null; };
+  /* pat: [{ t, d (ms), lo, hi (0..1) }]; o: { k (fuerza), lead (ms), movil (false: solo el mando), exact } */
+  A.haptic.pat = (pat, o = {}) => {
+    if (!pat || A.haptic.on === false || document.hidden) return;
+    if (haptic0 && o.movil !== false) { const v = vibOf(pat); if (v) setTimeout(() => haptic0(v), o.lead || 0); }
+    if (!M.on || !(PS.rumble > 0)) return;
+    let va = null; try { const gp = pad(); va = gp && gp.vibrationActuator; } catch (e) { /* sin mando */ } if (!va) return;
+    const g = PS.rumble / 100, k = o.k || FUERZA;
+    pat.forEach((s, i) => {
+      const j = o.exact ? 1 : 0.9 + 0.2 * Math.random(), at = Math.max(0, s.t + (i && !o.exact ? (Math.random() - 0.5) * 14 : 0)), d = Math.max(6, s.d * (o.exact ? 1 : 0.92 + 0.16 * Math.random()));
+      setTimeout(() => { if (A.haptic.on === false) return; try { va.playEffect("dual-rumble", { duration: Math.round(d), strongMagnitude: cl(s.lo * j * k * g), weakMagnitude: cl(s.hi * j * k * g) }).catch(() => {}); } catch (e) { /* mando sin vibracion */ } }, (o.lead || 0) + at);
+    });
+  };
+  A.haptic.esc = (k, o) => A.haptic.pat(ESC[k], o);
+  A.haptic.ESC = ESC;
+  /* un tramo suelto (js/debufos.js ya lo usaba si existia): lo, hi, ms */
+  A.haptic.rumble = (lo, hi, ms) => A.haptic.pat([{ t: 0, d: ms, lo, hi }], { k: 1 });
+  /* los jackpots (la casa: A.casa.premio, el cofre, la tienda...): su peldano 1-2-3 en el mando; en el movil, la escalera de siempre */
+  A.haptic.jackpot = level => {
+    const n = Math.max(1, Math.min(3, level | 0));
+    if (haptic0 && haptic0.jackpot) { const h = A.haptic; A.haptic = haptic0; try { haptic0.jackpot(n); } finally { A.haptic = h; } }   // el de js/audio.js llama a A.haptic: que vaya solo al movil
+    A.haptic.pat(ESC["jp" + n], { movil: false });
+  };
 
   /* ---------- lectura del mando ---------- */
   const ACT = 0.05;                                                      // lo que debe cambiar un eje o un gatillo en unos 80 ms para contar como "lo han tocado"
