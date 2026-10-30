@@ -100,7 +100,7 @@
   let SCEN = false; try { SCEN = localStorage.getItem("mc.scen") === "1"; } catch (e) {}
   const SUGSIG = A.SUGSIG || {};
   const famaArr = a => { if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; };
-  const sugTopic = x => (x.cat === "persona" ? "character" : x.sub === "animal" ? "nature" : "culture");
+  const sugTopic = x => ({ persona: "character", ciudad: "city", monumento: "landmark", naturaleza: "nature", historia: "history" })[x.cat] || (x.sub === "animal" ? "nature" : "culture");
   const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
   const sgRows = () => SG.map(sugRow).filter(r => r.dif2 != null);
   function cohort() { return SCEN ? rows.filter(r => !(N[r.key] && N[r.key].v === "no")).concat(sgRows().filter(r => N[r.key] && N[r.key].v === "ok")) : rows; }
@@ -111,7 +111,7 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"], ["cola", "Cola de decisiones"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"], ["categorias", "Categorías"], ["cola", "Cola de decisiones"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
   const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
@@ -292,9 +292,9 @@
     const L = SG.filter(x => (!f.cat || x.cat === f.cat) && (!f.sub || x.sub === f.sub) && (!f.pais || x.pais === f.pais) && (!f.sg || (f.sg === "aviso" ? x.avisos.length : f.sg === "limpias" ? !x.avisos.length && x.seguridad === "alta" : f.sg === "pend" ? !N[SGKEY(x)] : x.seguridad === f.sg)) && (!f.w || (f.w === "m" ? x.mujer : !x.mujer)) && (!f.q || (x.es + x.en + x.pais).toLowerCase().includes(f.q.toLowerCase())));
     const limp = L.filter(x => !x.avisos.length && x.seguridad === "alta" && !N[SGKEY(x)]).length;
     return `<div class="pl"><h2>Para añadir <small>${SG.length} propuestas verificadas contra Wikidata · nada entra hasta que tú digas</small></h2><div class="kpis"><div class="kpi"><b>${per.length}</b><span>personajes</span></div><div class="kpi"><b>${sel2.length}</b><span>Sello del país</span></div><div class="kpi"><b>${new Set(per.map(x => x.pais).filter(c => !hasP.has(c))).size}</b><span>países ganan 1.er personaje</span></div><div class="kpi"><b>${new Set(sel2.map(x => x.pais).filter(c => !hasC.has(c))).size}</b><span>países ganan 1.er Sello</span></div><div class="kpi"><b>${per.filter(x => x.mujer).length}</b><span>mujeres entre los nuevos</span></div><div class="kpi"><b>${SG.filter(x => !N[SGKEY(x)]).length}</b><span>sin mirar</span></div></div>
-      <div class="tools">${inp("sugerencias", "q", "buscar")}${sel("sugerencias", "cat", [["persona", "Personajes"], ["sello", "Sello del país"]], "Personajes y Sello")}${sel("sugerencias", "sub", [...new Set(SG.map(x => x.sub))].sort().map(x => [x, x]), "Todas las subcategorías")}${sel("sugerencias", "pais", [...new Set(SG.map(x => x.pais))].sort().map(x => [x, x]), "Todos los países")}${sel("sugerencias", "sg", [["pend", "Sin mirar"], ["limpias", "Limpias (seguridad alta, sin aviso)"], ["aviso", "Con aviso"], ["media", "Seguridad media"]], "Toda seguridad")}${sel("sugerencias", "w", [["m", "Solo mujeres"], ["h", "Solo hombres"]], "Hombres y mujeres")}<button class="chipb" data-act="clrf" data-v="sugerencias">Limpiar</button></div>
+      <div class="tools">${inp("sugerencias", "q", "buscar")}${sel("sugerencias", "cat", [["persona", "Personajes"], ["sello", "Sello del país"], ["ciudad", "Ciudades"], ["monumento", "Monumentos"], ["naturaleza", "Naturaleza"], ["historia", "Historia"]], "Todas las categorías")}${sel("sugerencias", "sub", [...new Set(SG.map(x => x.sub))].sort().map(x => [x, x]), "Todas las subcategorías")}${sel("sugerencias", "pais", [...new Set(SG.map(x => x.pais))].sort().map(x => [x, x]), "Todos los países")}${sel("sugerencias", "sg", [["pend", "Sin mirar"], ["limpias", "Limpias (seguridad alta, sin aviso)"], ["aviso", "Con aviso"], ["media", "Seguridad media"]], "Toda seguridad")}${sel("sugerencias", "w", [["m", "Solo mujeres"], ["h", "Solo hombres"]], "Hombres y mujeres")}<button class="chipb" data-act="clrf" data-v="sugerencias">Limpiar</button></div>
       <div class="row"><button class="btn" data-act="oklimpias">Bien a las ${limp} limpias de esta lista</button><button class="btn ghost" data-act="nolist">No a las ${L.filter(x => !N[SGKEY(x)]).length} sin mirar de esta lista</button></div></div>
-      <div class="pl">${T("sug", [{ h: "Propuesta", f: x => `<span class="nm" data-open="${esc(SGKEY(x))}">${esc(x.es)}</span>`, v: x => x.es }, { h: "Tipo", f: x => (x.cat === "persona" ? "Personaje" : "Sello") + ` <span class="pill">${esc(x.sub)}</span>`, v: x => x.cat + x.sub }, { h: "País", f: x => esc(x.pais), v: x => x.pais }, { h: "Nació en", f: x => esc(x.nacWD || x.nac || "—") }, { h: "Idiomas", n: 1, f: x => x.idiomas, v: x => x.idiomas }, { h: "Línea", f: x => zbar(sugRow(x)), v: x => { const d = sugRow(x).dif2; return d == null ? 101 : d; } }, { h: "Por qué", w: 1, f: x => esc(x.por_que) }, { h: "Avisos", w: 1, f: x => x.avisos.map(a => `<span class="pill bad">${esc(a)}</span>`).join("") + (x.seguridad === "media" ? '<span class="pill warn">dudosa</span>' : "") }, { h: "Opinión", a: 1, f: x => vb(SGKEY(x)) }], L, { s: 4, d: -1, lim: 60 })}
+      <div class="pl">${T("sug", [{ h: "Propuesta", f: x => `<span class="nm" data-open="${esc(SGKEY(x))}">${esc(x.es)}</span>`, v: x => x.es }, { h: "Tipo", f: x => (SGCATN[x.cat] || x.cat) + ` <span class="pill">${esc(x.sub)}</span>`, v: x => x.cat + x.sub }, { h: "País", f: x => esc(x.pais), v: x => x.pais }, { h: "Nació en", f: x => esc(x.nacWD || x.nac || "—") }, { h: "Idiomas", n: 1, f: x => x.idiomas, v: x => x.idiomas }, { h: "Línea", f: x => zbar(sugRow(x)), v: x => { const d = sugRow(x).dif2; return d == null ? 101 : d; } }, { h: "Por qué", w: 1, f: x => esc(x.por_que) }, { h: "Avisos", w: 1, f: x => x.avisos.map(a => `<span class="pill bad">${esc(a)}</span>`).join("") + (x.seguridad === "media" ? '<span class="pill warn">dudosa</span>' : "") }, { h: "Opinión", a: 1, f: x => vb(SGKEY(x)) }], L, { s: 4, d: -1, lim: 60 })}
       ${(A.SUG.sinCandidatos || []).length ? `<p class="note" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none" title="${esc(A.SUG.sinCandidatos.map(([c, n]) => c + (n ? " (" + n + ")" : "")).join("; "))}">Sin candidato válido según los documentalistas: ${A.SUG.sinCandidatos.length} países (pasa el ratón para verlos).</p>` : ""}</div>`;
   };
 
@@ -329,9 +329,9 @@
   const QSRC = [["entra", "Podría entrar"], ["sale", "Podría salir"]];
   function queueItems() {
     reindex(); const f = ff("cola"), out = [], seen = new Set(), g = remGroups();
-    SG.filter(x => !N[SGKEY(x)]).sort((a, b) => (b.video ? 1e4 : 0) + b.idiomas - (a.video ? 1e4 : 0) - a.idiomas).forEach(x => { seen.add(SGKEY(x)); out.push({ key: SGKEY(x), src: "entra", why: (x.video ? "Del vídeo · " : "Propuesta nueva · ") + (x.cat === "persona" ? "personaje" : "Sello del país") }); });
+    SG.filter(x => !N[SGKEY(x)]).sort((a, b) => (b.video ? 1e4 : 0) + b.idiomas - (a.video ? 1e4 : 0) - a.idiomas).forEach(x => { seen.add(SGKEY(x)); out.push({ key: SGKEY(x), src: "entra", why: (x.video ? "Del vídeo · " : "Propuesta nueva · ") + ((SGCATN[x.cat] || x.cat).toLowerCase()) }); });
     ["marcas", "disputados", "duplicados", "sinpais", "pastas", "nivel", "eeuu", "irrelevantes"].forEach(k => g[k].rows.forEach(r => { if (!N[r.key] && !seen.has(r.key)) { seen.add(r.key); out.push({ key: r.key, src: "sale", gk: k, why: g[k].t }); } }));
-    const L = out.filter(x => !f.src || x.src === f.src), a = L.filter(x => !QSKIP.has(x.key)), b = L.filter(x => QSKIP.has(x.key));
+    const topicOf = x => (x.src === "entra" ? sugTopic(sgByKey[x.key]) : (byKey[x.key] || {}).topic), L = out.filter(x => (!f.src || x.src === f.src) && (!f.cat || topicOf(x) === f.cat)), a = L.filter(x => !QSKIP.has(x.key)), b = L.filter(x => QSKIP.has(x.key));
     return { all: out, list: a.concat(b), fresh: a.length, skipped: b.length };
   }
   function qCard(it) {
@@ -360,7 +360,7 @@
   }
   VIEWS.cola = () => {
     const f = ff("cola"), Q = queueItems(), it = Q.list[0], nE = Q.all.filter(x => x.src === "entra").length, nS = Q.all.length - nE, done = userNotes().length;
-    const chips = `<div class="row"><button class="chipb ${f.src ? "" : "on"}" data-act="qsrc" data-s="">Todo · ${Q.all.length}</button>${QSRC.map(([id, l]) => `<button class="chipb ${f.src === id ? "on" : ""}" data-act="qsrc" data-s="${id}">${l} · ${id === "entra" ? nE : nS}</button>`).join("")}</div>`;
+    const chips = `<div class="row">${sel("cola", "cat", TOPICS.map(t => [t, CATS[t]]), "Todas las categorías")}<button class="chipb ${f.src ? "" : "on"}" data-act="qsrc" data-s="">Todo · ${Q.all.length}</button>${QSRC.map(([id, l]) => `<button class="chipb ${f.src === id ? "on" : ""}" data-act="qsrc" data-s="${id}">${l} · ${id === "entra" ? nE : nS}</button>`).join("")}</div>`;
     const main = it ? `<div class="pl"><h2>Ahora te toca <small>quedan ${Q.list.length}${Q.skipped ? " · " + Q.skipped + " saltadas al final" : ""} · ${done} opiniones guardadas</small></h2>${chips}
         ${qCard(it)}
         <div class="row"><button class="btn" data-act="qv" data-v="ok">Bien <kbd>B</kbd></button><button class="btn red" data-act="qv" data-v="no">No <kbd>N</kbd></button><button class="btn ghost" data-act="qv" data-v="cambiar">Cambiar… <kbd>C</kbd></button><button class="btn ghost" data-act="qskip">Saltar <kbd>␣</kbd></button><button class="btn ghost" data-act="qundo" ${QUNDO.length ? "" : "disabled"}>Deshacer <kbd>Z</kbd></button><button class="btn ghost" data-open="${esc(it.key)}">Ficha completa <kbd>I</kbd></button></div>
@@ -377,6 +377,49 @@
   function qSkip() { const it = queueItems().list[0]; if (it) { QSKIP.add(it.key); draw(); } }
   function qAll(src) { const L = queueItems().list.filter(x => !src || x.src === src); if (!L.length) return; L.forEach(x => { QUNDO.push({ key: x.key, prev: N[x.key] }); N[x.key] = { v: "ok", nota: "", t: Date.now() }; }); saveN(); toast(L.length + " marcadas como Bien"); draw(); }
 
+
+  /* ================= CATEGORIAS (el panel de trabajo, una categoria cada vez) ================= */
+  const SGCATN = { persona: "Personaje", sello: "Sello del país", ciudad: "Ciudad", monumento: "Monumento", naturaleza: "Naturaleza", historia: "Historia" };
+  const TOPICS = ["character", "capital", "city", "landmark", "nature", "history", "country", "flag", "clue", "culture"];
+  const TOPIC_HELP = {
+    character: "Personas famosas de toda la historia: una por país como mínimo y las más conocidas del mundo.",
+    capital: "Capitales: una por país. Solo se revisa que estén todas.",
+    city: "Ciudades que se preguntan en el mapa.",
+    landmark: "Monumentos y lugares famosos.",
+    nature: "Ríos, montañas, islas, mares y parques naturales.",
+    history: "Batallas, tratados y sucesos con lugar.",
+    country: "Países: ya están todos metidos.",
+    flag: "Banderas: una por país, ya están todas.",
+    clue: "Pistas (preguntas de «¿qué país es?»).",
+    culture: "Sello del país: plato, bebida, fiesta, música, deporte, planta y animal."
+  };
+  const catDone = () => { try { return JSON.parse((N["cfg:cats"] || {}).nota || "{}"); } catch (e) { return {}; } };
+  const sgTopicOf = x => sugTopic(x);
+  function catStats(t) {
+    const R = rows.filter(r => r.topic === t), S = SG.filter(x => sgTopicOf(x) === t), pend = S.filter(x => !N[SGKEY(x)]),
+      sale = Object.values(remGroups()).flatMap(g => g.rows).filter(r => r.topic === t && !N[r.key]), uniq = new Set(sale.map(r => r.key)),
+      has = new Set(); R.forEach(r => { if (r.ctry) has.add(r.ctry); (r.ctrys || []).forEach(c => has.add(c)); });
+    const without = COUNTRIES.filter(c => !has.has(c)), withSug = new Set(pend.map(x => x.pais)), cover = without.filter(c => withSug.has(c));
+    return { R, S, pend, nSale: uniq.size, without, cover, video: pend.filter(x => x.video).length, sinPais: S.filter(x => x.pais === "—").length, ok: S.filter(x => N[SGKEY(x)] && N[SGKEY(x)].v === "ok").length, no: S.filter(x => N[SGKEY(x)] && N[SGKEY(x)].v === "no").length };
+  }
+  VIEWS.categorias = () => {
+    reindex(); const D = catDone(), done = TOPICS.filter(t => D[t]).length;
+    const card = t => {
+      const s = catStats(t), n = s.pend.length + s.nSale, listo = n === 0 && !D[t], st = D[t] ? "Hecha" : listo ? "Sin nada pendiente" : n < s.R.length + s.S.length && (s.ok + s.no) ? "En curso" : "Por empezar", col = D[t] ? "var(--z0)" : listo ? "var(--gold)" : "var(--sub)";
+      const hints = [];
+      if (s.without.length && !["country", "flag", "clue"].includes(t)) hints.push(`<b>${s.without.length}</b> países sin ninguna entrada${s.cover.length ? `, <b>${s.cover.length}</b> de ellos con propuesta` : ""}: ${esc(s.without.slice(0, 6).join(", "))}${s.without.length > 6 ? "…" : ""}`);
+      if (s.video) hints.push(`<b>${s.video}</b> propuestas elegidas en el vídeo (salen primero)`);
+      if (s.sinPais) hints.push(`<b>${s.sinPais}</b> propuestas sin país asignado`);
+      if (["country", "flag", "clue", "capital"].includes(t) && !s.without.length) hints.push("Todos los países cubiertos: nada que añadir");
+      return `<div class="task" style="grid-template-columns:minmax(0,1fr) auto;align-items:start"><div><b>${esc(CATS[t])} <span class="pill" style="color:${col};margin-left:8px">${st}</span></b>
+        <span style="display:block">${esc(TOPIC_HELP[t])}</span>
+        <span style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="bdg">${s.R.length} en el juego</span><span class="bdg gold">${s.pend.length} por añadir</span><span class="bdg ${s.nSale ? "bad" : ""}">${s.nSale} por quitar</span>${zstack(s.R)}</span>
+        ${hints.length ? `<span style="display:block;margin-top:4px;color:var(--sub)">${hints.join(" · ")}</span>` : ""}</div>
+        <div class="col" style="gap:6px"><button class="btn" data-act="catwork" data-t="${t}" ${n ? "" : "disabled"}>Trabajar (${n})</button><button class="btn ghost" data-act="catdone" data-t="${t}">${D[t] ? "Reabrir" : "Marcar hecha"}</button></div></div>`;
+    };
+    return `<div class="hero"><h1>Categorías</h1><p>Una categoría cada vez. Pulsa <b>Trabajar</b> y te llevo a la cola con solo lo de esa categoría; cuando termines, <b>Marcar hecha</b>. Llevas <b>${done}</b> de ${TOPICS.length}. Lo que no votes se queda como está.</p></div>
+      <div class="pl"><div class="bars" style="gap:10px">${TOPICS.map(card).join("")}</div></div>`;
+  };
   /* ================= NOTAS ================= */
   VIEWS.notas = () => {
     const ks = userNotes().sort((a, b) => N[b].t - N[a].t), f = ff("notas"), L = ks.filter(k => !f.v || N[k].v === f.v).map(k => ({ key: k, name: nameOfKey(k), v: N[k].v, nota: N[k].nota, t: N[k].t })), c = countBy(ks, k => N[k].v);
@@ -443,7 +486,7 @@
     if (!has) return `<div class="tri"><figure class="miss"><figcaption>Portada · sin foto</figcaption></figure><figure class="miss"><figcaption>Historia · sin foto</figcaption></figure><figure class="miss"><figcaption>Dato clave · sin foto</figcaption></figure></div><p class="note"><span class="bdg bad">sin escribir</span> Todavía no existe su ficha: ni texto en los 12 idiomas ni las 3 fotos. Se crean cuando la apruebes con «Bien» y me digas «aplica».</p>`;
     return `<p class="note">${c ? (langOk(id) >= 11 ? '<span class="bdg ok">escrita en los 11 idiomas</span>' : `<span class="bdg bad">escrita en ${langOk(id)}/11 idiomas</span>`) : '<span class="bdg bad">sin texto</span>'}</p>${IMGD ? photos(id, IMGD) : ""}`; }
   function openSug(key) { const x = sgByKey[key]; dr().innerHTML = head(key) + `<h1>${esc(x.es)}</h1><p class="note" style="margin:0">${esc(x.en)} · propuesta nueva</p>
-    <div style="margin-top:10px"><span class="bdg gold">${x.cat === "persona" ? "Personaje" : "Sello del país"}</span><span class="bdg">${esc(x.sub)}</span><span class="bdg">${esc(x.pais)}</span>${x.mujer ? '<span class="bdg">mujer</span>' : ""}<span class="bdg ${x.seguridad === "alta" ? "ok" : "bad"}">seguridad ${x.seguridad}</span>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>
+    <div style="margin-top:10px"><span class="bdg gold">${SGCATN[x.cat] || x.cat}</span><span class="bdg">${esc(x.sub)}</span><span class="bdg">${esc(x.pais)}</span>${x.mujer ? '<span class="bdg">mujer</span>' : ""}<span class="bdg ${x.seguridad === "alta" ? "ok" : "bad"}">seguridad ${x.seguridad}</span>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>
     <h3>Su entrada en la Enciclopedia</h3>${sugEntry(x)}<h3>Por qué entra</h3><div class="txt" style="max-height:none">${esc(x.por_que)}</div><h3>Dificultad en la línea</h3><div id="dbox">${difHtml(key, null)}</div><h3>Datos verificados en Wikidata</h3><table><tr><td>Idiomas de Wikipedia</td><td class="num">${x.idiomas}</td></tr>${x.cat === "persona" ? `<tr><td>Nació en</td><td class="num">${esc(x.nacWD || x.nac || "—")}</td></tr><tr><td>Años</td><td class="num">${x.nacio || "?"} – ${x.murio || "vivo"}</td></tr>` : ""}</table>
     <p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(x.wiki.replace(/ /g, "_"))}" target="_blank" rel="noopener">Abrir en Wikipedia ↗</a></p><h3>Tu opinión</h3><div id="dvotes">${vb(key)}</div>`; }
   function openPais(c) { const R = rows.filter(r => r.ctry === c || (r.ctrys || []).includes(c)), g = countBy(R, r => r.topic), S2 = SG.filter(x => x.pais === c), fl = falta(c);
@@ -534,6 +577,8 @@
       case "dnudge": { const k = d.k, v = effOfKey(k, DID); return setDif(k, (v == null ? 50 : Math.round(v)) + +d.d); }
       case "dreset": return setDif(d.k, null);
       case "rep": return repStart(d.s);
+      case "catwork": ff("cola").cat = d.t; ff("cola").src = ""; return go("cola");
+      case "catdone": { const D = catDone(); if (D[d.t]) delete D[d.t]; else D[d.t] = Date.now(); N["cfg:cats"] = { v: "cfg", nota: JSON.stringify(D), t: Date.now() }; saveN(); return draw(); }
       case "qv": return qVote(d.v); case "qskip": return qSkip(); case "qundo": return qUndo();
       case "qsrc": ff("cola").src = d.s; return draw();
       case "qall": if (t.dataset.sure) return qAll(d.s); t.dataset.sure = 1; t.textContent = "Pulsa otra vez para confirmar"; return;
