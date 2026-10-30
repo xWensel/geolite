@@ -94,7 +94,7 @@ window.AIQ = window.AIQ || {};
       if (!vivo) return; vivo = false; sobreVivo = null;
       timers.forEach(clearTimeout); anims.forEach(a => { try { a.cancel(); } catch (e) { /* ya acabo */ } });
       cards.forEach(c => { c.classList.remove("sb-down", "sb-gira"); c.querySelectorAll(":scope > .sb-dorso, :scope > .sb-luz, :scope > .sb-canto").forEach(x => x.remove()); });
-      extra.forEach(x => x.remove()); tb.classList.remove("sb-on");
+      extra.forEach(x => x.remove()); tb.classList.remove("sb-on"); tb.classList.add("sb-fin");   // sb-fin: sin sb-on la animacion cp-deal volvia a aplicarse y las cartas se repartian por segunda vez
       offers.removeEventListener("click", salta, true); offers.removeEventListener("pointerdown", traga, true);
     };
     /* mientras se reparten, el primer clic sobre las cartas las voltea todas (y no compra a ciegas) */

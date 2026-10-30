@@ -2,7 +2,8 @@
    Todo sobre las piezas: nada salta ni flota, ninguna luz alrededor de los botones, el pixel art a escala entera */
 
 /* ---------------------------------------------------------------- el sobre: las cartas llegan boca abajo y se voltean en cadena */
-.gx-camp.sb-on .offers > .offer.pc { animation: none; transition: none; }                 /* el reparto lo lleva el sobre */
+.gx-camp.sb-on .offers > .offer.pc { animation: none; transition: none; }
+.gx-camp.sb-fin .offers > .offer.pc { animation: none; }   /* sb-fin: lo mantiene apagado al acabar el reparto */                 /* el reparto lo lleva el sobre */
 .gx-camp .offer.pc.sb-down > :not(.sb-dorso):not(.sb-luz) { visibility: hidden; }        /* boca abajo: solo el dorso */
 .gx-camp .offer.pc.sb-down { box-shadow: none; background: none; }
 .gx-camp .offer.pc.sb-down::before, .gx-camp .offer.pc.sb-down::after { visibility: hidden; }

@@ -325,7 +325,15 @@ else {
     /* la partida vive en localStorage y Chromium solo la escribe en disco al cerrar bien: con un cierre de golpe (cuelgue, apagon, "Detener" de
        Steam) se perdia TODA la sesion, aunque fuera de minutos (comprobado con el exe empaquetado). Se vuelca cada 3 s (solo escribe lo cambiado) */
     setInterval(() => { try { session.defaultSession.flushStorageData(); } catch (e) { /* sin sesion */ } }, 3000);
-    createWindow();
+    /* al abrir una version distinta de la ultima, se borra la cache vieja de Chromium (HTTP, Cache Storage, service workers, shaders); la partida
+       (localStorage) y la Enciclopedia (IndexedDB) no se tocan */
+    const purgaCache = async () => {
+      const f = path.join(app.getPath("userData"), "cachev.txt"); let prev = ""; try { prev = fs.readFileSync(f, "utf8").trim(); } catch (e) { /* primera vez */ }
+      const v = app.getVersion(); if (prev === v) return;
+      try { await session.defaultSession.clearCache(); await session.defaultSession.clearStorageData({ storages: ["cachestorage", "serviceworkers", "shadercache"] }); } catch (e) { /* sin sesion */ }
+      try { fs.writeFileSync(f, v); } catch (e) { /* sin disco */ }
+    };
+    purgaCache().then(createWindow, createWindow);
   });
 }
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });

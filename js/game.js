@@ -1490,6 +1490,9 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   if (document.fonts && document.fonts.load) Promise.race([Promise.all([document.fonts.load("400 20px 'Jersey 15'"), document.fonts.load("400 12px Silkscreen"), document.fonts.load("700 12px Silkscreen")]), new Promise(r => setTimeout(r, 1200))]).then(start, start);
   else start();
 
+  /* al entrar con una version distinta de la ultima que abrio este navegador, se borra TODA la cache de la app (Cache Storage de versiones anteriores);
+     las partidas y ajustes (localStorage, IndexedDB) no se tocan. El service worker nuevo la vuelve a llenar */
+  try { if (window.caches && localStorage.getItem("atlasiq.cacheV") !== A.VERSION) { caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))).catch(() => {}); localStorage.setItem("atlasiq.cacheV", A.VERSION); } } catch (e) { /* sin almacenamiento */ }
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 })(window.AIQ);

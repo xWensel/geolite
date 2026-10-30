@@ -27,7 +27,7 @@ void main(){ vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2)); gl_Pos
   /* ---------------------------------------------------------------- GLSL comun */
   const FC = `#version 300 es
 precision highp float; precision highp int;
-uniform vec2 uR; uniform vec2 uRes; uniform float uK; uniform vec2 uPorig; uniform float uT;
+uniform vec2 uR; uniform vec2 uRes; uniform float uK; uniform vec2 uPorig; uniform float uT; uniform float uSeaOnly;   // uSeaOnly: la pasada del mar quieto (sin tierra ni fronteras)
 uniform sampler2D uMsk, uBrd, uSoft, uBN, uBW;
 const float PI = 3.14159265, TAU = 6.2831853;
 vec2 qFrag(){ return vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uK; }
@@ -72,7 +72,7 @@ MS ms(vec2 p){
 }
 float clsOK(MS s){ return s.cls; }
 vec2 paisId(vec2 p){ float a = mskAt(p - uPorig).a * 255.; return vec2(h11(a * 1.37 + .5), h11(a * 7.13 + 3.1)); }
-float bordAA(vec2 p){ return mskAt(p - uPorig).g; }
+float bordAA(vec2 p){ return uSeaOnly > .5 ? 0. : mskAt(p - uPorig).g; }   // en el mar quieto (se hornea una vez y se copia) las fronteras del primer encuadre quedaban pintadas para siempre
 /* distancia a la frontera interior: lejos, de la frontera suavizada; cerca (< 3,5 px), exacta en la mascara (7 x 7) */
 float bordBlur(vec2 q){ float b = texture(uSoft, UV(q)).b / 4.; return b >= .24 ? 0. : 3. * sqrt(2. * log(.24 / max(b, 3e-4))); }
 #ifdef LITE
@@ -81,6 +81,7 @@ const int RB = 2;
 const int RB = 3;
 #endif
 float bordDist(vec2 p){
+  if (uSeaOnly > .5) return 99.;
   vec2 q = p - uPorig; float d = bordBlur(q); if (d > float(RB) + .5) return d;
   float e = 9.; for (int y = -RB; y <= RB; y++) for (int x = -RB; x <= RB; x++) { vec2 o2 = vec2(x, y); float g = mskAt(q + o2).g; if (g > .35) e = min(e, max(length(o2) - (g - .35) * .8, 0.)); }
   return min(e, max(d, float(RB) + .5));
@@ -123,7 +124,7 @@ layout(location = 0) out vec4 o0; layout(location = 1) out vec4 o1;
 float gEmis = 0.;
 ` + body + `
 /* el mar de las mesas nuevas va quieto en pantalla: se hornea UNA vez (uSeaOnly) y, lejos de la costa (uSeaFar px), cada fotograma solo lo copia */
-uniform float uSeaOnly, uSeaFar; uniform sampler2D uSeaA, uSeaB;
+uniform float uSeaFar; uniform sampler2D uSeaA, uSeaB;
 void main(){ vec2 q = qFrag();
   if (uSeaOnly < .5 && uSeaFar > 0. && sdAt(q) > uSeaFar) { o0 = texture(uSeaA, UV(q)); o1 = texture(uSeaB, UV(q)); return; }
   MS s = ms(q + uPorig); if (uSeaOnly > .5) { s.land = 0.; s.sd = 99.; s.border = 0.; s.coast = 0.; }
@@ -164,8 +165,9 @@ void main(){
   vec3 Ld = normalize(Lp - P);
   float fall = uLampI * mix(1., pow(clamp(1. - length(p - uLamp.xy) / (uR.x * .82), 0., 1.), 1.6), uPoolK);
   float dif = max(dot(N, Ld), 0.);
-  vec2 l2 = normalize(uLamp.xy - p + 1e-4);
-  float off = uCanto * (1.2 + 2.2 * length(p - uLamp.xy) / max(200., uLamp.z));
+  vec2 cen = uR * .5;   // la sombra proyectada sale de la lampara vista desde el CENTRO de la pantalla: con la direccion y el largo de cada pixel, al subir o bajar un pais cerca de la lampara la sombra giraba hacia un lado y crecia
+  vec2 l2 = normalize(uLamp.xy - cen + 1e-4);
+  float off = uCanto * (1.2 + 2.2 * length(cen - uLamp.xy) / max(200., uLamp.z));
   float sh = uCanto > 0. ? Soft(p + l2 * off) * (1. - s.land) : 0.;
   vec3 V = vec3(0, 0, 1), Hh = normalize(Ld + V);
   float shin = mix(220., 6., rough), nh = max(dot(N, Hh), 0.);
@@ -731,8 +733,8 @@ void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
   float marg = step(abs(mx), .5) + step(abs(mx - 3.), .5) * .55;
   T *= mix(vec3(1.), vec3(.93, .45, .48), clamp(marg, 0., 1.) * .8);
   float e = min(bordDist(p), max(-s.sd, 0.));
-  float fibr = vn(pp * vec2(2.2, .55) + 11.) * .6 + vn(pp * vec2(.6, 2.4) + 4.) * .4;
-  float bleed = uSangra * (.6 + 2.2 * fibr * fibr);
+  float fibr = vn(pp * vec2(.55, .14) + 11.) * .6 + vn(pp * vec2(.15, .6) + 4.) * .4;   // fibra a baja frecuencia: a 2 px el sangrado salia como un moteado sucio
+  float bleed = uSangra * (.8 + 1.0 * fibr);
   // en la franja de sangrado del mar, el color es el del pais mas cercano (la mascara ya lo da a 1,5 px; mas lejos se busca)
   float found = s.land > .5 ? 1. : 0., c10 = s.col10; vec2 qp = p;
   if (s.land <= .5 && s.sd < 4.) {
@@ -749,7 +751,7 @@ void mesaBake(MS s, out vec3 alb, out float h, out vec3 mat){
   int ci = int(c10);
   vec2 pid = paisId(qp);
   float reach = smoothstep(.6, -.6, s.sd - bleed) * found;
-  float ang = .55 + pid.x * 2.6 + (vn(p / 520. + 3.) - .5) * .8;
+  float ang = .55 + pid.x * 2.6;   // un solo angulo por pais: con un angulo que variase con la posicion, u = dot(p, n(ang)) hereda p (miles de px) y el trazo se comprime a 2-3 px (moire)
   float st = strokes(p, ang, float(ci) * 13.1 + floor(pid.y * 40.));
   float dens = (.66 + .2 * min(st, 1.) + .55 * max(st - 1., 0.) * uTrazo) * (1. + (fibr - .5) * .08);
   dens += .35 * exp(-max(e, 0.) / 1.8) * uTrazo;
@@ -1347,9 +1349,9 @@ void main(){ vec2 uv = gl_FragCoord.xy / 512.; o = vec4(pfbm(uv, 4., 1.), pfbm(u
     }
     /* la mesa puesta: se piden sus programas (compilan en paralelo; mientras, la mesa sale como antes) */
     /* el modo ligero (media resolucion en la luz, ruido y busquedas mas cortas): en la Steam Deck, con Calidad «ahorro», si el mapa ya ha
-       tenido que bajar su resolucion o si la propia firma tarda mas de 2 ms en la GPU (se mide de vez en cuando) */
+       tenido que bajar su resolucion o si la propia firma tarda mas de 5 ms en la GPU (se mide de vez en cuando) */
     lite() { const map = this.map; return document.documentElement.dataset.dev === "deck" || map.quality === "saver" || (map.rsPerf != null && map.rsPerf < 1) || this.slow >= 1 || !!A.firmaLite; }
-    /* segundo escalon (si aun asi va justa): tambien el material de las mesas nuevas a media resolucion */
+    /* segundo escalon (si aun asi va justa: mas de 10 ms; el presupuesto de un fotograma a 60 Hz son 16,6 y la firma comparte la GPU con la escena y la interfaz; con 2 ms, un monitor grande caia a media resolucion para siempre y la mesa salia con bordes escalonados): tambien el material de las mesas nuevas a media resolucion */
     half() { return this.slow >= 2 || A.firmaLite === 2; }
     /* la mesa puesta: se piden sus programas (compilan en paralelo; mientras, la mesa sale como antes) */
     prep(st) {
@@ -1483,7 +1485,7 @@ void main(){ vec2 uv = gl_FragCoord.xy / 512.; o = vec4(pfbm(uv, 4., 1.), pfbm(u
       if (this.qPend && !mide && gl.getQueryParameter(this.qPend, gl.QUERY_RESULT_AVAILABLE)) {          // la medida de hace unos fotogramas
         const ms = gl.getParameter(tq.GPU_DISJOINT_EXT) ? -1 : gl.getQueryParameter(this.qPend, gl.QUERY_RESULT) / 1e6; gl.deleteQuery(this.qPend); this.qPend = null;
         if (ms >= 0) { (this.qs || (this.qs = [])).push(ms); if (this.qs.length > 5) this.qs.shift();
-          if (this.qs.length === 5 && this.qs.slice().sort((a, b) => a - b)[2] > 2) { this.slow++; this.qs = []; } }   // la mediana de cinco medidas por encima de 2 ms: un escalon mas ligero
+          if (this.qs.length === 5 && this.qs.slice().sort((a, b) => a - b)[2] > (this.slow === 0 ? 5 : 10)) { this.slow++; this.qs = []; } }   // la mediana de cinco medidas por encima de 5 ms (la primera vez) o de 10 ms (la segunda): un escalon mas ligero
       }
       gl.activeTexture(gl.TEXTURE0);
       this.gen++;
