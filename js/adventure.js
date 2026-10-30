@@ -649,6 +649,7 @@ window.AIQ = window.AIQ || {};
   /* v0.3.55: la musica del momento (js/audio.js). El grupo del acto; el tema del jefe mientras dura su ronda; en el modo infinito, actos II y III */
   function musica(boss, delay) { if (run) A.music.moment(boss ? "boss" : run.inf ? "inf" : "a" + (Math.min(2, run.act) + 1), { delay }); }
   /* ---------------- modo infinito: tras la ronda 12, ya no hay mas rondas numeradas ni campamento ---------------- */
+  const INF_KM = 500;   // modo infinito: un aro mas de diana a 500 km (map.js _rings); por encima de el es un fallo y cuesta una provision (en todos los lugares, sin margen por tipo)
   function infPool() {                                                 // todo el banco de lugares, de todos los temas, sin repetir
     const P = pools(), seen = new Set(), out = [];
     Object.keys(P).forEach(k => P[k].forEach(q => { if (!seen.has(q.cid[0])) { seen.add(q.cid[0]); out.push(q); } }));
@@ -707,7 +708,8 @@ window.AIQ = window.AIQ || {};
       return `<div class="intro-in adv" data-topic="mixed"><div class="intro-left"><div class="intro-num blind">${A.blind("small", "s_compass")}</div><div class="intro-body">
         <span class="tag">${A.tx(actInfo(run.act).n)} · ${A.T("Modo infinito", "Infinite mode")}</span><h2>${A.tx(Lv.topicName)}</h2>
         <p class="intro-sub">${A.T("De todo tipo: mapas, países, monumentos, historia… Cada pregunta, menos tiempo.", "Every kind of question: maps, countries, landmarks, history… Less time on every question.")}</p>
-        <p class="adv-goal">${A.fmt1(Lv.seconds)} s</p></div></div>
+        <p class="adv-goal">${A.fmt1(Lv.seconds)} s</p>
+        <p class="intro-sub">${A.T("Hay un aro de diana a 500 km: si te quedas por encima, fallas y pierdes una provisión", "There is a bullseye ring at 500 km: land beyond it and you miss and lose a provision")}</p><div class="hearts">${hearts()}</div></div></div>
         <div class="intro-art"><i class="intro-hueco"></i><div class="intro-dealer" id="introDealer"></div></div></div>`;
     }
     const info = actInfo(run.act), def = rdef(), list = run.chal || [];
@@ -836,6 +838,7 @@ window.AIQ = window.AIQ || {};
     let dist = km == null ? 0 : Math.round(1000 * Math.exp(-c.km / c.scale));
     const time = km == null ? 0 : Math.round(400 * Math.max(0, left / limit) * (0.3 + 0.7 * dist / 1000));
     c.dist = dist; c.time = time; c.chips = dist + time;
+    if (run.inf && km != null && km > INF_KM) c.lines.push(["heart", A.tf("Fallo: más de {d}", "Miss: over {d}", { d: A.fmtDist(INF_KM) }), "−1"]);   // modo infinito: el fallo es quedarse a mas de 500 km (el aro rojo); el ticket lo dice
     /* acierto (racha, bandera): dentro de los 300 km de la Enciclopedia (x2 en mares y naturaleza), el anillo exterior; no un porcentaje de los puntos */
     const lim0 = (A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid }) : [300, 150, 75])[0] * (sumFlag("hitMul") || 1);
     c.hit = km != null && c.km <= lim0;
@@ -874,7 +877,7 @@ window.AIQ = window.AIQ || {};
       const S = C().S, Lv = S.camp.levels[0];
       Lv.seconds = Math.max(3, Math.round((Lv.seconds - 0.2) * 10) / 10); run.infSeconds = Lv.seconds;
       if (S.qs.length - S.qi < 60) S.qs.push(...infBatch(run.infN = (run.infN || 2) + 1));                        // se acerca el final del carrete: se rellena antes de que se note
-      const failed = res.km == null || res.dist < 400;
+      const failed = res.km == null || res.km > INF_KM;
       if (failed) {
         const insured = !!(run.sup && run.sup.seguro), shielded = insured || (has("shieldAct") && run.shieldAct !== run.act);
         if (shielded && !insured) run.shieldAct = run.act; else loseLife();
@@ -882,7 +885,7 @@ window.AIQ = window.AIQ || {};
       }
     }
     persist(); A.ach.emit("casino", { kind: "hold", coins: run.coins }); A.ach.emit("adv", { kind: "hold", coins: run.coins, perks: run.perks.length, inf: run.inf ? run.qi : 0 });   // inf: preguntas aguantadas en el modo infinito
-    const kind = res.km == null ? "timeout" : res.dist >= 960 ? "bull" : res.dist < 400 ? "miss" : res.streak >= 3 ? "streak" : res.dist >= 750 ? "good" : null;
+    const kind = res.km == null ? "timeout" : res.dist >= 960 ? "bull" : (run.inf ? res.km > INF_KM : res.dist < 400) ? "miss" : res.streak >= 3 ? "streak" : res.dist >= 750 ? "good" : null;
     const qAt = C().S.qi, still = () => { const S2 = C().S; return !!run && S2.qi === qAt && S2.phase === "reveal"; };   // pasaste a la siguiente: ya no la comenta
     /* lo que el crupier sabe de esta respuesta: el lugar, tu mano de verdad y si es "ese sitio otra vez" (js/dealer.js) */
     const oq = C().S.qs[qAt], info = { valid: still, km: res.km, dist: res.dist, hand: res.hand || null, chal: (run.chal || []).filter(c => !c.mesa).map(c => c.id), rk: run.act + ":" + run.round + ":" + (run.attempt || 0),

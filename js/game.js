@@ -958,7 +958,7 @@
       guess: guess ? [gLon, guess.lat] : null, answer: ans, highlight: isC && !af ? o.key : null, area: af || null, label, labelAt,
       dist: guess && km > 0 ? fmtKm(km) : "", pop: total ? "+" + A.fmt(total) : null, bull: !!guess && tier === 4,   // bull: con «¡Diana!» la diana de la tienda (js/punteros.js) sustituye a los anillos
       flags: up ? fl.map(flagImg) : null,
-      rings: guess && !isC ? { r: lim, n: cxr.level, at: [0, 1, 2].map(i => JP_AT + i * JP_MS), casi, oro: SIL && !par.vivo ? 1 : 0 } : null,   // anillos 300/150/75 km: se encienden con los jackpots
+      rings: guess && !isC ? { r: S.run && A.adv.isInfinite && A.adv.isInfinite() ? [...lim, 500] : lim, n: cxr.level, at: [0, 1, 2].map(i => JP_AT + i * JP_MS), casi, oro: SIL && !par.vivo ? 1 : 0 } : null,   // anillos 300/150/75 km: se encienden con los jackpots
     });
     if (adv && adv.bank && adv.bank.pt) { const bq = S.qi; map.setDecoys([{ lon: adv.bank.pt[0], lat: adv.bank.pt[1], bank: adv.bank.s, bankLabel: A.tx(A.chal.tl("ui_bank")).toUpperCase() + " +" + A.fmt(adv.bank.s), t0: performance.now() + 900 - M0, a: 1 }]); later(() => { if (S.phase === "reveal" && S.qi === bq && A.sfx.bankPin) A.sfx.bankPin(); }, 1500); }   // la chincheta de la banca cae despues de la tuya
     const fC = isC ? world.byName[o.key] : null;
@@ -1307,7 +1307,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
     if (L && !live) rows.push(`<div class="gx-lead-row"><span>${A.t("score.level")}</span><s></s><b>${A.fmt(S.levelScore)}${L.advance > 1 ? ` <small>/ ${A.fmt(L.advance)}</small>` : ""}</b></div>`
       + (L.advance > 1 ? `<div class="gx-bar"><i style="width:${Math.min(100, (100 * S.levelScore) / L.advance)}%"></i></div>` : ""));
     if (run && !prac) rows.push(`<div class="gx-lead-row"><span>${A.pick6("Doblones|Doubloons|Doublons|Dobrões|Dublonen|Dobloni||金币|도블론|ダブロン|Дублоны|Dublony")}</span><s></s><b>${A.fmt(run.coins || 0)}</b></div>`);
-    const hearts = run && !run.inf && run.lives > 0 ? `<div class="gx-hearts" aria-label="${A.pick6("Provisiones|Provisions|Provisions|Provisões|Proviant|Provviste||补给|식량|食料|Запасы|Zapasy")}: ${run.lives}">${A.icon("heart").repeat(Math.min(run.lives, 9))}</div>` : "";
+    const hearts = run && run.lives > 0 ? `<div class="gx-hearts" aria-label="${A.pick6("Provisiones|Provisions|Provisions|Provisões|Proviant|Provviste||补给|식량|食料|Запасы|Zapasy")}: ${run.lives}">${A.icon("heart").repeat(Math.min(run.lives, 9))}</div>` : "";
     const exitBtn = prac ? `<button class="gx-btn wide" id="saveExitBtn"><span>${A.pick6("Salir de la práctica|Leave practice|Quitter l'entraînement|Sair do treino|Training verlassen|Esci dall'allenamento||退出练习|연습 나가기|練習をやめる|Выйти из тренировки|Wyjdź z treningu")}</span></button>`
       : adv ? `<button class="gx-btn wide" id="saveExitBtn"><span>${A.T("Guardar y salir al menú", "Save and exit to menu")}</span></button>` : `<button class="gx-btn wide" id="exitBtn"><span>${A.T("Salir al menú", "Exit to menu")}</span></button>`;
     v.className = "gx"; v._gx = null;
@@ -1331,7 +1331,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
       const home = daily ? "daily" : "adventure";
       $("saveExitBtn").onclick = () => { A.sfx.ui(); leave(home); };
       let armed = false, tm = 0; const nb = $("newRunBtn");
-      nb.onclick = () => {
+      if (nb) nb.onclick = () => {
         if (!armed) { armed = true; nb.classList.add("armed"); nb.textContent = daily ? A.pick6("¿Seguro? El intento se cierra con los puntos que llevas. Pulsa otra vez|Sure? The attempt closes with the points you have. Press again|Sûr ? L'essai se clôt avec tes points actuels. Appuie encore|Certeza? A tentativa fecha com os pontos que você tem. Pressione de novo|Sicher? Der Versuch endet mit deinen jetzigen Punkten. Nochmal drücken|Sicuro? Il tentativo si chiude con i punti che hai. Premi ancora|¿Seguro? El intento se cierra con los puntos que llevas. Presiona otra vez|确定吗？本次尝试将以当前分数结束。再按一次|정말요? 지금 점수로 시도가 끝나요. 한 번 더 누르세요|本当に？今の点数で挑戦が終わります。もう一度押して|Точно? Попытка закроется с нынешними очками. Нажми ещё раз|Na pewno? Podejście zamknie się z obecnymi punktami. Naciśnij jeszcze raz") : A.T("¿Seguro? Se pierde esta partida. Pulsa otra vez", "Sure? This run is lost. Press again"); A.sfx.deny(); tm = setTimeout(() => { armed = false; nb.classList.remove("armed"); nb.textContent = newLbl; }, 4000); return; }
         clearTimeout(tm); A.adv.abandon(); A.sfx.deny(); leave(home);
       };

@@ -2471,6 +2471,11 @@ void main(){
         if (on) { const p = 1 + 1.5 * (1 - f) * (1 - f); c.globalAlpha = fade; c.lineWidth = 6 * p; c.strokeStyle = this._rgba(sk.ink, 0.8); c.stroke(); c.lineWidth = 3 * p; c.strokeStyle = MED[i]; c.stroke(); }
         else { c.setLineDash([2, 7]); c.lineCap = "round"; c.globalAlpha = 0.85 * grow * fade; c.lineWidth = 3.4; c.strokeStyle = this._rgba(sk.ink, 0.7); c.stroke(); c.lineWidth = 1.3; c.strokeStyle = this._rgba(sk.paper, 0.95); c.stroke(); c.setLineDash([]); c.lineCap = "butt"; }   // dos tonos, como la linea de distancia: se ve en tierra clara y en el mar
       }
+      if (R.r.length > 3) {                                              // modo infinito: el aro del fallo (R.r[3] = 500 km), el mismo trazo de dos tonos pero rojo; por fuera de el, pierdes una provision
+        const P = R.xy[3]; c.beginPath();
+        for (let j = 0; j < P.length; j += 2) { const px = A0[0] + (P[j] - A0[0]) * sc, py = A0[1] + (P[j + 1] - A0[1]) * sc; j ? c.lineTo(px, py) : c.moveTo(px, py); }
+        c.closePath(); c.setLineDash([8, 6]); c.globalAlpha = 0.9 * grow * fade; c.lineWidth = 5; c.strokeStyle = this._rgba(sk.ink, 0.8); c.stroke(); c.lineWidth = 2.6; c.strokeStyle = "#e0483c"; c.stroke(); c.setLineDash([]);
+      }
       c.restore();
     }
     /* el aro de oro de la diana perfecta (js/revelado.js, «el silencio»): el mismo trazo del aro encendido, su metal tirando a oro y un brillo que lo recorre */
