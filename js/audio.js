@@ -25,11 +25,11 @@ window.AIQ = window.AIQ || {};
   const R = () => Math.random();
 
   let ctx = null, master, sfxBus, revFx, musBus, musFilter, revIn, outTap, sala = null;
-  A.audio = { sfxOn: true, musicOn: true, vol: { master: 0.85, music: 0.7, sfx: 0.9 } };
-  const MUS_BASE = 0.55;
+  A.audio = { sfxOn: true, musicOn: true, vol: { master: 0.7, music: 1, sfx: 1 } };
+  const MUS_BASE = 0.55 * 0.85 * 0.7 / 0.7;   // v0.4.15: de fabrica General 70 y el resto 100; estos tres coeficientes (musica, efectos, ambiente) llevan la cuenta de lo de antes (85/70/90/60) para que suene EXACTAMENTE igual
   /* mezcla (Bloque F): LOUD sube el conjunto 13 dB (la musica pasa de -44 a -31 LUFS de mediana) y SFX_K coloca los efectos para que, con los
      reguladores de fabrica, cada uno suene a su escalon exacto sobre la musica (medido con el mismo medidor de la maqueta) */
-  const LOUD = Math.pow(10, 13 / 20), SFX_K = 1.6;
+  const LOUD = Math.pow(10, 13 / 20), SFX_K = 1.6 * 0.85 * 0.9 / 0.7;
   const LIM_MK = 1.14;                              // dB que el compresor del navegador suma solo (makeup de un limitador a -2 dB, 20:1): se deshacen
 
   /* la sala calida: ruido que decae y se oscurece al caer (paso bajo que baja de 7 kHz a 1,2 kHz), con 14 ms de predelay. Sin siseo */
@@ -534,7 +534,7 @@ window.AIQ = window.AIQ || {};
      cargan al arrancar, en segundo plano: nada se descodifica en mitad de una partida. El nivel es el de la maqueta (0 dB): la grabacion a -20 dB
      en la entrada de la mezcla, con los reguladores de fabrica */
   const PUB = { diana: ["aplauso_corto"], porpoco: ["oooh_1", "oooh_2", "oooh_3", "oooh_4"], racha5: ["vitores"], rota: ["ooow"], jackpot: ["aplauso_vitores"], ronda: ["aplauso_largo", "aplauso_largo_2", "aplauso_largo_3"] };   // la ronda: tres tomas de la misma sala y la misma tarde (snakebarney); las demas reacciones son tomas unicas de su serie
-  const PUB_G = 0.1 / (0.9 * SFX_K), pubB = {}, pubUlt = {}; let pubIni = false;
+  const PUB_G = 0.1 / (0.9 * 1.6), pubB = {}, pubUlt = {}; let pubIni = false;
   function pubCarga() {
     if (pubIni || !ctx) return; pubIni = true;
     [...new Set(Object.values(PUB).flat())].forEach((n, i) => setTimeout(() => fetch(A.media("assets/sfx/publico/" + n + ".mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { pubB[n] = b; }).catch(() => { /* sin esa grabacion, esa reaccion calla */ }), 400 + i * 120));
@@ -599,7 +599,7 @@ window.AIQ = window.AIQ || {};
     try {
       if (ctx.state === "suspended" || ctx.state === "interrupted") ctx.resume();
       const now = performance.now(); sfxHolds.forEach((t0, k) => { if (now - t0 > 30000) sfxHolds.delete(k); });
-      if (!Number.isFinite(A.audio.vol.sfx)) A.audio.vol.sfx = 0.9;
+      if (!Number.isFinite(A.audio.vol.sfx)) A.audio.vol.sfx = 1;
       const want = sfxWant();
       if (Math.abs(sfxBus.gain.value - want) > 0.02 || Math.abs(revFx.gain.value - want) > 0.02) sfxApply();
     } catch (e) { /* sin audio */ }
@@ -1302,7 +1302,7 @@ window.AIQ = window.AIQ || {};
     return { g, rs };
   }
   const cla = (key, fn) => go((t, ...a) => { const s = stripC(typeof key === "function" ? key(...a) : key), b0 = lb, r0 = lr; lb = s.g; lr = s.rs; try { return fn(t, ...a); } finally { lb = b0; lr = r0; } });
-  const PADK = MUS_BASE * 0.7;   // el acorde de fondo de antes iba por el bus de la musica (x0,55 x0,7 de fabrica): por su tira, a la misma fuerza
+  const PADK = 0.55 * 0.7;   // el acorde de fondo de antes iba por el bus de la musica (x0,55 x0,7 de fabrica): por su tira, a la misma fuerza
   const CL = {
     hover: cla("hover", t => {
       if (t - hovT < 0.06) return;
@@ -1577,10 +1577,10 @@ window.AIQ = window.AIQ || {};
     jefe: { lvl: 0, lp: 500, chips: 0, glass: 0, ice: 0, deck: 0 },      // llega el jefe: la sala se calla
     fuera: { lvl: 0, lp: 500, chips: 0, glass: 0, ice: 0, deck: 0 },     // la Enciclopedia: un aparato, fuera de la sala
   };
-  A.audio.vol.amb = 0.6;
+  A.audio.vol.amb = 1;
   let amb = null, ambPlace = "salon", ambTimer = 0;
   const ambWanted = () => A.audio.sfxOn && A.audio.vol.amb > 0.005;
-  const ambLevel = P => (ambWanted() ? P.lvl * 0.55 * 0.9 * A.audio.vol.amb : 0);
+  const ambLevel = P => (ambWanted() ? P.lvl * 0.55 * 0.9 * (0.85 * 0.6 / 0.7) * A.audio.vol.amb : 0);
   function ambBuild() {
     if (amb || !ctx) return;
     const mk = (f, sendTo) => { const g = ctx.createGain(), lp = ctx.createBiquadFilter(); g.gain.value = 0; lp.type = "lowpass"; lp.frequency.value = f; g.connect(lp).connect(master); if (sendTo) { const s = ctx.createGain(); s.gain.value = sendTo; lp.connect(s).connect(revIn); } return { g, lp }; };
