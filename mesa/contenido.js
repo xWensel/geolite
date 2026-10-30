@@ -100,7 +100,7 @@
   let SCEN = false; try { SCEN = localStorage.getItem("mc.scen") === "1"; } catch (e) {}
   const SUGSIG = A.SUGSIG || {};
   const famaArr = a => { if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; };
-  const sugTopic = x => ({ persona: "character", ciudad: "city", monumento: "landmark", naturaleza: "nature", historia: "history" })[x.cat] || (x.sub === "animal" ? "nature" : "culture");
+  const sugTopic = x => ({ persona: "character", ciudad: "city", monumento: "landmark", naturaleza: "nature", historia: "history", capital: "capital" })[x.cat] || (x.sub === "animal" ? "nature" : "culture");
   const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
   const sgRows = () => SG.map(sugRow).filter(r => r.dif2 != null);
   function cohort() { return SCEN ? rows.filter(r => !(N[r.key] && N[r.key].v === "no")).concat(sgRows().filter(r => N[r.key] && N[r.key].v === "ok")) : rows; }
@@ -111,7 +111,7 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"], ["categorias", "Categorías"], ["cola", "Cola de decisiones"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"], ["resultado", "Resultado por categorías"], ["categorias", "Categorías"], ["cola", "Cola de decisiones"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
   const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
@@ -379,7 +379,7 @@
 
 
   /* ================= CATEGORIAS (el panel de trabajo, una categoria cada vez) ================= */
-  const SGCATN = { persona: "Personaje", sello: "Sello del país", ciudad: "Ciudad", monumento: "Monumento", naturaleza: "Naturaleza", historia: "Historia" };
+  const SGCATN = { capital: "Capital", persona: "Personaje", sello: "Sello del país", ciudad: "Ciudad", monumento: "Monumento", naturaleza: "Naturaleza", historia: "Historia" };
   const TOPICS = ["character", "capital", "city", "landmark", "nature", "history", "country", "flag", "clue", "culture"];
   const TOPIC_HELP = {
     character: "Personas famosas de toda la historia: una por país como mínimo y las más conocidas del mundo.",
@@ -420,6 +420,44 @@
     return `<div class="hero"><h1>Categorías</h1><p>Una categoría cada vez. Pulsa <b>Trabajar</b> y te llevo a la cola con solo lo de esa categoría; cuando termines, <b>Marcar hecha</b>. Llevas <b>${done}</b> de ${TOPICS.length}. Lo que no votes se queda como está.</p></div>
       <div class="pl"><div class="bars" style="gap:10px">${TOPICS.map(card).join("")}</div></div>`;
   };
+
+  /* ================= RESULTADO POR CATEGORIAS (la revision completa, de menos a mas dificultad) ================= */
+  const RESCATS = ["character", "capital", "city", "landmark", "nature", "history", "culture"];
+  const bin10 = d => Math.min(9, Math.max(0, Math.floor((d - 1) / 10)));
+  const efectivo = (key, def) => { const n = N[key]; return n && (n.v === "ok" || n.v === "no") ? n.v : def; };
+  function resRows(t) {
+    const R = A.RES && A.RES.cats[t]; if (!R) return [];
+    const out = rows.filter(r => r.topic === t && r.dif2 != null).map(r => ({ key: r.key, name: r.name, ctry: r.ctry || "—", d: Math.round(r.dif2), estado: "queda", m: "" }));
+    const idx = {}; out.forEach(o => (idx[o.key] = o));
+    R.salen.forEach(s => { const o = idx[s.id]; if (o) { o.estado = "sale"; o.m = s.m + (s.por ? " → entra " + s.por : ""); } });
+    R.entran.forEach(e => { const k = "sug:" + e.id; out.push({ key: k, name: e.es, ctry: e.pais || "—", d: Math.round(e.d), estado: "entra", m: e.m, now: e.a, mujer: e.f }); });
+    return out;
+  }
+  VIEWS.resultado = () => {
+    reindex(); const f = ff("resultado"), t = f.t || "character", R = A.RES && A.RES.cats[t];
+    if (!R) return '<div class="hero"><h1>Resultado por categorías</h1><p>No hay resultado cargado.</p></div>';
+    if (t === "capital") { const base = rows.filter(r => r.topic === "capital" && r.dif2 != null); R.antes = Array(10).fill(0); base.forEach(r => R.antes[bin10(r.dif2)]++); R.despues = R.antes.slice(); R.entran.forEach(e => R.despues[bin10(e.d)]++); }
+    const D = catDone(), all = resRows(t), nIn = R.entran.length, nOut = R.salen.length, mx = Math.max(...R.antes, ...R.despues, 1);
+    const tr = f.tr == null || f.tr === "" ? null : +f.tr, L = all.filter(o => (!f.es || o.estado === f.es) && (tr == null || bin10(o.d) === tr) && (!f.q || (o.name + o.ctry).toLowerCase().includes(f.q.toLowerCase())));
+    const chips = RESCATS.map(c => `<button class="chipb ${c === t ? "on" : ""}" data-act="restab" data-t="${c}">${esc(CATS[c])}${D["res:" + c] ? " ✓" : ""}</button>`).join("");
+    const bars = R.antes.map((n, i) => { const m = R.despues[i], lo = i * 10 + 1, hi = (i + 1) * 10; return `<div class="rb ${tr === i ? "on" : ""}" data-act="restr" data-i="${i}" title="Dificultad ${lo}–${hi}: ${n} antes · ${m} después"><span class="rbv"><i style="height:${Math.round(60 * n / mx)}px;background:#6a5f8f"></i><i style="height:${Math.round(60 * m / mx)}px;background:${m < 15 ? "#ff6b78" : m < 40 ? "#ffd24a" : "#5ee07a"}"></i></span><b>${lo}–${hi}</b><small>${n} → ${m}</small></div>`; }).join("");
+    const mujer = R.entran.filter(e => e.f).length, ahora = R.entran.filter(e => e.a).length;
+    const est = { queda: '<span class="bdg">se queda</span>', entra: '<span class="bdg ok">ENTRA</span>', sale: '<span class="bdg bad">SALE</span>' };
+    return `<div class="hero"><h1>Resultado por categorías</h1><p>La revisión completa está hecha: en cada categoría <b>entran y salen las mismas fichas</b> (el total no cambia), de menos a más dificultad (1–100). Pesa la <b>importancia</b> (qué es esencial para enseñar) y el <b>reconocimiento</b> (qué es divertido y se conoce, incluidas figuras actuales). Tú solo miras; lo que no toques se aplica tal cual.</p></div>
+      <div class="pl"><h2>Categoría <small>pincha una para verla</small></h2><div class="row">${chips}</div>
+      <div class="kpis"><div class="kpi"><b>+${nIn}</b><span>entran</span></div><div class="kpi"><b>−${nOut}</b><span>salen</span></div><div class="kpi"><b>${R.n - nOut}</b><span>se quedan</span></div><div class="kpi"><b>${R.n} → ${R.n + nIn - nOut}</b><span>total antes y después${nIn !== nOut ? " · se compensa con otra categoría" : ""}${R.sinSustituto ? " (" + R.sinSustituto + " salidas por regla sin sustituto)" : ""}</span></div>${t === "character" ? `<div class="kpi"><b>${ahora}</b><span>figuras actuales entre las nuevas · ${mujer} mujeres</span></div>` : ""}</div></div>
+      <div class="pl"><h2>Dificultad de 1 a 100 <small>gris = antes · color = después (rojo: menos de 15 · ámbar: 15-39 · verde: 40 o más) · pincha un tramo para filtrar</small></h2><div class="rbars">${bars}</div></div>
+      <div class="pl"><h2>${esc(CATS[t])} de menos a más difícil <small>${L.length} de ${all.length}</small></h2>
+      <div class="tools">${inp("resultado", "q", "buscar")}${sel("resultado", "es", [["entra", "Solo lo que entra"], ["sale", "Solo lo que sale"], ["queda", "Solo lo que se queda"]], "Todo")}<button class="chipb" data-act="clrres">Limpiar</button><button class="btn" data-act="resok" data-t="${t}">Dar por buena esta categoría</button></div>
+      ${T("res", [{ h: "Dificultad", f: o => `<span class="bar3" style="width:90px;display:inline-flex;height:12px;vertical-align:middle"><i style="width:${o.d}%;background:${ZC[zoneOf(o.d)]}"></i></span> <b style="font-weight:400">${o.d}</b>`, v: o => o.d }, { h: "Nombre", f: o => (o.estado === "queda" ? nmc({ key: o.key, name: o.name }) : `<span class="nm" data-open="${esc(o.key)}">${esc(o.name)}</span>`) + (o.now ? ' <span class="pill ok">actual</span>' : ""), v: o => o.name }, { h: "País", f: o => esc(o.ctry), v: o => o.ctry }, { h: "Qué pasa", f: o => (est[efectivo(o.key, o.estado === "entra" ? "ok" : o.estado === "sale" ? "no" : null) === "ok" && o.estado === "sale" ? "queda" : efectivo(o.key, null) === "no" && o.estado === "entra" ? "queda" : o.estado]) , v: o => o.estado }, { h: "Por qué", w: 1, f: o => esc(o.m), v: o => o.m }, { h: "Tu opinión", a: 1, f: o => (o.estado === "queda" ? "" : vb(o.key)) }], L, { s: 0, d: 1, per: 16 })}</div>`;
+  };
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-act]"); if (!t) return; const a = t.dataset.act, d = t.dataset;
+    if (a === "restab") { ff("resultado").t = d.t; ff("resultado").tr = null; if (ST.res) ST.res.page = 0; draw(); }
+    else if (a === "restr") { const f = ff("resultado"); f.tr = f.tr == d.i ? null : +d.i; if (ST.res) ST.res.page = 0; draw(); }
+    else if (a === "clrres") { const t0 = ff("resultado").t; F.resultado = { t: t0 }; draw(); }
+    else if (a === "resok") { const R = A.RES.cats[d.t]; let n = 0; R.entran.forEach(x => { const k = "sug:" + x.id; if (!N[k]) { N[k] = { v: "ok", nota: "revisión completa", t: Date.now() }; n++; } }); R.salen.forEach(x => { if (!N[x.id]) { N[x.id] = { v: "no", nota: "revisión completa: " + x.m, t: Date.now() }; n++; } }); const D = catDone(); D["res:" + d.t] = Date.now(); N["cfg:cats"] = { v: "cfg", nota: JSON.stringify(D), t: Date.now() }; saveN(); toast("Categoría dada por buena (" + n + " decisiones guardadas)"); draw(); }
+  });
   /* ================= NOTAS ================= */
   VIEWS.notas = () => {
     const ks = userNotes().sort((a, b) => N[b].t - N[a].t), f = ff("notas"), L = ks.filter(k => !f.v || N[k].v === f.v).map(k => ({ key: k, name: nameOfKey(k), v: N[k].v, nota: N[k].nota, t: N[k].t })), c = countBy(ks, k => N[k].v);
@@ -614,5 +652,5 @@
   try { const es = REMOTE ? null : new EventSource("/api/live"); if (!es) throw 0; es.onmessage = () => { const b = $("#livebar"); b.style.display = "flex"; }; } catch (e) {}
   fetch("../data/wiki/es.json").then(r => r.json()).then(j => { WIKI = j; TXT.es = j; draw(); });
   fetch("../data/wiki/img.json").then(r => r.json()).then(j => { IMGD = j; draw(); });
-  window.MC2 = { rows, SG, open, go };
+  window.MC2 = { rows, SG, open, go, remGroups, SN, reindex, CFG, byKey };
 })();
