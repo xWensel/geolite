@@ -111,7 +111,7 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"], ["cola", "Cola de decisiones"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
   const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
@@ -321,6 +321,62 @@
       ${T("rem", [{ h: "Entrada", f: nmc, v: r => r.name }, { h: "Categoría", f: r => CATS[r.topic], v: r => r.topic }, { h: "País", f: r => esc(r.ctry || "—"), v: r => r.ctry }, { h: "Índice", f: zbar, v: r => r.dif2 }, { h: "Idiomas", n: 1, f: r => (SN[r.wid] || [])[0] ?? "—", v: r => (SN[r.wid] || [])[0] }, { h: "Visitas", n: 1, f: r => ((SN[r.wid] || [])[1] || 0).toLocaleString("es"), v: r => (SN[r.wid] || [])[1] }, { h: "Etiquetas", f: r => r.tags.map(t => `<span class="pill bad">${t}</span>`).join("") }, { h: "Opinión", a: 1, f: r => vb(r.key) }], g[open].rows, { lim: 50 })}</div>`;
   };
 
+
+  /* ================= COLA DE DECISIONES ================= */
+  /* Todo lo que pide una decision tuya en UNA sola cola: propuestas que podrian entrar y lo que podria salir (por grupos de reglas).
+     Una tarjeta cada vez, teclas B / N / C / Espacio (saltar) / Z (deshacer) / I (ficha). Lo que no votes se queda como esta (= Bien). */
+  const QSKIP = new Set(), QUNDO = [];
+  const QSRC = [["entra", "Podría entrar"], ["sale", "Podría salir"]];
+  function queueItems() {
+    reindex(); const f = ff("cola"), out = [], seen = new Set(), g = remGroups();
+    SG.filter(x => !N[SGKEY(x)]).sort((a, b) => b.idiomas - a.idiomas).forEach(x => { seen.add(SGKEY(x)); out.push({ key: SGKEY(x), src: "entra", why: "Propuesta nueva · " + (x.cat === "persona" ? "personaje" : "Sello del país") }); });
+    ["marcas", "disputados", "duplicados", "sinpais", "pastas", "nivel", "eeuu", "irrelevantes"].forEach(k => g[k].rows.forEach(r => { if (!N[r.key] && !seen.has(r.key)) { seen.add(r.key); out.push({ key: r.key, src: "sale", gk: k, why: g[k].t }); } }));
+    const L = out.filter(x => !f.src || x.src === f.src), a = L.filter(x => !QSKIP.has(x.key)), b = L.filter(x => QSKIP.has(x.key));
+    return { all: out, list: a.concat(b), fresh: a.length, skipped: b.length };
+  }
+  function qCard(it) {
+    const k = it.key;
+    if (it.src === "entra") {
+      const x = sgByKey[k], r = sugRow(x);
+      return `<div class="qc"><span class="pill warn">${esc(it.why)}</span><h1>${esc(x.es)}</h1><p class="note" style="margin:0">${esc(x.en)} · ${esc(x.pais)} · ${esc(x.sub)}${x.mujer ? " · mujer" : ""}</p>
+      <div class="qm"><div><small>Dificultad estimada</small>${zbar(r)}</div><div><small>Idiomas de Wikipedia</small><b>${x.idiomas}</b></div><div><small>Seguridad</small><b>${esc(x.seguridad)}</b></div></div>
+      ${x.avisos.length ? `<div>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>` : ""}<div class="txt" style="max-height:none">${esc(x.por_que)}</div></div>`;
+    }
+    const r = byKey[k];
+    return `<div class="qc"><span class="pill bad">${esc(it.why)}</span><h1>${esc(r.name)}</h1><p class="note" style="margin:0">${esc(CATS[r.topic] || r.topic)} · ${esc(r.ctry || "sin país")}</p>
+      <div class="qm"><div><small>Índice (0 fácil · 100 difícil)</small>${zbar(r)}</div><div><small>Idiomas</small><b>${(SN[r.wid] || [])[0] ?? "—"}</b></div><div><small>Visitas</small><b>${((SN[r.wid] || [])[1] || 0).toLocaleString("es")}</b></div></div>
+      ${r.tags.length ? `<div>${r.tags.map(t => `<span class="pill bad">${esc(t)}</span>`).join("")}</div>` : ""}<p class="note" style="margin:0">Bien = se queda en el juego · No = fuera.</p></div>`;
+  }
+  function qPreview() {
+    const R = rows.filter(r => r.dif2 != null), after = R.filter(r => !(N[r.key] && N[r.key].v === "no")).concat(sgRows().filter(r => N[r.key] && N[r.key].v === "ok")),
+      c = a => [0, 1, 2].map(z => a.filter(r => r.zone === z).length), c0 = c(R), c1 = c(after), un = userNotes(),
+      nSugOk = SG.filter(x => N[SGKEY(x)] && N[SGKEY(x)].v === "ok").length, nOut = rows.filter(r => N[r.key] && N[r.key].v === "no").length, nCh = un.filter(k => N[k].v === "cambiar").length;
+    return `<div class="pl"><h2>Si dijeras «aplica» ahora <small>solo es una vista previa: nada cambia hasta que me lo digas</small></h2>
+      <div class="kpis"><div class="kpi"><b>+${nSugOk}</b><span>entran (propuestas con Bien)</span></div><div class="kpi"><b>−${nOut}</b><span>salen (preguntas con No)</span></div><div class="kpi"><b>${nCh}</b><span>con «Cambiar…» (te leo la nota)</span></div></div>
+      <table><tr><th></th>${ZN.map((z, i) => `<th class="num" style="color:${ZC[i]}">${z}</th>`).join("")}<th class="num">Total</th></tr>
+      <tr><td>Hoy</td>${c0.map(x => `<td class="num">${x}</td>`).join("")}<td class="num">${R.length}</td></tr>
+      <tr><td>Después</td>${c1.map((x, i) => `<td class="num">${x}${x !== c0[i] ? ` <small style="color:${x > c0[i] ? "var(--z0)" : "#ff9aa4"}">${x > c0[i] ? "+" : ""}${x - c0[i]}</small>` : ""}</td>`).join("")}<td class="num">${after.length}</td></tr></table>
+      <div class="row"><button class="btn" data-act="copynotes">Copiar el parte para Claude</button><button class="btn ghost" data-go="margenes">Ver márgenes por nivel</button></div></div>`;
+  }
+  VIEWS.cola = () => {
+    const f = ff("cola"), Q = queueItems(), it = Q.list[0], nE = Q.all.filter(x => x.src === "entra").length, nS = Q.all.length - nE, done = userNotes().length;
+    const chips = `<div class="row"><button class="chipb ${f.src ? "" : "on"}" data-act="qsrc" data-s="">Todo · ${Q.all.length}</button>${QSRC.map(([id, l]) => `<button class="chipb ${f.src === id ? "on" : ""}" data-act="qsrc" data-s="${id}">${l} · ${id === "entra" ? nE : nS}</button>`).join("")}</div>`;
+    const main = it ? `<div class="pl"><h2>Ahora te toca <small>quedan ${Q.list.length}${Q.skipped ? " · " + Q.skipped + " saltadas al final" : ""} · ${done} opiniones guardadas</small></h2>${chips}
+        ${qCard(it)}
+        <div class="row"><button class="btn" data-act="qv" data-v="ok">Bien <kbd>B</kbd></button><button class="btn red" data-act="qv" data-v="no">No <kbd>N</kbd></button><button class="btn ghost" data-act="qv" data-v="cambiar">Cambiar… <kbd>C</kbd></button><button class="btn ghost" data-act="qskip">Saltar <kbd>␣</kbd></button><button class="btn ghost" data-act="qundo" ${QUNDO.length ? "" : "disabled"}>Deshacer <kbd>Z</kbd></button><button class="btn ghost" data-open="${esc(it.key)}">Ficha completa <kbd>I</kbd></button></div>
+        <div class="row"><button class="chipb" data-act="qall" data-s="${f.src || ""}">Todo lo que queda ${f.src ? "de «" + QSRC.find(x => x[0] === f.src)[1] + "»" : ""} = Bien (${Q.list.length})</button></div></div>`
+      : `<div class="pl"><h2>Ahora te toca</h2><p class="none" style="font-size:28px">¡Cola vacía! No queda nada que decidir${f.src ? " en este grupo" : ""}.</p>${chips}</div>`;
+    return `<div class="hero"><h1>Cola de decisiones</h1><p>Todo lo que me pide una decisión, de uno en uno y sin buscar nada. <b>Lo que no votes se queda como está</b> (cuenta como Bien). Teclas: <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>␣</kbd> saltar · <kbd>Z</kbd> deshacer · <kbd>I</kbd> ficha.</p></div>${main}${qPreview()}`;
+  };
+  function qVote(v) {
+    const it = queueItems().list[0]; if (!it) return;
+    if (v === "cambiar") return ask("Qué quieres que cambie", nameOfKey(it.key), "", t => { QUNDO.push({ key: it.key, prev: N[it.key] }); N[it.key] = { v: "cambiar", nota: t, t: Date.now() }; saveN(); draw(); }, true);
+    QUNDO.push({ key: it.key, prev: N[it.key] }); N[it.key] = { v, nota: it.src === "sale" && v === "no" ? "cola: " + it.why : "", t: Date.now() }; saveN(); toast(v === "ok" ? "Bien ✓" : "No ✕"); draw();
+  }
+  function qUndo() { const u = QUNDO.pop(); if (!u) return; if (u.prev) N[u.key] = u.prev; else delete N[u.key]; QSKIP.delete(u.key); saveN(); toast("Deshecho"); draw(); }
+  function qSkip() { const it = queueItems().list[0]; if (it) { QSKIP.add(it.key); draw(); } }
+  function qAll(src) { const L = queueItems().list.filter(x => !src || x.src === src); if (!L.length) return; L.forEach(x => { QUNDO.push({ key: x.key, prev: N[x.key] }); N[x.key] = { v: "ok", nota: "", t: Date.now() }; }); saveN(); toast(L.length + " marcadas como Bien"); draw(); }
+
   /* ================= NOTAS ================= */
   VIEWS.notas = () => {
     const ks = userNotes().sort((a, b) => N[b].t - N[a].t), f = ff("notas"), L = ks.filter(k => !f.v || N[k].v === f.v).map(k => ({ key: k, name: nameOfKey(k), v: N[k].v, nota: N[k].nota, t: N[k].t })), c = countBy(ks, k => N[k].v);
@@ -431,7 +487,7 @@
   /* ================= pintar ================= */
   function draw() {
     const a = document.activeElement, fid = a && a.id && a.id.startsWith("in_") ? a.id : null, pos = fid ? a.selectionStart : 0;
-    $("#nav").innerHTML = NAVG.map(([g, items]) => (g ? `<h4>${g}</h4>` : "") + items.map(([k, l]) => { let b = ""; if (k === "sugerencias") { const n = SG.filter(x => !N[SGKEY(x)]).length; b = n ? `<small>${n}</small>` : ""; } if (k === "notas") b = userNotes().length ? `<small>${userNotes().length}</small>` : ""; return `<button class="nav ${k === cur ? "on" : ""}" data-view="${k}"><span>${l}</span>${b}</button>`; }).join("")).join("");
+    $("#nav").innerHTML = NAVG.map(([g, items]) => (g ? `<h4>${g}</h4>` : "") + items.map(([k, l]) => { let b = ""; if (k === "sugerencias") { const n = SG.filter(x => !N[SGKEY(x)]).length; b = n ? `<small>${n}</small>` : ""; } if (k === "cola") { const n = queueItems().all.length; b = n ? `<small>${n}</small>` : ""; } if (k === "notas") b = userNotes().length ? `<small>${userNotes().length}</small>` : ""; return `<button class="nav ${k === cur ? "on" : ""}" data-view="${k}"><span>${l}</span>${b}</button>`; }).join("")).join("");
     $("#scen").innerHTML = SCEN ? "Viendo: <b>con mis decisiones</b>" : "Viendo: <b>hoy</b>"; $("#scen").dataset.act = "scen"; $("#cuts").innerHTML = `Cortes <b>${CFG.t[0]}</b> · <b>${CFG.t[1]}</b>`; $("#nvotes").innerHTML = `Opiniones <b>${userNotes().length}</b>`;
     const v = VIEWS[cur] || VIEWS.inicio; $("#view").className = "content v-" + cur; $("#view").innerHTML = v(); layout(); fit();
     if (fid) { const n = $("#" + fid); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
@@ -478,6 +534,9 @@
       case "dnudge": { const k = d.k, v = effOfKey(k, DID); return setDif(k, (v == null ? 50 : Math.round(v)) + +d.d); }
       case "dreset": return setDif(d.k, null);
       case "rep": return repStart(d.s);
+      case "qv": return qVote(d.v); case "qskip": return qSkip(); case "qundo": return qUndo();
+      case "qsrc": ff("cola").src = d.s; return draw();
+      case "qall": if (t.dataset.sure) return qAll(d.s); t.dataset.sure = 1; t.textContent = "Pulsa otra vez para confirmar"; return;
       case "base": CFG.base = d.b; saveCfg(); return draw();
       case "reload": return location.reload();
       case "clearnotes": if (t.dataset.sure) { userNotes().forEach(k => delete N[k]); saveN(); return draw(); } t.dataset.sure = 1; t.textContent = "Pulsa otra vez para vaciar"; return;
@@ -495,6 +554,7 @@
     if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) { e.preventDefault(); if (!$("#finder")) openFinder(); return; }
     if ($("#finder") && e.key === "Escape") { $("#finder").remove(); return; }
     if (!DKEY && !typing && !$(".ov")) { const t = $("#view .pager [data-pg]"); const id = t && t.dataset.pg.split(":")[0]; if (id && ST[id] && (e.key === "PageDown" || e.key === "PageUp")) { ST[id].page += e.key === "PageDown" ? 1 : -1; e.preventDefault(); draw(); return; } }
+    if (cur === "cola" && !DKEY && !typing && !$(".ov") && !e.ctrlKey && !e.metaKey) { const q = e.key.toLowerCase(); if (q === "b") { e.preventDefault(); return qVote("ok"); } if (q === "n") { e.preventDefault(); return qVote("no"); } if (q === "c") { e.preventDefault(); return qVote("cambiar"); } if (q === " " || q === "arrowright") { e.preventDefault(); return qSkip(); } if (q === "z") return qUndo(); if (q === "i") { const it = queueItems().list[0]; if (it) { CURLIST = [it.key]; return open(it.key); } } }
     if (!DKEY || typing) return;
     if (e.key === "Escape") closeDrawer(); else if (e.key === "ArrowRight") navDrawer(1); else if (e.key === "ArrowLeft") navDrawer(-1); else if (e.key.toLowerCase() === "b") vote(DKEY, "ok"); else if (e.key.toLowerCase() === "n") vote(DKEY, "no"); else if (e.key.toLowerCase() === "c") note(DKEY);
   });

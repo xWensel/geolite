@@ -135,3 +135,10 @@ tr:hover td { background: #2b2147; }
 .dn{width:84px;background:var(--panel2);border:0;box-shadow:inset 0 0 0 1px var(--line2);color:var(--ink);font:inherit;font-size:22px;padding:4px 6px;text-align:right}
 details summary{margin:6px 0}
 .v-balanceo .cols { --cols: minmax(0, 700px) minmax(0, 1fr); }
+
+/* cola de decisiones */
+.qc { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line2); }
+.qc h1 { margin: 0; font-weight: 400; font-size: 54px; line-height: 1; color: var(--gold); }
+.qm { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-end; } .qm small { display: block; font-family: var(--mono); font-size: 12px; text-transform: uppercase; color: var(--muted); } .qm b { font-weight: 400; font-size: 34px; }
+kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; background: rgba(0,0,0,.35); margin-left: 4px; }
+.chipb.on { outline: 2px solid var(--gold); }
