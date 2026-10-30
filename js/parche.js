@@ -78,7 +78,8 @@ window.AIQ = window.AIQ || {};
     const n = hasNew(), lbl = t("title") + (n ? " · " + t("unread") : "");
     return `<button class="menu-gear menu-patch${n ? " has-new" : ""}" id="patchBtn" type="button" aria-label="${esc(lbl)}" ${A.ttAttr(t("title"), n ? t("unread") + ". " + t("tipd") : t("tipd"))}>${A.icon("m_patch")}${n ? `<i class="pt-dot" aria-hidden="true"></i>` : ""}</button>`;
   };
-  const wire = () => { const b = $("patchBtn"); if (b) b.onclick = () => { A.sfx.card(); A.hub.screen("patch"); }; };
+  /* los datos se piden ANTES de cambiar de pantalla: si se cambiara con la carga a medias, la portada quedaria apartada (js/relieve.js) y, pasado su plazo, volveria a ponerse debajo/encima de las notas */
+  const wire = () => { const b = $("patchBtn"); if (b) b.onclick = () => { A.sfx.card(); if (A.PATCHES) A.hub.screen("patch"); else load().then(ok => { if (ok && C() && C().S.hub === "home") A.hub.screen("patch"); }); }; };
 
   /* ------------------------------------------------------------------ pintar un parche */
   const LOC = () => ({ pt: "pt-BR", zh: "zh-CN" }[A.lang] || A.lang || "es");

@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.7",
+      name: L("Las notas del parche, sin la portada encima", "Patch notes, without the menu on top", "Notes de patch, sans le menu par-dessus", "Notas do patch, sem o menu por cima", "Patchnotes, ohne das Menü darüber", "Note della patch, senza il menu sopra", "", "更新说明，不再被菜单盖住", "패치 노트, 메뉴가 위에 겹치지 않아요", "パッチノートがメニューに隠れない", "Список изменений без меню поверх", "Lista zmian bez menu na wierzchu"),
+      date: "2026-10-31",
+      summary: L("Al abrir las Notas del parche, el menú de la portada ya no se queda encima: la pantalla de notas se ve entera.", "Opening the Patch notes no longer leaves the home menu on top: the notes screen shows in full.", "L'ouverture des notes de patch ne laisse plus le menu d'accueil par-dessus : l'écran des notes s'affiche en entier.", "Ao abrir as notas do patch, o menu inicial já não fica por cima: o ecrã das notas vê-se inteiro.", "Beim Öffnen der Patchnotes bleibt das Startmenü nicht mehr darüber: der Notizen-Bildschirm ist komplett zu sehen.", "Aprendo le note della patch, il menu iniziale non resta più sopra: la schermata delle note si vede per intero.", "", "打开更新说明时，主菜单不再盖在上面：说明页面完整显示。", "패치 노트를 열 때 메인 메뉴가 더 이상 위에 남지 않아요. 노트 화면이 온전히 보여요.", "パッチノートを開いても、ホームのメニューが上に残らなくなりました。ノート画面が全体表示されます。", "При открытии списка изменений меню главного экрана больше не остаётся поверх: экран заметок виден целиком.", "Po otwarciu listy zmian menu główne nie zostaje na wierzchu: ekran notatek jest widoczny w całości."),
+      chapters: [
+        { id: "notas", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Las notas del parche", "Patch notes", "Les notes de patch", "As notas do patch", "Die Patchnotes", "Le note della patch", "", "更新说明", "패치 노트", "パッチノート", "Список изменений", "Lista zmian"),
+          entries: [
+            E(L("Las notas del parche, sin la portada encima", "Patch notes, without the menu on top", "Notes de patch, sans le menu par-dessus", "Notas do patch, sem o menu por cima", "Patchnotes, ohne das Menü darüber", "Note della patch, senza il menu sopra", "", "更新说明，不再被菜单盖住", "패치 노트, 메뉴가 위에 겹치지 않아요", "パッチノートがメニューに隠れない", "Список изменений без меню поверх", "Lista zmian bez menu na wierzchu"), "fix", "0.4.7", [
+              L("Los datos de las notas se piden antes de cambiar de pantalla, así la portada ya no queda encima mientras llegan.", "The notes data is now fetched before the screen changes, so the home menu no longer stays on top while it loads.", "Les données des notes sont demandées avant de changer d'écran : le menu d'accueil ne reste plus par-dessus pendant le chargement.", "Os dados das notas são pedidos antes de mudar de ecrã, por isso o menu inicial já não fica por cima enquanto carregam.", "Die Daten der Notizen werden vor dem Bildschirmwechsel geladen, daher bleibt das Startmenü beim Laden nicht mehr darüber.", "I dati delle note vengono richiesti prima di cambiare schermata, così il menu iniziale non resta sopra durante il caricamento.", "", "在切换页面之前先加载说明数据，加载期间主菜单不再盖在上面。", "화면을 바꾸기 전에 노트 데이터를 먼저 불러와서, 불러오는 동안 메인 메뉴가 위에 남지 않아요.", "画面を切り替える前にノートのデータを読み込むので、読み込み中にホームのメニューが上に残りません。", "Данные заметок запрашиваются до смены экрана, поэтому главное меню не остаётся поверх во время загрузки.", "Dane notatek są pobierane przed zmianą ekranu, więc menu główne nie zostaje na wierzchu podczas ładowania.")
+            ])
+          ] }
+      ]
+    },
+    {
       id: "0.4.6",
       name: L("Aro de 500 km en el modo infinito", "A 500 km ring in infinite mode", "Un anneau de 500 km en mode infini", "Um anel de 500 km no modo infinito", "Ein 500-km-Ring im Endlosmodus", "Un anello da 500 km nella modalità infinita", "", "无尽模式新增500公里环", "무한 모드에 500km 링 추가", "エンドレスモードに500kmのリング", "Кольцо в 500 км в бесконечном режиме", "Pierścień 500 km w trybie nieskończonym"),
       date: "2026-10-31",
