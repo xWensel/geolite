@@ -88,20 +88,20 @@
   function note(k) { ask("Qué quieres que cambie", nameOfKey(k), (N[k] && N[k].nota) || "", t => { N[k] = { v: (N[k] && N[k].v) || "cambiar", nota: t, t: Date.now() }; saveN(); toast("Nota guardada"); draw(); refreshDrawerVotes(); if (REP) repNext(); }, true); }
   const vb = k => { const n = N[k] || {}, e = esc(k); return `<span class="vt"><button class="y ${n.v === "ok" ? "on" : ""}" data-vote="ok" data-k="${e}">Bien</button><button class="n ${n.v === "no" ? "on" : ""}" data-vote="no" data-k="${e}">No</button><button class="c ${n.nota ? "on" : ""}" data-note="1" data-k="${e}">${n.nota ? "Nota ✎" : "Cambiar…"}</button></span>`; };
   const SGKEY = x => "sug:" + x.id, sgByKey = {}; SG.forEach(x => (sgByKey[SGKEY(x)] = x));
-  function nameOfKey(k) { if (byKey[k]) return byKey[k].name; if (sgByKey[k]) return "NUEVO: " + sgByKey[k].es + " (" + sgByKey[k].pais + ")"; if (k.startsWith("enc:")) return "ficha " + encName(k.slice(4)); if (k.startsWith("pais:")) return k.slice(5); return k; }
+  function nameOfKey(k) { if (k.startsWith("chg:")) return "CAMBIAR → " + nameOfKey(k.slice(4)); if (byKey[k]) return byKey[k].name; if (sgByKey[k]) return "NUEVO: " + sgByKey[k].es + " (" + sgByKey[k].pais + ")"; if (k.startsWith("enc:")) return "ficha " + encName(k.slice(4)); if (k.startsWith("pais:")) return k.slice(5); return k; }
 
   /* ================= indice de fama ================= */
   const SIG = [["sl", "Idiomas de Wikipedia", "ediciones en otros idiomas"], ["v", "Visitas en inglés", "12 meses, en.wikipedia"], ["inl", "Visitas en español", "12 meses, es.wikipedia"], ["st", "Declaraciones de Wikidata", "cuánto se ha escrito de ella"]];
   const scoreOf = (k, val) => { const a = ANC[k]; if (!a || val == null) return null; const f = k === "sl" || k === "st" ? val : Math.log10(val + 1); return cl01(100 * (f - a[0]) / (a[1] - a[0])); };
   function famaOf(id) { const a = SN[id]; if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; }
   const zoneOf = d => (d < CFG.t[0] ? 0 : d < CFG.t[1] ? 1 : 2);
-  function reindex() { rows.forEach(r => { const f = famaOf(r.wid); r.fama = f; const wk = f == null ? null : 100 - f; r.wiki = wk; r.base = CFG.base === "wiki" ? wk : (r.d == null ? wk : r.d); r.dif2 = OV[r.key] != null ? OV[r.key] : r.base; r.zone = r.dif2 == null ? null : zoneOf(r.dif2); r.zoneHoy = zoneOf(r.d); }); }
+  function reindex() { rows.forEach(r => { const f = famaOf(r.wid); r.fama = f; const wk = f == null ? null : 100 - f; r.wiki = wk; const dn = A.RES && A.RES.dnew ? A.RES.dnew[r.key] : null; r.base = CFG.base === "wiki" ? wk : (dn != null ? dn : (r.d == null ? wk : r.d)); r.dif2 = OV[r.key] != null ? OV[r.key] : r.base; r.zone = r.dif2 == null ? null : zoneOf(r.dif2); r.zoneHoy = zoneOf(r.d); }); }
   /* escenario: "hoy" o "con mis decisiones" (propuestas en Bien entran, filas en No salen) */
   let SCEN = false; try { SCEN = localStorage.getItem("mc.scen") === "1"; } catch (e) {}
   const SUGSIG = A.SUGSIG || {};
   const famaArr = a => { if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; };
   const sugTopic = x => ({ persona: "character", ciudad: "city", monumento: "landmark", naturaleza: "nature", historia: "history", capital: "capital" })[x.cat] || (x.sub === "animal" ? "nature" : "culture");
-  const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
+  const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : x.dRes != null ? x.dRes : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
   const sgRows = () => SG.map(sugRow).filter(r => r.dif2 != null);
   function cohort() { return SCEN ? rows.filter(r => !(N[r.key] && N[r.key].v === "no")).concat(sgRows().filter(r => N[r.key] && N[r.key].v === "ok")) : rows; }
   const isHand = r => !!r.hand, langOk = id => { const c = LC[id]; return c ? c.l.filter(x => x > 0).length : 0; };
@@ -422,6 +422,11 @@
   };
 
   /* ================= RESULTADO POR CATEGORIAS (la revision completa, de menos a mas dificultad) ================= */
+  const ZCEN = [17, 50, 83], ZNAME = ["Fácil", "Medio", "Difícil"];
+  const chgOn = k => !!N["chg:" + k];
+  const zbtns = (key, d) => { const z = d == null ? -1 : zoneOf(d), e = esc(key); return `<span class="zb">${[0, 1, 2].map(i => `<button class="z${i} ${z === i ? "on" : ""}" data-act="setzone" data-k="${e}" data-z="${i}" data-d="${d == null ? "" : d}" title="${ZNAME[i]}">${["F", "M", "D"][i]}</button>`).join("")}<button class="chg ${chgOn(key) ? "on" : ""}" data-act="chg" data-k="${e}" title="Pedir otro en su lugar">↻ Cambiar</button></span>`; };
+  function setZone(key, z, d) { if (d !== "" && d != null && zoneOf(+d) === z) return; OV[key] = ZCEN[z]; saveOv(); DIRTY = true; draw(); toast(ZNAME[z] + " (" + ZCEN[z] + ")"); }
+  function toggleChg(key) { const k = "chg:" + key; if (N[k]) { delete N[k]; toast("Quitada la petición de cambio"); } else { N[k] = { v: "cambiar", nota: "pedir cambiar", t: Date.now() }; toast("Pedido: lo cambio por otro"); } saveN(); draw(); }
   const RESCATS = ["character", "capital", "city", "landmark", "nature", "history", "culture"];
   const bin10 = d => Math.min(9, Math.max(0, Math.floor((d - 1) / 10)));
   const efectivo = (key, def) => { const n = N[key]; return n && (n.v === "ok" || n.v === "no") ? n.v : def; };
@@ -430,7 +435,7 @@
     const out = rows.filter(r => r.topic === t && r.dif2 != null).map(r => ({ key: r.key, name: r.name, ctry: r.ctry || "—", d: Math.round(r.dif2), estado: "queda", m: "" }));
     const idx = {}; out.forEach(o => (idx[o.key] = o));
     R.salen.forEach(s => { const o = idx[s.id]; if (o) { o.estado = "sale"; o.m = s.m + (s.por ? " → entra " + s.por : ""); } });
-    R.entran.forEach(e => { const k = "sug:" + e.id; out.push({ key: k, name: e.es, ctry: e.pais || "—", d: Math.round(e.d), estado: "entra", m: e.m, now: e.a, mujer: e.f }); });
+    R.entran.forEach(e => { const k = "sug:" + e.id; out.push({ key: k, name: e.es, ctry: e.pais || "—", d: Math.round(OV[k] != null ? OV[k] : e.d), estado: "entra", m: e.m, now: e.a, mujer: e.f }); });
     return out;
   }
   VIEWS.resultado = () => {
@@ -449,14 +454,16 @@
       <div class="pl"><h2>Dificultad de 1 a 100 <small>gris = antes · color = después (rojo: menos de 15 · ámbar: 15-39 · verde: 40 o más) · pincha un tramo para filtrar</small></h2><div class="rbars">${bars}</div></div>
       <div class="pl"><h2>${esc(CATS[t])} de menos a más difícil <small>${L.length} de ${all.length}</small></h2>
       <div class="tools">${inp("resultado", "q", "buscar")}${sel("resultado", "es", [["entra", "Solo lo que entra"], ["sale", "Solo lo que sale"], ["queda", "Solo lo que se queda"]], "Todo")}<button class="chipb" data-act="clrres">Limpiar</button><button class="btn" data-act="resok" data-t="${t}">Dar por buena esta categoría</button></div>
-      ${T("res", [{ h: "Dificultad", f: o => `<span class="bar3" style="width:90px;display:inline-flex;height:12px;vertical-align:middle"><i style="width:${o.d}%;background:${ZC[zoneOf(o.d)]}"></i></span> <b style="font-weight:400">${o.d}</b>`, v: o => o.d }, { h: "Nombre", f: o => (o.estado === "queda" ? nmc({ key: o.key, name: o.name }) : `<span class="nm" data-open="${esc(o.key)}">${esc(o.name)}</span>`) + (o.now ? ' <span class="pill ok">actual</span>' : ""), v: o => o.name }, { h: "País", f: o => esc(o.ctry), v: o => o.ctry }, { h: "Qué pasa", f: o => (est[efectivo(o.key, o.estado === "entra" ? "ok" : o.estado === "sale" ? "no" : null) === "ok" && o.estado === "sale" ? "queda" : efectivo(o.key, null) === "no" && o.estado === "entra" ? "queda" : o.estado]) , v: o => o.estado }, { h: "Por qué", w: 1, f: o => esc(o.m), v: o => o.m }, { h: "Tu opinión", a: 1, f: o => (o.estado === "queda" ? "" : vb(o.key)) }], L, { s: 0, d: 1, per: 16 })}</div>`;
+      ${T("res", [{ h: "Dificultad", f: o => `<span class="bar3" style="width:90px;display:inline-flex;height:12px;vertical-align:middle"><i style="width:${o.d}%;background:${ZC[zoneOf(o.d)]}"></i></span> <b style="font-weight:400">${o.d}</b>`, v: o => o.d }, { h: "Nombre", f: o => (o.estado === "queda" ? nmc({ key: o.key, name: o.name }) : `<span class="nm" data-open="${esc(o.key)}">${esc(o.name)}</span>`) + (o.now ? ' <span class="pill ok">actual</span>' : ""), v: o => o.name }, { h: "País", f: o => esc(o.ctry), v: o => o.ctry }, { h: "Qué pasa", f: o => (est[efectivo(o.key, o.estado === "entra" ? "ok" : o.estado === "sale" ? "no" : null) === "ok" && o.estado === "sale" ? "queda" : efectivo(o.key, null) === "no" && o.estado === "entra" ? "queda" : o.estado]) , v: o => o.estado }, { h: "Por qué", w: 1, f: o => esc(o.m), v: o => o.m }, { h: "Dificultad y cambios", a: 1, f: o => zbtns(o.key, o.d) }], L, { s: 0, d: 1, per: 16 })}</div>`;
   };
   document.addEventListener("click", e => {
     const t = e.target.closest("[data-act]"); if (!t) return; const a = t.dataset.act, d = t.dataset;
-    if (a === "restab") { ff("resultado").t = d.t; ff("resultado").tr = null; if (ST.res) ST.res.page = 0; draw(); }
+    if (a === "setzone") setZone(d.k, +d.z, d.d);
+    else if (a === "chg") toggleChg(d.k);
+    else if (a === "restab") { ff("resultado").t = d.t; ff("resultado").tr = null; if (ST.res) ST.res.page = 0; draw(); }
     else if (a === "restr") { const f = ff("resultado"); f.tr = f.tr == d.i ? null : +d.i; if (ST.res) ST.res.page = 0; draw(); }
     else if (a === "clrres") { const t0 = ff("resultado").t; F.resultado = { t: t0 }; draw(); }
-    else if (a === "resok") { const R = A.RES.cats[d.t]; let n = 0; R.entran.forEach(x => { const k = "sug:" + x.id; if (!N[k]) { N[k] = { v: "ok", nota: "revisión completa", t: Date.now() }; n++; } }); R.salen.forEach(x => { if (!N[x.id]) { N[x.id] = { v: "no", nota: "revisión completa: " + x.m, t: Date.now() }; n++; } }); const D = catDone(); D["res:" + d.t] = Date.now(); N["cfg:cats"] = { v: "cfg", nota: JSON.stringify(D), t: Date.now() }; saveN(); toast("Categoría dada por buena (" + n + " decisiones guardadas)"); draw(); }
+    else if (a === "resok") { const R = A.RES.cats[d.t]; let n = 0; R.entran.forEach(x => { const k = "sug:" + x.id; if (!N[k] && !chgOn(k)) { N[k] = { v: "ok", nota: "revisión completa", t: Date.now() }; n++; } }); R.salen.forEach(x => { if (!N[x.id] && !chgOn(x.id)) { N[x.id] = { v: "no", nota: "revisión completa: " + x.m, t: Date.now() }; n++; } }); const D = catDone(); D["res:" + d.t] = Date.now(); N["cfg:cats"] = { v: "cfg", nota: JSON.stringify(D), t: Date.now() }; saveN(); toast("Categoría dada por buena (" + n + " decisiones guardadas)"); draw(); }
   });
   /* ================= NOTAS ================= */
   VIEWS.notas = () => {

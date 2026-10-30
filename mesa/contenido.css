@@ -149,3 +149,11 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; background: r
 .rb.on { outline: 2px solid var(--gold); }
 .rb .rbv { display: flex; gap: 3px; align-items: flex-end; height: 62px; } .rb .rbv i { display: block; width: 14px; }
 .rb b { font-weight: 400; font-size: 16px; } .rb small { font-family: var(--mono); color: var(--muted); }
+
+/* botones de fila: fácil / medio / difícil + cambiar */
+.zb { display: inline-flex; gap: 4px; align-items: center; white-space: nowrap; }
+.zb button { font-family: var(--mono); font-size: 13px; min-width: 30px; padding: 4px 6px; background: transparent; box-shadow: inset 0 0 0 2px currentColor; cursor: pointer; }
+.zb .z0 { color: #5ee07a; } .zb .z1 { color: #ffd24a; } .zb .z2 { color: #ff6b78; }
+.zb .z0.on { background: #5ee07a; color: #14102a; } .zb .z1.on { background: #ffd24a; color: #14102a; } .zb .z2.on { background: #ff6b78; color: #14102a; }
+.zb button:hover { filter: brightness(1.25); }
+.zb .chg { color: var(--sub); margin-left: 6px; } .zb .chg.on { background: #8a6bff; color: #fff; }
