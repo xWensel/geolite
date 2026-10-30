@@ -157,3 +157,7 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; background: r
 .zb .z0.on { background: #5ee07a; color: #14102a; } .zb .z1.on { background: #ffd24a; color: #14102a; } .zb .z2.on { background: #ff6b78; color: #14102a; }
 .zb button:hover { filter: brightness(1.25); }
 .zb .chg { color: var(--sub); margin-left: 6px; } .zb .chg.on { background: #8a6bff; color: #fff; }
+
+/* cierre: filas que llevan a la categoria */
+table tr.go { cursor: pointer; }
+table tr.go:hover td { background: rgba(255, 210, 74, .10); }

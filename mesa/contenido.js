@@ -46,7 +46,7 @@
   const hdr = h => Object.assign(REMOTE ? { "x-mesa": KEY } : {}, h || {});
   const setNet = () => { const e = $("#net"); if (e) { e.textContent = SERVER ? (REMOTE ? "● portal conectado: Claude lee tus notas" : "● conectado: Claude lee tus notas") : OFF || "○ sin servidor: notas solo en este navegador"; e.style.color = SERVER ? "#5ee07a" : "#ff9aa4"; } };
   /* fusiona lo del servidor: lo que NO has tocado desde la ultima sincronizacion lo manda el servidor; lo que has tocado tu (incluso si lo has borrado) manda tu */
-  function reconcile(R) { const dirty = new Set(); new Set([...Object.keys(N), ...Object.keys(SYNC)]).forEach(k => { if (JSON.stringify(N[k]) !== JSON.stringify(SYNC[k])) dirty.add(k); }); const out = {}; Object.keys(R).forEach(k => { if (!dirty.has(k)) out[k] = R[k]; }); dirty.forEach(k => { if (N[k]) out[k] = N[k]; }); const ch = JSON.stringify(out) !== JSON.stringify(N); N = out; SYNC = JSON.parse(JSON.stringify(R)); try { localStorage.setItem("mc.sync", JSON.stringify(SYNC)); } catch (e) {} return ch; }
+  function reconcile(R) { const dirty = new Set(); new Set([...Object.keys(N), ...Object.keys(SYNC)]).forEach(k => { if (JSON.stringify(N[k]) !== JSON.stringify(SYNC[k])) dirty.add(k); }); const out = {}; Object.keys(R).forEach(k => { if (!dirty.has(k)) out[k] = R[k]; }); dirty.forEach(k => { if (N[k]) out[k] = N[k]; }); const ch = JSON.stringify(out) !== JSON.stringify(N); N = out; try { localStorage.setItem("mc.notas", JSON.stringify(N)); } catch (e) {} SYNC = JSON.parse(JSON.stringify(R)); try { localStorage.setItem("mc.sync", JSON.stringify(SYNC)); } catch (e) {} return ch; }
   function door(msg) { if ($("#door")) return; const o = document.createElement("div"); o.className = "ov"; o.id = "door"; o.innerHTML = `<div class="box"><h2 class="lbl" style="margin:0;color:var(--gold);font-size:14px!important">La mesa de contenido</h2><p class="note" style="margin:0">${esc(msg || "Privada: pide la clave de la mesa.")}</p><input id="dkey" type="password" placeholder="CLAVE" autocomplete="current-password"><div class="row"><button class="btn" id="dgo">Entrar</button></div></div>`; document.body.appendChild(o); const i = $("#dkey"); i.focus(); const go2 = () => { KEY = i.value.trim(); o.remove(); loadNotes(true); }; $("#dgo").onclick = go2; i.onkeydown = e => { if (e.key === "Enter") go2(); }; }
   async function loadNotes(redraw) {
     try { const r = await fetch(API, { headers: hdr() });
@@ -55,13 +55,13 @@
       if (r.status === 503) { SERVER = false; OFF = "○ el portal aún no está activado (falta MESA_KEY o Redis)"; return setNet(); }
       if (!r.ok) throw new Error("http"); const j = await r.json(); SERVER = true; OFF = ""; if (REMOTE) { RVER = j.ver; try { localStorage.setItem("mc.key", KEY); localStorage.setItem("geolite.mesa.key", KEY); } catch (e) {} }
       const ch = reconcile(REMOTE ? j.notas : j); loadCfg(); setNet(); if (redraw || ch) draw(); } catch (e) { SERVER = false; setNet(); } }
-  async function pushN() { if (saving) { again = true; return; } saving = true;
+  async function pushN() { if (saving) { again = true; return; } if (!ALLOWSHRINK && Object.keys(SYNC).length > 20 && Object.keys(N).length < Object.keys(SYNC).length * 0.5) { OFF = "○ no guardo: aquí tus notas están casi vacías (recarga con Ctrl+F5)"; SERVER = false; setNet(); return; } saving = true;
     try { do { again = false; const r = await fetch(API, { method: "POST", headers: hdr({ "content-type": "application/json" }), body: JSON.stringify(REMOTE ? { ver: RVER, notas: N } : N) });
         if (r.status === 409) { const j = await r.json(); RVER = j.ver; reconcile(j.notas); again = true; continue; }
         if (r.status === 401) { KEY = ""; SERVER = false; door("Esa no es la clave."); break; }
         SERVER = r.ok; if (r.ok) { if (REMOTE) RVER = (await r.json()).ver; SYNC = JSON.parse(JSON.stringify(N)); try { localStorage.setItem("mc.sync", JSON.stringify(SYNC)); } catch (e) {} } else OFF = "○ no se pudo guardar (" + r.status + ")";
       } while (again); } catch (e) { SERVER = false; } saving = false; setNet(); }
-  let VER = 0;
+  let VER = 0, ALLOWSHRINK = false;
   function saveN() { VER++; try { localStorage.setItem("mc.notas", JSON.stringify(N)); } catch (e) {} pushN(); }
   function saveCfg() { N["cfg:balanceo"] = { v: "cfg", nota: JSON.stringify(CFG), t: Date.now() }; N["cfg:historial"] = { v: "cfg", nota: JSON.stringify(HIST), t: Date.now() }; saveN(); }
   function saveOv() { N["cfg:dif"] = { v: "cfg", nota: JSON.stringify(OV), t: Date.now() }; VER++; saveN(); }
@@ -101,7 +101,7 @@
   const SUGSIG = A.SUGSIG || {};
   const famaArr = a => { if (!a) return null; let sw = 0, sv = 0; SIG.forEach(([k], i) => { const sc = scoreOf(k, a[i]); if (sc != null && CFG.w[k] > 0) { sw += CFG.w[k]; sv += CFG.w[k] * sc; } }); return sw ? sv / sw : null; };
   const sugTopic = x => ({ persona: "character", ciudad: "city", monumento: "landmark", naturaleza: "nature", historia: "history", capital: "capital" })[x.cat] || (x.sub === "animal" ? "nature" : "culture");
-  const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : x.dRes != null ? x.dRes : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
+  const sugRow = x => { const f = famaArr(SUGSIG[x.id]), d2 = OV[SGKEY(x)] != null ? OV[SGKEY(x)] : (A.CIERRE && A.CIERRE.d[x.id] != null) ? A.CIERRE.d[x.id] : x.dRes != null ? x.dRes : f == null ? null : 100 - f; return { key: SGKEY(x), name: x.es, topic: sugTopic(x), ctry: x.pais, dif2: d2, d: d2 == null ? 50 : d2, zone: d2 == null ? null : zoneOf(d2), zoneHoy: null, tags: [], sug: true, sub: x.sub, mujer: x.mujer, wid: null }; };
   const sgRows = () => SG.map(sugRow).filter(r => r.dif2 != null);
   function cohort() { return SCEN ? rows.filter(r => !(N[r.key] && N[r.key].v === "no")).concat(sgRows().filter(r => N[r.key] && N[r.key].v === "ok")) : rows; }
   const isHand = r => !!r.hand, langOk = id => { const c = LC[id]; return c ? c.l.filter(x => x > 0).length : 0; };
@@ -111,7 +111,7 @@
   const VIEWS = {}, ST = {}, F = {};
   let cur = (location.hash.slice(1) || "inicio"), CURLIST = [], NAVI = -1, WIKI = null, IMGD = null;
   const ff = v => (F[v] = F[v] || {});
-  const NAVG = [["", [["inicio", "Inicio"], ["resultado", "Resultado por categorías"], ["categorias", "Categorías"], ["cola", "Cola de decisiones"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Para quitar"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
+  const NAVG = [["", [["inicio", "Inicio"], ["propuestas", "Mis propuestas"], ["resultado", "Resultado por categorías"], ["cola", "Mis dudas, de una en una"], ["categorias", "Categorías"]]], ["Dificultad", [["balanceo", "La línea de dificultad"], ["margenes", "Márgenes por nivel"], ["rondas", "Probar las rondas"]]], ["Decidir", [["repaso", "Repaso, de uno en uno"], ["sugerencias", "Para añadir"], ["quitar", "Reglas de limpieza (antiguo)"], ["notas", "Mis notas"]]], ["Mirar", [["enciclopedia", "Enciclopedia"], ["paises", "Países"], ["personajes", "Personajes"], ["sello", "Sello del país"], ["como", "Cómo funciona hoy"]]]];
   const ALIAS = { preguntas: "balanceo", plan: "inicio" };
   function T(id, cols, data, o) { o = o || {}; const st = ST[id] || (ST[id] = { s: o.s == null ? null : o.s, d: o.d || 1, page: 0, per: o.per || 14 }); let list = data.slice();
     if (st.s != null && cols[st.s] && cols[st.s].v) { const f = cols[st.s].v; list.sort((a, b) => { const x = f(a), y = f(b); return (x > y ? 1 : x < y ? -1 : 0) * st.d; }); }
@@ -132,17 +132,54 @@
   function basePanel() { const b = readBase(); if (!b) return ""; const cur = new Set(rows.map(r => r.key)), old = new Set(b.k.map(x => x[0])), add = rows.filter(r => !old.has(r.key)), del = b.k.filter(x => !cur.has(x[0]));
     return `<div class="pl"><h2>Cambios en vivo <small>desde la línea base del ${new Date(b.t).toLocaleString("es")}</small></h2><div class="kpis"><div class="kpi"><b style="color:#5ee07a">+${add.length}</b><span>preguntas nuevas</span></div><div class="kpi"><b style="color:#ff6b78">−${del.length}</b><span>preguntas quitadas</span></div><div class="kpi"><b>${rows.length}</b><span>ahora</span></div><div class="kpi"><b>${b.k.length}</b><span>en la línea base</span></div></div>${add.length || del.length ? `<div class="cand">${add.slice(0, 30).map(r => `<span class="nm" data-open="${esc(r.key)}" style="color:#5ee07a">+ ${esc(r.name)}</span>`).join("")}${del.slice(0, 30).map(x => `<span class="nm" style="color:#ff9aa4;text-decoration:none">− ${esc(x[1])}</span>`).join("")}</div>` : '<p class="note" style="margin:0">Sin cambios todavía. Cuando yo aplique tus decisiones a los datos del juego, aparecerán aquí al instante.</p>'}<div class="row"><button class="chipb" data-act="setbase">Fijar la línea base ahora</button></div></div>`; }
   function setBase() { N["cfg:base"] = { v: "cfg", nota: JSON.stringify({ t: Date.now(), k: rows.map(r => [r.key, r.name]) }), t: Date.now() }; saveN(); }
+  /* ================= CIERRE: lo tuyo + lo mío, en vivo (A.CIERRE lo genera Claude: recomendaciones, duplicados, salidas y dificultad de cada propuesta) ================= */
+  const CI = () => A.CIERRE || { rec: {}, d: {}, dup: {}, salidas: [] };
+  const sgVote = x => (N[SGKEY(x)] || {}).v || null;
+  /* estado de una propuesta: ok (lo aprobaste) · si (la propongo yo) · duda · no (la rechazas tú o la rechazo yo) · dup (la aprobaste pero ya está en el juego) */
+  function sgEstado(x) { const v = sgVote(x), ci = CI(); if (ci.dup[x.id] || chgOn(SGKEY(x))) return v === "ok" ? "dup" : "no"; if (v === "ok") return "ok"; if (v === "no") return "no"; const r = ci.rec[x.id]; return r ? r[1] : "duda"; }
+  const SALMAP = () => { const o = {}; (CI().salidas || []).forEach(s => (o[s.id] = s)); return o; };
+  function rowSale(r) { const n = N[r.key]; if ((n && n.v === "no") || chgOn(r.key)) return "tuyo"; if (n && n.v === "ok") return null; return SALMAP()[r.key] ? "mio" : null; }
+  function saldoTopic(t) {
+    const R = rows.filter(r => r.topic === t), S = SG.filter(x => sugTopic(x) === t), e = S.map(sgEstado), eT = e.filter(v => v === "ok").length, eM = e.filter((v, i) => v === "si" && !sgVote(S[i])).length,
+      eD = e.filter((v, i) => v === "duda" && !sgVote(S[i])).length, s = R.map(rowSale), sT = s.filter(v => v === "tuyo").length, sM = s.filter(v => v === "mio").length;
+    return { hoy: R.length, eT, eM, eD, sT, sM, despues: R.length + eT + eM - sT - sM, saldo: eT + eM - sT - sM };
+  }
+  const RESM = {}; if (A.RES) Object.values(A.RES.cats).forEach(c => { c.entran.forEach(e => (RESM["sug:" + e.id] = e.m)); c.salen.forEach(s => (RESM[s.id] = s.m + (s.por ? " → entra " + s.por : ""))); });
+  const cleanNota = n => String(n || "").replace(/^revisión completa:? ?/, "");
+  const PBTN = { entra: [["ok", "Bien", 0], ["no", "No", 2]], duda: [["ok", "Bien", 0], ["no", "No", 2]], sale: [["no", "Que salga", 0], ["ok", "Que se quede", 2]], no: [["no", "De acuerdo", 0], ["ok", "Mejor sí", 2]] };
+  const pbtns = (key, tipo) => `<span class="zb">${PBTN[tipo].map(([v, l, z]) => `<button class="z${z}" data-act="prow" data-k="${esc(key)}" data-v="${v}">${l}</button>`).join("")}</span>`;
+
   /* ================= INICIO ================= */
   function pendingRem() { const g = remGroups(); return Object.values(g).reduce((s, x) => s + x.rows.filter(r => !N[r.key]).length, 0); }
   VIEWS.inicio = () => {
-    reindex(); const R = cohort().filter(r => r.dif2 != null), cnt = [0, 1, 2].map(k => R.filter(r => r.zone === k).length), pend = SG.filter(x => !N[SGKEY(x)]).length, g = remGroups(), quitar = Object.values(g).reduce((n, x) => n + x.rows.filter(r => !N[r.key]).length, 0);
-    return `<div class="hero"><h1>La mesa de contenido</h1><p>Aquí decides qué hay en Geolite. Tres pasos. Tú decides, yo lo aplico al juego cuando me lo digas: nada cambia antes.</p></div>
-      <div class="pl"><div class="bars" style="gap:10px">
-        <div class="task"><span class="num">★</span><div><b>Repasar de uno en uno</b><span>Lo más fácil: te enseño una cosa cada vez, tú pulsas Bien o No y paso a la siguiente.</span></div><button class="btn" data-go="repaso">Empezar el repaso</button></div>
-        <div class="task"><span class="num">1</span><div><b>Pon la dificultad</b><span>Una sola línea de 0 a 100 para TODO el juego (Aventura, Clásico y Duelo). Dos cortes la parten en Fácil, Medio y Difícil: ${cnt[0]} · ${cnt[1]} · ${cnt[2]} preguntas.</span></div><button class="btn" data-go="balanceo">Abrir la línea</button></div>
-        <div class="task"><span class="num">2</span><div><b>Decide qué entra</b><span>${SG.length} propuestas nuevas de personajes y de Sello del país. Quedan ${pend} sin mirar.</span></div><button class="btn" data-go="sugerencias">Para añadir</button></div>
-        <div class="task"><span class="num">3</span><div><b>Decide qué sale</b><span>Marcas, orígenes disputados, repetidas y lo menos conocido. Quedan ${quitar} sin mirar.</span></div><button class="btn" data-go="quitar">Para quitar</button></div></div></div>
-      <div class="pl"><h2>Cómo se usa <small>30 segundos</small></h2><div class="bars" style="gap:6px;font-size:23px"><div>• <b>Bien</b> = que entre o se quede · <b>No</b> = fuera · <b>Cambiar…</b> = me escribes qué quieres.</div><div>• Pincha en cualquier nombre: se abre su ficha con sus fotos, su dificultad y el texto.</div><div>• En la ficha: <span class="keys"><kbd>←</kbd> <kbd>→</kbd> cambian de elemento · <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>Esc</kbd> cierra</span></div><div>• <span class="keys"><kbd>/</kbd></span> o <span class="keys"><kbd>Ctrl K</kbd></span> busca cualquier cosa.</div><div>• Tus ${userNotes().length} opiniones se guardan solas. Mira «Mis notas» para repasarlas.</div></div></div>`;
+    reindex(); const un = userNotes().filter(k => !k.startsWith("chg:")), c = countBy(un, k => N[k].v), nChg = Object.keys(N).filter(k => k.startsWith("chg:")).length,
+      S = RESCATS.map(t => [t, saldoTopic(t)]), tot = S.reduce((a, [, s]) => ({ hoy: a.hoy + s.hoy, eT: a.eT + s.eT, eM: a.eM + s.eM, sT: a.sT + s.sT, sM: a.sM + s.sM, despues: a.despues + s.despues }), { hoy: 0, eT: 0, eM: 0, sT: 0, sM: 0, despues: 0 }),
+      net = tot.eT + tot.eM - tot.sT - tot.sM, sin = SG.filter(x => !sgVote(x)), nSi = sin.filter(x => sgEstado(x) === "si").length, nNo = sin.filter(x => sgEstado(x) === "no").length, nDu = sin.filter(x => sgEstado(x) === "duda").length, nSa = rows.filter(r => rowSale(r) === "mio").length;
+    const fila = ([t, s]) => `<tr class="go" data-act="gores" data-t="${t}"><td><b>${esc(CATS[t])}</b></td><td class="num">${s.hoy}</td><td class="num" style="color:var(--z0)">+${s.eT}</td><td class="num" style="color:var(--z0)">+${s.eM}</td><td class="num" style="color:#ff9aa4">−${s.sT}</td><td class="num" style="color:#ff9aa4">−${s.sM}</td><td class="num"><b>${s.despues}</b></td><td class="num" style="color:${s.saldo === 0 ? "var(--z0)" : "#ffd24a"}">${s.saldo > 0 ? "+" : ""}${s.saldo}</td></tr>`;
+    const task = (n, t, d, btn, tipo, hecho) => `<div class="task"><span class="num">${hecho ? "✓" : n}</span><div><b>${t}</b><span>${d}</span></div><button class="btn ${hecho ? "ghost" : ""}" data-act="goprop" data-tipo="${tipo}">${btn}</button></div>`;
+    return `<div class="hero"><h1>La mesa de contenido</h1><p>Yo propongo y tú apruebas. Ya he contado <b>todo lo que has votado</b> (${un.length} opiniones: ${c.ok || 0} Bien · ${c.no || 0} No · ${nChg} «Cambiar»): no te vuelvo a preguntar nada que ya hayas decidido. Lo que ves abajo es lo que falta.</p></div>
+      <div class="pl"><h2>Saldo por categoría <small>la Enciclopedia se queda en el mismo total: lo que entra y lo que sale tiene que cuadrar · pincha una fila para verla</small></h2>
+      <div class="tw"><table><tr><th>Categoría</th><th class="num">Hoy</th><th class="num">+ tuyos</th><th class="num">+ míos</th><th class="num">− tuyos</th><th class="num">− míos</th><th class="num">Después</th><th class="num">Saldo</th></tr>${S.map(fila).join("")}
+      <tr><td><b>Total</b></td><td class="num">${tot.hoy}</td><td class="num">+${tot.eT}</td><td class="num">+${tot.eM}</td><td class="num">−${tot.sT}</td><td class="num">−${tot.sM}</td><td class="num"><b>${tot.despues}</b></td><td class="num" style="color:${net === 0 ? "var(--z0)" : "#ffd24a"}"><b>${net > 0 ? "+" : ""}${net}</b></td></tr></table></div>
+      <p class="note" style="margin:6px 0 0">«Tuyos» = lo que ya has votado. «Míos» = lo que propongo yo y está sin votar. Cuando el saldo total es 0, el juego queda con las mismas fichas que ahora.</p></div>
+      <div class="pl"><h2>Lo que te toca <small>en este orden, de más fácil a más fino</small></h2><div class="bars" style="gap:10px">
+        ${task(1, "Aprueba lo que propongo que entre", nSi + " propuestas que encajan con lo que ya aprobaste (y con un personaje por país). Las apruebas de golpe o de una en una.", "Ver las " + nSi, "entra", nSi === 0)}
+        ${task(2, "Aprueba lo que propongo que salga", nSa + " fichas de las menos importantes para dejar sitio y que el total cuadre.", "Ver las " + nSa, "sale", nSa === 0)}
+        ${task(3, "Resuelve mis dudas", nDu + " propuestas en las que no me atrevo yo: tú decides.", "De una en una", "duda", nDu === 0)}
+        ${task(4, "Mira lo que rechazo yo", nNo + " propuestas que descarto (ya están en el juego, o no encajan con lo que has ido aprobando). Si alguna te gusta, la rescatas.", "Ver las " + nNo, "no", nNo === 0)}</div></div>
+      <div class="pl"><h2>Cómo se usa <small>30 segundos</small></h2><div class="bars" style="gap:6px;font-size:23px"><div>• <b>Bien</b> = que entre o se quede · <b>No</b> = fuera · <b>Cambiar…</b> = me pides otra cosa en su lugar.</div><div>• Pincha en cualquier nombre: se abre su ficha con sus fotos, su dificultad y el texto.</div><div>• <span class="keys"><kbd>/</kbd></span> o <span class="keys"><kbd>Ctrl K</kbd></span> busca cualquier cosa. Tus ${un.length} opiniones se guardan solas.</div></div></div>${basePanel()}`;
+  };
+  VIEWS.propuestas = () => {
+    reindex(); const f = ff("propuestas"), tipo = f.tipo || "entra", sg = SG.filter(x => !sgVote(x)), lists = { entra: sg.filter(x => sgEstado(x) === "si"), no: sg.filter(x => sgEstado(x) === "no"), duda: sg.filter(x => sgEstado(x) === "duda") }, sale = rows.filter(r => rowSale(r) === "mio");
+    const tabs = [["entra", "Propongo que entren", lists.entra.length], ["sale", "Propongo que salgan", sale.length], ["duda", "Mis dudas", lists.duda.length], ["no", "Rechazo yo", lists.no.length]], catOk = t => !f.cat || t === f.cat;
+    const chips = tabs.map(([id, l, n]) => `<button class="chipb ${tipo === id ? "on" : ""}" data-act="ptab" data-tipo="${id}">${l} · ${n}</button>`).join("");
+    let L; if (tipo === "sale") L = sale.filter(r => catOk(r.topic)).map(r => ({ key: r.key, name: r.name, topic: r.topic, ctry: r.ctry || "—", d: Math.round(r.dif2 == null ? r.d : r.dif2), why: (SALMAP()[r.key] || {}).m || "" }));
+    else L = lists[tipo].filter(x => catOk(sugTopic(x))).map(x => { const r = sugRow(x), rc = CI().rec[x.id] || []; return { key: SGKEY(x), name: x.es || x.en, topic: sugTopic(x), ctry: x.pais || "—", d: Math.round(r.dif2 == null ? 50 : r.dif2), why: rc[2] || "", p: rc[0] }; });
+    const txt = { entra: "Personas, lugares y cosas que propongo que ENTREN porque encajan con lo que has ido aprobando (famosas hoy en muchos idiomas, y un personaje por país). Si no hay nada que decir, se aprueban todas de golpe.", sale: "Fichas que propongo que SALGAN para que el total cuadre: las menos importantes y menos conocidas, sin tocar la única de su país en cada categoría.", duda: "Estas me dejan dudando: dime tú.", no: "Propuestas que DESCARTO: ya están en el juego, o se parecen a las que has ido rechazando. Si alguna te gusta, pulsa «Mejor sí»." }[tipo];
+    const bulkL = { entra: "Aprobar las " + L.length + " (todas entran)", sale: "Aprobar las " + L.length + " (todas salen)", duda: "", no: "Estoy de acuerdo con las " + L.length + " (todas fuera)" }[tipo];
+    return `<div class="hero"><h1>Mis propuestas</h1><p>${txt}</p></div>
+      <div class="pl"><div class="row">${chips}</div><div class="tools">${sel("propuestas", "cat", RESCATS.map(t => [t, CATS[t]]), "Todas las categorías")}${tipo === "duda" ? `<button class="btn" data-go="cola">Resolver de una en una</button>` : L.length ? `<button class="btn" data-act="pbulk" data-tipo="${tipo}">${bulkL}</button>` : ""}</div>
+      ${T("prop", [{ h: "Nombre", f: o => nmc(o), v: o => o.name }, { h: "Categoría", f: o => esc(CATS[o.topic] || o.topic), v: o => o.topic }, { h: "País", f: o => esc(o.ctry), v: o => o.ctry }, { h: "Dificultad", f: o => `<span class="bar3" style="width:90px;display:inline-flex;height:12px;vertical-align:middle"><i style="width:${o.d}%;background:${ZC[zoneOf(o.d)]}"></i></span> <b style="font-weight:400">${o.d}</b>`, v: o => o.d }, { h: "Por qué", w: 1, f: o => esc(o.why), v: o => o.why }, { h: "Tu decisión", a: 1, f: o => pbtns(o.key, tipo) }], L, { s: 3, d: 1, per: 15 })}</div>`;
   };
 
   VIEWS.repaso = () => {
@@ -326,21 +363,20 @@
   /* Todo lo que pide una decision tuya en UNA sola cola: propuestas que podrian entrar y lo que podria salir (por grupos de reglas).
      Una tarjeta cada vez, teclas B / N / C / Espacio (saltar) / Z (deshacer) / I (ficha). Lo que no votes se queda como esta (= Bien). */
   const QSKIP = new Set(), QUNDO = [];
-  const QSRC = [["entra", "Podría entrar"], ["sale", "Podría salir"]];
+  const QSRC = [];
   function queueItems() {
-    reindex(); const f = ff("cola"), out = [], seen = new Set(), g = remGroups();
-    SG.filter(x => !N[SGKEY(x)]).sort((a, b) => (b.video ? 1e4 : 0) + b.idiomas - (a.video ? 1e4 : 0) - a.idiomas).forEach(x => { seen.add(SGKEY(x)); out.push({ key: SGKEY(x), src: "entra", why: (x.video ? "Del vídeo · " : "Propuesta nueva · ") + ((SGCATN[x.cat] || x.cat).toLowerCase()) }); });
-    ["marcas", "disputados", "duplicados", "sinpais", "pastas", "nivel", "eeuu", "irrelevantes"].forEach(k => g[k].rows.forEach(r => { if (!N[r.key] && !seen.has(r.key)) { seen.add(r.key); out.push({ key: r.key, src: "sale", gk: k, why: g[k].t }); } }));
-    const topicOf = x => (x.src === "entra" ? sugTopic(sgByKey[x.key]) : (byKey[x.key] || {}).topic), L = out.filter(x => (!f.src || x.src === f.src) && (!f.cat || topicOf(x) === f.cat)), a = L.filter(x => !QSKIP.has(x.key)), b = L.filter(x => QSKIP.has(x.key));
+    reindex(); const f = ff("cola"), out = [], rc = x => (CI().rec[x.id] || [0])[0];
+    SG.filter(x => !sgVote(x) && sgEstado(x) === "duda").sort((a, b) => rc(b) - rc(a) || b.idiomas - a.idiomas).forEach(x => out.push({ key: SGKEY(x), src: "entra", why: "Mi duda · " + (SGCATN[x.cat] || x.cat).toLowerCase() }));
+    const topicOf = x => sugTopic(sgByKey[x.key]), L = out.filter(x => !f.cat || topicOf(x) === f.cat), a = L.filter(x => !QSKIP.has(x.key)), b = L.filter(x => QSKIP.has(x.key));
     return { all: out, list: a.concat(b), fresh: a.length, skipped: b.length };
   }
   function qCard(it) {
     const k = it.key;
     if (it.src === "entra") {
       const x = sgByKey[k], r = sugRow(x);
-      return `<div class="qc"><span class="pill ${x.video ? "ok" : "warn"}">${esc(it.why)}</span><h1>${esc(x.es)}</h1><p class="note" style="margin:0">${esc(x.en)} · ${esc(x.pais)} · ${esc(x.sub)}${x.mujer ? " · mujer" : ""}</p>
+      return `<div class="qc"><span class="pill ${x.video ? "ok" : "warn"}">${esc(it.why)}</span><h1>${esc(x.es || x.en)}</h1><p class="note" style="margin:0">${esc(x.en)} · ${esc(x.pais)} · ${esc(x.sub)}${x.mujer ? " · mujer" : ""}</p>
       <div class="qm"><div><small>Dificultad estimada</small>${zbar(r)}</div><div><small>Idiomas de Wikipedia</small><b>${x.idiomas}</b></div><div><small>Seguridad</small><b>${esc(x.seguridad)}</b></div></div>
-      ${x.avisos.length ? `<div>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>` : ""}<div class="txt" style="max-height:none">${esc(x.por_que)}</div></div>`;
+      ${x.avisos.length ? `<div>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>` : ""}${(CI().rec[x.id] || [])[2] ? `<p class="note" style="margin:0"><b>Mi opinión (${CI().rec[x.id][0]} %):</b> ${esc(CI().rec[x.id][2])}</p>` : ""}<div class="txt" style="max-height:none">${esc(x.por_que)}</div></div>`;
     }
     const r = byKey[k];
     return `<div class="qc"><span class="pill bad">${esc(it.why)}</span><h1>${esc(r.name)}</h1><p class="note" style="margin:0">${esc(CATS[r.topic] || r.topic)} · ${esc(r.ctry || "sin país")}</p>
@@ -364,9 +400,9 @@
     const main = it ? `<div class="pl"><h2>Ahora te toca <small>quedan ${Q.list.length}${Q.skipped ? " · " + Q.skipped + " saltadas al final" : ""} · ${done} opiniones guardadas</small></h2>${chips}
         ${qCard(it)}
         <div class="row"><button class="btn" data-act="qv" data-v="ok">Bien <kbd>B</kbd></button><button class="btn red" data-act="qv" data-v="no">No <kbd>N</kbd></button><button class="btn ghost" data-act="qv" data-v="cambiar">Cambiar… <kbd>C</kbd></button><button class="btn ghost" data-act="qskip">Saltar <kbd>␣</kbd></button><button class="btn ghost" data-act="qundo" ${QUNDO.length ? "" : "disabled"}>Deshacer <kbd>Z</kbd></button><button class="btn ghost" data-open="${esc(it.key)}">Ficha completa <kbd>I</kbd></button></div>
-        <div class="row"><button class="chipb" data-act="qall" data-s="${f.src || ""}">Todo lo que queda ${f.src ? "de «" + QSRC.find(x => x[0] === f.src)[1] + "»" : ""} = Bien (${Q.list.length})</button></div></div>`
-      : `<div class="pl"><h2>Ahora te toca</h2><p class="none" style="font-size:28px">¡Cola vacía! No queda nada que decidir${f.src ? " en este grupo" : ""}.</p>${chips}</div>`;
-    return `<div class="hero"><h1>Cola de decisiones</h1><p>Todo lo que me pide una decisión, de uno en uno y sin buscar nada. <b>Lo que no votes se queda como está</b> (cuenta como Bien). Teclas: <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>␣</kbd> saltar · <kbd>Z</kbd> deshacer · <kbd>I</kbd> ficha.</p></div>${main}${qPreview()}`;
+        </div>`
+      : `<div class="pl"><h2>Ahora te toca</h2><p class="none" style="font-size:28px">¡Sin dudas! No me queda nada que preguntarte aquí${f.src ? " en este grupo" : ""}.</p>${chips}</div>`;
+    return `<div class="hero"><h1>Mis dudas, de una en una</h1><p>Solo las propuestas en las que no me atrevo yo, de la más probable a la menos. <b>Lo que no votes no entra.</b> Teclas: <kbd>B</kbd> bien · <kbd>N</kbd> no · <kbd>C</kbd> nota · <kbd>␣</kbd> saltar · <kbd>Z</kbd> deshacer · <kbd>I</kbd> ficha.</p></div>${main}`;
   };
   function qVote(v) {
     const it = queueItems().list[0]; if (!it) return;
@@ -431,30 +467,26 @@
   const bin10 = d => Math.min(9, Math.max(0, Math.floor((d - 1) / 10)));
   const efectivo = (key, def) => { const n = N[key]; return n && (n.v === "ok" || n.v === "no") ? n.v : def; };
   function resRows(t) {
-    const R = A.RES && A.RES.cats[t]; if (!R) return [];
-    const out = rows.filter(r => r.topic === t && r.dif2 != null).map(r => ({ key: r.key, name: r.name, ctry: r.ctry || "—", d: Math.round(r.dif2), estado: "queda", m: "" }));
-    const idx = {}; out.forEach(o => (idx[o.key] = o));
-    R.salen.forEach(s => { const o = idx[s.id]; if (o) { o.estado = "sale"; o.m = s.m + (s.por ? " → entra " + s.por : ""); } });
-    R.entran.forEach(e => { const k = "sug:" + e.id; out.push({ key: k, name: e.es, ctry: e.pais || "—", d: Math.round(OV[k] != null ? OV[k] : e.d), estado: "entra", m: e.m, now: e.a, mujer: e.f }); });
+    const out = [];
+    rows.filter(r => r.topic === t && r.dif2 != null).forEach(r => { const s = rowSale(r); out.push({ key: r.key, name: r.name, ctry: r.ctry || "—", d: Math.round(r.dif2), estado: s ? "sale" : "queda", mio: s === "mio", m: s ? cleanNota((N[r.key] || {}).nota) || RESM[r.key] || (SALMAP()[r.key] || {}).m || (chgOn(r.key) ? "Pediste cambiarla" : "") : "" }); });
+    SG.filter(x => sugTopic(x) === t).forEach(x => { const e = sgEstado(x), v = sgVote(x); if (!(e === "ok" || (e === "si" && !v))) return; const r = sugRow(x); out.push({ key: SGKEY(x), name: x.es || x.en, ctry: x.pais || "—", d: Math.round(r.dif2 == null ? 50 : r.dif2), estado: "entra", mio: e === "si", now: x.nacio >= 1940 && !x.murio, mujer: x.mujer, m: e === "si" ? (CI().rec[x.id] || [])[2] || "" : RESM[SGKEY(x)] || cleanNota((N[SGKEY(x)] || {}).nota) || "Lo aprobaste tú" }); });
     return out;
   }
   VIEWS.resultado = () => {
-    reindex(); const f = ff("resultado"), t = f.t || "character", R = A.RES && A.RES.cats[t];
-    if (!R) return '<div class="hero"><h1>Resultado por categorías</h1><p>No hay resultado cargado.</p></div>';
-    if (t === "capital") { const base = rows.filter(r => r.topic === "capital" && r.dif2 != null); R.antes = Array(10).fill(0); base.forEach(r => R.antes[bin10(r.dif2)]++); R.despues = R.antes.slice(); R.entran.forEach(e => R.despues[bin10(e.d)]++); }
-    const D = catDone(), all = resRows(t), nIn = R.entran.length, nOut = R.salen.length, mx = Math.max(...R.antes, ...R.despues, 1);
+    reindex(); const f = ff("resultado"), t = f.t || "character", D = catDone(), all = resRows(t), bins = a => { const b = Array(10).fill(0); a.forEach(o => b[bin10(o.d)]++); return b; },
+      antes = bins(all.filter(o => o.estado !== "entra")), despues = bins(all.filter(o => o.estado !== "sale")), s = saldoTopic(t), mx = Math.max(...antes, ...despues, 1);
     const tr = f.tr == null || f.tr === "" ? null : +f.tr, L = all.filter(o => (!f.es || o.estado === f.es) && (tr == null || bin10(o.d) === tr) && (!f.q || (o.name + o.ctry).toLowerCase().includes(f.q.toLowerCase())));
     const chips = RESCATS.map(c => `<button class="chipb ${c === t ? "on" : ""}" data-act="restab" data-t="${c}">${esc(CATS[c])}${D["res:" + c] ? " ✓" : ""}</button>`).join("");
-    const bars = R.antes.map((n, i) => { const m = R.despues[i], lo = i * 10 + 1, hi = (i + 1) * 10; return `<div class="rb ${tr === i ? "on" : ""}" data-act="restr" data-i="${i}" title="Dificultad ${lo}–${hi}: ${n} antes · ${m} después"><span class="rbv"><i style="height:${Math.round(60 * n / mx)}px;background:#6a5f8f"></i><i style="height:${Math.round(60 * m / mx)}px;background:${m < 15 ? "#ff6b78" : m < 40 ? "#ffd24a" : "#5ee07a"}"></i></span><b>${lo}–${hi}</b><small>${n} → ${m}</small></div>`; }).join("");
-    const mujer = R.entran.filter(e => e.f).length, ahora = R.entran.filter(e => e.a).length;
-    const est = { queda: '<span class="bdg">se queda</span>', entra: '<span class="bdg ok">ENTRA</span>', sale: '<span class="bdg bad">SALE</span>' };
-    return `<div class="hero"><h1>Resultado por categorías</h1><p>La revisión completa está hecha: en cada categoría <b>entran y salen las mismas fichas</b> (el total no cambia), de menos a más dificultad (1–100). Pesa la <b>importancia</b> (qué es esencial para enseñar) y el <b>reconocimiento</b> (qué es divertido y se conoce, incluidas figuras actuales). Tú solo miras; lo que no toques se aplica tal cual.</p></div>
+    const bars = antes.map((n, i) => { const m = despues[i], lo = i * 10 + 1, hi = (i + 1) * 10; return `<div class="rb ${tr === i ? "on" : ""}" data-act="restr" data-i="${i}" title="Dificultad ${lo}–${hi}: ${n} antes · ${m} después"><span class="rbv"><i style="height:${Math.round(60 * n / mx)}px;background:#6a5f8f"></i><i style="height:${Math.round(60 * m / mx)}px;background:${m < 15 ? "#ff6b78" : m < 40 ? "#ffd24a" : "#5ee07a"}"></i></span><b>${lo}–${hi}</b><small>${n} → ${m}</small></div>`; }).join("");
+    const mujer = all.filter(o => o.estado === "entra" && o.mujer).length, ahora = all.filter(o => o.estado === "entra" && o.now).length, nMio = all.filter(o => o.mio).length;
+    const est = o => (o.estado === "entra" ? `<span class="bdg ${o.mio ? "" : "ok"}">ENTRA${o.mio ? " · propuesto" : ""}</span>` : o.estado === "sale" ? `<span class="bdg bad">SALE${o.mio ? " · propuesto" : ""}</span>` : '<span class="bdg">se queda</span>');
+    return `<div class="hero"><h1>Resultado por categorías</h1><p>Aquí está <b>todo lo que has votado y lo que propongo yo</b>, categoría por categoría, de menos a más dificultad (1–100). Se actualiza solo con cada voto tuyo. El total del juego no cambia: lo que entra y lo que sale tiene que cuadrar.</p></div>
       <div class="pl"><h2>Categoría <small>pincha una para verla</small></h2><div class="row">${chips}</div>
-      <div class="kpis"><div class="kpi"><b>+${nIn}</b><span>entran</span></div><div class="kpi"><b>−${nOut}</b><span>salen</span></div><div class="kpi"><b>${R.n - nOut}</b><span>se quedan</span></div><div class="kpi"><b>${R.n} → ${R.n + nIn - nOut}</b><span>total antes y después${nIn !== nOut ? " · se compensa con otra categoría" : ""}${R.sinSustituto ? " (" + R.sinSustituto + " salidas por regla sin sustituto)" : ""}</span></div>${t === "character" ? `<div class="kpi"><b>${ahora}</b><span>figuras actuales entre las nuevas · ${mujer} mujeres</span></div>` : ""}</div></div>
+      <div class="kpis"><div class="kpi"><b>+${s.eT + s.eM}</b><span>entran · ${s.eT} tuyos · ${s.eM} míos</span></div><div class="kpi"><b>−${s.sT + s.sM}</b><span>salen · ${s.sT} tuyos · ${s.sM} míos</span></div><div class="kpi"><b style="color:${s.saldo === 0 ? "var(--z0)" : "#ffd24a"}">${s.saldo > 0 ? "+" : ""}${s.saldo}</b><span>saldo de la categoría${s.saldo === 0 ? " (cuadra)" : " · se compensa con otras categorías"}</span></div><div class="kpi"><b>${s.hoy} → ${s.despues}</b><span>total antes y después</span></div>${t === "character" ? `<div class="kpi"><b>${ahora}</b><span>figuras actuales entre las nuevas · ${mujer} mujeres</span></div>` : ""}${s.eD ? `<div class="kpi"><b>${s.eD}</b><span>dudas mías por resolver</span></div>` : ""}</div></div>
       <div class="pl"><h2>Dificultad de 1 a 100 <small>gris = antes · color = después (rojo: menos de 15 · ámbar: 15-39 · verde: 40 o más) · pincha un tramo para filtrar</small></h2><div class="rbars">${bars}</div></div>
       <div class="pl"><h2>${esc(CATS[t])} de menos a más difícil <small>${L.length} de ${all.length}</small></h2>
-      <div class="tools">${inp("resultado", "q", "buscar")}${sel("resultado", "es", [["entra", "Solo lo que entra"], ["sale", "Solo lo que sale"], ["queda", "Solo lo que se queda"]], "Todo")}<button class="chipb" data-act="clrres">Limpiar</button><button class="btn" data-act="resok" data-t="${t}">Dar por buena esta categoría</button></div>
-      ${T("res", [{ h: "Dificultad", f: o => `<span class="bar3" style="width:90px;display:inline-flex;height:12px;vertical-align:middle"><i style="width:${o.d}%;background:${ZC[zoneOf(o.d)]}"></i></span> <b style="font-weight:400">${o.d}</b>`, v: o => o.d }, { h: "Nombre", f: o => (o.estado === "queda" ? nmc({ key: o.key, name: o.name }) : `<span class="nm" data-open="${esc(o.key)}">${esc(o.name)}</span>`) + (o.now ? ' <span class="pill ok">actual</span>' : ""), v: o => o.name }, { h: "País", f: o => esc(o.ctry), v: o => o.ctry }, { h: "Qué pasa", f: o => (est[efectivo(o.key, o.estado === "entra" ? "ok" : o.estado === "sale" ? "no" : null) === "ok" && o.estado === "sale" ? "queda" : efectivo(o.key, null) === "no" && o.estado === "entra" ? "queda" : o.estado]) , v: o => o.estado }, { h: "Por qué", w: 1, f: o => esc(o.m), v: o => o.m }, { h: "Dificultad y cambios", a: 1, f: o => zbtns(o.key, o.d) }], L, { s: 0, d: 1, per: 16 })}</div>`;
+      <div class="tools">${inp("resultado", "q", "buscar")}${sel("resultado", "es", [["entra", "Solo lo que entra"], ["sale", "Solo lo que sale"], ["queda", "Solo lo que se queda"]], "Todo")}<button class="chipb" data-act="clrres">Limpiar</button>${nMio ? `<button class="btn" data-act="resok" data-t="${t}">Aprobar mis ${nMio} propuestas de esta categoría</button>` : ""}</div>
+      ${T("res", [{ h: "Dificultad", f: o => `<span class="bar3" style="width:90px;display:inline-flex;height:12px;vertical-align:middle"><i style="width:${o.d}%;background:${ZC[zoneOf(o.d)]}"></i></span> <b style="font-weight:400">${o.d}</b>`, v: o => o.d }, { h: "Nombre", f: o => (o.estado === "queda" ? nmc({ key: o.key, name: o.name }) : `<span class="nm" data-open="${esc(o.key)}">${esc(o.name)}</span>`) + (o.now ? ' <span class="pill ok">actual</span>' : ""), v: o => o.name }, { h: "País", f: o => esc(o.ctry), v: o => o.ctry }, { h: "Qué pasa", f: est, v: o => o.estado }, { h: "Por qué", w: 1, f: o => esc(o.m), v: o => o.m }, { h: "Dificultad y cambios", a: 1, f: o => zbtns(o.key, o.d) + (o.mio ? " " + pbtns(o.key, o.estado === "sale" ? "sale" : "entra") : "") }], L, { s: 0, d: 1, per: 16 })}</div>`;
   };
   document.addEventListener("click", e => {
     const t = e.target.closest("[data-act]"); if (!t) return; const a = t.dataset.act, d = t.dataset;
@@ -463,7 +495,15 @@
     else if (a === "restab") { ff("resultado").t = d.t; ff("resultado").tr = null; if (ST.res) ST.res.page = 0; draw(); }
     else if (a === "restr") { const f = ff("resultado"); f.tr = f.tr == d.i ? null : +d.i; if (ST.res) ST.res.page = 0; draw(); }
     else if (a === "clrres") { const t0 = ff("resultado").t; F.resultado = { t: t0 }; draw(); }
-    else if (a === "resok") { const R = A.RES.cats[d.t]; let n = 0; R.entran.forEach(x => { const k = "sug:" + x.id; if (!N[k] && !chgOn(k)) { N[k] = { v: "ok", nota: "revisión completa", t: Date.now() }; n++; } }); R.salen.forEach(x => { if (!N[x.id] && !chgOn(x.id)) { N[x.id] = { v: "no", nota: "revisión completa: " + x.m, t: Date.now() }; n++; } }); const D = catDone(); D["res:" + d.t] = Date.now(); N["cfg:cats"] = { v: "cfg", nota: JSON.stringify(D), t: Date.now() }; saveN(); toast("Categoría dada por buena (" + n + " decisiones guardadas)"); draw(); }
+    else if (a === "gores") { ff("resultado").t = d.t; ff("resultado").tr = null; ff("resultado").es = ""; if (ST.res) ST.res.page = 0; go("resultado"); }
+    else if (a === "goprop") { if (d.tipo === "duda") return go("cola"); ff("propuestas").tipo = d.tipo; if (ST.prop) ST.prop.page = 0; go("propuestas"); }
+    else if (a === "ptab") { ff("propuestas").tipo = d.tipo; if (ST.prop) ST.prop.page = 0; draw(); }
+    else if (a === "prow") { const k = d.k; if (k.startsWith("sug:") || rows.some(r => r.key === k)) { N[k] = { v: d.v, nota: "propuesta mía: " + (d.v === "ok" ? "aprobada" : "rechazada"), t: Date.now() }; saveN(); toast(d.v === "ok" ? "Bien ✓" : "No ✕"); draw(); } }
+    else if (a === "pbulk") { if (!t.dataset.sure) { t.dataset.sure = 1; t.textContent = "Pulsa otra vez para confirmar"; return; } const tipo = d.tipo, vv = PBTN[tipo][0][0]; let n = 0; const f = ff("propuestas"), catOk = tp => !f.cat || tp === f.cat;
+      if (tipo === "sale") rows.filter(r => rowSale(r) === "mio" && catOk(r.topic)).forEach(r => { N[r.key] = { v: "no", nota: "propuesta mía: " + ((SALMAP()[r.key] || {}).m || "sale"), t: Date.now() }; n++; });
+      else SG.filter(x => !sgVote(x) && catOk(sugTopic(x)) && sgEstado(x) === (tipo === "entra" ? "si" : tipo === "no" ? "no" : "x")).forEach(x => { N[SGKEY(x)] = { v: vv, nota: "propuesta mía: " + ((CI().rec[x.id] || [])[2] || ""), t: Date.now() }; n++; });
+      saveN(); toast(n + " decisiones guardadas"); draw(); }
+    else if (a === "resok") { const t0 = d.t; let n = 0; SG.filter(x => sugTopic(x) === t0 && !sgVote(x) && sgEstado(x) === "si").forEach(x => { N[SGKEY(x)] = { v: "ok", nota: "propuesta mía: " + ((CI().rec[x.id] || [])[2] || ""), t: Date.now() }; n++; }); rows.filter(r => r.topic === t0 && rowSale(r) === "mio").forEach(r => { N[r.key] = { v: "no", nota: "propuesta mía: " + ((SALMAP()[r.key] || {}).m || "sale"), t: Date.now() }; n++; }); const D = catDone(); D["res:" + t0] = Date.now(); N["cfg:cats"] = { v: "cfg", nota: JSON.stringify(D), t: Date.now() }; saveN(); toast("Categoría aprobada (" + n + " decisiones guardadas)"); draw(); }
   });
   /* ================= NOTAS ================= */
   VIEWS.notas = () => {
@@ -575,7 +615,7 @@
   /* ================= pintar ================= */
   function draw() {
     const a = document.activeElement, fid = a && a.id && a.id.startsWith("in_") ? a.id : null, pos = fid ? a.selectionStart : 0;
-    $("#nav").innerHTML = NAVG.map(([g, items]) => (g ? `<h4>${g}</h4>` : "") + items.map(([k, l]) => { let b = ""; if (k === "sugerencias") { const n = SG.filter(x => !N[SGKEY(x)]).length; b = n ? `<small>${n}</small>` : ""; } if (k === "cola") { const n = queueItems().all.length; b = n ? `<small>${n}</small>` : ""; } if (k === "notas") b = userNotes().length ? `<small>${userNotes().length}</small>` : ""; return `<button class="nav ${k === cur ? "on" : ""}" data-view="${k}"><span>${l}</span>${b}</button>`; }).join("")).join("");
+    $("#nav").innerHTML = NAVG.map(([g, items]) => (g ? `<h4>${g}</h4>` : "") + items.map(([k, l]) => { let b = ""; if (k === "sugerencias") { const n = SG.filter(x => !N[SGKEY(x)]).length; b = n ? `<small>${n}</small>` : ""; } if (k === "cola") { const n = queueItems().all.length; b = n ? `<small>${n}</small>` : ""; } if (k === "propuestas") { const n = SG.filter(x => !sgVote(x) && sgEstado(x) === "si").length + rows.filter(r => rowSale(r) === "mio").length; b = n ? `<small>${n}</small>` : ""; } if (k === "notas") b = userNotes().length ? `<small>${userNotes().length}</small>` : ""; return `<button class="nav ${k === cur ? "on" : ""}" data-view="${k}"><span>${l}</span>${b}</button>`; }).join("")).join("");
     $("#scen").innerHTML = SCEN ? "Viendo: <b>con mis decisiones</b>" : "Viendo: <b>hoy</b>"; $("#scen").dataset.act = "scen"; $("#cuts").innerHTML = `Cortes <b>${CFG.t[0]}</b> · <b>${CFG.t[1]}</b>`; $("#nvotes").innerHTML = `Opiniones <b>${userNotes().length}</b>`;
     const v = VIEWS[cur] || VIEWS.inicio; $("#view").className = "content v-" + cur; $("#view").innerHTML = v(); layout(); fit();
     if (fid) { const n = $("#" + fid); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
@@ -629,7 +669,7 @@
       case "qall": if (t.dataset.sure) return qAll(d.s); t.dataset.sure = 1; t.textContent = "Pulsa otra vez para confirmar"; return;
       case "base": CFG.base = d.b; saveCfg(); return draw();
       case "reload": return location.reload();
-      case "clearnotes": if (t.dataset.sure) { userNotes().forEach(k => delete N[k]); saveN(); return draw(); } t.dataset.sure = 1; t.textContent = "Pulsa otra vez para vaciar"; return;
+      case "clearnotes": if (t.dataset.sure) { ALLOWSHRINK = true; userNotes().forEach(k => delete N[k]); saveN(); return draw(); } t.dataset.sure = 1; t.textContent = "Pulsa otra vez para vaciar"; return;
     }
   });
   function sgVisible(x) { const f = ff("sugerencias"); return (!f.cat || x.cat === f.cat) && (!f.sub || x.sub === f.sub) && (!f.pais || x.pais === f.pais) && (!f.sg || (f.sg === "aviso" ? x.avisos.length : f.sg === "limpias" ? !x.avisos.length && x.seguridad === "alta" : f.sg === "pend" ? !N[SGKEY(x)] : x.seguridad === f.sg)) && (!f.w || (f.w === "m" ? x.mujer : !x.mujer)) && (!f.q || (x.es + x.en + x.pais).toLowerCase().includes(f.q.toLowerCase())); }
