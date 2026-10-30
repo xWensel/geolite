@@ -351,6 +351,8 @@ img.ic.ic-dealer_mini, img.ic.ic-dealer_mini_s { image-rendering: pixelated; } i
 /* ---- el ticket de los doblones (catalogo, 27-oct): globo con HTML propio, cartulina con filo de tinta. Se abre al pasar el raton y se fija con un clic (data-pin) */
 .tt.rich { max-width: none; padding: 0; background: none; clip-path: none; filter: none; font-family: var(--serif); letter-spacing: 0; }
 .tt.rich::before { display: none; }
+/* el ticket de la economia vive en un .tt (tooltip oscuro): sus span heredaban el verde menta claro de «.tt span» y las etiquetas quedaban ilegibles sobre el papel crema */
+.tt.rich .tk span { color: inherit; } .tt.rich .tk b { text-transform: none; letter-spacing: 0; } .tt.rich .tk .ln b { display: inline; margin: 0; } .tt.rich .tk .strip span { overflow: hidden; }   /* la columna de epicas se estiraba por debajo de la tira y pisaba la nota de abajo */
 .tk { width: 330px; color: #16241c; background: #f6efdc; font-size: 18px; line-height: 1.02; box-shadow: 0 0 0 3px #16241c, 0 12px 0 3px rgba(0, 0, 0, .42); padding: 12px 16px 10px; display: flex; flex-direction: column; gap: 7px; text-align: left; }
 .tk h4 { display: flex; justify-content: space-between; align-items: baseline; margin: 0; font-size: 26px; line-height: 1; font-weight: 400; }
 .tk h4 b { font-weight: 400; font-size: 34px; color: #8a5a12; font-variant-numeric: tabular-nums; }
