@@ -33,7 +33,7 @@ window.AIQ = window.AIQ || {};
     ["tutankhamun", P, "Tutankhamun", "Tutankamón", 25.7402, 32.6014, ["luxor", "valley-of-the-kings", "cairo"]],
     ["ramses-ii", P, "Ramesses II", "Ramsés II", 22.3369, 31.6256, ["abu-simbel-temples", "luxor", "cairo"]],
     ["alexander-the-great", P, "Alexander the Great", "Alejandro Magno", 40.7626, 22.5232, ["athens", "acropolis-of-athens", "c:Greece"]],
-    ["pericles", P, "Pericles", "Pericles", 37.9715, 23.7257, ["athens", "acropolis-of-athens"]],    ["leonardo-da-vinci", P, "Leonardo da Vinci", "Leonardo da Vinci", 43.7833, 10.9167, ["milan", "louvre"]],
+        ["leonardo-da-vinci", P, "Leonardo da Vinci", "Leonardo da Vinci", 43.7833, 10.9167, ["milan", "louvre"]],
     ["michelangelo", P, "Michelangelo", "Miguel Ángel", 43.6408, 11.9962, ["rome", "c:Italy"]],
     ["galileo", P, "Galileo Galilei", "Galileo Galilei", 43.7229, 10.4017, ["leaning-tower-of-pisa", "c:Italy"]],
     ["dante", P, "Dante Alighieri", "Dante Alighieri", 43.7696, 11.2558, ["c:Italy", "rome"]],
@@ -62,7 +62,7 @@ window.AIQ = window.AIQ || {};
     ["victor-hugo", P, "Victor Hugo", "Victor Hugo", 47.2378, 6.0241, ["paris"]],
     ["joan-of-arc", P, "Joan of Arc", "Juana de Arco", 48.4453, 5.6697, ["paris", "battle-of-agincourt"]],
     ["charlemagne", P, "Charlemagne", "Carlomagno", 50.7753, 6.0839, ["cologne", "paris", "essen"]],
-    ["gustave-eiffel", P, "Gustave Eiffel", "Gustave Eiffel", 47.3220, 5.0415, ["eiffel-tower", "statue-of-liberty"]],    ["william-the-conqueror", P, "William the Conqueror", "Guillermo el Conquistador", 49.1829, -0.3707, ["battle-of-hastings", "london"]],    ["horatio-nelson", P, "Horatio Nelson", "Horacio Nelson", 52.9, 0.85, ["battle-of-trafalgar", "london"]],
+        ["william-the-conqueror", P, "William the Conqueror", "Guillermo el Conquistador", 49.1829, -0.3707, ["battle-of-hastings", "london"]],    
     ["duke-of-wellington", P, "Arthur Wellesley, 1st Duke of Wellington", "Duque de Wellington", 53.35, -6.26, ["battle-of-waterloo", "wellington"]],
     ["simon-bolivar", P, "Simón Bolívar", "Simón Bolívar", 10.5, -66.9, ["caracas", "battle-of-boyaca", "battle-of-ayacucho", "c:Venezuela"]],
     ["jose-de-san-martin", P, "José de San Martín", "José de San Martín", -29.7, -57.0, ["mendoza", "santiago", "buenos-aires"]],
@@ -100,11 +100,11 @@ window.AIQ = window.AIQ || {};
     ["wolfgang-amadeus-mozart", P, "Wolfgang Amadeus Mozart", "Wolfgang Amadeus Mozart", 47.8, 13.04, ["salzburg", "vienna"]],
     ["ludwig-van-beethoven", P, "Ludwig van Beethoven", "Ludwig van Beethoven", 50.7374, 7.0982, ["vienna", "cologne"]],
     ["sigmund-freud", P, "Sigmund Freud", "Sigmund Freud", 48.2082, 16.3738, ["vienna"]],
-    ["archduke-franz-ferdinand", P, "Archduke Franz Ferdinand of Austria", "Archiduque Francisco Fernando", 43.8563, 18.4131, ["assassination-of-archduke-franz-ferdinand", "vienna", "sarajevo"]],
+    
     ["antoni-gaudi", P, "Antoni Gaudí", "Antoni Gaudí", 41.4036, 2.1744, ["sagrada-familia", "barcelona"]],
     ["pablo-picasso", P, "Pablo Picasso", "Pablo Picasso", 36.7213, -4.4214, ["madrid", "barcelona"]],
     ["miguel-de-cervantes", P, "Miguel de Cervantes", "Miguel de Cervantes", 40.4168, -3.7038, ["madrid"]],
-    ["isabella-i-of-castile", P, "Isabella I of Castile", "Isabel I de Castilla", 40.6, -4.7, ["madrid", "alhambra"]],    ["otto-von-bismarck", P, "Otto von Bismarck", "Otto von Bismarck", 52.52, 13.405, ["berlin"]],
+        ["otto-von-bismarck", P, "Otto von Bismarck", "Otto von Bismarck", 52.52, 13.405, ["berlin"]],
     ["albert-einstein", P, "Albert Einstein", "Albert Einstein", 48.4011, 9.9876, ["berlin", "bern", "zurich"]],
     ["marie-curie", P, "Marie Curie", "Marie Curie", 52.2297, 21.0122, ["warsaw", "paris"]],
     ["nicolaus-copernicus", P, "Nicolaus Copernicus", "Nicolás Copérnico", 53.0138, 18.5984, ["warsaw", "krakow"]],
@@ -133,7 +133,7 @@ window.AIQ = window.AIQ || {};
     ["ancient-greece", E, "Ancient Greece", "Antigua Grecia", 37.9715, 23.7257, ["athens", "acropolis-of-athens", "statue-of-zeus-at-olympia", "battle-of-marathon"]],
     ["byzantine-empire", E, "Byzantine Empire", "Imperio bizantino", 41.0082, 28.9784, ["hagia-sophia", "istanbul"]],
     ["ottoman-empire", E, "Ottoman Empire", "Imperio otomano", 41.0082, 28.9784, ["istanbul", "ankara"]],
-    ["crusades", E, "Crusades", "Las Cruzadas", 32.9236, 35.0816, ["siege-of-acre", "siege-of-jerusalem", "jerusalem"]],
+    ["crusades", E, "Crusades", "Las Cruzadas", 32.9236, 35.0816, ["jerusalem"]],
     ["mughal-empire", E, "Mughal Empire", "Imperio mogol", 28.6562, 77.241, ["taj-mahal", "red-fort", "lahore"]],
     ["terracotta-army", E, "Terracotta Army", "Ejército de terracota", 34.3841, 109.2785, ["great-wall-of-china", "forbidden-city"]],
     ["meiji-restoration", E, "Meiji Restoration", "Restauración Meiji", 35.69, 139.692, ["tokyo"]],
@@ -155,7 +155,7 @@ window.AIQ = window.AIQ || {};
     ["baguette", Q, "Baguette", "Baguette", 48.8566, 2.3522, ["paris", "c:France"]],
     ["tango", Q, "Tango", "Tango", -34.6037, -58.3816, ["buenos-aires", "montevideo"]],
     ["flamenco", Q, "Flamenco", "Flamenco", 37.1773, -3.5986, ["madrid", "alhambra", "barcelona"]],
-    ["rio-carnival", Q, "Rio Carnival", "Carnaval de Río", -22.9068, -43.1729, ["rio-de-janeiro", "ipanema", "christ-the-redeemer"]],
+    
     ["oktoberfest", Q, "Oktoberfest", "Oktoberfest", 48.1351, 11.582, ["berlin", "cologne", "neuschwanstein-castle"]],
     ["bollywood", Q, "Bollywood", "Bollywood", 19.076, 72.8777, ["mumbai", "new-delhi"]],
     ["k-pop", Q, "K-pop", "K-pop", 37.5665, 126.978, ["seoul", "taegu"]],
@@ -164,23 +164,23 @@ window.AIQ = window.AIQ || {};
     ["tea", Q, "Tea", "Té", 7.2906, 80.6337, ["kandy", "c:Sri Lanka", "shanghai"]],
     ["chocolate", Q, "Chocolate", "Chocolate", 50.8503, 4.3517, ["brussels", "hershey-s-chocolate-world", "bern", "zurich"]],
     ["swiss-watch", Q, "Swiss watchmaking industry", "Relojería suiza", 46.948, 7.4474, ["bern", "zurich", "c:Switzerland"]],
-    ["northern-lights", Q, "Aurora", "Aurora boreal", 64.1466, -21.9426, ["reykjavik", "yellowknife", "bodo", "iqaluit", "nuuk", "kiruna", "utqiagvik", "north-cape"]],
-    ["midnight-sun", Q, "Midnight sun", "Sol de medianoche", 67.28, 14.4049, ["bodo", "oslo", "helsinki", "stockholm", "north-cape", "kiruna"]],
+    ["northern-lights", Q, "Aurora", "Aurora boreal", 64.1466, -21.9426, ["reykjavik", "yellowknife", "bodo", "iqaluit", "nuuk"]],
+    
     ["sahara", Q, "Sahara", "Sáhara", 23.4162, 25.6628, ["cairo", "timbuktu", "tunis", "c:Egypt"]],
     ["amazon-rainforest", Q, "Amazon rainforest", "Selva amazónica", -3.4653, -62.2159, ["c:Brazil", "c:Peru", "c:Colombia"]],
-    ["great-wildebeest-migration", Q, "Serengeti", "Gran migración de ñus", -2.3333, 34.8333, ["nairobi", "c:Kenya", "mount-kilimanjaro", "dodoma"]],
+    
     ["kangaroo", Q, "Kangaroo", "Canguro", -25.2744, 133.7751, ["canberra", "sydney", "melbourne", "c:Australia"]],
     ["kiwi-bird", Q, "Kiwi (bird)", "Kiwi (ave)", -41.2865, 174.7762, ["wellington", "auckland", "christchurch"]],
-    ["penguins", Q, "Penguin", "Pingüinos", -54.8019, -68.303, ["ushuaia", "cape-town", "dunedin", "port-lockroy", "paradise-harbour"]],    ["antarctic-treaty", E, "Antarctic Treaty System", "Tratado Antártico", 38.8977, -77.0365, ["esperanza-base", "king-george-island"]],
+    ["penguins", Q, "Penguin", "Pingüinos", -54.8019, -68.303, ["ushuaia", "cape-town", "dunedin"]],    ["antarctic-treaty", E, "Antarctic Treaty System", "Tratado Antártico", 38.8977, -77.0365, ["esperanza-base"]],
     ["lemur", Q, "Lemur", "Lémures", -18.7669, 46.8691, ["c:Madagascar"]],
     ["komodo-dragon", Q, "Komodo dragon", "Dragón de Komodo", -8.5, 119.5, ["komodo-national-park", "c:Indonesia"]],
     ["galapagos-tortoise", Q, "Galápagos tortoise", "Tortuga gigante de Galápagos", -0.6774, -90.5517, ["galapagos-islands"]],
     ["llama", Q, "Llama", "Llama", -13.5319, -71.9675, ["cusco", "la-paz", "lake-titicaca", "machu-picchu"]],
     ["giant-panda", Q, "Giant panda", "Panda gigante", 30.5728, 104.0668, ["beijing", "shanghai", "c:China"]],
-    ["dromedary", Q, "Dromedary", "Dromedario", 29.9792, 31.1342, ["cairo", "giza-pyramid-complex", "pushkar", "c:Saudi Arabia"]],
-    ["polar-bear", Q, "Polar bear", "Oso polar", 63.7467, -68.517, ["iqaluit", "yellowknife", "c:Canada", "c:Greenland", "franz-josef-land", "utqiagvik"]],
-    ["blue-whale", Q, "Gray whale", "Ballena gris", 27.7, -114.2, ["c:Mexico"]],
-    ["coral-reef", Q, "Coral reef", "Arrecife de coral", -18.2871, 147.6992, ["great-barrier-reef", "belize-barrier-reef-reserve", "tubbataha-reef-marine-park"]],
+    
+    ["polar-bear", Q, "Polar bear", "Oso polar", 63.7467, -68.517, ["iqaluit", "yellowknife", "c:Canada", "c:Greenland"]],
+    
+    
     ["geyser", Q, "Geyser", "Géiseres", 64.3104, -20.3024, ["reykjavik", "c:Iceland"]],
     ["fjord", Q, "Fjord", "Fiordos", 61.0, 6.9, ["oslo", "c:Norway", "bodo", "ilulissat-icefjord"]],
     ["sumo", Q, "Sumo", "Sumo", 35.6969, 139.7935, ["tokyo", "nagoya"]],
@@ -188,16 +188,16 @@ window.AIQ = window.AIQ || {};
     ["yoga", Q, "Yoga", "Yoga", 30.0869, 78.2676, ["new-delhi", "goa", "c:India", "kathmandu"]],
     ["holi", Q, "Holi", "Holi", 27.4924, 77.6737, ["lucknow", "new-delhi", "pushkar"]],
     ["spice-trade", Q, "Spice trade", "Comercio de especias", 15.4909, 73.8278, ["goa", "kandy", "c:Indonesia", "lisbon"]],
-    ["papyrus", Q, "Papyrus", "Papiro", 30.0444, 31.2357, ["cairo", "luxor"]],
+    
     ["mummy", Q, "Mummy", "Momias", 25.7402, 32.6014, ["luxor", "cairo", "valley-of-the-kings"]],
     ["rosetta-stone", Q, "Rosetta Stone", "Piedra de Rosetta", 31.4, 30.4167, ["cairo", "london"]],
-    ["aurochs-cave-art", Q, "Cave painting", "Arte rupestre", 25.5, 77.6, ["kakadu-national-park", "uluru"]],
+    
     ["kimchi", Q, "Kimchi", "Kimchi", 37.5665, 126.978, ["seoul", "pyongyang"]],
-    ["haggis", Q, "Haggis", "Haggis", 55.9533, -3.1883, ["london", "c:United Kingdom"]],
+    
     ["mate", Q, "Mate (drink)", "Mate", -34.9011, -56.1645, ["montevideo", "buenos-aires", "c:Paraguay"]],
     ["ceviche", Q, "Ceviche", "Ceviche", -12.0464, -77.0428, ["lima", "c:Peru"]],
-    ["tapas", Q, "Tapas", "Tapas", 40.4168, -3.7038, ["madrid", "barcelona"]],
-    ["carnival-of-venice", Q, "Carnival of Venice", "Carnaval de Venecia", 45.4408, 12.3155, ["milan", "c:Italy"]],
+    
+    
     ["fado", Q, "Fado", "Fado", 38.7223, -9.1393, ["lisbon"]],
     ["reggae", Q, "Reggae", "Reggae", 18.0179, -76.8099, ["c:Jamaica", "rose-hall-great-house"]],
     ["salsa-music", Q, "Salsa music", "Salsa", 18.4655, -66.1057, ["san-juan", "havana", "cali"]],

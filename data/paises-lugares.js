@@ -3,6 +3,7 @@
  * QIDs de Wikidata (nombres en data/places.js, A.PCOUNTRY). Propuesta de un documentalista y dos revisores; decide la mayoria. */
 window.AIQ = window.AIQ || {};
 window.AIQ.PLACE_COUNTRIES = {
+  "elbe": ["Q183","Q213"],
   "amazon-rainforest": ["Q155"],  // Selva amazónica → Brasil
   "battle-of-jutland": ["Q35"],  // Batalla de Jutlandia → Dinamarca
   "battle-of-the-coral-sea": ["Q408"],  // Batalla del mar del Coral → Australia
