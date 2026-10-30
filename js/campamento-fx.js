@@ -3,10 +3,11 @@
  *   sobre(tb)        las cartas llegan del mazo boca abajo (el dorso de la casa, pixel art por codigo a celdas de un pixel de arte) y se voltean
  *                    en cadena con giro en perspectiva y una luz que cruza la cara; la de mayor rareza va la ultima, espera un instante y voltea con
  *                    el canto de su color (y, la epica y la legendaria, su luz sobre el tapete). Un clic en las cartas las voltea todas de golpe.
- *   rodillos(el)     el contador de doblones cuenta con tambores de laton grabados (cifras de 7x11 pixeles de arte) que giran una unidad cada vez,
- *                    con su tic, y se asientan pasandose un pelo. La cifra de verdad sigue en el <b> (oculto): quien la escriba, la hace girar.
+ *   rodillos(el)     el contador de doblones es un naipe (v0.4.3, maqueta «El contador de moneda», opcion B): la moneda dibujada a su rejilla y la cifra en
+ *                    Jersey. Cuenta una unidad cada vez, con su tic, y se asienta con un golpe de un pixel de arte. La cifra de verdad sigue en el <b>
+ *                    (oculto): quien la escriba, la hace contar. (Hasta la v0.4.2 eran tambores de laton; el nombre de la funcion se queda.)
  *   saldo(tb)        la lampara que cuelga sobre la mesa sigue a tus doblones: pobre, alta y fria (luz pareja, nunca castigo); rica, baja y calida,
- *                    con el laton de los marcos brillando. Al cambiar de altura se mece y la luz la sigue con inercia.
+ *                    con el laton de la mesa y la mochila brillando. Al cambiar de altura se mece y la luz la sigue con inercia.
  * Todo vive SOBRE las piezas (nada salta ni flota), sin luces alrededor de los botones, a escala entera. Movimiento minimo: sin reparto ni volteo,
  * la cifra cambia seca y la lampara no se mece (la luz si sigue al saldo). Luces de la sala apagadas: sin lampara del saldo.
  */
@@ -158,72 +159,20 @@ window.AIQ = window.AIQ || {};
     });
   }
 
-  /* ================================================================ 2. LOS RODILLOS DE LATON */
-  /* las cifras: 7x11 pixeles de arte, trazo de 2 */
-  const DIG = [
-    [".#####.", "##...##", "##...##", "##...##", "##...##", "##...##", "##...##", "##...##", "##...##", "##...##", ".#####."],
-    ["..##...", ".###...", "####...", "..##...", "..##...", "..##...", "..##...", "..##...", "..##...", "..##...", "######."],
-    [".#####.", "##...##", ".....##", ".....##", "....##.", "...##..", "..##...", ".##....", "##.....", "##.....", "#######"],
-    [".#####.", "##...##", ".....##", ".....##", "..####.", ".....##", ".....##", ".....##", ".....##", "##...##", ".#####."],
-    ["....##.", "...###.", "..####.", ".##.##.", "##..##.", "##..##.", "#######", "....##.", "....##.", "....##.", "....##."],
-    ["#######", "##.....", "##.....", "######.", ".....##", ".....##", ".....##", ".....##", ".....##", "##...##", ".#####."],
-    [".#####.", "##...##", "##.....", "##.....", "######.", "##...##", "##...##", "##...##", "##...##", "##...##", ".#####."],
-    ["#######", ".....##", ".....##", "....##.", "....##.", "...##..", "...##..", "..##...", "..##...", "..##...", "..##..."],
-    [".#####.", "##...##", "##...##", "##...##", ".#####.", "##...##", "##...##", "##...##", "##...##", "##...##", ".#####."],
-    [".#####.", "##...##", "##...##", "##...##", "##...##", ".######", ".....##", ".....##", ".....##", "##...##", ".#####."],
-  ];
-  /* la tira: 10 cifras de 16 filas (11 de cifra + 5 de aire), 7 columnas. 1 = trazo, 2 = la luz bajo el grabado */
-  const TIRA = (() => {
-    const t = new Uint8Array(160 * 7), on = (k, x, y) => y >= 0 && y < 11 && DIG[k][y][x] === "#";
-    for (let k = 0; k < 10; k++) for (let y = 0; y < 16; y++) for (let x = 0; x < 7; x++) { const gy = y - 2; t[(k * 16 + y) * 7 + x] = on(k, x, gy) ? 1 : on(k, x, gy - 1) ? 2 : 0; }
-    return t;
-  })();
-  const LAT = ["#3c240a", "#6e3414", "#c46a1b", "#f5a623", "#fdd742"], INK = "#12062a", SOMBRA = "rgba(5, 12, 8, .55)";
+  /* ================================================================ 2. EL CONTADOR DE DOBLONES (la cuenta de los rodillos de antes, sobre un naipe) */
   /* Extrema: 110 ms por unidad, tope de 2 s, golpe al asentarse 0,3, tic a 0,9 */
   const RD = { paso: 0.11, total: 2.0, rebote: 0.3, tic: 0.9 };
-  const R = { el: null, b: null, cv: null, g: null, mo: null, key: null, shown: 0, from: 0, target: 0, steps: 0, st: 0, dur: 0.08, sign: 1, tics: 0, settle: -1, sdir: 1, glint: 0, raf: 0, last: 0, n: 2, cel: 2, z: 1 };
-  const nDig = v => Math.max(2, String(Math.max(0, Math.floor(v))).length);
-  /* la posicion de cada tambor (0 = unidades) para un valor continuo: el de arriba solo gira cuando todos los de abajo pasan de 9 a 0 */
-  function posDe(v, i) {
-    const p = Math.pow(10, i), lower = ((v % p) + p) % p, carry = i === 0 ? v - Math.floor(v) : Math.max(0, lower - (p - 1));
-    return ((Math.floor(v / p) % 10) + carry + 10) % 10;
-  }
+  const R = { el: null, b: null, cv: null, num: null, mo: null, key: null, shown: 0, from: 0, target: 0, steps: 0, st: 0, dur: 0.08, sign: 1, tics: 0, settle: -1, sdir: 1, glint: 0, raf: 0, last: 0 };
+  /* la cifra visible: la unidad que cuenta, y el golpe de un pixel de arte (2 px de diseno) al asentarse; subiendo, en el oro oscuro del naipe */
   function pintaRodillos(jolt) {
-    const { g, cv, cel, n } = R; if (!g) return;
-    const AW = 1 + 10 * n, AH = 18;
-    g.clearRect(0, 0, cv.width, cv.height);
-    const P = (x, y, c) => { g.fillStyle = c; g.fillRect(x * cel, (y + jolt) * cel, cel, cel); };
-    /* la sombra de la pieza, detras y abajo a la derecha (la lampara del Campamento cae de arriba a la izquierda) */
-    g.fillStyle = SOMBRA; g.fillRect(cel, (AH + jolt) * cel, AW * cel, cel); g.fillRect(AW * cel, (1 + jolt) * cel, cel, AH * cel);
-    const v = R.shown;
-    for (let y = 0; y < AH; y++) for (let x = 0; x < AW; x++) {
-      const m = x % 10;                                                  // 0 tinta (marco y separador), 1 y 9 bisel, 2..8 tambor
-      let c;
-      if (y === 0 || y === AH - 1 || m === 0) c = INK;
-      else if (y === 1 || y === AH - 2 || m === 1 || m === 9) {
-        const hi = (y === 1 && m !== 9) || (m === 1 && y < AH - 2 && y > 1);
-        c = y === AH - 2 || m === 9 ? LAT[1] : hi ? LAT[3] : LAT[1];
-      } else {
-        const di = n - 1 - Math.floor(x / 10), col = m - 2, yy = y - 8.5, Rr = 26, ang = Math.asin(Math.max(-1, Math.min(1, yy / Rr)));
-        const row = ((Math.floor(posDe(v, di) * 16 + ang * Rr + 7.5) % 160) + 160) % 160, t = TIRA[row * 7 + col];
-        let k = 1.6 + 2.4 * Math.cos(ang * 2.6); if (yy < -5) k -= 0.7;
-        let li = Math.max(0, Math.min(4, Math.round(k)));
-        if (t === 2) li = Math.min(4, li + 1);
-        c = LAT[li];
-        if (Math.abs(yy + 2.5) < 0.6 && t !== 1) c = R.glint > 0.45 || li >= 3 ? LAT[4] : LAT[Math.min(4, li + 1)];   // el brillo del laton, una fila, que se aviva al cobrar
-        if (t === 1) c = INK;
-      }
-      P(x, y, c);
-    }
+    const { num, el } = R; if (!num) return;
+    const t = String(Math.round(R.shown)); if (num.textContent !== t) num.textContent = t;
+    num.style.transform = jolt ? "translateY(2px)" : "";
+    el.classList.toggle("sube", R.glint > 0.02);
   }
   function mideRodillos() {
     const { el, cv } = R; if (!el || !cv) return;
-    const z = zoomDe(el), d = devicePixelRatio || 1, cel = Math.max(2, Math.round(2 * z * d)), n = R.n, AW = 1 + 10 * n, AH = 18;
-    R.cel = cel; R.z = z;
-    const W = (AW + 1) * cel, Hh = (AH + 2) * cel;
-    if (cv.width !== W || cv.height !== Hh) { cv.width = W; cv.height = Hh; }
-    cv.style.width = W / (z * d) + "px"; cv.style.height = Hh / (z * d) + "px";
-    pintaRodillos(0); if (saldoOn()) { S.sig = ""; pintaSaldo(); }
+    A.moneda.fit(cv); pintaRodillos(0); if (saldoOn()) { S.sig = ""; pintaSaldo(); }
   }
   const ticRodillo = i => son("camTic", R.sign, i, RD.tic);
   function bucleRodillos(now) {
@@ -252,8 +201,7 @@ window.AIQ = window.AIQ || {};
     if (!isFinite(v)) return; v = Math.max(0, Math.round(v));
     if (saldoOn()) S.goal = v;
     if (v === R.target && !R.steps) { if (R.shown !== v && R.settle < 0) { R.shown = v; pintaRodillos(0); } return; }
-    const nn = nDig(Math.max(v, R.shown)); if (nn !== R.n) { R.n = nn; mideRodillos(); }
-    if (quieto() || !R.g) { R.target = R.from = R.shown = v; R.steps = 0; R.settle = -1; pintaRodillos(0); saldoTick(); return; }
+    if (quieto() || !R.num) { R.target = R.from = R.shown = v; R.steps = 0; R.settle = -1; pintaRodillos(0); saldoTick(); return; }
     const from = R.steps ? Math.round(R.shown) : R.target, n = Math.abs(v - from);
     R.from = from; R.target = v; R.sign = Math.sign(v - from) || 1; R.steps = n; R.st = 0; R.tics = 0; R.settle = -1;
     R.dur = Math.max(0.028, Math.min(RD.paso, RD.total / Math.max(1, n)));
@@ -262,19 +210,21 @@ window.AIQ = window.AIQ || {};
     if (!R.raf) R.raf = requestAnimationFrame(bucleRodillos);
     saldoTick();
   }
-  /* el contador del Campamento: monta los tambores sobre el <b> de siempre (que sigue ahi, oculto, para quien escriba la cifra y para los lectores
+  /* el contador del Campamento: monta la moneda y la cifra sobre el <b> de siempre (que sigue ahi, oculto, para quien escriba la cifra y para los lectores
      de pantalla). key: la visita (run.shopKey); en la misma visita, un repintado cuenta desde lo que se veia; en una visita nueva, la cifra ya esta */
   function rodillos(el, key) {
-    if (!el) return;
+    if (!el || !A.moneda) return;
     const b = el.querySelector("b"); if (!b) return;
     const v = parseInt(b.textContent, 10) || 0, same = key != null && key === R.key && R.el;
     if (R.mo) R.mo.disconnect(); if (R.raf) cancelAnimationFrame(R.raf); R.raf = 0; R.last = 0;
-    const cv = document.createElement("canvas"); cv.className = "rd-cv"; cv.setAttribute("aria-hidden", "true");
-    b.after(cv); el.classList.add("rd-on");
-    R.el = el; R.b = b; R.cv = cv; R.g = cv.getContext("2d"); R.key = key;
+    const cv = A.moneda.el("coin", 2), old = el.querySelector(":scope > .ic"), pr = document.createElement("i"), num = document.createElement("span");
+    cv.classList.add("cn"); pr.className = "pr"; num.className = "num"; num.setAttribute("aria-hidden", "true");
+    if (old) old.replaceWith(cv); else el.prepend(cv);                    // la moneda del juego (js/juguetes.js la esconde mientras lanza el doblon)
+    b.before(pr, num); el.classList.add("rd-on");
+    R.el = el; R.b = b; R.cv = cv; R.num = num; R.key = key;
     if (same) { const s = R.steps ? R.shown : R.target; R.target = R.from = Math.round(s); R.shown = s; R.steps = 0; R.settle = -1; }
     else { R.target = R.from = R.shown = v; R.steps = 0; R.settle = -1; R.glint = 0; }
-    R.n = nDig(Math.max(v, R.shown)); mideRodillos();
+    mideRodillos();
     R.mo = new MutationObserver(() => aRodillos(parseInt(b.textContent, 10)));
     R.mo.observe(b, { childList: true, characterData: true, subtree: true });
     if (v !== R.target) aRodillos(v);
@@ -286,7 +236,7 @@ window.AIQ = window.AIQ || {};
      UNA capa encima de la mesa con un degradado radial (sin lienzo: un lienzo encima de todo obligaba a componer la mesa por capas), en mezcla normal: lo que la luz apaga es
      sombra (negro con su transparencia), lo que enciende es luz calida y, con poco dinero, un velo frio. Medido: cualquier modo de mezcla
      (multiplicar, aclarar, pantalla) o un lienzo a pantalla completa costaban 30-60 fotogramas a CPU x4 al entrar. El laton de
-     los marcos (mesa, mochila, contador) recibe el brillo a bandas cuando la lampara esta baja; los botones nunca.
+     los marcos (mesa y mochila) recibe el brillo a bandas cuando la lampara esta baja; los botones y el contador (un naipe) nunca.
      Extrema: brillo del laton 1, charco 1, se mece 0,9 */
   const SL = { brillo: 1, charco: 1, mece: 0.9, lx: 660 / 1920, ly: 430 / 1080 };
   const S = { tb: null, mul: null, rings: [], m: 0, goal: 0, sw: 0, swv: 0, raf: 0, last: 0, sig: "", w: 0, h: 0 };
@@ -358,8 +308,8 @@ window.AIQ = window.AIQ || {};
     const lay = document.getElementById("layer");
     if (!S.mul || !S.mul.isConnected) { S.mul = mk("sl-mul"); (lay || tb).appendChild(S.mul); }
     S.rings = [];
-    tb.querySelectorAll(":scope > .tb-shop, :scope > .tb-tray, .tb-coins").forEach(host => {
-      const el = document.createElement("i"); el.className = "sl-laton" + (host.classList.contains("tb-coins") ? " c" : ""); el.setAttribute("aria-hidden", "true"); host.appendChild(el); S.rings.push({ el, host });
+    tb.querySelectorAll(":scope > .tb-shop, :scope > .tb-tray").forEach(host => {
+      const el = document.createElement("i"); el.className = "sl-laton"; el.setAttribute("aria-hidden", "true"); host.appendChild(el); S.rings.push({ el, host });
     });
     S.tb = tb; S.key = key; S.sig = ""; S.goal = coins;
     if (!same) { S.m = Math.max(0, Math.min(60, coins)); S.sw = S.swv = 0; }

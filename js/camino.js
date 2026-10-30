@@ -139,7 +139,7 @@ window.AIQ = window.AIQ || {};
       <div class="gx-grid cm-grid">
         <header class="bq-head pf-head2"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l bq-h" id="cmH"><span><span class="gx-eyb">${esc(P6(C().tx.club))} · ${esc(P6(C().tx.lv).replace("{n}", lv))}</span>${esc(P6(PX.title))}</span></h2>
-          ${tabsHtml()}<span class="bq-wal" aria-label="${esc(P6(C().tx.fichas))}">${fi("bq-fi")}<b>${A.fmt(have)}</b></span>${A.hub.tools()}</header>
+          ${tabsHtml()}<span class="bq-walw"><span class="bq-wal" aria-label="${esc(P6(C().tx.fichas))}">${A.moneda.html("chip")}<b>${A.fmt(have)}</b></span></span>${A.hub.tools()}</header>
         <div class="gx-sh cm-left"><div class="gx-paper cm-me">${meHtml()}</div></div>
         <div class="gx-sh cm-right" id="pfRight">${bookHtml()}</div>
       </div></section>`;

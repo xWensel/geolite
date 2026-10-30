@@ -302,7 +302,7 @@ window.AIQ = window.AIQ || {};
       <div class="gx-grid bq-grid">
         <header class="bq-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l bq-h" id="bqH"><span class="bq-hic">${A.icon("purse")}</span><span><span class="gx-eyb">${esc(A.club ? P6(A.club.tx.club) : "")}${lv ? " · " + esc(lv) : ""}</span>${esc(P6(TX.title))}</span></h2>
-          <span class="bq-wal" aria-label="${esc(A.club ? P6(A.club.tx.fichas) : "")}">${fi()}<b id="bqWal">${A.fmt(have)}</b></span>${A.hub.tools()}</header>
+          <span class="bq-walw"><span class="bq-wal" aria-label="${esc(A.club ? P6(A.club.tx.fichas) : "")}">${A.moneda.html("chip")}<b id="bqWal">${A.fmt(have)}</b></span></span>${A.hub.tools()}</header>
         <div class="bq-railw">${railHtml()}</div>
         <div class="gx-sh bq-left"><div class="gx-paper bq-cat${catCls()}" id="bqCat">${catBody()}</div></div>
         <div class="gx-sh bq-right"><div class="gx-paper bq-det${catCls()}" id="bqDet">${detBody()}</div></div>

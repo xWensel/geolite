@@ -294,7 +294,7 @@ window.AIQ = window.AIQ || {};
   }
   /* tus fichas de oro en la portada, en su caja junto al engranaje (24-oct: ya no van en la carta). Al volver con fichas nuevas, la caja las cuenta
      delante de ti (moneda a moneda), con su brillo. Empieza en las que ya viste contar (fSeen) */
-  const wallet = () => { const c = st(), f = c.fSeen == null ? c.f : Math.min(c.fSeen, c.f); return `<span class="bq-wal hh-wal" id="hhWal" ${A.ttAttr ? A.ttAttr(P6(TX.fichas)) : ""} aria-label="${esc(P6(TX.fichas))}">${fi("bq-fi")}<b id="socioF">${A.fmt(f)}</b></span>`; };
+  const wallet = () => { const c = st(), f = c.fSeen == null ? c.f : Math.min(c.fSeen, c.f); return `<span class="bq-walw"><span class="bq-wal hh-wal" id="hhWal" ${A.ttAttr ? A.ttAttr(P6(TX.fichas)) : ""} aria-label="${esc(P6(TX.fichas))}">${A.moneda.html("chip", 2, "bq-fi")}<b id="socioF">${A.fmt(f)}</b></span></span>`; };
   /* al volver a la portada con fichas nuevas, la caja las cuenta delante de ti (moneda a moneda), con su brillo */
   function wire(onOpen) {
     const b = document.getElementById("socioBtn"); if (!b) return;

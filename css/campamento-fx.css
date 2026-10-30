@@ -21,17 +21,15 @@
 .gx-camp .sb-charco { position: absolute; z-index: 0; pointer-events: none; opacity: 0;
   box-shadow: 0 0 90px 46px color-mix(in srgb, var(--sb2) 60%, transparent), 0 0 28px 14px color-mix(in srgb, var(--sb2) 70%, transparent); background: color-mix(in srgb, var(--sb2) 40%, transparent); }
 
-/* ---------------------------------------------------------------- los rodillos de laton del contador */
-.gx-camp .tb-coins.rd-on > b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.gx-camp .tb-coins .rd-cv { display: block; flex: none; image-rendering: pixelated; }
+/* ---------------------------------------------------------------- la cifra del contador (el <b> real queda oculto; el naipe se pinta en css/gala.css) */
+.gx-camp .tb-coins.rd-on > b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; min-width: 0; }
 
 /* ---------------------------------------------------------------- la lampara del saldo */
 #layer > .sl-luz { position: absolute; inset: 0; z-index: 40; display: none; pointer-events: none; }   /* una sola capa, en #layer, que se queda entre repintados */
 #layer:not(.hidden):has(> #dlg .table.mesa.gx-camp) > .sl-luz { display: block; }
-/* el brillo del laton: solo en la banda de laton del marco (de 2 a 6 px del borde de los paneles; de 2 a 5 en el contador) */
+/* el brillo del laton: solo en la banda de laton del marco (de 2 a 6 px del borde de los paneles) */
 .gx-camp .sl-laton { position: absolute; inset: 2px; z-index: 3; padding: 4px; pointer-events: none; opacity: 0; image-rendering: pixelated;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.gx-camp .sl-laton.c { padding: 3px; }
 
 /* ---------------------------------------------------------------- el instante decisivo: la sala sin color salvo la pieza que decide */
 .dcv { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; opacity: 0; -webkit-backdrop-filter: grayscale(1) brightness(.55); backdrop-filter: grayscale(1) brightness(.55);

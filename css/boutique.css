@@ -11,11 +11,16 @@
 .bq-h > span:last-child { display: grid; gap: 6px; }
 .bq-h .gx-eyb { font-size: 16px; }
 .bq-hic .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .7)); }
-.bq-wal { display: inline-flex; align-items: center; gap: 12px; padding: 6px 18px 8px 12px; background: rgba(5, 14, 10, .72); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .55); }
-.bq-wal b { font-family: var(--sans); font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-ttl); font-variant-numeric: tabular-nums; }
+/* el monedero de fichas de oro (Tienda, Camino, Retos de la casa y portada) es el mismo naipe que el contador de doblones del Campamento (v0.4.3): papel con muesca a 48 px de alto,
+   la ficha dibujada a su rejilla (js/moneda.js) y la cifra en Jersey a 30 px con el filete impreso; la sombra dura va en un envoltorio (el recorte de la muesca se la comeria) */
+.bq-walw { display: inline-flex; filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .78)); }
+.bq-wal { display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 20px 0 12px; box-sizing: border-box; clip-path: var(--gx-notch); color: var(--gx-ink);
+  box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -4px 0 2px var(--gx-paper-lo); background: linear-gradient(#fffaf0 0 4px, var(--gx-paper) 4px calc(100% - 6px), #efe4c8 calc(100% - 6px)); }
+.bq-wal > .ic { flex: none; display: block; image-rendering: pixelated; }
+.bq-wal b { align-self: stretch; display: flex; align-items: center; justify-content: flex-end; margin: 9px 0 11px; padding: 0 0 3px 10px; min-width: 2ch; box-sizing: content-box; border-left: 2px dotted rgba(181, 101, 27, .55);
+  font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1; color: var(--gx-ink); font-variant-numeric: tabular-nums; }
 .bq-head .menu-tools { grid-column: auto; }
 .bq-fi { width: 32px; height: 32px; image-rendering: pixelated; flex: none; display: inline-block; }
-.bq-wal .bq-fi { width: 40px; height: 40px; }
 .bq-fi.sm { width: 24px; height: 24px; }
 
 .bq-left { grid-column: 4 / 10; grid-row: 2; min-width: 0; min-height: 0; }

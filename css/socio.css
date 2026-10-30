@@ -40,9 +40,6 @@ html.reduce-motion .sc-cat.sc-stamp { animation: none; }
 .hh-top .hh-socio.sc-v2:focus-visible .sc-card, html[data-input="pad"] .hh-top .hh-socio.sc-v2:focus .sc-card { outline: 3px solid var(--gx-red); outline-offset: 4px; }
 /* tus fichas de oro en la portada: la misma caja que el Perfil y la tienda, junto al engranaje; al volver con fichas nuevas, las cuenta */
 .hh-top .menu-tools { align-items: center; gap: 12px; }
-.hh-wal { padding: 4px 14px 6px 10px; }
-.hh-wal b { font-size: 34px; }
-.hh-wal .bq-fi { width: 36px; height: 36px; }
 .hh-wal.gain b { animation: sc-gain .22s ease-in-out 6 alternate; transform-origin: 0 50%; }
 .hh-wal.gain .bq-fi { animation: sc-spin .44s ease-in-out 3; }
 html.no-shake .hh-wal.gain b, html.no-shake .hh-wal.gain .bq-fi { animation: none; }

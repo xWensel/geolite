@@ -53,9 +53,10 @@
     background: url(../assets/dados/felt.png) 0 0 / 32px 32px, linear-gradient(var(--gx-felt-1), var(--gx-felt-3)); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(212, 160, 74, .7); }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-top { gap: 12px; }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-act { font-size: 16px; letter-spacing: .08em; opacity: 1; color: var(--gx-acc); }
-  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins { font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; gap: 4px; color: var(--gx-gold); }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins { font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1; gap: 6px; color: var(--gx-ttl); text-shadow: 0 2px 0 #050b08; }   /* v0.4.3: la moneda a 1:1 (22 de arte + 2 de grosor, la altura del corazon) y la cifra en Jersey a 30 */
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins b { font-weight: 400; }
-  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins .ic, html[data-skin="casino"] body:not(.duelo-on) #advBar .hp .ic { width: 24px; height: 24px; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-coins > .mn-cv { flex: none; }
+  html[data-skin="casino"] body:not(.duelo-on) #advBar .hp .ic { width: 24px; height: 24px; }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-perk { width: 32px; height: 32px; background: rgba(4, 12, 8, .45); box-shadow: inset 0 0 0 2px var(--gx-o); }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-wind, html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-noise { font-size: 16px; letter-spacing: .06em; }
   html[data-skin="casino"] body:not(.duelo-on) #advBar .ab-rise { border-radius: 0; background: #0b1d15; box-shadow: inset 0 0 0 2px var(--gx-o); padding: 5px 7px; }
