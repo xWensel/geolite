@@ -329,7 +329,7 @@
   const QSRC = [["entra", "Podría entrar"], ["sale", "Podría salir"]];
   function queueItems() {
     reindex(); const f = ff("cola"), out = [], seen = new Set(), g = remGroups();
-    SG.filter(x => !N[SGKEY(x)]).sort((a, b) => b.idiomas - a.idiomas).forEach(x => { seen.add(SGKEY(x)); out.push({ key: SGKEY(x), src: "entra", why: "Propuesta nueva · " + (x.cat === "persona" ? "personaje" : "Sello del país") }); });
+    SG.filter(x => !N[SGKEY(x)]).sort((a, b) => (b.video ? 1e4 : 0) + b.idiomas - (a.video ? 1e4 : 0) - a.idiomas).forEach(x => { seen.add(SGKEY(x)); out.push({ key: SGKEY(x), src: "entra", why: (x.video ? "Del vídeo · " : "Propuesta nueva · ") + (x.cat === "persona" ? "personaje" : "Sello del país") }); });
     ["marcas", "disputados", "duplicados", "sinpais", "pastas", "nivel", "eeuu", "irrelevantes"].forEach(k => g[k].rows.forEach(r => { if (!N[r.key] && !seen.has(r.key)) { seen.add(r.key); out.push({ key: r.key, src: "sale", gk: k, why: g[k].t }); } }));
     const L = out.filter(x => !f.src || x.src === f.src), a = L.filter(x => !QSKIP.has(x.key)), b = L.filter(x => QSKIP.has(x.key));
     return { all: out, list: a.concat(b), fresh: a.length, skipped: b.length };
@@ -338,7 +338,7 @@
     const k = it.key;
     if (it.src === "entra") {
       const x = sgByKey[k], r = sugRow(x);
-      return `<div class="qc"><span class="pill warn">${esc(it.why)}</span><h1>${esc(x.es)}</h1><p class="note" style="margin:0">${esc(x.en)} · ${esc(x.pais)} · ${esc(x.sub)}${x.mujer ? " · mujer" : ""}</p>
+      return `<div class="qc"><span class="pill ${x.video ? "ok" : "warn"}">${esc(it.why)}</span><h1>${esc(x.es)}</h1><p class="note" style="margin:0">${esc(x.en)} · ${esc(x.pais)} · ${esc(x.sub)}${x.mujer ? " · mujer" : ""}</p>
       <div class="qm"><div><small>Dificultad estimada</small>${zbar(r)}</div><div><small>Idiomas de Wikipedia</small><b>${x.idiomas}</b></div><div><small>Seguridad</small><b>${esc(x.seguridad)}</b></div></div>
       ${x.avisos.length ? `<div>${x.avisos.map(a => `<span class="bdg bad">${esc(a)}</span>`).join("")}</div>` : ""}<div class="txt" style="max-height:none">${esc(x.por_que)}</div></div>`;
     }
