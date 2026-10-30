@@ -649,6 +649,7 @@ window.AIQ = window.AIQ || {};
     reveal0: -18.8, reveal1: -14.3, reveal2: -12.5, reveal3: -10.1, reveal4: -19.5, reveal5: -14.8, impacto: -25.6, golpe: -15.3, count: -3.0, countEnd: -14.1,
     tick: -11.5, streak: -7.0, streakBreak: -25.5, flag: -14.0, coin: -19.2, jackpot1: -13.2, jackpot2: -13.0, jackpot3: -14.5, barrido: -6.6, goal: -14.5,
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
+    cofreCarga: -21, cofreGolpe: -13.3, cofreNota: -15, cofreFirma: -16,                                  // La apertura del cofre del jefe (js/cofre-fx.js)
     boss: -23.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
     clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
     foco: -11, caja: -8, llama: -10,                                            // Veredicto, jefe y cofre (js/foco.js, js/veredicto.js)
@@ -910,8 +911,49 @@ window.AIQ = window.AIQ || {};
     goal: go(t => { const b = bus("goal", 0.25); sub(b, t, { v: 0.16, f0: 120, f1: 50, dur: 0.2 }); [3, 5, 6].forEach((d, i) => { rhodes(b, deg(d, 60), t + 0.02 + i * 0.08, { v: 0.05, dur: 0.9 }); vibes(b, deg(d + 5, 60), t + 0.02 + i * 0.08, { v: 0.025, dur: 0.6 }); }); [0, 2, 4, 6].forEach((d, i) => rhodes(b, deg(d, 55), t + 0.28 + i * 0.01, { v: 0.035, dur: 1.4 })); pix(b, deg(11, 72), t + 0.3, { v: 0.008 }); A.music.duck(0.7, 1100); }),
     /* cada escalon de botin: unas fichas y dos notas, mas arriba cada vez */
     lootStep: go((t, k = 1) => { const b = bus("lootStep", 0.15); lluvia(b, t, 1 + k, 0.15, 0.3); vibes(b, deg(5 + Math.min(4, k), 64), t, { v: 0.035, dur: 0.5 }); vibes(b, deg(7 + Math.min(4, k), 64), t + 0.05, { v: 0.025, dur: 0.6 }); }),
-    /* v0.3.227: la nota propia de cada cofre de jefe (js/cofre.js, i = su numero): tres notas de vibrafono sobre un grado distinto para que los 17 no suenen igual */
-    cofreNota: go((t, i = 0) => { const b = bus("cofreNota", 0.2), d = 2 + (i % 7); rhodes(b, deg(d, 55), t, { v: 0.04, dur: 1.2 }); [5, 7, 9].forEach((s, k) => vibes(b, deg(d + s, 62), t + 0.03 + k * 0.07, { v: 0.036, dur: 0.7, pan: -0.3 + k * 0.3 })); }),
+    /* v0.4.11: la apertura del cofre del jefe (js/cofre-fx.js). Una sola llamada programa la carga (un tono que sube y tics cada vez mas rapidos, nada de ruido de
+       fondo), el golpe, 3, 5 o 7 notas del cofre y la firma sonora del jefe, todo en la tonalidad de la cancion que suena. Devuelve { cancel } para cuando se salta:
+       cada voz se crea poco antes de sonar (later) y cancel corta las que aun no han sonado. spec = { sn, tier, hit, hs, W, i, red, taps } en segundos */
+    cofreAbrir: spec => {
+      if (!A.audio.sfxOn || document.hidden || !init()) return null;
+      const { sn, tier, hit, hs, W, i = 0, red, taps = [] } = spec, t0 = ctx.currentTime + 0.03, d0 = 2 + (i % 7); let dead = false;
+      const at = (dt, fn) => later(t0 + dt, () => { if (!dead) fn(t0 + dt); }), post = a => hit + (red ? 0 : hs) + a;
+      const car = bus("cofreCarga", 0.12), gol = bus("cofreGolpe", 0.25), not = bus("cofreNota", 0.2), fir = bus("cofreFirma", 0.2);
+      const campana = (to, m, t, v, dur) => { const f = mtof(m), g = ctx.createGain(); [[1, 1], [2.756, 0.32], [5.404, 0.12]].forEach(([r, a]) => { if (f * r > 12000) return; const os = ctx.createOscillator(), ga = ctx.createGain(); os.type = "sine"; os.frequency.value = f * r; ga.gain.value = a; os.connect(ga).connect(g); os.start(t); os.stop(t + dur + 0.1); }); g.connect(to); env(g, t, 0.004, v, dur); };
+      /* carga: un tono que sube hasta el golpe y tics que se aceleran (el cine mudo calla toda la carga) */
+      if (sn !== "mute") {
+        const sw = ctx.createOscillator(), sg = ctx.createGain(); sw.type = "triangle"; sw.frequency.setValueAtTime(mtof(deg(0, 43)), t0); sw.frequency.exponentialRampToValueAtTime(mtof(deg(5, 55)), t0 + hit);
+        sg.gain.setValueAtTime(0.0001, t0); sg.gain.exponentialRampToValueAtTime(0.045, t0 + hit * 0.95); sg.gain.exponentialRampToValueAtTime(0.0001, t0 + hit + 0.03); sw.connect(sg).connect(car); sw.start(t0); sw.stop(t0 + hit + 0.1);
+        for (let tk = 0.2, gap = 0.2; tk < hit - 0.05; tk += gap, gap = Math.max(0.05, gap * 0.82)) { const k = tk; at(k, t => pix(car, deg(10, 72), t, { v: 0.006 + 0.012 * k / hit, dur: 0.04 })); }
+      }
+      /* golpe: grave, chasquido y el primer acorde; 3, 5 o 7 notas del cofre; un golpe mas fuerte cada vez en los escalones altos */
+      at(hit, t => { sub(gol, t, { v: 0.3, f0: 95, f1: 32, dur: 0.55 }); felt(gol, t, { v: 0.12, f: 700, dur: 0.06 }); A.music.duck([0.8, 0.7, 0.6][tier - 1], 2200); });
+      const n = [3, 5, 7][tier - 1], ST = [0, 5, 7, 9, 10, 12, 14];
+      at(post(0.02), t => rhodes(not, deg(d0, 55), t, { v: 0.045, dur: 1.4 }));
+      for (let k = 0; k < n - 1; k++) at(post(0.05 + k * 0.085), t => vibes(not, deg(d0 + ST[k + 1], 62), t, { v: 0.034, dur: k === n - 2 ? 1.6 : 0.7, pan: -0.4 + 0.8 * k / Math.max(1, n - 2) }));
+      W.forEach((w, k) => { if (k) at(post(w), t => { sub(gol, t, { v: 0.22, f0: 80, f1: 36, dur: 0.35 }); felt(gol, t, { v: 0.1, f: 900, dur: 0.05 }); [0, 2, 4, 7].forEach((s, q) => vibes(not, deg(d0 + 7 + s, 64), t + q * 0.05, { v: 0.03, dur: 0.9 })); }); });
+      /* la firma de cada jefe */
+      const F = {
+        relay: () => [0.12, 0.28, 0.44].forEach(d => at(post(d), t => { felt(fir, t, { v: 0.16, f: 400, dur: 0.07 }); pix(fir, deg(d0, 40), t, { v: 0.02, dur: 0.1 }); })),
+        wobble: () => { for (let q = 0; q < 8; q++) at(post(q * 0.08), t => vibes(fir, deg(d0 + 7, 64) + (q % 2 ? 0.35 : -0.35), t, { v: 0.026, dur: 0.3 })); },
+        tect: () => at(post(0), t => sub(fir, t, { v: 0.26, f0: 52, f1: 26, dur: 0.9 })),
+        focus: () => at(post(0.02), t => { for (let q = 0; q < 6; q++) vibes(fir, deg(d0 + 9 + q, 70), t + q * 0.04, { v: 0.022, dur: 0.5 }); }),
+        thunder: () => W.forEach((w, k) => at(post(w), t => { sub(fir, t, { v: 0.3, f0: 62 - k * 5, f1: 26, dur: 1.0 }); felt(fir, t, { v: 0.14, f: 1200, dur: 0.05 }); })),
+        lull: () => { for (let q = 0; q < 6; q++) at(q * hit / 6, t => vibes(car, deg(d0 + [0, 2, 4, 2, 4, 7][q], 64), t, { v: 0.02, dur: 0.8 })); at(hit, t => campana(fir, deg(d0 + 7, 66), t, 0.06, 1.6)); },
+        alarm: () => { for (let q = 0; q * 0.42 < hit - 0.1; q++) { const k = q * 0.42; at(k, t => campana(car, deg(d0 + 7, 72), t, 0.03 + 0.03 * k / hit, 0.4)); } at(hit, t => campana(fir, deg(d0 + 9, 74), t, 0.07, 1.4)); },
+        quake: () => { for (let q = 0; q * 0.22 < hit; q++) { const k = q * 0.22; at(k, t => sub(car, t, { v: 0.05 + 0.18 * k / hit, f0: 46, f1: 36, dur: 0.18 })); } for (let q = 0; q < 6; q++) at(post(q * 0.07), t => felt(fir, t, { v: 0.12, f: 600, dur: 0.05 })); },
+        glass: () => [0, 1, 2, 3, 4].forEach(q => at(post(0.02 + q * 0.07), t => vibes(fir, deg(d0 + 12 + q * 2, 74), t, { v: 0.02, dur: 0.35 }))),
+        cards: () => taps.slice(0, 14).forEach(p => { at(post(p.t), t => rec(fir, "carta", t, { lp: 3500, v: 0.14, len: 0.1 })); at(post(p.t + p.l), t => rec(fir, "carta", t, { lp: 2400, v: 0.16, len: 0.12 })); }),
+        bloop: () => [0.35, 0.5, 0.62, 0.75, 0.55].forEach(d => at(post(d), t => sub(fir, t, { v: 0.12, f0: 420, f1: 150, dur: 0.18 }))),
+        pad: () => at(0, t => { rhodes(car, deg(d0, 48), t, { v: 0.03, dur: hit + 0.6, lp: 900 }); rhodes(car, deg(d0 + 2, 48), t, { v: 0.022, dur: hit + 0.6, lp: 900 }); }),
+        whoosh: () => at(post(0.1), t => { for (let q = 0; q < 8; q++) { vibes(fir, deg(d0 + 5 + q, 60), t + q * 0.04, { v: 0.02, dur: 0.5, pan: -0.7 + q * 0.2 }); vibes(fir, deg(d0 + 12 - q, 66), t + 0.5 + q * 0.04, { v: 0.018, dur: 0.5, pan: 0.7 - q * 0.2 }); } }),
+        buzz: () => { for (let q = 0; q < 7; q++) at(q * hit / 7, t => pix(car, deg(d0 + 10, 64), t, { v: 0.012, dur: 0.06 })); },
+        bits: () => [0, 2, 4, 7, 4, 2, 0].forEach((s, q) => at(post(0.05 + q * 0.05), t => pix(fir, deg(d0 + 10 + s, 72), t, { v: 0.02, dur: 0.08 }))),
+        mute: () => at(post(0.12), t => { [0, 2, 4, 7, 9].forEach((s, q) => vibes(fir, deg(d0 + 7 + s, 64), t + q * 0.09, { v: 0.036, dur: 1.2 })); })
+      };
+      if (F[sn]) F[sn]();
+      return { cancel: () => { dead = true; } };
+    },
     ach: go(t => { const b = bus("ach", 0.3); sub(b, t, { v: 0.15, f0: 110, f1: 50, dur: 0.25 }); [0, 2, 4, 6, 8].forEach((d, i) => rhodes(b, deg(d, 55), t + i * 0.015, { v: 0.045, dur: 1.5, pan: (i - 2) * 0.2 })); [5, 7, 9, 10].forEach((d, i) => vibes(b, deg(d, 64), t + 0.1 + i * 0.08, { v: 0.04, dur: 0.9 })); [10, 12].forEach((d, i) => pix(b, deg(d, 72), t + 0.45 + i * 0.07, { v: 0.008 })); A.music.duck(0.7, 1400); }),
     buy: go(t => { const b = bus("buy", 0.15); rec(b, "mano", t, { lp: 2400, v: 0.55, len: 0.35 }); [0, 2, 4].forEach((d, i) => vibes(b, deg(d + 5, 60), t + 0.05 + i * 0.05, { v: 0.035, dur: 0.6 })); }),
     sell: go(t => { const b = bus("sell", 0.12); rec(b, "chip", t, { lp: 2600, v: 0.5 }); vibes(b, deg(6, 60), t + 0.02, { v: 0.03, dur: 0.4 }); vibes(b, deg(4, 60), t + 0.1, { v: 0.028, dur: 0.5 }); }),

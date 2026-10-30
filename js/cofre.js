@@ -206,11 +206,11 @@ const BOSSES = [
   function Chest(cv, key) { this.cv = cv; this.P = of(key).P; this.f = 0; this.luz = 0.25; this.fl = 0; this.draw(); }
   Chest.prototype.draw = function () { paint(this.cv, render(this.P, this.f, this.luz), this.fl); };
   Chest.prototype.set = function (o) { Object.assign(this, o); this.draw(); };
-  Chest.prototype.tween = function (k, to, ms) { const me = this, from = me[k], t0 = performance.now(); return new Promise(res => { (function step(now) { const q = Math.min(1, (now - t0) / ms); me[k] = from + (to - from) * q; me.draw(); if (q < 1 && me.cv.isConnected) requestAnimationFrame(step); else res(); })(t0); }); };
 
   /* el cofre como imagen suelta (el chip del Campamento) */
   function url(key, f, luz) { const cv = document.createElement("canvas"); paint(cv, render(of(key).P, f, luz == null ? 0.25 : luz), 0); return cv.toDataURL("image/png"); }
 
+  const SKIP = "Saltar|Skip|Passer|Pular|Überspringen|Salta||跳过|건너뛰기|スキップ|Пропустить|Pomiń";
   const PLAQUE = "Cofre de «{t}»|Chest of “{t}”|Coffre de « {t} »|Baú de “{t}”|Truhe von „{t}“|Forziere di «{t}»||“{t}”的宝箱|‘{t}’의 보물상자|「{t}」の宝箱|Сундук «{t}»|Skrzynia „{t}”";
 
   /* el telon del cofre: el veredicto se retira y queda el cofre solo sobre la mesa. o = { key, tag, name, tier (1 justa, 2 holgada, 3 aplastante),
@@ -225,9 +225,10 @@ const BOSSES = [
       <div class="gx-vd-dealer cf-dealer" id="vdDealer"></div></div>`, "tablewrap");
     const cv = $("cfCv"), ch = new Chest(cv, key), hand = $("cfHand"), pool = $("cfPool"), tel = $("cfTel");
     if (D && D.on) D.anchor($("vdDealer"));
+    if (A.cofreFx) A.cofreFx.warm();
     const fit = () => tel.style.setProperty("--s", Math.max(3, Math.min(8, Math.floor((innerHeight - 300) / 64), Math.floor(innerWidth * 0.46 / 64))));
     fit(); const onR = () => { if (cv.isConnected) fit(); else removeEventListener("resize", onR); }; addEventListener("resize", onR);
-    const st = { busy: false, stuck: !!o.stuck, done: false }, alive = () => cv.isConnected;
+    const st = { busy: false, stuck: !!o.stuck, done: false, opening: false }, alive = () => cv.isConnected;
     const tier = Math.max(1, Math.min(3, o.tier | 0 || 1)), shake = n => { if (C.jpShake) C.jpShake(n); };
 
     async function stuckSeq() {
@@ -241,24 +242,29 @@ const BOSSES = [
       await wait(2200); if (!alive()) return;
       hand.animate([{ transform: "scaleY(-1) translateY(0)", opacity: 1 }, { transform: "scaleY(-1) translateY(120%)", opacity: 0 }], { duration: 260, easing: "ease-in", fill: "forwards" }); await wait(300);
     }
-    async function openSeq() {
-      A.sfx.card(); shake(1); ch.set({ fl: 0.9 }); ch.tween("fl", 0, 180); await wait(280); if (!alive()) return;
-      ch.set({ f: 1, luz: 1 }); A.sfx.reveal(); pool.style.opacity = 0.25; await wait(380); if (!alive()) return;
-      ch.set({ f: 2, luz: 0.5 }); await wait(90); ch.set({ f: 3, luz: 0.6 }); await wait(90); ch.set({ f: 4, luz: 0.7 }); await wait(70); if (!alive()) return;
-      ch.set({ f: 6, luz: 0.8 }); A.sfx.stamp(); A.sfx.jackpot(tier); if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(tier); shake(tier);
-      pool.style.opacity = 0.8; ch.tween("luz", 1.25, 500); ch.set({ fl: 0.7 }); ch.tween("fl", 0, 260); await wait(110); ch.set({ f: 5 });
-      setTimeout(() => { if (A.sfx.cofreNota) A.sfx.cofreNota(of(key).i); }, 260);
-      await wait(350);
-      for (let k = 1; k < tier; k++) { if (!alive()) return; shake(Math.min(3, k + 1)); await ch.tween("luz", 0.9, 130); await ch.tween("luz", 1.3, 190); await wait(110); }
-      await wait(700);
+    /* la apertura (js/cofre-fx.js): carga, golpe, estallido con la firma del jefe, pico segun el margen y remate. Pulsar durante la apertura la salta;
+       al acabar el cofre queda abierto y espera tu pulsacion (Enter, A o clic) para pasar al Campamento */
+    let fx = null, hap = [];
+    const lab = txt => { const b = $("cfGo"), s = b && b.querySelector("span"); if (s) s.textContent = txt; };
+    function finish() { hap.forEach(clearTimeout); hap = []; st.opening = false; st.done = true; st.busy = false; lab(A.T("Al campamento", "To camp")); const b = $("cfGo"); if (b) b.focus({ preventScroll: true }); }
+    function openSeq() {
+      pool.style.opacity = 0;
+      try {
+        fx = A.cofreFx.create({ tel, slot: $("cfSlot"), canvas: cv, key, tier, onEnd: finish });
+        st.opening = true; lab(A.pick6(SKIP)); fx.play();
+        fx.T.W.forEach((w, k) => hap.push(setTimeout(() => { if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(Math.min(3, k + 1)); }, (fx.T.hit + fx.T.hs + w) * 1000)));
+        return true;
+      } catch (e) { if (fx) fx.dispose(); fx = null; st.opening = false; return false; }
     }
     async function go() {
-      if (st.busy || st.done || !alive()) return; st.busy = true;
+      if (st.opening) { if (fx) fx.skip(); return; }
+      if (st.done) { if (fx) fx.dispose(); if (alive()) o.then(); return; }
+      if (st.busy || !alive()) return; st.busy = true;
       if (st.stuck) { st.stuck = false; await stuckSeq(); st.busy = false; const b = $("cfGo"); if (b) b.focus({ preventScroll: true }); return; }
-      await openSeq(); if (!alive()) return; st.done = true;
-      o.then();
+      if (!openSeq()) { st.busy = false; st.done = true; o.then(); }
     }
     $("cfGo").onclick = go;
+    tel.addEventListener("click", e => { if (st.opening && !e.target.closest("button")) go(); });
   }
-  A.cofre = { open, has: key => !!BY[key], url, paint: (cv, key, f, luz) => paint(cv, render(of(key).P, f || 0, luz == null ? 0.25 : luz), 0) };
+  A.cofre = { GL, render, of, BOSSES, open, has: key => !!BY[key], url, paint: (cv, key, f, luz) => paint(cv, render(of(key).P, f || 0, luz == null ? 0.25 : luz), 0) };
 })();
