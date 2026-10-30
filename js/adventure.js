@@ -1632,7 +1632,7 @@ window.AIQ = window.AIQ || {};
      despues, como siempre, A.fitK baja la escala de la mesa. Lo llama A.fitK antes de medir */
   A.adv.supFit = t => {
     const sup = t.querySelector(":scope > .tb-sup"), offs = t.querySelector(".offers"), padB = parseFloat(getComputedStyle(t).paddingBottom) || 0;
-    const over = () => Math.max(0, ...[...t.children].map(c => (c.offsetParent === t ? c.offsetTop : c.offsetTop - t.offsetTop) + c.offsetHeight)) + padB > t.clientHeight + 1 || (!!sup && sup.offsetHeight > 160);   // 160: lo que mide la Barra en espanol + un poco; en ventanas altas, el idioma largo tampoco le quita alto a las cartas
+    const over = () => Math.max(0, ...[...t.children].map(c => (c.offsetParent === t ? c.offsetTop : c.offsetTop - t.offsetTop) + c.offsetHeight)) + padB > t.clientHeight + 1 || (!!sup && sup.offsetHeight > 170);   // 170 (antes 160: los botones de la Barra miden 32 px y comparten fila): lo que mide la Barra en espanol + un poco; en ventanas altas, el idioma largo tampoco le quita alto a las cartas
     const lv = ["sf1", "sf2", "sf3"], cv = ["cp1", "cp2"];
     if (sup) sup.classList.remove(...lv); if (offs) offs.classList.remove(...cv);
     if (!over()) return;

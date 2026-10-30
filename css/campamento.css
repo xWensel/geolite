@@ -44,7 +44,7 @@
 .rd.bar .rd-n.next .rd-ic .ic { width: 48px; height: 48px; opacity: 1; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
 .rd.bar .rd-n.next.boss .rd-ic { width: 56px; height: 56px; background: radial-gradient(circle at 50% 38%, #e0566a, #8a2234 72%); box-shadow: 0 0 0 2px var(--ink), inset 0 0 0 3px #fe5f55, 0 4px 0 rgba(0, 0, 0, .4), 0 0 18px 4px rgba(254, 95, 85, .6); }
 .rd.bar .rd-n.next.boss .rd-ic .ic { width: 48px; height: 48px; }
-.rd.bar .rd-n.next::after { content: ""; position: absolute; left: 50%; bottom: calc(100% - 3px); width: 18px; height: 18px; margin-left: -9px; image-rendering: pixelated; will-change: transform;
+.rd.bar .rd-n.next .rd-ic::after { content: ""; position: absolute; left: 50%; bottom: calc(100% - 3px); width: 18px; height: 18px; margin-left: -9px; image-rendering: pixelated; will-change: transform;
   background: url("../assets/icons/s_pin.webp") center / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .55)); animation: rd-pin 1.4s ease-in-out infinite; }
 @keyframes rd-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
@@ -122,7 +122,7 @@
 html.reduce-motion .lg-halo::after { animation: none; }
 
 /* reducir movimiento (Ajustes o el sistema): sin chincheta que bota, ficha que gira ni brillo que late */
-html.reduce-motion .rd.bar .rd-n.next::after { animation: none; }
+html.reduce-motion .rd.bar .rd-n.next .rd-ic::after { animation: none; }
 
 .rd.bar .rd-k { font-size: 18px; }
 @media (max-width: 700px) { .rd.plan { grid-template-columns: minmax(0, 1fr); } }

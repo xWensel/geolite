@@ -1100,3 +1100,22 @@ html.reduce-motion .bq-screen > .gx-grid, html.reduce-motion .pf-screen > .gx-gr
 
 .gx-vd-ticket .gx-lead-row span.nokm i { display: none; }
 .gx-vd-ticket .gx-lead-row span.wrap { white-space: normal; text-wrap: balance; }
+
+/* ---- la Barra, una sola rejilla (30-oct): las tres placas miden lo mismo y comparten filas -> titulo arriba, texto en medio y TODOS los botones y precios
+   (Rascar, 1+/2+/3+, el precio del Cafe doble, Activo) en la fila de abajo, a la misma altura y a la misma distancia del borde. Mismo relleno en las tres (el del juego de casino, que lleva cenefa). */
+.gx-camp .tb-sup { align-items: stretch; }
+.gx-camp .sup { align-content: stretch; grid-template-rows: auto minmax(0, 1fr) auto; padding: 20px 12px 18px; }
+.gx-camp .sup > .sp-p, .gx-camp .sup > .sp-on { grid-column: 1 / -1; grid-row: 3; justify-self: end; align-self: end; margin-top: 4px; }
+.gx-camp .sup > .bt-pick { grid-row: 3; align-self: end; margin-top: 4px; }
+.gx-camp .sup > .sp-on { display: inline-flex; align-items: center; min-height: 28px; }
+.gx-camp .sup > .bt-res { grid-column: 1 / -1; grid-row: 3; justify-self: end; align-self: end; margin-top: 4px; }
+.gx-camp .sup .bt-c, .gx-camp .sup .sp-p { box-sizing: border-box; height: 32px; }
+.gx-camp .sup .bt-c .sp-p, .gx-camp .sup .bt-n span { height: auto; }
+
+/* ---- el contador de doblones (30-oct): el lienzo de los rodillos mide 40 px (20 celdas de 2) y la caja solo dejaba 38 dentro de su marco (7 px por lado): las cifras pegaban arriba y abajo.
+   Caja de 60 px (marco 7 + 6 de aire por lado), relleno simetrico (sin el 2 px de abajo) y el icono de 32 px centrado en la misma linea que las cifras. */
+.gx-camp .tb-coins { height: 60px; padding: 0 20px 0 16px; gap: 10px; box-sizing: border-box; }
+.gx-camp .tb-coins .ic { flex: none; }
+.gx-camp .tb-coins .rd-cv { align-self: center; }
+/* si los botones de una placa no caben en una fila (ruso: Rojo / Negro / Verde + precio), pasan a una segunda en vez de salirse por la izquierda; en los demas idiomas sigue siendo una sola */
+.gx-camp .sup > .bt-pick { flex-wrap: wrap; row-gap: 4px; max-width: 100%; }
