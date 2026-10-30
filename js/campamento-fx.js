@@ -178,7 +178,7 @@ window.AIQ = window.AIQ || {};
     for (let k = 0; k < 10; k++) for (let y = 0; y < 16; y++) for (let x = 0; x < 7; x++) { const gy = y - 2; t[(k * 16 + y) * 7 + x] = on(k, x, gy) ? 1 : on(k, x, gy - 1) ? 2 : 0; }
     return t;
   })();
-  const LAT = ["#3c240a", "#6e3414", "#c46a1b", "#f5a623", "#fdd742"], INK = "#1d0a3d", SOMBRA = "rgba(5, 12, 8, .55)";
+  const LAT = ["#3c240a", "#6e3414", "#c46a1b", "#f5a623", "#fdd742"], INK = "#12062a", SOMBRA = "rgba(5, 12, 8, .55)";
   /* Extrema: 110 ms por unidad, tope de 2 s, golpe al asentarse 0,3, tic a 0,9 */
   const RD = { paso: 0.11, total: 2.0, rebote: 0.3, tic: 0.9 };
   const R = { el: null, b: null, cv: null, g: null, mo: null, key: null, shown: 0, from: 0, target: 0, steps: 0, st: 0, dur: 0.08, sign: 1, tics: 0, settle: -1, sdir: 1, glint: 0, raf: 0, last: 0, n: 2, cel: 2, z: 1 };
@@ -206,7 +206,7 @@ window.AIQ = window.AIQ || {};
       } else {
         const di = n - 1 - Math.floor(x / 10), col = m - 2, yy = y - 8.5, Rr = 26, ang = Math.asin(Math.max(-1, Math.min(1, yy / Rr)));
         const row = ((Math.floor(posDe(v, di) * 16 + ang * Rr + 7.5) % 160) + 160) % 160, t = TIRA[row * 7 + col];
-        let k = 1.2 + 2.4 * Math.cos(ang * 2.6); if (yy < -5) k -= 1;
+        let k = 1.6 + 2.4 * Math.cos(ang * 2.6); if (yy < -5) k -= 0.7;
         let li = Math.max(0, Math.min(4, Math.round(k)));
         if (t === 2) li = Math.min(4, li + 1);
         c = LAT[li];
@@ -223,7 +223,7 @@ window.AIQ = window.AIQ || {};
     const W = (AW + 1) * cel, Hh = (AH + 2) * cel;
     if (cv.width !== W || cv.height !== Hh) { cv.width = W; cv.height = Hh; }
     cv.style.width = W / (z * d) + "px"; cv.style.height = Hh / (z * d) + "px";
-    pintaRodillos(0);
+    pintaRodillos(0); if (saldoOn()) { S.sig = ""; pintaSaldo(); }
   }
   const ticRodillo = i => son("camTic", R.sign, i, RD.tic);
   function bucleRodillos(now) {
@@ -297,7 +297,10 @@ window.AIQ = window.AIQ || {};
     const r = tb.getBoundingClientRect(), W = r.width, Hh = r.height; if (!W || !Hh) return;
     const k = Math.min(innerWidth / 1920, innerHeight / 1080) || 1, x01 = Math.min(1, S.m / 50), e = x01 * x01 * (3 - 2 * x01);
     const Z = (2600 - 1950 * e) * k, lx = (SL.lx * 1920 + S.sw * 30) * k + (innerWidth - 1920 * k) / 2 - r.left, ly = (SL.ly * 1080 + S.sw * 6) * k + (innerHeight - 1080 * k) / 2 - r.top;
-    const sig = [Math.round(W), Math.round(Hh), Math.round(lx), Math.round(ly), Math.round(Z), e.toFixed(3), f].join();
+    /* el contador de doblones es lo unico que hay que LEER en la esquina mas lejana de la lampara: su laton llegaba al 20 % y los numeros se perdian.
+       La capa de luz se aclara en una elipse suave alrededor del contador (sin cantos: una caja encendida seria un cuadrado) */
+    const cr = rodillosOn() && R.el.getBoundingClientRect(), ck = cr && cr.width ? [cr.left, cr.top, cr.width, cr.height].map(Math.round).join("x") : "";
+    const sig = [Math.round(W), Math.round(Hh), Math.round(lx), Math.round(ly), Math.round(Z), e.toFixed(3), f, ck].join();
     if (sig === S.sig) return; S.sig = sig;
     const base = 0.86 + (0.74 - 0.86) * e, gain = (0.14 + (0.5 - 0.14) * e) * (0.6 + 0.4 * SL.charco), cold = [0.95, 1, 1.07], warm = [1.09, 1, 0.84], zt = zoomDe(tb);
     /* F: cuanto multiplica la luz cada canal (la maqueta); aqui, en mezcla normal: la sombra (1 - F) en negro, lo que pasa de 1 en luz calida y el
@@ -310,6 +313,10 @@ window.AIQ = window.AIQ || {};
       return `rgba(${rgb.join(", ")}, ${al.toFixed(3)}) ${(dd / zt).toFixed(1)}px`;
     });
     const lr = S.mul.getBoundingClientRect(), zl = zoomDe(S.mul) || 1;
+    if (ck) {
+      const rx = (cr.width / 2 + 70) / zl, ry = (cr.height / 2 + 55) / zl, mx = (cr.left + cr.width / 2 - lr.left) / zl, my = (cr.top + cr.height / 2 - lr.top) / zl;
+      S.mul.style.webkitMaskImage = S.mul.style.maskImage = `radial-gradient(ellipse ${rx.toFixed(1)}px ${ry.toFixed(1)}px at ${mx.toFixed(1)}px ${my.toFixed(1)}px, transparent 0, transparent 78%, #000 100%)`;
+    } else S.mul.style.webkitMaskImage = S.mul.style.maskImage = "";
     S.mul.style.background = `radial-gradient(circle at ${((lx + r.left - lr.left) / zl).toFixed(1)}px ${((ly + r.top - lr.top) / zl).toFixed(1)}px, ${stops.map(x => x.replace(/([\d.]+)px$/, (m0, v) => (v * zt / zl).toFixed(1) + "px")).join(", ")})`;
     /* el laton de los marcos: bandas de brillo alrededor del punto bajo la lampara (pixel art: cuatro escalones), solo con la lampara baja y calida */
     const kb = SL.brillo * e * f;

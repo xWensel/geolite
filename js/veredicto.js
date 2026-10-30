@@ -75,10 +75,13 @@ window.AIQ = window.AIQ || {};
     rodar(v, t, dur = 0.34, stag = 0.03) {
       const s = String(Math.max(0, Math.floor(v))).padStart(this.N, "0").slice(-this.N); this.anim = [];
       for (let i = 0; i < this.N; i++) {
-        const from = this.pos[i], to = +s[i]; let dist = (to - ((Math.round(from) % 10) + 10) % 10 + 10) % 10;
-        if (dist === 0 && v !== this.val && i >= this.N - 2) dist = 10;                       // las cifras bajas dan la vuelta aunque coincidan
+        /* from puede ser fraccionario (un rodillo a medio giro cuando llega la siguiente cuenta): el recorrido se mide desde donde esta de verdad, para que
+           acabe EXACTO en su cifra y no se quede entre dos (antes se redondeaba la salida pero no la llegada: los rodillos de la izquierda se quedaban pillados) */
+        const from = this.pos[i], to = +s[i]; let dist = (((to - from) % 10) + 10) % 10;
+        if (dist > 9.5) dist -= 10;                                                           // ya se paso de su cifra por poco: vuelve en vez de dar la vuelta entera
+        if (Math.abs(dist) < 0.001) dist = v !== this.val && i >= this.N - 2 ? 10 : 0;        // las cifras bajas dan la vuelta aunque coincidan
         const ii = this.N - 1 - i;
-        this.anim[i] = { from, d: dist, t0: t + ii * stag, t1: t + ii * stag + dur * (0.75 + 0.25 * Math.min(1, dist / 6)), done: dist === 0 };
+        this.anim[i] = { from, d: dist, t0: t + ii * stag, t1: t + ii * stag + dur * (0.75 + 0.25 * Math.min(1, Math.abs(dist) / 6)), done: dist === 0 };
       }
       this.val = v;
     }
@@ -86,7 +89,7 @@ window.AIQ = window.AIQ || {};
       let clacs = 0;
       for (let i = 0; i < this.N; i++) {
         const a = this.anim[i]; if (!a) continue;
-        if (t >= a.t1) { if (!a.done) { a.done = true; clacs++; } this.pos[i] = (a.from + a.d) % 10; a.e = t - a.t1; continue; }
+        if (t >= a.t1) { if (!a.done) { a.done = true; clacs++; } this.pos[i] = (((a.from + a.d) % 10) + 10) % 10; a.e = t - a.t1; continue; }
         if (t < a.t0) continue;
         const u = (t - a.t0) / (a.t1 - a.t0); this.pos[i] = a.from + a.d * easeOut(u); a.v = a.d * 3 * Math.pow(1 - u, 2) / (a.t1 - a.t0);
       }

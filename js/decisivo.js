@@ -23,15 +23,32 @@ window.AIQ = window.AIQ || {};
     for (const r of rs) if (r && r.width > 0 && r.height > 0) d += `M${r.left.toFixed(1)} ${r.top.toFixed(1)}H${r.right.toFixed(1)}V${r.bottom.toFixed(1)}H${r.left.toFixed(1)}Z`;
     return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'><path fill-rule='evenodd' d='${d}'/></svg>`)}")`;
   }
+  /* piezas con forma propia (dados, cubiletes, ficha, casilla): en vez de recortar un hueco cuadrado en el velo (se veia un cuadrado sin apagar alrededor de
+     cada dado), se apaga TODO lo demas: los hermanos de cada pieza y de sus ancestros hasta la capa del juego, uno a uno; la pieza conserva su color y su
+     silueta exacta. Si alguna pieza es un rectangulo virtual (la cuna de la rueda, el arco de la moneda), vale el velo con huecos de siempre */
+  const apagables = (ov, els) => {
+    const ruta = new Set(); els.forEach(k => { for (let n = k; n && n !== ov; n = n.parentElement) ruta.add(n); });
+    const fuera = []; const anda = n => { for (const c of n.children) { if (c.classList.contains("dcv")) continue; if (!ruta.has(c)) fuera.push(c); else if (!els.includes(c)) anda(c); } };
+    anda(ov); return fuera;
+  };
   function vigila(ov, o = {}) {
     const tier = Math.max(1, Math.min(3, o.tier | 0 || 1)), keep = typeof o.keep === "function" ? o.keep : () => o.keep || [];
-    let el = null, luz = [], on = false, done = false, raf = 0, t0 = 0, last = 0, des = 0, sig = "", out = false, tOut = 0, win = W;
+    let el = null, luz = [], on = false, done = false, raf = 0, t0 = 0, last = 0, des = 0, sig = "", out = false, tOut = 0, win = W, lift = false;
+    const tocados = new Map();                                              // elemento -> su filtro de antes (modo piezas con silueta)
+    const apaga = (x, f) => { if (!tocados.has(x)) tocados.set(x, x.style.filter); if (x.style.filter !== f) x.style.filter = f; };
     const pinta = now => {
-      raf = 0; if (!el || !el.isConnected || !ov.isConnected) { quita(); return; }
+      raf = 0; if (!ov.isConnected || (!lift && (!el || !el.isConnected))) { quita(); return; }
       const t = (now - t0) / 1000;
       if (!out) { const q = Math.min(1, t / win); des = Math.min(1, q * 6) * GRIS * NIVEL[tier - 1]; }
       else des *= Math.pow(0.0005, Math.min(0.05, (now - (last || now)) / 1000));
       last = now;
+      if (lift) {
+        const ks = keep().filter(k => k && k.nodeType === 1 && ov.contains(k) && k.getBoundingClientRect().width > 0);
+        const f = des < 0.005 ? "" : `grayscale(${des.toFixed(3)}) brightness(${(1 - 0.45 * des).toFixed(3)})`;
+        apagables(ov, ks).forEach(x => apaga(x, f)); tocados.forEach((v, x) => { if (!x.isConnected) tocados.delete(x); });
+        if (out && des < 0.01) { quita(); return; }
+        raf = requestAnimationFrame(pinta); return;
+      }
       const rs = keep().map(rect).filter(Boolean), s = rs.map(r => [r.left, r.top, r.width, r.height].map(Math.round).join(",")).join(";") + "|" + innerWidth + "x" + innerHeight;
       if (s !== sig) {
         sig = s; const m = mascara(rs); el.style.webkitMaskImage = el.style.maskImage = m;
@@ -41,11 +58,12 @@ window.AIQ = window.AIQ || {};
       if (out && des < 0.01) { quita(); return; }
       raf = requestAnimationFrame(pinta);
     };
-    const quita = () => { if (raf) cancelAnimationFrame(raf); raf = 0; if (el) el.remove(); luz.forEach(x => x.remove()); el = null; luz = []; };
+    const quita = () => { if (raf) cancelAnimationFrame(raf); raf = 0; tocados.forEach((v, x) => { x.style.filter = v; }); tocados.clear(); if (el) el.remove(); luz.forEach(x => x.remove()); el = null; luz = []; };
     const ya = (ventana) => {
       if (on || done || quieto() || saltando() || !ov.isConnected) return; on = true;
       win = Math.max(0.15, Math.min(W, ventana || W));
-      el = document.createElement("i"); el.className = "dcv"; el.setAttribute("aria-hidden", "true"); ov.appendChild(el);
+      const k0 = keep(); lift = k0.length > 0 && k0.every(k => k && k.nodeType === 1);
+      if (!lift) { el = document.createElement("i"); el.className = "dcv"; el.setAttribute("aria-hidden", "true"); ov.appendChild(el); }
       t0 = performance.now(); last = 0; raf = requestAnimationFrame(pinta);
       try { if (A.sfx && A.sfx.decisivo) A.sfx.decisivo(win, tier, TENSION); } catch (e) { /* sin audio */ }
       if (tier === 3 && A.haptic && A.haptic.dual) A.haptic.dual(0.3, 0, Math.round(win * 1000));

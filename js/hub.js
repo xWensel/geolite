@@ -245,7 +245,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ Aventura */
   let advSel = { deck: "explorer", asc: 0 };
-  const STAKE_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_boss"];
+  const STAKE_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_purple"];
   /* tanda 17: cada Ascension tiene nombre y una linea (A.adv.ascInfo, js/adventure.js); ascTexts: texto plano de los globos */
   const ascTexts = () => [T("Estándar", "Standard")].concat([1, 2, 3, 4, 5].map(i => { const x = A.adv.ascInfo(i); return `«${x.n}»: ${x.d}${x.k ? " " + x.k : ""}`; }));
   /* v0.3.47: Naipe de gala, "la mesa de salida" (mesa de diseño, paso 3). 12 columnas: la mesa de fieltro (1-8) con las cuatro barajas como naipes

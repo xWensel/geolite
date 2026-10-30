@@ -1682,7 +1682,7 @@ window.AIQ = window.AIQ || {};
      duerme. El tamano llega por ResizeObserver en pixeles reales: nada se mide por fotograma. Con "reducir movimiento", un brillo quieto (salvo
      en la secuencia del cofre) */
   const GLINT = `<span class="lg-halo"></span><span class="lg-clip"><canvas></canvas></span>`;
-  const ASC_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_boss"];   // la ficha de cada Ascension (como en js/hub.js)
+  const ASC_CHIP = ["blank_small", "blank_teal", "blank_gold", "blank_big", "blank_boss", "blank_purple"];   // la ficha de cada Ascension (como en js/hub.js)
   const Gold = (() => {
     const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], WH = [255, 255, 255], G0 = [255, 246, 200], G1 = [255, 217, 90], PER = 3.6, DUR = 0.9;
     const live = new Set(); let raf = 0, tm = 0, last = 0;
@@ -2376,7 +2376,7 @@ window.AIQ = window.AIQ || {};
     const P = COIN_REEL[kind].plan(END, edge), DUR = Math.max(P.L.t, P.total || 0);
     const frameAt = deg => ((Math.round((sg * deg) / (360 / NF)) % NF) + NF) % NF, put = i => { spr.style.backgroundPositionX = -i * fw + "px"; };
     put(0); if (P.sky && !sh.reduced) arc.style.visibility = shadow.style.visibility = "hidden";   // el que cae del cielo no se ve antes de soltarlo
-    const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => { const a = ov.querySelector(".cn-air").getBoundingClientRect(), c = arc.getBoundingClientRect(); return [new DOMRect(c.left - 6, a.top, c.width + 12, a.height), ov.querySelector(".rou-pick")]; } }) : null;   // Probador: el instante decisivo
+    const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => [arc, ov.querySelector(".rou-pick")] }) : null;   // Probador: el instante decisivo
     const reveal = () => {
       if (sh.revealed) return; sh.revealed = true; if (dec) dec.fin(); sh.outcome(); put(frameAt(END)); ov.classList.remove("spin"); ov.classList.add("done", "is-coin", edge ? "is-edge" : win ? "is-win" : "is-lose");
       if (A.haptic) A.haptic([edge ? 60 : 30]);

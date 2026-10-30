@@ -25,7 +25,7 @@
     mint: ramp("8fffbb", "54ff99", "28d86e", "199c4e", "115e30"), amber: ramp("ffd58d", "ffbf52", "e59f27", "a57119", "644511"),
   };
   const CREAM = ramp("ffffff", "fff4dc", "eedcb8", "c9aa84", "8a6a58"), INK = hex("1d0a3d");
-  const COL = { blank_big: "orange", blank_boss: "red", blank_gold: "gold", blank_small: "blue", blank_teal: "teal", blank_green: "mint",
+  const COL = { blank_big: "orange", blank_boss: "red", blank_gold: "gold", blank_small: "blue", blank_teal: "teal", blank_green: "mint", blank_purple: "purple",
     chip_b: "blue", chip_g: "green", chip_k: "dark", chip_p: "purple", chip_r: "red", chip_o: "amber" };
 
   /* ---------- mascaras (Uint8Array de N x N) ---------- */
