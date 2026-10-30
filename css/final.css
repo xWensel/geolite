@@ -47,12 +47,15 @@
 .fin-cs svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .6)); }
 .fin-thanks .fin-n { font-size: calc(81px * var(--dll, 1)); color: var(--brass-lt); }
 
-/* las dedicatorias: la familia del autor con su A al cubo, y su beta tester; el rodillo se para en la ultima */
+/* las dedicatorias: la familia del autor con su A al cubo, y los agradecimientos a los amigos que probaron el juego; el rodillo se para en la ultima */
+.fin-thx { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; gap: 6px 64px; margin-top: 2px; }
+.fin-thx .fin-n { font-size: calc(36px * var(--dll, 1)); }
+.fin-thx .fin-n + .fin-n { margin-top: 0; }
 .fin-fam { display: flex; justify-content: center; gap: 56px; margin-top: 6px; }
 .fin-cube { margin: 30px 0 0; font-family: var(--sans); font-size: 108px; line-height: .8; color: var(--brass); letter-spacing: .02em;
   text-shadow: 0 6px 0 #6b3f0a, 0 12px 0 #000, 0 0 40px rgba(248, 180, 73, .35); }
 .fin-cube sup { position: relative; top: -.42em; margin-left: 2px; font-size: 54px; line-height: 0; vertical-align: baseline; color: var(--brass-lt); }
-.fin-roll section.fin-ded:not(.fin-last) { padding-bottom: 64px; }
+.fin-roll section.fin-ded:not(.fin-last) { padding-bottom: 36px; }
 .fin-ded .fin-pip { margin-bottom: 20px; }
 .fin-cast { display: grid; gap: 14px; max-width: 560px; margin: 24px auto 0; }
 .fin-row { display: flex; align-items: center; gap: 14px; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1; }
@@ -92,6 +95,10 @@
   font-size: calc(108px * var(--dll, 1)); line-height: .8; color: var(--brass); letter-spacing: .04em; text-shadow: 0 6px 0 #6b3f0a, 0 12px 0 #000, 0 0 40px rgba(248, 180, 73, .35); }
 .fin-end.fin .fin-word { animation: fin-stamp .42s cubic-bezier(.5, 0, .8, .5) forwards; }
 @keyframes fin-stamp { 0% { opacity: 0; transform: translateX(-50%) scale(2.6); } 70% { opacity: 1; transform: translateX(-50%) scale(.94); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
+/* el tachan: la luz se va (solo los ojos del crupier y de Comodin) y vuelve de golpe; Comodin vive aparte, sobre la sala, a la misma escala que el crupier */
+.fin-end.dark .qx-beam, .fin-end.dark .qx-pool { animation: none; opacity: 0; }
+.fin-end.dark .fin-stage .dealer.big .dl-face { filter: none; }
+.fin-cat { position: absolute; z-index: 2; inset: 0; pointer-events: none; } .fin-cat * { pointer-events: none !important; }
 .fin-end.nodealer .fin-stage, .fin-end.nodealer .fin-plate { display: none; }   /* v0.3.236: los creditos desde Ajustes, sin crupier jubilado: solo el FIN */
 .fin-end-in.shake { animation: fin-shake .34s steps(2); }
 @keyframes fin-shake { 25% { transform: translate(4px, calc(-4vh - 3px)); } 50% { transform: translate(-4px, calc(-4vh + 2px)); } 75% { transform: translate(2px, calc(-4vh + 3px)); } }
