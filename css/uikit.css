@@ -10,7 +10,12 @@
 .tt b:only-child { text-transform: none; letter-spacing: .01em; font-size: 15.5px; color: #f7e9c4; font-weight: 700; }
 .tt .tt-k { display: inline-block; margin-left: 6px; padding: 0 6px; background: #1f5c40; color: #ffd87a; border-radius: 3px; }
 .tt em { font-style: normal; color: #7be04a; } .tt em.bad { color: #ff7d6e; } .tt em.gold { color: #ffd87a; }
+.gc-burst { position: fixed; z-index: 100001; width: 0; height: 0; pointer-events: none; }
+.gc-burst i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; background: #fff3cf; box-shadow: 0 0 0 1px #16241c; animation: gcb .5s ease-out forwards; }
+.gc-burst i.g { background: #f8b449; }
+@keyframes gcb { to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
 html.reduce-motion .tt { transition: none; }
+html.reduce-motion .gc-burst { display: none; }
 .kt { display: inline-flex; }
 
 /* ---------------------------------------------------------------- ajustes: pestanas y filas */

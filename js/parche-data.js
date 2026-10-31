@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.20",
+      name: L("Vuelven las chispas del clic", "Click sparks are back", "Les étincelles du clic reviennent", "As faíscas do clique voltaram", "Die Klick-Funken sind zurück", "Tornano le scintille del clic", "", "点击火花回来了", "클릭 불꽃이 돌아왔습니다", "クリックの火花が復活", "Искры при щелчке вернулись", "Iskry po kliknięciu wróciły"),
+      date: "2026-10-31",
+      summary: L("Al pulsar en los menús vuelven las chispas bajo la mano del crupier. En el mapa, la chincheta sigue sonando y destellando como siempre.", "Clicking in menus brings back the sparks under the dealer's hand. On the map, the pin still plays its sound and flash as always.", "Cliquer dans les menus ramène les étincelles sous la main du croupier. Sur la carte, la punaise garde son son et son éclat habituels.", "Ao clicar nos menus, as faíscas voltam sob a mão do crupiê. No mapa, o alfinete continua com o seu som e brilho de sempre.", "Beim Klicken in den Menüs sind die Funken unter der Hand des Croupiers wieder da. Auf der Karte behält die Nadel Klang und Aufblitzen wie gewohnt.", "Cliccando nei menu tornano le scintille sotto la mano del croupier. Sulla mappa, la puntina conserva suono e lampo di sempre.", "", "在菜单中点击时，荷官手下的火花又回来了。地图上，图钉的音效和闪光照旧。", "메뉴에서 클릭하면 딜러의 손 아래 불꽃이 다시 나옵니다. 지도에서는 핀의 소리와 반짝임이 그대로입니다.", "メニューでクリックすると、ディーラーの手の下に火花が戻ります。地図ではピンの音と閃光は今までどおりです。", "При щелчке в меню снова вспыхивают искры под рукой крупье. На карте булавка по-прежнему звучит и вспыхивает, как всегда.", "Kliknięcie w menu znów wywołuje iskry pod dłonią krupiera. Na mapie pinezka nadal gra i błyska jak dawniej."),
+      chapters: [
+        { id: "cursor", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Fehlerbehebung", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Cursor", "Cursor", "Curseur", "Cursor", "Cursor", "Cursore", "", "光标", "커서", "カーソル", "Курсор", "Kursor"),
+          entries: [
+            E(L("Vuelven las chispas del clic", "Click sparks are back", "Les étincelles du clic reviennent", "As faíscas do clique voltaram", "Die Klick-Funken sind zurück", "Tornano le scintille del clic", "", "点击火花回来了", "클릭 불꽃이 돌아왔습니다", "クリックの火花が復活", "Искры при щелчке вернулись", "Iskry po kliknięciu wróciły"), "fix", "0.4.20", [
+              L("Al pulsar en los menús vuelven las chispas bajo la mano del crupier. En el mapa, la chincheta sigue sonando y destellando como siempre.", "Clicking in menus brings back the sparks under the dealer's hand. On the map, the pin still plays its sound and flash as always.", "Cliquer dans les menus ramène les étincelles sous la main du croupier. Sur la carte, la punaise garde son son et son éclat habituels.", "Ao clicar nos menus, as faíscas voltam sob a mão do crupiê. No mapa, o alfinete continua com o seu som e brilho de sempre.", "Beim Klicken in den Menüs sind die Funken unter der Hand des Croupiers wieder da. Auf der Karte behält die Nadel Klang und Aufblitzen wie gewohnt.", "Cliccando nei menu tornano le scintille sotto la mano del croupier. Sulla mappa, la puntina conserva suono e lampo di sempre.", "", "在菜单中点击时，荷官手下的火花又回来了。地图上，图钉的音效和闪光照旧。", "메뉴에서 클릭하면 딜러의 손 아래 불꽃이 다시 나옵니다. 지도에서는 핀의 소리와 반짝임이 그대로입니다.", "メニューでクリックすると、ディーラーの手の下に火花が戻ります。地図ではピンの音と閃光は今までどおりです。", "При щелчке в меню снова вспыхивают искры под рукой крупье. На карте булавка по-прежнему звучит и вспыхивает, как всегда.", "Kliknięcie w menu znów wywołuje iskry pod dłonią krupiera. Na mapie pinezka nadal gra i błyska jak dawniej."),
+            ]),
+          ] }
+      ]
+    },
+    {
       id: "0.4.19",
       name: L("El cursor es la mano del crupier", "The cursor is the dealer's hand", "Le curseur est la main du croupier", "O cursor é a mão do crupiê", "Der Cursor ist die Hand des Croupiers", "Il cursore è la mano del croupier", "", "光标变成荷官的手", "커서가 딜러의 손이 되었습니다", "カーソルがディーラーの手に", "Курсор — рука крупье", "Kursor to dłoń krupiera"),
       date: "2026-10-31",

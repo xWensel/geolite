@@ -115,6 +115,13 @@
     }, true);
     const lift = () => { if (!tapOn) return; clearTimeout(tapTm); tapTm = setTimeout(() => setTap(false), Math.max(0, 120 - (performance.now() - tapT0))); };
     document.addEventListener("pointerup", lift, true); document.addEventListener("pointercancel", lift, true); addEventListener("blur", lift);
+    /* destello pixel-art al pulsar (no sobre el mapa: ahi ya esta la mira) */
+    document.addEventListener("pointerdown", e => {
+      if (!A.cursor.on || e.pointerType !== "mouse" || e.button !== 0 || (e.target && e.target.tagName === "CANVAS")) return;
+      const b = document.createElement("div"); b.className = "gc-burst"; b.style.left = e.clientX + "px"; b.style.top = e.clientY + "px";
+      for (let i = 0; i < 6; i++) { const p = document.createElement("i"), a = (i / 6) * Math.PI * 2 + Math.random() * 0.5; p.style.setProperty("--dx", Math.cos(a) * 18 + "px"); p.style.setProperty("--dy", Math.sin(a) * 18 + "px"); p.className = i % 2 ? "g" : ""; b.appendChild(p); }
+      document.body.appendChild(b); setTimeout(() => b.remove(), 520);
+    }, true);
   }
 
   /* ------------------------------------------------------------------ tooltips */
