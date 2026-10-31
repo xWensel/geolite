@@ -12,7 +12,7 @@ A.barraHall = function (cv, X) {
   const ROOMC = { ruletas: { w1: "#1d4a35", w2: "#102e21", sign: "#6dffb0" }, cartas: { w1: "#5a1a2c", w2: "#34101b", sign: "#ff8aa8" }, dados: { w1: "#13555f", w2: "#0a333b", sign: "#7cecff" }, rascas: { w1: "#6a4a14", w2: "#3e2a0a", sign: "#ffd060" } };
   const dots = () => { let r = "", prev = ""; X.list.forEach((g, i) => { if (g.room !== prev) { r += `<span class="rl">${X.rooms[g.room]}</span>`; prev = g.room; } r += `<button type="button" class="dt" data-i="${i}" style="--c1:${g.c[0]}" aria-label="${g.n}"></button>`; }); return r; };
   "use strict";
-  const IW = 640, IH = 360;
+  const SZ = (X.size && X.size()) || { w: 640, h: 360 }, IW = SZ.w, IH = Math.max(360, SZ.h), OY = IH - 360, HW = IW >> 1;   // lienzo del tamano de la ventana; OY = filas de pared extra por arriba (el suelo y las mesas siguen pegados abajo)
   const CJK = (getComputedStyle(document.documentElement).getPropertyValue("--cjk") || "").trim(), IS_CJK = /Fusion/.test(CJK);
   const FJ = IS_CJK ? 12 : 15, FF = "'Jersey 15', 'Pixelify Sans', " + (IS_CJK ? CJK + ", " : "") + "sans-serif", NS = IS_CJK ? 12 : 8, NF = "'Silkscreen', 'Geolite Cyrillic Caps', 'Pixelify Sans', " + (IS_CJK ? CJK + ", " : "") + "monospace";   // placas (Jersey) y neones (Silkscreen)
   /* ====================== utilidades ====================== */
@@ -33,7 +33,7 @@ A.barraHall = function (cv, X) {
   /* ====================== el mundo ====================== */
   const L = X.list, N = L.length, SP = 136, GAP = 128, FLOOR = 236, BASE = 268, TY = BASE - 98, TOPC = TY + 26;   // TOPC: centro del tapete en pantalla
   const ENTRY_CAM = -30; let wx = 520; L.forEach((g, i) => { if (i && g.room !== L[i - 1].room) wx += GAP; g.px = wx; wx += SP; });
-  const CAMMIN = ENTRY_CAM, CAMMAX = L[N - 1].px - 320 + 70;
+  const CAMMIN = ENTRY_CAM, CAMMAX = L[N - 1].px - HW + 70;
   const roomIds = Object.keys(X.rooms).filter(r => L.some(g => g.room === r));
   const rooms = roomIds.map((r, k) => { const gs = L.filter(g => g.room === r), first = gs[0].px, prevLast = k ? L.filter(g => g.room === roomIds[k - 1]).slice(-1)[0].px : first - 190; return { id: r, c: ROOMC[r], gate: k ? (prevLast + first) / 2 : first - 132 }; });
   const WALLC = { ruletas: [HX("#2c7a56"), HX("#173f2e")], cartas: [HX("#8a2a44"), HX("#431522")], dados: [HX("#1d8294"), HX("#0f4450")], rascas: [HX("#a8742a"), HX("#523714")], hall: [HX("#7a4a1c"), HX("#3a2008")] };
@@ -178,16 +178,16 @@ A.barraHall = function (cv, X) {
   }
   /* ====================== lienzos y DOM ====================== */
   const baseC = mk(IW, IH), bx = baseC.getContext("2d", { willReadFrequently: true }), emisC = mk(IW, IH), ex = emisC.getContext("2d"), finC = mk(IW, IH), fx = finC.getContext("2d"), lit = fx.createImageData(IW, IH);
-  const FH = IH - FLOOR, floorId = bx.createImageData(IW, FH), floorBuf = new Uint32Array(floorId.data.buffer);
+  const FH = 360 - FLOOR, floorId = bx.createImageData(IW, FH), floorBuf = new Uint32Array(floorId.data.buffer);
   const bl1 = mk(160, 90), bl1x = bl1.getContext("2d"), bl2 = mk(80, 45), bl2x = bl2.getContext("2d");
-  const out = mk(1280, 720); out.className = "pcv"; out.tabIndex = 0; out.setAttribute("role", "application"); out.setAttribute("aria-label", X.aria);
+  const out = mk(IW * 2, IH * 2); out.className = "pcv"; out.tabIndex = 0; out.setAttribute("role", "application"); out.setAttribute("aria-label", X.aria);
   const ox = out.getContext("2d"); ox.imageSmoothingEnabled = false;
   cv.innerHTML = `<div class="hrail">${dots()}</div><button type="button" class="harr l" aria-label="${X.left}">‹</button><button type="button" class="harr r" aria-label="${X.right}">›</button><div class="hcard"></div><div class="phint" id="phint"><i>←</i><i>→</i><span>${X.hint}</span></div>`;
   cv.insertBefore(out, cv.firstChild);
   const q = s => cv.querySelector(s);
   /* ====================== camara ====================== */
-  const STOPS = [ENTRY_CAM, ...L.map(g => g.px - 320)];            // 0 = entrada; 1.. = mesas
-  let cam = STOPS[Math.min(7, N)], vel = 0, drag = null, snap = null, stop = -1, MM = !!(X.reduce && X.reduce()), lastT = 0, lastRender = 0, hinted = false, time0 = performance.now();
+  const STOPS = [ENTRY_CAM, ...L.map(g => g.px - HW)];            // 0 = entrada; 1.. = mesas
+  let cam = STOPS[X.start != null ? clamp(X.start, 0, STOPS.length - 1) : Math.min(7, N)], vel = 0, drag = null, snap = null, stop = -1, MM = !!(X.reduce && X.reduce()), lastT = 0, lastRender = 0, hinted = X.start != null, time0 = performance.now();
   const near = c => { let b = 0, bd = 1e9; for (let i = 0; i < STOPS.length; i++) { const d = Math.abs(STOPS[i] - c); if (d < bd) { bd = d; b = i; } } return b; };
   const welcome = X.welcome;
   function cardIn(gi) { const hc = q(".hcard"); hc.innerHTML = gi < 0 ? welcome : X.card(L[gi]); if (gi >= 0) X.wire(hc, L[gi]); }
@@ -199,7 +199,7 @@ A.barraHall = function (cv, X) {
   const mxy = e => { const r = out.getBoundingClientRect(); return [(e.clientX - r.left) * IW / r.width, (e.clientY - r.top) * IH / r.height, r.width / IW]; };
   out.addEventListener("pointerdown", e => { if (e.button > 0) return; out.setPointerCapture(e.pointerId); const k = mxy(e)[2]; drag = { id: e.pointerId, x0: e.clientX, cam0: cam, moved: false, k, s: [{ t: performance.now(), c: cam }] }; snap = null; vel = 0; out.classList.add("grab"); });
   out.addEventListener("pointermove", e => { if (!drag || e.pointerId !== drag.id) return; const dx = e.clientX - drag.x0; if (!drag.moved && Math.abs(dx) < 5) return; drag.moved = true; hide(); let c = drag.cam0 - dx / drag.k; if (c < CAMMIN) c = CAMMIN - (CAMMIN - c) * 0.35; if (c > CAMMAX) c = CAMMAX + (c - CAMMAX) * 0.35; cam = c; const now = performance.now(); drag.s.push({ t: now, c }); while (drag.s.length > 6 || (drag.s.length > 2 && now - drag.s[0].t > 120)) drag.s.shift(); need = true; focus(near(cam)); });
-  const endDrag = e => { if (!drag || (e && e.pointerId !== drag.id)) return; const d = drag; drag = null; out.classList.remove("grab"); if (!d.moved) { const [x, y] = mxy(e); for (let i = 0; i < N; i++) { const sx = L[i].px - Math.round(cam); if (Math.abs(x - sx) < 60 && y > 130 && y < 276) { goTo(i + 1); hide(); return; } } return; }
+  const endDrag = e => { if (!drag || (e && e.pointerId !== drag.id)) return; const d = drag; drag = null; out.classList.remove("grab"); if (!d.moved) { const [x, y] = mxy(e); for (let i = 0; i < N; i++) { const sx = L[i].px - Math.round(cam); if (Math.abs(x - sx) < 60 && y > 130 + OY && y < 276 + OY) { goTo(i + 1); hide(); return; } } return; }
     const s = d.s, a = s[0], b = s[s.length - 1], dt = Math.max(16, b.t - a.t); vel = MM ? 0 : clamp((b.c - a.c) / dt * 16, -34, 34); if (MM || Math.abs(vel) < 1.2) goTo(near(cam + vel * 6)); need = true; };
   out.addEventListener("pointerup", endDrag); out.addEventListener("pointercancel", endDrag);
   out.addEventListener("wheel", e => { e.preventDefault(); hide(); const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; snap = null; if (MM) { goTo(stop + (d > 0 ? 1 : -1)); return; } vel = clamp(vel + d * 0.06, -30, 30); need = true; }, { passive: false });
@@ -213,14 +213,14 @@ A.barraHall = function (cv, X) {
   const WS = 0.35;                                                  // velocidad de la pared
   const sconceXs = c => { const off = Math.round(c * WS), r = []; for (let w = Math.floor(off / 180) * 180 - 180; w < off + IW + 200; w += 180) r.push(w - off + 90); return r; };
   function drawFloor(c) {
-    const r0 = 40, rB = BASE - FLOOR, camU = c + 320;
-    for (let r = 0; r < FH; r++) { const s = (r + r0) / (rB + r0), inv = 1 / s, v = (Math.floor(2400 / (r + r0)) % FT_H + FT_H) % FT_H, row = v * FT_W, o = r * IW; for (let x = 0; x < IW; x++) { const u = ((Math.floor((x - 320) * inv + camU) % FT_W) + FT_W) % FT_W; floorBuf[o + x] = floorTex[row + u]; } }
-    bx.putImageData(floorId, 0, FLOOR);
+    const r0 = 40, rB = BASE - FLOOR, camU = c + HW;
+    for (let r = 0; r < FH; r++) { const s = (r + r0) / (rB + r0), inv = 1 / s, v = (Math.floor(2400 / (r + r0)) % FT_H + FT_H) % FT_H, row = v * FT_W, o = r * IW; for (let x = 0; x < IW; x++) { const u = ((Math.floor((x - HW) * inv + camU) % FT_W) + FT_W) % FT_W; floorBuf[o + x] = floorTex[row + u]; } }
+    bx.putImageData(floorId, 0, FLOOR + OY);
   }
   function scene(time) {
-    const c = Math.round(cam), ctx = bx; ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, IW, IH);
-    const ra = roomAt(c + 320), tq = Math.round(ra.t * 8), off = Math.round(c * WS);
-    ctx.save(); ctx.translate(-(off % 32), 0); ctx.fillStyle = wallPattern(ra.a, ra.b, tq); ctx.fillRect(0, 0, IW + 32, FLOOR - 44); ctx.fillStyle = ctx.createPattern(wainscot, "repeat"); ctx.translate(0, FLOOR - 44); ctx.fillRect(0, 0, IW + 32, 44); ctx.restore();
+    const c = Math.round(cam), ctx = bx; ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, IW, IH); ctx.save(); ctx.translate(0, OY);
+    const ra = roomAt(c + HW), tq = Math.round(ra.t * 8), off = Math.round(c * WS);
+    ctx.save(); ctx.translate(-(off % 32), 0); ctx.fillStyle = wallPattern(ra.a, ra.b, tq); ctx.fillRect(0, -OY, IW + 32, FLOOR - 44 + OY); ctx.fillStyle = ctx.createPattern(wainscot, "repeat"); ctx.translate(0, FLOOR - 44); ctx.fillRect(0, 0, IW + 32, 44); ctx.restore();
     sconceXs(c).forEach((sx) => { ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx - 14, 96, 28, 58); ctx.fillStyle = rgb(K.br2); ctx.fillRect(sx - 13, 97, 26, 56); ctx.fillStyle = rgb(K.br3); ctx.fillRect(sx - 13, 97, 26, 1); ctx.fillStyle = rgb(mix(WALLC[ra.a][1], [0, 0, 0], 0.4)); ctx.fillRect(sx - 10, 100, 20, 50);
       const seed = Math.floor((sx + off) / 180); for (let j = 0; j < 12; j++) { ctx.fillStyle = rgb(mix(WALLC[ra.b][0], K.br3, 0.2 + hash(seed, j, 2) * 0.5)); ctx.fillRect(sx - 7 + (j % 4) * 4, 104 + ((j / 4) | 0) * 14, 3, 9); }
       ctx.fillStyle = rgb(K.br3); ctx.fillRect(sx - 4, 154, 8, 3); ctx.fillStyle = rgb(K.br2); ctx.fillRect(sx - 1, 157, 2, 6); });
@@ -243,10 +243,10 @@ A.barraHall = function (cv, X) {
     if (hallLamp) { const sx = HALLX - c + 62; if (sx > -60 && sx < IW + 60) { ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx - 1, 50, 3, 40); ctx.fillStyle = rgb(K.br2); ctx.fillRect(sx, 50, 1, 40); ctx.drawImage(hallLamp.base, sx - 30, 88); } }
     gates.forEach(s => { const sx = Math.round(s.x - c - s.w / 2); if (sx > IW || sx + s.w < 0) return; ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx + 10, 62, 2, 30); ctx.fillRect(sx + s.w - 12, 62, 2, 30); ctx.drawImage(s.base, sx, 92); });
     if (neonEntry) { const sx = csx + 118 - Math.round(neonEntry.w / 2); if (sx < IW && sx + neonEntry.w > 0) { ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx + 10, 62, 2, 30); ctx.fillRect(sx + neonEntry.w - 12, 62, 2, 30); ctx.drawImage(neonEntry.base, sx, 92); } }
-    ctx.drawImage(curtain, 0, 0); ctx.save(); ctx.translate(IW, 0); ctx.scale(-1, 1); ctx.drawImage(curtain, 0, 0); ctx.restore();
+    ctx.drawImage(curtain, 0, -OY); ctx.save(); ctx.translate(IW, -OY); ctx.scale(-1, 1); ctx.drawImage(curtain, 0, 0); ctx.restore(); ctx.restore();
   }
   function emissive(time) {
-    const c = Math.round(cam), e = ex; e.imageSmoothingEnabled = false; e.clearRect(0, 0, IW, IH); const fl = MM ? 1 : 1 + (Math.sin(time * 0.013) * 0.04 + Math.sin(time * 0.037) * 0.03);
+    const c = Math.round(cam), e = ex; e.imageSmoothingEnabled = false; e.clearRect(0, 0, IW, IH); e.save(); e.translate(0, OY); const fl = MM ? 1 : 1 + (Math.sin(time * 0.013) * 0.04 + Math.sin(time * 0.037) * 0.03);
     for (let i = 0; i < N; i++) { const sx = L[i].px - c; if (sx < -90 || sx > IW + 90) continue; const lp = lamps[L[i].room], on = i + 1 === stop, sway = MM ? 0 : (Math.floor(time / 900 + i * 1.7) % 4 === 0 ? 1 : 0);
       e.globalAlpha = on ? 0.4 * fl : 0.18; e.drawImage(haze, sx - 75, 126); e.globalAlpha = clamp((on ? 1 : 0.62) * (on ? fl : 1) * (lp.k || 1), 0, 1); e.drawImage(lp.glow, sx - 30 + sway, lp.top); e.globalAlpha = 1;
       e.fillStyle = "rgb(255,246,205)"; e.fillRect(sx - 4 + sway, lp.top + lp.bulbY, 8, 3); e.fillStyle = "rgb(255,215,130)"; e.fillRect(sx - 7 + sway, lp.top + lp.bulbY + 1, 14, 1);
@@ -256,24 +256,25 @@ A.barraHall = function (cv, X) {
     const csx = 50 - c; if (neonEntry) { const sx = csx + 118 - Math.round(neonEntry.w / 2); if (sx < IW && sx + neonEntry.w > 0) e.drawImage(neonEntry.em, sx, 92); }
     sconceXs(c).forEach(sx => { e.fillStyle = "rgb(255,236,170)"; e.fillRect(sx - 3, 152, 6, 3); e.fillStyle = "rgb(255,200,110)"; e.fillRect(sx - 4, 153, 8, 1); });
     { const sx = 120 - Math.round(c * 0.8); if (sx > -240 && sx < IW) { e.fillStyle = "rgba(255,225,150,.55)"; e.fillRect(sx, 148, 192, 2); e.fillRect(sx, 181, 192, 2); } if (csx > -260 && csx < IW) { e.fillStyle = "rgba(255,210,120,.6)"; e.fillRect(csx + 6, FLOOR + 28, 224, 1); } }
+    e.restore();
   }
   const AMB = 0.4, STEPS = 8, Lw = new Float32Array(IW * IH);
   const vig = (() => { const v = new Float32Array(IW * IH); for (let y = 0; y < IH; y++) for (let x = 0; x < IW; x++) { const dx = (x - IW / 2) / (IW / 2), dy = (y - IH * 0.55) / (IH * 0.62), d = Math.sqrt(dx * dx * 0.7 + dy * dy * 0.7); v[y * IW + x] = 1 - clamp((d - 0.6) / 0.8, 0, 1) * 0.5; } return v; })();
   function addMap(map, mw, mh, ox0, oy0, I) { const x0 = Math.max(0, ox0), y0 = Math.max(0, oy0), x1 = Math.min(IW, ox0 + mw), y1 = Math.min(IH, oy0 + mh); for (let y = y0; y < y1; y++) { let i = y * IW + x0, m = (y - oy0) * mw + (x0 - ox0); for (let x = x0; x < x1; x++, i++, m++) Lw[i] += I * map[m]; } }
   function compose(time) {
     const c = Math.round(cam), fl = MM ? 1 : 1 + (Math.sin(time * 0.013) * 0.05 + Math.sin(time * 0.037) * 0.035); Lw.fill(0);
-    for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -190 || lx > IW + 190) continue; addMap(lampLight, LMW, LMH, lx + LM.x0, LM.y0, i + 1 === stop ? 1.12 * fl : 0.52); }
-    sconceXs(c).forEach(sx => addMap(sconceLight, SCW, SCH, sx - 50, 102, 1));
-    { const hx = HALLX - c + 62; if (hx > -190 && hx < IW + 190) addMap(lampLight, LMW, LMH, hx + LM.x0, LM.y0, 0.9 * fl); }
-    { const sx = 120 - Math.round(c * 0.8); if (sx > -300 && sx < IW) for (let y = 128; y < 204; y++) { const v = 0.4 * (1 - Math.abs(y - 164) / 38); if (v <= 0) continue; const x0 = Math.max(0, sx - 20), x1 = Math.min(IW, sx + 230); for (let x = x0, i = y * IW + x0; x < x1; x++, i++) Lw[i] += v; } const csx = 50 - c; if (csx > -260 && csx < IW) for (let y = 150; y < 300; y++) { const dy = (y - 236) / 70; if (dy * dy >= 1) continue; const x0 = Math.max(0, csx - 20), x1 = Math.min(IW, csx + 260); for (let x = x0, i = y * IW + x0; x < x1; x++, i++) { const dx = (x - (csx + 118)) / 130, e2 = dx * dx + dy * dy; if (e2 < 1) Lw[i] += 0.62 * (1 - e2); } } }
+    for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -190 || lx > IW + 190) continue; addMap(lampLight, LMW, LMH, lx + LM.x0, LM.y0 + OY, i + 1 === stop ? 1.12 * fl : 0.52); }
+    sconceXs(c).forEach(sx => addMap(sconceLight, SCW, SCH, sx - 50, 102 + OY, 1));
+    { const hx = HALLX - c + 62; if (hx > -190 && hx < IW + 190) addMap(lampLight, LMW, LMH, hx + LM.x0, LM.y0 + OY, 0.9 * fl); }
+    { const sx = 120 - Math.round(c * 0.8); if (sx > -300 && sx < IW) for (let y = 128 + OY; y < 204 + OY; y++) { const v = 0.4 * (1 - Math.abs(y - OY - 164) / 38); if (v <= 0) continue; const x0 = Math.max(0, sx - 20), x1 = Math.min(IW, sx + 230); for (let x = x0, i = y * IW + x0; x < x1; x++, i++) Lw[i] += v; } const csx = 50 - c; if (csx > -260 && csx < IW) for (let y = 150 + OY; y < 300 + OY; y++) { const dy = (y - OY - 236) / 70; if (dy * dy >= 1) continue; const x0 = Math.max(0, csx - 20), x1 = Math.min(IW, csx + 260); for (let x = x0, i = y * IW + x0; x < x1; x++, i++) { const dx = (x - (csx + 118)) / 130, e2 = dx * dx + dy * dy; if (e2 < 1) Lw[i] += 0.62 * (1 - e2); } } }
     const src = bx.getImageData(0, 0, IW, IH).data, dst = lit.data;
     for (let p = 0, i = 0, y = 0; y < IH; y++) for (let x = 0; x < IW; x++, p++, i += 4) { const lw = Lw[p], s = (AMB + lw) * vig[p], q2 = Math.floor(s * STEPS + BAY[((y & 7) << 3) | (x & 7)]) / STEPS, f = q2 < 0.05 ? 0.05 : q2 > 1.25 ? 1.25 : q2, wf = lw > 0.001 ? lw / (AMB + lw) : 0;
       dst[i] = src[i] * f * (0.84 + 0.3 * wf); dst[i + 1] = src[i + 1] * f * (0.92 + 0.1 * wf); dst[i + 2] = src[i + 2] * f * (1.08 - 0.3 * wf); dst[i + 3] = 255; }
     fx.putImageData(lit, 0, 0); fx.globalCompositeOperation = "lighter"; fx.drawImage(emisC, 0, 0);
     bl1x.clearRect(0, 0, 160, 90); bl1x.imageSmoothingEnabled = true; bl1x.drawImage(emisC, 0, 0, 160, 90); bl2x.clearRect(0, 0, 80, 45); bl2x.imageSmoothingEnabled = true; bl2x.drawImage(bl1, 0, 0, 80, 45);
     fx.imageSmoothingEnabled = true; fx.globalAlpha = 0.8; fx.drawImage(bl1, 0, 0, IW, IH); fx.globalAlpha = 0.9; fx.drawImage(bl2, 0, 0, IW, IH); fx.globalAlpha = 1; fx.imageSmoothingEnabled = false;
-    if (!MM) for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -80 || lx > IW + 80) continue; const on = i + 1 === stop; for (let k = 0; k < (on ? 10 : 4); k++) { const ph = hash(i, k, 6) * 6.28, sp = 0.0006 + hash(i, k, 7) * 0.0007, yy = 134 + ((hash(i, k, 8) * 130 + time * sp * 60 * (0.6 + hash(i, k, 9))) % 130), t = (yy - 134) / 130, hw = 9 + 54 * t, xx = lx + Math.sin(time * 0.0007 + ph) * hw * 0.75 + (hash(i, k, 10) - 0.5) * hw * 0.4, a = (0.3 + 0.45 * (0.5 + 0.5 * Math.sin(time * 0.003 + ph))) * (1 - t * 0.5) * (on ? 1 : 0.6); fx.fillStyle = "rgba(255,240,196," + a.toFixed(2) + ")"; fx.fillRect(Math.round(xx), Math.round(yy), 1, 1); } }
-    fx.globalCompositeOperation = "source-over"; ox.drawImage(finC, 0, 0, 1280, 720);
+    if (!MM) for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -80 || lx > IW + 80) continue; const on = i + 1 === stop; for (let k = 0; k < (on ? 10 : 4); k++) { const ph = hash(i, k, 6) * 6.28, sp = 0.0006 + hash(i, k, 7) * 0.0007, yy = OY + 134 + ((hash(i, k, 8) * 130 + time * sp * 60 * (0.6 + hash(i, k, 9))) % 130), t = (yy - OY - 134) / 130, hw = 9 + 54 * t, xx = lx + Math.sin(time * 0.0007 + ph) * hw * 0.75 + (hash(i, k, 10) - 0.5) * hw * 0.4, a = (0.3 + 0.45 * (0.5 + 0.5 * Math.sin(time * 0.003 + ph))) * (1 - t * 0.5) * (on ? 1 : 0.6); fx.fillStyle = "rgba(255,240,196," + a.toFixed(2) + ")"; fx.fillRect(Math.round(xx), Math.round(yy), 1, 1); } }
+    fx.globalCompositeOperation = "source-over"; ox.drawImage(finC, 0, 0, IW * 2, IH * 2);
   }
   /* ====================== bucle ====================== */
   let raf = 0, alive = true; const perf = { n: 0, sA: 0, sB: 0, sC: 0, max: 0 };
@@ -288,6 +289,7 @@ A.barraHall = function (cv, X) {
     else if (!drag && stop >= 0 && Math.abs(STOPS[stop] - cam) > 0.6) goTo(stop, 300);
     if (need || now - lastRender > (MM ? 400 : 60)) { need = false; lastRender = now; const p0 = performance.now(), t = now - time0; scene(t); const p1 = performance.now(); emissive(t); const p2 = performance.now(); compose(t); const p3 = performance.now(); perf.n++; perf.sA += p1 - p0; perf.sB += p2 - p1; perf.sC += p3 - p2; perf.max = Math.max(perf.max, p3 - p0); }
   }
+  if (hinted) q("#phint").classList.add("off");
   focus(near(cam)); init().then(() => { need = true; }); raf = requestAnimationFrame(frame);
   cv.__pasillo = { refreshCard() { const gi = stop - 1; cardIn(gi); need = true; }, dispose() { alive = false; cancelAnimationFrame(raf); removeEventListener("keydown", kd); }, get cam() { return cam; }, get stop() { return stop; }, goTo, stats: () => ({ N, stop, n: perf.n, scene: +(perf.sA / perf.n).toFixed(2), emis: +(perf.sB / perf.n).toFixed(2), light: +(perf.sC / perf.n).toFixed(2), total: +((perf.sA + perf.sB + perf.sC) / perf.n).toFixed(2), max: +perf.max.toFixed(1) }), resetStats: () => { perf.n = perf.sA = perf.sB = perf.sC = perf.max = 0; } };
 };

@@ -106,3 +106,8 @@
 .brr-mid { align-self: center; gap: 9px; } .brr-pips { margin-top: 2px; } .brr-mid > .brr-pl { font-size: 22px; line-height: 1; } .brr-streak { display: inline; font-style: normal; height: auto; color: var(--gx-acc); letter-spacing: .04em; }
 .brr-say { top: 184px; }
 .brr-say { top: 180px; font-size: 22px; padding: 3px 14px 5px; min-height: 28px; } .brr-say .ic { width: 26px; height: 26px; }
+
+/* paso 9: el salon llena toda la ventana, sin margenes (el tablero toma el tamano de la ventana por JS: --bs y --oy) */
+.barra-screen { background: #0a1a12; }
+.brr-hall > .pcv { width: 100%; height: 100%; }
+.brr-hall .hcard { top: calc(476px + var(--oy, 0px)); } .brr-hall .harr { top: calc(300px + var(--oy, 0px)); }

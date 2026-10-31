@@ -163,7 +163,7 @@ window.AIQ = window.AIQ || {};
   const maxStake = () => Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN);
   function mkX() {
     const rank = ["ruletas", "dados", "rascas"], list = tables().map(t => ({ id: t.id, n: betName(t.id), ico: t.ico, c: t.c, room: ROOM_OF[t.id], soon: false })).sort((x, y) => rank.indexOf(x.room) - rank.indexOf(y.room));
-    return { list, rooms: { ruletas: A.tx(T.rRul), dados: A.tx(T.rDad), rascas: A.tx(T.rRas) }, hint: A.tx(T.hint), aria: A.tx(T.aria), left: A.tx(T.left), right: A.tx(T.right), title: A.tx(T.title).toUpperCase(),
+    return { size: () => ({ w: SZ.w, h: SZ.h }), list, rooms: { ruletas: A.tx(T.rRul), dados: A.tx(T.rDad), rascas: A.tx(T.rRas) }, hint: A.tx(T.hint), aria: A.tx(T.aria), left: A.tx(T.left), right: A.tx(T.right), title: A.tx(T.title).toUpperCase(),
       welcome: `<div class="soonc"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.welcome))}</p></div>`,
       reduce: () => !!(C().S && C().S.reduce), paused: () => busy || !!document.querySelector(".rou"),
       card: g => { const t = TABLES.find(x => x.id === g.id); return `<div class="tb-sup" style="display:block">${t.core ? COREC[g.id].card() : cardOf(g.id, R.play + 1)}</div>`; },
@@ -174,19 +174,33 @@ window.AIQ = window.AIQ || {};
   function padTick(api) {                                           // mando: cruceta o palanca izquierda recorren el pasillo (el resto lo lleva js/mando.js)
     const pads = navigator.getGamepads ? navigator.getGamepads() : []; for (const p of pads) { if (!p) continue; const l = (p.buttons[14] && p.buttons[14].pressed) || p.axes[0] < -0.6, r = (p.buttons[15] && p.buttons[15].pressed) || p.axes[0] > 0.6; if (l && !padL) api.goTo(api.stop - 1); if (r && !padR) api.goTo(api.stop + 1); padL = l; padR = r; break; }
   }
-  /* el salon llena la ventana: el lienzo de 640x360 se amplia un numero ENTERO de pixeles de pantalla (con el ratio de la pantalla) y se centra; el resto es terciopelo.
-     El tablero de 1280x720 se escala lo mismo (1 pixel del lienzo = 2 del tablero), asi el marcador, la carta y los textos crecen con el. */
-  function fitBoard() {
-    const st = root && root.querySelector(".barra-screen"), bd = root && root.querySelector(".brr-board"); if (!st || !bd) return;
-    const dpr = window.devicePixelRatio || 1, W = st.clientWidth, H = st.clientHeight, n = Math.max(1, Math.floor(Math.min(W * dpr / 640, H * dpr / 360) + 1e-6));
-    bd.style.setProperty("--bs", String(n / (2 * dpr)));
+  /* el salon llena TODA la ventana: el lienzo mide (ventana / n) pixeles, con n entero (pixel nitido); la pared sube por arriba y el suelo, las mesas y los botones quedan pegados abajo.
+     El tablero mide el doble (1 pixel del lienzo = 2 del tablero) y se escala n/(2*dpr): el marcador, la carta y los textos crecen con el. */
+  let SZ = { w: 640, h: 360, n: 1, dpr: 1 }, hallKey = "", rzT = 0;
+  function measure() {
+    const st = root && root.querySelector(".barra-screen"); if (!st) return SZ;
+    const dpr = window.devicePixelRatio || 1, W = Math.max(1, st.clientWidth) * dpr, H = Math.max(1, st.clientHeight) * dpr, n = Math.max(1, Math.floor(Math.min(W / 640, H / 360) + 1e-6)), w = Math.ceil(W / n);
+    return { w: w + (w & 1), h: Math.max(360, Math.ceil(H / n)), n, dpr };
   }
+  function fitBoard() {
+    const bd = root && root.querySelector(".brr-board"); if (!bd) return;
+    SZ = measure(); const st = bd.style;
+    st.width = SZ.w * 2 + "px"; st.height = SZ.h * 2 + "px"; st.margin = -SZ.h + "px 0 0 " + -SZ.w + "px";
+    st.setProperty("--bs", String(SZ.n / (2 * SZ.dpr))); st.setProperty("--oy", (SZ.h - 360) * 2 + "px");
+    return SZ.w + "x" + SZ.h + "x" + SZ.n;
+  }
+  function rebuildHall() {                                           // la ventana cambio: se levanta el salon con el tamano nuevo, en la misma mesa
+    rzT = 0; const el = root && root.querySelector(".brr-hall"), pas = el && el.__pasillo; if (!pas) return; if (mkX().paused()) { rzT = setTimeout(rebuildHall, 400); return; }
+    const k = fitBoard(); if (k === hallKey) return; const stop = pas.stop;
+    try { pas.dispose(); } catch (e) { /* ya cerrado */ } el.innerHTML = ""; hallKey = k; const x = mkX(); x.start = stop; A.barraHall(el, x);
+  }
+  const onResize = () => { fitBoard(); clearTimeout(rzT); rzT = setTimeout(rebuildHall, 160); };
   function build() {
     root.innerHTML = `<div class="gx-veil"></div><section class="barra-screen gx-stage gx-camp" data-nosq aria-labelledby="bH"><div class="brr-board"><div class="brr-hall"></div>
       <button type="button" class="hub-back brr-back" id="brBack">${A.icon("u_back", "sm")}${esc(A.tx(T.back))}</button><div id="brHudBox"></div>
       <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${MIN}" step="${MIN}" value="${MIN}" aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${MIN}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note" id="brNote"></span></div>
       <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i id="brTk">0</i></button></div><div class="brr-say" id="brSay"></div></div></section>`;
-    wire(); dealerOff(); if (A.fitK) A.fitK(); fitBoard(); addEventListener("resize", fitBoard);
+    wire(); dealerOff(); if (A.fitK) A.fitK(); hallKey = fitBoard(); addEventListener("resize", onResize);
     hall = A.barraHall(root.querySelector(".brr-hall"), mkX());
   }
   const setFill = r => { const mn = +r.min, mx = +r.max; r.style.setProperty("--p", mx > mn ? ((+r.value - mn) / (mx - mn)) * 100 + "%" : "100%"); };   // el relleno amarillo llega siempre hasta el selector
@@ -275,7 +289,7 @@ window.AIQ = window.AIQ || {};
     const shown = rk => { const e = document.getElementById("brRk"); if (e) e.textContent = rk ? "#" + rk : "—"; }; let got; submitScore(final, R.play).then(rank => { got = rank || 0; shown(got); });
     setTimeout(() => { if (!root) return; closePop(); root.querySelector(".brr-board").appendChild(o); if (got != null) shown(got); $("brAgain").onclick = () => { o.remove(); entry(); }; $("brOut2").onclick = () => leave(true); }, 700);
   }
-  function leave(done) { removeEventListener("resize", fitBoard); if (hall) { try { hall.dispose ? hall.dispose() : root.querySelector(".brr-hall").__pasillo.dispose(); } catch (e) { /* ya cerrado */ } hall = null; } closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
+  function leave(done) { removeEventListener("resize", onResize); clearTimeout(rzT); if (hall) { try { hall.dispose ? hall.dispose() : root.querySelector(".brr-hall").__pasillo.dispose(); } catch (e) { /* ya cerrado */ } hall = null; } closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
   /* ---------- abrir ---------- */
   function open_() {
     if (!A.adv || !A.adv.casino || !A.adv.casino.core) return A.hub.screen("home");
