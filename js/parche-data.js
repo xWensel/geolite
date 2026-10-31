@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.29",
+      name: L("Una sorpresa cambia de sitio", "One surprise moves", "Une surprise déménage", "Uma surpresa muda de lugar", "Eine Überraschung zieht um", "Una sorpresa cambia posto", "", "一个惊喜换了地方", "깜짝 요소 하나가 자리를 옮깁니다", "仕掛けがひとつ引っ越し", "Один сюрприз переезжает", "Jedna niespodzianka zmienia miejsce"),
+      date: "2026-10-31",
+      summary: L("Una de las sorpresas de la casa se muda al ticket de cierre de ronda, donde se luce mucho más.", "One of the house's surprises moves to the end-of-round ticket, where it shines much more.", "L'une des surprises de la maison déménage vers le ticket de fin de manche, où elle brille bien davantage.", "Uma das surpresas da casa se muda para o ticket de fim de rodada, onde brilha muito mais.", "Eine der Überraschungen des Hauses zieht auf den Rundenabschluss-Bon um, wo sie viel besser zur Geltung kommt.", "Una delle sorprese della casa si trasferisce sullo scontrino di fine round, dove risalta molto di più.", "", "老店的一个惊喜搬到了回合结算小票上，在那里效果好得多。", "하우스의 깜짝 요소 하나가 라운드 마감 영수증으로 옮겨 가서 훨씬 더 돋보입니다.", "ハウスの仕掛けのひとつが、ラウンド終了のレシートに引っ越しました。そのほうがずっと映えます。", "Один из сюрпризов заведения переезжает на чек по итогам раунда, где он смотрится гораздо лучше.", "Jedna z niespodzianek kasyna przenosi się na paragon z końca rundy, gdzie wypada o wiele lepiej."),
+      chapters: [
+        { id: "ajuste", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Cambio", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Una sorpresa cambia de sitio", "One surprise moves", "Une surprise déménage", "Uma surpresa muda de lugar", "Eine Überraschung zieht um", "Una sorpresa cambia posto", "", "一个惊喜换了地方", "깜짝 요소 하나가 자리를 옮깁니다", "仕掛けがひとつ引っ越し", "Один сюрприз переезжает", "Jedna niespodzianka zmienia miejsce"),
+          entries: [
+            E(L("Una sorpresa cambia de sitio", "One surprise moves", "Une surprise déménage", "Uma surpresa muda de lugar", "Eine Überraschung zieht um", "Una sorpresa cambia posto", "", "一个惊喜换了地方", "깜짝 요소 하나가 자리를 옮깁니다", "仕掛けがひとつ引っ越し", "Один сюрприз переезжает", "Jedna niespodzianka zmienia miejsce"), "change", "0.4.29", [
+              L("Una de las sorpresas de la casa se muda al ticket de cierre de ronda, donde se luce mucho más.", "One of the house's surprises moves to the end-of-round ticket, where it shines much more.", "L'une des surprises de la maison déménage vers le ticket de fin de manche, où elle brille bien davantage.", "Uma das surpresas da casa se muda para o ticket de fim de rodada, onde brilha muito mais.", "Eine der Überraschungen des Hauses zieht auf den Rundenabschluss-Bon um, wo sie viel besser zur Geltung kommt.", "Una delle sorprese della casa si trasferisce sullo scontrino di fine round, dove risalta molto di più.", "", "老店的一个惊喜搬到了回合结算小票上，在那里效果好得多。", "하우스의 깜짝 요소 하나가 라운드 마감 영수증으로 옮겨 가서 훨씬 더 돋보입니다.", "ハウスの仕掛けのひとつが、ラウンド終了のレシートに引っ越しました。そのほうがずっと映えます。", "Один из сюрпризов заведения переезжает на чек по итогам раунда, где он смотрится гораздо лучше.", "Jedna z niespodzianek kasyna przenosi się na paragon z końca rundy, gdzie wypada o wiele lepiej.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.28",
       name: L("Caídas más bestias", "Wilder falls", "Des chutes plus brutales", "Quedas mais brutas", "Wildere Stürze", "Cadute più brutali", "", "更猛烈的坠落", "더 거칠어진 추락", "荒っぽくなった落下", "Падения пожёстче", "Ostrzejsze upadki"),
       date: "2026-10-31",
