@@ -895,6 +895,7 @@ window.AIQ = window.AIQ || {};
     /* en que pais cayo tu pin y cual se buscaba; y si picaste en una chincheta trampa (solo para lo que dice el crupier) */
     const g = res.guess, P0 = A.pointer;
     if (g && res.km != null && P0 && P0.countryAt) { info.pinC = P0.countryAt(g.lon, g.lat); info.tgtC = oq && oq.t === "c" ? A.tx(oq.clue ? oq.answer : oq.name) : oq ? P0.countryAt(oq.lon, oq.lat) : ""; }
+    if (g && res.km != null && oq && oq.lat != null && oq.lon != null && A.geo && A.geo.haversine) info.anti = A.geo.haversine(g.lat, g.lon, -oq.lat, oq.lon > 0 ? oq.lon - 180 : oq.lon + 180) < 800;   // huevo: fallaste a menos de 800 km del otro lado del mundo
     info.left = res.left; info.sea = !!(g && res.km != null && P0 && P0.featureAt && !P0.featureAt(g.lon, g.lat));   // bloque D: el ultimo segundo y la chincheta en el agua
     if (res.km == null && A.dealer.idleMs) { const S1 = C().S; info.idle = A.dealer.idleMs() >= Math.max(3000, ((S1 && S1.limit) || 10) * 1000 - 600); }   // se acabo el tiempo sin tocar nada
     const dcs = C().map && C().map.decoys; if (g && dcs && dcs.length && res.dist < 750) info.decoy = dcs.some(d => A.geo.haversine(g.lat, g.lon, d.lat, d.lon) < 90);   // v0.52: las chinchetas caen en cualquier sitio, tambien junto al bueno: solo si fallaste

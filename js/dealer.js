@@ -2558,14 +2558,16 @@ window.AIQ = window.AIQ || {};
     if (Date.now() - (callKey[key] || 0) < (o.gap || 6000) || Date.now() - callAt < 2500) return false;   // cada forma de llamarle, su pausa (y 2,5 s entre dos cualesquiera)
     if (!homeFits()) return false;                                                    // no cabe: ese rato no viene
     const again = pres === "home" && visitOn(), k = again && o.again && LINES[o.again] ? o.again : key;
-    const t = (!again && o.line) || say1(k); if (!t) return false;
+    const t = ((!again || o.exact) && o.line) || say1(k); if (!t) return false;     // o.exact (js/huevos.js): esa frase concreta, aunque ya este de visita
     callAt = callKey[key] = Date.now(); callN++; ensure(); homeCorner = "home-tr";
     if (A.tt && A.tt.hide) A.tt.hide();                                                // habla el: fuera la ayuda de la carta (no dos textos a la vez)
-    const more = !again && Math.random() < 0.35;                                       // a veces, ya que esta, sigue con una de las suyas
-    D.say(t, { mood: o.mood || "sly", hold: holdFor(t), done: more ? () => later(() => { const c = homeChat(); if (c && c.t && pres === "home") D.say(c.t, { mood: c.mood, hold: holdFor(c.t) }); }, 900) : undefined });
-    if (!again && !catOn() && Math.random() < 0.15) setTimeout(() => catVisit(25000), 2500);   // a veces se trae al gato
+    const more = !again && !o.exact && Math.random() < 0.35;                           // a veces, ya que esta, sigue con una de las suyas (los huevos, con o.exact, dicen solo lo suyo)
+    D.say(t, Object.assign({ mood: o.mood || "sly", hold: holdFor(t), done: o.done || (more ? () => later(() => { const c = homeChat(); if (c && c.t && pres === "home") D.say(c.t, { mood: c.mood, hold: holdFor(c.t) }); }, 900) : undefined) }, o.say || {}));
+    if (!again && !o.exact && !catOn() && Math.random() < 0.15) setTimeout(() => catVisit(25000), 2500);   // a veces se trae al gato
     return true;
   }
+  /* js/huevos.js: los huevos de pascua que le provocas a proposito (maqueta votada el 31-oct) le llaman con las mismas reglas que tentarlo */
+  D.call = call; D.homeShown = homeShown;
   /* 1) la chistera del logo: tocarla le llama */
   addEventListener("pointerdown", e => {
     if (!homeShown()) return;
@@ -3145,6 +3147,7 @@ window.AIQ = window.AIQ || {};
   const who = () => { const P = A.profile && A.profile.get(); return (P && P.name) || nickName(); };     // tu nombre (v0.37) o, si le dijiste 3 veces "Ahora no", tu mote (v0.20); "" si nada
   const say1 = (key, d) => { const ln = pickLine(key); return ln ? fill(tx6(ln), Object.assign({ name: who() }, d)) : null; };   // una de la bolsa, con los datos puestos
   const nth = (key, i, d) => { const a = LINES[key]; return a && a[i] ? fill(tx6(a[i]), d) : null; };     // una concreta (las que van en orden)
+  D.nth = (key, i, d) => nth(key, i, Object.assign({ name: who() }, d));                                 // js/huevos.js: una concreta, ya traducida y con tu nombre
   const holdFor = t => 4200 + (t ? t.length : 60) * 24;
   const phase = () => (A.core && A.core.S && A.core.S.phase) || "";
   const tourOn = () => !!(A.tour && A.tour.active && A.tour.active());
@@ -3557,13 +3560,14 @@ window.AIQ = window.AIQ || {};
     if (o.dwell >= 600 && o.km != null && o.km >= 800 && Date.now() - hoverSaidAt > 180000) {    // te vio encima del sitio y clicaste lejos
       hoverSaidAt = Date.now(); return { t: o.pinC && o.pinC !== o.tgtC ? say1("hoverOver", { p: o.place, c: o.pinC }) : say1("hoverOver2", { p: o.place }), mood: "shock" };
     }
+    if (o.anti && Date.now() - antiAt > 600000) { antiAt = Date.now(); if (A.huevos) A.huevos.found("antipoda"); return { t: say1("hvAntipoda"), mood: "laugh" }; }   // huevo (31-oct): fallaste justo al otro lado del mundo
     const hl = handLine(kind, o); if (hl) return hl;
     /* v0.20: estas dos son sabor, no un dato raro: pasan por el presupuesto como cualquier reaccion y, si toca hablar, la sustituyen (soft) */
     if (kind === "miss" && o.pinC && o.tgtC && o.pinC !== o.tgtC && Math.random() < 0.4) return { t: say1("wrongCountry", { c: o.pinC, t: o.tgtC }), mood: "laugh", soft: true };   // otro pais
     if (o.goal && !once.goal && Math.random() < 0.5) { once.goal = 1; return { t: say1("goalMid"), mood: "angry", soft: true }; }   // ya tienes la meta (una vez por sesion)
     return null;
   }
-  let hoverSaidAt = -1e9, counterAt = -1e9;
+  let hoverSaidAt = -1e9, counterAt = -1e9, antiAt = -1e9;
   function handLine(kind, o) {
     const h = o.hand, ids = o.chal || []; if (!h || handRound === o.rk || o.km == null) return null;
     const ptr = ids.find(i => PTR_T.includes(i)), wind = ids.includes("wind"), mp = ids.find(i => MAP_T.includes(i));

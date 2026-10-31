@@ -623,6 +623,7 @@ window.AIQ = window.AIQ || {};
         ${mode("medal_gold", "duelo", [["vsBank", of(du.w, du.d)], ["streak", A.fmt(du.s)], ["league", esc(lg)]])}
         ${mode("m_codex", "codex", [["cards", `${A.fmt(cx.u)} / ${A.fmt(cx.t)}`], ["done", pfPct(cx.u, cx.t) + " %"], ["ach", achOf("codex")]])}
         ${mode("chip_g", "barra", [["plays", A.fmt(cas.plays || 0)], ["games", `${Object.keys(cas.games || {}).length} / 8`], ["ach", achOf("casino")]])}
+        ${A.huevos && A.huevos.libreta ? A.huevos.libreta() : ""}
       </ol>`;
   }
   /* los botones de la hoja: los tramos y «En tu carta» (la tienda, en Tu carta, con el icono de ese logro elegido) */

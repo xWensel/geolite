@@ -80,6 +80,7 @@ window.AIQ = window.AIQ || {};
         groups[g].el.appendChild(n);
       }
       groups.forEach(x => { if (x.el) x.el.querySelectorAll("ul").forEach(songs); });
+      if (A.huevos && A.huevos.creditos && groups[0] && groups[0].el) A.huevos.creditos(groups[0].el);   // huevo: la linea de Don Crupier
       inn.replaceChildren(...groups.filter(x => x.el).map(x => x.el)); drawIx();
     } catch (e) { inn.textContent = "credits.html"; loaded = false; }
   }

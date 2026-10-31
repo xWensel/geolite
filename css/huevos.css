@@ -1,0 +1,57 @@
+/* ----------------------------------------------------------------
+   LOS HUEVOS DE LA CASA (js/huevos.js): lo que solo pasa si provocas a la casa. Pixel art a escala entera; con Movimiento: Minimo, quietos. */
+/* terremoto de raton: las cartas y las placas tintinean (propiedad `translate`, para no pisar los giros y zooms de cada una) */
+.hh.hv-quake .mcard, .hh.hv-quake .plq, .hh.hv-quake .hh-logo { animation: hvq .22s steps(2) 5; }
+@keyframes hvq { 0% { translate: 0 0; } 25% { translate: -3px 2px; } 50% { translate: 3px -2px; } 75% { translate: -2px -2px; } 100% { translate: 0 0; } }
+html.reduce-motion .hh.hv-quake .mcard, html.reduce-motion .hh.hv-quake .plq, html.reduce-motion .hh.hv-quake .hh-logo { animation: none; }
+
+/* el ticket que no acaba: una cinta de papel que cuelga del ticket, sin tocar su maquetacion (se va con el ticket) */
+.hv-cinta { position: fixed; z-index: 60; overflow: hidden; background: var(--paper); color: var(--ink); box-sizing: border-box; padding: 6px 12px 10px; font-family: var(--sans); font-size: 19px; line-height: 1.15;
+  border: 2px solid var(--ink); border-right: 0; box-shadow: 0 6px 0 rgba(2, 6, 4, .5); pointer-events: none; transition: opacity .26s; background-image: repeating-linear-gradient(0deg, transparent 0 7px, rgba(29, 10, 61, .05) 7px 8px); }
+.hv-cinta.out { opacity: 0; }
+.hv-cinta > div { display: flex; justify-content: space-between; gap: 10px; padding: 1px 0; border-bottom: 1px dashed rgba(29, 10, 61, .35); animation: hvIn .12s steps(2); }
+.hv-cinta > div b { font-weight: 400; white-space: nowrap; }
+@keyframes hvIn { from { translate: 0 -6px; opacity: .4; } to { translate: 0 0; opacity: 1; } }
+html.reduce-motion .hv-cinta > div { animation: none; }
+
+/* su linea en los creditos y la nota con su retrato (no sale en pantalla: se la deja al pie del panel) */
+.hv-don { margin: 22px 0 6px; padding-top: 14px; border-top: 1px dashed rgba(255, 255, 255, .22); font-family: var(--sans); font-size: 22px; cursor: default; user-select: none; }
+.hv-don b { font-weight: 400; }
+.hv-don span { opacity: .8; }
+.hv-nota { position: absolute; right: 22px; bottom: 18px; z-index: 5; max-width: min(520px, calc(100% - 44px)); display: flex; gap: 12px; align-items: flex-end; opacity: 0; translate: 0 14px; transition: opacity .26s, translate .26s; pointer-events: none; }
+.hv-nota.in { opacity: 1; translate: 0 0; }
+.hv-nota img { width: 104px; height: 104px; image-rendering: pixelated; flex: none; }
+.hv-nota p { margin: 0; position: relative; padding: 11px 18px 13px 16px; background: #fdf5fd; color: #16241c; font-family: var(--sans); font-size: 27px; line-height: 1.12; box-shadow: 0 4px 0 rgba(2, 6, 4, .5); }
+html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
+
+/* placas sueltas: la fila cierra el hueco mientras una esta fuera */
+.hh-deck.five.hv-gap { grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.12fr) minmax(0, 1fr); }
+.hv-ghost { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
+
+/* el reverso de la carta de socio: papel oscuro con filete dorado, a escala entera de la carta (--d = pixeles de pantalla por pixel de arte) */
+.hv-rev { position: absolute; inset: 0; z-index: 6; box-sizing: border-box; display: grid; align-content: center; justify-items: center; gap: calc(var(--d) * 2); padding: calc(var(--d) * 4); text-align: center;
+  background: #1d0a3d; color: #f3f0fa; border: var(--d) solid #fdd742; box-shadow: inset 0 0 0 var(--d) #7a4a05; font-family: var(--sans); font-size: calc(var(--d) * 9); line-height: 1.05; pointer-events: none; }
+.hv-rev i { font-style: normal; color: #fdd742; }
+.hv-rev span { font-size: calc(var(--d) * 7); opacity: .85; }
+
+/* la moneda sobre la primera placa (el cebo de Comodin) */
+.hv-coin { position: fixed; z-index: 30; padding: 6px 8px 0; pointer-events: auto; cursor: default; }
+.hv-coin canvas { display: block; filter: drop-shadow(0 3px 0 rgba(2, 6, 4, .6)); }
+
+/* GEOLITE SE CAE: las letras sueltas del rotulo, por encima de las cartas y por debajo del crupier; a pixel entero y con la sombra dura del logo */
+.hv-letras { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.hv-letra { position: absolute; image-rendering: pixelated; filter: drop-shadow(0 5px 0 rgba(5, 12, 8, .85)); }
+
+/* su libreta en el Perfil (Records): una casilla por huevo; las que faltan, en silueta */
+.hv-cass { grid-column: 3 / -1; display: grid; grid-template-columns: repeat(17, minmax(0, 1fr)); gap: 4px; }
+.hv-cas { display: block; aspect-ratio: 1; box-sizing: border-box; border: 2px dashed var(--gx-lin, rgba(20, 35, 43, .35)); background: rgba(20, 35, 43, .08); }
+.hv-cas.tA, .hv-cas.tB, .hv-cas.tC { border: 2px solid var(--ink, #14232b); box-shadow: 0 2px 0 rgba(20, 35, 43, .35); }
+.hv-cas.tA { background: #f5a623; } .hv-cas.tB { background: #4ee3c1; } .hv-cas.tC { background: #b36cff; }
+/* la fila de la libreta es mas baja que las de los modos y las demas se aprietan un punto: la lista no necesita desplazarse */
+.pf-rcs:has(.hv-lib) .pf-rc { padding-block: 0; }
+.pf-rcs:has(.hv-lib) .hv-lib { padding-block: 0; }
+.hv-lib .pf-rci { width: 34px; height: 34px; justify-self: center; }
+.hv-lib .pf-rcn { font-size: 22px; }
+.hv-lib .pf-kv { gap: 0; }
+.hv-lib .pf-kv i { font-size: 16px; }
+.hv-cas { aspect-ratio: auto; height: 22px; }

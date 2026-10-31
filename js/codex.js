@@ -843,7 +843,7 @@ window.AIQ = window.AIQ || {};
     const q = ui.q, gs = index().gs, hits = [];
     order.forEach(id => { const e = E[id]; if (e.parent || !U(id)) return; const rec = memOf(id); if (fold(nameOf(e, rec) + " " + e.name.en + " " + (e.name.es || "") + " " + (rec && rec.title || "")).includes(q)) hits.push(id); });
     const sub = id => { const g = gs[E[id].g]; return g && !g.sea && E[id].type !== "country" ? gName(g) : g ? regName(g.reg) : ""; };
-    return `<header class="cx-ph-h">${A.icon("lens", "cx-kic")}<div><h2>${esc(P(S.results).replace("{n}", A.fmt(hits.length)))}</h2>${hits.length ? "" : `<p>${esc(P(S.noRes))}</p>`}</div></header>`
+    return `<header class="cx-ph-h">${A.icon("lens", "cx-kic")}<div><h2>${esc(P(S.results).replace("{n}", A.fmt(hits.length)))}</h2>${hits.length ? "" : `<p>${esc((A.huevos && A.huevos.busqueda && A.huevos.busqueda(q)) || P(S.noRes))}</p>`}</div></header>`
       + (hits.length ? grid(hits.slice(0, 240), sub) : "");
   }
 

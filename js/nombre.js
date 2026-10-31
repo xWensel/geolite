@@ -141,7 +141,7 @@ window.AIQ = window.AIQ || {};
     st.phase = "done"; st.doneAt = Date.now();
     const known = A.profile.knownName(v);                                     // antes de guardarlo: ¿ya se lo habias dicho alguna vez?
     inp.value = v; inp.readOnly = true; inp.blur(); meter(len(v));
-    A.profile.setName(v); A.rank.rename(); A.dealer.noteName("named");
+    A.profile.setName(v); A.rank.rename(); A.dealer.noteName("named"); if (A.huevos && A.huevos.nombre) A.huevos.nombre(v);   // huevo: nombres con historia
     root.classList.add("signed"); A.sfx.sign(); burst();
     if (A.haptic) A.haptic([16, 40, 24]);                                    // respeta Ajustes > Vibracion
     later(() => A.dealer.say(A.dealer.pick(known ? "nameRecall" : "nameWelcome"), { mood: known ? "shock" : "sly", hold: 0, force: true, done: () => later(close, 900) }), 520);
@@ -215,7 +215,7 @@ window.AIQ = window.AIQ || {};
       const prev = P().name || "", name = clean(v).trim();
       if (name === prev) return Promise.resolve(name);
       const kind = !name ? "" : A.profile.knownName(name) && name.toLowerCase() !== prev.toLowerCase() ? "recall" : prev ? "renamed" : "welcome";
-      A.profile.setName(name); if (kind && A.dealer.noteName) A.dealer.noteName(kind);
+      A.profile.setName(name); if (kind && A.dealer.noteName) A.dealer.noteName(kind); if (name && A.huevos && A.huevos.nombre) A.huevos.nombre(name);   // huevo: nombres con historia
       return A.rank.rename().then(() => name, () => name);
     },
     /* Ajustes > General: la tarjeta "Tu nombre" (textos y valor; game.js la llama al abrir Ajustes y al cambiar de idioma) */

@@ -21,6 +21,7 @@ window.AIQ = window.AIQ || {};
   }))));
   const quieto = () => document.documentElement.classList.contains("reduce-motion");
   const vivos = new Set();                                   // lienzos montados
+  const FALTAN = new Set(); let LET = null;                  // huevo: letras caidas (indices en LET.cajas) y su arte (tablero vacio, hoja de piezas, cajas)
   let f = 0, a = 0, acc = 0, last = 0, raf = 0;
 
   /* la resolucion del lienzo sale de la caja a la vista (incluye el zoom de la portada) y de los pixeles reales de la pantalla */
@@ -37,7 +38,15 @@ window.AIQ = window.AIQ || {};
     // capas fijas ya escaladas: detras (rotulo) y delante (carta y chistera)
     const capa = keys => { const o = document.createElement("canvas"); o.width = bw; o.height = bh; const c = o.getContext("2d");
       c.imageSmoothingEnabled = sc < 1; c.imageSmoothingQuality = "high";
-      for (const kk of keys) { const im = img[kk]; if (im) c.drawImage(im, Math.round(CAPAS[kk][1] * cv._sc), Math.round(CAPAS[kk][2] * cv._sc), Math.round(im.width * cv._sc), Math.round(im.height * cv._sc)); }
+      for (const kk of keys) {
+        const im = img[kk];
+        if (kk === "rot" && FALTAN.size && LET) {                                  // huevo (js/huevos.js): letras caidas. El tablero vacio y, encima, las piezas que siguen en su sitio
+          c.drawImage(LET.vacio, Math.round(CAPAS.rot[1] * cv._sc), Math.round(CAPAS.rot[2] * cv._sc), Math.round(LET.vacio.width * cv._sc), Math.round(LET.vacio.height * cv._sc));
+          LET.cajas.forEach((b, i) => { if (!FALTAN.has(i)) c.drawImage(LET.hoja, b[4], 0, b[2], b[3], Math.round((CAPAS.rot[1] + b[0]) * cv._sc), Math.round((CAPAS.rot[2] + b[1]) * cv._sc), Math.round(b[2] * cv._sc), Math.round(b[3] * cv._sc)); });
+          continue;
+        }
+        if (im) c.drawImage(im, Math.round(CAPAS[kk][1] * cv._sc), Math.round(CAPAS[kk][2] * cv._sc), Math.round(im.width * cv._sc), Math.round(im.height * cv._sc));
+      }
       return o; };
     cv._back = capa(["rot"]); cv._front = capa(["carta", "chis"]); cv._f = -1;
     /* resplandor y sombra: lienzos ESTATICOS detras (la silueta del logo, pintada una vez). Antes eran filter: drop-shadow sobre el lienzo vivo y la GPU
@@ -104,7 +113,10 @@ window.AIQ = window.AIQ || {};
       const zk = box.closest(".hh"); if (zk) { const mo = new MutationObserver(() => { if (!cv.isConnected) { mo.disconnect(); return; } ajusta(cv); pinta(cv); }); mo.observe(zk, { attributes: true, attributeFilter: ["style"] }); }
     }));
   }
-  A.geoLogo = { mount, load };
+  /* huevo «Geolite se cae» (js/huevos.js): quita o devuelve letras al rotulo. data = { vacio, hoja, cajas } la primera vez */
+  const quita = (set, data) => { if (data) LET = data; FALTAN.clear(); if (LET) set.forEach(i => FALTAN.add(i)); vivos.forEach(cv => { ajusta(cv); cv._f = -1; pinta(cv); }); };
+  const vivo = () => { for (const cv of vivos) if (cv.isConnected && (!cv.checkVisibility || cv.checkVisibility()) && cv.closest(".hh")) return cv; return null; };
+  A.geoLogo = { mount, load, quita, vivo };
 
   /* la pantalla de entrada: su imagen fija pasa a ser el logo vivo en cuanto cargan las capas */
   const gate = () => {
