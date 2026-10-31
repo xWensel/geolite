@@ -101,3 +101,8 @@
 .brr-stakes input[type=range]::-webkit-slider-runnable-track { height: 12px; background: linear-gradient(90deg, #f5a623 var(--p), #0a1a12 var(--p)); box-shadow: inset 0 0 0 2px #0a140f; }
 .brr-stakes input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 28px; margin-top: -8px; background: linear-gradient(#fff3b0, #d4a04a 60%, #c46a1b); box-shadow: inset 0 0 0 2px #0a140f; }
 .brr-stakes input[type=range]:disabled { opacity: .5; cursor: default; } .brr-stakes input[type=range]:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* paso 8: la informacion de la jugada, centrada en su caja y la frase del crupier mas abajo */
+.brr-mid { align-self: center; gap: 9px; } .brr-pips { margin-top: 2px; } .brr-mid > .brr-pl { font-size: 22px; line-height: 1; } .brr-streak { display: inline; font-style: normal; height: auto; color: var(--gx-acc); letter-spacing: .04em; }
+.brr-say { top: 184px; }
+.brr-say { top: 180px; font-size: 22px; padding: 3px 14px 5px; min-height: 28px; } .brr-say .ic { width: 26px; height: 26px; }
