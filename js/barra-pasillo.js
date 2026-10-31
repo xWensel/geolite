@@ -217,6 +217,7 @@ A.barraHall = function (cv, X) {
     for (let r = 0; r < FH; r++) { const s = (r + r0) / (rB + r0), inv = 1 / s, v = (Math.floor(2400 / (r + r0)) % FT_H + FT_H) % FT_H, row = v * FT_W, o = r * IW; for (let x = 0; x < IW; x++) { const u = ((Math.floor((x - HW) * inv + camU) % FT_W) + FT_W) % FT_W; floorBuf[o + x] = floorTex[row + u]; } }
     bx.putImageData(floorId, 0, FLOOR + OY);
   }
+  const soonW = tg => { const m = mk(8, 8).getContext("2d"); m.font = NS + "px " + NF; return (v => v + (v & 1))(Math.ceil(m.measureText(tg).width) + 8); };
   function scene(time) {
     const c = Math.round(cam), ctx = bx; ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, IW, IH); ctx.save(); ctx.translate(0, OY);
     const ra = roomAt(c + HW), tq = Math.round(ra.t * 8), off = Math.round(c * WS);
@@ -238,7 +239,7 @@ A.barraHall = function (cv, X) {
       const em = emblem[g.id], eg = emblemG[g.id], bob = MM || !on ? 0 : (Math.floor(time / 600) % 2), eb = TOPC - 9;
       const bb = embBox[g.id] || { bottom: em ? em.height : 0, cx: em ? em.width >> 1 : 0 }; ctx.fillStyle = 'rgba(0,0,0,.38)'; ctx.beginPath(); ctx.ellipse(sx, TOPC + 3, 15, 3, 0, 0, 7); ctx.fill(); ctx.drawImage(easel, sx - 17, eb - 1); if (em) ctx.drawImage(g.soon ? eg : em, sx - bb.cx, eb - bb.bottom - bob);
       if (!on) { const pl = plaque[g.id]; if (pl) ctx.drawImage(pl, sx - Math.floor(pl.width / 2), BASE + 12); }
-      if (g.soon) { ctx.fillStyle = rgb(BRASS_S[3]); ctx.fillRect(sx + 22, TOPC - 50, 44, 11); ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx + 21, TOPC - 51, 46, 1); ctx.fillRect(sx + 21, TOPC - 39, 46, 1); ctx.fillRect(sx + 21, TOPC - 51, 1, 13); ctx.fillRect(sx + 66, TOPC - 51, 1, 13); ctx.font = "8px Silkscreen"; ctx.letterSpacing = "0px"; ctx.textBaseline = "top"; ctx.fillText("PRONTO", sx + 25, TOPC - 48); } }
+      if (g.soon) { const tg = X.soonTag || "PRONTO", tw = soonW(tg); ctx.fillStyle = rgb(BRASS_S[3]); ctx.fillRect(sx - (tw >> 1), TOPC - 50, tw, 11); ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx - (tw >> 1) - 1, TOPC - 51, tw + 2, 1); ctx.fillRect(sx - (tw >> 1) - 1, TOPC - 39, tw + 2, 1); ctx.fillRect(sx - (tw >> 1) - 1, TOPC - 51, 1, 13); ctx.fillRect(sx - (tw >> 1) + tw, TOPC - 51, 1, 13); ctx.font = NS + "px " + NF; ctx.letterSpacing = "0px"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(tg, sx, TOPC - (IS_CJK ? 49 : 48)); ctx.textAlign = "left"; } }
     for (let i = 0; i < N; i++) { const sx = L[i].px - c; if (sx < -60 || sx > IW + 60) continue; const lp = lamps[L[i].room], sway = MM ? 0 : (Math.floor(time / 900 + i * 1.7) % 4 === 0 ? 1 : 0); ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx - 1, 50, 3, 40); ctx.fillStyle = rgb(K.br2); ctx.fillRect(sx, 50, 1, 40); ctx.drawImage(lp.base, sx - 30 + sway, lp.top); }
     if (hallLamp) { const sx = HALLX - c + 62; if (sx > -60 && sx < IW + 60) { ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx - 1, 50, 3, 40); ctx.fillStyle = rgb(K.br2); ctx.fillRect(sx, 50, 1, 40); ctx.drawImage(hallLamp.base, sx - 30, 88); } }
     gates.forEach(s => { const sx = Math.round(s.x - c - s.w / 2); if (sx > IW || sx + s.w < 0) return; ctx.fillStyle = rgb(K.ink); ctx.fillRect(sx + 10, 62, 2, 30); ctx.fillRect(sx + s.w - 12, 62, 2, 30); ctx.drawImage(s.base, sx, 92); });

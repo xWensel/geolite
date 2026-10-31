@@ -66,6 +66,10 @@ window.AIQ = window.AIQ || {};
     left: L6("Izquierda|Left|Gauche|Esquerda|Links|Sinistra||向左|왼쪽|左|Влево|W lewo"),
     right: L6("Derecha|Right|Droite|Direita|Rechts|Destra||向右|오른쪽|右|Вправо|W prawo"),
     welcome: L6("Camina por el casino y elige una mesa. 20 jugadas con 1.000 fichas.|Walk the casino and pick a table. 20 plays with 1,000 chips.|Parcours le casino et choisis une table. 20 jeux avec 1 000 jetons.|Percorra o cassino e escolha uma mesa. 20 jogadas com 1.000 fichas.|Geh durchs Casino und wähl einen Tisch. 20 Spiele mit 1.000 Chips.|Percorri il casinò e scegli un tavolo. 20 giocate con 1.000 fiches.||走过赌场，选一张桌子。20 局，1,000 筹码。|카지노를 걸으며 테이블을 고르세요. 1,000칩으로 20판.|カジノを歩いてテーブルを選ぼう。1,000チップで20プレイ。|Пройдись по казино и выбери стол. 20 ходов с 1 000 фишек.|Przejdź się po kasynie i wybierz stół. 20 gier z 1000 żetonów."),
+    rCar: L6("Cartas y más|Cards and more|Cartes et plus|Cartas e mais|Karten und mehr|Carte e altro||纸牌及更多|카드 외|カードほか|Карты и другое|Karty i więcej"),
+    mCar: L6("Mesa de cartas|Card table|Table de cartes|Mesa de cartas|Kartentisch|Tavolo di carte||牌桌|카드 테이블|カードテーブル|Карточный стол|Stół karciany"),
+    sTag: L6("PRÓXIMAMENTE|COMING SOON|BIENTÔT|EM BREVE|BALD|PRESTO||即将推出|곧 출시|近日公開|СКОРО|WKRÓTCE"),
+    sTxt: L6("Muy pronto: blackjack, vídeo póker, ruleta completa, bingo y baccarat.|Coming very soon: blackjack, video poker, full roulette, bingo and baccarat.|Très bientôt : blackjack, vidéo poker, roulette complète, bingo et baccara.|Muito em breve: blackjack, vídeo pôquer, roleta completa, bingo e bacará.|Sehr bald: Blackjack, Video-Poker, volles Roulette, Bingo und Baccara.|Prestissimo: blackjack, video poker, roulette completa, bingo e baccarat.||即将推出：二十一点、视频扑克、完整轮盘、宾果和百家乐。|곧 만나요: 블랙잭, 비디오 포커, 풀 룰렛, 빙고, 바카라.|まもなく登場：ブラックジャック、ビデオポーカー、フルルーレット、ビンゴ、バカラ。|Совсем скоро: блэкджек, видеопокер, полная рулетка, бинго и баккара.|Już wkrótce: blackjack, video poker, pełna ruleta, bingo i bakarat."),
     soon: L6("Mesas que irán llegando|Tables on the way|Des tables à venir|Mesas a caminho|Weitere Tische folgen|Altri tavoli in arrivo||更多桌子即将到来|곧 오는 테이블|近日追加のテーブル|Новые столы скоро|Kolejne stoły wkrótce"),
   };
   /* la voz del crupier: dos frases por situacion; nunca la misma dos veces seguidas */
@@ -97,9 +101,11 @@ window.AIQ = window.AIQ || {};
     { id: "dice", n: "bet:dice", ico: "bet_dados", c: ["#14797f", "#08303a"], at: [930, 235] },
     { id: "plk", n: "bet:plk", ico: "bet_plinko", c: ["#13808f", "#08323a"], at: [1130, 235] },
     { id: "globo", n: "bet:globo", ico: "bet_globo", c: ["#c86a5a", "#4a2a6a"], at: [930, 415] },
-    { id: "rasca", n: "bet:rasca", ico: "bet_rasca", c: ["#e6cf94", "#8a6a2a"], at: [1130, 415] }];
-  const tables = () => TABLES.filter(t => t.core ? !!(A.adv && A.adv.casino && A.adv.casino.core) : !!(A.adv && A.adv.casino && A.adv.casino.def && A.adv.casino.def(t.id)));
-  const betName = id => { const B = A.adv.casino.core.BETS[id]; return B ? A.tx(B.n) : id; };
+    { id: "rasca", n: "bet:rasca", ico: "bet_rasca", c: ["#e6cf94", "#8a6a2a"], at: [1130, 415] },
+    { id: "cartas", n: "", ico: "bet_cartas", c: ["#a8142e", "#3a0c1a"], soon: true }];   // la mesa de cartas: aun no se juega, el pasillo la muestra con su cartel de PRONTO
+  const tables = () => TABLES.filter(t => t.soon ? true : t.core ? !!(A.adv && A.adv.casino && A.adv.casino.core) : !!(A.adv && A.adv.casino && A.adv.casino.def && A.adv.casino.def(t.id)));
+  const betName = id => { if (id === "cartas") return A.tx(T.mCar);
+     const B = A.adv.casino.core.BETS[id]; return B ? A.tx(B.n) : id; };
   /* ---------- la partida ---------- */
   let R = null, RUN = null, root = null, busy = false, restoreRun = null, prevCoins = 0;
   const mkRun = seed => ({ coins: START, reds: {}, seed, attempt: 0, stats: { coinsEarned: 0 }, asc: 0, act: 0, round: 0, lives: 3, maxLives: 3, stock: [], perks: [], sup: {}, bets: {} });
@@ -159,14 +165,14 @@ window.AIQ = window.AIQ || {};
   const tableHtml = t => `<button type="button" class="brr-tbl" data-g="${t.id}" style="left:${t.at[0]}px;top:${t.at[1]}px;--c1:${t.c[0]};--c2:${t.c[1]}"><i class="brr-felt">${A.icon(t.ico)}</i><b class="brr-plq">${esc(betName(t.id))}</b></button>`;
   /* el salon: el pasillo (js/barra-pasillo.js) se monta UNA vez; cada jugada solo refresca el marcador, la apuesta, la carta de la mesa y la frase */
   let hall = null;
-  const ROOM_OF = { red: "ruletas", coin: "ruletas", wheel: "ruletas", dice: "dados", cups: "dados", plk: "rascas", globo: "rascas", rasca: "rascas" };
+  const ROOM_OF = { red: "ruletas", coin: "ruletas", wheel: "ruletas", dice: "dados", cups: "dados", plk: "rascas", globo: "rascas", rasca: "rascas", cartas: "cartas" };
   const maxStake = () => Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN);
   function mkX() {
-    const rank = ["ruletas", "dados", "rascas"], list = tables().map(t => ({ id: t.id, n: betName(t.id), ico: t.ico, c: t.c, room: ROOM_OF[t.id], soon: false })).sort((x, y) => rank.indexOf(x.room) - rank.indexOf(y.room));
-    return { size: () => ({ w: SZ.w, h: SZ.h }), list, rooms: { ruletas: A.tx(T.rRul), dados: A.tx(T.rDad), rascas: A.tx(T.rRas) }, hint: A.tx(T.hint), aria: A.tx(T.aria), left: A.tx(T.left), right: A.tx(T.right), title: A.tx(T.title).toUpperCase(),
+    const rank = ["ruletas", "dados", "rascas", "cartas"], list = tables().map(t => ({ id: t.id, n: betName(t.id), ico: t.ico, c: t.c, room: ROOM_OF[t.id], soon: !!t.soon })).sort((x, y) => rank.indexOf(x.room) - rank.indexOf(y.room));
+    return { size: () => ({ w: SZ.w, h: SZ.h }), list, rooms: { ruletas: A.tx(T.rRul), dados: A.tx(T.rDad), rascas: A.tx(T.rRas), cartas: A.tx(T.rCar) }, soonTag: A.tx(T.sTag), hint: A.tx(T.hint), aria: A.tx(T.aria), left: A.tx(T.left), right: A.tx(T.right), title: A.tx(T.title).toUpperCase(),
       welcome: `<div class="soonc"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.welcome))}</p></div>`,
       reduce: () => !!(C().S && C().S.reduce), paused: () => busy || !!document.querySelector(".rou"),
-      card: g => { const t = TABLES.find(x => x.id === g.id); return `<div class="tb-sup" style="display:block">${t.core ? COREC[g.id].card() : cardOf(g.id, R.play + 1)}</div>`; },
+      card: g => { const t = TABLES.find(x => x.id === g.id); if (t.soon) return `<div class="soonc"><h4>${esc(betName(g.id))}</h4><p>${esc(A.tx(T.sTxt))}</p></div>`; return `<div class="tb-sup" style="display:block">${t.core ? COREC[g.id].card() : cardOf(g.id, R.play + 1)}</div>`; },
       wire: (el, g) => { prevCoins = RUN.coins; const sup = el.querySelector(".sup.bet"); if (!sup || R.over) return; const t = TABLES.find(x => x.id === g.id), r = R.play + 1; if (t.core) COREC[g.id].wire(sup, r); else wireExt(g.id, sup, r); },
       tick: (now, api) => padTick(api) };
   }
