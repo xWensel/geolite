@@ -148,6 +148,7 @@ window.AIQ = window.AIQ || {};
   const posOf = (v, i) => { if (i === 0) return v; const p = Math.pow(10, i), fl = Math.floor(v / p), rem = v - fl * p; return fl + Math.max(0, rem - (p - 1)); };
   function paint(R, v, vel) {
     const el = R.el, cols = el._cols, n = cols.length, step = R.step;
+    if (!el._seps) return;                                            // el contador se rehizo por fuera (odoBuild de js/game.js): este giro ya no pinta nada
     for (let i = 0; i < n; i++) {
       const col = cols[n - 1 - i], p = posOf(v, i), blank = i > 0 && p < 0.001;
       if (blank !== !!col._blank) { col._blank = blank; col.style.visibility = blank ? "hidden" : ""; }
@@ -156,7 +157,7 @@ window.AIQ = window.AIQ || {};
       const y = f.toFixed(4); if (col._y !== y) { col._y = y; col.style.transform = `translateY(${(-f * R.cell).toFixed(4)}em)`; }
     }
     /* un separador de miles a la izquierda de cifras en blanco tampoco se ve */
-    for (const s of el._seps) { const show = s.left > 0 && !cols[s.left - 1]._blank; if (show !== !s.sp._hid) { s.sp._hid = !show; s.sp.style.visibility = show ? "" : "hidden"; } }
+    for (const s of el._seps) { const show = s.left > 0 && !!cols[s.left - 1] && !cols[s.left - 1]._blank; if (show !== !s.sp._hid) { s.sp._hid = !show; s.sp.style.visibility = show ? "" : "hidden"; } }
   }
   function lock(R) {
     { const sh = A.fmt(Math.round(R.to)).replace(/\d/g, "0"); if (!R.el._cols || R.el._cols.length < sh.replace(/[^0]/g, "").length) build(R.el, sh); }   // un corte puede llegar con las cifras de un valor mas corto
