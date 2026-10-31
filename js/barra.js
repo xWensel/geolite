@@ -60,6 +60,17 @@ window.AIQ = window.AIQ || {};
     unit: L6("tickets|tickets|tickets|tickets|Tickets|ticket||票券|티켓|チケット|билетов|biletów"),
     soon: L6("Mesas que irán llegando|Tables on the way|Des tables à venir|Mesas a caminho|Weitere Tische folgen|Altri tavoli in arrivo||更多桌子即将到来|곧 오는 테이블|近日追加のテーブル|Новые столы скоро|Kolejne stoły wkrótce"),
   };
+  /* la voz del crupier: dos frases por situacion; nunca la misma dos veces seguidas */
+  const V = {
+    lose: [L6("Eso ha dolido.|That hurt.|Ça fait mal.|Essa doeu.|Das tat weh.|Questa ha fatto male.||这下疼了。|아프네요.|痛いね。|Больно.|Boli."), L6("La casa se lo queda.|The house keeps it.|La maison garde tout.|A casa fica com tudo.|Das Haus behält's.|Se lo tiene il banco.||庄家收下了。|하우스가 가져갑니다.|店がいただくよ。|Казино забирает.|Kasyno zabiera.")],
+    win: [L6("Cobra, cobra.|Collect, collect.|Encaisse, encaisse.|Cobra, cobra.|Kassier ab.|Incassa, incassa.||收钱收钱。|받아 가세요.|受け取って。|Забирай.|Odbieraj."), L6("Eso sí.|Now we're talking.|Voilà qui est mieux.|Isso sim.|Das war gut.|Questo sì.||这才对。|바로 이거죠.|それそれ。|Вот это дело.|O to chodzi.")],
+    big: [L6("¡Eso es un pellizco!|That's a nice pinch!|Quel beau pactole !|Que belo pedaço!|Das ist ein Happen!|Che bel colpo!||好大一笔！|꽤 크게 먹었네요!|これは大きい！|Вот это куш!|Ale kąsek!"), L6("La sala entera te mira.|The whole room is watching.|Toute la salle te regarde.|O salão inteiro está olhando.|Der ganze Saal schaut zu.|Tutta la sala ti guarda.||全场都在看你。|온 홀이 쳐다봅니다.|会場中が見ているよ。|Весь зал смотрит на тебя.|Cała sala patrzy.")],
+    jack: [L6("¡BOTE!|JACKPOT!|JACKPOT !|JACKPOT!|JACKPOT!|JACKPOT!||大奖！|잭팟!|ジャックポット！|ДЖЕКПОТ!|JACKPOT!"), L6("¡Que alguien cierre la puerta!|Somebody lock the door!|Que quelqu'un ferme la porte !|Alguém tranque a porta!|Schließt mal jemand die Tür!|Qualcuno chiuda la porta!||快把门关上！|누가 문 좀 잠가요!|誰か扉を閉めて！|Кто-нибудь, закройте дверь!|Niech ktoś zamknie drzwi!")],
+    gold: [L6("Una ficha dorada, de la casa.|A gold chip, on the house.|Un jeton doré, offert par la maison.|Uma ficha dourada, cortesia da casa.|Ein Goldchip, aufs Haus.|Una fiche dorata, offre la casa.||一枚金筹码，本店赠送。|금 칩 하나, 하우스가 쏩니다.|金のチップ、店のおごりだ。|Золотая фишка, за счёт заведения.|Złoty żeton, na koszt firmy."), L6("Esta va por la casa: ficha dorada.|This one's on the house: gold chip.|Celui-ci, c'est la maison qui l'offre : jeton doré.|Esta é por conta da casa: ficha dourada.|Der geht aufs Haus: Goldchip.|Questa la offre la casa: fiche dorata.||这枚算店里的：金筹码。|이건 서비스예요: 금 칩.|これは店から：金のチップ。|Эта за счёт заведения: золотая фишка.|Ten na koszt firmy: złoty żeton.")],
+    start: [L6("Que empiece la función.|Let the show begin.|Que le spectacle commence.|Que comece o espetáculo.|Die Show beginnt.|Che lo spettacolo abbia inizio.||好戏开场。|쇼를 시작하죠.|さあ、開演だ。|Начинаем представление.|Zaczynamy przedstawienie."), L6("Veinte jugadas. Ni una más.|Twenty plays. Not one more.|Vingt jeux. Pas un de plus.|Vinte jogadas. Nenhuma a mais.|Zwanzig Spiele. Kein einziges mehr.|Venti giocate. Neanche una di più.||二十局，一局不多。|스무 판입니다. 한 판도 더는 없어요.|20プレイ。1回も多くはない。|Двадцать ходов. Ни одним больше.|Dwadzieścia gier. Ani jednej więcej.")],
+  };
+  let lastV = "";
+  const say = kind => { const a = V[kind], k = kind + (a.length > 1 && lastV === kind + "0" ? 1 : lastV === kind + "1" ? 0 : Math.floor(Math.random() * a.length)); lastV = k; return A.tx(a[+k.slice(kind.length)]); };
   const f = (t, o) => A.tx(t).replace(/\{(\w)\}/g, (m, k) => (o && o[k] != null ? o[k] : m));
   const fmt = n => Math.round(n).toLocaleString(A.lang === "en" ? "en-US" : A.lang || "es");
   /* ---------- el modulo: activo o no ---------- */
@@ -145,7 +156,7 @@ window.AIQ = window.AIQ || {};
       <button type="button" class="hub-back brr-back" id="brBack">${A.icon("u_back", "sm")}${esc(A.tx(T.back))}</button>${hudHtml()}
       <div class="brr-floor">${ts.map(tableHtml).join("")}<div class="brr-counter"><img src="assets/icons/dealer_neutral.webp" alt="" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp"></div></div>
       <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${max}" step="${MIN}" value="${Math.min(stk, max)}" ${max <= MIN ? "disabled" : ""} aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${fmt(Math.min(stk, max))}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note">${R.gold ? esc(A.tx(T.gold)) : BOTE.has(R.play + 1) ? esc(A.tx(T.bote)) : ""}</span></div>
-      <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i>${fmt(prof().tickets)}</i></button></div><div class="brr-say" id="brSay">${esc(msg || A.tx(T.pick))}</div></div></section>`;
+      <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i>${fmt(prof().tickets)}</i></button></div><div class="brr-say" id="brSay">${A.icon("dealer_mini_s")}<span>${esc(msg || A.tx(T.pick))}</span></div></div></section>`;
     wire(); dealerOff();
     if (A.fitK) A.fitK();
   }
@@ -185,7 +196,8 @@ window.AIQ = window.AIQ || {};
     const m = st ? (gain0 + st) / st : 0, lvl = !win ? 0 : m >= 10 ? 3 : m >= 3 ? 2 : 1;
     if (lvl >= 1) { try { A.sfx.jackpot(lvl); C().jpShake && C().jpShake(lvl); if (A.haptic) A.haptic([20, 30]); } catch (e) { /* sin sonido */ } }
     if (RUN.coins <= 0) { RUN.coins = 0; R.over = true; } if (R.play >= PLAYS) R.over = true;
-    persistRun(); paint(msg || (win ? "+" + fmt(gain) : "−" + fmt(Math.abs(gain)))); const e = $("brStk"); if (e) e.classList.add(win ? "up" : "down");
+    const kind = !win ? "lose" : lvl >= 3 ? "jack" : lvl === 2 ? "big" : "win", amt = (win ? "+" : "−") + fmt(Math.abs(gain));
+    persistRun(); paint((R.gold && !msg ? say("gold") : say(kind)) + " " + amt + (msg ? " · " + msg : "")); const e = $("brStk"); if (e) e.classList.add(win ? "up" : "down");
     if (R.over) endScreen();
   }
   function hud() { const e = $("brStk"); if (e && RUN) e.querySelector("b").textContent = fmt(RUN.coins); }
@@ -218,7 +230,7 @@ window.AIQ = window.AIQ || {};
     const b = prof(), freeOk = b.free !== today(), poor = !freeOk && !(A.club && A.club.fichas() >= FEE), o = document.createElement("div"); o.className = "brr-over";
     o.innerHTML = `<div class="brr-tk"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.intro))}</p>${b.best ? `<p class="brr-rec">${esc(A.tx(T.best))}: <b>${fmt(b.best)}</b> · ${esc(A.tx(T.myTk))}: <b>${fmt(b.tickets)}</b></p>` : ""}${freeOk ? `<button type="button" id="brFree" data-primary>${esc(A.tx(T.free))}</button>` : ""}<button type="button" id="brPay" ${freeOk ? 'class="alt"' : "data-primary"} ${poor ? "disabled" : ""}>${esc(f(T.pay, { n: FEE }))}</button>${poor ? `<p class="brr-poor">${esc(A.tx(T.poor))}</p>` : ""}<div class="brr-two"><button type="button" id="brRk2" class="ghost">${esc(A.tx(T.rank))}</button><button type="button" id="brPz2" class="ghost">${esc(A.tx(T.prizes))}</button></div><button type="button" id="brOut" class="ghost">${esc(A.tx(T.leave))}</button></div>`;
     root.querySelector(".brr-board").appendChild(o); $("brRk2").onclick = () => rankPanel(); $("brPz2").onclick = () => prizePanel();
-    const go = paid => { if (paid === "fee") { if (!(A.club && A.club.spend(FEE))) return; } else b.free = today(); b.runs++; saveP(); R = newRunState(paid); RUN = mkRun(R.seed); persistRun(); o.remove(); paint(); if (A.rank && A.rank.ticket) A.rank.ticket().then(id => { if (id && R) { R.ticketId = id; persistRun(); } }).catch(() => {}); };
+    const go = paid => { if (paid === "fee") { if (!(A.club && A.club.spend(FEE))) return; } else b.free = today(); b.runs++; saveP(); R = newRunState(paid); RUN = mkRun(R.seed); persistRun(); o.remove(); paint(say("start")); if (A.rank && A.rank.ticket) A.rank.ticket().then(id => { if (id && R) { R.ticketId = id; persistRun(); } }).catch(() => {}); };
     if (freeOk) $("brFree").onclick = () => go("free"); $("brPay").onclick = () => go("fee"); $("brOut").onclick = () => leave(true);
   }
   /* la partida acabada va al ranking general de La Barra de la casa (barra-all, el de siempre) con su boleto; sin red se queda en la clasificacion de este equipo */
