@@ -1494,6 +1494,27 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   /* al entrar con una version distinta de la ultima que abrio este navegador, se borra TODA la cache de la app (Cache Storage de versiones anteriores);
      las partidas y ajustes (localStorage, IndexedDB) no se tocan. El service worker nuevo la vuelve a llenar */
   try { if (window.caches && localStorage.getItem("atlasiq.cacheV") !== A.VERSION) { caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))).catch(() => {}); localStorage.setItem("atlasiq.cacheV", A.VERSION); } } catch (e) { /* sin almacenamiento */ }
-  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
+  /* v0.4.41: AVISO DE VERSION NUEVA. El service worker se activa solo al publicar una version (js/../sw.js: skipWaiting + claim), pero la pestana abierta sigue con el
+     codigo viejo hasta recargar: aqui se enseña un cartel pequeño abajo para recargar (nunca a media pregunta, nunca solo: la partida se guarda y se retoma). */
+  const UPD = { msg: "Hay una versión nueva del juego.|A new version of the game is available.|Une nouvelle version du jeu est disponible.|Há uma nova versão do jogo.|Es gibt eine neue Version des Spiels.|È disponibile una nuova versione del gioco.||游戏有新版本了。|게임의 새 버전이 있어요.|ゲームの新バージョンがあります。|Доступна новая версия игры.|Dostępna jest nowa wersja gry.",
+    go: "Recargar|Reload|Recharger|Recarregar|Neu laden|Ricarica||重新加载|새로고침|再読み込み|Перезагрузить|Odśwież", later: "Luego|Later|Plus tard|Depois|Später|Più tardi||稍后|나중에|あとで|Позже|Później" };
+  let updShown = false, updT = 0;
+  A.updNotice = () => {
+    if (updShown) return; clearTimeout(updT);
+    if (S.phase === "asking" || S.booting || document.getElementById("nm") && !document.getElementById("nm").classList.contains("hidden")) { updT = setTimeout(A.updNotice, 4000); return; }   // a media pregunta o con el nombre abierto: espera
+    updShown = true; const el = document.createElement("div"); el.id = "updNotice"; el.setAttribute("role", "status");
+    el.innerHTML = `<span>${A.tip6(UPD.msg)}</span><button type="button" class="gx-btn pri sm" id="updGo" data-primary><span>${A.tip6(UPD.go)}</span></button><button type="button" class="gx-btn gho sm" id="updLater"><span>${A.tip6(UPD.later)}</span></button>`;
+    document.body.appendChild(el); requestAnimationFrame(() => el.classList.add("on"));
+    document.getElementById("updGo").onclick = () => { try { A.core.save(); } catch (e) { /* sin guardado */ } location.reload(); };
+    document.getElementById("updLater").onclick = () => { el.remove(); setTimeout(() => { updShown = false; }, 30 * 60 * 1000); };
+  };
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+    const hadCtl = !!navigator.serviceWorker.controller;                                          // sin controlador previo es la primera visita: nada que avisar
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtl) A.updNotice(); });
+    navigator.serviceWorker.register("sw.js").then(reg => {
+      const look = () => { try { reg.update().catch(() => {}); } catch (e) { /* sin red */ } };
+      setInterval(look, 30 * 60 * 1000); document.addEventListener("visibilitychange", () => { if (!document.hidden) look(); });   // una pestana olvidada tambien se entera
+    }).catch(() => {});
+  }
 
 })(window.AIQ);
