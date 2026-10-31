@@ -241,7 +241,7 @@ window.AIQ = window.AIQ || {};
     if (win && mult > 1) { bonus = gain0 * (mult - 1); RUN.coins += bonus; gain += bonus; msg = BOTE.has(r) ? f(T.boteWin, { n: fmt(bonus) }) : f(T.goldWin, { n: fmt(bonus) }); }
     if (win && R.gold) R.gold = false;
     R.streak = win ? R.streak + 1 : 0; if (win && R.streak >= 3 && !R.gold && Math.random() < 0.35) R.gold = true;
-    R.play = r; R.log.push({ g: RUN.reds[r].id, net: gain });
+    R.play = r; R.log.push({ g: RUN.reds[r].id, net: gain }); ensureTicket();
     const m = st ? (gain0 + st) / st : 0, lvl = !win ? 0 : m >= 10 ? 3 : m >= 3 ? 2 : 1;
     if (lvl >= 1) { try { A.sfx.jackpot(lvl); C().jpShake && C().jpShake(lvl); if (A.haptic) A.haptic([20, 30]); } catch (e) { /* sin sonido */ } }
     if (RUN.coins <= 0) { RUN.coins = 0; R.over = true; } if (R.play >= PLAYS) R.over = true;
@@ -276,17 +276,33 @@ window.AIQ = window.AIQ || {};
   }
   /* ---------- entrada y final ---------- */
   function entry() {
+    flushPend();
     const b = prof(), freeOk = b.free !== today(), poor = !freeOk && !(A.club && A.club.fichas() >= FEE), o = document.createElement("div"); o.className = "brr-over";
     o.innerHTML = `<div class="brr-tk"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.intro))}</p>${b.best ? `<p class="brr-rec">${esc(A.tx(T.best))}: <b>${fmt(b.best)}</b> · ${esc(A.tx(T.myTk))}: <b>${fmt(b.tickets)}</b></p>` : ""}${freeOk ? `<button type="button" id="brFree" data-primary>${esc(A.tx(T.free))}</button>` : ""}<button type="button" id="brPay" ${freeOk ? 'class="alt"' : "data-primary"} ${poor ? "disabled" : ""}>${esc(f(T.pay, { n: FEE }))}</button>${poor ? `<p class="brr-poor">${esc(A.tx(T.poor))}</p>` : ""}<div class="brr-two"><button type="button" id="brRk2" class="ghost">${esc(A.tx(T.rank))}</button><button type="button" id="brPz2" class="ghost">${esc(A.tx(T.prizes))}</button></div><button type="button" id="brOut" class="ghost">${esc(A.tx(T.leave))}</button></div>`;
     root.querySelector(".brr-board").appendChild(o); $("brRk2").onclick = () => rankPanel(); $("brPz2").onclick = () => prizePanel();
-    const go = paid => { if (paid === "fee") { if (!(A.club && A.club.spend(FEE))) return; } else b.free = today(); b.runs++; saveP(); R = newRunState(paid); RUN = mkRun(R.seed); persistRun(); o.remove(); paint(say("start")); if (A.rank && A.rank.ticket) A.rank.ticket().then(id => { if (id && R) { R.ticketId = id; persistRun(); } }).catch(() => {}); };
+    const go = paid => { if (paid === "fee") { if (!(A.club && A.club.spend(FEE))) return; } else b.free = today(); b.runs++; saveP(); R = newRunState(paid); RUN = mkRun(R.seed); persistRun(); o.remove(); paint(say("start")); ensureTicket(); };
     if (freeOk) $("brFree").onclick = () => go("free"); $("brPay").onclick = () => go("fee"); $("brOut").onclick = () => leave(true);
   }
   /* la partida acabada va al ranking general de La Barra de la casa (barra-all, el de siempre) con su boleto; sin red se queda en la clasificacion de este equipo */
+  /* v0.4.44: el boleto de la partida se pide al empezar y, si el servidor no contesto (red, limite por hora), se vuelve a pedir en cada jugada: sin boleto la puntuacion no entra */
+  let tkBusy = false;
+  function ensureTicket() {
+    if (!R || R.ticketId || tkBusy || !A.rank || !A.rank.ticket) return; tkBusy = true; const mine = R;
+    A.rank.ticket().then(id => { if (id && R === mine && !mine.ticketId) { mine.ticketId = id; persistRun(); } }).catch(() => {}).then(() => { tkBusy = false; });
+  }
+  /* la puntuacion se reintenta 3 veces (red caida un momento) y, si aun asi no entra, queda pendiente y se reenvia al volver a entrar a la Barra */
+  const sendScore = async (final, plays, run) => { const r = await A.rank.submit("barra-all", { score: final, extra: { p: plays }, ...(run ? { pf: { run, x: { p: plays } } } : {}) }); return r && r.global ? r.global : null; };
   async function submitScore(final, plays) {
-    const rk = A.rank; if (!rk || !rk.submit || final <= 0) return null;
-    const pf = R.ticketId ? { run: R.ticketId, x: { p: plays } } : undefined;
-    try { await rk.submit("barra-all", { score: final, extra: { p: plays }, ...(pf ? { pf } : {}) }); const t = await rk.top("barra-all", 1); return t && t.me ? t.me.rank : null; } catch (e) { return null; }
+    const rk = A.rank; if (!rk || !rk.submit || final < 0) return null;   // v0.4.45: tambien las partidas que acaban en 0 fichas entran (con su nombre y 0)
+    const run = R.ticketId || null; let g = null;
+    for (let k = 0; k < 3 && !g; k++) { try { g = await sendScore(final, plays, run); } catch (e) { g = null; } if (!g && k < 2) await new Promise(r => setTimeout(r, 2500 * (k + 1))); }
+    if (!g) { const b = prof(); if (!b.pend || b.pend.final < final) { b.pend = { final, plays, run }; saveP(); } return null; }
+    const b = prof(); if (b.pend && b.pend.final <= final) { delete b.pend; saveP(); }
+    try { const t = await rk.top("barra-all", 1); return (t && t.me && t.me.rank) || g.rank || null; } catch (e) { return g.rank || null; }
+  }
+  async function flushPend() {
+    const b = prof(), p = b.pend; if (!p || !A.rank || !A.rank.submit) return;
+    try { if (await sendScore(p.final, p.plays, p.run)) { delete b.pend; saveP(); } } catch (e) { /* queda pendiente */ }
   }
   function endScreen() {
     const final = Math.max(0, RUN.coins), tk = Math.floor(final / TK), b = prof(); R.tk = tk; b.tickets += tk; if (final > b.best) b.best = final; b.hist.unshift({ at: Date.now(), final, tk }); b.hist.length = Math.min(b.hist.length, 30); delete b.run; saveP();

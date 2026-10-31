@@ -32,8 +32,8 @@ async function proof(rid, id, score, x) {
   return set || +s1 === score ? true : "used";
 }
 /* La Barra de la casa (v0.4.35): la puntuacion es el saldo final de la partida (fichas); x = { p: jugadas hechas, 1-20 }. Mismo boleto de partida (op "run"), uno por puntuacion,
-   y cada jugada dura al menos 3 s de reloj desde el boleto (una partida de 20 tarda mas de un minuto). Sigue siendo de confianza, como el resto. */
-const BQMS = 3000;
+   y cada jugada dura al menos 1 s de reloj desde el boleto. Sigue siendo de confianza, como el resto. */
+const BQMS = 1000;   // v0.4.44: 1 s por jugada (antes 3 s): con "saltar" y x2 una partida de 20 se juega en menos de un minuto y se rechazaba por "time"
 async function proofBarra(rid, id, score, x) {
   rid = String(rid || "");
   if (!/^[a-f0-9]{24}$/.test(rid) || !x || typeof x !== "object") return "proof";
