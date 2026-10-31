@@ -58,6 +58,14 @@ window.AIQ = window.AIQ || {};
     short: L6("Te faltan {n}|You need {n} more|Il t'en manque {n}|Faltam {n}|Dir fehlen {n}|Te ne mancano {n}||还差 {n}|{n}개 부족해요|あと{n}枚足りない|Не хватает {n}|Brakuje {n}"),
     ttl: L6("Título para tu carta|Title for your card|Titre pour ta carte|Título para o seu cartão|Titel für deine Karte|Titolo per la tua carta||卡片称号|카드 칭호|カードの称号|Титул для карты|Tytuł na kartę"),
     unit: L6("tickets|tickets|tickets|tickets|Tickets|ticket||票券|티켓|チケット|билетов|biletów"),
+    rRul: L6("Ruletas|Roulettes|Roulettes|Roletas|Roulette|Roulette||轮盘|룰렛|ルーレット|Рулетки|Ruletki"),
+    rDad: L6("Dados y cubiletes|Dice and cups|Dés et gobelets|Dados e copos|Würfel und Becher|Dadi e bussolotti||骰子和骰盅|주사위와 컵|サイコロとカップ|Кости и стаканчики|Kości i kubki"),
+    rRas: L6("Rascas, fichas y globos|Scratch cards, chips and balloons|Grattage, jetons et ballons|Raspadinhas, fichas e balões|Rubbellose, Chips und Ballons|Gratta e vinci, fiches e palloni||刮刮卡、筹码与气球|스크래치, 칩, 풍선|スクラッチ、チップ、気球|Скретч, фишки и шары|Zdrapki, żetony i balony"),
+    hint: L6("Arrastra o usa las flechas|Drag or use the arrow keys|Fais glisser ou utilise les flèches|Arraste ou use as setas|Zieh oder nutze die Pfeile|Trascina o usa le frecce||拖动或使用方向键|드래그하거나 화살표를 쓰세요|ドラッグか矢印キーで|Тяни или жми стрелки|Przeciągnij lub użyj strzałek"),
+    aria: L6("Pasillo del casino: flechas izquierda y derecha o arrastra para recorrerlo|Casino hall: left and right arrows or drag to walk it|Couloir du casino : flèches gauche et droite ou glisser pour le parcourir|Corredor do cassino: setas esquerda e direita ou arraste para percorrê-lo|Casino-Flur: Pfeile links und rechts oder ziehen, um ihn zu durchqueren|Corridoio del casinò: frecce sinistra e destra o trascina per percorrerlo||赌场走廊：左右方向键或拖动来行走|카지노 복도: 좌우 화살표나 드래그로 이동|カジノの廊下：左右の矢印かドラッグで移動|Коридор казино: стрелки влево и вправо или перетаскивание|Korytarz kasyna: strzałki lewo/prawo lub przeciąganie"),
+    left: L6("Izquierda|Left|Gauche|Esquerda|Links|Sinistra||向左|왼쪽|左|Влево|W lewo"),
+    right: L6("Derecha|Right|Droite|Direita|Rechts|Destra||向右|오른쪽|右|Вправо|W prawo"),
+    welcome: L6("Camina por el casino y elige una mesa. 20 jugadas con 1.000 fichas.|Walk the casino and pick a table. 20 plays with 1,000 chips.|Parcours le casino et choisis une table. 20 jeux avec 1 000 jetons.|Percorra o cassino e escolha uma mesa. 20 jogadas com 1.000 fichas.|Geh durchs Casino und wähl einen Tisch. 20 Spiele mit 1.000 Chips.|Percorri il casinò e scegli un tavolo. 20 giocate con 1.000 fiches.||走过赌场，选一张桌子。20 局，1,000 筹码。|카지노를 걸으며 테이블을 고르세요. 1,000칩으로 20판.|カジノを歩いてテーブルを選ぼう。1,000チップで20プレイ。|Пройдись по казино и выбери стол. 20 ходов с 1 000 фишек.|Przejdź się po kasynie i wybierz stół. 20 gier z 1000 żetonów."),
     soon: L6("Mesas que irán llegando|Tables on the way|Des tables à venir|Mesas a caminho|Weitere Tische folgen|Altri tavoli in arrivo||更多桌子即将到来|곧 오는 테이블|近日追加のテーブル|Новые столы скоро|Kolejne stoły wkrótce"),
   };
   /* la voz del crupier: dos frases por situacion; nunca la misma dos veces seguidas */
@@ -149,34 +157,47 @@ window.AIQ = window.AIQ || {};
   /* ---------- salon ---------- */
   const hudHtml = () => `<div class="brr-hud"><div class="brr-ttl"><b id="bH">${esc(A.tx(T.title))}</b><i>${esc(f(T.sub, { n: FEE }))}</i></div><div class="brr-mid"><div class="brr-pips">${Array.from({ length: PLAYS }, (_, i) => `<i class="${i < R.play ? "on" : i === R.play ? "now" : ""}"></i>`).join("")}</div><span>${esc(f(T.play, { n: Math.min(R.play + 1, PLAYS), m: PLAYS }))}</span><div class="brr-streak">${R.streak >= 2 ? esc(f(T.streak, { n: R.streak })) : ""}</div></div><div class="brr-stk" id="brStk">${A.icon("chip_r")}<div><b>${fmt(RUN.coins)}</b><small>${esc(A.tx(T.chips))}</small></div></div></div>`;
   const tableHtml = t => `<button type="button" class="brr-tbl" data-g="${t.id}" style="left:${t.at[0]}px;top:${t.at[1]}px;--c1:${t.c[0]};--c2:${t.c[1]}"><i class="brr-felt">${A.icon(t.ico)}</i><b class="brr-plq">${esc(betName(t.id))}</b></button>`;
-  function paint(msg) {
-    if (!root) return;
-    const ts = tables(), stk = stakeNow(), max = Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN);
-    root.innerHTML = `<div class="gx-veil"></div><section class="barra-screen gx-stage gx-camp" data-nosq aria-labelledby="bH"><div class="brr-board">
-      <button type="button" class="hub-back brr-back" id="brBack">${A.icon("u_back", "sm")}${esc(A.tx(T.back))}</button>${hudHtml()}
-      <div class="brr-floor">${ts.map(tableHtml).join("")}<div class="brr-counter"><img src="assets/icons/dealer_neutral.webp" alt="" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp"></div></div>
-      <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${max}" step="${MIN}" value="${Math.min(stk, max)}" ${max <= MIN ? "disabled" : ""} aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${fmt(Math.min(stk, max))}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note">${R.gold ? esc(A.tx(T.gold)) : BOTE.has(R.play + 1) ? esc(A.tx(T.bote)) : ""}</span></div>
-      <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i>${fmt(prof().tickets)}</i></button></div><div class="brr-say" id="brSay">${A.icon("dealer_mini_s")}<span>${esc(msg || A.tx(T.pick))}</span></div></div></section>`;
-    wire(); dealerOff();
-    if (A.fitK) A.fitK();
+  /* el salon: el pasillo (js/barra-pasillo.js) se monta UNA vez; cada jugada solo refresca el marcador, la apuesta, la carta de la mesa y la frase */
+  let hall = null;
+  const ROOM_OF = { red: "ruletas", coin: "ruletas", wheel: "ruletas", dice: "dados", cups: "dados", plk: "rascas", globo: "rascas", rasca: "rascas" };
+  const maxStake = () => Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN);
+  function mkX() {
+    const rank = ["ruletas", "dados", "rascas"], list = tables().map(t => ({ id: t.id, n: betName(t.id), ico: t.ico, c: t.c, room: ROOM_OF[t.id], soon: false })).sort((x, y) => rank.indexOf(x.room) - rank.indexOf(y.room));
+    return { list, rooms: { ruletas: A.tx(T.rRul), dados: A.tx(T.rDad), rascas: A.tx(T.rRas) }, hint: A.tx(T.hint), aria: A.tx(T.aria), left: A.tx(T.left), right: A.tx(T.right), title: A.tx(T.title).toUpperCase(),
+      welcome: `<div class="soonc"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.welcome))}</p></div>`,
+      reduce: () => !!(C().S && C().S.reduce), paused: () => busy || !!document.querySelector(".rou"),
+      card: g => { const t = TABLES.find(x => x.id === g.id); return `<div class="tb-sup" style="display:block">${t.core ? COREC[g.id].card() : cardOf(g.id, R.play + 1)}</div>`; },
+      wire: (el, g) => { prevCoins = RUN.coins; const sup = el.querySelector(".sup.bet"); if (!sup || R.over) return; const t = TABLES.find(x => x.id === g.id), r = R.play + 1; if (t.core) COREC[g.id].wire(sup, r); else wireExt(g.id, sup, r); },
+      tick: (now, api) => padTick(api) };
   }
+  let padL = false, padR = false;
+  function padTick(api) {                                           // mando: cruceta o palanca izquierda recorren el pasillo (el resto lo lleva js/mando.js)
+    const pads = navigator.getGamepads ? navigator.getGamepads() : []; for (const p of pads) { if (!p) continue; const l = (p.buttons[14] && p.buttons[14].pressed) || p.axes[0] < -0.6, r = (p.buttons[15] && p.buttons[15].pressed) || p.axes[0] > 0.6; if (l && !padL) api.goTo(api.stop - 1); if (r && !padR) api.goTo(api.stop + 1); padL = l; padR = r; break; }
+  }
+  function build() {
+    root.innerHTML = `<div class="gx-veil"></div><section class="barra-screen gx-stage gx-camp" data-nosq aria-labelledby="bH"><div class="brr-board"><div class="brr-hall"></div>
+      <button type="button" class="hub-back brr-back" id="brBack">${A.icon("u_back", "sm")}${esc(A.tx(T.back))}</button><div id="brHudBox"></div>
+      <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${MIN}" step="${MIN}" value="${MIN}" aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${MIN}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note" id="brNote"></span></div>
+      <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i id="brTk">0</i></button></div><div class="brr-say" id="brSay"></div></div></section>`;
+    wire(); dealerOff(); if (A.fitK) A.fitK();
+    hall = A.barraHall(root.querySelector(".brr-hall"), mkX());
+  }
+  function update(msg) {
+    const max = maxStake(), s = $("brStk2"), v = $("brStkv"); if (!s) return; R.stake = Math.min(Math.max(MIN, R.stake), max);
+    $("brHudBox").innerHTML = hudHtml(); s.max = max; s.value = R.stake; s.disabled = max <= MIN; v.textContent = fmt(R.stake);
+    $("brNote").textContent = R.gold ? A.tx(T.gold) : BOTE.has(R.play + 1) ? A.tx(T.bote) : ""; $("brTk").textContent = fmt(prof().tickets);
+    $("brSay").innerHTML = `${A.icon("dealer_mini_s")}<span>${esc(msg || A.tx(T.pick))}</span>`; dealerOff();
+    if (hall) hall.refreshCard();
+  }
+  function paint(msg) { if (!root) return; if (!root.querySelector(".brr-board")) build(); update(msg); }
+  const pill = () => { const p = root.querySelector(".brr-hall .hcard .bt-stake"); if (p) p.innerHTML = CNb() + stakeNow(); };
   function wire() {
     $("brBack").onclick = () => leave(); $("brRank").onclick = () => rankPanel(); $("brPrize").onclick = () => prizePanel();
-    const s = $("brStk2"), v = $("brStkv"); s.oninput = () => { R.stake = +s.value; v.textContent = fmt(R.stake); const p = root.querySelector(".brr-pop .bt-stake"); if (p) p.innerHTML = CNb() + stakeNow(); A.sfx.tick && A.sfx.tick(1); };
-    root.querySelectorAll(".brr-stakes [data-q]").forEach(b => (b.onclick = () => { const max = Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN); R.stake = b.dataset.q === "min" ? MIN : b.dataset.q === "all" ? max : Math.max(MIN, Math.round(RUN.coins / 2 / MIN) * MIN); s.value = Math.min(R.stake, max); v.textContent = fmt(+s.value); R.stake = +s.value; const p = root.querySelector(".brr-pop .bt-stake"); if (p) p.innerHTML = CNb() + stakeNow(); A.sfx.chip && A.sfx.chip(0.4); }));
-    root.querySelectorAll(".brr-tbl").forEach(t => (t.onclick = () => open(t.dataset.g, t)));
-    root.addEventListener("keydown", e => { if (e.key === "Escape" && root.querySelector(".brr-pop")) { closePop(); e.stopPropagation(); } });
+    const s = $("brStk2"), v = $("brStkv"); s.oninput = () => { R.stake = +s.value; v.textContent = fmt(R.stake); pill(); A.sfx.tick && A.sfx.tick(1); };
+    root.querySelectorAll(".brr-stakes [data-q]").forEach(b => (b.onclick = () => { const max = maxStake(); R.stake = b.dataset.q === "min" ? MIN : b.dataset.q === "all" ? max : Math.max(MIN, Math.round(RUN.coins / 2 / MIN) * MIN); s.value = Math.min(R.stake, max); R.stake = +s.value; v.textContent = fmt(R.stake); pill(); A.sfx.chip && A.sfx.chip(0.4); }));
   }
   const dealerOff = () => { try { A.dealer.casino(true); } catch (e) { /* sin crupier */ } };   // el crupier de la esquina no sale en el salon (las pantallas de casino lo vuelven a llamar al cerrarse)
-  function closePop() { root.querySelectorAll(".brr-pop").forEach(p => p.remove()); }
-  function open(id, tbl) {
-    if (busy || R.over) return; closePop(); prevCoins = RUN.coins; const t = TABLES.find(x => x.id === id), r = R.play + 1, pop = document.createElement("div"); pop.className = "brr-pop";
-    pop.innerHTML = `<button type="button" class="brr-x" aria-label="${esc(A.tx(T.close))}">×</button><div class="tb-sup">${t.core ? COREC[id].card() : cardOf(id, r)}</div>`;
-    const x = parseFloat(tbl.style.left), y = parseFloat(tbl.style.top); pop.style.left = Math.max(16, Math.min(1280 - 273, x > 640 ? x - 270 : x + 80)) + "px"; pop.style.top = Math.max(120, Math.min(720 - 200, y - 70)) + "px";
-    root.querySelector(".brr-board").appendChild(pop); pop.querySelector(".brr-x").onclick = closePop;
-    const el = pop.querySelector(".sup.bet"); if (t.core) COREC[id].wire(el, r); else wireExt(id, el, r);
-    const first = el.querySelector("button"); if (first) first.focus({ preventScroll: true });
-  }
+  function closePop() { /* la carta ya no es una ventana: vive en el pasillo */ }
   const cardOf = (id, r) => { const cx = mkCx(r), d = A.adv.casino.def(id); cx.head = headFor(id); return d.card(cx); };
   function wireExt(id, el, r) { A.adv.casino.def(id).wire(el, mkCx(r)); }
   /* una jugada empieza cuando el juego cobra (deja su registro en RUN.reds[r]) y termina al cerrarse su pantalla */
@@ -246,7 +267,7 @@ window.AIQ = window.AIQ || {};
     const shown = rk => { const e = document.getElementById("brRk"); if (e) e.textContent = rk ? "#" + rk : "—"; }; let got; submitScore(final, R.play).then(rank => { got = rank || 0; shown(got); });
     setTimeout(() => { if (!root) return; closePop(); root.querySelector(".brr-board").appendChild(o); if (got != null) shown(got); $("brAgain").onclick = () => { o.remove(); entry(); }; $("brOut2").onclick = () => leave(true); }, 700);
   }
-  function leave(done) { closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
+  function leave(done) { if (hall) { try { hall.dispose ? hall.dispose() : root.querySelector(".brr-hall").__pasillo.dispose(); } catch (e) { /* ya cerrado */ } hall = null; } closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
   /* ---------- abrir ---------- */
   function open_() {
     if (!A.adv || !A.adv.casino || !A.adv.casino.core) return A.hub.screen("home");
