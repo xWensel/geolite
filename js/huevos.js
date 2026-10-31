@@ -154,29 +154,33 @@ window.AIQ = window.AIQ || {};
       clearTimeout(t); t = setTimeout(() => { n = 0; }, 3500);
       if (++n < 5) return; n = 0; busy = true; H.found("ticket"); rollo(tk);
     }, true);
+    /* el ticket CRECE de verdad, como una maquina de escribir: se saca de la maquetacion (la columna conserva su hueco, nada se mueve) y se ancla por abajo; cada renglon nuevo
+       entra en cuatro pasos por el borde de abajo y todo lo demas sube con el papel hasta salirse por arriba. La llama y la puntuacion son un solo cuerpo: la llama es un lienzo del propio
+       ticket y se queda donde estaba respecto a las cifras, asi que sube con ellas y al volver el rollo esta exactamente donde empezo */
     async function rollo(tk) {
-      const quieto = reduced(), pausa = ms => new Promise(r => setTimeout(r, ms));
-      const prev = { h: tk.style.height, ov: tk.style.overflow, mh: tk.style.maxHeight };
-      tk.style.height = tk.offsetHeight + "px"; tk.style.maxHeight = tk.offsetHeight + "px"; tk.style.overflow = "hidden";        // el papel ya no crece: lo nuevo empuja lo viejo hacia arriba
+      const quieto = reduced(), pausa = ms => new Promise(r => setTimeout(r, ms)), mid = tk.parentElement;
+      const prevT = tk.getAttribute("style"), prevM = mid.getAttribute("style");
+      mid.style.position = "relative"; mid.style.overflow = "visible";
+      const w = tk.offsetWidth, left = tk.offsetLeft, h0 = mid.offsetHeight, th0 = tk.offsetHeight, bot0 = h0 - (tk.offsetTop + th0);
+      const z = tk.getBoundingClientRect().width / Math.max(1, w), baja0 = tk.getBoundingClientRect().bottom;
+      const tope = Math.max(0, (innerHeight - 100 - baja0) / z);                                // lo que puede bajar el borde de abajo (sin pisar los botones)
+      mid.style.height = h0 + "px";
+      Object.assign(tk.style, { position: "absolute", left: left + "px", width: w + "px", top: "auto", bottom: bot0 + "px", margin: "0" });
       const nuevos = [];
-      const baja = to => new Promise(res => {                                                                                      // desplaza el rollo a pasos de pixel entero (como la caja)
-        if (quieto) { tk.scrollTop = to; return res(); }
-        const f = tk.scrollTop, dur = Math.max(160, Math.abs(to - f) * 5), t0 = performance.now();
-        const tick = now => { const k = Math.min(1, (now - t0) / dur); tk.scrollTop = Math.round(f + (to - f) * (1 - Math.pow(1 - k, 3))); if (k < 1 && tk.isConnected) requestAnimationFrame(tick); else res(); };
-        requestAnimationFrame(tick);
-      });
-      const fin = () => { nuevos.forEach(r => r.remove()); tk.scrollTop = 0; tk.style.height = prev.h; tk.style.maxHeight = prev.mh; tk.style.overflow = prev.ov; busy = false; };
+      const ancla = () => { const extra = tk.offsetHeight - th0; tk.style.bottom = (bot0 - Math.min(Math.max(0, extra), tope)) + "px"; };   // crece por abajo hasta el tope y luego, por arriba
+      const fin = () => { nuevos.forEach(r => r.remove()); if (prevT == null) tk.removeAttribute("style"); else tk.setAttribute("style", prevT); if (prevM == null) mid.removeAttribute("style"); else mid.setAttribute("style", prevM); busy = false; };
       try {
         const items = A.HV.tx.cinta;
         for (let i = 0; i < items.length; i++) {
           if (!tk.isConnected) return (busy = false);                                    // pasaste de pantalla: se lo lleva
           const row = document.createElement("div"); row.className = "gx-lead-row hv-renglon"; row.innerHTML = `<span>${esc(T(items[i][0]))}</span><s></s><b>${items[i][1] ? esc(T(items[i][1])) : ""}</b>`;
-          tk.appendChild(row); nuevos.push(row);
+          tk.appendChild(row); nuevos.push(row); ancla();
           if (A.sfx && A.sfx.chip) try { A.sfx.chip(Math.min(4, 1 + (i % 4))); } catch (er) { /* audio */ }
-          await baja(tk.scrollHeight - tk.clientHeight); await pausa(quieto ? 40 : 170);
+          const t0 = performance.now(); const sigue = () => { ancla(); if (performance.now() - t0 < 200) requestAnimationFrame(sigue); }; if (!quieto) sigue();
+          await pausa(quieto ? 40 : 230);
         }
         await pausa(1200 + 1000);                                                          // y su segundo de mas
-        await baja(0);                                                                     // el rollo vuelve: lo de siempre, sano y salvo
+        for (let k = nuevos.length - 1; k >= 0; k--) { nuevos[k].remove(); ancla(); if (!quieto) await pausa(55); }   // el rollo se rebobina renglon a renglon
       } finally { if (tk.isConnected) fin(); else busy = false; }
     }
   })();

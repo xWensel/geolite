@@ -68,3 +68,8 @@ html.reduce-motion .hh.hv-golpe, html.no-shake .hh.hv-golpe { animation: none; }
 .hv-brillo { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(105deg, transparent 38%, rgba(255, 243, 176, .5) 48%, rgba(255, 255, 255, .7) 50%, rgba(255, 243, 176, .5) 52%, transparent 62%) 120% 0 / 260% 100%; animation: hvBrillo .9s steps(12) 1 both; }
 @keyframes hvBrillo { from { background-position: 120% 0; } to { background-position: -20% 0; } }
 html.reduce-motion .hv-brillo { display: none; }
+
+/* cada renglon nuevo del ticket entra en cuatro pasos desde abajo, como una tecla de maquina de escribir (quieto con Movimiento: Minimo) */
+.gx-vd-ticket .hv-renglon { animation: hvRen .2s steps(4) both; }
+@keyframes hvRen { from { max-height: 0; opacity: .3; overflow: hidden; } to { max-height: 70px; opacity: 1; overflow: hidden; } }
+html.reduce-motion .gx-vd-ticket .hv-renglon { animation: none; }
