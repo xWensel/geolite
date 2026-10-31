@@ -127,7 +127,7 @@ window.AIQ = window.AIQ || {};
       <div class="ra-tag"><b></b><span></span></div>
       <div class="ra-top"><div class="ra-res"><span class="ra-plate"></span><span class="ra-msg"></span></div></div>
       <div class="ra-dealerbox bob"><div class="ra-dealer"></div><img class="ra-sweat s1" src="${AS}sweat.png" alt="" draggable="false"><img class="ra-sweat s2" src="${AS}sweat.png" alt="" draggable="false"></div>
-      <div class="ra-bubble"><span></span></div>
+      <div class="ra-bubble" data-bb><p></p></div>
       <div class="ra-band"><i class="rou-lights top"></i><i class="rou-lights bot"></i></div>
       <div class="ra-plaque ra-pay"></div>
       <div class="ra-card off"><img class="ra-base" src="${AS}card_${th}.png" alt="" draggable="false"><div class="ra-ct"></div><div class="ra-cf"></div><div class="ra-syms"></div><canvas class="ra-foil" width="${NW}" height="${NH}"></canvas><div class="ra-hls"></div></div>
@@ -195,14 +195,14 @@ window.AIQ = window.AIQ || {};
       const c = "g-" + g, dur = { tip: 620, shrug: 720, hop: 920, faint: 2850 }[g] || 700; dealerBox.classList.remove("g-tip", "g-shrug", "g-hop", "g-faint"); void dealerBox.offsetWidth; dealerBox.classList.add(c); later(() => dealerBox.classList.remove(c), dur);
     }
     function speak(p) {
-      SP.cur = true; bTx.textContent = p.text; bubble.classList.add("on"); if (p.face) setFace(p.face); if (p.g) gesture(p.g);
+      SP.cur = true; bTx.textContent = p.text; A.dealer.skin(bubble, p.v); bubble.classList.add("on"); if (p.face) setFace(p.face); if (p.g) gesture(p.g);
       if (spr) { clearInterval(talkIv); try { spr.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, p.text.length)) { clearInterval(talkIv); try { spr.talk(false); } catch (e) { /* nada */ } return; } try { spr.syl(); } catch (e) { /* nada */ } }, 70); }   // la boca al ritmo de la frase
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }
     function say(key, prio = 1, skipIfBusy) {
       const a = LN[key]; if (!a) return; if (skipIfBusy && SP.cur) return;
       let i = Math.floor(rnd() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(rnd() * (a.length - 1))) % a.length; LAST[key] = i;
-      const p = { text: tr(a[i].t) || "", face: a[i].f, g: a[i].g, prio };
+      const p = { text: tr(a[i].t) || "", v: A.dealer.vozOf(key), face: a[i].f, g: a[i].g, prio };
       if (SP.cur) { if (!SP.pend || prio >= SP.pend.prio) SP.pend = p; return; } speak(p);
     }
     const speechIdle = () => waitFor(res => { const iv = setInterval(() => { if (!alive() || (!SP.cur && !SP.pend)) { clearInterval(iv); res(); } }, 120); });

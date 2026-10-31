@@ -17,11 +17,9 @@
 .rou.plk .pk-left { position: absolute; left: 0; top: 0; width: 520px; height: 1080px; z-index: 6; pointer-events: none; }
 .rou.plk .pk-left .rou-pick { position: absolute; left: 60px; top: 40px; font-size: 15px; }
 .rou.plk .pk-dealer { position: absolute; z-index: 7; pointer-events: none; }
-.rou.plk .pk-bubble { position: absolute; left: 50px; top: 446px; width: 420px; z-index: 6; padding: 14px 20px 12px; background: #fff; color: #120a2a; border: 4px solid #0a0048; box-shadow: 0 6px 0 #0a0048;
+.rou.plk .pk-bubble { position: absolute; left: 50px; top: 446px; width: 420px; z-index: 6; padding: 14px 20px 12px;
   font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; }
 .rou.plk .pk-bubble.on { opacity: 1; transform: none; }
-.rou.plk .pk-bubble::before { content: ""; position: absolute; left: 200px; top: -26px; border: 12px solid transparent; border-bottom: 14px solid #0a0048; }
-.rou.plk .pk-bubble::after { content: ""; position: absolute; left: 204px; top: -17px; border: 8px solid transparent; border-bottom: 10px solid #fff; }
 .rou.plk .pk-hint { position: absolute; left: 60px; top: 700px; font: 900 34px/1.05 var(--serif); letter-spacing: .04em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f; opacity: 0; transition: opacity .25s; max-width: 430px; }
 .rou.plk .pk-hint.on { opacity: 1; }
 .rou.plk .pk-hist { position: absolute; left: 60px; top: 830px; width: 430px; display: flex; flex-wrap: wrap; gap: 10px; }

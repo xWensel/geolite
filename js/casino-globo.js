@@ -84,7 +84,7 @@ window.AIQ = window.AIQ || {};
         <div class="gb-top"><div class="gb-ghostlbl"></div><div class="gb-mult">×1,00</div><div class="gb-sub"></div></div><div class="gb-res"><span class="gb-plate"></span><span class="gb-msg"></span></div>
         <div class="gb-left"><div class="gb-pill gb-click gb-pstake"></div><div class="gb-pill gb-click gb-pauto"></div><button class="gb-back" type="button"></button></div>
         <div class="gb-alt"><div class="gb-alt-track"><div class="gb-alt-fill"></div></div><div class="gb-alt-ticks"></div><i class="gb-flag cash"></i><i class="gb-flag ghost"></i><b class="gb-alt-km"></b></div>
-        <div class="gb-dealerbox"></div><div class="gb-bubble"><span></span></div>
+        <div class="gb-dealerbox"></div><div class="gb-bubble" data-bb><p></p></div>
         <button class="gb-btn go" type="button"><b class="gb-btnA"></b><i class="gb-btnB"></i></button><div class="gb-hist"></div><div class="gb-count"></div></div>
       <div class="gb-frame"><i class="rou-lights top"></i><i class="rou-lights bot"></i><i class="gb-vl l"></i><i class="gb-vl r"></i></div></div><div class="gb-dealer"></div>`;
     let rig = null;
@@ -360,12 +360,12 @@ window.AIQ = window.AIQ || {};
     const rigSet = f => { if (rig) { try { rig.set(f); } catch (e) { /* nada */ } } }, rigPlay = g => { if (rig && !reduced) { try { rig.play(g); } catch (e) { /* nada */ } } };
     const lineOf = key => { const a = LN[key]; let i = Math.floor(rnd() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(rnd() * (a.length - 1))) % a.length; LAST[key] = i; return tr(a[i]) || ""; };
     function speak(p) {
-      SP.cur = true; bTx.textContent = p.text; bubble.classList.add("on"); rigSet(p.face); rigPlay(p.g);
+      SP.cur = true; bTx.textContent = p.text; A.dealer.skin(bubble, p.v); bubble.classList.add("on"); rigSet(p.face); rigPlay(p.g);
       if (rig) { clearInterval(talkIv); try { rig.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, p.text.length)) { clearInterval(talkIv); try { rig.talk(false); } catch (e) { /* nada */ } return; } try { rig.syl(); } catch (e) { /* nada */ } }, 70); }
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); rigSet("sly"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }
     function react(key, prio = 4, skipIfBusy) {
-      if (skipIfBusy && SP.cur) return; const rx = RX[key], p = { text: lineOf(key), face: FACE[pick1(rx[0])], g: GEST[pick1(rx[1])], prio };
+      if (skipIfBusy && SP.cur) return; const rx = RX[key], p = { text: lineOf(key), v: A.dealer.vozOf(key), face: FACE[pick1(rx[0])], g: GEST[pick1(rx[1])], prio };
       if (SP.cur) { if (!SP.pend || prio >= SP.pend.prio) SP.pend = p; return; } speak(p);
     }
     const speechIdle = () => new Promise((res, rej) => { const iv = setInterval(() => { if (!alive()) { clearInterval(iv); rej(CANCEL); } else if (!SP.cur && !SP.pend) { clearInterval(iv); res(); } }, 120); });

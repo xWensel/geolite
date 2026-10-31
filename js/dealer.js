@@ -1697,7 +1697,7 @@ window.AIQ = window.AIQ || {};
       "Comodín persigue el botón que elijas. Ni con mando te libras de él.|Joker chases whatever button you pick. Even with a controller, you can't shake him.|Joker poursuit le bouton que tu choisis. Même à la manette, tu ne t'en débarrasses pas.|O Coringa persegue o botão que você escolher. Nem com controle você se livra dele.|Joker jagt jeden Knopf, den du wählst. Nicht mal mit Controller wirst du ihn los.|Jolly insegue il pulsante che scegli. Nemmeno col controller te ne liberi.|Comodín persigue el botón que elijas. Ni con control te libras de él.|你选哪个按钮，小丑就追哪个。用手柄也甩不掉它。|조커는 네가 고른 버튼을 쫓아. 패드로 해도 못 피해.|ジョーカーは君が選んだボタンを追いかける。コントローラーでも逃げられないぞ。|Джокер гоняется за выбранной кнопкой. Даже с геймпадом от него не отделаться.|Joker goni każdy przycisk, który wybierzesz. Nawet z padem się od niego nie uwolnisz.",
     ],
     catSleep: [
-      "Shh, se ha dormido. Haz clic bajito.|Shh, he's asleep. Click quietly.|Chut, il s'est endormi. Clique tout doucement.|Psiu, ele dormiu. Clica baixinho.|Pssst, er schläft. Klick leise.|Ssst, si è addormentato. Clicca piano.|Shh, se durmió. Haz clic bajito.|嘘，它睡着了。点鼠标轻一点。|쉿, 잠들었어. 살살 클릭해.|シーッ、寝ちゃった。クリックは小さめにな。|Тсс, он уснул. Кликай потише.|Ciii, zasnął. Klikaj cichutko.",
+      "<s>Shh,</s> se ha dormido. Haz clic bajito.|<s>Shh,</s> he's asleep. Click quietly.|<s>Chut,</s> il s'est endormi. Clique tout doucement.|<s>Psiu,</s> ele dormiu. Clica baixinho.|<s>Pssst,</s> er schläft. Klick leise.|<s>Ssst,</s> si è addormentato. Clicca piano.|<s>Shh,</s> se durmió. Haz clic bajito.|<s>嘘，</s>它睡着了。点鼠标轻一点。|<s>쉿,</s> 잠들었어. 살살 클릭해.|<s>シーッ、</s>寝ちゃった。クリックは小さめにな。|<s>Тсс,</s> он уснул. Кликай потише.|<s>Ciii,</s> zasnął. Klikaj cichutko.",
       "Comodín duerme dieciséis horas al día. Yo, ninguna: alguien tiene que vigilarte.|Joker sleeps sixteen hours a day. Me, zero: somebody has to keep an eye on you.|Joker dort seize heures par jour. Moi, zéro : il faut bien que quelqu'un te surveille.|O Coringa dorme dezesseis horas por dia. Eu, nenhuma: alguém tem que ficar de olho em você.|Joker schläft sechzehn Stunden am Tag. Ich keine: Irgendwer muss dich ja im Auge behalten.|Jolly dorme sedici ore al giorno. Io, nessuna: qualcuno deve pur tenerti d'occhio.||小丑一天睡十六个小时。我一小时都不睡：总得有人盯着你。|조커는 하루에 열여섯 시간 자. 난 한 시간도 안 자. 누군가는 널 지켜봐야 하니까.|ジョーカーは一日16時間寝る。私はゼロ時間だ。誰かが君を見張らないとな。|Джокер спит шестнадцать часов в сутки. Я — ни минуты: кто-то же должен за тобой следить.|Joker śpi szesnaście godzin na dobę. Ja ani minuty: ktoś musi cię pilnować.",
       "Se ha dormido en la mesa. Es su forma de decirte que tardas mucho.|He fell asleep on the table. It's his way of saying you're taking too long.|Il s'est endormi sur la table. C'est sa façon de te dire que tu traînes.|Ele dormiu na mesa. É o jeito dele de dizer que você está demorando.|Er ist auf dem Tisch eingeschlafen. So sagt er dir, dass du ewig brauchst.|Si è addormentato sul tavolo. È il suo modo di dirti che ci metti troppo.|Se durmió en la mesa. Es su forma de decirte que tardas mucho.|它在牌桌上睡着了。这是在告诉你：你太慢了。|테이블 위에서 잠들었네. 너 너무 오래 걸린다는 뜻이야.|テーブルの上で寝ちまった。君が遅すぎるって言いたいのさ。|Уснул прямо на столе. Так он намекает, что ты слишком долго.|Zasnął na stole. Tak ci mówi, że strasznie się guzdrzesz.",
     ],
@@ -2666,6 +2666,7 @@ window.AIQ = window.AIQ || {};
      la nota ni el dock: mide el hueco real, encoge el retrato hasta que quepa y sube o estrecha el bocadillo (ventanas bajas, portatiles
      pequenos, movil en horizontal). Antes el retrato de 250 px tapaba la placa en pantallas de poca altura. */
   function fitCorner() {
+    bbkFit();                                                         // v0.4.34: si cambia de pantalla, cambia su escala: la letra del globo sigue siendo de 27 px reales
     if (!el || el.classList.contains("camp") || el.classList.contains("lvpos")) return;      // en el Campamento su sitio lo mide campRoom
     if (el.classList.contains("aside")) return asidePlace();                     // v0.3.172: apartado en otra pantalla del hub (D.aside)
     const bs = bubble.style, fs = face.style;
@@ -2853,7 +2854,7 @@ window.AIQ = window.AIQ || {};
     }));
   };
   addEventListener("resize", () => { if (D.busy) { fitCorner(); if (el && el.classList.contains("aside")) asidePlace(); requestAnimationFrame(cabe); } else requestAnimationFrame(cabeFig); });
-  D.refit = () => { if (D.busy) fitCorner(); };
+  D.refit = () => { if (D.busy) { bbkFit(); fitCorner(); } };
   D.asideOn = () => !!(el && el.classList.contains("aside") && el.classList.contains("in"));   // v0.3.205: acabando una frase en otra pantalla (los avisos esperan a que acabe: js/jukebox.js, js/profile.js)                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
   /* v0.32: la cara y el gesto de cada frase. Manda la escena si lo pide (o.face / o.gesture); si no, la tabla XMAP por clave (y por indice,
      "clave#i"), revisada frase a frase; si la frase no esta en la tabla, el mood de siempre. Un gesto no se repite dos veces seguidas en 20 s */
@@ -2875,6 +2876,13 @@ window.AIQ = window.AIQ || {};
       drama: "hoverQuit hoverAbandon quitAskLong quitAskName quitPlead quitBribe quitRetPlead quitSeasonExpress sulk sulkBack retireEnd hoverOver hoverOver2 funeral shopStrip shopTryNoBuy shopLeave retireEndCat"
     };
     for (const v in G) G[v].split(" ").forEach(k => { VOZ[k] = v; });
+    const C = {   // los 4 juegos de la Barra (js/casino-*.js: su globo es el mismo, A.dealer.skin)
+      canto: "gbIntro rcIntro plkDrop plkCenter",
+      nervios: "gbFly gbCloseCall rcTension rcCasi plkNear plkEdge diceTie2",
+      grito: "gbCash3 gbBurst100 gbBurstHigh gbCeiling rcGordo plkMax diceBoxcars diceDealer12",
+      drama: "gbRegret diceWinBig"
+    };
+    for (const v in C) C[v].split(" ").forEach(k => { VOZ[k] = v; });
   }
   const VOZ_OLD = { shout: "grito", tremble: "nervios", whisper: "susurro", think: "susurro", dark: "siniestro", sing: "canto", glitch: "senal", gold: "anuncio" };
   const VOCES = ["grito", "canto", "susurro", "nervios", "siniestro", "libreta", "senal", "anuncio", "sueno", "drama", "jefe"];
@@ -2888,6 +2896,14 @@ window.AIQ = window.AIQ || {};
     return { plain: plain.join(""), cls };
   }
   const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
+  /* v0.4.34: TAMANO UNICO. El globo es SIEMPRE el mismo (27 px reales por el tamano del texto de Ajustes) en cualquier pantalla: las que escalan con --k (veredicto, telon del cofre,
+     Duelo, casino...) lo encogian o lo agrandaban. --bbk = cuanto escala la pantalla donde esta (rect / offset); css/bocadillo.css divide la letra por el. */
+  const bbkOf = host => {   // producto del zoom de todos los ancestros (exacto); si la escala viene de un transform (escenarios del casino), el cociente rect/offset
+    let k = 1; for (let a = host; a; a = a.parentElement) { const z = parseFloat(getComputedStyle(a).zoom); if (z && z !== 1) k *= z; }
+    if (Math.abs(k - 1) < 0.001 && host) { const w = host.offsetWidth, r = host.getBoundingClientRect(); if (w > 120 && r.width) k = r.width / w; }
+    return k > 0.2 && k < 5 ? Math.round(k * 1000) / 1000 : 1;
+  };
+  const bbkFit = () => { if (el) el.style.setProperty("--bbk", bbkOf(el)); };
   function voiceFor(line, o) {
     if (o.sty) return VOZ_OLD[o.sty] || (o.sty === "habla" ? "" : VOCES.includes(o.sty) ? o.sty : "");
     if (o.voice !== undefined) return o.voice;
@@ -2933,7 +2949,7 @@ window.AIQ = window.AIQ || {};
     spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " aside" : peek.includes("peek") ? peek : home + peek); bubble.classList.add("on");
     if (o.pos) { el.removeAttribute("style"); el.className = "dealer in lvpos lv-" + o.pos + " " + mood; document.body.appendChild(el); }   // la mesa elige donde sale: una esquina o el centro grande, por encima de todo
     else if (el.parentNode === document.body) (D.host || $("app")).appendChild(el);
-    if (V) bubble.dataset.v = V; else delete bubble.dataset.v; tagEl.textContent = V === "libreta" ? A.tx(TAG_LIBRETA) : V === "senal" ? "Don Crupier.exe" : "";   // la voz del bocadillo (css/bocadillo.css); la mesa en vivo la elige con o.sty
+    bbkFit(); if (V) bubble.dataset.v = V; else delete bubble.dataset.v; tagEl.textContent = V === "libreta" ? A.tx(TAG_LIBRETA) : V === "senal" ? "Don Crupier.exe" : "";   // la voz del bocadillo (css/bocadillo.css); la mesa en vivo la elige con o.sty
     bubble.classList.toggle("live", !!o.live); if (o.live) bubble.querySelector(".dl-live span").textContent = A.pick6(LIVE_TAG);   // js/vivo.js: el crupier de verdad (el autor) te habla en directo
     if (o.lang) { bubble.lang = o.lang; bubble.style.setProperty("--dll", /^(zh|ja|ko|ru)/.test(o.lang) ? ".889" : "1"); } else if (bubble.lang) { bubble.removeAttribute("lang"); bubble.style.removeProperty("--dll"); }
     /* un espacio de ancho cero SIEMPRE detras de lo que falta: sin el, al escribir la ultima letra `text-wrap: pretty` repartia las lineas distinto y la frase saltaba de renglon al acabar */
@@ -3122,6 +3138,9 @@ window.AIQ = window.AIQ || {};
   D.pick = (key, d) => (LINES[key] ? say1(key, d) : null);
   D.has = key => !!(LINES[key] && LINES[key].length);
   D.sayKey = (key, o = {}) => { const t = D.pick(key, o.data); if (!t) return false; D.say(t, Object.assign({ hold: holdFor(t) }, o)); return true; };
+  /* el globo de cada juego de la Barra es el MISMO globo (css/bocadillo.css, [data-bb]): voz por clave de frase y escala de su escenario */
+  D.vozOf = key => VOZ[key] || "";
+  D.skin = (b, v) => { if (!b) return; b.setAttribute("data-bb", ""); if (v) b.dataset.v = v; else delete b.dataset.v; b.style.setProperty("--bbk", bbkOf(b.parentElement)); };
   D.lines = LINES; D.LINGER = LINGER;
   D._fake = (kind, n) => fakeAch(kind || "idle", n || 75);   // solo para pruebas: fuerza el logro falso
 

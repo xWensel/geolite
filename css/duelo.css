@@ -50,7 +50,7 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .seatw { position: relative; }
 .du-st .seatw .dealer.big { position: absolute; left: 0; bottom: 0; flex-direction: row; align-items: center; gap: 14px; z-index: 5; }
 .du-st .seatw .dealer.big .dl-face { width: 128px; height: 128px; order: 0; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .4)); }
-.du-st .seatw .dealer.big .dl-bubble { order: 1; margin: 0; width: max-content; max-width: 470px; padding: 10px 14px 12px; font-size: calc(22px * var(--dll, 1)); line-height: 1.12; clip-path: none; background: #fff; color: #14110f; box-shadow: 0 0 0 2px #14110f, 0 6px 0 2px rgba(2, 6, 4, .55); transform-origin: 0 50%; }
+.du-st .seatw .dealer.big .dl-bubble { order: 1; margin: 0; width: max-content; max-width: 470px; transform-origin: 0 50%; }   /* el mismo globo que en todas partes (css/bocadillo.css): ya no lleva su caja blanca ni su letra de 22 px */
 
 /* ---------------------------------------------------------------- 1 · LA SALA */
 .du-st .lob { grid-template-rows: 64px minmax(0, 1fr) 132px; }

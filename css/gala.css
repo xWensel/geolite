@@ -175,7 +175,7 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
 :is(.gx-vd, .cf-tel) .dealer.inline { flex-direction: column; align-items: center; gap: 10px; transform: none; }
 :is(.gx-vd, .cf-tel) .dealer.inline .dl-face { width: 224px; height: 224px; order: 2; }
 :is(.gx-vd, .cf-tel) .dealer.inline .dl-face > .cr-cv:not(.mini) { top: auto; bottom: 0; transform: translateX(-50%); }
-:is(.gx-vd, .cf-tel) .dealer.inline .dl-bubble { margin: 0; max-width: min(100%, 380px); font-size: calc(22px * var(--dll, 1)); text-align: center; order: 1; transform-origin: 50% 100%; padding-bottom: 20px;
+:is(.gx-vd, .cf-tel) .dealer.inline .dl-bubble { margin: 0; max-width: min(100%, 440px); font-size: calc(27px * var(--dll, 1)); text-align: center; order: 1; transform-origin: 50% 100%; padding-bottom: 20px;
   --bbx: 50%; --bbt: 12px; }
 .gx-vd-iq { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 14px; width: min(100%, 320px); }
 .gx-vd-iq > .ic, .gx-vd-iq > img { grid-row: span 2; width: 56px; height: 56px; image-rendering: pixelated; }
