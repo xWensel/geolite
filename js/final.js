@@ -91,6 +91,13 @@ window.AIQ = window.AIQ || {};
     return root;
   }
   const later = (fn, ms) => { const s = st; if (s) s.T.push(setTimeout(() => { if (st === s) fn(); }, ms)); };
+  /* la escala del rodillo es ENTERA (--fk): con la del juego (p. ej. 1,275 en 1080p) la letra pixelada se emborronaba y la columna se metia bajo las cortinas.
+     Por debajo de 1 (ventanas pequenas) no hay escala entera posible y se queda la del juego */
+  function fitK() {
+    if (!root) return; const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--k")) || 1;
+    root.style.setProperty("--fk", String(k >= 1 ? Math.max(1, Math.floor(k + 0.001)) : k));
+  }
+  addEventListener("resize", () => { if (st) fitK(); });
 
   /* ---------- el rodillo */
   function rollHTML(o) {
@@ -144,7 +151,7 @@ window.AIQ = window.AIQ || {};
   }
 
   function play(o = {}) {
-    mount(); if (st) stop();
+    mount(); if (st) stop(); fitK();
     st = { o, T: [], phase: "roll", y: 0, end: 0, speed: 0, hold: 4.5, fast: false, raf: 0, last: 0 };
     /* v0.3.236: o.retired === false (los creditos vistos desde Ajustes sin haber jubilado nunca al crupier): sin su foco ni su placa. o.replay: desde Ajustes
        o el segundo final: el juego no se cierra, asi que el aviso final dice "volver" y no "cerrar el casino" */
@@ -186,7 +193,7 @@ window.AIQ = window.AIQ || {};
     const r = $("finRoll"), e = $("finEnd");
     root.classList.add("wide");                                         // las cortinas se abren del todo: sitio para su globo
     r.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: "forwards" }).onfinish = () => { r.style.visibility = "hidden"; };
-    later(() => { if (A.sfx.spot && !e.classList.contains("nodealer")) A.sfx.spot(); e.classList.add("lit"); }, 500);
+    later(() => { if (A.sfx.spot) A.sfx.spot(); e.classList.add("lit"); }, 500);
     later(() => e.classList.add("plated"), 1400);
     later(() => {
       const next = () => later(() => {
@@ -201,7 +208,7 @@ window.AIQ = window.AIQ || {};
      Sin crupier (creditos desde Ajustes sin haberlo jubilado) no hay escena. Con Movimiento en Minimo no hay apagon: la pose y ya */
   function tachan(next) {
     const D = A.dealer, CR = A.crupier, cm = A.comodin, e = $("finEnd");
-    if (!st || e.classList.contains("nodealer") || !D || !D.face || !cm || !A.COMODIN_DATA) return next();
+    if (!st || !D || !D.face || !cm || !A.COMODIN_DATA) return next();
     const k = () => (D.k && D.k()) || 3, dpr = window.devicePixelRatio || 1, cw = (A.COMODIN_DATA.box[2] - A.COMODIN_DATA.box[0]) * k() / dpr;
     const host = document.createElement("div"); host.className = "fin-cat"; root.insertBefore(host, root.querySelector(".fin-scan"));
     st.cat = host;
