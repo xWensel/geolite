@@ -249,11 +249,11 @@ A.barraHall = function (cv, X) {
   function emissive(time) {
     const c = Math.round(cam), e = ex; e.imageSmoothingEnabled = false; e.clearRect(0, 0, IW, IH); e.save(); e.translate(0, OY); const fl = MM ? 1 : 1 + (Math.sin(time * 0.013) * 0.04 + Math.sin(time * 0.037) * 0.03);
     for (let i = 0; i < N; i++) { const sx = L[i].px - c; if (sx < -90 || sx > IW + 90) continue; const lp = lamps[L[i].room], on = i + 1 === stop, sway = MM ? 0 : (Math.floor(time / 900 + i * 1.7) % 4 === 0 ? 1 : 0);
-      e.globalAlpha = on ? 0.4 * fl : 0.18; e.drawImage(haze, sx - 75, 126); e.globalAlpha = clamp((on ? 1 : 0.62) * (on ? fl : 1) * (lp.k || 1), 0, 1); e.drawImage(lp.glow, sx - 30 + sway, lp.top); e.globalAlpha = 1;
+      e.globalAlpha = on ? 0.26 * fl : 0.11; e.drawImage(haze, sx - 75, 126); e.globalAlpha = clamp((on ? 0.8 : 0.5) * (on ? fl : 1) * (lp.k || 1), 0, 1); e.drawImage(lp.glow, sx - 30 + sway, lp.top); e.globalAlpha = 1;
       e.fillStyle = "rgb(255,246,205)"; e.fillRect(sx - 4 + sway, lp.top + lp.bulbY, 8, 3); e.fillStyle = "rgb(255,215,130)"; e.fillRect(sx - 7 + sway, lp.top + lp.bulbY + 1, 14, 1);
       const g = L[i], em = emblem[g.id]; if (em && on && !g.soon) { e.globalAlpha = 0.22 + 0.08 * Math.sin(time * 0.004); const bb = embBox[g.id]; e.drawImage(em, sx - bb.cx, TOPC - 9 - bb.bottom); e.globalAlpha = 1; } }
-    if (hallLamp) { const sx = HALLX - c + 62; if (sx > -90 && sx < IW + 90) { e.globalAlpha = 0.4; e.drawImage(haze, sx - 75, 126); e.globalAlpha = 0.85; e.drawImage(hallLamp.glow, sx - 30, 88); e.globalAlpha = 1; e.fillStyle = 'rgb(255,246,205)'; e.fillRect(sx - 4, 88 + hallLamp.bulbY, 8, 3); } }
-    gates.forEach(s => { const sx = Math.round(s.x - c - s.w / 2); if (sx > IW || sx + s.w < 0) return; const t = Math.floor(time / 90) % 97, f = MM ? 1 : (t === 3 ? 0.35 : t === 5 ? 0.7 : 1); e.globalAlpha = f; e.drawImage(s.em, sx, 92); e.globalAlpha = 1; });
+    if (hallLamp) { const sx = HALLX - c + 62; if (sx > -90 && sx < IW + 90) { e.globalAlpha = 0.26; e.drawImage(haze, sx - 75, 126); e.globalAlpha = 0.7; e.drawImage(hallLamp.glow, sx - 30, 88); e.globalAlpha = 1; e.fillStyle = 'rgb(255,246,205)'; e.fillRect(sx - 4, 88 + hallLamp.bulbY, 8, 3); } }
+    gates.forEach(s => { const sx = Math.round(s.x - c - s.w / 2); if (sx > IW || sx + s.w < 0) return; const t = Math.floor(time / 90) % 97, f = MM ? 1 : (t === 3 ? 0.35 : t === 5 ? 0.7 : 1); e.globalAlpha = f * 0.85; e.drawImage(s.em, sx, 92); e.globalAlpha = 1; });
     const csx = 50 - c; if (neonEntry) { const sx = csx + 118 - Math.round(neonEntry.w / 2); if (sx < IW && sx + neonEntry.w > 0) e.drawImage(neonEntry.em, sx, 92); }
     sconceXs(c).forEach(sx => { e.fillStyle = "rgb(255,236,170)"; e.fillRect(sx - 3, 152, 6, 3); e.fillStyle = "rgb(255,200,110)"; e.fillRect(sx - 4, 153, 8, 1); });
     { const sx = 120 - Math.round(c * 0.8); if (sx > -240 && sx < IW) { e.fillStyle = "rgba(255,225,150,.55)"; e.fillRect(sx, 148, 192, 2); e.fillRect(sx, 181, 192, 2); } if (csx > -260 && csx < IW) { e.fillStyle = "rgba(255,210,120,.6)"; e.fillRect(csx + 6, FLOOR + 28, 224, 1); } }
@@ -264,17 +264,20 @@ A.barraHall = function (cv, X) {
   function addMap(map, mw, mh, ox0, oy0, I) { const x0 = Math.max(0, ox0), y0 = Math.max(0, oy0), x1 = Math.min(IW, ox0 + mw), y1 = Math.min(IH, oy0 + mh); for (let y = y0; y < y1; y++) { let i = y * IW + x0, m = (y - oy0) * mw + (x0 - ox0); for (let x = x0; x < x1; x++, i++, m++) Lw[i] += I * map[m]; } }
   function compose(time) {
     const c = Math.round(cam), fl = MM ? 1 : 1 + (Math.sin(time * 0.013) * 0.05 + Math.sin(time * 0.037) * 0.035); Lw.fill(0);
-    for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -190 || lx > IW + 190) continue; addMap(lampLight, LMW, LMH, lx + LM.x0, LM.y0 + OY, i + 1 === stop ? 1.12 * fl : 0.52); }
+    for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -190 || lx > IW + 190) continue; addMap(lampLight, LMW, LMH, lx + LM.x0, LM.y0 + OY, i + 1 === stop ? 0.85 * fl : 0.4); }
     sconceXs(c).forEach(sx => addMap(sconceLight, SCW, SCH, sx - 50, 102 + OY, 1));
-    { const hx = HALLX - c + 62; if (hx > -190 && hx < IW + 190) addMap(lampLight, LMW, LMH, hx + LM.x0, LM.y0 + OY, 0.9 * fl); }
+    { const hx = HALLX - c + 62; if (hx > -190 && hx < IW + 190) addMap(lampLight, LMW, LMH, hx + LM.x0, LM.y0 + OY, 0.7 * fl); }
     { const sx = 120 - Math.round(c * 0.8); if (sx > -300 && sx < IW) for (let y = 128 + OY; y < 204 + OY; y++) { const v = 0.4 * (1 - Math.abs(y - OY - 164) / 38); if (v <= 0) continue; const x0 = Math.max(0, sx - 20), x1 = Math.min(IW, sx + 230); for (let x = x0, i = y * IW + x0; x < x1; x++, i++) Lw[i] += v; } const csx = 50 - c; if (csx > -260 && csx < IW) for (let y = 150 + OY; y < 300 + OY; y++) { const dy = (y - OY - 236) / 70; if (dy * dy >= 1) continue; const x0 = Math.max(0, csx - 20), x1 = Math.min(IW, csx + 260); for (let x = x0, i = y * IW + x0; x < x1; x++, i++) { const dx = (x - (csx + 118)) / 130, e2 = dx * dx + dy * dy; if (e2 < 1) Lw[i] += 0.62 * (1 - e2); } } }
     const src = bx.getImageData(0, 0, IW, IH).data, dst = lit.data;
     for (let p = 0, i = 0, y = 0; y < IH; y++) for (let x = 0; x < IW; x++, p++, i += 4) { const lw = Lw[p], s = (AMB + lw) * vig[p], q2 = Math.floor(s * STEPS + BAY[((y & 7) << 3) | (x & 7)]) / STEPS, f = q2 < 0.05 ? 0.05 : q2 > 1.25 ? 1.25 : q2, wf = lw > 0.001 ? lw / (AMB + lw) : 0;
       dst[i] = src[i] * f * (0.84 + 0.3 * wf); dst[i + 1] = src[i + 1] * f * (0.92 + 0.1 * wf); dst[i + 2] = src[i + 2] * f * (1.08 - 0.3 * wf); dst[i + 3] = 255; }
     fx.putImageData(lit, 0, 0); fx.globalCompositeOperation = "lighter"; fx.drawImage(emisC, 0, 0);
     bl1x.clearRect(0, 0, 160, 90); bl1x.imageSmoothingEnabled = true; bl1x.drawImage(emisC, 0, 0, 160, 90); bl2x.clearRect(0, 0, 80, 45); bl2x.imageSmoothingEnabled = true; bl2x.drawImage(bl1, 0, 0, 80, 45);
-    fx.imageSmoothingEnabled = true; fx.globalAlpha = 0.8; fx.drawImage(bl1, 0, 0, IW, IH); fx.globalAlpha = 0.9; fx.drawImage(bl2, 0, 0, IW, IH); fx.globalAlpha = 1; fx.imageSmoothingEnabled = false;
+    fx.imageSmoothingEnabled = true; fx.globalAlpha = 0.42; fx.drawImage(bl1, 0, 0, IW, IH); fx.globalAlpha = 0.45; fx.drawImage(bl2, 0, 0, IW, IH); fx.globalAlpha = 1; fx.imageSmoothingEnabled = false;
     if (!MM) for (let i = 0; i < N; i++) { const lx = L[i].px - c; if (lx < -80 || lx > IW + 80) continue; const on = i + 1 === stop; for (let k = 0; k < (on ? 10 : 4); k++) { const ph = hash(i, k, 6) * 6.28, sp = 0.0006 + hash(i, k, 7) * 0.0007, yy = OY + 134 + ((hash(i, k, 8) * 130 + time * sp * 60 * (0.6 + hash(i, k, 9))) % 130), t = (yy - OY - 134) / 130, hw = 9 + 54 * t, xx = lx + Math.sin(time * 0.0007 + ph) * hw * 0.75 + (hash(i, k, 10) - 0.5) * hw * 0.4, a = (0.3 + 0.45 * (0.5 + 0.5 * Math.sin(time * 0.003 + ph))) * (1 - t * 0.5) * (on ? 1 : 0.6); fx.fillStyle = "rgba(255,240,196," + a.toFixed(2) + ")"; fx.fillRect(Math.round(xx), Math.round(yy), 1, 1); } }
+    /* las cortinas van DELANTE de todo y son opacas: ni la luz, ni el neon, ni el bloom, ni el polvo se ven a traves (se vuelven a pintar encima, con su sombra de sala) */
+    fx.globalCompositeOperation = "source-over"; fx.imageSmoothingEnabled = false; fx.drawImage(curtain, 0, 0); fx.save(); fx.translate(IW, 0); fx.scale(-1, 1); fx.drawImage(curtain, 0, 0); fx.restore();
+    fx.fillStyle = "rgba(0,0,0,.32)"; fx.fillRect(0, 0, curtain.width, IH); fx.fillRect(IW - curtain.width, 0, curtain.width, IH);
     fx.globalCompositeOperation = "source-over"; ox.drawImage(finC, 0, 0, IW * 2, IH * 2);
   }
   /* ====================== bucle ====================== */
