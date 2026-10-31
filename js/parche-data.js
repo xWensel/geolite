@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.48",
+      name: L("Una ruleta menos", "One roulette fewer", "Une roulette de moins", "Uma roleta a menos", "Ein Roulette weniger", "Una roulette in meno", "", "少一张轮盘", "룰렛 하나 줄었어요", "ルーレットが1つ減った", "Одной рулеткой меньше", "Jedna ruletka mniej"),
+      date: "2026-11-01",
+      summary: L("«Rojo o negro» sale de La Barra de la casa: la ruleta europea ya hace lo mismo y más.", "\"Red or black\" leaves the House Bar: the European roulette already does the same and more.", "« Rouge ou noir » quitte le Bar de la maison : la roulette européenne fait déjà la même chose, et plus.", "\"Vermelho ou preto\" sai do Bar da casa: a roleta europeia já faz o mesmo e mais.", "„Rot oder Schwarz“ verlässt die Bar des Hauses: Das europäische Roulette kann dasselbe und mehr.", "«Rosso o nero» lascia il Bar della casa: la roulette europea fa già lo stesso e di più.", "", "「红或黑」退出赌场吧台：欧式轮盘已经能做同样的事，而且更多。", "‘빨강 아니면 검정’이 하우스 바에서 빠집니다. 유러피안 룰렛이 같은 일을 더 많이 해요.", "「赤か黒か」はハウスのバーから外れる。ヨーロピアン・ルーレットが同じことをもっとできるから。", "«Красное или чёрное» уходит из бара: европейская рулетка уже умеет то же и больше.", "„Czerwone albo czarne” znika z baru: ruletka europejska robi to samo i więcej."),
+      chapters: [
+        { id: "rojo-0448", kicker: L("Sale", "Removed", "Retiré", "Removido", "Entfernt", "Rimosso", "", "移除", "제거", "削除", "Убрано", "Usunięto"),
+          title: L("La Barra de la casa", "The House Bar", "Le Bar de la maison", "O Bar da casa", "Die Bar des Hauses", "Il Bar della casa", "", "赌场吧台", "하우스 바", "ハウスのバー", "Бар заведения", "Bar kasyna"),
+          entries: [
+            E(L("Sin «Rojo o negro» en La Barra", "No \"Red or black\" in the House Bar", "Plus de « Rouge ou noir » au Bar", "Sem \"Vermelho ou preto\" no Bar", "Kein „Rot oder Schwarz“ in der Bar", "Niente «Rosso o nero» nel Bar", "", "吧台不再有「红或黑」", "하우스 바에서 ‘빨강 아니면 검정’ 제거", "ハウスのバーから「赤か黒か」を撤去", "Без «Красного или чёрного» в баре", "Bez „Czerwonego albo czarnego” w barze"), "out", "0.4.48", [
+              L("En el modo La Barra de la casa ya no está la mesa de **Rojo, negro o verde**: con la ruleta europea, que gira siempre y admite todas las apuestas, hacía lo mismo. En la Aventura sigue igual.", "In The House Bar mode the **Red, black or green** table is gone: with the European roulette, which always spins and takes every bet, it did the same thing. In the Adventure it stays as it was.", "Dans le mode Bar de la maison, la table **Rouge, noir ou vert** a disparu : avec la roulette européenne, qui tourne toujours et accepte toutes les mises, elle faisait la même chose. Dans l'Aventure, rien ne change.", "No modo Bar da casa, a mesa **Vermelho, preto ou verde** saiu: com a roleta europeia, que gira sempre e aceita todas as apostas, fazia o mesmo. Na Aventura continua igual.", "Im Modus Bar des Hauses gibt es den Tisch **Rot, Schwarz oder Grün** nicht mehr: Mit dem europäischen Roulette, das immer dreht und alle Einsätze annimmt, tat er dasselbe. Im Abenteuer bleibt alles gleich.", "Nel modo Bar della casa non c'è più il tavolo **Rosso, nero o verde**: con la roulette europea, che gira sempre e accetta tutte le puntate, faceva la stessa cosa. Nell'Avventura resta uguale.", "", "在赌场吧台模式中，**红、黑或绿**这张桌子已移除：欧式轮盘一直在转并支持所有下注，作用相同。冒险模式里保持不变。", "하우스 바 모드에서 **빨강·검정·초록** 테이블이 사라졌어요. 늘 돌면서 모든 베팅을 받는 유러피안 룰렛이 같은 역할을 합니다. 어드벤처에서는 그대로예요.", "ハウスのバーモードから**赤・黒・緑**のテーブルを外した。常に回り全てのベットを受けるヨーロピアン・ルーレットが同じ役目を果たすため。アドベンチャーはそのまま。", "В режиме «Бар заведения» стол **«Красное, чёрное или зелёное»** убран: европейская рулетка, которая всегда крутится и принимает все ставки, делает то же самое. В Приключении всё остаётся как было.", "W trybie Bar kasyna nie ma już stołu **Czerwone, czarne lub zielone**: ruletka europejska, która kręci się cały czas i przyjmuje wszystkie zakłady, robiła to samo. W Przygodzie nic się nie zmienia."),
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.47",
       name: L("Cortinas delante, luces más suaves", "Curtains in front, softer lights", "Rideaux devant, lumières plus douces", "Cortinas na frente, luzes mais suaves", "Vorhänge vorn, weicheres Licht", "Tende davanti, luci più morbide", "", "窗帘在前，灯光更柔和", "커튼은 앞에, 조명은 더 부드럽게", "カーテンが手前、照明はやわらかく", "Шторы впереди, свет мягче", "Zasłony z przodu, łagodniejsze światła"),
       date: "2026-11-01",

@@ -94,7 +94,7 @@ window.AIQ = window.AIQ || {};
   const saveP = () => { try { A.profile.save(); } catch (e) { /* sin almacenamiento */ } };
   /* ---------- las mesas (las que existen; las demas no se ven hasta que existan) ---------- */
   const TABLES = [
-    { id: "red", n: "bet:red", ico: "bet_red", c: ["#2f8a5c", "#0f3b28"], at: [150, 235], core: 1 },
+    /* «Rojo o negro» ya no esta en La Barra (v0.4.48): la ruleta europea hace lo mismo; sigue en la Aventura (COREC.red queda por si vuelve) */
     { id: "coin", n: "bet:coin", ico: "bet_coin", c: ["#2d62b8", "#0f2548"], at: [350, 235], core: 1 },
     { id: "wheel", n: "bet:wheel", ico: "bet_wheel", c: ["#8a3a9a", "#2d0f38"], at: [150, 415], core: 1 },
     { id: "cups", n: "bet:cups", ico: "bet_cups", c: ["#a02a4a", "#3a0c1a"], at: [350, 415], core: 1 },
