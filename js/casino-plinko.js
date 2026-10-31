@@ -282,7 +282,7 @@ window.AIQ = window.AIQ || {};
       if (ST.dropped) return; const stake = stakes[stakeI];
       if (run.coins < stake) { A.sfx.deny(); cx.shake(Q(".pk-go")); return; }
       ST.dropped = true; ST.phase = "drop"; ov.classList.add("dropped"); Q(".pk-back2").hidden = true; sh.waiting(false);
-      const att = run.attempt || 0, res = decide(`${run.seed}:plinko:${cx.r}:${att}`, ST.col, ST.risk, stake);
+      const att = run.attempt || 0, res = decide(`${run.seed}:plinko:${cx.r}:${att}${cx.plS(cx.r)}`, ST.col, ST.risk, stake);
       run.coins += res.coins - stake; if (res.coins > stake) run.stats.coinsEarned += res.coins - stake;                                          // se cobra al soltar, como la ruleta: recargar a medias no lo deshace
       run.reds = run.reds || {}; run.reds[cx.r] = { id: "plk", att, stake, risk: ST.risk, col: ST.col, slot: res.slot, t: res.t, coins: res.coins };
       cx.persist(); purse = run.coins - res.coins; renderPanel(); { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = purse; }

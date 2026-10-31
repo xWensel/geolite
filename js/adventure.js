@@ -1922,6 +1922,19 @@ window.AIQ = window.AIQ || {};
     return k;
   }
   const casinoKind = r => { const R = casOf(r); return R && CASINO.includes(R.id) ? R.id : A.adv._casinoForce || pickCasino(r); };   // _casinoForce: solo pruebas
+  /* Barra libre: hasta 3 partidas al juego de la Barra por Campamento (e intento). Cada una se paga aparte y sortea otro resultado (el sufijo de la semilla, plS);
+     al volver a jugar se borra el registro anterior (reportCasino ya lo contó): los efectos sobre la ronda (reto extra, racha, reloj) son los de la ultima. run.casN[ronda:intento] = partidas jugadas */
+  const barMax = () => 1 + (shopCtx().barPlays || 0);
+  const barN = r => (run.casN && run.casN[r + ":" + (run.attempt || 0)]) || 1;
+  const plS = r => { const n = barN(r); return n > 1 ? ":p" + n : ""; };
+  function barAgainOk(r) {
+    const b = casOf(r); if (!b || r !== roundNo() || run.inf || !CASINO.includes(b.id) || b.att !== (run.attempt || 0) || barN(r) >= barMax() || rouOpen) return false;
+    return b.id === "globo" || b.id === "rasca" ? !!b.done : b.id === "cups" ? b.pick != null : true;   // a medias (globo en vuelo, rasca sin terminar, baile sin elegir): aun no
+  }
+  function barAgain(r) {
+    if (!barAgainOk(r)) return;
+    reportCasino(); run.casN = run.casN || {}; run.casN[r + ":" + (run.attempt || 0)] = barN(r) + 1; delete run.reds[r]; persist(); A.sfx.tick(1); renderShop(false);
+  }
   const SIDE_GAMES = ["offer", "double", "final"];
   const sideRound = r => (r > LAST ? null : r % 4 === 3 ? (r === LAST ? "final" : "double") : "offer");   // la apuesta lateral que toca en la ronda r: antes de cada jefe la suya; en los demas Campamentos (desde el primero), la Oferta de la casa
   function sideOk(k, r) {
@@ -1997,7 +2010,12 @@ window.AIQ = window.AIQ || {};
     if (!sideOk(k, r)) return "";
     return `<div class="sup bet bt-${k}" data-bet="${k}" role="button" tabindex="0">${head}<em class="sp-p bt-go">${A.tx(BT.go)}${k === "double" ? " · " + CN() + run.coins : ""}</em></div>`;
   }
-  function wireBet() { document.querySelectorAll("#dlg .sup.bet").forEach(wireOneBet); }
+  const AGAIN = L6("Otra vez|Again|Encore|De novo|Nochmal|Ancora||再来一次|한 번 더|もう一回|Ещё раз|Jeszcze raz"), AGAIN_D = L6("Barra libre: otra partida ({n} de {m}).|Open bar: another play ({n} of {m}).|Open bar : une autre partie ({n} sur {m}).|Barra livre: mais uma partida ({n} de {m}).|Open Bar: noch eine Partie ({n} von {m}).|Open bar: un'altra partita ({n} su {m}).||畅饮吧台：再玩一次（第 {n} 次，共 {m} 次）。|오픈 바: 한 판 더 ({m}판 중 {n}번째).|オープンバー：もう一回（{m}回中{n}回目）。|Открытый бар: ещё одна партия ({n} из {m}).|Open bar: jeszcze jedna partia ({n} z {m}).");
+  const againHtml = (r, h) => {   // la Barra libre: la carta ya jugada ofrece otra partida (el dado de «Cambiar cartas» + n/3)
+    const i = h && barAgainOk(r) ? h.lastIndexOf("</div>") : -1; if (i < 0) return h; const n = barN(r) + 1, m = barMax();
+    return h.replace('class="sup ', 'class="sup has-again ').slice(0, i + 10) + `<button class="sp-p bt-again" type="button" data-again="1" ${A.ttAttr(A.tx(AGAIN), A.tx(AGAIN_D).replace("{n}", n).replace("{m}", m))}>${ic("dice")}${n}/${m}</button>` + h.slice(i);
+  };
+  function wireBet() { document.querySelectorAll("#dlg .sup.bet").forEach(wireOneBet); document.querySelectorAll("#dlg .bt-again").forEach(b => (b.onclick = e => { e.stopPropagation(); barAgain(roundNo()); })); }
   function wireOneBet(el) {
     const r = roundNo(), k = el.dataset.bet;
     if (k === "offer") {
@@ -2014,7 +2032,7 @@ window.AIQ = window.AIQ || {};
       if (pill) pill.onclick = e => { e.stopPropagation(); coinStake = (coinStake + 1) % COIN_STAKES.length; pill.innerHTML = CN() + coinCost(coinStake); A.sfx.tick(1); };   // el precio se cambia con un clic en la ficha
       el.querySelectorAll("[data-side]").forEach(btn => (btn.onclick = e => {
         e.stopPropagation(); if (rouOpen) return; const stake = coinCost(coinStake); if (run.coins < stake) { A.sfx.deny(); shake(el); return; }
-        const att = run.attempt || 0, u = A.rng(`${run.seed}:moneda:${r}:${att}`)(), pick = btn.dataset.side;
+        const att = run.attempt || 0, u = A.rng(`${run.seed}:moneda:${r}:${att}${plS(r)}`)(), pick = btn.dataset.side;
         const out = u < 1 / 64 ? "edge" : (u - 1 / 64) / (63 / 64) < 0.5 ? "heads" : "tails", win = out === pick, pay = out === "edge" || win ? stake * 2 : 0;   // 1 de cada 64 cae de canto
         run.coins += pay - stake; if (pay > stake) run.stats.coinsEarned += pay - stake;
         run.reds = run.reds || {}; run.reds[r] = { id: "coin", pick, out, win: win || out === "edge", att, stake, pay };
@@ -2031,7 +2049,7 @@ window.AIQ = window.AIQ || {};
       const btn = el.querySelector("[data-play]"); if (!btn) return;
       btn.onclick = e => {
         e.stopPropagation(); if (rouOpen) return; const tier = cupsStake % COIN_STAKES.length, stake = coinCost(cupsStake); if (run.coins < stake) { A.sfx.deny(); shake(el); return; }
-        const att = run.attempt || 0, u = A.rng(`${run.seed}:trile:${r}:${att}`), coinId = Math.floor(u() * 3), joke = A.adv._cupsJoke != null ? !!A.adv._cupsJoke : u() < 1 / 50;   // donde esta el doblon y el chiste del trilero (1 de cada 50): decididos por la semilla (_cupsJoke: solo pruebas)
+        const att = run.attempt || 0, u = A.rng(`${run.seed}:trile:${r}:${att}${plS(r)}`), coinId = Math.floor(u() * 3), joke = A.adv._cupsJoke != null ? !!A.adv._cupsJoke : u() < 1 / 50;   // donde esta el doblon y el chiste del trilero (1 de cada 50): decididos por la semilla (_cupsJoke: solo pruebas)
         run.coins -= stake; run.reds = run.reds || {};
         const rec = (run.reds[r] = { id: "cups", att, stake, coin: coinId, joke, pick: null, win: false, pay: 0 });   // la ficha ya esta pagada: recargar a mitad del baile = el crupier se la queda
         persist(); A.sfx.rouBet(1); if (A.haptic) A.haptic([10]);
@@ -2047,7 +2065,7 @@ window.AIQ = window.AIQ || {};
       const spinBtn = el.querySelector("[data-spin]"); if (!spinBtn) return;                // ya tirada en este intento: solo el resultado
       spinBtn.onclick = e => {
         e.stopPropagation(); if (rouOpen) return; const c = wheelCost(); if (run.coins < c) { A.sfx.deny(); shake(el); return; }
-        const att = run.attempt || 0, w = Math.floor(A.rng(`${run.seed}:premios:${r}:${att}`)() * PRIZES.length), rec = { id: "wheel", w, att };
+        const att = run.attempt || 0, w = Math.floor(A.rng(`${run.seed}:premios:${r}:${att}${plS(r)}`)() * PRIZES.length), rec = { id: "wheel", w, att };
         run.coins -= c; run.reds = run.reds || {}; run.reds[r] = rec; const afterFee = run.coins;
         const info = applyPrize(PRIZES[w], rec, r); run.bar = null;       // el premio puede ser un suministro: la Barra se vuelve a montar
         persist(); A.sfx.rouBet(2); if (A.haptic) A.haptic([10]);
@@ -2061,7 +2079,7 @@ window.AIQ = window.AIQ || {};
       if (pill) pill.onclick = e => { e.stopPropagation(); redStake = (redStake + 1) % 3; pill.innerHTML = CN() + redCost(redStake); A.sfx.tick(1); };   // el precio se cambia con un clic en la ficha; el premio de acertar crece con ella
       el.querySelectorAll("[data-pick]").forEach(btn => (btn.onclick = e => {
         e.stopPropagation(); if (rouOpen) return; const c = redCost(redStake); if (run.coins < c) { A.sfx.deny(); shake(el); return; }
-        const att = run.attempt || 0, n = Math.floor(A.rng(`${run.seed}:rojo:${r}:${att}`)() * 37), out = colorOf(n), pick = btn.dataset.pick;   // la rueda europea: 18 rojos, 18 negros y el cero
+        const att = run.attempt || 0, n = Math.floor(A.rng(`${run.seed}:rojo:${r}:${att}${plS(r)}`)() * 37), out = colorOf(n), pick = btn.dataset.pick;   // la rueda europea: 18 rojos, 18 negros y el cero
         run.coins -= c; run.reds = run.reds || {}; const win = pick === out;
         const extra = !win && chalFor(r).list.length < 5 ? pickSealed(r, 1, "rojoextra") : [];   // fallar: la cuota ya esta perdida y la ronda trae un reto mas (sellado, nivel 3; con 5 retos ya no cabe)
         const pay = win ? c * 2 : 0;   // acertar paga YA el doble de la cuota (antes: un +50 % de la ronda siguiente, que se perdia si no la superabas)
@@ -2690,7 +2708,7 @@ window.AIQ = window.AIQ || {};
      card() y se cablea con wire(). cx es CX (abajo) mas { b, head, att } en card() y { r } en wire(); b es el registro de la ronda (run.reds[r]). Cada juego guarda su registro ANTES de animar. */
   const CASINO_EXT = {};
   const CX = {
-    get run() { return run; }, get open() { return rouOpen; }, round: roundNo, persist, rouShell, reelPick, coinCost, STAKES: COIN_STAKES, CN, BT, BT2, ic, L6, casOf,
+    get run() { return run; }, get open() { return rouOpen; }, round: roundNo, persist, rouShell, reelPick, coinCost, STAKES: COIN_STAKES, CN, BT, BT2, ic, L6, casOf, plS,
     shake: el => shake(el),                                                                                 // (shake se define mas abajo)
     refresh: () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); },        // repinta el Campamento cuando se cierra la pantalla del juego
     coins: () => { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins; },   // el saldo que se ve detras de la capa
@@ -2705,7 +2723,7 @@ window.AIQ = window.AIQ || {};
   let supFresh = null;                                                 // el suministro recien comprado: solo a ese le cae el sello
   function supHtml() {
     const sup = run.sup || {}, r = roundNo(), card = s => `<button class="sup sp-${s.id}${sup[s.id] ? " on" : ""}${supFresh === s.id ? " fresh" : ""}" data-sup="${s.id}" type="button"><span class="sp-ic">${ic(s.ico)}</span><span class="sp-t"><b>${A.tx(s.n)}</b><i>${A.tx(s.d)}</i></span>${sup[s.id] ? `<em class="sp-on">${A.T("Activo", "On")}</em>` : `<em class="sp-p">${CN()}${supCost(s)}</em>`}</button>`;
-    const void_ = '<i class="sup-void"></i>', red = betHtml(casinoKind(r)), slot = id => (!id ? "" : SIDE_GAMES.includes(id) ? betHtml(id) : card(SUPS.find(x => x.id === id))) || void_;
+    const void_ = '<i class="sup-void"></i>', red = againHtml(r, betHtml(casinoKind(r))), slot = id => (!id ? "" : SIDE_GAMES.includes(id) ? betHtml(id) : card(SUPS.find(x => x.id === id))) || void_;
     const [L, R] = barOf(r);
     supFresh = null;
     return `<div class="tb-sup${red ? "" : " no-cas"}">${slot(L)}${red || ""}${slot(R)}${A.bulbs()}</div>`;   // v0.3.52: la Barra, con las bombillas de la casa   // izquierda, un suministro; derecha, la apuesta que toque (o hueco); centro, el juego de casino (si la casa ya abre las apuestas)

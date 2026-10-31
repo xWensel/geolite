@@ -60,7 +60,7 @@ window.AIQ = window.AIQ || {};
       const btn = el.querySelector("[data-play]"); if (!btn) return;
       btn.onclick = e => {
         e.stopPropagation(); if (cx.open) return; const run = cx.run, stake = cx.coinCost(stakeI); if (run.coins < stake) { A.sfx.deny(); cx.shake(el); return; }
-        const att = run.attempt || 0, res = decide(`${run.seed}:dados:${cx.r}:${att}`), pay = res.win ? stake * 2 : 0;
+        const att = run.attempt || 0, res = decide(`${run.seed}:dados:${cx.r}:${att}${cx.plS(cx.r)}`), pay = res.win ? stake * 2 : 0;
         run.coins += pay - stake; if (pay > stake) run.stats.coinsEarned += pay - stake;                 // se cobra al empezar, como la ruleta: recargar a medias no lo deshace
         run.reds = run.reds || {}; run.reds[cx.r] = { id: "dice", att, stake, th: res.throws, win: res.win, tie2: res.tie2, level: res.level, pay };
         cx.persist(); A.sfx.rouBet(1); if (A.haptic) A.haptic([10]);
