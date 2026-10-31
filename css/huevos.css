@@ -21,10 +21,10 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 .hv-rev { position: absolute; inset: 0; z-index: 6; pointer-events: none; font-family: var(--sans); text-align: center; color: #f3f0fa; }
 .hv-rev-art { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .hv-rev > small, .hv-rev > b, .hv-rev > i, .hv-rev > span { position: absolute; left: 0; right: 0; font-weight: 400; font-style: normal; line-height: 1; }
-.hv-r1 { top: calc(var(--d) * 50); font-size: calc(var(--d) * 8); letter-spacing: calc(var(--d) * .5); text-transform: uppercase; color: #fdd742; }
-.hv-r2 { top: calc(var(--d) * 61); font-size: calc(var(--d) * 17); color: #f3f0fa; text-shadow: 0 var(--d) 0 #0b0618; }
-.hv-r3 { top: calc(var(--d) * 86); font-size: calc(var(--d) * 8); color: #bdb7d1; }
-.hv-r4 { top: calc(var(--d) * 101); font-size: calc(var(--d) * 7); padding: 0 calc(var(--d) * 11); line-height: 1.05 !important; color: #8a8fa8; }
+.hv-r1 { top: calc(var(--d) * (var(--hh) - 82)); font-size: calc(var(--d) * 8); letter-spacing: calc(var(--d) * .5); text-transform: uppercase; color: #fdd742; }
+.hv-r2 { top: calc(var(--d) * (var(--hh) - 72)); font-size: calc(var(--d) * 17); color: #f3f0fa; text-shadow: 0 var(--d) 0 #0b0618; }
+.hv-r3 { top: calc(var(--d) * (var(--hh) - 52)); font-size: calc(var(--d) * 8); color: #bdb7d1; }
+.hv-r4 { top: calc(var(--d) * (var(--hh) - 24)); font-size: calc(var(--d) * 7); padding: 0 calc(var(--d) * 11); line-height: 1.05 !important; color: #8a8fa8; }
 
 /* la moneda sobre la primera placa (el cebo de Comodin) */
 .hv-coin { position: fixed; z-index: 30; padding: 6px 8px 0; pointer-events: auto; cursor: default; }
@@ -63,3 +63,8 @@ html.reduce-motion .hh.hv-golpe, html.no-shake .hh.hv-golpe { animation: none; }
 /* los renglones tontos del ticket de cierre: la etiqueta se parte en dos lineas en vez de cortarse con «…» (el valor, siempre entero) */
 .gx-vd-ticket .hv-renglon span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.05; }
 .gx-vd-ticket .hv-renglon b { white-space: nowrap; }
+
+/* el brillo de la vuelta: una banda de luz diagonal cruza el dorso una sola vez, a pasos (nada con Movimiento: Minimo) */
+.hv-brillo { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(105deg, transparent 38%, rgba(255, 243, 176, .5) 48%, rgba(255, 255, 255, .7) 50%, rgba(255, 243, 176, .5) 52%, transparent 62%) 120% 0 / 260% 100%; animation: hvBrillo .9s steps(12) 1 both; }
+@keyframes hvBrillo { from { background-position: 120% 0; } to { background-position: -20% 0; } }
+html.reduce-motion .hv-brillo { display: none; }

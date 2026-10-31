@@ -285,7 +285,7 @@ window.AIQ = window.AIQ || {};
   H.socioNo = () => st.no || 0; H._no = v => { st.no = v; save(); };
   H.socioTxt = () => (st.no ? String(st.no).padStart(4, "0") : "····");
   setTimeout(pideNo, 4000); setInterval(pideNo, 600000);
-  const dorsoArte = hh => {
+  const dorsoArte = (hh, no) => {
     const c = document.createElement("canvas"); c.width = 96; c.height = hh; const g = c.getContext("2d"), px = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
     px(0, 0, 96, hh, "#1d0a3d");
     for (let y = 0; y < hh; y++) for (let x = 0; x < 96; x++) if ((x + y) % 8 === 0 || ((x - y) % 8 + 8) % 8 === 0) px(x, y, 1, 1, "#2a1559");     // la reticula de la casa (rombos)
@@ -295,33 +295,50 @@ window.AIQ = window.AIQ || {};
     px(7, 7, 82, hh - 14, "#1d0a3d");                                                                                                             // el tapete liso dentro del segundo filete
     for (let y = 8; y < hh - 8; y++) for (let x = 8; x < 88; x++) if ((x + y) % 8 === 0 || ((x - y) % 8 + 8) % 8 === 0) px(x, y, 1, 1, "#241250");
     /* la ficha de oro con la chistera de la casa, en el centro de arriba */
-    const N = 30, cy = Math.round(hh * .30), ox = 48 - N / 2, oy = cy - N / 2;
+    const N = 30, cy = Math.round(hh * .27), ox = 48 - N / 2, oy = cy - N / 2;
     try { if (A.ficha && A.ficha.px) { const f = document.createElement("canvas"); f.width = f.height = N; f.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(A.ficha.px(N, "blank_gold")), N, N), 0, 0); g.drawImage(f, ox, oy); } } catch (e) { px(ox + 2, oy + 2, N - 4, N - 4, "#f5a623"); }
+    /* tu huella: un codigo de barras de pixel (22..74) que sale de tu numero de socio: el dorso es el mismo para todos, la huella no */
+    let sd = ((no || 7) * 2654435761) >>> 0; const al = () => (sd = (Math.imul(sd, 1664525) + 1013904223) >>> 0) / 4294967296;
+    { const by = hh - 40; let x = 22; px(x, by, 1, 9, "#f3f0fa"); x += 2; px(x, by, 1, 9, "#f3f0fa"); x += 3;
+      while (x < 70) { const w = al() > .62 ? 2 : 1; if (al() > .22) px(x, by, w, 9, "#f3f0fa"); x += w + 1; }
+      px(71, by, 1, 9, "#f3f0fa"); px(73, by, 1, 9, "#f3f0fa"); px(22, by + 10, 52, 1, "#7a4a05"); }
     const HAT = ["...######...", "...######...", "...######...", "...bbbbbb...", "...######...", "############"], hx = 48 - 6, hy = cy - 4;
     HAT.forEach((row, ry) => { for (let rx = 0; rx < 12; rx++) { const ch = row[rx]; if (ch !== ".") px(hx + rx, hy + ry, 1, 1, ch === "b" ? "#c46a1b" : "#1d0a3d"); } });
     return c;
   };
   (function () {
-    let t = 0, vuelta = null, n = 0;
+    let t = 0, dado = false, n = 0;                                                    // dado = la carta esta del reves (hasta que la vuelvas a mantener pulsada)
     const fecha = () => { const P = A.profile && A.profile.get && A.profile.get(); const ts = (P && P.created) || Date.now(); try { return new Date(ts).toLocaleDateString(A.lang === "es-419" ? "es" : A.lang, { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } };
-    function da(card) {
-      if (vuelta || !A.HV) return; const rect = card.getBoundingClientRect(); if (!rect.width) return;
-      const d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(rect.height / d));
-      const back = document.createElement("div"); back.className = "hv-rev"; back.style.cssText = `--d:${d}px`;
-      const art = dorsoArte(Hh); art.className = "hv-rev-art"; back.appendChild(art);
+    function dorso(card) {                                                              // el dorso entero (arte a la rejilla de la carta + sus textos + el brillo de la vuelta)
+      const rect = card.getBoundingClientRect(), d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(rect.height / d));
+      const back = document.createElement("div"); back.className = "hv-rev"; back.style.cssText = `--d:${d}px;--hh:${Hh}`;
+      const art = dorsoArte(Hh, H.socioNo()); art.className = "hv-rev-art"; back.appendChild(art);
       back.insertAdjacentHTML("beforeend", `<small class="hv-r1">${T(A.HV.tx.socioClub)}</small><b class="hv-r2">${T(A.HV.tx.socioNum).replace("{n}", H.socioTxt())}</b><i class="hv-r3">${T(A.HV.tx.socioDesde).replace("{d}", fecha())}</i><span class="hv-r4">${T(A.HV.tx.socioLetra)}</span>`);
-      const flip = f => { if (reduced()) return f(); card.style.transition = "scale .12s steps(3)"; card.style.scale = "0 1"; setTimeout(() => { f(); card.style.scale = "1 1"; }, 130); };
-      flip(() => card.appendChild(back)); vuelta = { card, back, flip }; H.found("reverso"); n++; if (!st.no) pideNo();
-      if (n === 5) dice("reverso", "hvReverso", { mood: "laugh", gap: 1000, libre: true });
+      back._no = H.socioNo() + "|" + A.lang; return back;
     }
-    function quita() { if (!vuelta) return; const v = vuelta; vuelta = null; v.flip(() => v.back.remove()); }
+    const gira = (card, f) => { if (reduced()) return f(); card.style.transition = "scale .12s steps(3)"; card.style.scale = "0 1"; setTimeout(() => { f(); card.style.scale = "1 1"; }, 130); };
+    function alterna(card) {
+      if (!A.HV) return; dado = !dado;
+      if (dado) {
+        if (!st.no) pideNo();
+        gira(card, () => { const b = dorso(card); card.appendChild(b); if (!reduced()) { const br = document.createElement("u"); br.className = "hv-brillo"; b.appendChild(br); setTimeout(() => br.remove(), 1100); } });
+        H.found("reverso"); n++; if (n === 5) dice("reverso", "hvReverso", { mood: "laugh", gap: 1000, libre: true });
+      } else gira(card, () => { card.querySelectorAll(".hv-rev").forEach(e => e.remove()); });
+    }
+    /* si la portada repinta la carta (cambia tu nivel, tu nombre o el idioma), el dorso se vuelve a poner donde estaba: la vuelta es tuya hasta que la desgires */
+    setInterval(() => {
+      if (!dado || !D() || !D().homeShown || !D().homeShown()) return;
+      const c = document.querySelector(".hh .sc-card"); if (!c) return;
+      const b = c.querySelector(".hv-rev"); if (!b || b._no !== H.socioNo() + "|" + A.lang) { if (b) b.remove(); c.appendChild(dorso(c)); }
+    }, 400);
     document.addEventListener("pointerdown", e => {
       if (e.button !== 0 || !D() || !D().homeShown || !D().homeShown()) return;
       const card = e.target && e.target.closest && e.target.closest(".hh .sc-card"); if (!card) return;
-      clearTimeout(t); t = setTimeout(() => { da(card); const traga = c => { c.stopPropagation(); c.preventDefault(); }; addEventListener("click", traga, { capture: true, once: true }); setTimeout(() => removeEventListener("click", traga, true), 800); }, 900);
+      clearTimeout(t); t = setTimeout(() => { alterna(card); const traga = c => { c.stopPropagation(); c.preventDefault(); }; addEventListener("click", traga, { capture: true, once: true }); setTimeout(() => removeEventListener("click", traga, true), 800); }, 900);
     }, true);
-    addEventListener("pointerup", () => { clearTimeout(t); quita(); }, true);
-    document.addEventListener("pointerleave", () => { clearTimeout(t); quita(); }, true);
+    addEventListener("pointerup", () => clearTimeout(t), true);
+    document.addEventListener("pointerleave", () => clearTimeout(t), true);
+    H._dado = () => dado;
   })();
 
   /* ================================================================== A · COMODIN Y LA MONEDA: una moneda sobre la primera placa; mirarla 3 s con el cursor llama al gato, que la tira */
