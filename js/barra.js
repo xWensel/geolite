@@ -12,7 +12,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const L6 = A.L6, C = () => A.core, $ = id => document.getElementById(id), esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const FEE = 50, START = 1000, PLAYS = 20, MIN = 25, TK = 10;
+  const FEE = 50, START = 1000, PLAYS = 20, MIN = 1, TK = 10;
   const BOTE = new Set([10, 20]);                                   // las jugadas de BOTE (la ganancia paga doble)
   const T = {
     title: L6("La Barra de la casa|The House Bar|Le Bar de la maison|O Bar da casa|Die Bar des Hauses|Il Bar della casa||赌场吧台|하우스 바|ハウスのバー|Бар заведения|Bar kasyna"),

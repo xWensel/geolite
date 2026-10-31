@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.43",
+      name: L("Apuesta desde 1", "Bets from 1", "Mises dès 1", "Apostas a partir de 1", "Einsätze ab 1", "Puntate da 1", "", "1 起押", "1부터 베팅", "1から賭けられる", "Ставки от 1", "Zakłady od 1"),
+      date: "2026-10-31",
+      summary: L("En La Barra de la casa puedes apostar desde 1 ficha, la cantidad que quieras.", "In The House Bar you can bet from 1 chip, whatever amount you like.", "Au Bar de la maison, tu peux miser dès 1 jeton, le montant que tu veux.", "No Bar da casa você pode apostar a partir de 1 ficha, o valor que quiser.", "In der Bar des Hauses kannst du ab 1 Chip setzen, so viel du willst.", "Al Bar della casa puoi puntare da 1 fiche, la cifra che vuoi.", "", "在赌场吧台，你可以从 1 个筹码起押，想押多少都行。", "하우스 바에서는 1칩부터 원하는 만큼 베팅할 수 있어요.", "ハウスのバーでは1チップから好きな額を賭けられる。", "В баре заведения можно ставить от 1 фишки, сколько захочешь.", "W barze kasyna możesz stawiać od 1 żetonu, ile chcesz."),
+      chapters: [
+        { id: "apuesta-0443", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioria", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("La Barra de la casa", "The House Bar", "Le Bar de la maison", "O Bar da casa", "Die Bar des Hauses", "Il Bar della casa", "", "赌场吧台", "하우스 바", "ハウスのバー", "Бар заведения", "Bar kasyna"),
+          entries: [
+            E(L("Apuesta desde 1", "Bets from 1", "Mises dès 1", "Apostas a partir de 1", "Einsätze ab 1", "Puntate da 1", "", "1 起押", "1부터 베팅", "1から賭けられる", "Ставки от 1", "Zakłady od 1"), "buff", "0.4.43", [
+              L("La apuesta mínima baja de 25 a **1 ficha** y el regulador sube de una en una: apuesta lo que te dé la gana, en todas las mesas.", "The minimum bet drops from 25 to **1 chip** and the slider moves one chip at a time: bet whatever you like, at every table.", "La mise minimale passe de 25 à **1 jeton** et le curseur avance d'un jeton à la fois : mise ce que tu veux, à toutes les tables.", "A aposta mínima cai de 25 para **1 ficha** e o controle sobe de uma em uma: aposte o que quiser, em todas as mesas.", "Der Mindesteinsatz sinkt von 25 auf **1 Chip**, und der Regler bewegt sich in Einerschritten: Setze, was du willst, an allen Tischen.", "La puntata minima scende da 25 a **1 fiche** e il cursore avanza di una alla volta: punta quello che vuoi, a tutti i tavoli.", "", "最低下注从 25 降到 **1 个筹码**，滑块每次移动 1 个：所有牌桌都能想押多少押多少。", "최소 베팅이 25에서 **1칩**으로 내려가고 슬라이더도 1칩씩 움직여요. 모든 테이블에서 원하는 만큼 베팅하세요.", "最低ベットが25から**1チップ**に下がり、スライダーも1チップずつ動く。どのテーブルでも好きな額を賭けられる。", "Минимальная ставка снижена с 25 до **1 фишки**, а ползунок двигается по одной: ставь сколько хочешь за любым столом.", "Minimalny zakład spada z 25 do **1 żetonu**, a suwak przesuwa się co jeden: stawiaj, ile chcesz, przy każdym stole.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.42",
       name: L("Provisiones siempre a la vista", "Provisions always in view", "Provisions toujours visibles", "Provisões sempre à vista", "Proviant immer sichtbar", "Provviste sempre in vista", "", "补给始终可见", "식량이 항상 보여요", "食料をいつも表示", "Запасы всегда на виду", "Zapasy zawsze widoczne"),
       date: "2026-10-31",
