@@ -7,7 +7,7 @@
  * nada de las clasificaciones. Tampoco suena ni salta nada por cada cosa: se escribe directamente y se avisa una vez.
  * ON: el interruptor. Vale true en Electron de desarrollo (main.js, host:truco: devuelto sin flags el 28-oct, a
  *   peticion del autor, mientras no se empaquete para Steam). En las builds empaquetadas main.js lo niega
- *   (app.isPackaged) y en la web no existe geoliteHost, asi que queda apagado: en Steam y en la web el 7 x 7 no
+ *   (app.isPackaged) y en la web (sin geoliteHost) queda ENCENDIDO desde la v0.4.18, a peticion del autor, que juega en el navegador: en Steam el 7 x 7 no
  *   desbloquea nada (solo deshace un truco que haya quedado activo de una version anterior).
  *   tools/steam-pack.mjs avisa si esta encendido a la fuerza.
  * Va justo despues de js/support.js: al volver a como estaba, la copia se escribe ANTES de que el perfil, el crupier y la Enciclopedia lean
@@ -15,8 +15,8 @@
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  /* el truco vive en Electron (preload.js: geoliteHost.truco); en la web no hay geoliteHost y queda apagado */
-  const ON = !!(typeof window !== "undefined" && window.geoliteHost && typeof window.geoliteHost.truco === "function" && window.geoliteHost.truco());
+  /* en Electron decide main.js (preload.js: geoliteHost.truco); en la web no hay geoliteHost y el truco queda ENCENDIDO (a peticion del autor, 31-oct) */
+  const ON = (typeof window !== "undefined" && window.geoliteHost && typeof window.geoliteHost.truco === "function") ? !!window.geoliteHost.truco() : true;   // Electron: lo decide main.js; en la web (sin geoliteHost): encendido mientras no salga a Steam
   const KEYS = ["atlasiq.profile.v1", "atlasiq.v2", "atlasiq.codex.v1", "atlasiq.dealer.v1"];   // lo que el truco cambia
   const COPIA = "atlasiq.truco.copia", VOLVER = "atlasiq.truco.volver", AVISO = "atlasiq.truco.aviso";
   A.truco = { on: ON };
