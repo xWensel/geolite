@@ -310,7 +310,8 @@ window.AIQ = window.AIQ || {};
   /* v0.3.107 (usuario): la Ascension 0 es GRATIS para cualquiera y la curva es progresiva: los objetivos de A0, A1 y A2 salen de una escalera propia (de la ronda 1 a la 12,
      lineal: 1.600 -> 4.000, 1.750 -> 4.300 y 2.000 -> 4.600); de A3 en adelante, la de siempre (2.000 + 250 por ronda, 4.777 el jefe final) x (1 + 5 % por Ascension) */
   const TG_S = [1600, 1750, 2000], TG_F = [4000, 4300, 4600];
-  const baseOfR = (r, asc) => { const a = asc == null ? (run ? run.asc | 0 : 0) : asc | 0; if (a >= 3) return r >= 11 ? 4777 : 2000 + 250 * r; return r >= 11 ? TG_F[a] : Math.round((TG_S[a] + (TG_F[a] - TG_S[a]) * r / 11) / 50) * 50; };
+  const TG_K = [1.04, 1.06, 1.07, 1.12, 1.12, 1.16];                  // la racha pasa de una ronda a otra: objetivos mas altos para compensar (simulacion: igualan el % de victorias de antes)
+  const baseOfR = (r, asc) => { const a = asc == null ? (run ? run.asc | 0 : 0) : asc | 0, k = TG_K[Math.min(5, a)]; if (a >= 3) return Math.round((r >= 11 ? 4777 : 2000 + 250 * r) * k / 50) * 50; return Math.round((r >= 11 ? TG_F[a] : Math.round((TG_S[a] + (TG_F[a] - TG_S[a]) * r / 11) / 50) * 50) * k / 50) * 50; };
   const tgMul = () => (!run || (run.asc | 0) < 3 ? 1 : ascFx(run.asc).target);   // la escalera de A0-A2 ya lleva su Ascension dentro
   const baseTarget = () => { const r = roundNo(), base = baseOfR(r), m = tgMul(); return r >= 11 && m === 1 ? base : Math.round((base * m) / 50) * 50; };
   const target = () => { const t = { seconds: 0, target: 1 }; perkList().forEach(p => p.round && p.round(t, run)); t.target = Math.max(0.85, t.target); const r = roundNo(), base = baseOfR(r), m = tgMul() * t.target; return r >= 11 && m === 1 ? base : Math.round((base * m) / 50) * 50; };   // tanda 12: las rebajas del objetivo (Midas y Mesa de minimos) no pasan del −15 %
@@ -635,7 +636,7 @@ window.AIQ = window.AIQ || {};
   function startRound(keep) {
     run.phase = "round"; ticket(); if (A.coverMap) A.coverMap("camp", false);   // sales del Campamento: el mapa vuelve a dibujarse al instante
     A.casa.acto(run.act);                                              // la noche avanza con los actos (js/casa.js)
-    if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = Math.max(run.streak || 0, sumFlag("streakMin") || 0, run.sup && run.sup.tonic ? 2 : 0); run.calmOn = false; refillTools(); }   // catalogo: la racha PASA de una ronda a otra (antes se ponia a 0)
+    if (!keep) { run.qPts = []; run.qi = 0; run.luckUsed = false; run.guardUsed = false; run.rTools = 0; run.rBulls = 0; run.leftSum = 0; run.roundScore = 0; run.rGood = 0; run.streak = Math.max((run.attempt ? run.sr0 : run.streak) || 0, sumFlag("streakMin") || 0, run.sup && run.sup.tonic ? 2 : 0); run.sr0 = run.streak; run.calmOn = false; refillTools(); }   // catalogo: la racha PASA de una ronda a otra (antes se ponia a 0)
     const Lv = roundLevel(keep), S = C().S;
     S.run = run; S.camp = { id: "adv", mode: "adventure", title: { es: "Aventura", en: "Adventure" }, home: { lat: 20, lon: 10, zoom: 1 }, levels: [Lv] };
     S.runTotal = run.score; S.runMax = 0; C().map.setHome(S.camp.home); C().map.setStyle(mapStyleFor());
@@ -643,6 +644,7 @@ window.AIQ = window.AIQ || {};
     A.chal.begin(run.chal, A.chal.fx(amuPerks()), { seed: run.seed, round: roundNo(), halve: run.chalHalve, boss: run.chalKey, asc: run.asc, topic: run.topic, cjk: run.cjk });
     persist(); A.ach.emit("adv", { kind: "round", act: run.act }); C().startLevel(0);
     if (keep) { S.qi = run.qi; S.levelScore = run.roundScore; S.streak = run.streak || 0; S.hits = run.rGood; C().updateHud && C().updateHud(); }
+    else if (run.streak) { S.streak = run.streak; if (A.casa.racha) A.casa.racha(S.streak); }   // la racha pasa de una ronda a otra (startLevel la ponia a 0)
     if (Lv.boss) setTimeout(() => A.sfx.boss(), 200);
     musica(Lv.boss, 760);                                              // el tema del jefe entra tras los tres golpes de su llegada
   }

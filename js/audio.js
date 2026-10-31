@@ -25,11 +25,11 @@ window.AIQ = window.AIQ || {};
   const R = () => Math.random();
 
   let ctx = null, master, sfxBus, revFx, musBus, musFilter, revIn, outTap, sala = null;
-  A.audio = { sfxOn: true, musicOn: true, vol: { master: 0.85, music: 0.7, sfx: 0.9 } };
-  const MUS_BASE = 0.55;
+  A.audio = { sfxOn: true, musicOn: true, vol: { master: 0.7, music: 1, sfx: 1 } };
+  const MUS_BASE = 0.55 * 0.85 * 0.7 / 0.7;   // v0.4.15: de fabrica General 70 y el resto 100; estos tres coeficientes (musica, efectos, ambiente) llevan la cuenta de lo de antes (85/70/90/60) para que suene EXACTAMENTE igual
   /* mezcla (Bloque F): LOUD sube el conjunto 13 dB (la musica pasa de -44 a -31 LUFS de mediana) y SFX_K coloca los efectos para que, con los
      reguladores de fabrica, cada uno suene a su escalon exacto sobre la musica (medido con el mismo medidor de la maqueta) */
-  const LOUD = Math.pow(10, 13 / 20), SFX_K = 1.6;
+  const LOUD = Math.pow(10, 13 / 20), SFX_K = 1.6 * 0.85 * 0.9 / 0.7;
   const LIM_MK = 1.14;                              // dB que el compresor del navegador suma solo (makeup de un limitador a -2 dB, 20:1): se deshacen
 
   /* la sala calida: ruido que decae y se oscurece al caer (paso bajo que baja de 7 kHz a 1,2 kHz), con 14 ms de predelay. Sin siseo */
@@ -534,7 +534,7 @@ window.AIQ = window.AIQ || {};
      cargan al arrancar, en segundo plano: nada se descodifica en mitad de una partida. El nivel es el de la maqueta (0 dB): la grabacion a -20 dB
      en la entrada de la mezcla, con los reguladores de fabrica */
   const PUB = { diana: ["aplauso_corto"], porpoco: ["oooh_1", "oooh_2", "oooh_3", "oooh_4"], racha5: ["vitores"], rota: ["ooow"], jackpot: ["aplauso_vitores"], ronda: ["aplauso_largo", "aplauso_largo_2", "aplauso_largo_3"] };   // la ronda: tres tomas de la misma sala y la misma tarde (snakebarney); las demas reacciones son tomas unicas de su serie
-  const PUB_G = 0.1 / (0.9 * SFX_K), pubB = {}, pubUlt = {}; let pubIni = false;
+  const PUB_G = 0.1 / (0.9 * 1.6), pubB = {}, pubUlt = {}; let pubIni = false;
   function pubCarga() {
     if (pubIni || !ctx) return; pubIni = true;
     [...new Set(Object.values(PUB).flat())].forEach((n, i) => setTimeout(() => fetch(A.media("assets/sfx/publico/" + n + ".mp3")).then(r => (r.ok ? r.arrayBuffer() : Promise.reject())).then(b => ctx.decodeAudioData(b)).then(b => { pubB[n] = b; }).catch(() => { /* sin esa grabacion, esa reaccion calla */ }), 400 + i * 120));
@@ -599,7 +599,7 @@ window.AIQ = window.AIQ || {};
     try {
       if (ctx.state === "suspended" || ctx.state === "interrupted") ctx.resume();
       const now = performance.now(); sfxHolds.forEach((t0, k) => { if (now - t0 > 30000) sfxHolds.delete(k); });
-      if (!Number.isFinite(A.audio.vol.sfx)) A.audio.vol.sfx = 0.9;
+      if (!Number.isFinite(A.audio.vol.sfx)) A.audio.vol.sfx = 1;
       const want = sfxWant();
       if (Math.abs(sfxBus.gain.value - want) > 0.02 || Math.abs(revFx.gain.value - want) > 0.02) sfxApply();
     } catch (e) { /* sin audio */ }
@@ -650,7 +650,7 @@ window.AIQ = window.AIQ || {};
     tick: -11.5, streak: -7.0, streakBreak: -25.5, flag: -14.0, coin: -19.2, jackpot1: -13.2, jackpot2: -13.0, jackpot3: -14.5, barrido: -6.6, goal: -14.5,
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
     cofreCarga: -21, cofreGolpe: -13.3, cofreNota: -15, cofreFirma: -16,                                  // La apertura del cofre del jefe (js/cofre-fx.js)
-    boss: -23.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
+    boss: -23.0, tachan: -22.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
     clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
     foco: -11, caja: -8, llama: -10,                                            // Veredicto, jefe y cofre (js/foco.js, js/veredicto.js)
     clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,
@@ -973,6 +973,15 @@ window.AIQ = window.AIQ || {};
       [[15, 0.9], [12, 1.22], [11, 1.6]].forEach(([s, d], i) => { rhodes(b, r + s, t + d, { v: 0.07, dur: i === 2 ? 2.6 : 1.4, idx: 2.4, lp: 1500 }); rhodes(b, r + s - 12, t + d, { v: 0.05, dur: i === 2 ? 2.6 : 1.4, idx: 1.6, lp: 900 }); });
       A.music.duck(0.45, 3000);
     }),
+    /* EL TACHAN de los creditos (js/final.js): un golpe grave de timbal, un racimo oscuro (tonica, segunda menor, tritono y novena menor) que crece desde
+       lo grave y dos notas que caen en el piano; nada de agudos ni de ruido */
+    tachan: go(t => {
+      const b = bus("tachan", 0.45), r = 36 + ((curT().home % 12) + 12) % 12;
+      sub(b, t, { v: 0.42, f0: 110, f1: 30, dur: 0.7 }); sub(b, t, { v: 0.14, f0: 190, f1: 80, dur: 0.25 }); felt(b, t, { v: 0.07, f: 300, dur: 0.1 });
+      padOscuro(b, [r, r + 1, r + 6, r + 13], t + 0.02, 3.4, 0.034);
+      [[16, 0.55], [15, 1.0]].forEach(([s, d], i) => { rhodes(b, r + s, t + d, { v: 0.07, dur: i ? 2.6 : 1.4, idx: 2.4, lp: 1500 }); rhodes(b, r + s - 12, t + d, { v: 0.05, dur: i ? 2.6 : 1.4, idx: 1.6, lp: 900 }); });
+      A.music.duck(0.4, 3200);
+    }),
     /* el crupier: una silaba por letra (i = indice), murmullo calido segun su humor */
     voice: go((t, mood = "sly", i = 0) => {
       const m = VM[mood] || VM.sly, b = bus("voice", 0.05), n = m.b + 12 + m.pat[i % m.pat.length] + ((i * 7) % 3), f = mtof(n);
@@ -1248,7 +1257,7 @@ window.AIQ = window.AIQ || {};
      centro), para quien los prefiera. Cada uno entra por su tira, sin filtro, y suena en el MISMO escalon que su version nueva (CLA, dB, medido con
      la misma vara): la musica sigue al frente. Los efectos de la regla (retos, globo, rasca y el resto del casino) son los mismos con las dos */
   const CLA = {
-    ach: -17.7, barrido: -19.7, blip: -25.1, boss: -22.5, buy: -19.2, card: -15.4, clear: -17.3, coin: -25.5, count: -21.3, countEnd: -22.8, deny: -26.8, felt: -25.5,
+    ach: -17.7, barrido: -19.7, blip: -25.1, boss: -22.5, tachan: -22.0, buy: -19.2, card: -15.4, clear: -17.3, coin: -25.5, count: -21.3, countEnd: -22.8, deny: -26.8, felt: -25.5,
     flag: -16.8, goal: -19.1, golpe: -18.8, hover: -16.3, impacto: -26.6, intro: -25.5, jackpot1: -16.6, jackpot2: -15.9, jackpot3: -18.2, lampara: -21.5, lootStep: -20.2,
     lose: -30.9, menuHover: -15.9, pause: -25.7, pin: -27.3, reveal0: -25.3, reveal1: -21.8, reveal2: -19.1, reveal3: -17.9, reveal4: -18.9, reveal5: -25.7,
     rouBet: -24.9, rouStop: -30.7, rouTick: -25.9, sell: -18.6, stamp: -32.7, streak: -17.5, streakBreak: -20.6, tick: -17.6, toggle: -27.1, ui: -17.7, voice: -19.1,
@@ -1293,7 +1302,7 @@ window.AIQ = window.AIQ || {};
     return { g, rs };
   }
   const cla = (key, fn) => go((t, ...a) => { const s = stripC(typeof key === "function" ? key(...a) : key), b0 = lb, r0 = lr; lb = s.g; lr = s.rs; try { return fn(t, ...a); } finally { lb = b0; lr = r0; } });
-  const PADK = MUS_BASE * 0.7;   // el acorde de fondo de antes iba por el bus de la musica (x0,55 x0,7 de fabrica): por su tira, a la misma fuerza
+  const PADK = 0.55 * 0.7;   // el acorde de fondo de antes iba por el bus de la musica (x0,55 x0,7 de fabrica): por su tira, a la misma fuerza
   const CL = {
     hover: cla("hover", t => {
       if (t - hovT < 0.06) return;
@@ -1417,6 +1426,7 @@ window.AIQ = window.AIQ || {};
     intro: cla("intro", t => { noise(t, 0.5, { lp: 400, sweepTo: 6000, vol: 0.09, type: "bandpass", q: 1.4 }); thump(t + 0.32, { vol: 0.25, f0: 100, f1: 40, dur: 0.3 }); MOTIF.forEach((m, i) => pluck(m - 12, t + 0.34 + i * 0.09, { vol: 0.1, dur: 0.6 })); A.music.duck(0.4, 1800); }),
     lampara: cla("lampara", (t, i = 0) => { const r = Math.random; noise(t, 0.014, { hp: 3400 + 500 * i + 400 * r(), vol: 0.05 }); thump(t, { vol: 0.06, f0: 290 - 30 * i + 20 * r(), f1: 120, dur: 0.06 }); bell(i ? 91 : 86, t + 0.018, { vol: 0.016 + 0.005 * r(), dur: 0.7, rev: 0.35 }); }),
     boss: cla("boss", t => { [0, 0.28, 0.56].forEach(d => thump(t + d, { vol: 0.42, f0: 95, f1: 34, dur: 0.32 })); pad([38, 41, 44, 50], t, 2.6, 0.09 * PADK, lb); pluck(50, t + 0.85, { vol: 0.14, dur: 1.4, bright: 2, rev: 0.7 }); pluck(47, t + 1.1, { vol: 0.14, dur: 1.8, bright: 2, rev: 0.8 }); A.music.duck(0.3, 2600); }),
+    tachan: cla("tachan", t => { thump(t, { vol: 0.5, f0: 110, f1: 30, dur: 0.5 }); noise(t, 0.2, { lp: 900, vol: 0.1 }); pad([38, 39, 44, 51], t, 3.2, 0.1 * PADK, lb); pluck(51, t + 0.55, { vol: 0.14, dur: 1.6, bright: 2, rev: 0.8 }); pluck(50, t + 1.0, { vol: 0.14, dur: 2.0, bright: 2, rev: 0.8 }); A.music.duck(0.3, 3000); }),
     voice: cla("voice", (t, mood = "sly", i = 0) => { const m = VMOOD[mood] || VMOOD.sly; blipSq(t, m.b + m.pat[i % m.pat.length] + ((i * 7) % 3), m); }),
     rouBet: cla("rouBet", (t, k = 0) => { noise(t, 0.018, { hp: 4200, vol: 0.07 }); thump(t, { vol: 0.15, f0: 230, f1: 90, dur: 0.1 }); bell(86 + k * 3, t + 0.004, { vol: 0.05, dur: 0.3, rev: 0.25 }); bell(93 + k * 3, t + 0.045, { vol: 0.04, dur: 0.35, rev: 0.25 }); noise(t + 0.09, 0.012, { hp: 5200, vol: 0.04 }); }),
     rouTick: cla("rouTick", (t, v = 0) => { pluck(86 - v * 22, t, { vol: 0.05 + v * 0.05, dur: 0.05 + v * 0.09, bright: 3.5, rev: 0.1 + v * 0.2 }); thump(t, { vol: 0.035 + v * 0.09, f0: 520 - v * 260, f1: 180, dur: 0.035 }); noise(t, 0.01 + v * 0.01, { hp: 3800, vol: 0.03 + v * 0.04 }); }),
@@ -1567,10 +1577,10 @@ window.AIQ = window.AIQ || {};
     jefe: { lvl: 0, lp: 500, chips: 0, glass: 0, ice: 0, deck: 0 },      // llega el jefe: la sala se calla
     fuera: { lvl: 0, lp: 500, chips: 0, glass: 0, ice: 0, deck: 0 },     // la Enciclopedia: un aparato, fuera de la sala
   };
-  A.audio.vol.amb = 0.6;
+  A.audio.vol.amb = 1;
   let amb = null, ambPlace = "salon", ambTimer = 0;
   const ambWanted = () => A.audio.sfxOn && A.audio.vol.amb > 0.005;
-  const ambLevel = P => (ambWanted() ? P.lvl * 0.55 * 0.9 * A.audio.vol.amb : 0);
+  const ambLevel = P => (ambWanted() ? P.lvl * 0.55 * 0.9 * (0.85 * 0.6 / 0.7) * A.audio.vol.amb : 0);
   function ambBuild() {
     if (amb || !ctx) return;
     const mk = (f, sendTo) => { const g = ctx.createGain(), lp = ctx.createBiquadFilter(); g.gain.value = 0; lp.type = "lowpass"; lp.frequency.value = f; g.connect(lp).connect(master); if (sendTo) { const s = ctx.createGain(); s.gain.value = sendTo; lp.connect(s).connect(revIn); } return { g, lp }; };

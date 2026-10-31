@@ -3906,14 +3906,14 @@ window.AIQ = window.AIQ || {};
     if (!A.final || A.final.active()) return false;
     const ret = DS.retired, retired = !!ret;
     const prevTrack = A.music && A.music.index ? A.music.index() : -1;          // los creditos ponen su vals (pista 06): al acabar vuelve la que sonaba
-    D.hold(true); if (retired) ensureShown();
+    D.hold(true); ensureShown();
     A.final.play({ name: who(), stats: serviceStats(), date: dateTxt(retired ? ret.ts : Date.now(), true), retired, replay: true,
       table: retired ? tableName(ret.via === "classic") : "",
       finale: retired ? (stage, next) => { D.dock(stage); let k = 0; const ends = [nth("retireEnd", 0), nth("retireEnd", 1)];
         const one = () => { if (k >= ends.length) { const bb = el && el.querySelector(".dl-bubble"); if (bb) bb.classList.remove("on"); return next(); }
           const i = k++; D.say(ends[i], { mood: "sly", face: i ? "wink" : "bow", gesture: i ? "hat_tip" : "hat_off_bow", hold: 0, force: true, done: () => setTimeout(one, 900) }); };
-        one(); } : null,
-      done: () => { if (retired) { D.dock(null); D.release(); hideIfOff(); } D.hold(false); setTimeout(() => (prevTrack >= 0 ? A.music.go(prevTrack, true) : A.music.start()), 300); if (done) done(); } });
+        one(); } : (stage, next) => { D.dock(stage); setTimeout(next, 900); },   // sin haberlo jubilado: sale igual bajo su foco, callado; el tachan de js/final.js hace el resto
+      done: () => { D.dock(null); D.release(); hideIfOff(); D.hold(false); setTimeout(() => (prevTrack >= 0 ? A.music.go(prevTrack, true) : A.music.start()), 300); if (done) done(); } });
     return true;
   };
   /* v0.3.236: EL SEGUNDO FINAL, el Clasico entero (las 12 campanas ganadas, js/game.js endScreen). La primera vez se jubila (misma escena, sus frases

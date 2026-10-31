@@ -22,7 +22,7 @@
       A.lang = d.lang && A.STR[d.lang] ? d.lang : "en";   // v0.3.232: sin idioma guardado el juego arranca en ingles, no en el del sistema
       S.intro = d.intro !== false; S.reduce = !!d.reduce; S.cursor = d.cursor !== false; S.tips = d.tips !== false; S.tour = d.tour !== false; S.songToast = d.songToast !== false; S.setTab = ({ video: "screen", pad: "ctl" })[d.setTab] || (["general", "screen", "sound", "ctl", "a11y", "data"].includes(d.setTab) ? d.setTab : "general");   // v0.3.2: Imagen pasa a Pantalla y Mando a Controles S.skin = "casino";
       A.audio.sfxOn = d.sfx !== false; A.audio.musicOn = d.music !== false;
-      if (d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx", "amb"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
+      if (d.volV === 2 && d.vol && typeof d.vol === "object") for (const k of ["master", "music", "sfx", "amb"]) if (Number.isFinite(d.vol[k])) A.audio.vol[k] = Math.max(0, Math.min(1, d.vol[k]));
       S.prog = d.prog && typeof d.prog === "object" && !Array.isArray(d.prog) ? d.prog : {}; S.mode = d.mode || "classic"; S.campId = d.campId || null; S.quality = d.quality || "auto";
       S.panSens = d.panSens || 100; S.zoomSens = d.zoomSens || 100; S.units = d.units === "mi" ? "mi" : "km";
       S.contrast = !!d.contrast; S.colorblind = ["protan", "deutan", "tritan"].includes(d.colorblind) ? d.colorblind : "off"; S.qSize = ["l", "xl"].includes(d.qSize) ? d.qSize : "n";
@@ -39,7 +39,7 @@
     } catch (e) { A.lang = "en"; }
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, sonidos: S.sonidos, musica: S.musica, ambiente: S.ambiente, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, volV: 2, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, sonidos: S.sonidos, musica: S.musica, ambiente: S.ambiente, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
   }
 
   const lv = () => S.camp.levels[S.level];
@@ -410,7 +410,7 @@
     rs.onclick = () => {
       if (!rs.classList.contains("armed")) { rs.classList.add("armed"); rs.textContent = A.t("set.reset.ask"); A.sfx.ui(); clearTimeout(tm); tm = setTimeout(() => { rs.classList.remove("armed"); syncSettings(); }, 4000); return; }
       clearTimeout(tm); rs.classList.remove("armed");
-      A.audio.setVol("master", 0.85); A.audio.setVol("music", 0.7); A.audio.setVol("sfx", 0.9); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
+      A.audio.setVol("master", 0.7); A.audio.setVol("music", 1); A.audio.setVol("sfx", 1); A.audio.setVol("amb", 1); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
       S.quality = "auto"; map.setQuality("auto"); S.luces = "full"; A.casa.set("full"); S.ambiente = "hoy"; A.casa.ambiente("hoy"); S.sonidos = "lounge"; A.audio.setSonidos("lounge"); S.musica = "banda"; A.audio.setMusica("banda"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
       S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 85; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
@@ -742,6 +742,7 @@
     closeDialog(); setPrompt(); setTimer(S.limit);
     $("plate").classList.remove("hidden", "hurry"); $("pauseBtn").classList.toggle("hidden", !!(S.duel && S.duel.net)); $("factText").textContent = "";
     if (S.run) A.adv.onQuestion();
+    if (S.run && !S.qi && S.streak >= 2) setStreak();                 // la racha que pasa de ronda se ve desde la primera pregunta
     if (A.codex && A.codex.toastAside) A.codex.toastAside();         // el monton de tarjetas nuevas no se queda tapando el mapa con el reloj corriendo
     updateHud();
   }

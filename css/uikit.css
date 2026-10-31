@@ -14,7 +14,8 @@
 .gc-burst i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; background: #fff3cf; box-shadow: 0 0 0 1px #16241c; animation: gcb .5s ease-out forwards; }
 .gc-burst i.g { background: #f8b449; }
 @keyframes gcb { to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
-html.reduce-motion .gc-burst { display: none; } html.reduce-motion .tt { transition: none; }
+html.reduce-motion .tt { transition: none; }
+html.reduce-motion .gc-burst { display: none; }
 .kt { display: inline-flex; }
 
 /* ---------------------------------------------------------------- ajustes: pestanas y filas */

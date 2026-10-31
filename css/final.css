@@ -17,20 +17,20 @@
 @keyframes fin-rise { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: .5; } 85% { opacity: .35; } 100% { opacity: 0; transform: translate(var(--dx), -105vh); } }
 
 /* las cortinas: dos panos de terciopelo con ribete dorado que se abren al empezar y se cierran al final */
-.fin-cur { position: absolute; z-index: 3; top: 0; bottom: 0; width: max(28px, calc(50vw - 400px)); pointer-events: none;
+.fin-cur { position: absolute; z-index: 3; top: 0; bottom: 0; width: max(28px, calc(50vw - 400px * var(--fk, 1))); pointer-events: none;
   background: repeating-linear-gradient(90deg, #3a0f12 0 10px, #5a171b 10px 18px, #46121a 18px 24px); }
 .fin-cur::after { content: ""; position: absolute; top: 0; bottom: 0; width: 6px; background: repeating-linear-gradient(180deg, var(--brass) 0 6px, #b3741c 6px 12px); }
 .fin-cur.l { left: 0; transform: translateX(-100%); } .fin-cur.l::after { right: 0; }
 .fin-cur.r { right: 0; transform: translateX(100%); } .fin-cur.r::after { left: 0; }
 .fin.open .fin-cur { transition: transform 1.6s cubic-bezier(.2, .8, .2, 1); transform: none; }
-.fin.open.wide .fin-cur { width: max(28px, calc(50vw - 600px)); transition: transform 1.6s cubic-bezier(.2, .8, .2, 1), width 1.4s cubic-bezier(.3, .7, .3, 1); }
+.fin.open.wide .fin-cur { width: max(28px, calc(50vw - 600px * var(--k, 1))); transition: transform 1.6s cubic-bezier(.2, .8, .2, 1), width 1.4s cubic-bezier(.3, .7, .3, 1); }
 .fin.open.wide.closing .fin-cur, .fin.closing .fin-cur { transition: transform 1.3s cubic-bezier(.6, 0, .4, 1), width 1.3s cubic-bezier(.6, 0, .4, 1); width: 50.5vw; transform: none; }
 
 /* ------------------------------------------------ el rodillo (se mueve a pixel entero desde js/final.js) */
 .fin-view { position: absolute; z-index: 1; inset: 0; overflow: hidden;
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%); }
 .fin-roll { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
-.fin-roll-in { width: min(640px, calc(100vw - 32px)); margin: 0 auto; text-align: center; zoom: var(--k, 1); }
+.fin-roll-in { width: min(640px, calc((100vw - 32px) / var(--fk, 1))); margin: 0 auto; text-align: center; zoom: var(--fk, 1); }   /* --fk: la escala ENTERA del rodillo (js/final.js), para que la letra pixelada caiga en su rejilla */
 .fin-roll section { padding: 0 0 132px; }
 .fin-roll h3 { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0 0 14px; font-family: var(--mono); font-weight: 400; font-size: 16px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--brass); text-shadow: 0 2px 0 #000; }
@@ -40,19 +40,22 @@
 .fin-n + .fin-n { margin-top: 6px; }
 .fin-s { margin: 10px 0 0; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1.12; color: rgba(242, 233, 214, .62); text-wrap: balance; }
 .fin-pip { display: block; width: 6px; height: 6px; margin: 0 auto 28px; background: var(--brass); box-shadow: 0 0 0 2px #000, 0 0 12px rgba(248, 180, 73, .6); transform: rotate(45deg); }
-.fin-open { height: calc(100vh / var(--k, 1)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 !important; margin-bottom: 40px; }
+.fin-open { height: calc(100vh / var(--fk, 1)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 !important; margin-bottom: 40px; }
 .fin-logo { width: min(470px, 78vw); image-rendering: auto; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .6)) drop-shadow(0 0 36px rgba(248, 180, 73, .3)); }
 .fin-by { margin: 40px 0 10px; font-family: var(--mono); font-size: 16px; letter-spacing: .14em; color: rgba(242, 233, 214, .62); text-transform: uppercase; }
 .fin-cs { width: min(330px, 62vw); }
 .fin-cs svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .6)); }
 .fin-thanks .fin-n { font-size: calc(81px * var(--dll, 1)); color: var(--brass-lt); }
 
-/* las dedicatorias: la familia del autor con su A al cubo, y su beta tester; el rodillo se para en la ultima */
+/* las dedicatorias: la familia del autor con su A al cubo, y los agradecimientos a los amigos que probaron el juego; el rodillo se para en la ultima */
+.fin-thx { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; gap: 6px 64px; margin-top: 2px; }
+.fin-thx .fin-n { font-size: calc(36px * var(--dll, 1)); }
+.fin-thx .fin-n + .fin-n { margin-top: 0; }
 .fin-fam { display: flex; justify-content: center; gap: 56px; margin-top: 6px; }
 .fin-cube { margin: 30px 0 0; font-family: var(--sans); font-size: 108px; line-height: .8; color: var(--brass); letter-spacing: .02em;
   text-shadow: 0 6px 0 #6b3f0a, 0 12px 0 #000, 0 0 40px rgba(248, 180, 73, .35); }
 .fin-cube sup { position: relative; top: -.42em; margin-left: 2px; font-size: 54px; line-height: 0; vertical-align: baseline; color: var(--brass-lt); }
-.fin-roll section.fin-ded:not(.fin-last) { padding-bottom: 64px; }
+.fin-roll section.fin-ded:not(.fin-last) { padding-bottom: 36px; }
 .fin-ded .fin-pip { margin-bottom: 20px; }
 .fin-cast { display: grid; gap: 14px; max-width: 560px; margin: 24px auto 0; }
 .fin-row { display: flex; align-items: center; gap: 14px; font-family: var(--sans); font-size: calc(27px * var(--dll, 1)); line-height: 1; }
@@ -92,7 +95,11 @@
   font-size: calc(108px * var(--dll, 1)); line-height: .8; color: var(--brass); letter-spacing: .04em; text-shadow: 0 6px 0 #6b3f0a, 0 12px 0 #000, 0 0 40px rgba(248, 180, 73, .35); }
 .fin-end.fin .fin-word { animation: fin-stamp .42s cubic-bezier(.5, 0, .8, .5) forwards; }
 @keyframes fin-stamp { 0% { opacity: 0; transform: translateX(-50%) scale(2.6); } 70% { opacity: 1; transform: translateX(-50%) scale(.94); } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
-.fin-end.nodealer .fin-stage, .fin-end.nodealer .fin-plate { display: none; }   /* v0.3.236: los creditos desde Ajustes, sin crupier jubilado: solo el FIN */
+/* el tachan: la luz se va (solo los ojos del crupier y de Comodin) y vuelve de golpe; Comodin vive aparte, sobre la sala, a la misma escala que el crupier */
+.fin-end.dark .qx-beam, .fin-end.dark .qx-pool { animation: none; opacity: 0; }
+.fin-end.dark .fin-stage .dealer.big .dl-face { filter: none; }
+.fin-cat { position: absolute; z-index: 2; inset: 0; pointer-events: none; } .fin-cat * { pointer-events: none !important; }
+.fin-end.nodealer .fin-plate span { display: none; }   /* los creditos desde Ajustes, sin haberlo jubilado: el crupier sale igual (y su gato) pero su placa lleva solo el nombre */
 .fin-end-in.shake { animation: fin-shake .34s steps(2); }
 @keyframes fin-shake { 25% { transform: translate(4px, calc(-4vh - 3px)); } 50% { transform: translate(-4px, calc(-4vh + 2px)); } 75% { transform: translate(2px, calc(-4vh + 3px)); } }
 

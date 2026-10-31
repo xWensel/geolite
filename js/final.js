@@ -47,8 +47,7 @@ window.AIQ = window.AIQ || {};
     dedic: "Dedicado a|Dedicated to|Dédié à|Dedicado a|Gewidmet|Dedicato a||谨献给|이 게임을 바칩니다|この作品を捧げる|Посвящается|Dedykuję",
     daughter: "mi hija|my daughter|ma fille|minha filha|meine Tochter|mia figlia||我的女儿|내 딸|娘|моей дочери|mojej córce",
     wife: "mi mujer|my wife|ma femme|minha esposa|meine Frau|mia moglie||我的妻子|내 아내|妻|моей жене|mojej żonie",
-    special: "Dedicatoria especial|Special dedication|Dédicace spéciale|Dedicatória especial|Besondere Widmung|Dedica speciale||特别献给|특별한 헌사|特別な感謝を|Особая благодарность|Specjalna dedykacja",
-    tester: "Mi incansable beta tester|My tireless beta tester|Mon infatigable bêta-testeur|Meu incansável beta tester|Mein unermüdlicher Betatester|Il mio instancabile beta tester||我那不知疲倦的测试员|지칠 줄 모르는 나의 베타 테스터|疲れ知らずのベータテスター|Моему неутомимому бета-тестеру|Mojemu niestrudzonemu beta testerowi",
+    special: "Agradecimientos:|Thanks to:|Remerciements :|Agradecimentos:|Danksagung:|Ringraziamenti:||特别感谢：|감사의 말:|謝辞：|Благодарности:|Podziękowania:",
     name: "Don Crupier|The Dealer|Don Croupier|Dom Crupiê|Don Croupier|Don Croupier||荷官先生|딜러 나리|ドン・ディーラー|Дон Крупье|Don Krupier",
     plate: "Jubilado el {d}|Retired on {d}|Retraité le {d}|Aposentado em {d}|In Rente seit dem {d}|In pensione · {d}||{d}退休|{d} 은퇴|{d} 引退|На пенсии с {d}|Na emeryturze od {d}",
     fin: "FIN|THE END|FIN|FIM|ENDE|FINE||剧终|끝|完|КОНЕЦ|KONIEC",
@@ -92,6 +91,13 @@ window.AIQ = window.AIQ || {};
     return root;
   }
   const later = (fn, ms) => { const s = st; if (s) s.T.push(setTimeout(() => { if (st === s) fn(); }, ms)); };
+  /* la escala del rodillo es ENTERA (--fk): con la del juego (p. ej. 1,275 en 1080p) la letra pixelada se emborronaba y la columna se metia bajo las cortinas.
+     Por debajo de 1 (ventanas pequenas) no hay escala entera posible y se queda la del juego */
+  function fitK() {
+    if (!root) return; const k = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--k")) || 1;
+    root.style.setProperty("--fk", String(k >= 1 ? Math.max(1, Math.floor(k + 0.001)) : k));
+  }
+  addEventListener("resize", () => { if (st) fitK(); });
 
   /* ---------- el rodillo */
   function rollHTML(o) {
@@ -107,6 +113,7 @@ window.AIQ = window.AIQ || {};
       sec(TX.ost, n("Álvaro Cano")),
       sec(TX.cast, `<div class="fin-cast">
         <div class="fin-row"><span class="fin-mug">${mug ? `<img src="${mug}" alt="">` : ""}</span><b>${P6(TX.name)}</b><i></i><em>${P6(TX.himself)}</em></div>
+        <div class="fin-row"><span class="fin-mug"><img id="finCatMug" alt="" style="visibility:hidden"></span><b>Comodín</b><i></i><em>${P6(TX.himself)}</em></div>
         ${ret ? `<div class="fin-row"><span class="fin-mug q">?</span><b>${P6(TX.who)}</b><i></i><em>${esc(o.name || P6(TX.you))}</em></div>` : ""}</div>`),
       sec(TX.sheet, `<div class="fin-tk">
         <div class="fin-tk-h"><b>Geolite · Casino</b>${P6(TX.settle)}<small>${esc(o.table || "")}${when ? " · " + esc(when) : ""}</small></div><hr>${rows}<hr>
@@ -120,8 +127,18 @@ window.AIQ = window.AIQ || {};
       sec("", n(P6(TX.thanks)) + s(P6(TX.thanksS)), "fin-thanks"),
       sec(TX.dedic, `<div class="fin-fam"><div><p class="fin-n">Alejandra</p>${s(P6(TX.daughter))}</div><div><p class="fin-n">Alicia</p>${s(P6(TX.wife))}</div></div>
         <p class="fin-cube" aria-label="A³">A<sup>3</sup></p>`, "fin-ded"),
-      sec(TX.special, n("Hugiitop") + s(P6(TX.tester)), "fin-ded fin-last"),
+      sec(TX.special, `<div class="fin-thx">${["Can1strão", "Hugiitop", "Gavaba29", "Danryk", "H4po", "Guerra"].map(n).join("")}</div>`, "fin-ded fin-last"),
     ].join("");
+  }
+  /* el retrato de Comodin en el reparto: el gato sentado, a su pixel, en una ficha de 64x64 como la cabeza del crupier */
+  function catMug() {
+    const d = A.COMODIN_DATA, img = $("finCatMug"); if (!d || !img || !d.r.base) return;
+    const im = new Image(); im.onload = () => {
+      const [sx, sy, w, h] = d.r.base, c = document.createElement("canvas"); c.width = c.height = 64;
+      c.getContext("2d").drawImage(im, sx, sy, w, h, Math.round((64 - w) / 2), Math.round((64 - h) / 2), w, h);
+      img.src = c.toDataURL(); img.style.visibility = "";
+    };
+    im.src = d.atlas;
   }
   function locale() { const L = (A.LANGS || []).find(l => l.code === A.lang); return L ? L.loc : undefined; }
   /* "Cousins" en oro y "studios" en perla, como en la intro del estudio (el mismo trazado de js/logo.js) */
@@ -134,7 +151,7 @@ window.AIQ = window.AIQ || {};
   }
 
   function play(o = {}) {
-    mount(); if (st) stop();
+    mount(); if (st) stop(); fitK();
     st = { o, T: [], phase: "roll", y: 0, end: 0, speed: 0, hold: 4.5, fast: false, raf: 0, last: 0 };
     /* v0.3.236: o.retired === false (los creditos vistos desde Ajustes sin haber jubilado nunca al crupier): sin su foco ni su placa. o.replay: desde Ajustes
        o el segundo final: el juego no se cierra, asi que el aviso final dice "volver" y no "cerrar el casino" */
@@ -142,7 +159,7 @@ window.AIQ = window.AIQ || {};
     $("finHint").className = "fin-hint"; $("finHint").innerHTML = `<span><kbd>${P6(TX.hold)}</kbd>${P6(TX.fast)}</span><span><kbd>Esc</kbd>${P6(TX.skip)}</span>`;
     $("finPlateN").textContent = P6(TX.name); $("finPlateD").textContent = P6(TX.plate).replace("{d}", o.date || "");
     $("finWord").textContent = P6(TX.fin);
-    const ri = $("finRollIn"); ri.innerHTML = rollHTML(o); csLogo($("finCs")); $("finRoll").style.visibility = ""; $("finRoll").style.opacity = "";
+    const ri = $("finRollIn"); ri.innerHTML = rollHTML(o); csLogo($("finCs")); catMug(); $("finRoll").style.visibility = ""; $("finRoll").style.opacity = "";
     A.music.muffle(false); A.music.go(TRACK, true);
     reduced() ? root.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400 })
       : root.animate([{ transform: "scale(0, .006)", filter: "brightness(4)", easing: "cubic-bezier(.2, .6, .4, 1)" }, { transform: "scale(1.02, .008)", filter: "brightness(3)", offset: .4 }, { transform: "none", filter: "brightness(1)" }], { duration: 560 });
@@ -176,15 +193,39 @@ window.AIQ = window.AIQ || {};
     const r = $("finRoll"), e = $("finEnd");
     root.classList.add("wide");                                         // las cortinas se abren del todo: sitio para su globo
     r.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: "forwards" }).onfinish = () => { r.style.visibility = "hidden"; };
-    later(() => { if (A.sfx.spot && !e.classList.contains("nodealer")) A.sfx.spot(); e.classList.add("lit"); }, 500);
+    later(() => { if (A.sfx.spot) A.sfx.spot(); e.classList.add("lit"); }, 500);
     later(() => e.classList.add("plated"), 1400);
     later(() => {
       const next = () => later(() => {
         e.classList.add("fin"); later(() => { if (A.sfx.stamp) A.sfx.stamp(); const x = e.querySelector(".fin-end-in"); x.classList.remove("shake"); void x.offsetWidth; x.classList.add("shake"); A.haptic && A.haptic([40]); }, 300);
         later(() => { st.phase = "wait"; $("finBack").classList.add("on"); }, 2200);
       }, 200);
-      if (st.o.finale) st.o.finale($("finStage"), next); else next();
+      if (st.o.finale) st.o.finale($("finStage"), () => tachan(next)); else next();
     }, 1700);
+  }
+  /* EL TACHAN: tras sus dos frases la luz se va; en la oscuridad solo se ven los ojos del crupier y los de Comodin (a su lado, mirandole). Un golpe grave
+     y la luz vuelve de golpe: el crupier se inclina con su cara oscura y el gato se levanta, los dos posando como tras un truco, y entonces cae el FIN.
+     Sin crupier (creditos desde Ajustes sin haberlo jubilado) no hay escena. Con Movimiento en Minimo no hay apagon: la pose y ya */
+  function tachan(next) {
+    const D = A.dealer, CR = A.crupier, cm = A.comodin, e = $("finEnd");
+    if (!st || !D || !D.face || !cm || !A.COMODIN_DATA) return next();
+    const k = () => (D.k && D.k()) || 3, dpr = window.devicePixelRatio || 1, cw = (A.COMODIN_DATA.box[2] - A.COMODIN_DATA.box[0]) * k() / dpr;
+    const host = document.createElement("div"); host.className = "fin-cat"; root.insertBefore(host, root.querySelector(".fin-scan"));
+    st.cat = host;
+    const eyes = on => { if (CR && CR.ojos) CR.ojos(on); };
+    /* sobre el borde de arriba de su placa, en su extremo derecho y mirandole (el gato es fisico: siempre sobre algo). Se mide al ponerlo y otra vez al posar */
+    const put = () => { const pl = root.querySelector(".fin-plate").getBoundingClientRect(); cm.show({ host, k, floor: Math.max(0, Math.round(innerHeight - pl.top)), x: Math.round(Math.min(innerWidth - cw / 2 - 8, pl.right - cw * 0.12)), mode: "still", dir: -1 }); };
+    put();
+    const pose = () => {
+      put(); e.classList.remove("dark"); eyes(false); cm.dark(false);
+      D.face("dark", "hat_off_bow"); cm.play("levanta", { hold: true });
+      if (A.sfx.tachan) A.sfx.tachan(); A.haptic && A.haptic([60, 40, 60]);
+      if (!reduced()) { const x = e.querySelector(".fin-end-in"); x.classList.remove("shake"); void x.offsetWidth; x.classList.add("shake"); }
+      later(next, reduced() ? 900 : 2400);
+    };
+    if (reduced()) return pose();
+    e.classList.add("dark"); eyes(true); D.face("dark"); cm.dark(true, "ojos"); if (A.sfx.powerdown) A.sfx.powerdown();
+    later(pose, 2200);
   }
   function leave() {                                                   // las cortinas se cierran y la sala se apaga
     if (!st || st.phase !== "wait") return; st.phase = "out"; $("finBack").className = "fin-back";
@@ -196,7 +237,13 @@ window.AIQ = window.AIQ || {};
       later(() => { const o = st.o; a.cancel(); root.style.opacity = "0"; stop(); if (o.done) o.done(); }, 900);
     }, 1400);
   }
-  function stop() { if (!st) return; st.T.forEach(clearTimeout); cancelAnimationFrame(st.raf); st = null; root.className = "fin"; $("finRollIn").innerHTML = ""; }
+  function stop() {
+    if (!st) return;
+    if (st.cat) {                                                      // el tachan: Comodin se va con la sala y el crupier recupera su cara
+      st.cat.remove(); if (A.comodin) { A.comodin.dark(false); A.comodin.hide(); } if (A.crupier && A.crupier.ojos) A.crupier.ojos(false);
+      if (A.dealer && A.dealer.restFace) A.dealer.restFace(); $("finEnd").classList.remove("dark");
+    }
+    st.T.forEach(clearTimeout); cancelAnimationFrame(st.raf); st = null; root.className = "fin"; $("finRollIn").innerHTML = ""; }
 
   A.final = { play, active: () => !!st };
 })(window.AIQ);

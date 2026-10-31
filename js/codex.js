@@ -433,7 +433,7 @@ window.AIQ = window.AIQ || {};
   const pctOf = s => (s.t ? (s.u >= s.t ? 100 : Math.floor(100 * s.u / s.t)) : 0);
 
   /* nombres y banderas de los paises */
-  const cName = ne => { const e = E["c:" + ne], n = e && e.name; if (n && n.es && n.fr) return A.tx(n); const q = neQ[ne], pc = q && A.PCOUNTRY && A.PCOUNTRY[q]; return (pc && A.tx(pc)) || (n && n.en) || ne; };
+  const cName = ne => { const e = E["c:" + ne], n = e && e.name; if (n && n.es && n.fr) return A.tx(n); const q = neQ[ne] || (ne === "Antarctica" ? "Q51" : ""), pc = q && A.PCOUNTRY && A.PCOUNTRY[q]; return (pc && A.tx(pc)) || (n && n.en) || ne; };
   const gName = g => (g.ne ? cName(g.ne) : g.qc ? ((A.PCOUNTRY && A.PCOUNTRY[g.qc] && A.tx(A.PCOUNTRY[g.qc])) || g.qc) : regName(g.reg));
   /* banderas ya rasterizadas (tools/flags-raster.cjs): los SVG con escudo se pintan en el hilo principal y una pagina con 40 daba un tiron */
   const hasFlag = ne => { const en = neEn[ne]; return !!(en && A.FLAGS && A.FLAGS[en]); };   // los 199 paises la tienen (data/flags.js); si faltara una, sale el icono de pais
