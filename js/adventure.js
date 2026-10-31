@@ -1400,9 +1400,9 @@ window.AIQ = window.AIQ || {};
   };
   function renderBars() {
     ensureBars(); const bar = $("advBar"), tb = $("toolBar"), cb = $("chalBar"); renderLoot();
-    if (!run || !C().S.camp || C().S.camp.mode !== "adventure" || ["title", "levelEnd", "shop"].includes(C().S.phase)) { bar.classList.add("hidden"); tb.classList.add("hidden"); cb.classList.add("hidden"); return; }
+    if (!run || !C().S.camp || C().S.camp.mode !== "adventure" || ["title", "levelEnd", "shop"].includes(C().S.phase)) { document.body.classList.remove("inf-on"); bar.classList.add("hidden"); tb.classList.add("hidden"); cb.classList.add("hidden"); return; }
     const info = actInfo(run.act), silenced = (run.boss || []).includes("silence");
-    bar.classList.remove("hidden");
+    bar.classList.remove("hidden"); document.body.classList.toggle("inf-on", !!run.inf);   // v0.4.42: el modo infinito no tiene Campamento: las provisiones son lo que juegas, y se ven siempre
     bar.innerHTML = `<div class="ab-top"><span class="ab-act" data-tf="abact">${A.tx(info.n)}</span><span class="ab-coins" id="abCoins" data-tf="abcoins" data-pin="1">${A.moneda ? A.moneda.html("coinHud", 1) : CN()}<b>${run.coins}</b></span><span class="ab-hearts" data-tf="abhearts">${hearts()}</span></div>
       <div class="ab-perks">${run.perks.map(id => `<span class="ab-perk" data-id="${id}">${ic(id)}${id === "hoard" && run.hucha ? `<b class="hc-n">${run.hucha}</b>` : ""}</span>`).join("")}</div>
       ${A.jefes ? A.jefes.riseHtml() : ""}

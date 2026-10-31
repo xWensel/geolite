@@ -102,6 +102,8 @@ body.title-on .brand-sh { opacity: 0; pointer-events: none; }
 /* movil y tablet: el ticket es una hoja inferior sobre el pie de pagina; mientras se ve, el resto del HUD de partida se aparta */
 @media (max-width: 900px) {
   body.tk-on #advBar, body.tk-on #toolBar, body.tk-on .rail-sh { display: none; }
+  body.tk-on.inf-on #advBar { display: flex; }   /* modo infinito: con el ticket abierto sigue el cartel de arriba, solo con acto, doblones y PROVISIONES */
+  body.tk-on.inf-on #advBar .ab-perks, body.tk-on.inf-on #advBar .ab-rise, body.tk-on.inf-on #advBar .ab-wind { display: none; }
   #dlg.side { place-self: end center; margin: 0 0 calc(var(--note-top, 90px) + 8px); max-height: calc(calc(100 * var(--vh)) - 226px - var(--note-top, 90px)); overflow-y: auto; scrollbar-width: none; }
   #dlg.side::-webkit-scrollbar { display: none; }
 }
