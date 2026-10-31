@@ -174,17 +174,25 @@ window.AIQ = window.AIQ || {};
   function padTick(api) {                                           // mando: cruceta o palanca izquierda recorren el pasillo (el resto lo lleva js/mando.js)
     const pads = navigator.getGamepads ? navigator.getGamepads() : []; for (const p of pads) { if (!p) continue; const l = (p.buttons[14] && p.buttons[14].pressed) || p.axes[0] < -0.6, r = (p.buttons[15] && p.buttons[15].pressed) || p.axes[0] > 0.6; if (l && !padL) api.goTo(api.stop - 1); if (r && !padR) api.goTo(api.stop + 1); padL = l; padR = r; break; }
   }
+  /* el salon llena la ventana: el lienzo de 640x360 se amplia un numero ENTERO de pixeles de pantalla (con el ratio de la pantalla) y se centra; el resto es terciopelo.
+     El tablero de 1280x720 se escala lo mismo (1 pixel del lienzo = 2 del tablero), asi el marcador, la carta y los textos crecen con el. */
+  function fitBoard() {
+    const st = root && root.querySelector(".barra-screen"), bd = root && root.querySelector(".brr-board"); if (!st || !bd) return;
+    const dpr = window.devicePixelRatio || 1, W = st.clientWidth, H = st.clientHeight, n = Math.max(1, Math.floor(Math.min(W * dpr / 640, H * dpr / 360) + 1e-6));
+    bd.style.setProperty("--bs", String(n / (2 * dpr)));
+  }
   function build() {
     root.innerHTML = `<div class="gx-veil"></div><section class="barra-screen gx-stage gx-camp" data-nosq aria-labelledby="bH"><div class="brr-board"><div class="brr-hall"></div>
       <button type="button" class="hub-back brr-back" id="brBack">${A.icon("u_back", "sm")}${esc(A.tx(T.back))}</button><div id="brHudBox"></div>
       <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${MIN}" step="${MIN}" value="${MIN}" aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${MIN}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note" id="brNote"></span></div>
       <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i id="brTk">0</i></button></div><div class="brr-say" id="brSay"></div></div></section>`;
-    wire(); dealerOff(); if (A.fitK) A.fitK();
+    wire(); dealerOff(); if (A.fitK) A.fitK(); fitBoard(); addEventListener("resize", fitBoard);
     hall = A.barraHall(root.querySelector(".brr-hall"), mkX());
   }
+  const setFill = r => { const mn = +r.min, mx = +r.max; r.style.setProperty("--p", mx > mn ? ((+r.value - mn) / (mx - mn)) * 100 + "%" : "100%"); };   // el relleno amarillo llega siempre hasta el selector
   function update(msg) {
     const max = maxStake(), s = $("brStk2"), v = $("brStkv"); if (!s) return; R.stake = Math.min(Math.max(MIN, R.stake), max);
-    $("brHudBox").innerHTML = hudHtml(); s.max = max; s.value = R.stake; s.disabled = max <= MIN; v.textContent = fmt(R.stake);
+    $("brHudBox").innerHTML = hudHtml(); s.max = max; s.value = R.stake; s.disabled = max <= MIN; v.textContent = fmt(R.stake); setFill(s);
     $("brNote").textContent = R.gold ? A.tx(T.gold) : BOTE.has(R.play + 1) ? A.tx(T.bote) : ""; $("brTk").textContent = fmt(prof().tickets);
     $("brSay").innerHTML = `${A.icon("dealer_mini_s")}<span>${esc(msg || A.tx(T.pick))}</span>`; dealerOff();
     if (hall) hall.refreshCard();
@@ -193,8 +201,8 @@ window.AIQ = window.AIQ || {};
   const pill = () => { const p = root.querySelector(".brr-hall .hcard .bt-stake"); if (p) p.innerHTML = CNb() + stakeNow(); };
   function wire() {
     $("brBack").onclick = () => leave(); $("brRank").onclick = () => rankPanel(); $("brPrize").onclick = () => prizePanel();
-    const s = $("brStk2"), v = $("brStkv"); s.oninput = () => { R.stake = +s.value; v.textContent = fmt(R.stake); pill(); A.sfx.tick && A.sfx.tick(1); };
-    root.querySelectorAll(".brr-stakes [data-q]").forEach(b => (b.onclick = () => { const max = maxStake(); R.stake = b.dataset.q === "min" ? MIN : b.dataset.q === "all" ? max : Math.max(MIN, Math.round(RUN.coins / 2 / MIN) * MIN); s.value = Math.min(R.stake, max); R.stake = +s.value; v.textContent = fmt(R.stake); pill(); A.sfx.chip && A.sfx.chip(0.4); }));
+    const s = $("brStk2"), v = $("brStkv"); s.oninput = () => { R.stake = +s.value; v.textContent = fmt(R.stake); setFill(s); pill(); A.sfx.tick && A.sfx.tick(1); };
+    root.querySelectorAll(".brr-stakes [data-q]").forEach(b => (b.onclick = () => { const max = maxStake(); R.stake = b.dataset.q === "min" ? MIN : b.dataset.q === "all" ? max : Math.max(MIN, Math.round(RUN.coins / 2 / MIN) * MIN); s.value = Math.min(R.stake, max); R.stake = +s.value; v.textContent = fmt(R.stake); setFill(s); pill(); A.sfx.chip && A.sfx.chip(0.4); }));
   }
   const dealerOff = () => { try { A.dealer.casino(true); } catch (e) { /* sin crupier */ } };   // el crupier de la esquina no sale en el salon (las pantallas de casino lo vuelven a llamar al cerrarse)
   function closePop() { /* la carta ya no es una ventana: vive en el pasillo */ }
@@ -267,7 +275,7 @@ window.AIQ = window.AIQ || {};
     const shown = rk => { const e = document.getElementById("brRk"); if (e) e.textContent = rk ? "#" + rk : "—"; }; let got; submitScore(final, R.play).then(rank => { got = rank || 0; shown(got); });
     setTimeout(() => { if (!root) return; closePop(); root.querySelector(".brr-board").appendChild(o); if (got != null) shown(got); $("brAgain").onclick = () => { o.remove(); entry(); }; $("brOut2").onclick = () => leave(true); }, 700);
   }
-  function leave(done) { if (hall) { try { hall.dispose ? hall.dispose() : root.querySelector(".brr-hall").__pasillo.dispose(); } catch (e) { /* ya cerrado */ } hall = null; } closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
+  function leave(done) { removeEventListener("resize", fitBoard); if (hall) { try { hall.dispose ? hall.dispose() : root.querySelector(".brr-hall").__pasillo.dispose(); } catch (e) { /* ya cerrado */ } hall = null; } closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
   /* ---------- abrir ---------- */
   function open_() {
     if (!A.adv || !A.adv.casino || !A.adv.casino.core) return A.hub.screen("home");

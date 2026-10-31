@@ -87,3 +87,17 @@
 .brr-say { z-index: 2; }
 #brHudBox > .brr-hud { position: absolute; }
 .brr-hall .hrail { top: 134px; } .brr-say { top: 166px; } .brr-hall .phint { top: auto; bottom: 64px; left: 40px; }
+
+/* paso 6: el salon llena cualquier ventana (v0.4.36) */
+.barra-screen.gx-stage { zoom: 1; }
+.barra-screen { background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, .6) 100%), repeating-linear-gradient(90deg, #4a0f1c 0 14px, #7a1a2c 14px 22px, #3a0a14 22px 34px); }
+.barra-screen::before { content: none; }
+.brr-board { transform: scale(var(--bs, 1)); transform-origin: 50% 50%; }
+.brr-hud { top: 56px; } .brr-back { top: 8px; }
+
+/* paso 7: la carta, justo en el centro de la mesa elegida; la barra de apuesta con el relleno hasta el selector */
+.brr-hall .hcard { left: 50%; transform: translateX(-50%); width: 320px; } .brr-hall .hcard .tb-sup { display: block; } .brr-hall .hcard .sup { width: 100%; box-sizing: border-box; }
+.brr-stakes input[type=range] { -webkit-appearance: none; appearance: none; width: 150px; height: 28px; background: none; margin: 0; cursor: pointer; --p: 0%; }
+.brr-stakes input[type=range]::-webkit-slider-runnable-track { height: 12px; background: linear-gradient(90deg, #f5a623 var(--p), #0a1a12 var(--p)); box-shadow: inset 0 0 0 2px #0a140f; }
+.brr-stakes input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 28px; margin-top: -8px; background: linear-gradient(#fff3b0, #d4a04a 60%, #c46a1b); box-shadow: inset 0 0 0 2px #0a140f; }
+.brr-stakes input[type=range]:disabled { opacity: .5; cursor: default; } .brr-stakes input[type=range]:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
