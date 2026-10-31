@@ -86,4 +86,4 @@
 .brr-hall .hcard { top: 476px; }
 .brr-say { z-index: 2; }
 #brHudBox > .brr-hud { position: absolute; }
-.brr-hall .hrail { top: 134px; } .brr-say { top: 166px; } .brr-hall .phint { top: 166px; }
+.brr-hall .hrail { top: 134px; } .brr-say { top: 166px; } .brr-hall .phint { top: auto; bottom: 64px; left: 40px; }

@@ -13,6 +13,8 @@ A.barraHall = function (cv, X) {
   const dots = () => { let r = "", prev = ""; X.list.forEach((g, i) => { if (g.room !== prev) { r += `<span class="rl">${X.rooms[g.room]}</span>`; prev = g.room; } r += `<button type="button" class="dt" data-i="${i}" style="--c1:${g.c[0]}" aria-label="${g.n}"></button>`; }); return r; };
   "use strict";
   const IW = 640, IH = 360;
+  const CJK = (getComputedStyle(document.documentElement).getPropertyValue("--cjk") || "").trim(), IS_CJK = /Fusion/.test(CJK);
+  const FJ = IS_CJK ? 12 : 15, FF = "'Jersey 15', 'Pixelify Sans', " + (IS_CJK ? CJK + ", " : "") + "sans-serif", NS = IS_CJK ? 12 : 8, NF = "'Silkscreen', 'Geolite Cyrillic Caps', 'Pixelify Sans', " + (IS_CJK ? CJK + ", " : "") + "monospace";   // placas (Jersey) y neones (Silkscreen)
   /* ====================== utilidades ====================== */
   const mk = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
   const HX = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
@@ -138,12 +140,12 @@ A.barraHall = function (cv, X) {
   /* ---- placas y rotulos de neon (necesitan las fuentes) ---- */
   const plaque = {}; let gates = [], neonEntry = null, hallLamp = null; const HALLX = 28;
   const buildText = () => {
-    L.forEach(g => { const t = g.n, m = mk(260, 20).getContext("2d"); m.font = "15px 'Jersey 15', 'Pixelify Sans', sans-serif"; const w = Math.min(Math.ceil(m.measureText(t).width) + 14, 132), pc = mk(w, 15), px = pc.getContext("2d"), B = g.soon ? BRASS_S : BRASS;
+    L.forEach(g => { const t = g.n, m = mk(260, 20).getContext("2d"); let fs = FJ; m.font = fs + "px " + FF; while (fs > 9 && m.measureText(t).width > 118) { fs--; m.font = fs + "px " + FF; } const w = Math.min(Math.ceil(m.measureText(t).width) + 14, 132), pc = mk(w, 15), px = pc.getContext("2d"), B = g.soon ? BRASS_S : BRASS;
       for (let yy = 0; yy < 15; yy++) for (let xx = 0; xx < w; xx++) { const edge = xx === 0 || yy === 0 || xx === w - 1 || yy === 14; px.fillStyle = rgb(edge ? B[1] : yy < 2 ? B[4] : yy > 11 ? B[2] : B[3]); px.fillRect(xx, yy, 1, 1); }
-      px.font = m.font; px.textBaseline = "top"; px.fillStyle = "#1d0a3d"; px.fillText(t, 7, 1); plaque[g.id] = pc; });
-    const neon = (txt, col) => { const m = mk(400, 12).getContext("2d"); m.font = "8px Silkscreen, 'Pixelify Sans', monospace"; m.letterSpacing = "1px"; const tw = Math.ceil(m.measureText(txt).width), W = tw + 20, H = 21, base = mk(W, H), em = mk(W, H), b = base.getContext("2d"), e = em.getContext("2d"), cc = HX(col);
+      px.font = m.font; px.textBaseline = "top"; px.fillStyle = "#1d0a3d"; px.fillText(t, 7, IS_CJK ? 1 : 1 + (15 - fs > 3 ? 1 : 0)); plaque[g.id] = pc; });
+    const neon = (txt, col) => { const m = mk(400, 12).getContext("2d"); m.font = NS + "px " + NF; m.letterSpacing = "1px"; const tw = Math.ceil(m.measureText(txt).width), W = tw + 20, H = 21, base = mk(W, H), em = mk(W, H), b = base.getContext("2d"), e = em.getContext("2d"), cc = HX(col);
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const edge = x === 0 || y === 0 || x === W - 1 || y === H - 1, bev = x === 1 || y === 1 || x === W - 2 || y === H - 2, tube = (x === 3 || y === 3 || x === W - 4 || y === H - 4) && x > 2 && y > 2 && x < W - 3 && y < H - 3; b.fillStyle = rgb(edge ? K.ink : bev ? K.br2 : tube ? mix(cc, [0, 0, 0], 0.6) : [10, 20, 15]); b.fillRect(x, y, 1, 1); if (tube) { e.fillStyle = rgb(mix(cc, [255, 255, 255], 0.1)); e.fillRect(x, y, 1, 1); } }
-      b.font = e.font = "8px Silkscreen, 'Pixelify Sans', monospace"; b.letterSpacing = e.letterSpacing = "1px"; b.textBaseline = e.textBaseline = "top"; b.fillStyle = rgb(mix(cc, [0, 0, 0], 0.6)); b.fillText(txt, 10, 7); e.fillStyle = rgb(cc); e.fillText(txt, 10, 7); e.fillStyle = "rgba(255,255,255,.6)"; e.fillText(txt, 10, 6.5); return { base, em, w: W, h: H }; };
+      b.font = e.font = NS + "px " + NF; b.letterSpacing = e.letterSpacing = "1px"; b.textBaseline = e.textBaseline = "top"; const ty = IS_CJK ? 5 : 7; b.fillStyle = rgb(mix(cc, [0, 0, 0], 0.6)); b.fillText(txt, 10, ty); e.fillStyle = rgb(cc); e.fillText(txt, 10, ty); e.fillStyle = "rgba(255,255,255,.6)"; e.fillText(txt, 10, ty - 0.5); return { base, em, w: W, h: H }; };
     hallLamp = lampSprite(1, ["#f5a623", "#c46a1b", "#fdd742"]); gates = rooms.map(r => Object.assign({ x: r.gate }, neon(X.rooms[r.id].toUpperCase() + " ›", r.c.sign))); neonEntry = neon(X.title, "#ffe39a");
   };
   /* ====================== luz precalculada ====================== */
@@ -164,7 +166,7 @@ A.barraHall = function (cv, X) {
   const loadImg = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
   const nat = (im, n) => { const c = mk(n, n), x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(im, 0, 0, n, n); return c; };
   async function init() {
-    await Promise.all([document.fonts.load("15px 'Jersey 15'"), document.fonts.load("8px Silkscreen")].map(p => p.catch(() => 0)));
+    const allT = L.map(g => g.n).join("") + Object.values(X.rooms).join("") + X.title; await Promise.all([document.fonts.load(FJ + "px " + FF, allT), document.fonts.load(NS + "px " + NF, allT.toUpperCase() + "›")].map(p => p.catch(() => 0)));
     const srcs = [...new Set(L.map(g => g.ico))], ims = await Promise.all(srcs.map(s => loadImg("assets/icons/" + s + ".webp"))), dealer = await loadImg("assets/icons/dealer_neutral.webp"), icons = {};
     srcs.forEach((s, i) => { if (ims[i]) icons[s] = nat(ims[i], Math.round(ims[i].naturalWidth / 8)); });
     L.forEach(g => { const base = icons[g.ico]; if (!base) return; emblem[g.id] = base; { const bw = base.width, bd = base.getContext('2d').getImageData(0, 0, bw, base.height).data; let y1 = 0, x0 = bw, x1 = 0; for (let y = 0; y < base.height; y++) for (let x = 0; x < bw; x++) if (bd[(y * bw + x) * 4 + 3] > 40) { y1 = y; if (x < x0) x0 = x; if (x > x1) x1 = x; } embBox[g.id] = { bottom: y1 + 1, cx: Math.round((x0 + x1 + 1) / 2) }; } const n = base.width, gc = mk(n, n), x = gc.getContext("2d"); x.drawImage(base, 0, 0); const id = x.getImageData(0, 0, n, n), d = id.data; for (let i = 0; i < d.length; i += 4) { const v = d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; d[i] = v * 0.55; d[i + 1] = v * 0.6; d[i + 2] = v * 0.74; } x.putImageData(id, 0, 0); emblemG[g.id] = gc; });
