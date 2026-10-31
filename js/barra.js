@@ -198,7 +198,7 @@ window.AIQ = window.AIQ || {};
   function rebuildHall() {                                           // la ventana cambio: se levanta el salon con el tamano nuevo, en la misma mesa
     rzT = 0; const el = root && root.querySelector(".brr-hall"), pas = el && el.__pasillo; if (!pas) return; if (mkX().paused()) { rzT = setTimeout(rebuildHall, 400); return; }
     const k = fitBoard(); if (k === hallKey) return; const stop = pas.stop;
-    try { pas.dispose(); } catch (e) { /* ya cerrado */ } el.innerHTML = ""; hallKey = k; const x = mkX(); x.start = stop; A.barraHall(el, x);
+    try { pas.dispose(); } catch (e) { /* ya cerrado */ } el.innerHTML = ""; hallKey = k; const x = mkX(); x.start = stop; A.barraHall(el, x); hall = el.__pasillo || null;
   }
   const onResize = () => { fitBoard(); clearTimeout(rzT); rzT = setTimeout(rebuildHall, 160); };
   function build() {
@@ -207,7 +207,7 @@ window.AIQ = window.AIQ || {};
       <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${MIN}" step="${MIN}" value="${MIN}" aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${MIN}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note" id="brNote"></span></div>
       <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i id="brTk">0</i></button></div><div class="brr-say" id="brSay"></div></div></section>`;
     wire(); dealerOff(); if (A.fitK) A.fitK(); hallKey = fitBoard(); addEventListener("resize", onResize);
-    hall = A.barraHall(root.querySelector(".brr-hall"), mkX());
+    { const el = root.querySelector(".brr-hall"); A.barraHall(el, mkX()); hall = el.__pasillo || null; }   // v0.4.39: A.barraHall no devuelve nada (el pasillo cuelga de su lienzo): sin esto la carta no se volvia a cablear tras jugar y la jugada siguiente se perdia
   }
   const setFill = r => { const mn = +r.min, mx = +r.max; r.style.setProperty("--p", mx > mn ? ((+r.value - mn) / (mx - mn)) * 100 + "%" : "100%"); };   // el relleno amarillo llega siempre hasta el selector
   function update(msg) {

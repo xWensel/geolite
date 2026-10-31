@@ -831,6 +831,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 .gx-camp .tr-relic.tr-pact { flex: none; align-self: center; width: 22px; height: 22px; margin: -6px 0 -6px 2px; }
 .gx-camp .tr-pact .tr-face { border-radius: 50%; background: radial-gradient(circle at 36% 32%, #ff7b6b, #c2372e 48%, #8e1f19 78%); box-shadow: 0 0 0 2px var(--gx-o), inset 0 0 0 2px rgba(255, 217, 138, .55); }
 .gx-camp .tr-pact .tr-face .ic { width: 16px; height: 16px; }
+.gx-camp .tr-pact[data-relic="suitcase"] .tr-face { background: radial-gradient(circle at 36% 32%, #ffe08a, #d9a441 48%, #8a5d15 78%); }   /* la Maleta: lacre de laton */
 /* la Ventaja lleva un sello dorado (solo cabe una) */
 .gx-camp .tr-relic.vtg .tr-face::after { content: ""; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--gx-gold); box-shadow: 0 0 0 2px var(--gx-o); }
 /* mochila llena: las reliquias esperan a que elijas cual vendes (con lo que te dan por ella) */

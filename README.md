@@ -44,7 +44,7 @@ Cada Campamento sortea un juego de los ocho. Todos se deciden con la semilla de 
 | El duelo de dados | Dos dados cada uno contra Don Crupier; gana el total mayor y paga ×2 (un empate se repite una vez) | ×2 |
 | La lluvia de fichas | Plinko de 12 filas, tres niveles de riesgo y 11 columnas de salida; hasta ×95 | 96,09 – 97,00 % |
 | El globo | Crash: cobra antes de que reviente; sube hasta ×100 | 97,00 % exacto |
-| Rasca y gana | Tarjeta de 3×3 casillas que se rasca con la doblón; tres iguales pagan de ×2 a ×100 | 96,00 % exacto |
+| Rasca y gana | Tarjeta de 3×3 casillas que se rasca con la doblón; tres iguales pagan de ×2 a ×100 | 96,75 % exacto |
 
 Las fichas son de 2, 5 o 10 doblones. Los retornos se comprueban enumerando todas las combinaciones.
 

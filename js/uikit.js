@@ -80,11 +80,12 @@
     try { fine = matchMedia("(pointer:fine)").matches && matchMedia("(hover:hover)").matches; } catch (e) { /* sin matchMedia */ }
     if (!fine) return;
     const root = document.documentElement, fb = { def: "default", ptr: "pointer", txt: "text", grab: "grab", grabbing: "grabbing", no: "not-allowed", wait: "wait", cross: "crosshair", zin: "zoom-in", zout: "zoom-out", help: "help" };
-    const sp = {}, hcss = (fr, k) => `url("${HF[fr].url}") ${HF[fr].hx} ${HF[fr].hy}, ${fb[k]}`;
-    const remake = () => { Object.keys(SPR).forEach(k => { sp[k] = `${sprite(k)}, ${fb[k]}`; }); if (HF.idle && HF.tap) { sp.def = hcss("idle", "def"); sp.ptr = hcss("idle", "ptr"); } };
+    const sp = {}, sm = {}, hcss = (fr, k) => `url("${HF[fr].url}") ${HF[fr].hx} ${HF[fr].hy}, ${fb[k]}`;
+    let edge = false;   // la mano (41x58) pegada a un borde: los navegadores no dibujan un cursor de mas de 32 px si se sale de la ventana (Safari, Chrome), y el raton "se pierde"; ahi vuelven la flecha y la manita pequenas
+    const remake = () => { Object.keys(SPR).forEach(k => { sp[k] = sm[k] = `${sprite(k)}, ${fb[k]}`; }); if (HF.idle && HF.tap) { sp.def = hcss("idle", "def"); sp.ptr = hcss("idle", "ptr"); } };
     remake();
     A.cursor.available = true;
-    A.cursor.set = on => { A.cursor.on = !!on; Object.keys(SPR).forEach(k => root.style.setProperty("--c-" + k, on ? sp[k] : fb[k])); };
+    A.cursor.set = on => { A.cursor.on = !!on; Object.keys(SPR).forEach(k => root.style.setProperty("--c-" + k, on ? (edge && (k === "def" || k === "ptr") ? sm[k] : sp[k]) : fb[k])); };
     A.cursor.set(true);
     const apply = () => { remake(); for (const k in sprMemo) delete sprMemo[k]; A.cursor.set(A.cursor.on); if (A.mando && A.mando.cursorChanged) A.mando.cursorChanged(); };
     A.cursor.setSize = big => { const c = big ? 3 : 2; if (c === CELL) return; CELL = c; remake(); for (const k in sprMemo) delete sprMemo[k]; A.cursor.set(A.cursor.on); buildHand().then(apply); };
@@ -108,7 +109,15 @@
     root.classList.add("gcur");
     /* al pulsar la mano da con el dedo (tap) y vuelve a reposar; como minimo 120 ms para que se vea en un clic rapido. No sobre el mapa: ahi esta la mira */
     let tapOn = false, tapT0 = 0, tapTm = 0;
-    const setTap = on => { tapOn = on; if (!A.cursor.on || !HF.tap) return; root.style.setProperty("--c-def", on ? hcss("tap", "def") : sp.def); root.style.setProperty("--c-ptr", on ? hcss("tap", "ptr") : sp.ptr); };
+    const setTap = on => { tapOn = on; if (!A.cursor.on || !HF.tap || edge) return; root.style.setProperty("--c-def", on ? hcss("tap", "def") : sp.def); root.style.setProperty("--c-ptr", on ? hcss("tap", "ptr") : sp.ptr); };
+    /* ¿cabe la mano entera dentro de la ventana con la yema en el puntero? si no, cursor pequeno hasta que se aleje del borde */
+    document.addEventListener("pointermove", e => {
+      if (e.pointerType !== "mouse" || !A.cursor.on || !HF.idle) return;
+      const h = HF.idle, m = 6, fit = e.clientX - h.hx >= m && e.clientY - h.hy >= m && e.clientX - h.hx + h.w <= innerWidth - m && e.clientY - h.hy + h.h <= innerHeight - m;
+      if (fit === !edge) return; edge = !fit; A.cursor.set(true);
+      if (fit && tapOn) setTap(true);
+    }, { capture: true, passive: true });
+    document.addEventListener("pointerleave", () => { if (edge) { edge = false; A.cursor.set(true); } });
     document.addEventListener("pointerdown", e => {
       if (!A.cursor.on || e.pointerType !== "mouse" || e.button !== 0 || !HF.tap || (e.target && e.target.tagName === "CANVAS")) return;
       clearTimeout(tapTm); tapT0 = performance.now(); setTap(true);

@@ -98,7 +98,11 @@ window.AIQ = window.AIQ || {};
     nx.innerHTML = `<span>${last ? t6("¡Entendido!|Got it!|Compris !|Entendi!|Verstanden!|Capito!||明白了！|알겠어요!|わかった！|Понятно!|Jasne!") : t6("Siguiente|Next|Suivant|Próximo|Weiter|Avanti||下一步|다음|次へ|Далее|Dalej")}</span>${A.gala.keyHint("Enter", "a")}`;
     place(step); if (!quiet && A.sfx.card) A.sfx.card();
     if (!quiet) { mouth(Math.min(28, Math.round(t6(step.txt).length / 3))); if (face) face.play(tour.i === 0 ? "e_invita" : "point"); }   // señala lo que explica
-    nx.onclick = () => { tour.i++; show(); }; el.querySelector(".tour-skip").onclick = () => finish(false, true);
+    /* al instante: los botones actuan al PULSAR (no al soltar), un clic en la penumbra tambien pasa de paso y Esc / Enter siguen valiendo */
+    const next = () => { if (cur !== tour) return; tour.i++; show(); }, skip = () => { if (cur === tour) finish(false, true); };
+    const quick = (b, f) => { b.onpointerdown = e => { if (e.button > 0) return; e.preventDefault(); e.stopPropagation(); b._pd = performance.now(); f(); }; b.onclick = e => { e.stopPropagation(); if (!b._pd || performance.now() - b._pd > 800) f(); b._pd = 0; }; };
+    quick(nx, next); quick(el.querySelector(".tour-skip"), skip);
+    el.onpointerdown = e => { if (e.target === el && e.button === 0) { e.preventDefault(); next(); } };
   }
   function finish(done, skipAll) {
     const tour = cur; cur = null; const el = $("tour"); if (el) { el.classList.remove("on"); setTimeout(() => el.classList.add("hidden"), 220); } if (face) face.shown(false);

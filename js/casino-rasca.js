@@ -1,5 +1,5 @@
 /* Geolite - Rasca y gana (v0.2.52): juego del centro de la Barra (se registra en adventure.js con A.adv.casino.add; textos en js/casino-rasca-textos.js, laminas en js/casino-rasca-arte.js).
-   Tarjeta de 3x3 casillas: tres simbolos iguales en cualquier parte = premio segun el simbolo (x2, x3, x5, x10, x25, x100); la ficha (2, 5 o 10) solo multiplica el premio. RTP 96,000 % exacto.
+   Tarjeta de 3x3 casillas: tres simbolos iguales en cualquier parte = premio segun el simbolo (x2, x3, x5, x10, x25, x100); la ficha (2, 5 o 10) solo multiplica el premio. RTP 96,750 % exacto (v0.4.39: 28,1 % de tarjetas con premio).
    La semilla decide la tarjeta ENTERA antes de animar nada (`run.seed:rasca:ronda:intento`): rascar, el orden, la presentacion y "Rasca todo" solo ENSENAN un resultado ya decidido y cobrado
    (como la ruleta, la ficha y el premio se pagan al empezar: recargar a medias no lo deshace ni lo cambia). La presentacion de cada tarjeta sale de un carrete de 8 (tema + entrada + orden de
    revelado + efecto de premio; reelPick: nunca las dos ultimas, mas peso a las menos vistas) y no depende ni del resultado ni de la ficha. Escenario de 1920x1080 con el arte a x4 (cada pixel del
@@ -42,12 +42,12 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ el resultado: la semilla decide la tarjeta entera (todo en cienmilesimas: DEN = 100000) */
   const DEN = 100000, SLOT_MULT = [100, 25, 10, 5, 3, 3, 2, 2, 2];
   const TIERS = [
-    { id: "x100", m: 100, n: 80,    slots: [0],       level: 3, sit: "rcJackpot" },
-    { id: "x25",  m: 25,  n: 400,   slots: [1],       level: 3, sit: "rcGordo" },
-    { id: "x10",  m: 10,  n: 1200,  slots: [2],       level: 2, sit: "rcMedio" },
-    { id: "x5",   m: 5,   n: 4000,  slots: [3],       level: 2, sit: "rcMedio" },
-    { id: "x3",   m: 3,   n: 8500,  slots: [4, 5],    level: 1, sit: "rcChico" },
-    { id: "x2",   m: 2,   n: 10250, slots: [6, 7, 8], level: 1, sit: "rcChico" },
+    { id: "x100", m: 100, n: 60,    slots: [0],       level: 3, sit: "rcJackpot" },
+    { id: "x25",  m: 25,  n: 350,   slots: [1],       level: 3, sit: "rcGordo" },
+    { id: "x10",  m: 10,  n: 1000,  slots: [2],       level: 2, sit: "rcMedio" },
+    { id: "x5",   m: 5,   n: 3200,  slots: [3],       level: 2, sit: "rcMedio" },
+    { id: "x3",   m: 3,   n: 9000,  slots: [4, 5],    level: 1, sit: "rcChico" },
+    { id: "x2",   m: 2,   n: 14500, slots: [6, 7, 8], level: 1, sit: "rcChico" },
   ];
   const CASI_N = 28000, CASI_W = [3, 3, 2, 1, 1, 1, 1, 1, 1];     // 28 %: tarjetas con exactamente UNA pareja (y nada mas); mas "casi" de chistera, diamante y doblon
   const WIN_N = TIERS.reduce((a, t) => a + t.n, 0), RTP_N = TIERS.reduce((a, t) => a + t.n * t.m, 0);

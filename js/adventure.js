@@ -297,7 +297,7 @@ window.AIQ = window.AIQ || {};
   const loseLife = () => { if (run.lives <= 1 && has("lastHand") && !run.lastHandUsed) { run.lastHandUsed = 1; setTimeout(() => A.adv.flash("lasthand", 2, "♥"), 300); return; } run.lives--; run.livesLostAct++; };   // Ultima mano: una vez por expedicion, la ultima provision se queda
   const maxPerks = () => baseSlots() + perkList().reduce((n, p) => n + (p.slot || 0), 0);   // tanda 13 (S7): huecos de la mochila
   /* 0.2.23: el Pacto no ocupa hueco (antes ocupaba el que daba y no servia de nada): la mochila cuenta todo lo demas; el Pacto se ve como un lacre junto al contador */
-  const isPact = id => !!(A.RELICS[id] && A.RELICS[id].pact), bag = () => run.perks.filter(id => !isPact(id)), bagN = () => bag().length;
+  const isPact = id => !!(A.RELICS[id] && A.RELICS[id].pact), isApart = id => !!(A.RELICS[id] && (A.RELICS[id].pact || A.RELICS[id].apart)), bag = () => run.perks.filter(id => !isApart(id)), bagN = () => bag().length;   // v0.4.39: lo que da hueco (el Pacto, la Maleta) va aparte y no lo ocupa
   const has = flag => perkList().some(p => p[flag]);
   const sumFlag = flag => perkList().reduce((n, p) => n + (p[flag] || 0), 0);
   const owned = id => run.perks.includes(id);
@@ -1793,7 +1793,7 @@ window.AIQ = window.AIQ || {};
   function peekRelic(id, camp) {
     const p = A.RELICS[id]; if (!p || !run) return null;
     const tag = rarTag(p.r), meta = id === "hoard" && run.hucha ? `${CN()}<b>${run.hucha}</b> ${A.tx(PK_IN)}` : "";
-    const pact = isPact(id) && bagN() > baseSlots(), mode = !camp ? "" : legOn ? "busy" : pact ? "pact" : swapIx != null && !isPact(id) ? "swap" : "sell";
+    const pact = isApart(id) && bagN() > baseSlots(), mode = !camp ? "" : legOn ? "busy" : pact ? "pact" : swapIx != null && !isApart(id) ? "swap" : "sell";
     const btn = mode === "sell" || mode === "swap" ? `<button class="pk-act sell" type="button"><span>${A.pick6(SELL)}</span><em>${CN()}+${sellValue(id)}</em></button>`   // con la mochila llena tambien se vende: la carta elegida entra en su hueco
       : mode === "pact" ? `<button class="pk-act off" type="button" disabled><span>${A.tx(PACT_FIRST)}</span></button>` : "";
     return { key: `r:${id}:${mode}:${sellValue(id)}`, cls: `r${p.r}${p.amulet ? " amu" : ""}${btn ? " act" : ""}`, html: pkCard({ ...p, id }, tag, meta, btn),
@@ -1828,7 +1828,7 @@ window.AIQ = window.AIQ || {};
     const cards = run.stock.map((s, i) => cardHtml(s, i, chest)).join("") || `<p class="tb-empty">${A.T("No quedan cartas: ¡sigue adelante!", "No cards left: move on!")}</p>`;
     /* la mochila no avisa de que una reliquia ya no sirve: saber cuando venderla tambien es cosa del jugador */
     const B = bag(), relics = Array.from({ length: slots }, (_, k) => (B[k] ? relicHtml(B[k]) : `<span class="tr-slot${k >= baseSlots() ? " pact" : ""}"></span>`)).join("");   // el hueco del Pacto, con su lacre
-    const pactSeal = run.perks.some(isPact) ? `<span class="tr-relic tr-pact r1" data-relic="pact"><button class="tr-face" type="button">${ic("pact")}</button></span>` : "";   // 0.2.23: el Pacto, fuera de los huecos
+    const pactSeal = run.perks.filter(isApart).map(id => `<span class="tr-relic tr-pact r1" data-relic="${id}"><button class="tr-face" type="button">${ic(A.RELICS[id].ico || id)}</button></span>`).join("");   // 0.2.23: el Pacto, fuera de los huecos
     const tools = Object.keys(run.tools).map(id => `<span class="tr-card tr-tool" data-tool="${id}" tabindex="0"><span class="tr-face">${ic(TOOLS[id].ico)}<span class="tr-pips">${Array.from({ length: toolMax(id) }, () => "<i></i>").join("")}</span></span></span>`).join("") || `<i class="tr-none">${A.T("Ninguna", "None")}</i>`;
     /* fuera la frase de siempre ("Tres cartas sobre la mesa..."): solo los avisos que cambian algo (revancha, cofre, mochila llena) */
     const retryNote = !chest && run.stock.some((s, i) => s.fix && !run.bought.includes(i));
@@ -1868,7 +1868,7 @@ window.AIQ = window.AIQ || {};
     /* la mochila: pasar el raton abre la carta grande (con su boton de vender); un clic la deja fija. Con una carta de la mesa esperando
        hueco, el clic en la reliquia la vende y entra esa. Tambien en el cofre del jefe: con la mochila llena, vendes una y eliges gratis */
     document.querySelectorAll("#dlg .tr-relic").forEach(c => { const id = c.dataset.relic;
-      c.querySelector(".tr-face").onclick = e => { e.stopPropagation(); if (swapIx != null && !isPact(id)) { A.peek.close(true); return swapFor(swapIx, id, chest); } A.peek.toggle(e.currentTarget); }; });
+      c.querySelector(".tr-face").onclick = e => { e.stopPropagation(); if (swapIx != null && !isApart(id)) { A.peek.close(true); return swapFor(swapIx, id, chest); } A.peek.toggle(e.currentTarget); }; });
     document.querySelectorAll("#dlg .tr-tool").forEach(c => (c.onclick = e => { e.stopPropagation(); A.peek.toggle(c); }));
     const tb = document.querySelector("#dlg .table.mesa"); if (tb) tb.addEventListener("click", e => { if (swapIx != null && !e.target.closest(".offer")) { swapIx = null; document.querySelectorAll("#dlg .swap-pick, #dlg .swap-src").forEach(x => x.classList.remove("swap-pick", "swap-src")); } });
     if ($("rerollBtn")) $("rerollBtn").onclick = () => {
@@ -2664,6 +2664,7 @@ window.AIQ = window.AIQ || {};
         }
         release(); ov.classList.remove("spin");
         // 3. elige
+        coin.show = false;                                                                  // v0.4.39: al elegir, el doblon deja de dibujarse: pasar el raton levanta un poco el cubilete y dejaba ver cual cubre
         hint("pick"); say("trilePick"); if (A.haptic) A.haptic([8]); sh.waiting(true); const pickId = await choose(); sh.waiting(false);
         const rec = o.onPick(pickId), win = rec.win;                                           // la tirada se decide y se guarda AQUI, antes de la revelacion
         // 4. revelacion
@@ -2777,7 +2778,7 @@ window.AIQ = window.AIQ || {};
       const p = A.RELICS[s.id], c = chest ? 0 : cardCost(s);
       if (owned(s.id)) return;                                            // 0.2.5: un amuleto no se compra dos veces (tiendas guardadas de antes, con su recarga)
       const swapV = null;   // catalogo: las Ventajas ya no se venden entre si: solo las limita la mochila
-      if (!swapV && !p.pact && bagN() >= maxPerks()) {                // tanda 9 (S10): mochila llena: eliges cual vendes y la carta entra en su hueco, en un gesto
+      if (!swapV && !p.pact && !p.apart && bagN() >= maxPerks()) {                // tanda 9 (S10): mochila llena: eliges cual vendes y la carta entra en su hueco, en un gesto
         if (run.coins + Math.max(...bag().map(sellValue)) < c) return noFunds(el);
         swapIx = i; document.querySelectorAll("#dlg .tr-relic:not(.tr-pact)").forEach(x => { x.classList.add("swap-pick"); x.dataset.sv = "+" + sellValue(x.dataset.relic); }); document.querySelectorAll("#dlg .offer").forEach(x => x.classList.toggle("swap-src", x === el)); A.sfx.card(); flash(A.tx(SWAP_PICK)); return;   // 0.2.21: cada reliquia ensena lo que te dan por venderla (antes una flecha de cambio)
       }
@@ -2896,7 +2897,7 @@ window.AIQ = window.AIQ || {};
     } catch (e) { console.error(e); end(); }
   }
   A.adv.busy = () => legOn !== 0;                                        // la legendaria del cofre se esta luciendo (js/game.js: Esc no abre el menu)
-  function sell(id, chest) { const k = run.perks.indexOf(id); if (k < 0 || (isPact(id) && bagN() > baseSlots())) return; const v = sellValue(id); if (id === "hoard" && run.hucha) { const t = run.hucha >= 20 ? 3 : run.hucha >= 10 ? 2 : 1; A.casa.premio(t); run.hucha = 0; }   // se rompe: llueven monedas
+  function sell(id, chest) { const k = run.perks.indexOf(id); if (k < 0 || (isApart(id) && bagN() > baseSlots())) return; const v = sellValue(id); if (id === "hoard" && run.hucha) { const t = run.hucha >= 20 ? 3 : run.hucha >= 10 ? 2 : 1; A.casa.premio(t); run.hucha = 0; }   // se rompe: llueven monedas
     const qv = A.celebra && A.celebra.antesDeVender ? A.celebra.antesDeVender(id) : null;   // Probador: la mini carta se consume con un filo oscuro
     run.perks.splice(k, 1); run.coins += v; if (run.paid) delete run.paid[id]; if (A.RELICS[id].sell) A.RELICS[id].sell(run); A.sfx.sell(); persist(); renderShop(!!chest); if (qv) qv(); }   // sell: lo que la reliquia dio al comprarla se va con ella (Corazon de explorador)
   function flash(t) { const n = document.querySelector("#dlg .tb-shop"); if (!n) return; n.querySelectorAll(".shop-flash").forEach(x => x.remove()); const m = document.createElement("p"); m.className = "shop-flash"; m.textContent = t; n.appendChild(m); setTimeout(() => m.remove(), 2200); }   // flotando sobre las cartas: no empuja nada
