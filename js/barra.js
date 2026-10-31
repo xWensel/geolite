@@ -98,13 +98,14 @@ window.AIQ = window.AIQ || {};
     { id: "coin", n: "bet:coin", ico: "bet_coin", c: ["#2d62b8", "#0f2548"], at: [350, 235], core: 1 },
     { id: "wheel", n: "bet:wheel", ico: "bet_wheel", c: ["#8a3a9a", "#2d0f38"], at: [150, 415], core: 1 },
     { id: "cups", n: "bet:cups", ico: "bet_cups", c: ["#a02a4a", "#3a0c1a"], at: [350, 415], core: 1 },
+    { id: "rule", n: "bet:rule", ico: "bet_red", c: ["#1f7a4a", "#0a2e1d"], at: [250, 325], core: 1, own: 1 },     // la ruleta europea que nunca para (js/barra-ruleta.js): solo existe en La Barra
     { id: "dice", n: "bet:dice", ico: "bet_dados", c: ["#14797f", "#08303a"], at: [930, 235] },
     { id: "plk", n: "bet:plk", ico: "bet_plinko", c: ["#13808f", "#08323a"], at: [1130, 235] },
     { id: "globo", n: "bet:globo", ico: "bet_globo", c: ["#c86a5a", "#4a2a6a"], at: [930, 415] },
     { id: "rasca", n: "bet:rasca", ico: "bet_rasca", c: ["#e6cf94", "#8a6a2a"], at: [1130, 415] },
     { id: "cartas", n: "", ico: "bet_cartas", c: ["#a8142e", "#3a0c1a"], soon: true }];   // la mesa de cartas: aun no se juega, el pasillo la muestra con su cartel de PRONTO
-  const tables = () => TABLES.filter(t => t.soon ? true : t.core ? !!(A.adv && A.adv.casino && A.adv.casino.core) : !!(A.adv && A.adv.casino && A.adv.casino.def && A.adv.casino.def(t.id)));
-  const betName = id => { if (id === "cartas") return A.tx(T.mCar);
+  const tables = () => TABLES.filter(t => t.soon ? true : t.own ? !!(A.barraRuleta && A.adv && A.adv.casino && A.adv.casino.core) : t.core ? !!(A.adv && A.adv.casino && A.adv.casino.core) : !!(A.adv && A.adv.casino && A.adv.casino.def && A.adv.casino.def(t.id)));
+  const betName = id => { if (id === "cartas") return A.tx(T.mCar); if (id === "rule") return A.tx(A.barraRuleta.bet.n);
      const B = A.adv.casino.core.BETS[id]; return B ? A.tx(B.n) : id; };
   /* ---------- la partida ---------- */
   let R = null, RUN = null, root = null, busy = false, restoreRun = null, prevCoins = 0;
@@ -125,7 +126,7 @@ window.AIQ = window.AIQ || {};
     own("att", 0); own("b", null);
     return cx;
   }
-  const headFor = id => { const B = A.adv.casino.core.BETS[id], ic = A.adv.casino.core.ic; return `<span class="sp-ic">${ic(B.ico)}</span><span class="sp-t" data-tt="${esc(A.tx(B.d))}"><b>${esc(A.tx(B.n))}</b><i>${esc(A.tx(B.s))}</i></span>`; };
+  const headFor = id => { const B = id === "rule" ? A.barraRuleta.bet : A.adv.casino.core.BETS[id], ic = A.adv.casino.core.ic; return `<span class="sp-ic">${ic(B.ico)}</span><span class="sp-t" data-tt="${esc(A.tx(B.d))}"><b>${esc(A.tx(B.n))}</b><i>${esc(A.tx(B.s))}</i></span>`; };
   const CNb = () => A.icon("chip_r", "cn");
   const stakePill = () => `<em class="sp-p bt-stake">${CNb()}${stakeNow()}</em>`;
   /* ---------- las cuatro mesas de adventure.js: carta y resultado propios, pantallas de la Aventura ---------- */
@@ -158,6 +159,12 @@ window.AIQ = window.AIQ || {};
         K.spinCups({ stake: st, purse: RUN.coins + st, tier, coinId, joke, seq: K.cupsMoves(`${RUN.seed}:trile:baile:${r}`, tier),
           onPick(id) { rec.pick = id; rec.win = !joke && id === coinId; rec.pay = rec.win ? Math.round(st * 2.85) : 0; RUN.coins += rec.pay; hud(); return rec; },
           onError() { if (rec.pick == null) { RUN.coins += st; delete RUN.reds[r]; hud(); } } }, closed); }; } } };
+  /* la ruleta que nunca para: la mesa (js/barra-ruleta.js) lleva su reloj y sus fichas; aqui se le da el monedero de la partida y se anota cada giro con apuesta como UNA jugada */
+  const ruleHost = () => ({ seed: RUN.seed, min: MIN, plays: PLAYS, coins: () => RUN.coins, add: n => { RUN.coins += n; persistRun(); hud(); }, play: () => R.play + 1, bote: () => BOTE.has(R.play + 1), over: () => !!(R && R.over),
+    onSpin: (stake, pay, before) => { if (!R || R.over) return; const r = R.play + 1; RUN.reds[r] = { id: "rule", stake, pay, win: pay > 0, own: 1 }; prevCoins = before; settle(r); } });
+  COREC.rule = {
+    card: () => `<div class="sup bet cas bt-rule" data-bet="rule">${headFor("rule")}<span class="bt-pick"><button class="bt-c bt-cs" type="button" data-sit="1">${A.tx(A.barraRuleta.tx.sit)}</button></span>${A.barraRuleta.liveHtml(RUN.seed)}</div>`,
+    wire: el => { const b = el.querySelector("[data-sit]"); if (!b) return; b.onclick = e => { e.stopPropagation(); if (busy || !R || R.over) return; busy = true; A.barraRuleta.open(ruleHost(), closed); }; } };
   const WMUL = { coin: 1.5, jack: 3.5, cafe: 0.5, seguro: 1.5, streak: 1, life: 1.5 };   // la Ruleta de premios en la Barra: todo se paga en fichas (los demas premios, nada)
   const mkWheelRun = () => ({ asc: 0, act: 0, round: 0, coins: RUN.coins, lives: 3, maxLives: 3, stats: { coinsEarned: 0 }, sup: {}, bets: {}, reds: {}, perks: [], stock: [], seed: RUN.seed });
   /* ---------- salon ---------- */
@@ -165,7 +172,7 @@ window.AIQ = window.AIQ || {};
   const tableHtml = t => `<button type="button" class="brr-tbl" data-g="${t.id}" style="left:${t.at[0]}px;top:${t.at[1]}px;--c1:${t.c[0]};--c2:${t.c[1]}"><i class="brr-felt">${A.icon(t.ico)}</i><b class="brr-plq">${esc(betName(t.id))}</b></button>`;
   /* el salon: el pasillo (js/barra-pasillo.js) se monta UNA vez; cada jugada solo refresca el marcador, la apuesta, la carta de la mesa y la frase */
   let hall = null;
-  const ROOM_OF = { red: "ruletas", coin: "ruletas", wheel: "ruletas", dice: "dados", cups: "dados", plk: "rascas", globo: "rascas", rasca: "rascas", cartas: "cartas" };
+  const ROOM_OF = { red: "ruletas", coin: "ruletas", wheel: "ruletas", rule: "ruletas", dice: "dados", cups: "dados", plk: "rascas", globo: "rascas", rasca: "rascas", cartas: "cartas" };
   const maxStake = () => Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN);
   function mkX() {
     const rank = ["ruletas", "dados", "rascas", "cartas"], list = tables().map(t => ({ id: t.id, n: betName(t.id), ico: t.ico, c: t.c, room: ROOM_OF[t.id], soon: !!t.soon })).sort((x, y) => rank.indexOf(x.room) - rank.indexOf(y.room));
@@ -243,7 +250,7 @@ window.AIQ = window.AIQ || {};
     R.streak = win ? R.streak + 1 : 0; if (win && R.streak >= 3 && !R.gold && Math.random() < 0.35) R.gold = true;
     R.play = r; R.log.push({ g: RUN.reds[r].id, net: gain }); ensureTicket();
     const m = st ? (gain0 + st) / st : 0, lvl = !win ? 0 : m >= 10 ? 3 : m >= 3 ? 2 : 1;
-    if (lvl >= 1) { try { A.sfx.jackpot(lvl); C().jpShake && C().jpShake(lvl); if (A.haptic) A.haptic([20, 30]); } catch (e) { /* sin sonido */ } }
+    if (lvl >= 1 && !RUN.reds[r].own) { try { A.sfx.jackpot(lvl); C().jpShake && C().jpShake(lvl); if (A.haptic) A.haptic([20, 30]); } catch (e) { /* sin sonido */ } }
     if (RUN.coins <= 0) { RUN.coins = 0; R.over = true; } if (R.play >= PLAYS) R.over = true;
     const kind = !win ? "lose" : lvl >= 3 ? "jack" : lvl === 2 ? "big" : "win", amt = (win ? "+" : "−") + fmt(Math.abs(gain));
     persistRun(); paint((R.gold && !msg ? say("gold") : say(kind)) + " " + amt + (msg ? " · " + msg : "")); const e = $("brStk"); if (e) e.classList.add(win ? "up" : "down");

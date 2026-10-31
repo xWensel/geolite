@@ -651,6 +651,7 @@ window.AIQ = window.AIQ || {};
     lootStep: -11.6, ach: -13.3, buy: -15.0, sell: -18.3, clear: -14.5, lose: -22.3, stamp: -26.0, win: -10.3, intro: -14.4, lampara: -15.9,
     cofreCarga: -21, cofreGolpe: -13.3, cofreNota: -15, cofreFirma: -16,                                  // La apertura del cofre del jefe (js/cofre-fx.js)
     boss: -23.0, tachan: -22.0, voice: -13.5, rouBet: -22.9, rouTick: -16.1, rouStop: -24.2,
+    rulPick: -24, rulChip: -20, rulOff: -26, rulGo: -19, rulTick: -16, rulLaunch: -19, rulRoll: -25, rulClick: -19, rulBounce: -20, rulReveal: -17, rulWin1: -14, rulWin2: -12, rulWin3: -11, rulCount: -19, rulCoin: -21, rulLose: -23, rulNear: -19, rulStreak: -13,   // La ruleta de la Barra (js/barra-ruleta.js)
     clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,     // La pregunta y el revelado (js/revelado.js): el clavado, el latido, el casi y los rodillos
     foco: -11, caja: -8, llama: -10,                                            // Veredicto, jefe y cofre (js/foco.js, js/veredicto.js)
     clava: -19.5, aliento: -20.5, queda: -15.5, raja: -22.5, encaja: -13.5,
@@ -995,6 +996,42 @@ window.AIQ = window.AIQ || {};
     rouBet: go((t, k = 0) => { const b = bus("rouBet", 0.1); rec(b, "chip", t, { lp: 2600, v: 0.6 }); rec(b, "chip", t + 0.06, { lp: 2400, v: 0.35 }); vibes(b, deg(6 + k, 64), t + 0.02, { v: 0.02, dur: 0.35, trem: false }); }),
     rouTick: go((t, v = 0) => { const b = bus("rouTick", 0.04); felt(b, t, { v: 0.03 + v * 0.05, f: 2600 - v * 1300, dur: 0.012 + v * 0.02 }); sub(b, t, { v: 0.02 + v * 0.05, f0: 420 - v * 200, f1: 160, dur: 0.03 }); }),
     rouStop: go(t => { const b = bus("rouStop", 0.2); sub(b, t, { v: 0.2, f0: 160, f1: 50, dur: 0.2 }); felt(b, t, { v: 0.07, f: 1800, dur: 0.03 }); rec(b, "chip", t + 0.02, { lp: 2600, v: 0.4 }); vibes(b, deg(4, 60), t + 0.03, { v: 0.035, dur: 0.8 }); }),
+    /* LA RULETA DE LA BARRA (v0.4.46): dopamina en cada paso. La ficha sube un grado de la escala con cada ficha que pones; la cuenta atras sube de tono y la ultima pega; la bola rueda, sus clics
+       frenan casilla a casilla y sus rebotes suenan a campanita; el premio cuenta hacia arriba en notas (mas largo y mas alto cuanto mas grande) con lluvia de fichas; la racha sube de escalon;
+       el casi-fallo se desinfla y el cero pesa. Todas por su propio bus (NIVEL rul*) y por la escala de la cancion que suena (deg) */
+    rulPick: go((t, i = 0) => { const b = bus("rulPick", 0.1); rec(b, "chip", t, { lp: 2400, v: 0.45 }); vibes(b, techo(deg(2 + i, 60)), t + 0.012, { v: 0.03, dur: 0.3, trem: false }); }),
+    rulChip: go((t, tier = 0, n = 1) => { const b = bus("rulChip", 0.16), k = Math.min(n - 1, 14);
+      rec(b, "chip", t, { lp: 2600 + tier * 450, v: 0.55 + tier * 0.07 }); rec(b, "chip", t + 0.05, { lp: 2400, v: 0.28 });
+      vibes(b, techo(deg(3 + k, 57)), t + 0.012, { v: 0.05 + tier * 0.008, dur: 0.55, trem: false });
+      if (tier >= 3) { bell(techo(deg(8 + k, 60)), t + 0.03, { vol: 0.03 + tier * 0.005, dur: 0.6, bus: b, rev: 0 }); sub(b, t, { v: 0.08 + tier * 0.02, f0: 150, f1: 70, dur: 0.12 }); } }),
+    rulOff: go(t => { const b = bus("rulOff", 0.08); felt(b, t, { v: 0.05, f: 900, dur: 0.05 }); vibes(b, techo(deg(2, 60)), t + 0.01, { v: 0.025, dur: 0.18, trem: false }); }),
+    rulGo: go(t => { const b = bus("rulGo", 0.3); bell(84, t, { vol: 0.045, dur: 0.9, bus: b, rev: 0 }); bell(91, t + 0.13, { vol: 0.05, dur: 1.1, bus: b, rev: 0 }); vibes(b, techo(deg(7, 62)), t + 0.13, { v: 0.03, dur: 0.6 }); }),
+    rulTick: go((t, i = 1) => { const b = bus("rulTick", 0.12), last = i >= 5;
+      felt(b, t, { v: 0.05 + i * 0.012, f: 1700, dur: 0.04 }); vibes(b, techo(deg(2 + i, 64)), t + 0.005, { v: 0.035 + i * 0.012, dur: last ? 0.5 : 0.22, trem: false });
+      if (last) { sub(b, t, { v: 0.18, f0: 120, f1: 55, dur: 0.22 }); bell(79, t, { vol: 0.04, dur: 0.7, bus: b, rev: 0 }); } }),
+    rulLaunch: go(t => { const b = bus("rulLaunch", 0.2);
+      noise(t, 0.7, { lp: 300, sweepTo: 6500, vol: 0.07, type: "bandpass", q: 1.2, bus: b }); thump(t, { vol: 0.22, f0: 140, f1: 46, dur: 0.3, bus: b });
+      for (let i = 0; i < 9; i++) felt(b, t + 0.12 + i * (0.06 - i * 0.004), { v: 0.04 + i * 0.004, f: 2200 + i * 160, dur: 0.02 }); A.music.duck && A.music.duck(0.7, 3000); }),
+    rulRoll: go((t, s = 0.5) => { const b = bus("rulRoll", 0.05); noise(t, 0.11, { lp: 1500 + s * 1800, type: "bandpass", q: 1.6, vol: 0.02 + s * 0.035, bus: b }); if (R() < 0.5) felt(b, t + 0.03, { v: 0.02 + s * 0.03, f: 2800, dur: 0.015 }); }),
+    rulClick: go((t, v = 0.5) => { const b = bus("rulClick", 0.1); felt(b, t, { v: 0.04 + v * 0.08, f: 2600 - v * 900, dur: 0.014 + (1 - v) * 0.02 }); pluck(techo(deg(3 + (R() * 5 | 0), 64)), t, { vol: 0.032 + v * 0.03, dur: 0.1, bright: 5, bus: b, rev: 0 }); }),
+    rulBounce: go((t, i = 0) => { const b = bus("rulBounce", 0.2); felt(b, t, { v: 0.1, f: 3000, dur: 0.02 }); thump(t, { vol: 0.07, f0: 340, f1: 200, dur: 0.05, bus: b }); bell(96 - (i % 3) * 3, t, { vol: 0.045, dur: 0.35, bus: b, rev: 0 }); }),
+    rulReveal: go((t, kind = 0) => { const b = bus("rulReveal", 0.3);
+      thump(t, { vol: 0.26, f0: 150, f1: 48, dur: 0.28, bus: b }); noise(t, 0.05, { hp: 1400, vol: 0.06, bus: b });
+      const ch = kind === 2 ? [0, 1, 6] : kind === 0 ? [4, 6, 8] : [2, 4, 7]; ch.forEach((d, i) => vibes(b, techo(deg(d, 57)), t + 0.03 + i * 0.03, { v: 0.045, dur: 0.9, pan: (i - 1) * 0.25 })); }),
+    rulWin: go((t, lvl = 1) => { const b = bus("rulWin" + lvl, 0.28), n = [0, 5, 8, 12][lvl];
+      sub(b, t, { v: 0.1 + lvl * 0.06, f0: 120, f1: 50, dur: 0.2 + lvl * 0.08 });
+      for (let i = 0; i < n; i++) vibes(b, techo(deg(2 + i, 60)), t + 0.04 + i * (0.06 - lvl * 0.007), { v: 0.04 + i * 0.002, dur: 0.5, trem: false, pan: -0.4 + (i % 5) * 0.2 });
+      lluvia(b, t + 0.05, 4 + lvl * 5, 0.5 + lvl * 0.3, 0.12 + lvl * 0.03);
+      if (lvl >= 2) [0, 2, 4, 6].forEach((d, i) => rhodes(b, deg(d, 55), t + 0.02 + i * 0.012, { v: 0.04, dur: 1.0, pan: (i - 1.5) * 0.2 }));
+      if (lvl >= 3) later(t + 0.3, () => { try { A.sfx.jackpot(3); } catch (e) { /* sin sonido */ } }); }),
+    rulCount: go((t, i = 0, lvl = 1) => { const b = bus("rulCount", 0.1), m = techo(deg(1 + (i % 12), 62 + Math.min(i, 10)));
+      pix(b, m, t, { v: 0.03, dur: 0.07 }); felt(b, t, { v: 0.025, f: 3200, dur: 0.015 }); if (i % 4 === 3) vibes(b, techo(m + 12), t, { v: 0.025, dur: 0.25, trem: false }); }),
+    rulCoin: go((t, i = 0) => { const b = bus("rulCoin", 0.2); rec(b, "chip", t, { lp: 3600, v: 0.4 }); bell(99 + (i % 4) * 2, t + 0.01, { vol: 0.04, dur: 0.3, bus: b, rev: 0 }); }),
+    rulLose: go(t => { const b = bus("rulLose", 0.25); sub(b, t, { v: 0.12, f0: 110, f1: 62, dur: 0.32 }); vibes(b, deg(3, 55), t + 0.02, { v: 0.03, dur: 0.5, trem: false }); vibes(b, deg(1, 55), t + 0.16, { v: 0.03, dur: 0.7, trem: false }); }),
+    rulNear: go(t => { const b = bus("rulNear", 0.25); tono(b, t, { f: 540, f1: 250, dur: 0.55, type: "sawtooth", lp: 1500, v: 0.035 }); thump(t + 0.5, { vol: 0.12, f0: 100, f1: 50, dur: 0.2, bus: b }); felt(b, t + 0.52, { v: 0.05, f: 700, dur: 0.05 }); }),
+    rulStreak: go((t, n = 2) => { const b = bus("rulStreak", 0.3), m = Math.min(n, 7);
+      for (let j = 0; j < m + 2; j++) vibes(b, techo(deg(4 + j, 60)), t + j * 0.06, { v: 0.045, dur: 0.45, trem: false, pan: -0.5 + j * 0.15 });
+      bell(techo(84 + m * 2), t + (m + 2) * 0.06, { vol: 0.06, dur: 1.0, bus: b, rev: 0 }); sub(b, t, { v: 0.14, f0: 130, f1: 56, dur: 0.25 }); }),
 
     /* ---- LA REGLA: los de siempre, sin version nueva. Suenan igual, por su tira (dos pasos bajos hacia 4,2 kHz y su escalon) ---- */
     /* ruleta lineal del Campamento (v0.73): el "no va mas", el arranque (la musica baja), el latido del casi-fallo, el frenazo, el empujon y el cero */
