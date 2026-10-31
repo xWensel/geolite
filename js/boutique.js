@@ -889,7 +889,7 @@ window.AIQ = window.AIQ || {};
     if (!id || ST.trying || ST.busy) return;
     const map = C().map; if (!map || !map.setStyle || !A.MAPSTYLES[id]) return;
     ST.trying = id; if (A.sfx && A.sfx.card) A.sfx.card();
-    map.setStyle(A.MAPSTYLES[id]); if (map.dirty !== undefined) map.dirty = map.fxDirty = true;
+    map.setStyleNow ? map.setStyleNow(A.MAPSTYLES[id]) : map.setStyle(A.MAPSTYLES[id]);
     document.body.classList.add("bq-try");
     const lab = document.createElement("div"); lab.className = "bq-tryl"; lab.id = "bqTryL";
     lab.innerHTML = `<div class="gx-paper"><b>${esc(P6(TX.trying).replace("{m}", M().name(id)))}</b><button type="button" class="gx-btn sm" id="bqTryBack"><span>${esc(P6(TX.tryBack))}</span>${A.gala.keyHint("Esc", "b")}</button></div>`;
@@ -900,7 +900,7 @@ window.AIQ = window.AIQ || {};
   function tryOff(quiet) {
     if (!ST.trying) return;
     clearTimeout(ST.tryT); const id = ST.trying; ST.trying = null;
-    const map = C().map; if (map && map.setStyle) map.setStyle(M().style());
+    const map = C().map; if (map && map.setStyle) (map.setStyleNow ? map.setStyleNow(M().style()) : map.setStyle(M().style()));
     document.body.classList.remove("bq-try");
     const l = $("bqTryL"); if (l) l.remove();
     if (!quiet) { if (A.sfx && A.sfx.card) A.sfx.card(); const f = $("bqTry"); if (f) f.focus({ preventScroll: true }); }

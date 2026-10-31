@@ -117,14 +117,14 @@ window.AIQ = window.AIQ || {};
     const L = live; if (!L) { document.body.classList.remove("ms-on"); return; }
     live = null; removeEventListener("keydown", onKey, true); L.timers.forEach(clearTimeout);
     const map = A.core && A.core.map, M = A.mesas;
-    try { M.seen(L.ids); if (keep) M.use(L.id); else if (map) map.setStyle(M.style()); } catch (e) { console.error("Estreno:", e); }
+    try { M.seen(L.ids); if (keep) M.use(L.id); else if (map) (map.setStyleNow || map.setStyle).call(map, M.style()); } catch (e) { console.error("Estreno:", e); }
     const done = () => { L.anims.forEach(a => { try { a.cancel(); } catch (e) { /* ya acabo */ } }); if (L.el) L.el.remove(); };
     document.body.classList.add("ms-off"); document.body.classList.remove("ms-on"); setTimeout(() => document.body.classList.remove("ms-off"), 400);
     if (L.gala) L.gala.close(done); else done();
     const S = A.core && A.core.S; if (map && map.startDrift && S && S.phase === "title") map.startDrift();
   }
   /* si la portada se va con el estreno a medias (no deberia: la capa lo tapa todo), se deja para la proxima vez */
-  function cancel() { clearTimeout(tm); due = false; if (!live) return; const L = live; live = null; removeEventListener("keydown", onKey, true); L.timers.forEach(clearTimeout); if (L.el) L.el.remove(); document.body.classList.remove("ms-on"); const map = A.core && A.core.map; if (map) map.setStyle(A.mesas.style()); }
+  function cancel() { clearTimeout(tm); due = false; if (!live) return; const L = live; live = null; removeEventListener("keydown", onKey, true); L.timers.forEach(clearTimeout); if (L.el) L.el.remove(); document.body.classList.remove("ms-on"); const map = A.core && A.core.map; if (map) (map.setStyleNow || map.setStyle).call(map, A.mesas.style()); }
 
   A.mesas.check = check; A.mesas.cancel = cancel;
   Object.defineProperty(A.mesas, "live", { get: () => !!live });
