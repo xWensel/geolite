@@ -8,7 +8,7 @@ window.AIQ = window.AIQ || {};
 (function (A) {
   const T = A.T, L = A.L, $ = id => document.getElementById(id), C = () => A.core;
   const RUNKEY = "atlasiq.run.v2", DAILYKEY = "atlasiq.daily.v1", PRACTICEKEY = "atlasiq.practice";   // la practica no se guarda: su ranura solo existe para que nada pise las otras   // el intento del Reto diario va en su propia ranura: no pisa la expedicion guardada
-  const ic = (id, cls) => A.icon(id, cls), CN = () => A.icon("coin", "cn");
+  const ic = (id, cls) => A.icon(id, cls), CN = () => A.icon(A.adv._barra ? "chip_r" : "coin", "cn");   // en La Barra de la casa (js/barra.js) la moneda de las pantallas de casino es la ficha de la casa
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const L6 = A.L6;
   const suitRed = s => s === "s_pin" || s === "s_compass" || s === "heart";
@@ -2329,7 +2329,7 @@ window.AIQ = window.AIQ || {};
     if (P.k === "steal") { const amt = Math.floor(run.coins / 2); run.coins -= amt; rec.val = -amt; return { name: A.tx(T.steal), detail: A.tx(T.stealD) + (amt ? " · −" + amt : ""), tone: "bad", jp: 0 }; }
     return { name: A.tx(T.none), detail: A.tx(T.noneD), tone: "none", jp: 0 };
   }
-  const wedgeLabel = P => (P.mul ? "+" + prizeVal(P.mul) : P.k === "steal" ? "−½" : P.k === "clock" ? "−3s" : "");
+  const wedgeLabel = P => (A.adv._wedge ? A.adv._wedge(P) : P.mul ? "+" + prizeVal(P.mul) : P.k === "steal" ? "−½" : P.k === "clock" ? "−3s" : "");
 
   /* la capa a pantalla completa que comparten Moneda y Ruleta de premios (la de Rojo o negro es la suya): teclado bloqueado, cierre con fundido, nunca deja el Campamento bloqueado */
   function rouShell(cls, html, vars, done) {
@@ -2713,7 +2713,10 @@ window.AIQ = window.AIQ || {};
     refresh: () => { if (!run || C().S.phase !== "shop" || !run.stock) return; renderShop(false); },        // repinta el Campamento cuando se cierra la pantalla del juego
     coins: () => { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins; },   // el saldo que se ve detras de la capa
   };
-  A.adv.casino = { add(def) { CASINO_EXT[def.id] = def; BETS[def.id] = def.bet; if (!CASINO.includes(def.id)) CASINO.push(def.id); }, ids: () => CASINO.slice() };                                         // solo para pruebas (dev/)
+  A.adv.casino = { add(def) { CASINO_EXT[def.id] = def; BETS[def.id] = def.bet; if (!CASINO.includes(def.id)) CASINO.push(def.id); }, ids: () => CASINO.slice(), def: id => CASINO_EXT[id] };                                         // solo para pruebas (dev/)
+  /* v0.4.35: lo que La Barra de la casa (js/barra.js) toma de la Aventura: el cx de los juegos, las pantallas de Rojo o negro, Moneda, Ruleta de premios y Trile, y sus textos.
+     useRun(fake) cambia el run de este archivo mientras dura una pantalla (la Ruleta de premios pinta sus premios con el run) y devuelve la funcion que lo repone */
+  A.adv.casino.core = { CX, BETS, BT, BT2, CT, WT, TRL, PRIZES, colorOf, spinRoulette, spinCoin, spinWheel, spinCups, cupsMoves, cupsPreload, ic, useRun: fake => { const old = run; run = fake; return () => { run = old; }; } };
   const SUPS = [
     { id: "cafe", cost: 3, ico: "sup_cafe", n: A.L("Café doble", "Double espresso"), d: A.L("+4 s por pregunta en la próxima ronda", "+4 s per question next round") },
     { id: "seguro", cost: 8, ico: "sup_seguro", n: A.L("Seguro de ronda", "Round insurance"), d: A.L("Si fallas la próxima ronda, no pierdes provisión", "If you fail next round, you keep your provision") },

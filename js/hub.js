@@ -114,7 +114,7 @@ window.AIQ = window.AIQ || {};
     })() : null;
     const noDeal = homeDealt; homeDealt = true;                       // las cartas se reparten solo la primera vez que se ve la portada; al volver de Perfil & co. ya estan en la mesa
     c.dialog(`<div class="hh${noDeal ? " nodeal" : ""}">
-      <div class="hh-top">${A.salir ? A.salir.button() : ""}${A.club ? A.club.card() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${A.club ? tools().replace('<div class="menu-tools">', '<div class="menu-tools">' + A.club.wallet()) : tools()}</div>
+      <div class="hh-top">${A.salir ? A.salir.button() : ""}${A.club ? A.club.card() : ""}<div class="hh-logo geo-logo" role="img" aria-label="Geolite"><img src="assets/logo.png" alt=""></div>${A.club ? tools().replace('<div class="menu-tools">', '<div class="menu-tools">' + (A.barra ? A.barra.button() : "") + A.club.wallet()) : tools()}</div>
       <p class="hh-tag">${A.t("title.tag")}</p>
       <div class="hh-cards">
         ${mc("classic", "K", "s_palm", "card_classic", T("Clásico", "Classic"), T("Regiones del mundo, banderas, pistas, sucesos y personajes, contra el reloj.", "Regions of the world, flags, clues, events and famous people, against the clock."), T("Directo al grano", "No frills"))}
@@ -140,6 +140,7 @@ window.AIQ = window.AIQ || {};
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
     if (A.dealer && A.dealer.watchCards) A.dealer.watchCards(document.querySelector(".hh"));   // si miras mucho el Clasico, apaga las luces de su carta
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
+    if (A.barra) A.barra.wireButton();
     if (A.club) A.club.wire(() => { if (A.camino) screen("camino"); else { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); } });   // tu carta: abre el camino del socio (js/camino.js) y cuenta las fichas de oro nuevas
     if ($("bqBtn")) {
       $("bqBtn").onclick = () => { A.sfx.card(); if (A.escaparate && A.boutique.cat) A.boutique.cat("hoy"); screen("boutique"); };   // v2: la tienda se abre en el escaparate de hoy
@@ -642,7 +643,7 @@ window.AIQ = window.AIQ || {};
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile" && id !== "camino") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
     const naipe = A.relieve ? A.relieve.antes(id, de) : null;             // v0.3.199 (Bloque F, paso 3): la pantalla se reparte como un naipe desde su pieza (js/relieve.js)
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), retos: () => A.clubRetos.open(), camino }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), barra: () => A.barra.open(), retos: () => A.clubRetos.open(), camino }[id] || home)();
     if (naipe) A.relieve.despues(naipe, id);
     C().refreshSkinBits && C().refreshSkinBits();
     if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva
