@@ -38,7 +38,7 @@ window.AIQ = window.AIQ || {};
   let line = Promise.resolve();
   const post = body => (line = line.catch(() => null).then(async () => {
     const k = body && !body.op && A.socio && A.socio.code ? A.socio.code() : "";    // v0.3.174: con cada puntuacion, el estilo de tu carta (api/submit.js, "sty")
-    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(k ? { ...body, k } : body) }, 20000); if (j && j.ok && k) styleSent = k; return j && j.ok ? j : null; } catch (e) { return null; }
+    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(k ? { ...body, k } : body) }, 20000); if (j && j.ok && k) styleSent = k; R.lastErr = j && j.ok ? "" : (j && j.reason) || "net"; return j && j.ok ? j : null; } catch (e) { R.lastErr = "net"; return null; }   // lastErr: por que no entro la ultima puntuacion (proof, time, run, rate, ban, kv, invalid o net); la Barra lo ensena
   }));
   /* v0.3.174: si vistes la carta de otra forma (icono, titulo, marco, categoria), la Clasificacion la ensena asi: se manda al abrirla, solo si cambio
      y solo si ya estas en alguna tabla. El servidor la guarda una vez por jugador (api/submit.js, op "sty") */

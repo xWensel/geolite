@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.45",
+      name: L("El motivo, a la vista", "The reason, in view", "Le motif, bien visible", "O motivo, à vista", "Der Grund, sichtbar", "Il motivo, in vista", "", "原因一目了然", "이유가 보여요", "理由が見える", "Причина на виду", "Powód na wierzchu"),
+      date: "2026-10-31",
+      summary: L("Si tu puntuación de La Barra no entra en la clasificación, la pantalla final dice por qué.", "If your House Bar score does not make the leaderboard, the end screen says why.", "Si ton score du Bar n'entre pas au classement, l'écran final dit pourquoi.", "Se a sua pontuação do Bar não entrar na classificação, a tela final diz o motivo.", "Kommt dein Ergebnis aus der Bar nicht in die Rangliste, nennt der Endbildschirm den Grund.", "Se il tuo punteggio del Bar non entra in classifica, la schermata finale dice perché.", "", "如果你在吧台的成绩没有进入排行榜，结束画面会告诉你原因。", "하우스 바 점수가 순위표에 오르지 못하면 마지막 화면이 이유를 알려 줘요.", "ハウスのバーのスコアがランキングに載らない場合、最後の画面が理由を表示する。", "Если твой результат из бара не попал в таблицу, финальный экран скажет почему.", "Jeśli wynik z baru nie trafi do rankingu, ekran końcowy poda powód."),
+      chapters: [
+        { id: "motivo-0445", kicker: L("Mejora", "Improvement", "Amélioration", "Melhoria", "Verbesserung", "Miglioria", "", "改进", "개선", "改善", "Улучшение", "Ulepszenie"),
+          title: L("La Barra de la casa", "The House Bar", "Le Bar de la maison", "O Bar da casa", "Die Bar des Hauses", "Il Bar della casa", "", "赌场吧台", "하우스 바", "ハウスのバー", "Бар заведения", "Bar kasyna"),
+          entries: [
+            E(L("El motivo, a la vista", "The reason, in view", "Le motif, bien visible", "O motivo, à vista", "Der Grund, sichtbar", "Il motivo, in vista", "", "原因一目了然", "이유가 보여요", "理由が見える", "Причина на виду", "Powód na wierzchu"), "change", "0.4.45", [
+              L("En la pantalla final, junto a tu puesto, sale entre paréntesis lo que contestó el servidor cuando la puntuación no entró (por ejemplo, **time**, **proof**, **run** o **net**). Así se puede arreglar a la primera.", "On the end screen, next to your rank, the server's answer appears in brackets when the score did not get in (for example **time**, **proof**, **run** or **net**). That way it can be fixed on the first try.", "Sur l'écran final, à côté de ton rang, la réponse du serveur s'affiche entre parenthèses quand le score n'est pas entré (par exemple **time**, **proof**, **run** ou **net**). On peut ainsi corriger du premier coup.", "Na tela final, ao lado da sua posição, a resposta do servidor aparece entre parênteses quando a pontuação não entrou (por exemplo, **time**, **proof**, **run** ou **net**). Assim dá para corrigir de primeira.", "Auf dem Endbildschirm steht neben deinem Platz in Klammern die Antwort des Servers, wenn das Ergebnis nicht aufgenommen wurde (zum Beispiel **time**, **proof**, **run** oder **net**). So lässt es sich gleich beheben.", "Nella schermata finale, accanto alla tua posizione, tra parentesi compare la risposta del server quando il punteggio non è entrato (per esempio **time**, **proof**, **run** o **net**). Così si può correggere al primo colpo.", "", "在结束画面里，名次旁边会用括号显示服务器在成绩未入榜时的回复（例如 **time**、**proof**、**run** 或 **net**），这样可以一次修好。", "마지막 화면의 순위 옆에, 점수가 올라가지 못했을 때 서버의 답이 괄호 안에 나와요(예: **time**, **proof**, **run**, **net**). 그래서 한 번에 고칠 수 있어요.", "最後の画面の順位の横に、スコアが載らなかったときのサーバーの返答がかっこ内に表示される（例：**time**、**proof**、**run**、**net**）。これで一度で直せる。", "На финальном экране рядом с местом в скобках показывается ответ сервера, если результат не принят (например, **time**, **proof**, **run** или **net**). Так это можно исправить с первого раза.", "Na ekranie końcowym obok miejsca w nawiasie pojawia się odpowiedź serwera, gdy wynik nie został przyjęty (na przykład **time**, **proof**, **run** lub **net**). Dzięki temu da się to naprawić za pierwszym razem.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.44",
       name: L("Tu partida, siempre en la clasificación", "Your run always makes the board", "Ta partie, toujours au classement", "A sua partida, sempre na classificação", "Deine Partie kommt immer in die Rangliste", "La tua partita entra sempre in classifica", "", "你的对局总会进入排行榜", "내 판은 항상 순위표에 올라요", "あなたのプレイは必ずランキングに載る", "Твоя партия всегда попадает в таблицу", "Twoja rozgrywka zawsze trafia do rankingu"),
       date: "2026-10-31",
