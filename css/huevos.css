@@ -24,8 +24,6 @@ html.reduce-motion .hv-cinta > div { animation: none; }
 .hv-nota p { margin: 0; position: relative; padding: 11px 18px 13px 16px; background: #fdf5fd; color: #16241c; font-family: var(--sans); font-size: 27px; line-height: 1.12; box-shadow: 0 4px 0 rgba(2, 6, 4, .5); }
 html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 
-/* placas sueltas: la fila cierra el hueco mientras una esta fuera */
-.hh-deck.five.hv-gap { grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.12fr) minmax(0, 1fr); }
 .hv-ghost { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
 
 /* el reverso de la carta de socio: el MISMO para todos (arte a la rejilla de la carta, --d = pixeles de pantalla por pixel de arte) y tu numero de socio */
@@ -46,7 +44,7 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 .hv-letra { position: absolute; image-rendering: pixelated; filter: drop-shadow(0 5px 0 rgba(5, 12, 8, .85)); }
 
 /* su libreta en el Perfil (Records): una casilla por huevo; las que faltan, en silueta */
-.hv-cass { grid-column: 3 / -1; display: grid; grid-template-columns: repeat(17, minmax(0, 1fr)); gap: 4px; }
+.hv-cass { grid-column: 3 / -1; display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 4px; }
 .hv-cas { display: block; aspect-ratio: 1; box-sizing: border-box; border: 2px dashed var(--gx-lin, rgba(20, 35, 43, .35)); background: rgba(20, 35, 43, .08); }
 .hv-cas.tA, .hv-cas.tB, .hv-cas.tC { border: 2px solid var(--ink, #14232b); box-shadow: 0 2px 0 rgba(20, 35, 43, .35); }
 .hv-cas.tA { background: #f5a623; } .hv-cas.tB { background: #4ee3c1; } .hv-cas.tC { background: #b36cff; }
@@ -58,3 +56,10 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 .hv-lib .pf-kv { gap: 0; }
 .hv-lib .pf-kv i { font-size: 16px; }
 .hv-cas { aspect-ratio: auto; height: 22px; }
+
+/* el ticket entero deja pasar los clics al mapa (pointer-events: none): la linea TOTAL si los recibe, para el huevo del ticket que no acaba */
+.ticket .tk-total { pointer-events: auto; }
+
+/* la version de la portada no recibia clics (pointer-events: none): ahora si, con un margen de 8 px para poder acertarla (huevo de las notas del parche) */
+#dlg > .hh-ver { pointer-events: auto; cursor: default; }
+#dlg > .hh-ver::before { content: ""; position: absolute; inset: -8px -10px; }

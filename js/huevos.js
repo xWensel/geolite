@@ -20,7 +20,7 @@ window.AIQ = window.AIQ || {};
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* sin almacenamiento */ } };
   /* el orden y el tipo de cada uno (la libreta los muestra en silueta hasta que los encuentras) */
   H.list = [
-    ["letras", "A"], ["parche", "A"], ["placas", "A"], ["reverso", "B"], ["sacudida", "A"], ["propina", "A"], ["traje", "A"], ["gato", "A"], ["hora", "C"],
+    ["letras", "A"], ["parche", "A"], ["reverso", "B"], ["sacudida", "A"], ["propina", "A"], ["traje", "A"], ["gato", "A"], ["hora", "C"],
     ["oficina", "A"], ["machacar", "A"],
     ["ticket", "B"], ["antipoda", "C"], ["esc", "B"],
     ["nombres", "C"], ["nomina", "A"], ["busquedas", "B"]
@@ -218,7 +218,7 @@ window.AIQ = window.AIQ || {};
     });
   };
 
-  /* ================================================================== arrastrar con umbral (placas y propina): solo con raton; el clic de despues se lo traga */
+  /* ================================================================== arrastrar con umbral (la propina): solo con raton; el clic de despues se lo traga */
   function arrastre(selector, o) {
     document.addEventListener("pointerdown", e => {
       if (e.pointerType !== "mouse" || e.button !== 0 || !D() || !D().homeShown || !D().homeShown()) return;
@@ -239,32 +239,6 @@ window.AIQ = window.AIQ || {};
     }, true);
   }
   const vuelve = (ghost, fin) => { const d = ghost._d || [0, 0]; if (reduced()) { ghost.remove(); fin && fin(); return; } const a = ghost.animate([{ translate: `${d[0]}px ${d[1]}px` }, { translate: "0px 0px" }], { duration: 220, easing: "ease-out" }); a.onfinish = () => { ghost.remove(); fin && fin(); }; };
-
-  /* ================================================================== A · PLACAS SUELTAS: arrastrar una placa de abajo y soltarla fuera de la fila */
-  (function () {
-    let nth = 0, busy = false;
-    arrastre(".hh-deck .plq", {
-      puede: () => !busy,
-      crea: el => {
-        const r = el.getBoundingClientRect(), g = el.cloneNode(true); g.removeAttribute("id"); g.classList.add("hv-ghost"); g.tabIndex = -1;
-        g.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;margin:0;z-index:3000;pointer-events:none`;
-        document.body.appendChild(g); el.style.visibility = "hidden"; return g;
-      },
-      suelta: (el, g) => {
-        const deck = el.closest(".hh-deck"), dr = deck.getBoundingClientRect(), d = g._d || [0, 0];
-        if (g.getBoundingClientRect().bottom > dr.top + 40) return vuelve(g, () => { el.style.visibility = ""; });      // no la sacaste: vuelve a su sitio
-        busy = true; nth++; H.found("placas");
-        const caer = () => { g.remove(); deck.classList.add("hv-gap"); el.style.display = "none"; el.style.visibility = ""; };
-        if (reduced()) caer(); else { const a = g.animate([{ translate: `${d[0]}px ${d[1]}px`, rotate: "0deg" }, { translate: `${d[0] + 40}px ${innerHeight}px`, rotate: "26deg" }], { duration: 650, easing: "cubic-bezier(.5,0,1,.6)" }); a.onfinish = caer; }
-        if (nth === 1) dice("placas", "hvPlaca", { mood: "shock", gap: 30000 });
-        setTimeout(() => {                                                          // vuelve sola, de un salto
-          deck.classList.remove("hv-gap"); el.style.display = "";
-          if (!reduced()) el.animate([{ translate: "0 60px", opacity: 0 }, { translate: "0 -10px", opacity: 1, offset: .7 }, { translate: "0 0" }], { duration: 380 });
-          busy = false;
-        }, 3000);
-      }
-    });
-  })();
 
   /* ================================================================== A · PROPINA: arrastrar tu ficha de oro (el contador del Club) hasta el crupier de visita. Nunca se gasta */
   (function () {

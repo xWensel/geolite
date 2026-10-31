@@ -51,10 +51,6 @@ window.AIQ = window.AIQ || {};
     "Otra vez. Las pongo yo; tú mira y aprende.|Again. I'll put them back; you watch and learn.|Encore. Je les remets ; toi, tu regardes et tu apprends.|De novo. Eu coloco; você observa e aprende.|Schon wieder. Ich setze sie ein; du schaust zu und lernst.|Di nuovo. Le rimetto io; tu guarda e impara.||又来了。我来摆，你看着学。|또야. 내가 다시 놓을 테니, 넌 보고 배워.|またか。私が戻すから、君は見て覚えろ。|Опять. Я поставлю, а ты смотри и учись.|Znowu. Ja je ustawię, a ty patrz i ucz się."
   ];
 
-  HV.line.hvPlaca = [
-    "Eso estaba pegado. …Estaba. Vuelve en tres, dos…|That was glued on. …It was. It's back in three, two…|C'était collé. …Ça l'était. Ça revient dans trois, deux…|Isso estava colado. …Estava. Volta em três, dois…|Das war festgeklebt. …War es. Kommt zurück in drei, zwei…|Era incollata. …Lo era. Torna tra tre, due…||那块是粘住的。……本来是。三、二，马上回来……|그거 붙어 있었는데. …있었는데 말이야. 셋, 둘… 곧 돌아와.|それは貼り付けてあったはずだ。……はずだった。三、二、戻るぞ……|Она была приклеена. …Была. Вернётся через три, два…|To było przyklejone. …Było. Wróci za trzy, dwa…"
-  ];
-
   HV.line.hvReverso = [
     "Cada reverso lo firmo yo. Con tinta invisible.|I sign every back myself. In invisible ink.|Je signe chaque verso moi-même. À l'encre invisible.|Eu assino cada verso pessoalmente. Com tinta invisível.|Jede Rückseite unterschreibe ich selbst. Mit unsichtbarer Tinte.|Firmo ogni retro di persona. Con inchiostro invisibile.||每张背面都是我亲自签的。用隐形墨水。|뒷면은 전부 내가 직접 서명해. 보이지 않는 잉크로.|裏面は全部私が自分でサインしている。見えないインクでな。|Каждую оборотную сторону подписываю лично я. Невидимыми чернилами.|Każdy rewers podpisuję osobiście. Niewidzialnym atramentem."
   ];
