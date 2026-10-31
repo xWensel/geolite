@@ -314,7 +314,7 @@ window.AIQ = window.AIQ || {};
     let t = 0, dado = false, n = 0;                                                    // dado = la carta esta del reves (hasta que la vuelvas a mantener pulsada)
     const fecha = () => { const P = A.profile && A.profile.get && A.profile.get(); const ts = (P && P.created) || Date.now(); try { return new Date(ts).toLocaleDateString(A.lang === "es-419" ? "es" : A.lang, { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } };
     function dorso(card) {                                                              // el dorso entero (arte a la rejilla de la carta + sus textos + el brillo de la vuelta)
-      const rect = card.getBoundingClientRect(), d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(rect.height / d));
+      const d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(card.offsetHeight / d));   // offsetHeight, no el rectangulo: inclinada, en hover o a media vuelta el rectangulo mide otra cosa y los textos caian fuera de la carta
       const back = document.createElement("div"); back.className = "hv-rev"; back.style.cssText = `--d:${d}px;--hh:${Hh}`;
       const art = dorsoArte(Hh, H.socioNo()); art.className = "hv-rev-art"; back.appendChild(art);
       back.insertAdjacentHTML("beforeend", `<small class="hv-r1">${T(A.HV.tx.socioClub)}</small><b class="hv-r2">${T(A.HV.tx.socioNum).replace("{n}", H.socioTxt())}</b><i class="hv-r3">${T(A.HV.tx.socioDesde).replace("{d}", fecha())}</i><span class="hv-r4">${T(A.HV.tx.socioLetra)}</span>`);
@@ -325,14 +325,15 @@ window.AIQ = window.AIQ || {};
       if (!A.HV) return; dado = !dado;
       if (dado) {
         if (!st.no) pideNo();
-        gira(card, () => { const b = dorso(card); card.appendChild(b); if (!reduced()) { const br = document.createElement("u"); br.className = "hv-brillo"; b.appendChild(br); setTimeout(() => br.remove(), 1100); } });
+        gira(card, () => { card.querySelectorAll(".hv-rev").forEach(e => e.remove()); const b = dorso(card); card.appendChild(b); if (!reduced()) { const br = document.createElement("u"); br.className = "hv-brillo"; b.appendChild(br); setTimeout(() => br.remove(), 1100); } });
         H.found("reverso"); n++; if (n === 5) dice("reverso", "hvReverso", { mood: "laugh", gap: 1000, libre: true });
       } else gira(card, () => { card.querySelectorAll(".hv-rev").forEach(e => e.remove()); });
     }
     /* si la portada repinta la carta (cambia tu nivel, tu nombre o el idioma), el dorso se vuelve a poner donde estaba: la vuelta es tuya hasta que la desgires */
     setInterval(() => {
       if (!dado || !D() || !D().homeShown || !D().homeShown()) return;
-      const c = document.querySelector(".hh .sc-card"); if (!c) return;
+      const c = document.querySelector(".hh .sc-card"); if (!c || c.style.scale === "0 1") return;   // a media vuelta no se toca: dos dorsos apilados (el del intervalo y el de la vuelta) estropeaban la carta
+      const bs = c.querySelectorAll(".hv-rev"); for (let i = 1; i < bs.length; i++) bs[i].remove();
       const b = c.querySelector(".hv-rev"); if (!b || b._no !== H.socioNo() + "|" + A.lang) { if (b) b.remove(); c.appendChild(dorso(c)); }
     }, 400);
     document.addEventListener("pointerdown", e => {

@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.40",
+      name: L("La carta, sin dobles", "The card, no doubles", "La carte, sans doublons", "O cartão, sem duplicatas", "Die Karte, ohne Doppelgänger", "La tessera, senza doppi", "", "卡片不再重影", "카드, 겹침 없이", "カードの二重表示を修正", "Карта без двойников", "Karta bez duplikatów"),
+      date: "2026-10-31",
+      summary: L("Al dar la vuelta a tu carta de socio ya no se apilan dos dorsos.", "Flipping your member card no longer stacks two backs on top of each other.", "Retourner ta carte de membre n'empile plus deux versos.", "Virar o seu cartão de sócio não empilha mais dois versos.", "Beim Umdrehen deiner Mitgliedskarte stapeln sich nicht mehr zwei Rückseiten.", "Girare la tua tessera di socio non sovrappone più due retri.", "", "翻转会员卡时不再叠出两个背面。", "회원 카드를 뒤집을 때 뒷면이 겹쳐 쌓이지 않아요.", "会員カードを裏返しても、裏面が二重に重ならなくなった。", "При переворачивании карты участника больше не накладываются две обратные стороны.", "Obracanie karty członkowskiej nie nakłada już dwóch rewersów."),
+      chapters: [
+        { id: "carta-0440", kicker: L("Arreglo", "Fix", "Correction", "Correção", "Korrektur", "Correzione", "", "修复", "수정", "修正", "Исправление", "Poprawka"),
+          title: L("Tu carta de socio", "Your member card", "Ta carte de membre", "Seu cartão de sócio", "Deine Mitgliedskarte", "La tua tessera di socio", "", "你的会员卡", "내 회원 카드", "あなたの会員カード", "Твоя карта участника", "Twoja karta członkowska"),
+          entries: [
+            E(L("La carta, sin dobles", "The card, no doubles", "La carte, sans doublons", "O cartão, sem duplicatas", "Die Karte, ohne Doppelgänger", "La tessera, senza doppi", "", "卡片不再重影", "카드, 겹침 없이", "カードの二重表示を修正", "Карта без двойников", "Karta bez duplikatów"), "fix", "0.4.40", [
+              L("Si dabas la vuelta a la carta en un mal momento, aparecían **dos dorsos encimados**: el número salía borroso y la frase de abajo se escapaba fuera de la carta. Ahora solo hay uno y los textos quedan siempre dentro.", "If you flipped the card at the wrong moment, **two backs stacked up**: the number looked smeared and the line at the bottom spilled outside the card. Now there is only one and the text always stays inside.", "En retournant la carte au mauvais moment, **deux versos s'empilaient** : le numéro devenait flou et la ligne du bas sortait de la carte. Désormais il n'y en a qu'un et le texte reste toujours dedans.", "Se você virasse o cartão na hora errada, **dois versos se empilhavam**: o número ficava borrado e a frase de baixo saía do cartão. Agora há só um e o texto fica sempre dentro.", "Wenn du die Karte im falschen Moment umgedreht hast, **stapelten sich zwei Rückseiten**: Die Nummer wurde unscharf und die Zeile unten rutschte aus der Karte. Jetzt gibt es nur noch eine, und der Text bleibt immer innen.", "Se giravi la tessera nel momento sbagliato, **si sovrapponevano due retri**: il numero risultava sfocato e la frase in basso usciva dalla tessera. Ora ce n'è uno solo e il testo resta sempre dentro.", "", "在不合适的时机翻转卡片时，会**叠出两个背面**：号码模糊，底部那行字跑到卡片外。现在只有一个背面，文字始终在卡片内。", "잘못된 타이밍에 카드를 뒤집으면 **뒷면이 두 개 겹쳐** 번호가 번지고 아래 문구가 카드 밖으로 나갔어요. 이제 하나만 생기고 글자는 항상 카드 안에 있어요.", "タイミングが悪いときに裏返すと、**裏面が二重に重なり**、番号がにじみ、下の一文がカードの外にはみ出していた。今は1枚だけで、文字は常にカード内に収まる。", "Если перевернуть карту в неудачный момент, **две обратные стороны накладывались**: номер расплывался, а нижняя строка выходила за карту. Теперь она одна, и текст всегда внутри.", "Gdy obróciłeś kartę w złym momencie, **nakładały się dwa rewersy**: numer się rozmazywał, a dolny wiersz wychodził poza kartę. Teraz jest tylko jeden, a tekst zawsze mieści się w karcie.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.39",
       name: L("Jugadas bien contadas", "Plays counted right", "Des jeux bien comptés", "Jogadas bem contadas", "Spiele richtig gezählt", "Giocate contate bene", "", "局数计算正确", "판 수를 정확히 세요", "プレイ数を正しくカウント", "Ходы считаются верно", "Rozgrywki liczone poprawnie"),
       date: "2026-10-31",
