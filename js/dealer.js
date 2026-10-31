@@ -2975,7 +2975,7 @@ window.AIQ = window.AIQ || {};
     fitCorner(); spr.fit(); spr.shown(true); spr.talk(true); bubble.style.translate = ""; requestAnimationFrame(cabe);   // v0.3.205: y siempre entero en pantalla
     /* el globo crece renglon a renglon al escribir (la frase ya esta maquetada y oculta, asi que ninguna palabra salta): se mide una sola vez
        a que renglon cae cada letra y luego solo se sube la altura del parrafo cuando empieza uno nuevo (sin leer el layout por letra) */
-    txt.style.height = ""; let lineOf = null, lineH = 0, nLines = 1, shown = -1;
+    txt.style.height = ""; let lineOf = null, lineH = 0, nLines = 1, shown = -1, lineB = [];
     /* v0.3.172: lo escrito va en `sofar` y lo que falta en `rest`: se puede volver a medir a media frase (D.aside lo aparta y le cambia el ancho) */
     const measure = () => {
       lineOf = null; txt.style.height = "";
@@ -2985,6 +2985,7 @@ window.AIQ = window.AIQ || {};
           const lo = sp.map(c => (c ? c.offsetTop : null)), tops = []; lo.forEach(t => { if (t != null && !tops.some(u => Math.abs(u - t) < 3)) tops.push(t); }); tops.sort((x, y) => x - y);
           let cur = 0; lineOf = lo.map(t => (t == null ? cur : (cur = tops.findIndex(u => Math.abs(u - t) < 3))));
           nLines = tops.length || 1; lineH = hp / nLines; if (nLines < 2) lineOf = null;
+          lineB = []; sp.forEach((c, j) => { if (c && lineOf) lineB[lineOf[j]] = Math.max(lineB[lineOf[j]] || 0, c.offsetTop + c.offsetHeight); });
         } else if (tn && k) {
           const rg = document.createRange(), tops = [], lo = []; let a0 = 0;
           for (const ch of text) { const inS = a0 < n0, nd = inS ? sofar : tn, off = inS ? a0 : a0 - n0; rg.setStart(nd, off); rg.setEnd(nd, off + ch.length); const r = rg.getClientRects()[0]; lo.push(r && r.height ? Math.round((r.top - pr.top) / k) : null); a0 += ch.length; }
@@ -2992,11 +2993,13 @@ window.AIQ = window.AIQ || {};
           let cur = 0; lineOf = lo.map(t => (t == null ? cur : (cur = tops.findIndex(u => Math.abs(u - t) < 3))));
           nLines = tops.length || 1; lineH = hp / nLines;
           if (nLines < 2) lineOf = null;                                       // una sola linea: nada que crecer
+          lineB = []; if (lineOf) { let a1 = 0, j = 0; for (const ch of text) { const inS = a1 < n0, nd = inS ? sofar : tn, off = inS ? a1 : a1 - n0; rg.setStart(nd, off); rg.setEnd(nd, off + ch.length); const r = rg.getClientRects()[0]; a1 += ch.length; if (r && r.height) lineB[lineOf[j]] = Math.max(lineB[lineOf[j]] || 0, (r.bottom - pr.top) / k); j++; } }   // donde acaba de verdad cada renglon (v0.4.36)
         }
       } catch (e) { lineOf = null; }
     };
     measure();
-    const grow = i => { if (!lineOf) return; const l = lineOf[i] || 0; if (l <= shown) return; shown = l; txt.style.height = lineH * (l + 1) + "px"; };
+    const grow = i => { if (!lineOf) return; const l = lineOf[i] || 0; if (l <= shown) return; shown = l; const cs = getComputedStyle(txt), pb = parseFloat(cs.paddingBottom) || 0, ex = cs.boxSizing === "border-box" ? 0 : (parseFloat(cs.paddingTop) || 0) + pb;   // el alto sale de donde acaba de verdad el renglon (mas el relleno de la voz): ninguna letra se corta
+      const need = lineB[l] != null ? lineB[l] + pb : lineH * (l + 1); txt.style.height = Math.ceil(need - ex) + "px"; };
     relines = () => { if (!typing || lineN !== me) return; measure(); shown = -1; grow(Math.max(0, i - 1)); };
     grow(0);
     if (mood === "laugh") A.sfx.laugh && A.sfx.laugh();
