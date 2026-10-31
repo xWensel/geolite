@@ -742,6 +742,7 @@
     closeDialog(); setPrompt(); setTimer(S.limit);
     $("plate").classList.remove("hidden", "hurry"); $("pauseBtn").classList.toggle("hidden", !!(S.duel && S.duel.net)); $("factText").textContent = "";
     if (S.run) A.adv.onQuestion();
+    if (S.run && !S.qi && S.streak >= 2) setStreak();                 // la racha que pasa de ronda se ve desde la primera pregunta
     if (A.codex && A.codex.toastAside) A.codex.toastAside();         // el monton de tarjetas nuevas no se queda tapando el mapa con el reloj corriendo
     updateHud();
   }
