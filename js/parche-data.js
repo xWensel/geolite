@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.28",
+      name: L("Caídas más bestias", "Wilder falls", "Des chutes plus brutales", "Quedas mais brutas", "Wildere Stürze", "Cadute più brutali", "", "更猛烈的坠落", "더 거칠어진 추락", "荒っぽくなった落下", "Падения пожёстче", "Ostrzejsze upadki"),
+      date: "2026-10-31",
+      summary: L("Lo que se cae en la casa ahora tiene física completa: gira, se tumba, se amontona, se cae por los lados y golpea con mucha más fuerza.", "Things that fall in the house now have full physics: they spin, lie down, pile up, tumble off the sides and hit much harder.", "Ce qui tombe dans la maison a désormais une physique complète : ça tourne, se couche, s'entasse, tombe par les côtés et frappe bien plus fort.", "O que cai na casa agora tem física completa: gira, deita, se amontoa, cai pelos lados e bate com muito mais força.", "Was im Haus fällt, folgt jetzt einer vollständigen Physik: Es dreht sich, legt sich hin, stapelt sich, kippt über die Seiten und schlägt viel härter auf.", "Ciò che cade nella casa ora ha una fisica completa: ruota, si sdraia, si accatasta, cade dai lati e colpisce molto più forte.", "", "老店里掉落的东西现在有了完整的物理：会旋转、躺倒、堆叠、从两侧滑落，撞击也猛烈得多。", "하우스에서 떨어지는 것들이 이제 완전한 물리를 따릅니다. 회전하고, 눕고, 쌓이고, 옆으로 굴러떨어지고, 훨씬 세게 부딪칩니다.", "ハウスで落ちるものは完全な物理で動きます。回転し、倒れ、積み重なり、横から転げ落ち、衝撃もずっと強くなりました。", "Всё, что падает в заведении, теперь подчиняется полной физике: вращается, ложится, громоздится, сваливается с краёв и бьётся гораздо сильнее.", "To, co spada w kasynie, ma teraz pełną fizykę: obraca się, kładzie, układa w stosy, spada bokami i uderza o wiele mocniej."),
+      chapters: [
+        { id: "caidas", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Cambio", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Lo que se cae", "Things that fall", "Ce qui tombe", "O que cai", "Was fällt", "Ciò che cade", "", "掉落的东西", "떨어지는 것들", "落ちるもの", "Падающее", "To, co spada"),
+          entries: [
+            E(L("Física completa", "Full physics", "Physique complète", "Física completa", "Volle Physik", "Fisica completa", "", "完整的物理", "완전한 물리", "完全な物理", "Полная физика", "Pełna fizyka"), "change", "0.4.28", [
+              L("Más giro, más choques y un golpe que se nota al caer.", "More spin, more collisions and an impact you can feel when they land.", "Plus de rotation, plus de collisions et un impact que l'on sent à l'atterrissage.", "Mais giro, mais colisões e um impacto que se sente ao cair.", "Mehr Drehung, mehr Zusammenstöße und ein Aufprall, den man beim Landen spürt.", "Più rotazione, più urti e un impatto che si sente quando atterra.", "", "更多旋转、更多碰撞，落地时的冲击也能清楚感觉到。", "더 많은 회전, 더 많은 충돌, 그리고 떨어질 때 느껴지는 충격.", "回転も衝突も増え、落ちたときの衝撃がはっきり伝わります。", "Больше вращения, больше столкновений и удар, который чувствуется при падении.", "Więcej obrotów, więcej zderzeń i uderzenie, które czuć przy upadku.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.27",
       name: L("Sorpresas más afinadas", "Sharper surprises", "Des surprises mieux réglées", "Surpresas mais afinadas", "Feinere Überraschungen", "Sorprese più rifinite", "", "更精致的惊喜", "더 다듬어진 깜짝 요소", "磨かれた仕掛け", "Доработанные сюрпризы", "Dopracowane niespodzianki"),
       date: "2026-10-31",
