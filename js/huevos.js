@@ -142,33 +142,47 @@ window.AIQ = window.AIQ || {};
     }, true);
   })();
 
-  /* ================================================================== B · TICKET INTERMINABLE: 5 clics en el TOTAL y el papel sigue saliendo (una cinta que cuelga del ticket, sin tocar su maquetacion) */
+  /* ================================================================== B · TICKET INTERMINABLE: en el veredicto de una ronda SUPERADA, 5 clics seguidos en el ticket. El papel sigue saliendo por debajo del sello, lo de
+     arriba (la cabecera, los lugares, el sello) sube y se pierde por el borde, y van saliendo renglones tontos sobre el propio ticket. Al acabar, el rollo vuelve y todo queda como estaba */
   (function () {
     let n = 0, t = 0, busy = false;
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const parado = tk => !tk.getAnimations({ subtree: true }).some(a => { try { return a.playState === "running" && a.effect.getComputedTiming().iterations !== Infinity; } catch (e) { return false; } });   // el ticket ya acabo de imprimirse
     addEventListener("click", e => {
-      const tot = e.target && e.target.closest && e.target.closest(".tk-total"); if (!tot || busy || !A.HV) return;
+      const tk = e.target && e.target.closest && e.target.closest(".gx-vd-ticket"); if (!tk || busy || !A.HV) return;
+      if (tk.closest(".gx-vd.lose") || !parado(tk)) return;
       clearTimeout(t); t = setTimeout(() => { n = 0; }, 3500);
-      if (++n < 5) return; n = 0;
-      const tk = tot.closest(".ticket") || tot.parentElement, r = tk.getBoundingClientRect(), tr = tot.getBoundingClientRect();
-      const w = Math.round(Math.min(r.width, r.left - 14)), top = Math.round(Math.max(8, tr.top - 150)), room = innerHeight - top - 10;
-      if (w < 120 || room < 80) return;                                              // no cabe a su lado: no sale
-      busy = true; H.found("ticket");
-      const box = document.createElement("div"); box.className = "hv-cinta";          // el papel sale por una ranura del costado: cuelga a la izquierda del ticket, tapado un poco por el
-      box.style.cssText = `left:${Math.round(r.left - w + 6)}px;top:${top}px;width:${w}px;max-height:${Math.round(room)}px`;
-      document.body.appendChild(box);
-      const items = A.HV.tx.cinta; let i = 0;
-      const step = () => {
-        if (!box.isConnected || !tk.isConnected) { box.remove(); busy = false; return; }          // pasaste de pregunta: se la lleva
-        if (i >= items.length) { setTimeout(() => { box.classList.add("out"); setTimeout(() => { box.remove(); busy = false; }, reduced() ? 0 : 260); }, 1200 + 1000); return; }
-        const it = items[i++], row = document.createElement("div");
-        row.innerHTML = `<span>${esc(T(it[0]))}</span><b>${it[1] ? esc(T(it[1])) : ""}</b>`; box.appendChild(row);
-        box.scrollTop = box.scrollHeight;
-        if (A.sfx && A.sfx.chip) A.sfx.chip(Math.min(4, i));
-        setTimeout(step, reduced() ? 60 : 340);
-      };
-      step();
+      if (++n < 5) return; n = 0; busy = true; H.found("ticket"); rollo(tk);
     }, true);
+    /* el ticket CRECE de verdad, como una maquina de escribir: se saca de la maquetacion (la columna conserva su hueco, nada se mueve) y se ancla por abajo; cada renglon nuevo
+       entra en cuatro pasos por el borde de abajo y todo lo demas sube con el papel hasta salirse por arriba. La llama y la puntuacion son un solo cuerpo: la llama es un lienzo del propio
+       ticket y se queda donde estaba respecto a las cifras, asi que sube con ellas y al volver el rollo esta exactamente donde empezo */
+    async function rollo(tk) {
+      const quieto = reduced(), pausa = ms => new Promise(r => setTimeout(r, ms)), mid = tk.parentElement;
+      const prevT = tk.getAttribute("style"), prevM = mid.getAttribute("style");
+      mid.style.position = "relative"; mid.style.overflow = "visible";
+      const w = tk.offsetWidth, left = tk.offsetLeft, h0 = mid.offsetHeight, th0 = tk.offsetHeight, bot0 = h0 - (tk.offsetTop + th0);
+      const z = tk.getBoundingClientRect().width / Math.max(1, w), baja0 = tk.getBoundingClientRect().bottom;
+      const tope = Math.max(0, (innerHeight - 100 - baja0) / z);                                // lo que puede bajar el borde de abajo (sin pisar los botones)
+      mid.style.height = h0 + "px";
+      Object.assign(tk.style, { position: "absolute", left: left + "px", width: w + "px", top: "auto", bottom: bot0 + "px", margin: "0" });
+      const nuevos = [];
+      const ancla = () => { const extra = tk.offsetHeight - th0; tk.style.bottom = (bot0 - Math.min(Math.max(0, extra), tope)) + "px"; };   // crece por abajo hasta el tope y luego, por arriba
+      const fin = () => { nuevos.forEach(r => r.remove()); if (prevT == null) tk.removeAttribute("style"); else tk.setAttribute("style", prevT); if (prevM == null) mid.removeAttribute("style"); else mid.setAttribute("style", prevM); busy = false; };
+      try {
+        const items = A.HV.tx.cinta;
+        for (let i = 0; i < items.length; i++) {
+          if (!tk.isConnected) return (busy = false);                                    // pasaste de pantalla: se lo lleva
+          const row = document.createElement("div"); row.className = "gx-lead-row hv-renglon"; row.innerHTML = `<span>${esc(T(items[i][0]))}</span><s></s><b>${items[i][1] ? esc(T(items[i][1])) : ""}</b>`;
+          tk.appendChild(row); nuevos.push(row); ancla();
+          if (A.sfx && A.sfx.chip) try { A.sfx.chip(Math.min(4, 1 + (i % 4))); } catch (er) { /* audio */ }
+          const t0 = performance.now(); const sigue = () => { ancla(); if (performance.now() - t0 < 200) requestAnimationFrame(sigue); }; if (!quieto) sigue();
+          await pausa(quieto ? 40 : 230);
+        }
+        await pausa(1200 + 1000);                                                          // y su segundo de mas
+        for (let k = nuevos.length - 1; k >= 0; k--) { nuevos[k].remove(); ancla(); if (!quieto) await pausa(55); }   // el rollo se rebobina renglon a renglon
+      } finally { if (tk.isConnected) fin(); else busy = false; }
+    }
   })();
 
   /* ================================================================== B · BUSQUEDAS IMPOSIBLES: la Enciclopedia contesta con retintin (js/codex.js llama aqui cuando no hay resultados) */
@@ -275,7 +289,7 @@ window.AIQ = window.AIQ || {};
   H.socioNo = () => st.no || 0; H._no = v => { st.no = v; save(); };
   H.socioTxt = () => (st.no ? String(st.no).padStart(4, "0") : "····");
   setTimeout(pideNo, 4000); setInterval(pideNo, 600000);
-  const dorsoArte = hh => {
+  const dorsoArte = (hh, no) => {
     const c = document.createElement("canvas"); c.width = 96; c.height = hh; const g = c.getContext("2d"), px = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
     px(0, 0, 96, hh, "#1d0a3d");
     for (let y = 0; y < hh; y++) for (let x = 0; x < 96; x++) if ((x + y) % 8 === 0 || ((x - y) % 8 + 8) % 8 === 0) px(x, y, 1, 1, "#2a1559");     // la reticula de la casa (rombos)
@@ -285,33 +299,50 @@ window.AIQ = window.AIQ || {};
     px(7, 7, 82, hh - 14, "#1d0a3d");                                                                                                             // el tapete liso dentro del segundo filete
     for (let y = 8; y < hh - 8; y++) for (let x = 8; x < 88; x++) if ((x + y) % 8 === 0 || ((x - y) % 8 + 8) % 8 === 0) px(x, y, 1, 1, "#241250");
     /* la ficha de oro con la chistera de la casa, en el centro de arriba */
-    const N = 30, cy = Math.round(hh * .30), ox = 48 - N / 2, oy = cy - N / 2;
+    const N = 30, cy = Math.round(hh * .27), ox = 48 - N / 2, oy = cy - N / 2;
     try { if (A.ficha && A.ficha.px) { const f = document.createElement("canvas"); f.width = f.height = N; f.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(A.ficha.px(N, "blank_gold")), N, N), 0, 0); g.drawImage(f, ox, oy); } } catch (e) { px(ox + 2, oy + 2, N - 4, N - 4, "#f5a623"); }
+    /* tu huella: un codigo de barras de pixel (22..74) que sale de tu numero de socio: el dorso es el mismo para todos, la huella no */
+    let sd = ((no || 7) * 2654435761) >>> 0; const al = () => (sd = (Math.imul(sd, 1664525) + 1013904223) >>> 0) / 4294967296;
+    { const by = hh - 40; let x = 22; px(x, by, 1, 9, "#f3f0fa"); x += 2; px(x, by, 1, 9, "#f3f0fa"); x += 3;
+      while (x < 70) { const w = al() > .62 ? 2 : 1; if (al() > .22) px(x, by, w, 9, "#f3f0fa"); x += w + 1; }
+      px(71, by, 1, 9, "#f3f0fa"); px(73, by, 1, 9, "#f3f0fa"); px(22, by + 10, 52, 1, "#7a4a05"); }
     const HAT = ["...######...", "...######...", "...######...", "...bbbbbb...", "...######...", "############"], hx = 48 - 6, hy = cy - 4;
     HAT.forEach((row, ry) => { for (let rx = 0; rx < 12; rx++) { const ch = row[rx]; if (ch !== ".") px(hx + rx, hy + ry, 1, 1, ch === "b" ? "#c46a1b" : "#1d0a3d"); } });
     return c;
   };
   (function () {
-    let t = 0, vuelta = null, n = 0;
+    let t = 0, dado = false, n = 0;                                                    // dado = la carta esta del reves (hasta que la vuelvas a mantener pulsada)
     const fecha = () => { const P = A.profile && A.profile.get && A.profile.get(); const ts = (P && P.created) || Date.now(); try { return new Date(ts).toLocaleDateString(A.lang === "es-419" ? "es" : A.lang, { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } };
-    function da(card) {
-      if (vuelta || !A.HV) return; const rect = card.getBoundingClientRect(); if (!rect.width) return;
-      const d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(rect.height / d));
-      const back = document.createElement("div"); back.className = "hv-rev"; back.style.cssText = `--d:${d}px`;
-      const art = dorsoArte(Hh); art.className = "hv-rev-art"; back.appendChild(art);
+    function dorso(card) {                                                              // el dorso entero (arte a la rejilla de la carta + sus textos + el brillo de la vuelta)
+      const rect = card.getBoundingClientRect(), d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(rect.height / d));
+      const back = document.createElement("div"); back.className = "hv-rev"; back.style.cssText = `--d:${d}px;--hh:${Hh}`;
+      const art = dorsoArte(Hh, H.socioNo()); art.className = "hv-rev-art"; back.appendChild(art);
       back.insertAdjacentHTML("beforeend", `<small class="hv-r1">${T(A.HV.tx.socioClub)}</small><b class="hv-r2">${T(A.HV.tx.socioNum).replace("{n}", H.socioTxt())}</b><i class="hv-r3">${T(A.HV.tx.socioDesde).replace("{d}", fecha())}</i><span class="hv-r4">${T(A.HV.tx.socioLetra)}</span>`);
-      const flip = f => { if (reduced()) return f(); card.style.transition = "scale .12s steps(3)"; card.style.scale = "0 1"; setTimeout(() => { f(); card.style.scale = "1 1"; }, 130); };
-      flip(() => card.appendChild(back)); vuelta = { card, back, flip }; H.found("reverso"); n++; if (!st.no) pideNo();
-      if (n === 5) dice("reverso", "hvReverso", { mood: "laugh", gap: 1000, libre: true });
+      back._no = H.socioNo() + "|" + A.lang; return back;
     }
-    function quita() { if (!vuelta) return; const v = vuelta; vuelta = null; v.flip(() => v.back.remove()); }
+    const gira = (card, f) => { if (reduced()) return f(); card.style.transition = "scale .12s steps(3)"; card.style.scale = "0 1"; setTimeout(() => { f(); card.style.scale = "1 1"; }, 130); };
+    function alterna(card) {
+      if (!A.HV) return; dado = !dado;
+      if (dado) {
+        if (!st.no) pideNo();
+        gira(card, () => { const b = dorso(card); card.appendChild(b); if (!reduced()) { const br = document.createElement("u"); br.className = "hv-brillo"; b.appendChild(br); setTimeout(() => br.remove(), 1100); } });
+        H.found("reverso"); n++; if (n === 5) dice("reverso", "hvReverso", { mood: "laugh", gap: 1000, libre: true });
+      } else gira(card, () => { card.querySelectorAll(".hv-rev").forEach(e => e.remove()); });
+    }
+    /* si la portada repinta la carta (cambia tu nivel, tu nombre o el idioma), el dorso se vuelve a poner donde estaba: la vuelta es tuya hasta que la desgires */
+    setInterval(() => {
+      if (!dado || !D() || !D().homeShown || !D().homeShown()) return;
+      const c = document.querySelector(".hh .sc-card"); if (!c) return;
+      const b = c.querySelector(".hv-rev"); if (!b || b._no !== H.socioNo() + "|" + A.lang) { if (b) b.remove(); c.appendChild(dorso(c)); }
+    }, 400);
     document.addEventListener("pointerdown", e => {
       if (e.button !== 0 || !D() || !D().homeShown || !D().homeShown()) return;
       const card = e.target && e.target.closest && e.target.closest(".hh .sc-card"); if (!card) return;
-      clearTimeout(t); t = setTimeout(() => { da(card); const traga = c => { c.stopPropagation(); c.preventDefault(); }; addEventListener("click", traga, { capture: true, once: true }); setTimeout(() => removeEventListener("click", traga, true), 800); }, 900);
+      clearTimeout(t); t = setTimeout(() => { alterna(card); const traga = c => { c.stopPropagation(); c.preventDefault(); }; addEventListener("click", traga, { capture: true, once: true }); setTimeout(() => removeEventListener("click", traga, true), 800); }, 900);
     }, true);
-    addEventListener("pointerup", () => { clearTimeout(t); quita(); }, true);
-    document.addEventListener("pointerleave", () => { clearTimeout(t); quita(); }, true);
+    addEventListener("pointerup", () => clearTimeout(t), true);
+    document.addEventListener("pointerleave", () => clearTimeout(t), true);
+    H._dado = () => dado;
   })();
 
   /* ================================================================== A · COMODIN Y LA MONEDA: una moneda sobre la primera placa; mirarla 3 s con el cursor llama al gato, que la tira */

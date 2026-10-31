@@ -5,15 +5,6 @@
 @keyframes hvq { 0% { translate: 0 0; } 25% { translate: -3px 2px; } 50% { translate: 3px -2px; } 75% { translate: -2px -2px; } 100% { translate: 0 0; } }
 html.reduce-motion .hh.hv-quake .mcard, html.reduce-motion .hh.hv-quake .plq, html.reduce-motion .hh.hv-quake .hh-logo { animation: none; }
 
-/* el ticket que no acaba: una cinta de papel que cuelga del ticket, sin tocar su maquetacion (se va con el ticket) */
-.hv-cinta { position: fixed; z-index: 60; overflow: hidden; background: var(--paper); color: var(--ink); box-sizing: border-box; padding: 6px 12px 10px; font-family: var(--sans); font-size: 19px; line-height: 1.15;
-  border: 2px solid var(--ink); border-right: 0; box-shadow: 0 6px 0 rgba(2, 6, 4, .5); pointer-events: none; transition: opacity .26s; background-image: repeating-linear-gradient(0deg, transparent 0 7px, rgba(29, 10, 61, .05) 7px 8px); }
-.hv-cinta.out { opacity: 0; }
-.hv-cinta > div { display: flex; justify-content: space-between; gap: 10px; padding: 1px 0; border-bottom: 1px dashed rgba(29, 10, 61, .35); animation: hvIn .12s steps(2); }
-.hv-cinta > div b { font-weight: 400; white-space: nowrap; }
-@keyframes hvIn { from { translate: 0 -6px; opacity: .4; } to { translate: 0 0; opacity: 1; } }
-html.reduce-motion .hv-cinta > div { animation: none; }
-
 /* su linea en los creditos y la nota con su retrato (no sale en pantalla: se la deja al pie del panel) */
 .hv-don { margin: 22px 0 6px; padding-top: 14px; border-top: 1px dashed rgba(255, 255, 255, .22); font-family: var(--sans); font-size: 22px; cursor: default; user-select: none; }
 .hv-don b { font-weight: 400; }
@@ -30,10 +21,10 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 .hv-rev { position: absolute; inset: 0; z-index: 6; pointer-events: none; font-family: var(--sans); text-align: center; color: #f3f0fa; }
 .hv-rev-art { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .hv-rev > small, .hv-rev > b, .hv-rev > i, .hv-rev > span { position: absolute; left: 0; right: 0; font-weight: 400; font-style: normal; line-height: 1; }
-.hv-r1 { top: calc(var(--d) * 50); font-size: calc(var(--d) * 8); letter-spacing: calc(var(--d) * .5); text-transform: uppercase; color: #fdd742; }
-.hv-r2 { top: calc(var(--d) * 61); font-size: calc(var(--d) * 17); color: #f3f0fa; text-shadow: 0 var(--d) 0 #0b0618; }
-.hv-r3 { top: calc(var(--d) * 86); font-size: calc(var(--d) * 8); color: #bdb7d1; }
-.hv-r4 { top: calc(var(--d) * 101); font-size: calc(var(--d) * 7); padding: 0 calc(var(--d) * 11); line-height: 1.05 !important; color: #8a8fa8; }
+.hv-r1 { top: calc(var(--d) * (var(--hh) - 82)); font-size: calc(var(--d) * 8); letter-spacing: calc(var(--d) * .5); text-transform: uppercase; color: #fdd742; }
+.hv-r2 { top: calc(var(--d) * (var(--hh) - 72)); font-size: calc(var(--d) * 17); color: #f3f0fa; text-shadow: 0 var(--d) 0 #0b0618; }
+.hv-r3 { top: calc(var(--d) * (var(--hh) - 52)); font-size: calc(var(--d) * 8); color: #bdb7d1; }
+.hv-r4 { top: calc(var(--d) * (var(--hh) - 24)); font-size: calc(var(--d) * 7); padding: 0 calc(var(--d) * 11); line-height: 1.05 !important; color: #8a8fa8; }
 
 /* la moneda sobre la primera placa (el cebo de Comodin) */
 .hv-coin { position: fixed; z-index: 30; padding: 6px 8px 0; pointer-events: auto; cursor: default; }
@@ -57,8 +48,6 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 .hv-lib .pf-kv i { font-size: 16px; }
 .hv-cas { aspect-ratio: auto; height: 22px; }
 
-/* el ticket entero deja pasar los clics al mapa (pointer-events: none): la linea TOTAL si los recibe, para el huevo del ticket que no acaba */
-.ticket .tk-total { pointer-events: auto; }
 
 /* la version de la portada no recibia clics (pointer-events: none): ahora si, con un margen de 8 px para poder acertarla (huevo de las notas del parche) */
 #dlg > .hh-ver { pointer-events: auto; cursor: default; }
@@ -70,3 +59,17 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 html.reduce-motion .hh.hv-golpe, html.no-shake .hh.hv-golpe { animation: none; }
 .hv-chispa { position: absolute; width: 4px; height: 4px; pointer-events: none; }
 .hv-letra { will-change: transform; }
+
+/* los renglones tontos del ticket de cierre: la etiqueta se parte en dos lineas en vez de cortarse con «…» (el valor, siempre entero) */
+.gx-vd-ticket .hv-renglon span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.05; }
+.gx-vd-ticket .hv-renglon b { white-space: nowrap; }
+
+/* el brillo de la vuelta: una banda de luz diagonal cruza el dorso una sola vez, a pasos (nada con Movimiento: Minimo) */
+.hv-brillo { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(105deg, transparent 38%, rgba(255, 243, 176, .5) 48%, rgba(255, 255, 255, .7) 50%, rgba(255, 243, 176, .5) 52%, transparent 62%) 120% 0 / 260% 100%; animation: hvBrillo .9s steps(12) 1 both; }
+@keyframes hvBrillo { from { background-position: 120% 0; } to { background-position: -20% 0; } }
+html.reduce-motion .hv-brillo { display: none; }
+
+/* cada renglon nuevo del ticket entra en cuatro pasos desde abajo, como una tecla de maquina de escribir (quieto con Movimiento: Minimo) */
+.gx-vd-ticket .hv-renglon { animation: hvRen .2s steps(4) both; }
+@keyframes hvRen { from { max-height: 0; opacity: .3; overflow: hidden; } to { max-height: 70px; opacity: 1; overflow: hidden; } }
+html.reduce-motion .gx-vd-ticket .hv-renglon { animation: none; }
