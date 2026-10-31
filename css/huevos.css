@@ -59,3 +59,7 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 html.reduce-motion .hh.hv-golpe, html.no-shake .hh.hv-golpe { animation: none; }
 .hv-chispa { position: absolute; width: 4px; height: 4px; pointer-events: none; }
 .hv-letra { will-change: transform; }
+
+/* los renglones tontos del ticket de cierre: la etiqueta se parte en dos lineas en vez de cortarse con «…» (el valor, siempre entero) */
+.gx-vd-ticket .hv-renglon span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.05; }
+.gx-vd-ticket .hv-renglon b { white-space: nowrap; }
