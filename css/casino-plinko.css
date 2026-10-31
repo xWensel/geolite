@@ -20,6 +20,7 @@
 .rou.plk .pk-bubble { position: absolute; left: 50px; top: 446px; width: 420px; z-index: 6; padding: 14px 20px 12px;
   font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; }
 .rou.plk .pk-bubble.on { opacity: 1; transform: none; }
+.rou.plk .pk-bubble { top: 434px; --bbx: 216px; padding-top: 26px; }   /* cola arriba, dentro de su caja (apunta al crupier de encima) */
 .rou.plk .pk-hint { position: absolute; left: 60px; top: 700px; font: 900 34px/1.05 var(--serif); letter-spacing: .04em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f; opacity: 0; transition: opacity .25s; max-width: 430px; }
 .rou.plk .pk-hint.on { opacity: 1; }
 .rou.plk .pk-hist { position: absolute; left: 60px; top: 830px; width: 430px; display: flex; flex-wrap: wrap; gap: 10px; }

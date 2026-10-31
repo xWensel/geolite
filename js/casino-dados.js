@@ -76,7 +76,7 @@ window.AIQ = window.AIQ || {};
 
   function spinDice(o, done) {
     const cx = o.cx, TST = A.adv._dice || {}, ST = (TST.st = { phase: "intro" });                // ST.phase: solo pruebas (intro, dshake, droll, pturn, pshake, proll, cmp, result)
-    const html = `<div class="dd-stage"><div class="dd-bg"></div><div class="dd-dealer"><div class="dd-dl"></div></div><div class="dd-bubble" data-bb><p></p></div>
+    const html = `<div class="dd-stage"><div class="dd-bg"></div><div class="dd-dealer"><div class="dd-dl"></div></div><div class="dd-bubble" data-bb data-tail="l"><p></p></div>
       <div class="dd-left"><div class="rou-pick"><span class="rp-dot rp-dice"></span><span class="rp-k">${tr(cx.BT.seal)}</span><b>${tr(BET.n)} · ${o.stake}</b></div><div class="dd-hint"></div></div>
       <div class="dd-top"><b class="dd-no"></b><div class="dd-res"><span class="dd-plate"></span><span class="dd-msg"></span></div></div>
       <div class="dd-band"><div class="dd-rail dd-rail-h"></div><div class="dd-rail dd-rail-l"></div><div class="dd-rail dd-rail-r"></div>
@@ -248,7 +248,7 @@ window.AIQ = window.AIQ || {};
     const gesture = g => { if (!g || g === "none" || reduced) return; dealerImg.classList.remove("hop", "shudder", "drop", "lean"); void dealerImg.offsetWidth; dealerImg.classList.add(g); setTimeout(() => dealerImg.classList.remove(g), 900); };
     const lineOf = key => { const a = LN[key]; let i = Math.floor(rnd() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(rnd() * (a.length - 1))) % a.length; LAST[key] = i; return tr(a[i]) || ""; };
     function speak(p) {
-      SP.cur = true; bTx.textContent = p.text; A.dealer.skin(bubble, p.v); bubble.classList.add("on"); face(p.face); gesture(p.g); talk(p.text);
+      SP.cur = true; A.dealer.skin(bubble, p.v); p.text = A.dealer.fill(bTx, p.text, p.v); bubble.classList.add("on"); face(p.face); gesture(p.g); talk(p.text);
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); face("neutral"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }
     function say(key, prio = 1, skipIfBusy) {

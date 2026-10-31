@@ -18,6 +18,7 @@
 .rou.dice .dd-bubble { position: absolute; left: 1160px; top: 150px; max-width: 560px; z-index: 6; padding: 14px 20px 12px;
   font: 27px/1.12 "Jersey 15", var(--serif); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; pointer-events: none; }
 .rou.dice .dd-bubble.on { opacity: 1; transform: none; }
+.rou.dice .dd-bubble { left: 1148px; --bby: 40px; padding-left: 32px; }   /* cola a la izquierda, dentro de su caja */
 .rou.dice .dd-left { position: absolute; left: 130px; top: 150px; width: 600px; z-index: 6; display: flex; flex-direction: column; gap: 22px; align-items: flex-start; pointer-events: none; }
 .rou.dice .dd-left .rou-pick { font-size: 15px; }
 .rou.dice .dd-hint { font: 900 36px/1.05 var(--serif); letter-spacing: .04em; color: #ffe9a6; text-shadow: 0 4px 0 #0a140f; opacity: 0; transition: opacity .25s; max-width: 600px; }

@@ -360,7 +360,7 @@ window.AIQ = window.AIQ || {};
     const rigSet = f => { if (rig) { try { rig.set(f); } catch (e) { /* nada */ } } }, rigPlay = g => { if (rig && !reduced) { try { rig.play(g); } catch (e) { /* nada */ } } };
     const lineOf = key => { const a = LN[key]; let i = Math.floor(rnd() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(rnd() * (a.length - 1))) % a.length; LAST[key] = i; return tr(a[i]) || ""; };
     function speak(p) {
-      SP.cur = true; bTx.textContent = p.text; A.dealer.skin(bubble, p.v); bubble.classList.add("on"); rigSet(p.face); rigPlay(p.g);
+      SP.cur = true; A.dealer.skin(bubble, p.v); p.text = A.dealer.fill(bTx, p.text, p.v); bubble.classList.add("on"); rigSet(p.face); rigPlay(p.g);
       if (rig) { clearInterval(talkIv); try { rig.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, p.text.length)) { clearInterval(talkIv); try { rig.talk(false); } catch (e) { /* nada */ } return; } try { rig.syl(); } catch (e) { /* nada */ } }, 70); }
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); rigSet("sly"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }

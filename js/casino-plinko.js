@@ -82,7 +82,7 @@ window.AIQ = window.AIQ || {};
   function spinPlinko(o, done) {
     const cx = o.cx, TST = A.adv._plinko || {};
     const html = `<div class="pk-stage" data-decor="petroleo"><div class="pk-bg"></div>
-      <div class="pk-left"><div class="rou-pick"><span class="rp-dot rp-plk"></span><span class="rp-k">${tr(cx.BT.seal)}</span><b></b></div><div class="pk-bubble" data-bb><p></p></div><div class="pk-hint"></div><div class="pk-hist"></div></div>
+      <div class="pk-left"><div class="rou-pick"><span class="rp-dot rp-plk"></span><span class="rp-k">${tr(cx.BT.seal)}</span><b></b></div><div class="pk-bubble" data-bb data-tail="t"><p></p></div><div class="pk-hint"></div><div class="pk-hist"></div></div>
       <div class="pk-top"><b class="pk-no"></b><div class="pk-res"><span class="pk-plate"></span><span class="pk-msg"></span></div></div>
       <div class="pk-bshadow"></div>
       <div class="pk-board"><img class="pk-back petroleo" src="assets/plinko/board_petroleo.png" alt="" draggable="false"><img class="pk-back noche" src="assets/plinko/board_noche.png" alt="" draggable="false"><img class="pk-back marmol" src="assets/plinko/board_marmol.png" alt="" draggable="false"><img class="pk-back rubi" src="assets/plinko/board_rubi.png" alt="" draggable="false">
@@ -139,7 +139,7 @@ window.AIQ = window.AIQ || {};
     const rigSet = f => { if (spr) { try { spr.set(f); } catch (e) { /* nada */ } } }, rigPlay = g => { if (spr && !reduced) { try { spr.play(g); } catch (e) { /* nada */ } } };
     const lineOf = key => { const a = LN[key]; let i = Math.floor(vr() * a.length); if (i === LAST[key] && a.length > 1) i = (i + 1 + Math.floor(vr() * (a.length - 1))) % a.length; LAST[key] = i; return tr(a[i]) || ""; };
     function speak(p) {
-      SP.cur = true; bTx.textContent = p.text; A.dealer.skin(bubble, p.v); bubble.classList.add("on"); rigSet(p.face); rigPlay(p.g);
+      SP.cur = true; A.dealer.skin(bubble, p.v); p.text = A.dealer.fill(bTx, p.text, p.v); bubble.classList.add("on"); rigSet(p.face); rigPlay(p.g);
       if (spr) { clearInterval(talkIv); try { spr.talk(true); } catch (e) { /* nada */ } let n = 0; talkIv = setInterval(() => { if (!alive() || ++n > Math.min(60, p.text.length)) { clearInterval(talkIv); try { spr.talk(false); } catch (e) { /* nada */ } return; } try { spr.syl(); } catch (e) { /* nada */ } }, 70); }
       setTimeout(() => { if (!alive()) return; bubble.classList.remove("on"); rigSet("sly"); if (SP.pend) { const n = SP.pend; SP.pend = null; setTimeout(() => alive() && speak(n), 350); } else SP.cur = false; }, 1800 + p.text.length * 22 + (A.dealer.LINGER || 1000));
     }

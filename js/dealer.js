@@ -3140,6 +3140,20 @@ window.AIQ = window.AIQ || {};
   D.sayKey = (key, o = {}) => { const t = D.pick(key, o.data); if (!t) return false; D.say(t, Object.assign({ hold: holdFor(t) }, o)); return true; };
   /* el globo de cada juego de la Barra es el MISMO globo (css/bocadillo.css, [data-bb]): voz por clave de frase y escala de su escenario */
   D.vozOf = key => VOZ[key] || "";
+  /* la frase de un juego de la Barra con sus marcas y la voz (canto, nervios, cifras): aparece entera; devuelve el texto sin etiquetas */
+  D.fill = (p, raw, v) => {
+    const PM = parseMarks(tagsToSent(String(raw == null ? "" : raw))), text = PM.plain, marked = PM.cls.some(Boolean);
+    if (!(marked || v === "canto" || v === "nervios" || (v === "libreta" && /\d/.test(text)))) { p.textContent = text; return text; }
+    p.replaceChildren(); let w = null; const flushW = () => { if (w) { p.appendChild(w); w = null; } }, cp = [...text], sp = new Array(cp.length).fill(null);
+    cp.forEach((ch, k) => {
+      if (ch === " ") { flushW(); p.appendChild(document.createTextNode(" ")); return; }
+      const c = document.createElement("i"); c.className = "dl-c" + (PM.cls[k] ? " " + PM.cls[k] : v === "canto" && !marked ? " dl-k" : ""); c.style.setProperty("--i", k); c.textContent = ch; sp[k] = c;
+      if (CJK.test(ch)) { flushW(); p.appendChild(c); } else { if (!w) { w = document.createElement("span"); w.className = "dl-w"; } w.appendChild(c); }
+    });
+    flushW();
+    if (v === "libreta") { const re = /\d[\d.,]*(\s?%)?/g; let m; while ((m = re.exec(text))) for (let k = m.index; k < m.index + m[0].length; k++) if (sp[k]) sp[k].classList.add("dl-n"); }
+    return text;
+  };
   D.skin = (b, v) => { if (!b) return; b.setAttribute("data-bb", ""); if (v) b.dataset.v = v; else delete b.dataset.v; b.style.setProperty("--bbk", bbkOf(b.parentElement)); };
   D.lines = LINES; D.LINGER = LINGER;
   D._fake = (kind, n) => fakeAch(kind || "idle", n || 75);   // solo para pruebas: fuerza el logro falso

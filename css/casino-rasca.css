@@ -59,6 +59,7 @@
 @keyframes ra-drip { 0% { opacity: 0; transform: translateY(-8px); } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(54px); } }
 .rou.rasca .ra-bubble { position: absolute; left: 1424px; top: 70px; max-width: 450px; z-index: 110; padding: 14px 20px 12px; font-family: "Jersey 15", var(--serif); line-height: 1.12; opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; pointer-events: none; }
 .rou.rasca .ra-bubble.on { opacity: 1; transform: none; }
+.rou.rasca .ra-bubble { left: 1412px; --bby: 40px; padding-left: 32px; }   /* cola a la izquierda, dentro de su caja (js/casino-rasca.js data-tail="l") */
 /* el mostrador: marfil con filo de laton y bombillas (como las bandas de las ruletas) */
 .rou.rasca .ra-band { position: absolute; left: 0; top: 330px; width: 1920px; height: 680px; z-index: 3; overflow: visible;
   background: url(../assets/rasca/felt_ivory.png) 0 0 / 128px 128px, radial-gradient(ellipse at 50% 44%, #fbf1d6 0%, #ead9ad 52%, #c3a875 100%);
