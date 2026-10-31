@@ -99,7 +99,7 @@ window.AIQ = window.AIQ || {};
       const btn = el.querySelector("[data-play]"); if (!btn) return;
       btn.onclick = e => {
         e.stopPropagation(); if (cx.open) return; const run = cx.run, stake = cx.coinCost(stakeI); if (run.coins < stake) { A.sfx.deny(); cx.shake(el); return; }
-        const TST = A.adv._rasca || {}, att = run.attempt || 0, out = decide(`${run.seed}:rasca:${cx.r}:${att}`), mult = out.mult || 0, pay = stake * mult;
+        const TST = A.adv._rasca || {}, att = run.attempt || 0, out = decide(`${run.seed}:rasca:${cx.r}:${att}${cx.plS(cx.r)}`), mult = out.mult || 0, pay = stake * mult;
         const rid = TST.reel || cx.reelPick("rasca", REEL.map(r => r.id));                                 // la presentacion: carrete vivo (_rasca.reel: solo pruebas)
         run.coins += pay - stake; if (pay > stake) run.stats.coinsEarned += pay - stake;                  // se cobra al empezar, como la ruleta: recargar a medias no lo deshace
         run.reds = run.reds || {}; run.reds[cx.r] = { id: "rasca", att, stake, grid: out.grid, cls: out.cls, mult, cells: out.cells, rid, pay, done: false };

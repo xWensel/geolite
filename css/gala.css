@@ -1115,6 +1115,9 @@ html.reduce-motion .bq-screen > .gx-grid, html.reduce-motion .pf-screen > .gx-gr
 .gx-camp .sup > .bt-pick { grid-row: 3; align-self: end; margin-top: 4px; }
 .gx-camp .sup > .sp-on { display: inline-flex; align-items: center; min-height: 28px; }
 .gx-camp .sup > .bt-res { grid-column: 1 / -1; grid-row: 3; justify-self: end; align-self: end; margin-top: 4px; }
+/* Barra libre: «Otra vez n/3» en la fila de abajo, a la izquierda; el resultado de la partida sigue a la derecha */
+.gx-camp .sup > .bt-again { grid-column: 1 / -1; grid-row: 3; justify-self: start; align-self: end; margin-top: 4px; border: 0; cursor: pointer; font-family: var(--sans); font-size: 20px; line-height: 1; } .gx-camp .sup > .bt-again:hover { filter: brightness(1.12); }
+.gx-camp .sup.has-again > .bt-res { max-width: calc(100% - 74px); }   /* el resultado no pisa el boton: si no cabe, baja de linea */
 .gx-camp .sup .bt-c, .gx-camp .sup .sp-p { box-sizing: border-box; height: 32px; }
 .gx-camp .sup .bt-c .sp-p, .gx-camp .sup .bt-n span { height: auto; }
 

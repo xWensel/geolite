@@ -422,7 +422,7 @@ window.AIQ = window.AIQ || {};
     async function takeoff() {
       if (ST.phase !== "ready" || !NEXT) return;
       if (run.coins < ST.stake) { A.sfx.deny(); cx.shake(btn); return; }
-      const att = run.attempt || 0, dr = draw(`${run.seed}:globo:${cx.r}:${att}`), X = TST.x != null ? TST.x : dr.x;      // _globo.x: solo pruebas
+      const att = run.attempt || 0, dr = draw(`${run.seed}:globo:${cx.r}:${att}${cx.plS(cx.r)}`), X = TST.x != null ? TST.x : dr.x;      // _globo.x: solo pruebas
       run.coins -= ST.stake; run.reds = run.reds || {}; rec = run.reds[cx.r] = { id: "globo", att, stake: ST.stake, X, cashM: 0, pay: 0 };           // la ficha ya esta pagada y el punto de reventon, guardado: recargar a media vuelo = reventon
       cx.persist(); { const cb = document.querySelector("#shopCoins b"); if (cb) cb.textContent = run.coins; }
       const bu = BURSTS[NEXT.burst];
