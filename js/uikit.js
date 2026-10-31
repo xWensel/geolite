@@ -54,9 +54,22 @@
   }
   const KEY = { auto: "def", default: "def", pointer: "ptr", text: "txt", grab: "grab", grabbing: "grabbing", "not-allowed": "no", wait: "wait", progress: "wait", help: "help", crosshair: "cross", "zoom-in": "zin", "zoom-out": "zout", move: "grab", "all-scroll": "grab" };
   A.cursor = { on: false, available: false, set() {} };
+  /* la mano del crupier (js/cursor-mano.js, la del dedo): hace de flecha (def) y de manita (ptr); reposa sobre las cosas y da con el dedo al pulsar (tap) */
+  const HF = {};
+  const handSprite = fr => HF[fr] && { url: HF[fr].url, hx: HF[fr].hx, hy: HF[fr].hy, w: HF[fr].w, h: HF[fr].h };
+  const buildHand = () => {
+    const M = A.CURSOR_MANO; if (!M) return Promise.resolve();
+    const k = CELL >= 3 ? 2 : 1;                                       // 1 pixel de arte = 1 de pantalla (2 con el puntero Grande: el limite de un cursor es 128 px)
+    return Promise.all(["idle", "tap"].map(n => new Promise(ok => {
+      const im = new Image(); im.onerror = ok;
+      im.onload = () => { const cv = document.createElement("canvas"); cv.width = M.w * k; cv.height = M.h * k; const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.drawImage(im, 0, 0, cv.width, cv.height); HF[n] = { url: cv.toDataURL("image/png"), hx: M.hx * k + (k >> 1), hy: M.hy * k + (k >> 1), w: cv.width, h: cv.height }; ok(); };
+      im.src = M[n];
+    })));
+  };
   /* el cursor del mando (js/mando.js) dibuja estos mismos sprites aunque el puntero de casino del raton este apagado */
   const sprMemo = {};
   A.cursor.sprite = name => {
+    if ((name === "def" || name === "ptr") && HF.idle) return handSprite("idle");
     if (!SPR[name]) return null; if (sprMemo[name]) return sprMemo[name];
     const m = /url\("([^"]+)"\) (\d+) (\d+)/.exec(sprite(name)), [src] = SPR[name], w = (Math.max(...src.map(r => r.length)) + 2) * CELL, h = (src.length + 2) * CELL;
     return (sprMemo[name] = m ? { url: m[1], hx: +m[2], hy: +m[3], w, h } : null);
@@ -67,11 +80,15 @@
     try { fine = matchMedia("(pointer:fine)").matches && matchMedia("(hover:hover)").matches; } catch (e) { /* sin matchMedia */ }
     if (!fine) return;
     const root = document.documentElement, fb = { def: "default", ptr: "pointer", txt: "text", grab: "grab", grabbing: "grabbing", no: "not-allowed", wait: "wait", cross: "crosshair", zin: "zoom-in", zout: "zoom-out", help: "help" };
-    const sp = {}; Object.keys(SPR).forEach(k => { sp[k] = `${sprite(k)}, ${fb[k]}`; });
+    const sp = {}, hcss = (fr, k) => `url("${HF[fr].url}") ${HF[fr].hx} ${HF[fr].hy}, ${fb[k]}`;
+    const remake = () => { Object.keys(SPR).forEach(k => { sp[k] = `${sprite(k)}, ${fb[k]}`; }); if (HF.idle && HF.tap) { sp.def = hcss("idle", "def"); sp.ptr = hcss("idle", "ptr"); } };
+    remake();
     A.cursor.available = true;
     A.cursor.set = on => { A.cursor.on = !!on; Object.keys(SPR).forEach(k => root.style.setProperty("--c-" + k, on ? sp[k] : fb[k])); };
     A.cursor.set(true);
-    A.cursor.setSize = big => { const c = big ? 3 : 2; if (c === CELL) return; CELL = c; Object.keys(SPR).forEach(k => { sp[k] = `${sprite(k)}, ${fb[k]}`; }); for (const k in sprMemo) delete sprMemo[k]; A.cursor.set(A.cursor.on); if (A.mando && A.mando.cursorChanged) A.mando.cursorChanged(); };
+    const apply = () => { remake(); for (const k in sprMemo) delete sprMemo[k]; A.cursor.set(A.cursor.on); if (A.mando && A.mando.cursorChanged) A.mando.cursorChanged(); };
+    A.cursor.setSize = big => { const c = big ? 3 : 2; if (c === CELL) return; CELL = c; remake(); for (const k in sprMemo) delete sprMemo[k]; A.cursor.set(A.cursor.on); buildHand().then(apply); };
+    buildHand().then(apply);
     const st = document.createElement("style"); st.id = "gcurCss";
     st.textContent = `html.gcur { cursor: var(--c-def); }
 :where(html.gcur) :where(a[href], button, summary, select, label[for], [role=button], [role=switch], input[type=button], input[type=submit], input[type=checkbox], input[type=radio], input[type=range], input[type=color], input[type=file]) { cursor: var(--c-ptr); }
@@ -89,13 +106,15 @@
     const sweep = () => { for (const sh of document.styleSheets) { try { if (sh.ownerNode && sh.ownerNode.id === "gcurCss") continue; fix(sh.cssRules); } catch (e) { /* hoja externa */ } } };
     sweep(); window.addEventListener("load", sweep); setTimeout(sweep, 1200);
     root.classList.add("gcur");
-    /* destello pixel-art al pulsar (no sobre el mapa: ahi ya esta la mira) */
+    /* al pulsar la mano da con el dedo (tap) y vuelve a reposar; como minimo 120 ms para que se vea en un clic rapido. No sobre el mapa: ahi esta la mira */
+    let tapOn = false, tapT0 = 0, tapTm = 0;
+    const setTap = on => { tapOn = on; if (!A.cursor.on || !HF.tap) return; root.style.setProperty("--c-def", on ? hcss("tap", "def") : sp.def); root.style.setProperty("--c-ptr", on ? hcss("tap", "ptr") : sp.ptr); };
     document.addEventListener("pointerdown", e => {
-      if (!A.cursor.on || e.pointerType !== "mouse" || e.button !== 0 || (e.target && e.target.tagName === "CANVAS")) return;
-      const b = document.createElement("div"); b.className = "gc-burst"; b.style.left = e.clientX + "px"; b.style.top = e.clientY + "px";
-      for (let i = 0; i < 6; i++) { const p = document.createElement("i"), a = (i / 6) * Math.PI * 2 + Math.random() * 0.5; p.style.setProperty("--dx", Math.cos(a) * 18 + "px"); p.style.setProperty("--dy", Math.sin(a) * 18 + "px"); p.className = i % 2 ? "g" : ""; b.appendChild(p); }
-      document.body.appendChild(b); setTimeout(() => b.remove(), 520);
+      if (!A.cursor.on || e.pointerType !== "mouse" || e.button !== 0 || !HF.tap || (e.target && e.target.tagName === "CANVAS")) return;
+      clearTimeout(tapTm); tapT0 = performance.now(); setTap(true);
     }, true);
+    const lift = () => { if (!tapOn) return; clearTimeout(tapTm); tapTm = setTimeout(() => setTap(false), Math.max(0, 120 - (performance.now() - tapT0))); };
+    document.addEventListener("pointerup", lift, true); document.addEventListener("pointercancel", lift, true); addEventListener("blur", lift);
   }
 
   /* ------------------------------------------------------------------ tooltips */
