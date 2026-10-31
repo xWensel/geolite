@@ -34,6 +34,21 @@ window.AIQ = window.AIQ || {};
 
   A.PATCHES = [
     {
+      id: "0.4.31",
+      name: L("Una sorpresa a tu manera", "A surprise on your terms", "Une surprise à ta main", "Uma surpresa ao seu gosto", "Eine Überraschung nach deinem Takt", "Una sorpresa a modo tuo", "", "由你掌控的惊喜", "네 마음대로 하는 깜짝 요소", "思いのままの仕掛け", "Сюрприз на твоих условиях", "Niespodzianka na twoich zasadach"),
+      date: "2026-10-31",
+      summary: L("Una de las sorpresas de la casa se queda como tú la dejes: tú decides cuándo se da la vuelta y cuándo se desgira. Y estrena detalles.", "One of the house's surprises stays the way you leave it: you decide when it turns over and when it turns back. And it gets new details.", "L'une des surprises de la maison reste comme tu la laisses : c'est toi qui décides quand elle se retourne et quand elle revient. Et elle s'enrichit de nouveaux détails.", "Uma das surpresas da casa fica como você a deixar: você decide quando ela vira e quando desvira. E ganha novos detalhes.", "Eine der Überraschungen des Hauses bleibt so, wie du sie lässt: Du entscheidest, wann sie sich umdreht und wann zurück. Und sie bekommt neue Details.", "Una delle sorprese della casa resta come la lasci: decidi tu quando si gira e quando torna indietro. E guadagna nuovi dettagli.", "", "老店的一个惊喜会保持你留下的样子：什么时候翻过去、什么时候翻回来，由你决定。而且多了新细节。", "하우스의 깜짝 요소 하나는 네가 둔 그대로 남습니다. 언제 뒤집고 언제 되돌릴지는 네가 정해요. 새로운 디테일도 더해졌습니다.", "ハウスの仕掛けのひとつは、君が残したままの状態を保ちます。いつ裏返し、いつ戻すかは君次第。新しいディテールも加わりました。", "Один из сюрпризов заведения остаётся таким, каким ты его оставил: ты сам решаешь, когда его перевернуть и когда вернуть. И в нём появились новые детали.", "Jedna z niespodzianek kasyna zostaje taka, jak ją zostawisz: sam decydujesz, kiedy się odwraca i kiedy wraca. Do tego zyskała nowe szczegóły."),
+      chapters: [
+        { id: "ajuste", kicker: L("Cambio", "Change", "Changement", "Mudança", "Änderung", "Cambio", "", "改动", "변경", "変更", "Изменение", "Zmiana"),
+          title: L("Una sorpresa a tu manera", "A surprise on your terms", "Une surprise à ta main", "Uma surpresa ao seu gosto", "Eine Überraschung nach deinem Takt", "Una sorpresa a modo tuo", "", "由你掌控的惊喜", "네 마음대로 하는 깜짝 요소", "思いのままの仕掛け", "Сюрприз на твоих условиях", "Niespodzianka na twoich zasadach"),
+          entries: [
+            E(L("Una sorpresa a tu manera", "A surprise on your terms", "Une surprise à ta main", "Uma surpresa ao seu gosto", "Eine Überraschung nach deinem Takt", "Una sorpresa a modo tuo", "", "由你掌控的惊喜", "네 마음대로 하는 깜짝 요소", "思いのままの仕掛け", "Сюрприз на твоих условиях", "Niespodzianka na twoich zasadach"), "change", "0.4.31", [
+              L("Una de las sorpresas de la casa se queda como tú la dejes: tú decides cuándo se da la vuelta y cuándo se desgira. Y estrena detalles.", "One of the house's surprises stays the way you leave it: you decide when it turns over and when it turns back. And it gets new details.", "L'une des surprises de la maison reste comme tu la laisses : c'est toi qui décides quand elle se retourne et quand elle revient. Et elle s'enrichit de nouveaux détails.", "Uma das surpresas da casa fica como você a deixar: você decide quando ela vira e quando desvira. E ganha novos detalhes.", "Eine der Überraschungen des Hauses bleibt so, wie du sie lässt: Du entscheidest, wann sie sich umdreht und wann zurück. Und sie bekommt neue Details.", "Una delle sorprese della casa resta come la lasci: decidi tu quando si gira e quando torna indietro. E guadagna nuovi dettagli.", "", "老店的一个惊喜会保持你留下的样子：什么时候翻过去、什么时候翻回来，由你决定。而且多了新细节。", "하우스의 깜짝 요소 하나는 네가 둔 그대로 남습니다. 언제 뒤집고 언제 되돌릴지는 네가 정해요. 새로운 디테일도 더해졌습니다.", "ハウスの仕掛けのひとつは、君が残したままの状態を保ちます。いつ裏返し、いつ戻すかは君次第。新しいディテールも加わりました。", "Один из сюрпризов заведения остаётся таким, каким ты его оставил: ты сам решаешь, когда его перевернуть и когда вернуть. И в нём появились новые детали.", "Jedna z niespodzianek kasyna zostaje taka, jak ją zostawisz: sam decydujesz, kiedy się odwraca i kiedy wraca. Do tego zyskała nowe szczegóły.")
+            ]),
+          ] },
+      ],
+    },
+    {
       id: "0.4.30",
       name: L("Una sorpresa cambia de sitio", "One surprise moves", "Une surprise déménage", "Uma surpresa muda de lugar", "Eine Überraschung zieht um", "Una sorpresa cambia posto", "", "一个惊喜换了地方", "깜짝 요소 하나가 자리를 옮깁니다", "仕掛けがひとつ引っ越し", "Один сюрприз переезжает", "Jedna niespodzianka zmienia miejsce"),
       date: "2026-10-31",
