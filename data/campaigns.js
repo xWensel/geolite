@@ -147,18 +147,21 @@ window.AIQ = window.AIQ || {};
       id: "c-" + g.id, mode: "classic", title: meta.t, blurb: meta.d, home: g.home,
       levels: g.levels.map((L, li) => {
         const kind = L.kind || (L.bonus ? "clue" : kindOf(L.name));
+        /* v0.4.24: mares, lagos, archipielagos, regiones, lineas y eventos de zona (data/aguas.js) tambien son area en el Clasico: clic dentro = acierto pleno, como en la Aventura */
+        const areaOf = (id, d) => { const wf = A.waters && A.waters.feat(id); return wf ? { lat: wf.label ? wf.label[1] : d.lat, lon: wf.label ? wf.label[0] : d.lon, q: { area: id } } : { lat: d.lat, lon: d.lon, q: {} }; };
         const mk = d => {
-            if (d.n6) return {                                                              // Eventos/Personajes: textos ya traducidos por tools/build-classic.mjs
-              t: "p", lat: d.lat, lon: d.lon, cid: [d.ck || A.ckey(d.n)], img: d.img || null,
+            if (d.n6) { const ar = areaOf(d.ck || A.ckey(d.n), d); return {                 // Eventos/Personajes: textos ya traducidos por tools/build-classic.mjs
+              t: "p", lat: ar.lat, lon: ar.lon, cid: [d.ck || A.ckey(d.n)], img: d.img || null, ...ar.q,
               name: { en: d.n, ...d.n6 }, sub: d.s6 || same(""), clue: false, answer: null, fact: { en: d.f, ...d.f6 },
-            };
+            }; }
             const clue = L.bonus && d.f;
             const sp = clue ? { name: d.n, sub: "" } : splitName(d.n);
             const full = !clue && (A.CLASSIC_TR || {})[d.n] ? tr6(d.n) : null;                 // traduccion del nombre completo (p. ej. "Olympia, Washington"): se parte en cada idioma
             const part = k => { const o = {}; L6.forEach(l => { const v = full[l], i = v.lastIndexOf(", "); o[l] = i > 0 ? (k ? v.slice(i + 2) : v.slice(0, i)) : (k ? "" : v); }); return o; };
             const ck = d.ck || A.ckey(clue ? d.f : d.n), pais = kind === "flag" && ck.startsWith("c:");   // una bandera es la de un pais: se acierta en todo su territorio (km 0 dentro, si no al borde), como en la Aventura
+            const ar = areaOf(ck, d);
             return {
-              ...(pais ? { t: "c", key: ck.slice(2) } : { t: "p" }), lat: d.lat, lon: d.lon, cid: [ck], kf: d.kf || 1,
+              ...(pais ? { t: "c", key: ck.slice(2) } : { t: "p" }), lat: ar.lat, lon: ar.lon, cid: [ck], kf: d.kf || 1, ...ar.q,
               name: full ? part(0) : clue && d.c6 ? { en: d.n, ...d.c6 } : tr6(sp.name), sub: full ? part(1) : tr6(sp.sub),
               clue: !!clue, answer: clue ? tr6(d.f) : null,
               fact: clue ? same("") : d.f6 ? { en: d.f, ...d.f6 } : tr6(d.f, d.f.length > 40),
