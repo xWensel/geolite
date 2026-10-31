@@ -1293,6 +1293,15 @@ window.AIQ = window.AIQ || {};
     angry: { b: 40, w: "sawtooth", pat: [0, -2, 1, -3], d: 0.055, v: 0.055, slide: -1 }, shock: { b: 58, w: "square", pat: [0, 4, 8, 12], d: 0.05, v: 0.055, slide: 2 },
     boss: { b: 34, w: "sawtooth", pat: [0, 0, -3, 2], d: 0.09, v: 0.075, slide: -1 },
   };
+  /* v0.4.30 LOS BOCADILLOS: el sonido de cada voz (el canto es una melodia: cada silaba una nota de la pentatonica) */
+  const VOICEP = {
+    grito: { b: 48, w: "sawtooth", pat: [0, -2, 1, -3], d: 0.055, v: 0.075, slide: -1 }, canto: { b: 57, w: "square", pat: [0, 2, 4, 7, 9, 7, 4, 2], d: 0.1, v: 0.055, slide: 0 },
+    susurro: { b: 64, w: "triangle", pat: [0, 2, 0, 3], d: 0.04, v: 0.03, slide: 0 }, nervios: { b: 60, w: "square", pat: [0, 4, 1, 6, 2], d: 0.035, v: 0.05, slide: 1 },
+    siniestro: { b: 30, w: "sawtooth", pat: [0, 0, -3, 2], d: 0.09, v: 0.075, slide: -1 }, libreta: { b: 66, w: "square", pat: [0, 0, 0, 5], d: 0.02, v: 0.04, slide: 0 },
+    senal: { b: 70, w: "square", pat: [0, 12], d: 0.035, v: 0.045, slide: 0 }, anuncio: { b: 62, w: "square", pat: [0, 4, 7, 12], d: 0.08, v: 0.06, slide: 2 },
+    sueno: { b: 42, w: "triangle", pat: [0, -1, -2], d: 0.13, v: 0.045, slide: -3 }, drama: { b: 48, w: "triangle", pat: [0, -1, -3], d: 0.1, v: 0.05, slide: -2 },
+    jefe: { b: 34, w: "sawtooth", pat: [0, 0, -3, 2], d: 0.09, v: 0.075, slide: -1 }
+  };
   /* Bloque J: los sonidos de raton (pasar, pulsar placa, pulsar boton) nunca suenan igual dos veces seguidas: 6 tonos por familia, ±3 % */
   const bag = () => { let last = -1; return () => { let i; do { i = Math.floor(Math.random() * 6); } while (i === last); last = i; return (i - 2.5) * 0.2; }; };
   const uiVar = bag(), cardVar = bag();
@@ -1427,7 +1436,7 @@ window.AIQ = window.AIQ || {};
     lampara: cla("lampara", (t, i = 0) => { const r = Math.random; noise(t, 0.014, { hp: 3400 + 500 * i + 400 * r(), vol: 0.05 }); thump(t, { vol: 0.06, f0: 290 - 30 * i + 20 * r(), f1: 120, dur: 0.06 }); bell(i ? 91 : 86, t + 0.018, { vol: 0.016 + 0.005 * r(), dur: 0.7, rev: 0.35 }); }),
     boss: cla("boss", t => { [0, 0.28, 0.56].forEach(d => thump(t + d, { vol: 0.42, f0: 95, f1: 34, dur: 0.32 })); pad([38, 41, 44, 50], t, 2.6, 0.09 * PADK, lb); pluck(50, t + 0.85, { vol: 0.14, dur: 1.4, bright: 2, rev: 0.7 }); pluck(47, t + 1.1, { vol: 0.14, dur: 1.8, bright: 2, rev: 0.8 }); A.music.duck(0.3, 2600); }),
     tachan: cla("tachan", t => { thump(t, { vol: 0.5, f0: 110, f1: 30, dur: 0.5 }); noise(t, 0.2, { lp: 900, vol: 0.1 }); pad([38, 39, 44, 51], t, 3.2, 0.1 * PADK, lb); pluck(51, t + 0.55, { vol: 0.14, dur: 1.6, bright: 2, rev: 0.8 }); pluck(50, t + 1.0, { vol: 0.14, dur: 2.0, bright: 2, rev: 0.8 }); A.music.duck(0.3, 3000); }),
-    voice: cla("voice", (t, mood = "sly", i = 0) => { const m = VMOOD[mood] || VMOOD.sly; blipSq(t, m.b + m.pat[i % m.pat.length] + ((i * 7) % 3), m); }),
+    voice: cla("voice", (t, mood = "sly", i = 0, voz = "") => { const m = VOICEP[voz] || VMOOD[mood] || VMOOD.sly; blipSq(t, m.b + m.pat[i % m.pat.length] + ((i * 7) % 3), m); }),
     rouBet: cla("rouBet", (t, k = 0) => { noise(t, 0.018, { hp: 4200, vol: 0.07 }); thump(t, { vol: 0.15, f0: 230, f1: 90, dur: 0.1 }); bell(86 + k * 3, t + 0.004, { vol: 0.05, dur: 0.3, rev: 0.25 }); bell(93 + k * 3, t + 0.045, { vol: 0.04, dur: 0.35, rev: 0.25 }); noise(t + 0.09, 0.012, { hp: 5200, vol: 0.04 }); }),
     rouTick: cla("rouTick", (t, v = 0) => { pluck(86 - v * 22, t, { vol: 0.05 + v * 0.05, dur: 0.05 + v * 0.09, bright: 3.5, rev: 0.1 + v * 0.2 }); thump(t, { vol: 0.035 + v * 0.09, f0: 520 - v * 260, f1: 180, dur: 0.035 }); noise(t, 0.01 + v * 0.01, { hp: 3800, vol: 0.03 + v * 0.04 }); }),
     rouStop: cla("rouStop", t => { thump(t, { vol: 0.42, f0: 170, f1: 50, dur: 0.24 }); noise(t, 0.07, { lp: 2600, vol: 0.11 }); noise(t + 0.012, 0.02, { hp: 5000, vol: 0.06 }); bell(79, t + 0.02, { vol: 0.07, dur: 0.7, rev: 0.3 }); }),

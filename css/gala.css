@@ -176,7 +176,7 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
 :is(.gx-vd, .cf-tel) .dealer.inline .dl-face { width: 224px; height: 224px; order: 2; }
 :is(.gx-vd, .cf-tel) .dealer.inline .dl-face > .cr-cv:not(.mini) { top: auto; bottom: 0; transform: translateX(-50%); }
 :is(.gx-vd, .cf-tel) .dealer.inline .dl-bubble { margin: 0; max-width: min(100%, 380px); font-size: calc(22px * var(--dll, 1)); text-align: center; order: 1; transform-origin: 50% 100%; padding-bottom: 20px;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(50% + 10px) calc(100% - 12px), 50% 100%, calc(50% - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+  --bbx: 50%; --bbt: 12px; }
 .gx-vd-iq { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 14px; width: min(100%, 320px); }
 .gx-vd-iq > .ic, .gx-vd-iq > img { grid-row: span 2; width: 56px; height: 56px; image-rendering: pixelated; }
 .gx-vd-iq > .ic { width: 64px; height: 64px; } /* iconos de nivel: 64 px nativos, escala 1 */
@@ -944,7 +944,7 @@ button.dia-fi:focus-visible::after, html[data-input="pad"] button.dia-fi:focus::
 /* el crupier sentado a la mesa: en el rincon derecho de la mochila, junto al boton, con el globo hacia arriba y a la izquierda (js/dealer.js, campRoom) */
 .dealer.camp.seat { left: auto; right: var(--cr); align-items: flex-end; }
 .dealer.camp.seat .dl-bubble { transform-origin: calc(100% - var(--hf) / 2) 100%;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - var(--hf) / 2 + 10px) calc(100% - 12px), calc(100% - var(--hf) / 2) 100%, calc(100% - var(--hf) / 2 - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+  --bbx: calc(100% - var(--hf) / 2); --bbt: 12px; }
 
 /* reducir movimiento: sin cartas que botan ni se reparten, bombillas quietas y sin ficha que gira */
 html.reduce-motion .gx-camp .offer.pc { animation: none; }

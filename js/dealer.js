@@ -2370,15 +2370,15 @@ window.AIQ = window.AIQ || {};
   const D = A.dealer = { on: false, onHome: false, host: null, timers: [], busy: false };
   D.tier = () => DS.tier || 0;
   D._sello = n => { DS.tier = Math.max(DS.tier || 0, n | 0); saveStore(); };     // el truco de pruebas (js/truco.js): la categoria ya sellada, sin ceremonia                                              // la categoria que ya te ha sellado (js/club.js: la tarjeta de la portada)
-  let el, face, spr, bubble, txt, sofar, rest, typing = false, doneAt = 0, pend = null, dozing = false, relines = () => {};   // relines: vuelve a medir los renglones de la frase en curso (D.aside)   // typing: esta escribiendo una frase; doneAt: cuando acabo la ultima; pend: la que espera su turno
+  let el, face, spr, bubble, txt, tagEl, sofar, rest, typing = false, doneAt = 0, pend = null, dozing = false, relines = () => {};   // relines: vuelve a medir los renglones de la frase en curso (D.aside)   // typing: esta escribiendo una frase; doneAt: cuando acabo la ultima; pend: la que espera su turno
   const rand = a => a[Math.floor(Math.random() * a.length)];
 
   function ensure() {
     if (el && el.isConnected) return;
     if (el) { rehome(); return; }                                    // su pantalla se fue con el dentro: vuelve a #app con lo que estuviera diciendo (nunca se le corta)
     el = document.createElement("div"); el.id = "dealer"; el.className = "dealer";
-    el.innerHTML = `<div class="dl-bubble"><b class="dl-live"><i></i><span></span></b><p></p></div><div class="dl-face"></div>`;
-    $("app").appendChild(el); face = el.querySelector(".dl-face"); bubble = el.querySelector(".dl-bubble"); txt = bubble.querySelector("p");
+    el.innerHTML = `<div class="dl-bubble"><b class="dl-live"><i></i><span></span></b><b class="dl-tag"></b><p></p></div><div class="dl-face"></div>`;
+    $("app").appendChild(el); face = el.querySelector(".dl-face"); bubble = el.querySelector(".dl-bubble"); txt = bubble.querySelector("p"); tagEl = bubble.querySelector(".dl-tag");
     spr = A.crupier.mount(face, { casa: true });                      // v0.32: el crupier animado (caras, boca al hablar, gestos), siempre a escala entera de pixel; bloque D: al tamano unico
     face.addEventListener("pointerdown", e => onPoke(e));
     face.addEventListener("pointerenter", () => { if (pres === "home") visit(); });   // bloque D: si le haces caso, se queda un rato mas
@@ -2857,6 +2857,43 @@ window.AIQ = window.AIQ || {};
   D.asideOn = () => !!(el && el.classList.contains("aside") && el.classList.contains("in"));   // v0.3.205: acabando una frase en otra pantalla (los avisos esperan a que acabe: js/jukebox.js, js/profile.js)                                   // v0.2.15: la hoja del ticket aparece, cambia o se va (js/marcador.js)
   /* v0.32: la cara y el gesto de cada frase. Manda la escena si lo pide (o.face / o.gesture); si no, la tabla XMAP por clave (y por indice,
      "clave#i"), revisada frase a frase; si la frase no esta en la tabla, el mood de siempre. Un gesto no se repite dos veces seguidas en 20 s */
+  /* v0.4.30 LOS BOCADILLOS: cada grupo de frases tiene su VOZ (css/bocadillo.css: forma, letra y adorno; ritmo y sonido, aqui y en audio.js).
+     Habla es la de siempre y no aparece en el mapa. Una linea suelta puede llevar la suya con "clave#indice". La mesa en vivo sigue mandando con o.sty (nombres viejos incluidos).
+     MARCAS dentro de una frase, en cualquier idioma: <g>gritada</g>, <c>cantada</c>, <s>susurrada</s>, <e>con enfasis</e> (las cifras de la Libreta se marcan solas). */
+  const VOZ = {}; {
+    const G = {
+      susurro: "homeTempt runHot lockMine cxTease tagFix nameSkipLast achSecret pfPage catSleep catAsleep catPetNo catGone quitCatWarn quitCatAgain quitCatByeSleep quitCatBackSleep",
+      sueno: "homeTimeMorning runIdle homeIdle timeoutIdle",
+      siniestro: "homeTimeNight tantrumBlackout act3 infinite runLate quitDark quitBye quitByeName quitRetDark quitRetFake quitSeason nemesis calHalloween",
+      senal: "homeMeta afk tabBackHome resize runMeta tabBackRun quitShell quitDenied quitWeb quitRetShell quitRetDenied quitRetX quitRetCrash quitRetCrashSave quitGlove quitWindow quitWindowLaugh quitRetGlove quitRetWindow quitRetDrop babelOld babelNew babelMany mesaNew newVersion fakeAch fakeAchIdle fakeAchDoor copyName rightClick batteryReal napWake secondWin forgetBye dejavu calInoc calApril midnight photo winSmall winBorder tourSkip osLang padOn deckOn monitor padOff",
+      grito: "tantrumShake quitShout quitFake quitStay quitDrop quitCatRemote",
+      libreta: "openResume openLastLose openLastWin openLongAway clock visitsMeta totalMeta runStart runAfterLose runAfterWin quitAskCount quitAskStays pokeMemory trickDebut trickHouse trickYou trickVet ghostFall virgin ghostBeat handPtr handWind handMap handPangea handFlip handBlind nemesisBeat pfDiffGood pfDiffBad pfBookClock pfBookDoor pfBookCoins pfBookKm anniv annivYear streakDays lateLeft trickAgain cxFirst cxPace cxPaceSlow cxNothing fileFirst h2hYou h2hHouse h2hLead h2hBack betMake betDouble betWon betLost betLostWin betDebt betBrag nickFirst nickNew wrongCountry gateWait cardAdv cardAdvNone cardDaily0 cardDaily cardDaily3 podOne podPodium podRank podNone shopNoFundsN pfOpen pfOpenFirst pfBook pfStare pfAgain pfStats pfCard openLongAway14 openLongAway30 betWin betLose",
+      anuncio: "runFirst runDaily act2 runAgainRecord nameWelcome tierUp tierHi retire retireClassic achGen achAll podGold shopOpen shopAllGold shopWearGoldHat shopBuyGoldHat achRun duelStart duelStartName duelHeBack duelLeague",
+      jefe: "finalBoss bossNamed bossBeat bossWins bossBeat_blackout bossWins_blackout bossBeat_dizzy bossWins_dizzy bossBeat_onecont bossWins_onecont bossBeat_blind bossWins_blind bossBeat_nightfall bossWins_nightfall bossBeat_siesta bossWins_siesta bossBeat_falsealarm bossWins_falsealarm bossBeat_quakehall bossWins_quakehall bossBeat_fourthwall bossWins_fourthwall bossBeat_mirror bossWins_mirror bossBeat_shuffled bossWins_shuffled bossBeat_dirty bossWins_dirty bossBeat_perfect bossWins_perfect bossBeat_crash bossWins_crash bossBeat_nopass bossWins_nopass bossBeat_duel bossWins_duel bossBeat_wheel bossWins_wheel bossBeat_flagfog bossWins_flagfog bossBeat_flagworld bossWins_flagworld bossBeat_flagneon bossWins_flagneon bossBeat_flagpix bossWins_flagpix bossBeat_flagmute bossWins_flagmute",
+      nervios: "runDanger roundFailLast betGiveUp retireAgain closeCall roundFailClose duelClose duelLate timeout streak",
+      canto: "roundWinBig quitStayTroll quitBribePaid homeHum songFav calNewYear calXmas winFull catPamper",
+      drama: "hoverQuit hoverAbandon quitAskLong quitAskName quitPlead quitBribe quitRetPlead quitSeasonExpress sulk sulkBack retireEnd hoverOver hoverOver2 funeral shopStrip shopTryNoBuy shopLeave retireEndCat"
+    };
+    for (const v in G) G[v].split(" ").forEach(k => { VOZ[k] = v; });
+  }
+  const VOZ_OLD = { shout: "grito", tremble: "nervios", whisper: "susurro", think: "susurro", dark: "siniestro", sing: "canto", glitch: "senal", gold: "anuncio" };
+  const VOCES = ["grito", "canto", "susurro", "nervios", "siniestro", "libreta", "senal", "anuncio", "sueno", "drama", "jefe"];
+  const VSTEP = { grito: 22, canto: 52, susurro: 62, nervios: 30, siniestro: 70, libreta: 28, senal: 36, anuncio: 40, sueno: 85, drama: 66, jefe: 48 };   // ms por letra (habla, 34)
+  const TAG_LIBRETA = L6("De mi libreta|From my notebook|De mon carnet|Da minha caderneta|Aus meinem Notizbuch|Dal mio taccuino||我的小本本|내 수첩에서|私の手帳より|Из моей записной книжки|Z mojego notesu");
+  const MKCLS = ["dl-g", "dl-k", "dl-s", "dl-e"];
+  const tagsToSent = t => t.replace(/<(\/?)([gcse])>/g, (m, sl, k) => String.fromCharCode(0xE000 + "gcse".indexOf(k) * 2 + (sl ? 1 : 0)));
+  function parseMarks(t) {
+    const plain = [], cls = []; let cur = -1;
+    for (const ch of t) { const c = ch.codePointAt(0); if (c >= 0xE000 && c <= 0xE007) { const k = c - 0xE000; if (k % 2 === 0) cur = k / 2; else if (cur === (k - 1) / 2) cur = -1; continue; } plain.push(ch); cls.push(cur < 0 ? "" : MKCLS[cur]); }
+    return { plain: plain.join(""), cls };
+  }
+  const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
+  function voiceFor(line, o) {
+    if (o.sty) return VOZ_OLD[o.sty] || (o.sty === "habla" ? "" : VOCES.includes(o.sty) ? o.sty : "");
+    if (o.voice !== undefined) return o.voice;
+    const id = lineOf.get(line) || LINE_ID.get(line);
+    return id ? (VOZ[id[0] + "#" + id[1]] || VOZ[id[0]] || "") : "";
+  }
   let lastGest = "", lastGestAt = 0;
   function faceFor(line, o) {
     const id = lineOf.get(line) || LINE_ID.get(line);
@@ -2890,20 +2927,33 @@ window.AIQ = window.AIQ || {};
     if (homeCtx) { const w = presWant(); if (w !== pres) setPres(w); }   // de pie en su sitio antes de abrir la boca
     ensure(); clear(); leaving = false; clearTimeout(leaveT); const me = ++lineN; if (o.fx) D.fx(o.fx); if (o.start) o.start();
     if (!o.force && !D.host) noteSaid();
-    const X = faceFor(line, o), mood = o.mood || "sly", text = o.force ? (typeof line === "string" ? line : A.tx(line)) : personal(typeof line === "string" ? line : A.tx(line));
+    const X = faceFor(line, o), mood = o.mood || "sly", V = voiceFor(line, o), srcS = tagsToSent(typeof line === "string" ? line : A.tx(line)), PM = parseMarks(o.force ? srcS : personal(srcS)), text = PM.plain;
     const inline = !!el.closest("#vdDealer"), home = D.onHome && !D.host && !inline && homeCorner ? " home " + homeCorner : "";
     const peek = pres === "home" && home ? " stay" : "";   // bloque D: habla desde su sitio fijo
     spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " aside" : peek.includes("peek") ? peek : home + peek); bubble.classList.add("on");
     if (o.pos) { el.removeAttribute("style"); el.className = "dealer in lvpos lv-" + o.pos + " " + mood; document.body.appendChild(el); }   // la mesa elige donde sale: una esquina o el centro grande, por encima de todo
     else if (el.parentNode === document.body) (D.host || $("app")).appendChild(el);
-    bubble.className = bubble.className.replace(/\s*\bst-\w+/g, ""); if (o.sty) bubble.classList.add("st-" + o.sty);   // estilo del bocadillo que elige la mesa (gritando, susurro...)
+    if (V) bubble.dataset.v = V; else delete bubble.dataset.v; tagEl.textContent = V === "libreta" ? A.tx(TAG_LIBRETA) : V === "senal" ? "Don Crupier.exe" : "";   // la voz del bocadillo (css/bocadillo.css); la mesa en vivo la elige con o.sty
     bubble.classList.toggle("live", !!o.live); if (o.live) bubble.querySelector(".dl-live span").textContent = A.pick6(LIVE_TAG);   // js/vivo.js: el crupier de verdad (el autor) te habla en directo
     if (o.lang) { bubble.lang = o.lang; bubble.style.setProperty("--dll", /^(zh|ja|ko|ru)/.test(o.lang) ? ".889" : "1"); } else if (bubble.lang) { bubble.removeAttribute("lang"); bubble.style.removeProperty("--dll"); }
     /* un espacio de ancho cero SIEMPRE detras de lo que falta: sin el, al escribir la ultima letra `text-wrap: pretty` repartia las lineas distinto y la frase saltaba de renglon al acabar */
     const ZW = "\u200b";
     /* la frase entera ya maquetada desde el principio, con lo que falta por escribir invisible: el globo nace con su tamano final y ninguna palabra
        salta de linea a media escritura (y `text-wrap: pretty` reparte las lineas sin dejar una palabra sola) */
-    sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest"; rest.textContent = text + ZW; txt.replaceChildren(sofar, rest);
+    sofar = document.createTextNode(""); rest = document.createElement("span"); rest.className = "dl-rest";
+    /* con marcas, ola del canto, temblor de los nervios o cifras de la libreta, cada letra es una pieza oculta (dl-h) que se destapa al escribir: el globo nace igual de entero */
+    const marked = PM.cls.some(Boolean), spanMode = marked || V === "canto" || V === "nervios" || (V === "libreta" && /\d/.test(text)); let sp = null;
+    if (spanMode) {
+      const cp = [...text]; sp = new Array(cp.length).fill(null); txt.replaceChildren(); let w = null;
+      const flushW = () => { if (w) { txt.appendChild(w); w = null; } };
+      cp.forEach((ch, k) => {
+        if (ch === " ") { flushW(); txt.appendChild(document.createTextNode(" ")); return; }
+        const c = document.createElement("i"); c.className = "dl-c dl-h" + (PM.cls[k] ? " " + PM.cls[k] : V === "canto" && !marked ? " dl-k" : ""); c.style.setProperty("--i", k); c.textContent = ch; sp[k] = c;
+        if (CJK.test(ch)) { flushW(); txt.appendChild(c); } else { if (!w) { w = document.createElement("span"); w.className = "dl-w"; } w.appendChild(c); }
+      });
+      flushW();
+      if (V === "libreta") { const re = /\d[\d.,]*(\s?%)?/g; let m; while ((m = re.exec(text))) for (let k = m.index; k < m.index + m[0].length; k++) if (sp[k]) sp[k].classList.add("dl-n"); }
+    } else { rest.textContent = text + ZW; txt.replaceChildren(sofar, rest); }
     if (!el.classList.contains("aside")) el.style.left = el.style.width = "";   // lo que le dejo el apartado (D.aside)
     if (!el.classList.contains("peek")) { el.style.right = ""; if (!el.classList.contains("home")) el.style.top = ""; }   // bloque D: ni lo de asomado ni lo de la portada pisan otros sitios
     fitCorner(); spr.fit(); spr.shown(true); spr.talk(true); bubble.style.translate = ""; requestAnimationFrame(cabe);   // v0.3.205: y siempre entero en pantalla
@@ -2915,7 +2965,11 @@ window.AIQ = window.AIQ || {};
       lineOf = null; txt.style.height = "";
       try {
         const hp = txt.offsetHeight, pr = txt.getBoundingClientRect(), k = hp && pr.height ? pr.height / hp : 0, n0 = sofar.data.length, tn = rest.firstChild;
-        if (tn && k) {
+        if (sp && hp) {
+          const lo = sp.map(c => (c ? c.offsetTop : null)), tops = []; lo.forEach(t => { if (t != null && !tops.some(u => Math.abs(u - t) < 3)) tops.push(t); }); tops.sort((x, y) => x - y);
+          let cur = 0; lineOf = lo.map(t => (t == null ? cur : (cur = tops.findIndex(u => Math.abs(u - t) < 3))));
+          nLines = tops.length || 1; lineH = hp / nLines; if (nLines < 2) lineOf = null;
+        } else if (tn && k) {
           const rg = document.createRange(), tops = [], lo = []; let a0 = 0;
           for (const ch of text) { const inS = a0 < n0, nd = inS ? sofar : tn, off = inS ? a0 : a0 - n0; rg.setStart(nd, off); rg.setEnd(nd, off + ch.length); const r = rg.getClientRects()[0]; lo.push(r && r.height ? Math.round((r.top - pr.top) / k) : null); a0 += ch.length; }
           lo.forEach(t => { if (t != null && !tops.some(u => Math.abs(u - t) < 3)) tops.push(t); }); tops.sort((x, y) => x - y);
@@ -2930,7 +2984,7 @@ window.AIQ = window.AIQ || {};
     relines = () => { if (!typing || lineN !== me) return; measure(); shown = -1; grow(Math.max(0, i - 1)); };
     grow(0);
     if (mood === "laugh") A.sfx.laugh && A.sfx.laugh();
-    let i = 0, at = 0; const chars = [...text], step = mood === "laugh" ? 44 : 34;
+    let i = 0, at = 0; const chars = [...text], step = mood === "laugh" ? 44 : (VSTEP[V] || 34);
     const tick = () => {
       if (!el.isConnected) { rehome(); fitCorner(); }                        // otra pantalla sustituyo la suya: termina la frase en la esquina (antes se callaba a media frase)
       if (i >= chars.length) {
@@ -2943,7 +2997,8 @@ window.AIQ = window.AIQ || {};
       }
       /* v0.3.205: un renglon nuevo espera a que el globo se abra (su alto crece en 0,2 s): antes su primera letra asomaba cortada por abajo */
       if (lineOf && (lineOf[i] || 0) > shown && !document.documentElement.classList.contains("reduce-motion")) { grow(i); later(tick, 190); return; }
-      grow(i); sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i); } i++; later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0));
+      grow(i); if (sp) { if (sp[i]) sp[i].classList.remove("dl-h"); } else { sofar.data += chars[i]; at += chars[i].length; rest.textContent = text.slice(at) + ZW; } if (/\S/.test(chars[i])) { spr.syl(); if (i % 2 === 0 && mood !== "laugh") A.sfx.voice && A.sfx.voice(mood, i, V); } i++;
+      later(tick, step + (/[.,!?…。，！？、]/.test(chars[i - 1]) ? 140 : 0) + (V === "nervios" && Math.random() < .12 ? 140 : 0) + (V === "grito" && chars[i - 1] === " " ? 70 : 0));
     };
     typing = true; if (o.fx === "blackout") later(tick, 1100); else tick(); D.busy = true;   // el apagon tapa 1,3 s: empieza a escribir cuando vuelve la luz
   };

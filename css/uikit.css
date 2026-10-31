@@ -292,7 +292,7 @@ body.tk-on .rail-sh { display: none; }
 .dealer.home.home-tr.in { transform: none; }
 .dealer.home .dl-face { width: var(--hf); height: var(--hf); }
 .dealer.home .dl-bubble { max-width: var(--hb); min-width: min(var(--hf), var(--hb)); margin: 0; padding-bottom: 22px; font-size: calc(27px * var(--dll, 1)); transform-origin: var(--tail) 100%;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(var(--tail) + 10px) calc(100% - 12px), var(--tail) 100%, calc(var(--tail) - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+  --bbx: var(--tail); --bbt: 12px; }
 @media (max-width: 900px), (max-height: 560px) { .dealer.home { display: none; } }   /* movil: la pantalla ya va justa, sin distracciones extra */
 
 /* ==== textos sin huerfanos: nunca una palabra sola en la ultima linea (A.squeeze ademas aprieta un poco los que se pasan por pocas letras) ==== */
@@ -328,7 +328,7 @@ body.tk-on .rail-sh { display: none; }
 .dealer.camp { left: var(--cl); bottom: var(--cb); top: auto; right: auto; z-index: 100010; pointer-events: none; flex-direction: column; align-items: flex-start; gap: 4px; }
 .dealer.camp .dl-face { width: var(--hf); height: var(--hf); }
 .dealer.camp .dl-bubble { max-width: var(--hb); min-width: min(var(--hf), var(--hb)); margin: 0; padding-bottom: 22px; font-size: calc(27px * var(--dll, 1)); transform-origin: calc(var(--hf) / 2) 100%;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(var(--hf) / 2 + 10px) calc(100% - 12px), calc(var(--hf) / 2) 100%, calc(var(--hf) / 2 - 10px) calc(100% - 12px), 0 calc(100% - 12px)); }
+  --bbx: calc(var(--hf) / 2); --bbt: 12px; }
 /* v0.19: se queda traspuesto en la portada (js/dealer.js, startDoze): bosteza y duerme con sus zetas y su cabeceo, todo en el sprite (v0.32) */
 /* corrige el lema de la portada: tachado en rojo y "Yo si." a mano */
 .hh-tag .tag-x { text-decoration: line-through; text-decoration-color: #e2483d; text-decoration-thickness: 3px; }

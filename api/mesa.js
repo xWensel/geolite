@@ -24,7 +24,7 @@ const SID = /^[a-z0-9]{8,24}$/, WORD = /^[a-z_]{0,24}$/, GEST = /^[a-z_]{1,24}(@
 const FX = ["rayo", "tormenta", "lluvia", "apagon", "terremoto", "humo", "cristal", "huellas", "ventana"];
 const CH = ["shaky", "missing", "mirror", "memory", "runes", "anagram", "riddle", "babel", "nocountry", "fakepass", "ticker", "ctrlz", "stormnight", "trap", "giants", "blur", "dark", "flicker", "wrongborders", "noborders", "spread", "tilt", "flip", "spin", "clouds", "rain", "myopia", "mosaic", "quake", "decoys", "lightning", "tremble", "ghost", "lag", "cmirror", "wind", "storm", "silence", "crack", "hang", "battery", "flaghue", "flagblur", "flagdark", "flaggray", "flagback", "flagpuzzle", "flagwind", "frost", "frosted", "tiles", "signal", "card", "flagwet"];   // los retos que se pueden poner a mano (A.CHAL sin los absorbidos ni los de jefe)
 const KEY = process.env.MESA_KEY || "";
-const STY = ["shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // estilos del bocadillo (css/challenges.css, .dl-bubble.st-*)
+const STY = ["grito", "canto", "susurro", "nervios", "siniestro", "libreta", "senal", "anuncio", "sueno", "drama", "jefe", "shout", "tremble", "whisper", "think", "dark", "sing", "glitch", "gold"];   // voces del bocadillo (css/bocadillo.css, js/dealer.js); los 8 nombres viejos se siguen aceptando
 const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier (la mesa nueva ya no lo manda: tiene su sitio fijo en cada pantalla; se acepta por las mesas viejas)
 const HUMOR = ["contento", "tenso", "picado", "aburrido", "admirado"];
 const CAT = ["espera", "levanta", "anda", "salta", "zarpa", "caricia", "regana", "duerme", "despierta"];   // A.comodin.act
