@@ -63,3 +63,10 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 /* la version de la portada no recibia clics (pointer-events: none): ahora si, con un margen de 8 px para poder acertarla (huevo de las notas del parche) */
 #dlg > .hh-ver { pointer-events: auto; cursor: default; }
 #dlg > .hh-ver::before { content: ""; position: absolute; inset: -8px -10px; }
+
+/* GEOLITE SE CAE, el golpe: la portada tiembla cuando una letra cae fuerte y saltan chispas de pixel (nada de esto con Movimiento: Minimo) */
+.hh.hv-golpe { animation: hvg .26s steps(2) 2; }
+@keyframes hvg { 0% { translate: 0 0; } 25% { translate: -6px 4px; } 50% { translate: 6px -5px; } 75% { translate: -4px -3px; } 100% { translate: 0 0; } }
+html.reduce-motion .hh.hv-golpe, html.no-shake .hh.hv-golpe { animation: none; }
+.hv-chispa { position: absolute; width: 4px; height: 4px; pointer-events: none; }
+.hv-letra { will-change: transform; }

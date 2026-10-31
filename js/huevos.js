@@ -391,7 +391,7 @@ window.AIQ = window.AIQ || {};
 
     async function cae(cv) {
       const d = await carga(); if (!d || !A.geoLogo) return; busy = true; H.found("letras");
-      const r = cv.getBoundingClientRect(), u = r.width / 664, quieto = reduced(), rnd = (a, b) => a + Math.random() * (b - a);
+      const r = cv.getBoundingClientRect(), u = r.width / 664, quieto = reduced(), rnd = (a, b) => a + Math.random() * (b - a), PI = Math.PI;
       const cap = document.createElement("div"); cap.className = "hv-letras"; document.body.appendChild(cap);
       const rc = e => { const q = e.getBoundingClientRect(); return { l: q.left, r: q.right, t: q.top, b: q.bottom }; };
       /* donde chocan: las tres cartas de modo y las placas de abajo (con su escalon: la Aventura va mas alta que las otras dos) */
@@ -400,69 +400,97 @@ window.AIQ = window.AIQ || {};
       const so = document.querySelector(".hh .hh-socio-w, .hh .sc-host"), sq = so && rc(so);
       const clip = () => { if (!sq) return; const W = innerWidth, H2 = innerHeight; cap.style.clipPath = `polygon(evenodd, 0 0, ${W}px 0, ${W}px ${H2}px, 0 ${H2}px, 0 0, ${sq.l}px ${sq.t}px, ${sq.r}px ${sq.t}px, ${sq.r}px ${sq.b}px, ${sq.l}px ${sq.b}px, ${sq.l}px ${sq.t}px)`; };
       clip();
+      /* los cuerpos: cada letra es una caja con masa, inercia, giro libre y rebote propio; las cartas y placas, cajas fijas */
       const L = CAJAS.map((b, i) => {
         const w = Math.round(b[2] * u), h = Math.round(b[3] * u), c = document.createElement("canvas"); c.width = w; c.height = h; c.className = "hv-letra";
         const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(d.hoja, b[4], 0, b[2], b[3], 0, 0, w, h);
-        const x0 = Math.round(r.left + b[0] * u), y0 = Math.round(r.top + (ROT_Y + b[1]) * u);
-        c.style.cssText = `width:${w}px;height:${h}px`; cap.appendChild(c);
-        return { c, i, w0: w, h0: h, x0, y0, x: x0, y: y0, o: 0, vx: 0, vy: 0, est: "espera", e: rnd(.16, .42), off: rnd(-.1, .16), tipo: 0, tsal: i * 110 + rnd(0, 140), kx: rnd(-130, 190) * u };
+        const x0 = Math.round(r.left + b[0] * u), y0 = Math.round(r.top + (ROT_Y + b[1]) * u); c.style.cssText = `width:${w}px;height:${h}px`; cap.appendChild(c);
+        const hw = w * .46, hh = h * .47, m = hw * hh * 4 / 1000, I = m * (4 * hw * hw + 4 * hh * hh) / 12;
+        return { c, i, w0: w, h0: h, x0, y0, hw, hh, x: x0 + w / 2, y: y0 + h / 2, a: 0, vx: 0, vy: 0, w: 0, im: 1 / m, ii: 1 / I, e: rnd(.3, .55), mu: rnd(.35, .6), est: "espera", tsal: i * 70 + rnd(0, 150), quieta: 0, ult: 0 };
       });
-      const dims = l => (l.o % 2 ? [l.h0, l.w0] : [l.w0, l.h0]);
-      const pon = l => { const [bw, bh] = dims(l), cx = l.x + bw / 2, cy = l.y + bh / 2; l.c.style.left = Math.round(cx - l.w0 / 2) + "px"; l.c.style.top = Math.round(cy - l.h0 / 2) + "px"; l.c.style.transform = l.o ? `rotate(${l.o * 90}deg)` : ""; };
+      const FIJOS = SOL.map(q => ({ x: (q.l + q.r) / 2, y: (q.t + q.b) / 2, hw: (q.r - q.l) / 2, hh: (q.b - q.t) / 2, a: 0, vx: 0, vy: 0, w: 0, im: 0, ii: 0, e: .3, mu: .6 }));
+      const pon = l => { l.c.style.left = Math.round(l.x - l.w0 / 2) + "px"; l.c.style.top = Math.round(l.y - l.h0 / 2) + "px"; l.c.style.transform = l.a ? `rotate(${l.a}rad)` : ""; };
       L.forEach(pon);
       const resto = new Set([0, 1, 2, 3, 4, 5]); A.geoLogo.quita(resto, d);              // las letras salen del rotulo y pasan a ser estas piezas, en el mismo sitio
-      /* la fisica: gravedad, choque con las cartas, las placas y las otras letras (cajas alineadas: a 90 grados la rotacion es exacta, sin emborronar el pixel).
-         Cada vez cambia: retraso, empujon lateral, rebote y aplomo al azar; asi unas se quedan en lo alto, otras hacen piramide y otras vuelcan y se caen por el lado */
-      const G = 2700 * u;
-      const caja = l => { const [bw, bh] = dims(l); return { l: l.x, r: l.x + bw, t: l.y, b: l.y + bh }; };
+      /* ---- los efectos del golpe: temblor de la portada, chispas de pixel y el golpe de la ficha (todo en reposo con Movimiento: Minimo) */
+      let tGolpe = 0;
+      const golpe = (x, y, v) => {
+        const t = performance.now(); if (quieto) return;
+        if (v > 520 * u && t - tGolpe > 320) {
+          tGolpe = t; const hh = document.querySelector(".hh");
+          if (hh && !noShake()) { hh.classList.remove("hv-golpe"); void hh.offsetWidth; hh.classList.add("hv-golpe"); setTimeout(() => hh.classList.remove("hv-golpe"), 520); }
+          sfx("chip", 3); sfx("chip", 1);
+        }
+        const n = Math.min(12, 3 + Math.round(v / (110 * u)));
+        for (let k = 0; k < n; k++) {
+          const p = document.createElement("i"); p.className = "hv-chispa"; p.style.cssText = `left:${Math.round(x)}px;top:${Math.round(y)}px;background:${["#fdd742", "#fff3b0", "#f5a623"][k % 3]}`; cap.appendChild(p);
+          const ang = rnd(-PI, 0), sp = rnd(30, 80 + v * .08) * Math.min(1.4, u * 1.6 + .4), a = p.animate([{ translate: "0 0", opacity: 1 }, { translate: `${Math.cos(ang) * sp}px ${Math.sin(ang) * sp + 24}px`, opacity: 0 }], { duration: rnd(260, 480), easing: "cubic-bezier(.2,.7,.4,1)" }); a.onfinish = () => p.remove();
+        }
+      };
+      /* ---- el motor: choques caja-contra-caja (cada esquina que entra en la otra caja es un contacto), impulsos con rebote y rozamiento, correccion de hundimiento */
+      const G = 2400 * u, cor = b => { const c = Math.cos(b.a), s = Math.sin(b.a); return [[-b.hw, -b.hh], [b.hw, -b.hh], [b.hw, b.hh], [-b.hw, b.hh]].map(([px, py]) => [b.x + px * c - py * s, b.y + px * s + py * c]); };
+      const dentro = (A1, B1, out) => {                                                  // esquinas de A1 dentro de la caja B1
+        const c = Math.cos(B1.a), s = Math.sin(B1.a);
+        for (const [px, py] of cor(A1)) {
+          const dx = px - B1.x, dy = py - B1.y, lx = dx * c + dy * s, ly = -dx * s + dy * c, ex = B1.hw - Math.abs(lx), ey = B1.hh - Math.abs(ly);
+          if (ex <= 0 || ey <= 0) continue;
+          let nl, dep; if (ex < ey) { nl = [Math.sign(lx) || 1, 0]; dep = ex; } else { nl = [0, Math.sign(ly) || 1]; dep = ey; }
+          out.push({ a: A1, b: B1, px, py, nx: nl[0] * c - nl[1] * s, ny: nl[0] * s + nl[1] * c, dep });
+        }
+      };
+      const impulso = ct => {
+        const { a, b } = ct, rax = ct.px - a.x, ray = ct.py - a.y, rbx = ct.px - b.x, rby = ct.py - b.y;
+        let vrx = (a.vx - a.w * ray) - (b.vx - b.w * rby), vry = (a.vy + a.w * rax) - (b.vy + b.w * rbx);
+        const vn = vrx * ct.nx + vry * ct.ny; if (vn >= 0) return;
+        const rna = rax * ct.ny - ray * ct.nx, rnb = rbx * ct.ny - rby * ct.nx, k = a.im + b.im + rna * rna * a.ii + rnb * rnb * b.ii;
+        const e = -vn > 140 * u ? Math.max(a.e, b.e * .5) : 0, j = -(1 + e) * vn / k;
+        const aplica = (ix, iy) => { a.vx += ix * a.im; a.vy += iy * a.im; a.w += (rax * iy - ray * ix) * a.ii; b.vx -= ix * b.im; b.vy -= iy * b.im; b.w -= (rbx * iy - rby * ix) * b.ii; };
+        aplica(ct.nx * j, ct.ny * j);
+        vrx = (a.vx - a.w * ray) - (b.vx - b.w * rby); vry = (a.vy + a.w * rax) - (b.vy + b.w * rbx);                       // rozamiento
+        const tx = -ct.ny, ty = ct.nx, vt = vrx * tx + vry * ty, rta = rax * ty - ray * tx, rtb = rbx * ty - rby * tx, kt = a.im + b.im + rta * rta * a.ii + rtb * rtb * b.ii;
+        let jt = -vt / kt; const mu = Math.min(a.mu, b.mu || 1), mx = mu * j; jt = Math.max(-mx, Math.min(mx, jt)); aplica(tx * jt, ty * jt);
+        if (-vn > 200 * u) golpes.push([ct.px, ct.py, -vn]);
+      };
+      let golpes = [];
+      const sim = (dt, now) => {
+        const vivos = L.filter(l => l.est === "cae" || l.est === "reposo");
+        for (const l of L) if (l.est === "espera" && now >= l.tsal) {                      // «tirarla»: cada una sale con su empujon, su patada hacia arriba y su giro
+          l.est = "cae"; l.vx = rnd(-460, 560) * u; l.vy = -rnd(120, 560) * u; l.w = rnd(-9, 9); sfx("chip", l.i % 4);
+        }
+        for (const l of L) if (l.est === "cae") { l.vy += G * dt; l.vx *= .9995; l.w *= .997; l.x += l.vx * dt; l.y += l.vy * dt; l.a += l.w * dt; }
+        const cs = [], cuerpos = FIJOS.concat(vivos.map(l => (l.est === "reposo" ? Object.assign(l, { im: 0, ii: 0, vx: 0, vy: 0, w: 0 }) : l)));
+        for (const l of vivos) if (l.est === "cae") for (const b of cuerpos) { if (b === l) continue; const dx = b.x - l.x, dy = b.y - l.y, rr = Math.hypot(l.hw, l.hh) + Math.hypot(b.hw, b.hh); if (dx * dx + dy * dy > rr * rr) continue; dentro(l, b, cs); dentro(b, l, cs); }
+        for (let it = 0; it < 7; it++) for (const ct of cs) impulso(ct);
+        for (const ct of cs) {                                                              // nunca hundidas
+          const p = Math.max(ct.dep - .4, 0) * .55, s = ct.a.im + ct.b.im; if (!s || !p) continue;
+          ct.a.x += ct.nx * p * ct.a.im / s; ct.a.y += ct.ny * p * ct.a.im / s; ct.b.x -= ct.nx * p * ct.b.im / s; ct.b.y -= ct.ny * p * ct.b.im / s;
+        }
+        for (const l of L) if (l.est === "cae") {
+          if (Math.hypot(l.vx, l.vy) < 14 * u && Math.abs(l.w) < .25) { l.quieta += dt; if (l.quieta > .5) { l.est = "reposo"; l.vx = l.vy = l.w = 0; l.im = l.ii = 0; } } else l.quieta = 0;
+          if (l.x > innerWidth + 90 || l.x < -90 || l.y > innerHeight + 130) { l.est = "fuera"; l.c.style.visibility = "hidden"; }
+        }
+      };
       const caida = () => new Promise(res => {
         const t0 = performance.now(); let last = t0;
-        if (quieto) { L.forEach((l, i) => { l.x = l.x0 + (i - 2.5) * 30 * u; l.y = Math.min(...SOL.map(q => q.t)) - dims(l)[1] - 2; l.est = "reposo"; pon(l); }); return res(); }
-        const paso = (l, dt, now) => {
-          if (l.est === "espera") { if (now - t0 < l.tsal) return; l.est = "cae"; l.vx = l.kx; sfx("chip", l.i % 4); }
-          if (l.est !== "cae") return;
-          l.vy += G * dt; l.x += l.vx * dt; l.y += l.vy * dt;
-          const [bw, bh] = dims(l); let suelo = null;
-          const solidos = SOL.concat(L.filter(m => m !== l && (m.est === "cae" || m.est === "reposo")).map(caja));
-          for (const s of solidos) {
-            const ox = Math.min(l.x + bw, s.r) - Math.max(l.x, s.l), oy = Math.min(l.y + bh, s.b) - Math.max(l.y, s.t);
-            if (ox <= 0 || oy <= 0) continue;
-            const cx = l.x + bw / 2, cy = l.y + bh / 2, sx = (s.l + s.r) / 2, sy = (s.t + s.b) / 2;
-            if (oy <= ox) {
-              if (cy < sy) { l.y = s.t - bh; if (l.vy > 0) { if (l.vy > 280 * u) { l.vy = -l.vy * l.e; sfx("chip", 1 + (l.i % 3)); } else l.vy = 0; l.vx *= .75; if (!suelo || s.t < suelo.t) suelo = s; } }
-              else { l.y = s.b; if (l.vy < 0) l.vy = 0; }
-            } else { l.x += cx < sx ? -ox : ox; l.vx = (cx < sx ? -1 : 1) * Math.abs(l.vx) * .3; }
-          }
-          if (suelo && Math.abs(l.vy) < 1) {
-            const cx = l.x + bw / 2, ex = l.off * bw;
-            const dir = cx < suelo.l + ex ? -1 : cx > suelo.r - ex ? 1 : 0;
-            if (dir && l.o === 0 && !l.tipo) {                                                // vuelca por el borde: un cuarto de vuelta hacia donde cae
-              l.tipo = 1; const bot = l.y + bh; l.o = dir > 0 ? 1 : 3; const [nw, nh] = dims(l);
-              l.x = cx - nw / 2 + dir * nw * .2; l.y = bot - nh - 2; l.vx = dir * rnd(70, 150) * u; l.vy = -rnd(30, 90) * u; sfx("chip", 2);
-            } else if (dir) { l.vx = dir * Math.max(Math.abs(l.vx), 60 * u); }                // ya tumbada: resbala y se cae
-            else if (Math.abs(l.vx) > 6 * u) { const f = 650 * u * dt; l.vx = Math.abs(l.vx) <= f ? 0 : l.vx - Math.sign(l.vx) * f; }
-            else { l.vx = 0; l.est = "reposo"; }
-          }
-          const [fw] = dims(l);
-          if (l.x > innerWidth + 30 || l.x + fw < -30 || l.y > innerHeight + 80) { l.est = "fuera"; l.c.style.visibility = "hidden"; }
-        };
+        if (quieto) { L.forEach((l, i) => { l.x = l.x0 + l.w0 / 2 + (i - 2.5) * 30 * u; l.y = Math.min(...SOL.map(q => q.t)) - l.h0 / 2 - 2; l.a = rnd(-.2, .2); l.est = "reposo"; pon(l); }); return res(); }
         const tick = now => {
-          const dt = Math.min(.034, (now - last) / 1000); last = now;
-          for (let k = 0; k < 2; k++) L.forEach(l => paso(l, dt / 2, now));
+          const dt = Math.min(.034, (now - last) / 1000); last = now; golpes = [];
+          for (let k = 0; k < 4; k++) sim(dt / 4, now - t0);
           L.forEach(l => { if (l.est !== "fuera") pon(l); }); clip();
-          if (L.every(l => l.est === "reposo" || l.est === "fuera") || now - t0 > 6500) { L.forEach(l => { if (l.est === "cae" || l.est === "espera") { l.est = "fuera"; l.c.style.visibility = "hidden"; } }); return res(); }
+          if (golpes.length) { const g = golpes.reduce((m, q) => (q[2] > m[2] ? q : m)); golpe(g[0], g[1], g[2]); }
+          if (L.every(l => l.est === "reposo" || l.est === "fuera") || now - t0 > 8000) { L.forEach(l => { if (l.est === "cae" || l.est === "espera") { l.est = "fuera"; l.c.style.visibility = "hidden"; } }); return res(); }
           requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
       });
-      /* la vuelta: de la mas alta a la mas baja, cada letra se endereza y sube a su sitio en un arco; al llegar vuelve al rotulo */
+      /* la vuelta: de la mas alta a la mas baja, cada letra se endereza (gira por el camino mas corto) y sube a su sitio en un arco; al llegar vuelve al rotulo */
       const vuelve = l => new Promise(res => {
-        if (l.est === "fuera") { l.c.style.visibility = ""; l.x = Math.min(Math.max(l.x, -l.w0), innerWidth); l.y = Math.min(Math.max(l.y, -l.h0), innerHeight - 10); }
-        else { const [bw, bh] = dims(l), cx = l.x + bw / 2, bot = l.y + bh; l.o = 0; l.x = cx - l.w0 / 2; l.y = bot - l.h0; }
-        l.o = 0; pon(l); const fx = l.x, fy = l.y, dur = quieto ? 1 : 480, t0 = performance.now(), alto = 70 * u;
+        if (l.est === "fuera") { l.c.style.visibility = ""; l.x = Math.min(Math.max(l.x, -l.w0), innerWidth + l.w0); l.y = Math.min(Math.max(l.y, -l.h0), innerHeight - 10); }
+        l.a = ((l.a + PI) % (2 * PI) + 2 * PI) % (2 * PI) - PI; pon(l);
+        const fx = l.x, fy = l.y, fa = l.a, tx = l.x0 + l.w0 / 2, ty = l.y0 + l.h0 / 2, dur = quieto ? 1 : 500, t0 = performance.now(), alto = 70 * u;
         const tick = now => {
           const k = Math.min(1, (now - t0) / dur), e = k * k * (3 - 2 * k);
-          l.x = fx + (l.x0 - fx) * e; l.y = fy + (l.y0 - fy) * e - Math.sin(Math.PI * e) * alto; pon(l);
+          l.x = fx + (tx - fx) * e; l.y = fy + (ty - fy) * e - Math.sin(PI * e) * alto; l.a = fa * (1 - e); pon(l);
           if (k < 1) return requestAnimationFrame(tick);
           resto.delete(l.i); A.geoLogo.quita(resto); l.c.remove(); sfx("chip", 3); res();
         };
@@ -470,7 +498,7 @@ window.AIQ = window.AIQ || {};
       });
       const recoge = async () => { const orden = L.slice().sort((a, b) => a.y - b.y); for (const l of orden) { if (!cap.isConnected) break; await vuelve(l); await wait(quieto ? 0 : 140); } };
       const limpia = () => { cap.remove(); if (A.geoLogo) A.geoLogo.quita(new Set()); busy = false; };
-      const guardia = setTimeout(limpia, 26000);                                         // pase lo que pase, el titulo vuelve entero
+      const guardia = setTimeout(limpia, 30000);                                         // pase lo que pase, el titulo vuelve entero
       try {
         await caida();
         if (n === 1) {
