@@ -142,33 +142,43 @@ window.AIQ = window.AIQ || {};
     }, true);
   })();
 
-  /* ================================================================== B · TICKET INTERMINABLE: 5 clics en el TOTAL y el papel sigue saliendo (una cinta que cuelga del ticket, sin tocar su maquetacion) */
+  /* ================================================================== B · TICKET INTERMINABLE: en el veredicto de una ronda SUPERADA, 5 clics seguidos en el ticket. El papel sigue saliendo por debajo del sello, lo de
+     arriba (la cabecera, los lugares, el sello) sube y se pierde por el borde, y van saliendo renglones tontos sobre el propio ticket. Al acabar, el rollo vuelve y todo queda como estaba */
   (function () {
     let n = 0, t = 0, busy = false;
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const parado = tk => !tk.getAnimations({ subtree: true }).some(a => { try { return a.playState === "running" && a.effect.getComputedTiming().iterations !== Infinity; } catch (e) { return false; } });   // el ticket ya acabo de imprimirse
     addEventListener("click", e => {
-      const tot = e.target && e.target.closest && e.target.closest(".tk-total"); if (!tot || busy || !A.HV) return;
+      const tk = e.target && e.target.closest && e.target.closest(".gx-vd-ticket"); if (!tk || busy || !A.HV) return;
+      if (tk.closest(".gx-vd.lose") || !parado(tk)) return;
       clearTimeout(t); t = setTimeout(() => { n = 0; }, 3500);
-      if (++n < 5) return; n = 0;
-      const tk = tot.closest(".ticket") || tot.parentElement, r = tk.getBoundingClientRect(), tr = tot.getBoundingClientRect();
-      const w = Math.round(Math.min(r.width, r.left - 14)), top = Math.round(Math.max(8, tr.top - 150)), room = innerHeight - top - 10;
-      if (w < 120 || room < 80) return;                                              // no cabe a su lado: no sale
-      busy = true; H.found("ticket");
-      const box = document.createElement("div"); box.className = "hv-cinta";          // el papel sale por una ranura del costado: cuelga a la izquierda del ticket, tapado un poco por el
-      box.style.cssText = `left:${Math.round(r.left - w + 6)}px;top:${top}px;width:${w}px;max-height:${Math.round(room)}px`;
-      document.body.appendChild(box);
-      const items = A.HV.tx.cinta; let i = 0;
-      const step = () => {
-        if (!box.isConnected || !tk.isConnected) { box.remove(); busy = false; return; }          // pasaste de pregunta: se la lleva
-        if (i >= items.length) { setTimeout(() => { box.classList.add("out"); setTimeout(() => { box.remove(); busy = false; }, reduced() ? 0 : 260); }, 1200 + 1000); return; }
-        const it = items[i++], row = document.createElement("div");
-        row.innerHTML = `<span>${esc(T(it[0]))}</span><b>${it[1] ? esc(T(it[1])) : ""}</b>`; box.appendChild(row);
-        box.scrollTop = box.scrollHeight;
-        if (A.sfx && A.sfx.chip) A.sfx.chip(Math.min(4, i));
-        setTimeout(step, reduced() ? 60 : 340);
-      };
-      step();
+      if (++n < 5) return; n = 0; busy = true; H.found("ticket"); rollo(tk);
     }, true);
+    async function rollo(tk) {
+      const quieto = reduced(), pausa = ms => new Promise(r => setTimeout(r, ms));
+      const prev = { h: tk.style.height, ov: tk.style.overflow, mh: tk.style.maxHeight };
+      tk.style.height = tk.offsetHeight + "px"; tk.style.maxHeight = tk.offsetHeight + "px"; tk.style.overflow = "hidden";        // el papel ya no crece: lo nuevo empuja lo viejo hacia arriba
+      const nuevos = [];
+      const baja = to => new Promise(res => {                                                                                      // desplaza el rollo a pasos de pixel entero (como la caja)
+        if (quieto) { tk.scrollTop = to; return res(); }
+        const f = tk.scrollTop, dur = Math.max(160, Math.abs(to - f) * 5), t0 = performance.now();
+        const tick = now => { const k = Math.min(1, (now - t0) / dur); tk.scrollTop = Math.round(f + (to - f) * (1 - Math.pow(1 - k, 3))); if (k < 1 && tk.isConnected) requestAnimationFrame(tick); else res(); };
+        requestAnimationFrame(tick);
+      });
+      const fin = () => { nuevos.forEach(r => r.remove()); tk.scrollTop = 0; tk.style.height = prev.h; tk.style.maxHeight = prev.mh; tk.style.overflow = prev.ov; busy = false; };
+      try {
+        const items = A.HV.tx.cinta;
+        for (let i = 0; i < items.length; i++) {
+          if (!tk.isConnected) return (busy = false);                                    // pasaste de pantalla: se lo lleva
+          const row = document.createElement("div"); row.className = "gx-lead-row hv-renglon"; row.innerHTML = `<span>${esc(T(items[i][0]))}</span><s></s><b>${items[i][1] ? esc(T(items[i][1])) : ""}</b>`;
+          tk.appendChild(row); nuevos.push(row);
+          if (A.sfx && A.sfx.chip) try { A.sfx.chip(Math.min(4, 1 + (i % 4))); } catch (er) { /* audio */ }
+          await baja(tk.scrollHeight - tk.clientHeight); await pausa(quieto ? 40 : 170);
+        }
+        await pausa(1200 + 1000);                                                          // y su segundo de mas
+        await baja(0);                                                                     // el rollo vuelve: lo de siempre, sano y salvo
+      } finally { if (tk.isConnected) fin(); else busy = false; }
+    }
   })();
 
   /* ================================================================== B · BUSQUEDAS IMPOSIBLES: la Enciclopedia contesta con retintin (js/codex.js llama aqui cuando no hay resultados) */
