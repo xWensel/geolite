@@ -315,7 +315,7 @@ window.AIQ = window.AIQ || {};
     /* la que llevas puesta (si dejo de ser tuya, por ejemplo al reiniciar el perfil, vuelve la de siempre) */
     current: () => { const u = mem().use; return u && A.MAPSTYLES[u] && A.mesas.owned(u) ? u : "casino"; },
     style: () => A.MAPSTYLES[A.mesas.current()] || A.MAPSTYLES.casino,
-    use(id) { if (!A.MAPSTYLES[id] || !A.mesas.owned(id)) return false; mem().use = id; A.profile.save(); const map = A.core && A.core.map; if (map && map.setStyle && !(A.codex && A.codex.isOpen && A.codex.isOpen())) map.setStyle(A.mesas.style()); return true; },
+    use(id) { if (!A.MAPSTYLES[id] || !A.mesas.owned(id)) return false; mem().use = id; A.profile.save(); const map = A.core && A.core.map; if (map && map.setStyle && !(A.codex && A.codex.isOpen && A.codex.isOpen())) (map.setStyleNow || map.setStyle).call(map, A.mesas.style()); return true; },
     /* ganadas y aun sin estrenar (js/mesas.js) */
     fresh: () => A.MESAS.filter(m => m.id !== "casino" && !m.shop && A.mesas.owned(m.id) && !mem().seen[m.id]).map(m => m.id),   // el estreno con cartel es solo de las que se ganan jugando: las que compras ya quedan puestas en la tienda
     seen(ids) { const s = mem().seen, t = Date.now(); ids.forEach(id => { s[id] = t; }); A.profile.save(); },

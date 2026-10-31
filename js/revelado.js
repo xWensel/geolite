@@ -132,8 +132,9 @@ window.AIQ = window.AIQ || {};
   };
 
   /* ================================================================ los rodillos (par-rodillos) */
-  /* cada cifra es un rodillo de cuentakilometros: las unidades giran siempre y las demas solo cuando la de abajo pasa de 9 a 0; el giro va a saltos de
-     pixel (X.salto px a 1080p, en pixeles reales); recorte duro, sin fantasmas. Encaja con su clic */
+  /* cada cifra es un tambor de carrete: todas las cifras desde la mas alta que cambia giran por su cuenta (vueltas de mas sobre su valor), paran de
+     izquierda a derecha, cada una con su clic, y asientan con un leve rebote; el giro va a saltos de pixel (X.salto px a 1080p, en pixeles reales);
+     recorte duro, sin fantasmas. Debajo sigue el valor de la cuenta (el casi baja, duda y vuelve) */
   const DIG = [..."01234567890"].map(d => `<i>${d}</i>`).join("");
   const RUN = new Set(), FIN = new Map(); let raf = 0, lastTic = 0;
   function build(el, shape) {
@@ -146,14 +147,19 @@ window.AIQ = window.AIQ || {};
     el._shape = shape; el.style.setProperty("--t", "0s");
   }
   const posOf = (v, i) => { if (i === 0) return v; const p = Math.pow(10, i), fl = Math.floor(v / p), rem = v - fl * p; return fl + Math.max(0, rem - (p - 1)); };
-  function paint(R, v, vel) {
+  /* el tambor de cada cifra (R.sp[i], i = 0 unidades): da `turns` vueltas de mas sobre su valor, frena hasta `stop` ms y, si cabe, se pasa un poco y
+     asienta (`bounce` ms). Las cifras de arriba paran antes: el carrete se asienta de izquierda a derecha */
+  const SPIN_P = 1.8, BOUNCE = 0.3;
+  const spinOf = (sp, t) => (t >= sp.end ? 0 : t >= sp.stop ? (sp.bounce ? BOUNCE * Math.sin(Math.PI * clamp((t - sp.stop) / sp.bounce)) : 0) : sp.turns * 10 * Math.pow(1 - clamp(t / sp.stop), SPIN_P));
+  function paint(R, v, vel, t) {
     const el = R.el, cols = el._cols, n = cols.length, step = R.step;
     if (!el._seps) return;                                            // el contador se rehizo por fuera (odoBuild de js/game.js): este giro ya no pinta nada
     for (let i = 0; i < n; i++) {
-      const col = cols[n - 1 - i], p = posOf(v, i), blank = i > 0 && p < 0.001;
+      const col = cols[n - 1 - i], p = posOf(v, i), sp = t != null && R.sp ? R.sp[i] : null, extra = sp ? spinOf(sp, t) : 0;
+      const blank = i > 0 && p < 0.001 && !(sp && t < sp.end);                      // un tambor que gira se ve aunque su cifra aun sea 0 a la izquierda
       if (blank !== !!col._blank) { col._blank = blank; col.style.visibility = blank ? "hidden" : ""; }
       if (blank) continue;
-      let f = ((p % 10) + 10) % 10; if (step > 0) f = Math.round(f / step) * step;
+      let f = ((((p % 10) + extra) % 10) + 10) % 10; if (step > 0) f = Math.round(f / step) * step;
       const y = f.toFixed(4); if (col._y !== y) { col._y = y; col.style.transform = `translateY(${(-f * R.cell).toFixed(4)}em)`; }
     }
     /* un separador de miles a la izquierda de cifras en blanco tampoco se ve */
@@ -176,7 +182,9 @@ window.AIQ = window.AIQ || {};
       if (seg !== R.seg) { R.seg = seg; if (R.onSeg) R.onSeg(seg); }
       if (R.onV) R.onV(v, seg);
       if (done) { RUN.delete(R); lock(R); if (R.onV) R.onV(R.to, -1); if (R.clic) { son("encaja", R.row || 0); vib(0.05, 0.25, 40); } continue; }
-      paint(R, v, vel);
+      paint(R, v, vel, t);
+      /* cada tambor encaja con su clic al parar (de izquierda a derecha), sin amontonarse */
+      if (R.sp && R.tick) for (const sp of R.sp) if (!sp.clic && t >= sp.stop) { sp.clic = true; if (now - lastTic > 30) { lastTic = now; son("count", clamp(R.row / 6)); } }
       /* el clic del rodillo: cada vez que las unidades pasan una cifra (sin amontonarse) */
       if (R.tick && R.last != null && Math.floor(v) !== Math.floor(R.last) && vel < 6 && now - lastTic > 42 && Math.random() < 0.6) { lastTic = now; son("count", clamp(R.row / 6)); }
       R.last = v;
@@ -202,7 +210,15 @@ window.AIQ = window.AIQ || {};
     const z = el.currentCSSZoom || 1, fs = parseFloat(getComputedStyle(el).fontSize) || 30, pitch = fs * z * (devicePixelRatio || 1);
     const sal = Math.max(1, Math.round(X.salto * Math.min(innerWidth / 1920, innerHeight / 1080) * (devicePixelRatio || 1)));
     const cell = el.classList.contains("odp") ? 1.4 : 1;
-    const R = { el, cell, from, to, at, start: performance.now() + (o.delay || 0), step: sal / (pitch * cell), tick: !!o.tick, row: o.row || 0, onSeg: o.onSeg, onV: o.onV, clic: o.clic !== false, seg: -1, last: null, shown: false };
+    /* los tambores: giran desde la cifra mas alta que cambia hasta las unidades (como un carrete: si cambia la de arriba, las de abajo tambien giran) */
+    const dgA = (x, i) => (i > 0 && x < Math.pow(10, i) ? -1 : Math.floor(x / Math.pow(10, i)) % 10), vals = [from, ...path.map(p => p.to)].map(Math.round), T = Math.round(to), nd = String(Math.abs(T)).length;
+    let hiP = -1; for (let i = 0; i < nd; i++) if (vals.some(x => dgA(x, i) !== dgA(T, i))) hiP = i;
+    let sp = null;
+    if (hiP >= 0) {
+      const s0 = segs[0].ms, bounce = s0 >= 420 ? 130 : 0, D = s0 - bounce, base = clamp(Math.round(D / 260), 1, 6); sp = [];
+      for (let i = 0; i <= hiP; i++) { const stop = Math.max(1, D * (1 - 0.45 * (hiP ? i / hiP : 0))); sp.push({ turns: Math.max(1, Math.round(base * stop / D)), stop, bounce, end: stop + bounce, clic: false }); }
+    }
+    const R = { el, cell, from, to, at, sp, start: performance.now() + (o.delay || 0), step: sal / (pitch * cell), tick: !!o.tick, row: o.row || 0, onSeg: o.onSeg, onV: o.onV, clic: o.clic !== false, seg: -1, last: null, shown: false };
     el._v = to; RUN.add(R); paint(R, from, 0); R.shown = true;
     if (!raf) raf = requestAnimationFrame(frame);
   };

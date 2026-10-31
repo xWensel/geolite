@@ -179,6 +179,9 @@ void main(){
     return c;
   };
 
+  /* cordon de tiro de las borlas: paleta de la borla, trenzado de 4 tonos y anilla de 5x4 donde nace bajo la bambalina */
+  const CORDON = { t: { o: "#1d0a3d", 1: "#fff3b0", 2: "#fdd742", 3: "#f5a623", 4: "#c46a1b", 5: "#6e3414" }, tonos: ["2", "3", "4", "3"], anilla: [".ooo.", "o122o", "o345o", ".ooo."] };
+
   /* ------------------------------------------------------------------ la pieza en pantalla */
   const sfx = (n, ...a) => { try { if (A.sfx && A.sfx[n]) A.sfx[n](...a); } catch (e) { /* sin sonido */ } };
   const haptic = (lo, hi, ms) => { try { if (A.haptic && A.haptic.dual) A.haptic.dual(lo, hi, ms); } catch (e) { /* sin mando */ } };
@@ -249,12 +252,23 @@ void main(){
       U("uCloth", 1220); U("uAmp", 15 * P.hondo); U("uSheen", P.brillo); U("uPix", P.pix ? 1 : 0); U("uBands", P.bandas); U("uVal", P.bambalina ? 1 : 0); U("uTop", P.bambalina ? 14 : 0);
       U("uValOff", val); U("uDim", dim); U("uC0", C0); U("uC1", C1); U("uC2", C2);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      /* borlas en el canto de cada hoja (a la altura del atado), en enteros */
+      /* cordon de tiro: baja de la bambalina siguiendo el canto de cada hoja y la borla cuelga de su extremo (a la altura del atado), todo en
+         enteros de arte; en la juntura cada cordon se queda de su lado (tope), asi las borlas nunca se cruzan con el rebote del cierre */
       g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
-      const yb = Math.round(H * 0.56), kk = Math.pow((yb - 14) / (H - 14), 1.6), eb = top + sway * P.balanceo * kk;
+      const yb0 = Math.round(H * 0.56), kk = Math.pow((yb0 - 14) / (H - 14), 1.6), eb = top + sway * P.balanceo * kk;
       if (eb > 60) {
-        const xl = Math.round((eb - 40 - tas.width / 2) / k) * k, xr = Math.round((W - eb + 40 - tas.width / 2) / k) * k;
-        g.drawImage(tasS, xl + k, yb + 2 * k); g.drawImage(tasS, xr + k, yb + 2 * k); g.drawImage(tas, xl, yb); g.drawImage(tas, xr, yb);
+        const y1 = Math.round(yb0 / k), y0 = 16, gap = 8 * k, inset = 20;
+        const edgeAt = (y, f) => top + sway * P.balanceo * f * Math.pow((y * k - 14) / (H - 14), 1.6);
+        const put = (x, y, ch) => { if (x < 0) return; g.fillStyle = CORDON.t[ch]; g.fillRect(x * k, y * k, k, k); };
+        for (const lado of [-1, 1]) {
+          const xc = y => { const e = edgeAt(y, lado < 0 ? 1 : 0.92); return Math.round((lado < 0 ? Math.min(e - inset, W / 2 - gap) : Math.max(W - e + inset, W / 2 + gap)) / k); };
+          for (let y = y0 + 2; y < y1; y++) { const x = xc(y); put(x - 1, y, "o"); put(x + 1, y, "o"); }
+          for (let y = y0 + 2; y < y1; y++) put(xc(y), y, CORDON.tonos[y % 4]);
+          const rx = xc(y0 + 2);
+          CORDON.anilla.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] !== ".") put(rx - 2 + i, y0 - 2 + j, r[i]); });
+          const tx = (xc(y1 - 1) - 6) * k, ty = y1 * k;
+          g.drawImage(tasS, tx + k, ty + 2 * k); g.drawImage(tas, tx, ty);
+        }
       }
     };
     const frame = now => {

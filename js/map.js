@@ -1223,6 +1223,8 @@ void main(){
       if (this.fir) try { this.fir.prep(st); } catch (e) { console.warn("firma:", e); } }   // la firma de la mesa nueva se compila ya, al ponerla
     stopDrift() { clearTimeout(this._dT); this.drift = null; }
     /* una foto del mapa tal como se ve (el estreno de una mesa, js/mesas.js): se pinta y se copia en la misma tarea, antes de que el navegador componga */
+    /* pone una mesa y la pinta en la misma tarea: el navegador no compone nunca un fotograma con la anterior (la prueba de La tienda) */
+    setStyleNow(st) { this.setStyle(st); try { if (!this.lost) { this.dirty = false; this._drawGL(performance.now()); } } catch (e) { this.dirty = this.fxDirty = true; } }
     snap() { try { const c = document.createElement("canvas"); c.width = this.cv.width; c.height = this.cv.height; this._drawGL(performance.now()); c.getContext("2d").drawImage(this.cv, 0, 0); return c; } catch (e) { return null; } }
     setAnchor(px, py) { this.zc = [px, py]; }
 
