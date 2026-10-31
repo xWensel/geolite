@@ -111,6 +111,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ los textos de los objetos */
   HV.tx.socioDesde = "Socio desde {d}|Member since {d}|Membre depuis le {d}|Sócio desde {d}|Mitglied seit {d}|Socio dal {d}||入会日期 {d}|가입일 {d}|入会日 {d}|Участник с {d}|Członek od {d}";
+  HV.tx.socioClub = "Club de la casa|The House Club|Le Club de la maison|Clube da casa|Der Club des Hauses|Club della casa||老店俱乐部|하우스 클럽|ハウス・クラブ|Клуб заведения|Klub kasyna";
   HV.tx.socioNum = "Nº {n}|No. {n}|N° {n}|Nº {n}|Nr. {n}|N. {n}||编号 {n}|번호 {n}|No. {n}|№ {n}|Nr {n}";
   HV.tx.socioLetra = "Si la pierdes, no la reponemos.|If you lose it, we won't replace it.|Si tu la perds, on ne la remplace pas.|Se perder, não repomos.|Bei Verlust gibt es keinen Ersatz.|Se la perdi, non la sostituiamo.||丢了概不补发。|잃어버리면 재발급 없음.|紛失しても再発行しません。|Потеряешь — не заменим.|Zgubisz — nie wymienimy.";
 

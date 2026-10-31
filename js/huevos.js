@@ -286,18 +286,48 @@ window.AIQ = window.AIQ || {};
     });
   })();
 
-  /* ================================================================== B · EL REVERSO DE TU CARTA: mantenerla pulsada 0,9 s la da la vuelta (se dibuja por codigo, a escala entera) */
+  /* ================================================================== B · EL REVERSO DE TU CARTA: mantenerla pulsada 0,9 s la da la vuelta. EL MISMO dorso para todos (reticula de la casa, doble filete de oro, la ficha con la
+     chistera) y un solo dato tuyo: tu NUMERO DE SOCIO, el de orden de llegada (api/socio.js: el primero que entro es el 1). Se dibuja a la rejilla de la carta (96 x H pixeles de arte) */
+  let pidiendo = false;
+  async function pideNo() {                                                         // el numero se pide una vez y se guarda; sin red, se pide otro dia
+    if (st.no || pidiendo || !A.profile || !A.profile.get) return; pidiendo = true;
+    try {
+      const c = new AbortController(), tm = setTimeout(() => c.abort(), 8000);
+      const r = await fetch("/api/socio", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: A.profile.get().id }), signal: c.signal }); clearTimeout(tm);
+      const j = await r.json(); if (j && j.ok && j.n > 0) { st.no = j.n; save(); }
+    } catch (e) { /* sin red o sin backend: sigue sin numero */ }
+    pidiendo = false;
+  }
+  H.socioNo = () => st.no || 0; H._no = v => { st.no = v; save(); };
+  H.socioTxt = () => (st.no ? String(st.no).padStart(4, "0") : "····");
+  setTimeout(pideNo, 4000); setInterval(pideNo, 600000);
+  const dorsoArte = hh => {
+    const c = document.createElement("canvas"); c.width = 96; c.height = hh; const g = c.getContext("2d"), px = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+    px(0, 0, 96, hh, "#1d0a3d");
+    for (let y = 0; y < hh; y++) for (let x = 0; x < 96; x++) if ((x + y) % 8 === 0 || ((x - y) % 8 + 8) % 8 === 0) px(x, y, 1, 1, "#2a1559");     // la reticula de la casa (rombos)
+    const marco = (i, col) => { px(i + 1, i, 96 - 2 * i - 2, 1, col); px(i + 1, hh - 1 - i, 96 - 2 * i - 2, 1, col); px(i, i + 1, 1, hh - 2 * i - 2, col); px(96 - 1 - i, i + 1, 1, hh - 2 * i - 2, col); };   // sin las esquinas: corte en bisel
+    marco(1, "#0b0618"); marco(2, "#fdd742"); marco(3, "#7a4a05"); marco(6, "#c46a1b");
+    for (const [x, y] of [[4, 4], [91, 4], [4, hh - 5], [91, hh - 5]]) px(x, y, 1, 1, "#fdd742");                                                    // un remache en cada esquina
+    px(7, 7, 82, hh - 14, "#1d0a3d");                                                                                                             // el tapete liso dentro del segundo filete
+    for (let y = 8; y < hh - 8; y++) for (let x = 8; x < 88; x++) if ((x + y) % 8 === 0 || ((x - y) % 8 + 8) % 8 === 0) px(x, y, 1, 1, "#241250");
+    /* la ficha de oro con la chistera de la casa, en el centro de arriba */
+    const N = 30, cy = Math.round(hh * .30), ox = 48 - N / 2, oy = cy - N / 2;
+    try { if (A.ficha && A.ficha.px) { const f = document.createElement("canvas"); f.width = f.height = N; f.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(A.ficha.px(N, "blank_gold")), N, N), 0, 0); g.drawImage(f, ox, oy); } } catch (e) { px(ox + 2, oy + 2, N - 4, N - 4, "#f5a623"); }
+    const HAT = ["...######...", "...######...", "...######...", "...bbbbbb...", "...######...", "############"], hx = 48 - 6, hy = cy - 4;
+    HAT.forEach((row, ry) => { for (let rx = 0; rx < 12; rx++) { const ch = row[rx]; if (ch !== ".") px(hx + rx, hy + ry, 1, 1, ch === "b" ? "#c46a1b" : "#1d0a3d"); } });
+    return c;
+  };
   (function () {
     let t = 0, vuelta = null, n = 0;
-    const fecha = () => { const P = A.profile && A.profile.get && A.profile.get(); const ts = (P && (P.created || P.since || P.first)) || Date.now(); try { return new Date(ts).toLocaleDateString(A.lang === "es-419" ? "es" : A.lang, { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } };
-    const numero = () => { const P = A.profile && A.profile.get && A.profile.get(); return String(((A.rank && A.rank.hash && P) ? A.rank.hash(P.id + ":socio") : 421) % 10000).padStart(4, "0"); };
+    const fecha = () => { const P = A.profile && A.profile.get && A.profile.get(); const ts = (P && P.created) || Date.now(); try { return new Date(ts).toLocaleDateString(A.lang === "es-419" ? "es" : A.lang, { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } };
     function da(card) {
-      if (vuelta || !A.HV) return; const cv = card.querySelector(".sc-cv"); const rect = card.getBoundingClientRect(); if (!rect.width) return;
-      const back = document.createElement("div"); back.className = "hv-rev"; const d = parseFloat(card.style.getPropertyValue("--sd")) || 2;
-      back.style.cssText = `--d:${d}px`;
-      back.innerHTML = `<b>${T(A.HV.tx.socioDesde).replace("{d}", fecha())}</b><i>${T(A.HV.tx.socioNum).replace("{n}", numero())}</i><span>${T(A.HV.tx.socioLetra)}</span>`;
+      if (vuelta || !A.HV) return; const rect = card.getBoundingClientRect(); if (!rect.width) return;
+      const d = parseFloat(card.style.getPropertyValue("--sd")) || 2, Hh = Math.max(96, Math.round(rect.height / d));
+      const back = document.createElement("div"); back.className = "hv-rev"; back.style.cssText = `--d:${d}px`;
+      const art = dorsoArte(Hh); art.className = "hv-rev-art"; back.appendChild(art);
+      back.insertAdjacentHTML("beforeend", `<small class="hv-r1">${T(A.HV.tx.socioClub)}</small><b class="hv-r2">${T(A.HV.tx.socioNum).replace("{n}", H.socioTxt())}</b><i class="hv-r3">${T(A.HV.tx.socioDesde).replace("{d}", fecha())}</i><span class="hv-r4">${T(A.HV.tx.socioLetra)}</span>`);
       const flip = f => { if (reduced()) return f(); card.style.transition = "scale .12s steps(3)"; card.style.scale = "0 1"; setTimeout(() => { f(); card.style.scale = "1 1"; }, 130); };
-      flip(() => card.appendChild(back)); vuelta = { card, back, flip }; H.found("reverso"); n++;
+      flip(() => card.appendChild(back)); vuelta = { card, back, flip }; H.found("reverso"); n++; if (!st.no) pideNo();
       if (n === 5) dice("reverso", "hvReverso", { mood: "laugh", gap: 1000, libre: true });
     }
     function quita() { if (!vuelta) return; const v = vuelta; vuelta = null; v.flip(() => v.back.remove()); }
@@ -382,59 +412,91 @@ window.AIQ = window.AIQ || {};
       const cv = A.geoLogo && A.geoLogo.vivo && A.geoLogo.vivo(); if (!cv || !aLetra(cv, e)) return;
       clearTimeout(tc); tc = setTimeout(() => { clics = 0; }, 3000);
       if (++clics < 5) return; clics = 0; n++;
-      if (n > 2) return;                                                             // la tercera vez en la sesion, nada: ya se sabe
       cae(cv).catch(() => { if (A.geoLogo) A.geoLogo.quita(new Set()); });
     }, true);
 
     async function cae(cv) {
       const d = await carga(); if (!d || !A.geoLogo) return; busy = true; H.found("letras");
-      const r = cv.getBoundingClientRect(), u = r.width / 664, quieto = reduced();
-      const cards = [...document.querySelectorAll(".hh .mcard")].map(c => c.getBoundingClientRect().top).filter(t => t > r.top + 40);
-      const suelo = (cards.length ? Math.min(...cards) : r.bottom + 60 * u) - 6;       // el borde de arriba de las cartas
+      const r = cv.getBoundingClientRect(), u = r.width / 664, quieto = reduced(), rnd = (a, b) => a + Math.random() * (b - a);
       const cap = document.createElement("div"); cap.className = "hv-letras"; document.body.appendChild(cap);
+      const rc = e => { const q = e.getBoundingClientRect(); return { l: q.left, r: q.right, t: q.top, b: q.bottom }; };
+      /* donde chocan: las tres cartas de modo y las placas de abajo (con su escalon: la Aventura va mas alta que las otras dos) */
+      const SOL = [...document.querySelectorAll(".hh .mcard, .hh .hh-deck .plq")].map(rc).filter(q => q.r - q.l > 40 && q.t > r.top + 20);
+      /* la carta de socio va por encima de todo: las letras pasan POR DETRAS (el crupier, con su z propio, tambien va delante) */
+      const so = document.querySelector(".hh .hh-socio-w, .hh .sc-host"), sq = so && rc(so);
+      const clip = () => { if (!sq) return; const W = innerWidth, H2 = innerHeight; cap.style.clipPath = `polygon(evenodd, 0 0, ${W}px 0, ${W}px ${H2}px, 0 ${H2}px, 0 0, ${sq.l}px ${sq.t}px, ${sq.r}px ${sq.t}px, ${sq.r}px ${sq.b}px, ${sq.l}px ${sq.b}px, ${sq.l}px ${sq.t}px)`; };
+      clip();
       const L = CAJAS.map((b, i) => {
         const w = Math.round(b[2] * u), h = Math.round(b[3] * u), c = document.createElement("canvas"); c.width = w; c.height = h; c.className = "hv-letra";
         const g = c.getContext("2d"); g.imageSmoothingEnabled = false; g.drawImage(d.hoja, b[4], 0, b[2], b[3], 0, 0, w, h);
         const x0 = Math.round(r.left + b[0] * u), y0 = Math.round(r.top + (ROT_Y + b[1]) * u);
-        c.style.cssText = `left:${x0}px;top:${y0}px;width:${w}px;height:${h}px`; cap.appendChild(c);
-        return { c, i, x0, y0, x: x0, y: y0, h, dx: (i % 2 ? 1 : -1) * Math.round((3 + i * 1.5) * u), vy: 0, est: 0 };
+        c.style.cssText = `width:${w}px;height:${h}px`; cap.appendChild(c);
+        return { c, i, w0: w, h0: h, x0, y0, x: x0, y: y0, o: 0, vx: 0, vy: 0, est: "espera", e: rnd(.16, .42), off: rnd(-.1, .16), tipo: 0, tsal: i * 110 + rnd(0, 140), kx: rnd(-130, 190) * u };
       });
+      const dims = l => (l.o % 2 ? [l.h0, l.w0] : [l.w0, l.h0]);
+      const pon = l => { const [bw, bh] = dims(l), cx = l.x + bw / 2, cy = l.y + bh / 2; l.c.style.left = Math.round(cx - l.w0 / 2) + "px"; l.c.style.top = Math.round(cy - l.h0 / 2) + "px"; l.c.style.transform = l.o ? `rotate(${l.o * 90}deg)` : ""; };
+      L.forEach(pon);
       const resto = new Set([0, 1, 2, 3, 4, 5]); A.geoLogo.quita(resto, d);              // las letras salen del rotulo y pasan a ser estas piezas, en el mismo sitio
-      const pos = l => { l.c.style.left = Math.round(l.x) + "px"; l.c.style.top = Math.round(l.y) + "px"; };
-      /* la caida: gravedad con dos rebotes, siempre a saltos de pixel entero de arte (u) */
-      const G = 2600 * u, paso = v => Math.round(v / u) * u;
+      /* la fisica: gravedad, choque con las cartas, las placas y las otras letras (cajas alineadas: a 90 grados la rotacion es exacta, sin emborronar el pixel).
+         Cada vez cambia: retraso, empujon lateral, rebote y aplomo al azar; asi unas se quedan en lo alto, otras hacen piramide y otras vuelcan y se caen por el lado */
+      const G = 2700 * u;
+      const caja = l => { const [bw, bh] = dims(l); return { l: l.x, r: l.x + bw, t: l.y, b: l.y + bh }; };
       const caida = () => new Promise(res => {
-        if (quieto) { L.forEach(l => { l.x = l.x0 + l.dx; l.y = suelo - l.h; pos(l); }); return res(); }
-        let t0 = performance.now(), last = t0, fin = 0;
-        L.forEach(l => { l.t = t0 + l.i * 110; });
+        const t0 = performance.now(); let last = t0;
+        if (quieto) { L.forEach((l, i) => { l.x = l.x0 + (i - 2.5) * 30 * u; l.y = Math.min(...SOL.map(q => q.t)) - dims(l)[1] - 2; l.est = "reposo"; pon(l); }); return res(); }
+        const paso = (l, dt, now) => {
+          if (l.est === "espera") { if (now - t0 < l.tsal) return; l.est = "cae"; l.vx = l.kx; sfx("chip", l.i % 4); }
+          if (l.est !== "cae") return;
+          l.vy += G * dt; l.x += l.vx * dt; l.y += l.vy * dt;
+          const [bw, bh] = dims(l); let suelo = null;
+          const solidos = SOL.concat(L.filter(m => m !== l && (m.est === "cae" || m.est === "reposo")).map(caja));
+          for (const s of solidos) {
+            const ox = Math.min(l.x + bw, s.r) - Math.max(l.x, s.l), oy = Math.min(l.y + bh, s.b) - Math.max(l.y, s.t);
+            if (ox <= 0 || oy <= 0) continue;
+            const cx = l.x + bw / 2, cy = l.y + bh / 2, sx = (s.l + s.r) / 2, sy = (s.t + s.b) / 2;
+            if (oy <= ox) {
+              if (cy < sy) { l.y = s.t - bh; if (l.vy > 0) { if (l.vy > 280 * u) { l.vy = -l.vy * l.e; sfx("chip", 1 + (l.i % 3)); } else l.vy = 0; l.vx *= .75; if (!suelo || s.t < suelo.t) suelo = s; } }
+              else { l.y = s.b; if (l.vy < 0) l.vy = 0; }
+            } else { l.x += cx < sx ? -ox : ox; l.vx = (cx < sx ? -1 : 1) * Math.abs(l.vx) * .3; }
+          }
+          if (suelo && Math.abs(l.vy) < 1) {
+            const cx = l.x + bw / 2, ex = l.off * bw;
+            const dir = cx < suelo.l + ex ? -1 : cx > suelo.r - ex ? 1 : 0;
+            if (dir && l.o === 0 && !l.tipo) {                                                // vuelca por el borde: un cuarto de vuelta hacia donde cae
+              l.tipo = 1; const bot = l.y + bh; l.o = dir > 0 ? 1 : 3; const [nw, nh] = dims(l);
+              l.x = cx - nw / 2 + dir * nw * .2; l.y = bot - nh - 2; l.vx = dir * rnd(70, 150) * u; l.vy = -rnd(30, 90) * u; sfx("chip", 2);
+            } else if (dir) { l.vx = dir * Math.max(Math.abs(l.vx), 60 * u); }                // ya tumbada: resbala y se cae
+            else if (Math.abs(l.vx) > 6 * u) { const f = 650 * u * dt; l.vx = Math.abs(l.vx) <= f ? 0 : l.vx - Math.sign(l.vx) * f; }
+            else { l.vx = 0; l.est = "reposo"; }
+          }
+          const [fw] = dims(l);
+          if (l.x > innerWidth + 30 || l.x + fw < -30 || l.y > innerHeight + 80) { l.est = "fuera"; l.c.style.visibility = "hidden"; }
+        };
         const tick = now => {
-          const dt = Math.min(.04, (now - last) / 1000); last = now;
-          L.forEach(l => {
-            if (now < l.t || l.est === 2) return;
-            l.vy += G * dt; l.y += l.vy * dt; l.x = l.x0 + l.dx * Math.min(1, (l.y - l.y0) / Math.max(1, suelo - l.h - l.y0));
-            if (l.y >= suelo - l.h) { l.y = suelo - l.h; if (l.est === 0) { l.vy = -l.vy * .38; l.est = 1; sfx("chip", l.i % 4); } else if (Math.abs(l.vy) > 90 * u) { l.vy = -l.vy * .3; sfx("chip", 1); } else { l.vy = 0; l.est = 2; fin++; } }
-            l.c.style.left = Math.round(paso(l.x)) + "px"; l.c.style.top = Math.round(paso(l.y)) + "px";
-          });
-          if (fin >= L.length || now - t0 > 4000) { L.forEach(l => { l.y = suelo - l.h; l.x = l.x0 + l.dx; pos(l); }); return res(); }
+          const dt = Math.min(.034, (now - last) / 1000); last = now;
+          for (let k = 0; k < 2; k++) L.forEach(l => paso(l, dt / 2, now));
+          L.forEach(l => { if (l.est !== "fuera") pon(l); }); clip();
+          if (L.every(l => l.est === "reposo" || l.est === "fuera") || now - t0 > 6500) { L.forEach(l => { if (l.est === "cae" || l.est === "espera") { l.est = "fuera"; l.c.style.visibility = "hidden"; } }); return res(); }
           requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
       });
-      /* la vuelta: cada letra sube a su sitio en un arco, a saltos de pixel, y al llegar vuelve al rotulo */
+      /* la vuelta: de la mas alta a la mas baja, cada letra se endereza y sube a su sitio en un arco; al llegar vuelve al rotulo */
       const vuelve = l => new Promise(res => {
-        const fx = l.x, fy = l.y, dur = quieto ? 1 : 460, t0 = performance.now(), alto = 70 * u;
+        if (l.est === "fuera") { l.c.style.visibility = ""; l.x = Math.min(Math.max(l.x, -l.w0), innerWidth); l.y = Math.min(Math.max(l.y, -l.h0), innerHeight - 10); }
+        else { const [bw, bh] = dims(l), cx = l.x + bw / 2, bot = l.y + bh; l.o = 0; l.x = cx - l.w0 / 2; l.y = bot - l.h0; }
+        l.o = 0; pon(l); const fx = l.x, fy = l.y, dur = quieto ? 1 : 480, t0 = performance.now(), alto = 70 * u;
         const tick = now => {
           const k = Math.min(1, (now - t0) / dur), e = k * k * (3 - 2 * k);
-          l.x = fx + (l.x0 - fx) * e; l.y = fy + (l.y0 - fy) * e - Math.sin(Math.PI * e) * alto;
-          l.c.style.left = Math.round(paso(l.x)) + "px"; l.c.style.top = Math.round(paso(l.y)) + "px";
+          l.x = fx + (l.x0 - fx) * e; l.y = fy + (l.y0 - fy) * e - Math.sin(Math.PI * e) * alto; pon(l);
           if (k < 1) return requestAnimationFrame(tick);
           resto.delete(l.i); A.geoLogo.quita(resto); l.c.remove(); sfx("chip", 3); res();
         };
         requestAnimationFrame(tick);
       });
-      const recoge = async () => { for (const l of L) { if (!cap.isConnected) break; await vuelve(l); await wait(quieto ? 0 : 140); } };
+      const recoge = async () => { const orden = L.slice().sort((a, b) => a.y - b.y); for (const l of orden) { if (!cap.isConnected) break; await vuelve(l); await wait(quieto ? 0 : 140); } };
       const limpia = () => { cap.remove(); if (A.geoLogo) A.geoLogo.quita(new Set()); busy = false; };
-      const guardia = setTimeout(limpia, 20000);                                         // pase lo que pase, el titulo vuelve entero
+      const guardia = setTimeout(limpia, 26000);                                         // pase lo que pase, el titulo vuelve entero
       try {
         await caida();
         if (n === 1) {
@@ -448,7 +510,7 @@ window.AIQ = window.AIQ || {};
           await recoge();
           const t2 = D().homeShown() ? D().nth("hvLetras", 2) : null; if (t2) await new Promise(res => D().say(t2, { mood: "laugh", hold: hold(t2), done: res }));
         } else {
-          await wait(1200); const ok = dice("letras", "hvLetras", { i: 3, mood: "angry", gap: 1000, libre: true }); await wait(ok ? 800 : 200); await recoge();
+          await wait(1200); const ok = n === 2 && dice("letras", "hvLetras", { i: 3, mood: "angry", gap: 1000, libre: true }); await wait(ok ? 800 : 200); await recoge();
         }
       } finally { clearTimeout(guardia); limpia(); }
     }

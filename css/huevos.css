@@ -28,11 +28,14 @@ html.reduce-motion .hv-nota { transition: none; translate: 0 0; }
 .hh-deck.five.hv-gap { grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.12fr) minmax(0, 1fr); }
 .hv-ghost { filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
 
-/* el reverso de la carta de socio: papel oscuro con filete dorado, a escala entera de la carta (--d = pixeles de pantalla por pixel de arte) */
-.hv-rev { position: absolute; inset: 0; z-index: 6; box-sizing: border-box; display: grid; align-content: center; justify-items: center; gap: calc(var(--d) * 2); padding: calc(var(--d) * 4); text-align: center;
-  background: #1d0a3d; color: #f3f0fa; border: var(--d) solid #fdd742; box-shadow: inset 0 0 0 var(--d) #7a4a05; font-family: var(--sans); font-size: calc(var(--d) * 9); line-height: 1.05; pointer-events: none; }
-.hv-rev i { font-style: normal; color: #fdd742; }
-.hv-rev span { font-size: calc(var(--d) * 7); opacity: .85; }
+/* el reverso de la carta de socio: el MISMO para todos (arte a la rejilla de la carta, --d = pixeles de pantalla por pixel de arte) y tu numero de socio */
+.hv-rev { position: absolute; inset: 0; z-index: 6; pointer-events: none; font-family: var(--sans); text-align: center; color: #f3f0fa; }
+.hv-rev-art { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.hv-rev > small, .hv-rev > b, .hv-rev > i, .hv-rev > span { position: absolute; left: 0; right: 0; font-weight: 400; font-style: normal; line-height: 1; }
+.hv-r1 { top: calc(var(--d) * 50); font-size: calc(var(--d) * 8); letter-spacing: calc(var(--d) * .5); text-transform: uppercase; color: #fdd742; }
+.hv-r2 { top: calc(var(--d) * 61); font-size: calc(var(--d) * 17); color: #f3f0fa; text-shadow: 0 var(--d) 0 #0b0618; }
+.hv-r3 { top: calc(var(--d) * 86); font-size: calc(var(--d) * 8); color: #bdb7d1; }
+.hv-r4 { top: calc(var(--d) * 101); font-size: calc(var(--d) * 7); padding: 0 calc(var(--d) * 11); line-height: 1.05 !important; color: #8a8fa8; }
 
 /* la moneda sobre la primera placa (el cebo de Comodin) */
 .hv-coin { position: fixed; z-index: 30; padding: 6px 8px 0; pointer-events: auto; cursor: default; }

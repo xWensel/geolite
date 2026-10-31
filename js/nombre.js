@@ -30,7 +30,7 @@ window.AIQ = window.AIQ || {};
     saved: "Guardado|Saved|Enregistré|Salvo|Gespeichert|Salvato||已保存|저장됨|保存しました|Сохранено|Zapisano",
   };
   /* numero de socio: sale de tu id, siempre el mismo */
-  const memberNo = () => t6(TX.no) + " " + String((A.rank && A.rank.hash ? A.rank.hash(P().id + ":socio") : 421) % 10000).padStart(4, "0");
+  const memberNo = () => t6(TX.no) + " " + (A.huevos && A.huevos.socioNo && A.huevos.socioNo() ? A.huevos.socioTxt() : String((A.rank && A.rank.hash ? A.rank.hash(P().id + ":socio") : 421) % 10000).padStart(4, "0"));   // tu numero real (api/socio.js); sin red, el de siempre
 
   /* ------------------------------------------------------------------ la escena */
   let root = null, st = null, asked = false, timers = [];
