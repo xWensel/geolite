@@ -88,7 +88,7 @@
   /* ------------------------------------------------------------ odometro mecanico */
   const DIGITS = [..."0123456789"].map(d => `<i>${d}</i>`).join("");
   function odoBuild(el, shape, oldDigits) {
-    el.innerHTML = ""; el._cols = [];
+    el.innerHTML = ""; el._cols = []; el._seps = null; el._shape = null;   // los rodillos de js/revelado.js se rehacen en su proxima vuelta (sus separadores ya no estan en el DOM)
     let di = 0;
     [...shape].forEach((ch, i) => {
       if (ch === "0") {
