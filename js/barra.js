@@ -43,6 +43,21 @@ window.AIQ = window.AIQ || {};
     boteWin: L6("¡BOTE! +{n}|JACKPOT! +{n}|BONUS ! +{n}|BÔNUS! +{n}|BONUS! +{n}|BONUS! +{n}||奖池！+{n}|보너스! +{n}|ボーナス！+{n}|БОНУС! +{n}|BONUS! +{n}"),
     goldWin: L6("¡Ficha dorada! +{n}|Gold chip! +{n}|Jeton doré ! +{n}|Ficha dourada! +{n}|Goldchip! +{n}|Fiche dorata! +{n}||金筹码！+{n}|금 칩! +{n}|金チップ！+{n}|Золотая фишка! +{n}|Złoty żeton! +{n}"),
     close: L6("Cerrar|Close|Fermer|Fechar|Schließen|Chiudi||关闭|닫기|閉じる|Закрыть|Zamknij"),
+    rank: L6("Clasificación|Leaderboard|Classement|Classificação|Rangliste|Classifica||排行榜|순위|ランキング|Рейтинг|Ranking"),
+    norows: L6("Aún no hay partidas. ¡Sé el primero!|No games yet. Be the first!|Pas encore de parties. Sois le premier !|Ainda sem partidas. Seja o primeiro!|Noch keine Spiele. Sei der Erste!|Nessuna partita ancora. Sii il primo!||暂无对局，来当第一个吧！|아직 기록이 없어요. 첫 번째가 되세요!|まだ記録がありません。最初の1人に！|Пока нет игр. Будь первым!|Brak gier. Bądź pierwszy!"),
+    you: L6("Tú|You|Toi|Você|Du|Tu||你|나|あなた|Ты|Ty"),
+    local: L6("Solo en este equipo|Only on this device|Seulement sur cet appareil|Só neste aparelho|Nur auf diesem Gerät|Solo su questo dispositivo||仅限本机|이 기기만|この端末のみ|Только на этом устройстве|Tylko na tym urządzeniu"),
+    place: L6("Puesto|Rank|Rang|Posição|Platz|Posizione||排名|순위|順位|Место|Miejsce"),
+    prizes: L6("Canje|Prize counter|Comptoir des prix|Balcão de prêmios|Preisschalter|Banco premi||兑奖处|경품 교환소|景品交換所|Призы|Wymiana nagród"),
+    myTk: L6("Tus tickets|Your tickets|Tes tickets|Seus tickets|Deine Tickets|I tuoi ticket||你的票券|내 티켓|あなたのチケット|Твои билеты|Twoje bilety"),
+    redeem: L6("Canjear|Redeem|Échanger|Trocar|Einlösen|Riscatta||兑换|교환|交換|Обменять|Wymień"),
+    sure: L6("¿Seguro?|Sure?|Sûr ?|Certeza?|Sicher?|Sicuro?||确定吗？|정말요?|本当に？|Точно?|Na pewno?"),
+    mine: L6("Tuyo|Yours|À toi|Seu|Deins|Tuo||已拥有|보유|所持|Твой|Twój"),
+    wear: L6("Ponerlo|Wear it|Le porter|Usar|Anlegen|Indossa||使用|착용|つける|Надеть|Załóż"),
+    worn: L6("Puesto|Worn|Porté|Em uso|Getragen|Indossato||使用中|착용 중|着用中|Надето|Założony"),
+    short: L6("Te faltan {n}|You need {n} more|Il t'en manque {n}|Faltam {n}|Dir fehlen {n}|Te ne mancano {n}||还差 {n}|{n}개 부족해요|あと{n}枚足りない|Не хватает {n}|Brakuje {n}"),
+    ttl: L6("Título para tu carta|Title for your card|Titre pour ta carte|Título para o seu cartão|Titel für deine Karte|Titolo per la tua carta||卡片称号|카드 칭호|カードの称号|Титул для карты|Tytuł na kartę"),
+    unit: L6("tickets|tickets|tickets|tickets|Tickets|ticket||票券|티켓|チケット|билетов|biletów"),
     soon: L6("Mesas que irán llegando|Tables on the way|Des tables à venir|Mesas a caminho|Weitere Tische folgen|Altri tavoli in arrivo||更多桌子即将到来|곧 오는 테이블|近日追加のテーブル|Новые столы скоро|Kolejne stoły wkrótce"),
   };
   const f = (t, o) => A.tx(t).replace(/\{(\w)\}/g, (m, k) => (o && o[k] != null ? o[k] : m));
@@ -52,6 +67,7 @@ window.AIQ = window.AIQ || {};
   const isOn = () => { try { return localStorage.getItem(KEYON) !== "0"; } catch (e) { return true; } };
   const prof = () => { const P = A.profile.get(); const b = (P.barra = P.barra && typeof P.barra === "object" ? P.barra : {}); b.tickets = b.tickets | 0; b.best = b.best | 0; b.runs = b.runs | 0; b.free = b.free || ""; b.hist = Array.isArray(b.hist) ? b.hist : []; return b; };
   const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const spendTickets = n => { const b = prof(); n = Math.max(0, Math.round(n)); if (b.tickets < n) return false; b.tickets -= n; saveP(); return true; };
   const saveP = () => { try { A.profile.save(); } catch (e) { /* sin almacenamiento */ } };
   /* ---------- las mesas (las que existen; las demas no se ven hasta que existan) ---------- */
   const TABLES = [
@@ -129,12 +145,12 @@ window.AIQ = window.AIQ || {};
       <button type="button" class="hub-back brr-back" id="brBack">${A.icon("u_back", "sm")}${esc(A.tx(T.back))}</button>${hudHtml()}
       <div class="brr-floor">${ts.map(tableHtml).join("")}<div class="brr-counter"><img src="assets/icons/dealer_neutral.webp" alt="" data-cart="dealer_neutral" data-cdef="assets/icons/dealer_neutral.webp"></div></div>
       <div class="brr-stakes"><span>${esc(A.tx(T.bet))}</span><input id="brStk2" type="range" min="${MIN}" max="${max}" step="${MIN}" value="${Math.min(stk, max)}" ${max <= MIN ? "disabled" : ""} aria-label="${esc(A.tx(T.bet))}"><b id="brStkv">${fmt(Math.min(stk, max))}</b><button type="button" data-q="min">${esc(A.tx(T.min))}</button><button type="button" data-q="half">50 %</button><button type="button" data-q="all">${esc(A.tx(T.all))}</button><span class="brr-note">${R.gold ? esc(A.tx(T.gold)) : BOTE.has(R.play + 1) ? esc(A.tx(T.bote)) : ""}</span></div>
-      <div class="brr-say" id="brSay">${esc(msg || A.tx(T.pick))}</div></div></section>`;
+      <div class="brr-tools"><button type="button" id="brRank">${A.icon("m_rank")}<b>${esc(A.tx(T.rank))}</b></button><button type="button" id="brPrize">${A.icon("crown")}<b>${esc(A.tx(T.prizes))}</b><i>${fmt(prof().tickets)}</i></button></div><div class="brr-say" id="brSay">${esc(msg || A.tx(T.pick))}</div></div></section>`;
     wire(); dealerOff();
     if (A.fitK) A.fitK();
   }
   function wire() {
-    $("brBack").onclick = () => leave();
+    $("brBack").onclick = () => leave(); $("brRank").onclick = () => rankPanel(); $("brPrize").onclick = () => prizePanel();
     const s = $("brStk2"), v = $("brStkv"); s.oninput = () => { R.stake = +s.value; v.textContent = fmt(R.stake); const p = root.querySelector(".brr-pop .bt-stake"); if (p) p.innerHTML = CNb() + stakeNow(); A.sfx.tick && A.sfx.tick(1); };
     root.querySelectorAll(".brr-stakes [data-q]").forEach(b => (b.onclick = () => { const max = Math.max(MIN, Math.floor(RUN.coins / MIN) * MIN); R.stake = b.dataset.q === "min" ? MIN : b.dataset.q === "all" ? max : Math.max(MIN, Math.round(RUN.coins / 2 / MIN) * MIN); s.value = Math.min(R.stake, max); v.textContent = fmt(+s.value); R.stake = +s.value; const p = root.querySelector(".brr-pop .bt-stake"); if (p) p.innerHTML = CNb() + stakeNow(); A.sfx.chip && A.sfx.chip(0.4); }));
     root.querySelectorAll(".brr-tbl").forEach(t => (t.onclick = () => open(t.dataset.g, t)));
@@ -173,19 +189,50 @@ window.AIQ = window.AIQ || {};
     if (R.over) endScreen();
   }
   function hud() { const e = $("brStk"); if (e && RUN) e.querySelector("b").textContent = fmt(RUN.coins); }
+  /* ---------- paneles: clasificacion y canje ---------- */
+  function panel(html, wireFn) {
+    const board = root.querySelector(".brr-board"); board.querySelectorAll(".brr-panel").forEach(x => x.remove());
+    const o = document.createElement("div"); o.className = "brr-over brr-panel"; o.innerHTML = `<div class="brr-tk brr-wide">${html}<button type="button" class="ghost" id="brClose">${esc(A.tx(T.close))}</button></div>`; board.appendChild(o);
+    const close = () => o.remove(); $("brClose").onclick = close; o.addEventListener("keydown", e => { if (e.key === "Escape") { e.stopPropagation(); close(); } }); wireFn && wireFn(o, close); const f = $("brClose"); f && f.focus({ preventScroll: true });
+    return o;
+  }
+  function rankPanel() {
+    const P = A.profile.get();
+    panel(`<h4>${esc(A.tx(T.rank))}</h4><div id="brRows" class="brr-rows"><p>…</p></div><p class="brr-loc" id="brLoc"></p>`);
+    (A.rank ? A.rank.top("barra-all", 10) : Promise.resolve({ rows: [], global: false })).then(t => {
+      const rows = t.rows || [], me = P.id, box = document.getElementById("brRows"); if (!box) return;
+      box.innerHTML = rows.length ? `<table>${rows.map((r, i) => `<tr class="${r.id && r.id === me ? "me" : ""}"><td>${i + 1}</td><td>${esc(r.name)}${r.id && r.id === me ? " · " + esc(A.tx(T.you)) : ""}</td><td>${fmt(r.score)}</td></tr>`).join("")}${t.me && t.me.rank > rows.length ? `<tr class="me"><td>${t.me.rank}</td><td>${esc(A.tx(T.you))}</td><td>${fmt(t.me.score)}</td></tr>` : ""}</table>` : `<p>${esc(A.tx(T.norows))}</p>`;
+      const l = document.getElementById("brLoc"); if (l && !t.global) l.textContent = A.tx(T.local);
+    });
+  }
+  function prizePanel(armed) {
+    const list = A.socio && A.socio.tkTitles ? A.socio.tkTitles() : [], b = prof(), cur = A.socio.title();
+    panel(`<h4>${esc(A.tx(T.prizes))}</h4><p>${esc(A.tx(T.myTk))}: <b>${fmt(b.tickets)}</b></p><div class="brr-prizes">${list.map(t => { const short = t.tk - b.tickets, st = t.owned ? (cur === t.id ? "worn" : "mine") : short > 0 ? "poor" : "buy";
+      return `<div class="brr-pz ${t.owned ? "own" : ""}">${A.icon("crown")}<b>${esc(t.name)}</b><i>${esc(A.tx(T.ttl))}</i><span class="brr-pr">${fmt(t.tk)} ${esc(A.tx(T.unit))}</span><button type="button" data-id="${t.id}" data-st="${st}" ${st === "poor" || st === "worn" ? "disabled" : ""}>${esc(st === "worn" ? A.tx(T.worn) : st === "mine" ? A.tx(T.wear) : st === "poor" ? f(T.short, { n: fmt(short) }) : armed === t.id ? A.tx(T.sure) : A.tx(T.redeem))}</button></div>`; }).join("")}</div>`,
+      o => o.querySelectorAll(".brr-pz button").forEach(btn => (btn.onclick = () => { const id = btn.dataset.id, st = btn.dataset.st;
+        if (st === "mine") { A.socio.setTitle(id); A.sfx.tick && A.sfx.tick(1); return prizePanel(); }
+        if (st === "buy") { if (armed !== id) return prizePanel(id); if (A.socio.redeemTitle(id)) { A.sfx.buy && A.sfx.buy(); const t = $("brPrize"); if (t) t.querySelector("i").textContent = fmt(prof().tickets); } prizePanel(); } })));
+  }
   /* ---------- entrada y final ---------- */
   function entry() {
     const b = prof(), freeOk = b.free !== today(), poor = !freeOk && !(A.club && A.club.fichas() >= FEE), o = document.createElement("div"); o.className = "brr-over";
-    o.innerHTML = `<div class="brr-tk"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.intro))}</p>${b.best ? `<p class="brr-rec">${esc(A.tx(T.best))}: <b>${fmt(b.best)}</b></p>` : ""}${freeOk ? `<button type="button" id="brFree" data-primary>${esc(A.tx(T.free))}</button>` : ""}<button type="button" id="brPay" ${freeOk ? 'class="alt"' : "data-primary"} ${poor ? "disabled" : ""}>${esc(f(T.pay, { n: FEE }))}</button>${poor ? `<p class="brr-poor">${esc(A.tx(T.poor))}</p>` : ""}<button type="button" id="brOut" class="ghost">${esc(A.tx(T.leave))}</button></div>`;
-    root.querySelector(".brr-board").appendChild(o);
-    const go = paid => { if (paid === "fee") { if (!(A.club && A.club.spend(FEE))) return; } else b.free = today(); b.runs++; saveP(); R = newRunState(paid); RUN = mkRun(R.seed); persistRun(); o.remove(); paint(); };
+    o.innerHTML = `<div class="brr-tk"><h4>${esc(A.tx(T.title))}</h4><p>${esc(A.tx(T.intro))}</p>${b.best ? `<p class="brr-rec">${esc(A.tx(T.best))}: <b>${fmt(b.best)}</b> · ${esc(A.tx(T.myTk))}: <b>${fmt(b.tickets)}</b></p>` : ""}${freeOk ? `<button type="button" id="brFree" data-primary>${esc(A.tx(T.free))}</button>` : ""}<button type="button" id="brPay" ${freeOk ? 'class="alt"' : "data-primary"} ${poor ? "disabled" : ""}>${esc(f(T.pay, { n: FEE }))}</button>${poor ? `<p class="brr-poor">${esc(A.tx(T.poor))}</p>` : ""}<div class="brr-two"><button type="button" id="brRk2" class="ghost">${esc(A.tx(T.rank))}</button><button type="button" id="brPz2" class="ghost">${esc(A.tx(T.prizes))}</button></div><button type="button" id="brOut" class="ghost">${esc(A.tx(T.leave))}</button></div>`;
+    root.querySelector(".brr-board").appendChild(o); $("brRk2").onclick = () => rankPanel(); $("brPz2").onclick = () => prizePanel();
+    const go = paid => { if (paid === "fee") { if (!(A.club && A.club.spend(FEE))) return; } else b.free = today(); b.runs++; saveP(); R = newRunState(paid); RUN = mkRun(R.seed); persistRun(); o.remove(); paint(); if (A.rank && A.rank.ticket) A.rank.ticket().then(id => { if (id && R) { R.ticketId = id; persistRun(); } }).catch(() => {}); };
     if (freeOk) $("brFree").onclick = () => go("free"); $("brPay").onclick = () => go("fee"); $("brOut").onclick = () => leave(true);
+  }
+  /* la partida acabada va al ranking general de La Barra de la casa (barra-all, el de siempre) con su boleto; sin red se queda en la clasificacion de este equipo */
+  async function submitScore(final, plays) {
+    const rk = A.rank; if (!rk || !rk.submit || final <= 0) return null;
+    const pf = R.ticketId ? { run: R.ticketId, x: { p: plays } } : undefined;
+    try { await rk.submit("barra-all", { score: final, extra: { p: plays }, ...(pf ? { pf } : {}) }); const t = await rk.top("barra-all", 1); return t && t.me ? t.me.rank : null; } catch (e) { return null; }
   }
   function endScreen() {
     const final = Math.max(0, RUN.coins), tk = Math.floor(final / TK), b = prof(); R.tk = tk; b.tickets += tk; if (final > b.best) b.best = final; b.hist.unshift({ at: Date.now(), final, tk }); b.hist.length = Math.min(b.hist.length, 30); delete b.run; saveP();
     const bestP = R.log.reduce((m, x) => (x.net > m.net ? x : m), { net: 0, g: "" }), o = document.createElement("div"); o.className = "brr-over";
-    o.innerHTML = `<div class="brr-tk"><h4>${esc(A.tx(final <= 0 ? T.broke : T.end))}</h4><div class="brr-big">${fmt(final)}</div><div class="brr-lab">${esc(A.tx(T.final))}</div><div class="brr-row"><span>${esc(A.tx(T.bigp))}</span><b>${bestP.net > 0 ? esc(betName(bestP.g)) + " +" + fmt(bestP.net) : "—"}</b></div><div class="brr-row"><span>${esc(A.tx(T.tickets))}</span><b>${fmt(tk)}</b></div><div class="brr-row"><span>${esc(A.tx(T.best))}</span><b>${fmt(b.best)}</b></div><button type="button" id="brAgain" data-primary>${esc(A.tx(T.again))}</button><button type="button" id="brOut2" class="ghost">${esc(A.tx(T.leave))}</button></div>`;
-    setTimeout(() => { if (!root) return; closePop(); root.querySelector(".brr-board").appendChild(o); $("brAgain").onclick = () => { o.remove(); entry(); }; $("brOut2").onclick = () => leave(true); }, 700);
+    o.innerHTML = `<div class="brr-tk"><h4>${esc(A.tx(final <= 0 ? T.broke : T.end))}</h4><div class="brr-big">${fmt(final)}</div><div class="brr-lab">${esc(A.tx(T.final))}</div><div class="brr-row"><span>${esc(A.tx(T.bigp))}</span><b>${bestP.net > 0 ? esc(betName(bestP.g)) + " +" + fmt(bestP.net) : "—"}</b></div><div class="brr-row"><span>${esc(A.tx(T.tickets))}</span><b>${fmt(tk)}</b></div><div class="brr-row"><span>${esc(A.tx(T.best))}</span><b>${fmt(b.best)}</b></div><div class="brr-row"><span>${esc(A.tx(T.place))}</span><b id="brRk">…</b></div><button type="button" id="brAgain" data-primary>${esc(A.tx(T.again))}</button><button type="button" id="brOut2" class="ghost">${esc(A.tx(T.leave))}</button></div>`;
+    const shown = rk => { const e = document.getElementById("brRk"); if (e) e.textContent = rk ? "#" + rk : "—"; }; let got; submitScore(final, R.play).then(rank => { got = rank || 0; shown(got); });
+    setTimeout(() => { if (!root) return; closePop(); root.querySelector(".brr-board").appendChild(o); if (got != null) shown(got); $("brAgain").onclick = () => { o.remove(); entry(); }; $("brOut2").onclick = () => leave(true); }, 700);
   }
   function leave(done) { closePop(); if (RUN && R && !R.over) persistRun(); if (restoreRun) { restoreRun(); restoreRun = null; } A.adv._barra = false; try { A.dealer.casino(false); } catch (e) { /* sin crupier */ } root = null; R = null; RUN = null; A.hub.screen("home"); }
   /* ---------- abrir ---------- */
@@ -198,5 +245,5 @@ window.AIQ = window.AIQ || {};
   /* la placa de la portada (arriba a la derecha, junto a las fichas de oro) */
   const button = () => isOn() ? `<button type="button" class="brr-plate" id="barraBtn" aria-label="${esc(A.tx(T.title))}">${A.icon("bet_red")}<b>${esc(A.tx(T.plaque))}</b></button>` : "";
   const wireButton = () => { const b = $("barraBtn"); if (b) b.onclick = () => { A.sfx.card && A.sfx.card(); A.hub.screen("barra"); }; };
-  A.barra = { open: open_, button, wireButton, on: isOn, setOn: v => { try { localStorage.setItem(KEYON, v ? "1" : "0"); } catch (e) { /* sin almacenamiento */ } }, tx: T, FEE, START, PLAYS, MIN, state: () => ({ R, RUN }), _leave: leave };
+  A.barra = { open: open_, button, wireButton, on: isOn, setOn: v => { try { localStorage.setItem(KEYON, v ? "1" : "0"); } catch (e) { /* sin almacenamiento */ } }, spendTickets, tickets: () => prof().tickets, tx: T, FEE, START, PLAYS, MIN, state: () => ({ R, RUN }), _leave: leave };
 })(window.AIQ);

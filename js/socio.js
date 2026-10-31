@@ -116,6 +116,13 @@ window.AIQ = window.AIQ || {};
     { id: "doble", p: 40, n: "Doble o nada|Double or nothing|Quitte ou double|Dobro ou nada|Doppelt oder nichts|Lascia o raddoppia||加倍或归零|더블 오어 낫싱|ダブル・オア・ナッシング|Пан или пропал|Wszystko albo nic" },
     { id: "rapido", p: 40, n: "Ni idea, pero rápido|No clue, but fast|Aucune idée, mais vite|Sem ideia, mas rápido|Keine Ahnung, aber schnell|Nessuna idea, ma veloce||毫无头绪，但很快|몰라도 빠르게|分からないけど速い|Без понятия, зато быстро|Bez pojęcia, ale szybko" },
     { id: "invita", p: 60, n: "La casa invita|On the house|C'est la maison qui régale|A casa convida|Geht aufs Haus|Offre la casa||本店请客|하우스가 쏜다|店のおごり|За счёт заведения|Na koszt firmy" },
+    /* v0.4.35: los premios de La Barra de la casa (js/barra.js, el canje): tk = tickets */
+    { id: "tahur", tk: 60, n: "Tahúr de guante blanco|White-glove gambler|Joueur en gants blancs|Apostador de luvas brancas|Spieler mit weißen Handschuhen|Giocatore in guanti bianchi||戴白手套的赌徒|흰 장갑 도박사|白手袋の勝負師|Игрок в белых перчатках|Gracz w białych rękawiczkach" },
+    { id: "caliente", tk: 80, n: "Mano caliente|Hot hand|Main chaude|Mão quente|Heiße Hand|Mano calda||手气正旺|뜨거운 손|ホットハンド|Горячая рука|Gorąca ręka" },
+    { id: "sinfreno", tk: 100, n: "Sin freno|No brakes|Sans frein|Sem freio|Ohne Bremse|Senza freni||不踩刹车|브레이크 없이|ブレーキなし|Без тормозов|Bez hamulców" },
+    { id: "cazabotes", tk: 150, n: "Cazador de botes|Jackpot hunter|Chasseur de jackpots|Caçador de prêmios|Jackpot-Jäger|Cacciatore di jackpot||奖池猎人|잭팟 사냥꾼|ジャックポットハンター|Охотник за джекпотом|Łowca jackpotów" },
+    { id: "duenobarra", tk: 250, n: "Dueño de la Barra|Owner of the Bar|Maître du Bar|Dono do Bar|Herr der Bar|Padrone del Bar||吧台之主|바의 주인|バーの主|Хозяин Бара|Pan Baru" },
+    { id: "casapierde", tk: 400, n: "La casa pierde por una vez|For once, the house loses|Pour une fois, la maison perd|Por uma vez, a casa perde|Einmal verliert das Haus|Per una volta, la casa perde||庄家难得一输|이번만은 하우스가 진다|たまには店が負ける|На этот раз казино проиграло|Raz kasyno przegrywa" },
     /* v2: uno cada 10 niveles del camino (lv = el nivel en que se gana) */
     { id: "billete", lv: 5, n: "Billete de ida|One-way ticket|Aller simple|Passagem de ida|Einfache Fahrt|Biglietto di sola andata||单程票|편도 티켓|片道切符|Билет в один конец|Bilet w jedną stronę" },
     { id: "tapete", lv: 15, n: "Fiel al tapete|Loyal to the felt|Fidèle au tapis|Fiel ao feltro|Dem Filz treu|Fedele al panno verde||牌桌常驻|펠트의 단골|フェルトに忠実|Верен сукну|Wierny suknu" },
@@ -130,6 +137,7 @@ window.AIQ = window.AIQ || {};
   ];
   const TIT = Object.fromEntries(TITLES.map(t => [t.id, t]));
   const TX = {
+    byBarra: "Se canjea en La Barra de la casa por {n} tickets|Redeemed at the House Bar for {n} tickets|S'échange au Bar de la maison contre {n} tickets|Troca-se no Bar da casa por {n} tickets|Im Haus-Bar gegen {n} Tickets einlösbar|Si riscatta al Bar della casa con {n} ticket||在赌场吧台用 {n} 张票券兑换|하우스 바에서 티켓 {n}장으로 교환|ハウスのバーでチケット{n}枚と交換|Обменивается в Баре заведения за {n} билетов|Do wymiany w Barze kasyna za {n} biletów",
     secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|숨겨진 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
     byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Conquistado com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就「{a}」后获得|업적 「{a}」 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
     byLv: "Se gana en el nivel {n} del Club|Earned at Club level {n}|S'obtient au niveau {n} du Club|Conquistado no nível {n} do Clube|Freigeschaltet mit Club-Stufe {n}|Si ottiene al livello {n} del Club||俱乐部 {n} 级时获得|클럽 레벨 {n}에서 획득|クラブのレベル{n}で手に入る|Даётся на уровне клуба {n}|Zdobywasz na poziomie klubu {n}",
@@ -165,9 +173,11 @@ window.AIQ = window.AIQ || {};
   const title = () => { const c = prof().club || {}; return c.tit && titleOwned(c.tit) ? c.tit : ""; };
   const setTitle = id => { if (id && !titleOwned(id)) return false; club().tit = id || ""; A.profile.save(); return true; };
   const titleName = id => (TIT[id] ? P6(TIT[id].n) : "");
-  const titleHow = id => { const t = TIT[id]; if (!t) return ""; if (t.lv) return P6(TX.byLv).replace("{n}", t.lv); if (t.ach) { const a = achOf(t.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; } return t.duel ? P6(TX.byDuel).replace("{n}", A.fmt(Math.min(duelWins(), t.duel))) : ""; };
+  const titleHow = id => { const t = TIT[id]; if (!t) return ""; if (t.tk) return P6(TX.byBarra).replace("{n}", t.tk); if (t.lv) return P6(TX.byLv).replace("{n}", t.lv); if (t.ach) { const a = achOf(t.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; } return t.duel ? P6(TX.byDuel).replace("{n}", A.fmt(Math.min(duelWins(), t.duel))) : ""; };
   const titleFull = id => (TIT[id] && TIT[id].p) || 0, titlePrice = id => deal("t:" + id, titleFull(id));
   const titles = () => TITLES.map(t => ({ id: t.id, kind: t.p ? "tienda" : "hito", owned: titleOwned(t.id), price: titlePrice(t.id), name: titleName(t.id), how: titleHow(t.id) }));
+  const tkTitles = () => TITLES.filter(t => t.tk).map(t => ({ id: t.id, tk: t.tk, owned: titleOwned(t.id), name: titleName(t.id) }));
+  function redeemTitle(id) { const t = TIT[id]; if (!t || !t.tk || titleOwned(id) || !A.barra || !A.barra.spendTickets(t.tk)) return false; const c = club(); c.tt[id] = Date.now(); c.tit = id; A.profile.save(); return true; }   // el canje de La Barra de la casa
   function buyTitle(id) { const t = TIT[id]; if (!t || !t.p || titleOwned(id) || !A.club || !A.club.spend || !A.club.spend(titlePrice(id))) return false; const c = club(); c.tt[id] = Date.now(); c.tit = id; A.profile.save(); return true; }
 
   /* ---------------------------------------------------------------- dibujo al pixel: rejilla de colores con contorno automatico */
@@ -541,7 +551,7 @@ window.AIQ = window.AIQ || {};
   /* el truco de pruebas (js/truco.js): todo lo de la tienda, tuyo (los logros ya los da el truco) */
   const _todo = () => { const c = club(); Object.keys(SHOP_IC).forEach(id => { c.ic[id] = c.ic[id] || Date.now(); }); TITLES.forEach(t => { if (t.p) c.tt[t.id] = c.tt[t.id] || Date.now(); }); c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; MARCOS.forEach(m => { if (m.p) c.mc[m.id] = c.mc[m.id] || Date.now(); }); A.profile.save(); };
 
-  A.socio = { mount, thumb, icons, icon, setIcon, buyIcon, iconName, iconHow, iconKind, iconOwned, titles, title, setTitle, buyTitle, titleName, titleHow, titleOwned,
+  A.socio = { mount, thumb, icons, icon, setIcon, buyIcon, iconName, iconHow, iconKind, iconOwned, titles, tkTitles, redeemTitle, title, setTitle, buyTitle, titleName, titleHow, titleOwned,
     marcos, marco, setMarco, buyMarco, marcoName, marcoHow, marcoOwned, badge, code, parse, _todo, iconFull, titleFull, marcoFull,
     /* el lote del escaparate: darla sin cobrar ni ponerla (w = i icono, t titulo, k marco) */
     give: (w, id) => { const c = club(); if (w === "i" && SHOP_IC[id] && !iconOwned(id)) c.ic[id] = Date.now(); else if (w === "t" && TIT[id] && TIT[id].p && !titleOwned(id)) c.tt[id] = Date.now(); else if (w === "k" && MAR[id] && MAR[id].p && !marcoOwned(id)) { c.mc = c.mc && typeof c.mc === "object" ? c.mc : {}; c.mc[id] = Date.now(); } else return false; A.profile.save(); return true; },

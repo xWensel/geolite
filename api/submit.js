@@ -31,6 +31,21 @@ async function proof(rid, id, score, x) {
   const [set, s1] = await kv.pipeline([["HSETNX", "run:" + rid, "s", score], ["HGET", "run:" + rid, "s"]]);
   return set || +s1 === score ? true : "used";
 }
+/* La Barra de la casa (v0.4.35): la puntuacion es el saldo final de la partida (fichas); x = { p: jugadas hechas, 1-20 }. Mismo boleto de partida (op "run"), uno por puntuacion,
+   y cada jugada dura al menos 3 s de reloj desde el boleto (una partida de 20 tarda mas de un minuto). Sigue siendo de confianza, como el resto. */
+const BQMS = 3000;
+async function proofBarra(rid, id, score, x) {
+  rid = String(rid || "");
+  if (!/^[a-f0-9]{24}$/.test(rid) || !x || typeof x !== "object") return "proof";
+  const p = +x.p;
+  if (!Number.isInteger(p) || p < 1 || p > 20 || !Number.isInteger(score) || score < 0 || score > 5e6) return "proof";
+  const [[uid, t0, s0]] = await kv.pipeline([["HMGET", "run:" + rid, "id", "t", "s"]]);
+  if (!uid || uid !== id) return "run";
+  if (Date.now() - +t0 < p * BQMS) return "time";
+  if (s0 != null) return +s0 === score ? true : "used";
+  const [set, s1] = await kv.pipeline([["HSETNX", "run:" + rid, "s", score], ["HGET", "run:" + rid, "s"]]);
+  return set || +s1 === score ? true : "used";
+}
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") return res.status(405).json({ ok: false });
@@ -92,7 +107,7 @@ module.exports = async (req, res) => {
       await kv.pipeline([["ZADD", lb, total, id], ["HSET", names, id, name], ["HSET", "tries:" + board, id, mine.join(",")], ["EXPIRE", lb, TTL], ["EXPIRE", names, TTL], ["EXPIRE", "tries:" + board, TTL], ...(add.length ? [["HSET", "lbip", id, h]] : [])]);
     } else {
       const up = cur == null || score > +cur;                          // entra o sube: hace falta el boleto. Si no (cambio de nombre, reenvio), solo cambia el nombre
-      if (up) { const v = await proof(b.run, id, score, b.x); if (v !== true) return res.status(403).json({ ok: false, reason: v }); }
+      if (up) { const v = await (/^barra/.test(board) ? proofBarra(b.run, id, score, b.x) : proof(b.run, id, score, b.x)); if (v !== true) return res.status(403).json({ ok: false, reason: v }); }
       if (dayB) await kv.pipeline([["ZADD", lb, "GT", score, id], ["HSET", names, id, name], ["EXPIRE", lb, TTL], ["EXPIRE", names, TTL], ...(up ? [["HSET", "lbip", id, h]] : [])]);   // mejor expedicion del dia (advd-; day- de versiones anteriores), caduca como el Reto diario
       else await kv.pipeline([["ZADD", lb, "GT", score, id], ["HSET", names, id, name], ["PERSIST", lb], ["PERSIST", names], ...(up ? [["HSET", "lbip", id, h]] : [])]);   // la Aventura es "de siempre": no caduca
     }

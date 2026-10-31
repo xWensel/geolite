@@ -38,3 +38,16 @@
 /* la placa de la portada: junto a las fichas de oro, a su misma altura */
 .brr-plate { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 2px 8px; background: #f5a623; color: var(--gx-ink); border: 0; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -3px 0 #c46a1b; cursor: pointer; font-family: var(--serif); font-size: 20px; clip-path: var(--gx-notch); }
 .brr-plate .ic { width: 28px; height: 28px; } .brr-plate b { font-weight: 400; } .brr-plate:hover { filter: brightness(1.08); } .brr-plate:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+/* paso 2: clasificacion y canje */
+.brr-tools { left: 740px; top: 586px; display: flex; gap: 10px; }
+.brr-tools button { display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 2px 8px; background: #f5a623; color: var(--gx-ink); border: 0; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -3px 0 #c46a1b; font: 22px var(--serif); cursor: pointer; }
+.brr-tools .ic { width: 28px; height: 28px; } .brr-tools b { font-weight: 400; } .brr-tools i { font-style: normal; background: #fff3b0; padding: 0 7px; box-shadow: inset 0 0 0 2px var(--gx-o); }
+.brr-tools button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.brr-wide { width: 800px; max-height: 620px; overflow: auto; }
+.brr-tabs { display: flex; gap: 8px; justify-content: center; } .brr-tk .brr-tabs button { font-size: 22px; padding: 4px 16px 6px; margin: 0; background: #e8dcc0; box-shadow: inset 0 0 0 2px var(--gx-o); } .brr-tk .brr-tabs button[aria-pressed="true"] { background: #f5a623; box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 -3px 0 #c46a1b; }
+.brr-rows table { width: 100%; border-collapse: collapse; font-size: 24px; text-align: left; } .brr-rows td { padding: 4px 10px; border-bottom: 2px dashed #cdbd97; } .brr-rows td:last-child { text-align: right; font-variant-numeric: tabular-nums; } .brr-rows tr.me td { background: #fff3b0; } .brr-loc { color: var(--gx-ink-2); font-size: 18px !important; }
+.brr-prizes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.brr-pz { background: #fffaec; box-shadow: inset 0 0 0 2px var(--gx-o); padding: 10px; display: grid; gap: 4px; justify-items: center; align-content: start; } .brr-pz.own { background: #e6f2d8; }
+.brr-pz .ic { width: 48px; height: 48px; } .brr-pz b { font-weight: 400; font-size: 22px; line-height: 1; } .brr-pz i { font-style: normal; font-size: 16px; color: var(--gx-ink-2); }
+.brr-pr { background: #f5a623; padding: 2px 10px; box-shadow: inset 0 0 0 2px var(--gx-o); font-size: 20px; }
+.brr-tk .brr-pz button { font-size: 20px; padding: 4px 12px 6px; margin-top: 2px; } .brr-two { display: flex; justify-content: center; gap: 12px; } .brr-two button { font-size: 22px !important; }
