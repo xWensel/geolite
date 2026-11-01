@@ -7,20 +7,20 @@
 .rou.ruleta .ru-stage canvas, .rou.ruleta .ru-stage img { image-rendering: pixelated; display: block; }
 .ru-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, #1d4a37 0, #12301f 60%, #08170f 100%); }
 /* cabecera: titulo, jugada, saldo en papel */
-.ru-hud { position: absolute; left: 40px; top: 22px; width: 1840px; height: 104px; }
+.ru-hud { position: absolute; left: var(--L, 40px); top: 22px; width: calc(1920px - 2 * var(--L, 40px)); height: 104px; }
 .ru-t { font-size: 56px; line-height: 1; color: #fff3d6; text-shadow: 0 4px 0 #050b08; } .ru-s { font-size: 28px; color: #b9c6b6; }
 .ru-pips { display: flex; gap: 6px; margin-top: 6px; } .ru-pips i { width: 22px; height: 22px; background: #0e271c; box-shadow: inset 0 0 0 2px var(--ru-o); } .ru-pips i.on { background: var(--ru-acc); } .ru-pips i.now { background: var(--ru-paper); }
 .ru-sal { position: absolute; right: 20px; top: -4px; height: 96px; display: flex; align-items: center; gap: 12px; padding: 0 22px 0 10px; background: var(--ru-paper); color: var(--ru-ink); clip-path: var(--ru-notch); box-shadow: inset 0 0 0 2px var(--ru-o); }
 .ru-sal img { width: 64px; height: 64px; } .ru-sal b { font-weight: 400; font-size: 58px; line-height: 1; font-variant-numeric: tabular-nums; display: inline-block; } .ru-sal small { display: block; font-size: 22px; color: var(--ru-ink2); margin-top: -4px; }
 .ru-sal b.bump { animation: ru-bump .7s ease-out; } @keyframes ru-bump { 0% { transform: scale(1); } 25% { transform: scale(1.5); } 100% { transform: scale(1); } }
-.ru-ph { position: absolute; left: 640px; top: 140px; width: 1240px; display: flex; align-items: center; gap: 24px; }
+.ru-ph { position: absolute; left: var(--fl, 640px); top: 140px; width: var(--fw, 1240px); display: flex; align-items: center; gap: 24px; }
 .ru-phase { font: 700 30px/1 var(--mono, "Silkscreen", monospace); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; color: var(--ru-acc); } .ru-phase.spin { color: #ff8a7a; } .ru-phase.pay { color: #fff3d6; }
 .ru-clock { font: 700 30px/1 var(--mono, "Silkscreen", monospace); color: #fff3d6; font-variant-numeric: tabular-nums; min-width: 92px; }
 .ru-cyc { position: relative; flex: 1; height: 20px; display: flex; background: #0e271c; box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 0 0 4px var(--ru-rim-lo); padding: 4px; }
 .ru-cyc b { display: block; height: 100%; } .ru-cyc .s1 { width: 62.2%; background: rgba(255, 207, 102, .55); } .ru-cyc .s2 { width: 22.2%; background: rgba(255, 138, 122, .6); } .ru-cyc .s3 { width: 15.6%; background: rgba(243, 237, 220, .4); }
 .ru-cyc i { position: absolute; top: -6px; bottom: -6px; width: 6px; background: #fff3d6; box-shadow: 0 0 0 2px var(--ru-o); }
 /* columna izquierda: rueda, marcador (papel), crupier */
-.ru-left { position: absolute; left: 40px; top: 190px; width: 560px; display: flex; flex-direction: column; gap: 24px; }
+.ru-left { position: absolute; left: var(--L, 40px); top: 190px; width: calc(560px - min(40px, var(--ins, 0px))); display: flex; flex-direction: column; gap: 24px; }
 .ru-wheel { position: relative; height: 504px; display: grid; place-items: center; background: #0b1510; box-shadow: 0 0 0 3px var(--ru-o), 0 0 0 9px var(--ru-rim), 0 0 0 12px var(--ru-o); }
 .ru-wheel canvas { width: 480px; height: 480px; }
 .ru-res { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; opacity: 0; } .ru-res.on { animation: ru-res 4.2s both; }
@@ -33,11 +33,11 @@
 .ru-last { display: flex; align-items: center; gap: 16px; } .ru-hist { display: flex; gap: 6px; flex-wrap: nowrap; } .ru-hist .ru-d, .ru-hc .ru-d { width: 36px; height: 36px; font-size: 14px; }
 .ru-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .ru-stats div { box-shadow: inset 0 0 0 2px var(--ru-ink2); padding: 4px 10px; } .ru-stats span { font: 400 12px/1 var(--mono, "Silkscreen", monospace); color: var(--ru-ink2); text-transform: uppercase; display: block; } .ru-stats b { font: 400 30px/1.1 "Jersey 15", var(--serif); color: var(--ru-ink); }
 .ru-hc { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } .ru-hc .ru-lbl:nth-of-type(2) { margin-left: 10px; }
-.ru-say { position: absolute; left: 40px; top: 960px; width: 560px; height: 86px; display: flex; gap: 14px; align-items: center; }
+.ru-say { position: absolute; left: var(--L, 40px); top: 960px; width: calc(560px - min(40px, var(--ins, 0px))); height: 86px; display: flex; gap: 14px; align-items: center; }
 .ru-av { width: 80px; height: 80px; flex: none; display: grid; place-items: center; background: var(--ru-paper); clip-path: var(--ru-notch); box-shadow: inset 0 0 0 2px var(--ru-o); } .ru-av img { width: 60px; height: 60px; }
 .ru-sayt { font-size: 32px; line-height: 1; color: #fff3d6; } .ru-sayt.pop { animation: ru-say .35s ease-out; } @keyframes ru-say { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: none; } }
 /* tapete */
-.ru-feltwrap { position: absolute; left: 640px; top: 196px; width: 1240px; display: flex; justify-content: center; }
+.ru-feltwrap { position: absolute; left: var(--fl, 640px); top: 196px; width: var(--fw, 1240px); display: flex; justify-content: center; }
 .ru-felt { position: relative; background: radial-gradient(130% 120% at 50% 0%, #256046 0, #1a4531 60%, #12301f 100%); box-shadow: 0 0 0 3px var(--ru-o), 0 0 0 9px var(--ru-rim), 0 0 0 12px var(--ru-o), 0 14px 0 12px rgba(0, 0, 0, .35); touch-action: manipulation; }
 .ru-felt:not(.locked) { cursor: pointer; } .ru-felt.locked { cursor: not-allowed; }
 .ru-c { position: absolute; box-sizing: border-box; display: grid; place-items: center; font: 400 44px/1 "Jersey 15", var(--serif); color: #fff; box-shadow: inset 0 0 0 1px rgba(212, 160, 74, .55); }
@@ -55,9 +55,9 @@
 .ru-stk.win { animation: ru-pulse .5s ease-in-out infinite alternate; z-index: 3; } .ru-stk.lose { opacity: .4; filter: grayscale(1); } @keyframes ru-pulse { to { transform: translateY(-8px); } }
 .ru-nova { position: absolute; inset: 0; display: none; place-items: center; background: rgba(8, 23, 15, .6); font: 700 76px/1 var(--mono, "Silkscreen", monospace); letter-spacing: .12em; color: #ff8a7a; text-shadow: 0 5px 0 #050b08; pointer-events: none; text-transform: uppercase; }
 .ru-felt.locked .ru-nova { display: grid; } .ru-felt.pay .ru-nova { display: none; }
-.ru-info { position: absolute; left: 640px; top: 668px; width: 1240px; height: 70px; display: flex; align-items: center; padding: 0 22px; font-size: 27px; line-height: 1.05; clip-path: var(--ru-notch); background: var(--ru-paper); color: var(--ru-ink); box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 0 0 4px var(--ru-rim); }
+.ru-info { position: absolute; left: var(--fl, 640px); top: 668px; width: var(--fw, 1240px); height: 70px; display: flex; align-items: center; padding: 0 22px; font-size: 27px; line-height: 1.05; clip-path: var(--ru-notch); background: var(--ru-paper); color: var(--ru-ink); box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 0 0 4px var(--ru-rim); }
 /* bandeja de laton con las pilas */
-.ru-tray { position: absolute; left: 640px; top: 750px; width: 1240px; height: 220px; clip-path: var(--ru-notch); background: linear-gradient(var(--ru-rim-hi) 0 6px, var(--ru-rim) 6px calc(100% - 10px), var(--ru-rim-lo) calc(100% - 10px)); box-shadow: inset 0 0 0 2px var(--ru-o); }
+.ru-tray { position: absolute; left: var(--fl, 640px); top: 750px; width: var(--fw, 1240px); height: 220px; clip-path: var(--ru-notch); background: linear-gradient(var(--ru-rim-hi) 0 6px, var(--ru-rim) 6px calc(100% - 10px), var(--ru-rim-lo) calc(100% - 10px)); box-shadow: inset 0 0 0 2px var(--ru-o); }
 .ru-trin { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 16px; background: #0e271c; box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 6px 0 rgba(0, 0, 0, .35); display: flex; justify-content: space-around; align-items: flex-end; padding: 0 10px 14px; }
 .ru-pile { position: relative; width: 120px; display: flex; flex-direction: column; align-items: center; cursor: grab; touch-action: none; outline: none; }
 .ru-pc { position: relative; width: 64px; height: 96px; margin-bottom: 10px; transition: transform .08s steps(2); } .ru-pile.on .ru-pc { transform: translateY(-12px); } .ru-pile:focus-visible .ru-pl { outline: 3px solid #fff; }
@@ -69,9 +69,9 @@
 .rou.ruleta .gb { font: 400 30px/1 "Jersey 15", var(--serif); background: var(--ru-gold); color: var(--ru-ink); border: 0; padding: 12px 26px 14px; cursor: pointer; clip-path: var(--ru-notch); box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 -6px 0 #b5651b, inset 0 3px 0 #ffd37a; transition: transform .06s; }
 .rou.ruleta .gb:hover { background: #ffb93b; } .rou.ruleta .gb:active { transform: translateY(3px); } .rou.ruleta .gb:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .rou.ruleta .gb.alt { background: var(--ru-paper); box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 -6px 0 #cdbd97; } .rou.ruleta .gb.out { background: #9e2a26; color: #fff; box-shadow: inset 0 0 0 2px var(--ru-o), inset 0 -6px 0 #6b1b18; }
-.ru-acts { position: absolute; left: 640px; top: 984px; width: 1240px; display: flex; gap: 14px; } .ru-acts .out { margin-left: auto; }
+.ru-acts { position: absolute; left: var(--fl, 640px); top: 984px; width: var(--fw, 1240px); display: flex; gap: 14px; } .ru-acts .out { margin-left: auto; }
 /* premios y avisos */
-.ru-pay { position: absolute; left: 640px; top: 300px; width: 1240px; text-align: center; font: 700 150px/1 var(--mono, "Silkscreen", monospace); pointer-events: none; opacity: 0; text-shadow: 0 8px 0 #000, 0 0 40px currentColor; z-index: 20; }
+.ru-pay { position: absolute; left: var(--fl, 640px); top: 300px; width: var(--fw, 1240px); text-align: center; font: 700 150px/1 var(--mono, "Silkscreen", monospace); pointer-events: none; opacity: 0; text-shadow: 0 8px 0 #000, 0 0 40px currentColor; z-index: 20; }
 .ru-pay.on { opacity: 1; animation: ru-payin .5s cubic-bezier(.2, 1.6, .4, 1); } .ru-pay.on.end { animation: ru-payout 2.2s ease-in both; }
 @keyframes ru-payin { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } @keyframes ru-payout { 0%, 55% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.1); } }
 .ru-streak { position: absolute; right: 70px; top: 150px; font: 700 54px/1 var(--mono, "Silkscreen", monospace); color: #ffcf66; text-shadow: 0 5px 0 #000; opacity: 0; pointer-events: none; z-index: 21; } .ru-streak.on { animation: ru-streak 2.2s ease-out both; }

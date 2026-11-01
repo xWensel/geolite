@@ -100,8 +100,8 @@ window.AIQ = window.AIQ || {};
     const ST = (TST.st = { phase: "pick", ts: 1, row: -1, plan: null, dropped: false, col: colI, risk: riskI, lastSlot: -1, slow: TST.slow || 1 });   // ST.phase: solo pruebas (pick, drop, fall, done)
     const dealerHost = Q(".pk-dealer");
     const fit = () => {
-      const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 90 && (1080 * c / 4 - H) / 2 <= 24) k = c;
-      const s = k / 4, ox = Math.round((W - 1920 * s) / 2), oy = Math.round((H - 1080 * s) / 2); stage.style.transform = `translate(${ox}px,${oy}px) scale(${s})`;
+      const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; const kk = A.casFit(ov, W, H);
+      const s = kk, ox = Math.round((W - 1920 * s) / 2), oy = Math.round((H - 1080 * s) / 2); stage.style.transform = `translate(${ox}px,${oy}px) scale(${s})`;
       const sn = A.crupier.snap(320 * s), box = 320 * s, css = sn.css || box;                      // el crupier a pixel entero de pantalla: va fuera del escenario escalado
       dealerHost.style.cssText = `left:${ox + 100 * s + (box - css) / 2}px;top:${oy + 100 * s + (box - css) / 2}px;width:${css}px;height:${css}px`;
     };

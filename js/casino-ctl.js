@@ -9,6 +9,10 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   "use strict";
+  /* La escala de los escenarios de 1920x1080: SIEMPRE ENTERA (k/4: cada pixel del arte = k pixeles de pantalla, nunca pixel irregular). Se elige la mayor k que no recorte mas de
+     110 px de ancho por lado (ni 24 de alto). Lo que recorta la ventana por lado, en pixeles de DISENO, se publica en la capa como --ins (0 si cabe entero, ~123 en un Deck de 1280x800
+     con k = 3): los escenarios apartan de ese margen sus placas, frases, tapetes y botones (css/casino-*.css, bloque «margen de seguridad»), asi nada importante se corta. */
+  A.casFit = (ov, W, H) => { let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 110 && (1080 * c / 4 - H) / 2 <= 24) k = c; const s = k / 4, over = Math.max(0, (1920 * s - W) / 2); if (ov && ov.style) ov.style.setProperty("--ins", over > 0 ? Math.ceil(over / s + 16) + "px" : "0px"); return s; };
   const N = { now: performance.now.bind(performance), st: window.setTimeout.bind(window), ct: window.clearTimeout.bind(window), si: window.setInterval.bind(window), ci: window.clearInterval.bind(window),
     raf: window.requestAnimationFrame.bind(window) };                                          // los nativos, guardados antes de tocar nada
   const FF = 14, TXT = {

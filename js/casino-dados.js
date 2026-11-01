@@ -89,8 +89,8 @@ window.AIQ = window.AIQ || {};
     const ov = sh.ov, stage = ov.querySelector(".dd-stage"), reduced = sh.reduced, Q = s => ov.querySelector(s), CANCEL = {};
     ov.classList.remove("spin"); preload();
     let TS = (TST.slow || 1) * (reduced ? 0.55 : 1);                                              // escala de tiempo (reducir movimiento: todo mas corto; _dice.slow: camara lenta, solo pruebas)
-    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 90 && (1080 * c / 4 - H) / 2 <= 24) k = c;
-      stage.style.transform = `translate(${Math.round((W - 1920 * k / 4) / 2)}px,${Math.round((H - 1080 * k / 4) / 2)}px) scale(${k / 4})`; };
+    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; const kk = A.casFit(ov, W, H);
+      stage.style.transform = `translate(${Math.round((W - 1920 * kk) / 2)}px,${Math.round((H - 1080 * kk) / 2)}px) scale(${kk})`; };
     fit(); const onResize = () => { if (ov.isConnected) fit(); }; addEventListener("resize", onResize);
     const alive = () => !sh.closed && ov.isConnected, pend = new Set();
     const sleep = ms => new Promise((res, rej) => setTimeout(() => (alive() ? res() : rej(CANCEL)), ms));

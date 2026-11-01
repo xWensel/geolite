@@ -68,3 +68,5 @@
 .rou.dice .dd-hit { position: absolute; left: 1060px; top: 450px; width: 760px; height: 500px; z-index: 150; cursor: pointer; display: none; }
 .rou.dice .dd-hit.on { display: block; }
 .rou.dice .dd-coin { position: absolute; left: 0; top: 0; width: 96px; height: 96px; z-index: 120; background: url(../assets/icons/coin_spin.webp) 0 0 / 2304px 96px no-repeat; image-rendering: pixelated; display: none; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .35)); pointer-events: none; }
+/* v0.4.50 · margen de seguridad (--ins: lo que recorta la ventana por lado, p. ej. un Deck de 1280x800 a x3) */
+.rou.dice .dd-turn { margin-left: calc(-1 * max(0px, calc(var(--ins, 0px) - 85px))); }

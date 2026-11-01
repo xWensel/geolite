@@ -2552,8 +2552,8 @@ window.AIQ = window.AIQ || {};
     try { A.dealer.hold(true); } catch (e) { /* sin crupier */ }                                  // el crupier de la esquina calla: aqui habla el de la mesa
     const ov = sh.ov, stage = ov.querySelector(".tr-stage"), reduced = sh.reduced, Q = s => ov.querySelector(s), CANCEL = {};
     ov.classList.remove("spin");
-    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 90 && (1080 * c / 4 - H) / 2 <= 24) k = c;   // K entero: cada pixel del arte = K pixeles de pantalla
-      stage.style.transform = `translate(${Math.round((W - 1920 * k / 4) / 2)}px,${Math.round((H - 1080 * k / 4) / 2)}px) scale(${k / 4})`; };
+    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; const kk = A.casFit(ov, W, H);   // K entero: cada pixel del arte = K pixeles de pantalla
+      stage.style.transform = `translate(${Math.round((W - 1920 * kk) / 2)}px,${Math.round((H - 1080 * kk) / 2)}px) scale(${kk})`; };
     fit(); const onResize = () => { if (ov.isConnected) fit(); else removeEventListener("resize", onResize); }; addEventListener("resize", onResize);
     const alive = () => !sh.closed && ov.isConnected;
     const sleep = ms => new Promise((res, rej) => setTimeout(() => (alive() ? res() : rej(CANCEL)), ms));

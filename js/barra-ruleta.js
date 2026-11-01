@@ -114,13 +114,13 @@ window.AIQ = window.AIQ || {};
     if (!sh) return;
     try { A.dealer.hold(true); } catch (e) { /* sin crupier */ }
     const ov = sh.ov, stage = ov.querySelector(".ru-stage"), Q = n => ov.querySelector(`[data-r="${n}"]`); ov.classList.remove("spin"); sh.waiting(true);
-    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 90 && (1080 * c / 4 - H) / 2 <= 24) k = c;
-      stage.style.transform = `translate(${Math.round((W - 1920 * k / 4) / 2)}px,${Math.round((H - 1080 * k / 4) / 2)}px) scale(${k / 4})`; };
+    const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; const kk = A.casFit(ov, W, H);
+      stage.style.transform = `translate(${Math.round((W - 1920 * kk) / 2)}px,${Math.round((H - 1080 * kk) / 2)}px) scale(${kk})`; };
     onResize = () => { if (ov.isConnected) fit(); }; fit(); addEventListener("resize", onResize);
     const draw = Wheel(Q("wheel")), felt = Q("felt"), infoEl = Q("info"), sayEl = Q("say");
 
     /* ---- el tapete: casillas, apuestas y su geometria (stage de 1920: W = 84) ---- */
-    const W = 84, H = 96, Z = 105, HD = 76, T = { straight: 35, split: 17, street: 11, trio: 11, corner: 8, basket: 8, line: 5, column: 2, dozen: 2, even: 1 };
+    const INS = parseFloat(ov.style.getPropertyValue("--ins")) || 0, W = INS > 0 ? 76 : 84, H = 96, Z = Math.round(W * 1.25), HD = 76, T = { straight: 35, split: 17, street: 11, trio: 11, corner: 8, basket: 8, line: 5, column: 2, dozen: 2, even: 1 };
     const n3 = (c, rt) => 3 * c + 3 - rt, hotspots = [], outs = [], cells = {};
     const mk = (type, nums, label, cx, cy) => ({ type, nums, label, odds: T[type], cx, cy, key: type + ":" + nums.join("-") + ":" + label });
     (function geometry() {
@@ -141,6 +141,7 @@ window.AIQ = window.AIQ || {};
       const ev = [[U.low, n => n >= 1 && n <= 18, "1-18"], [U.even, n => n > 0 && n % 2 === 0, tr(U.even)], [U.red, n => RED.has(n), "r"], [U.black, n => n > 0 && !RED.has(n), "b"], [U.odd, n => n % 2 === 1, tr(U.odd)], [U.high, n => n >= 19, "19-36"]];
       ev.forEach((e, i) => { const ns = []; for (let n = 1; n <= 36; n++) if (e[1](n)) ns.push(n); const o = mk("even", ns, tr(e[0]), Z + (2 * i + 1) * W, 3 * H + HD + HD / 2); o.rect = [Z + 2 * i * W, 3 * H + HD, 2 * W, HD]; o.txt = e[2]; outs.push(o); });
     })();
+    { const L = Math.max(40, INS), fw = INS > 0 ? Z + 13 * W + 24 : 1240, fl = INS > 0 ? L + 550 : 640; stage.style.setProperty("--L", L + "px"); stage.style.setProperty("--fl", fl + "px"); stage.style.setProperty("--fw", fw + "px"); }   // margen de seguridad (Deck): tapete mas estrecho y todo dentro de lo que se ve
     felt.style.width = Z + 13 * W + "px"; felt.style.height = 3 * H + 2 * HD + "px";
     const box = (cls, x, y, w, h, inner) => { const e = document.createElement("div"); e.className = "ru-c " + cls; e.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`; e.innerHTML = inner || ""; felt.appendChild(e); return e; };
     cells[0] = box("zero", 0, 0, Z, 3 * H, "0");

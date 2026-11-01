@@ -150,3 +150,8 @@ html.ra-pad #padCur { display: none; }
 .rou.rasca .ra-row[data-tier="x5"] .ra-ics span { box-shadow: inset 0 0 0 3px #1d0a3d, 0 0 0 4px #ffd95a, 0 0 0 8px #1d0a3d; }
 html.soft-flash .rou.rasca .ra-stage.flash::after { animation-name: ra-flash-soft; }
 @keyframes ra-flash-soft { 0% { opacity: .3; } 40% { opacity: .04; } 55% { opacity: .22; } 100% { opacity: 0; } }
+/* v0.4.50 · margen de seguridad (--ins: lo que recorta la ventana por lado, p. ej. un Deck de 1280x800 a x3): nada importante a menos de ese margen del borde */
+.rou.rasca .ra-sign, .rou.rasca .ra-tag, .rou.rasca .ra-top { margin-left: max(0px, calc(var(--ins, 0px) - 70px)); }
+.rou.rasca .ra-hud { margin-left: max(0px, calc(var(--ins, 0px) - 96px)); }
+.rou.rasca .ra-right, .rou.rasca .ra-help { margin-left: calc(-1 * max(0px, calc(var(--ins, 0px) - 102px))); }
+.rou.rasca .ra-bubble { margin-left: calc(-1 * max(0px, calc(var(--ins, 0px) - 58px))); }

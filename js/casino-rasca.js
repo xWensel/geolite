@@ -159,8 +159,8 @@ window.AIQ = window.AIQ || {};
     let scale = 1, ox = 0, oy = 0, shakeX = 0, shakeY = 0, ovL = 0, ovT = 0;
     const applyTf = () => { stage.style.transform = `translate(${Math.round(ox + shakeX * scale)}px,${Math.round(oy + shakeY * scale)}px) scale(${scale})`; };
     const fit = () => {
-      const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; let k = 2; for (const c of [3, 4, 5, 6]) if ((1920 * c / 4 - W) / 2 <= 90 && (1080 * c / 4 - H) / 2 <= 24) k = c;
-      scale = k / 4; ox = Math.round((W - 1920 * scale) / 2); oy = Math.round((H - 1080 * scale) / 2); const r = ov.getBoundingClientRect(); ovL = r.left; ovT = r.top; applyTf();
+      const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; const kk = A.casFit(ov, W, H);
+      scale = kk; ox = Math.round((W - 1920 * scale) / 2); oy = Math.round((H - 1080 * scale) / 2); const r = ov.getBoundingClientRect(); ovL = r.left; ovT = r.top; applyTf();
     };
     fit(); const onResize = () => { if (ov.isConnected) fit(); }; addEventListener("resize", onResize);
     const toStage = (cxp, cyp) => [(cxp - ovL - ox) / scale, (cyp - ovT - oy) / scale];
