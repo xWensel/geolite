@@ -105,7 +105,7 @@
 /* paso 8: la informacion de la jugada, centrada en su caja y la frase del crupier mas abajo */
 .brr-mid { align-self: center; gap: 9px; } .brr-pips { margin-top: 2px; } .brr-mid > .brr-pl { font-size: 22px; line-height: 1; } .brr-streak { display: inline; font-style: normal; height: auto; color: var(--gx-acc); letter-spacing: .04em; }
 .brr-say { top: 184px; }
-.brr-say { top: 180px; font-size: 22px; padding: 3px 14px 5px; min-height: 28px; } .brr-say .ic { width: 26px; height: 26px; }
+.brr-say { top: 158px; font-size: 20px; padding: 2px 14px 3px; min-height: 24px; } .brr-say .ic { width: 22px; height: 22px; }   /* v0.4.50: justo bajo la tira de salas y por encima de los carteles de neon (que cuelgan desde el borde 184 + 2*OY): antes la frase pisaba el cartel de la sala */
 
 /* paso 9: el salon llena toda la ventana, sin margenes (el tablero toma el tamano de la ventana por JS: --bs y --oy) */
 .barra-screen { background: #0a1a12; }

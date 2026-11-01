@@ -96,7 +96,7 @@ window.AIQ = window.AIQ || {};
   const TABLES = [
     /* «Rojo o negro» ya no esta en La Barra (v0.4.48): la ruleta europea hace lo mismo; sigue en la Aventura (COREC.red queda por si vuelve) */
     { id: "coin", n: "bet:coin", ico: "bet_coin", c: ["#2d62b8", "#0f2548"], at: [350, 235], core: 1 },
-    { id: "wheel", n: "bet:wheel", ico: "bet_wheel", c: ["#8a3a9a", "#2d0f38"], at: [150, 415], core: 1 },
+    /* «Ruleta de premios» ya no esta en La Barra (v0.4.50): sus premios (vidas, retos, objetos) solo tienen sentido en la Aventura; COREC.wheel queda por si vuelve */
     { id: "cups", n: "bet:cups", ico: "bet_cups", c: ["#a02a4a", "#3a0c1a"], at: [350, 415], core: 1 },
     { id: "rule", n: "bet:rule", ico: "bet_red", c: ["#1f7a4a", "#0a2e1d"], at: [250, 325], core: 1, own: 1 },     // la ruleta europea que nunca para (js/barra-ruleta.js): solo existe en La Barra
     { id: "dice", n: "bet:dice", ico: "bet_dados", c: ["#14797f", "#08303a"], at: [930, 235] },
