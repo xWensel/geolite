@@ -1501,7 +1501,7 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   let updShown = false, updT = 0;
   A.updNotice = () => {
     if (updShown) return; clearTimeout(updT);
-    if (S.phase === "asking" || S.booting || document.getElementById("nm") && !document.getElementById("nm").classList.contains("hidden")) { updT = setTimeout(A.updNotice, 4000); return; }   // a media pregunta o con el nombre abierto: espera
+    if (S.phase === "asking" || S.booting || document.getElementById("rouOv") || document.getElementById("nm") && !document.getElementById("nm").classList.contains("hidden")) { updT = setTimeout(A.updNotice, 4000); return; }   // a media pregunta, con un juego de casino abierto (apuestas cobradas a medias) o con el nombre abierto: espera
     updShown = true; const el = document.createElement("div"); el.id = "updNotice"; el.setAttribute("role", "status");
     el.innerHTML = `<span>${A.tip6(UPD.msg)}</span><button type="button" class="gx-btn pri sm" id="updGo" data-primary><span>${A.tip6(UPD.go)}</span></button><button type="button" class="gx-btn gho sm" id="updLater"><span>${A.tip6(UPD.later)}</span></button>`;
     document.body.appendChild(el); requestAnimationFrame(() => el.classList.add("on"));

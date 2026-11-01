@@ -18,6 +18,7 @@ window.AIQ = window.AIQ || {};
   const FF = 14, TXT = {
     skip: A.L6("Saltar|Skip|Passer|Pular|Überspringen|Salta||跳过|건너뛰기|スキップ|Пропустить|Pomiń"),
     skipTip: A.L6("Saltar al resultado|Skip to the result|Passer au résultat|Pular para o resultado|Zum Ergebnis springen|Salta al risultato||跳到结果|결과로 건너뛰기|結果へスキップ|Перейти к результату|Przejdź do wyniku"),
+    leave: A.L6("Salir|Leave|Quitter|Sair|Verlassen|Esci||离开|나가기|出る|Выйти|Wyjdź"),
     go: A.L6("Continuar|Continue|Continuer|Continuar|Weiter|Continua||继续|계속|続ける|Продолжить|Dalej"),
     ffTip: A.L6("Mantén pulsado: ×2 de velocidad|Hold: double speed|Maintiens : vitesse ×2|Segure: velocidade ×2|Gedrückt halten: doppeltes Tempo|Tieni premuto: velocità ×2|Mantén presionado: ×2 de velocidad|按住：2 倍速|길게 누르면 2배속|長押しで2倍速|Удерживай: скорость ×2|Przytrzymaj: prędkość ×2"),
   };
@@ -100,10 +101,11 @@ window.AIQ = window.AIQ || {};
     const dock = document.createElement("div"); dock.className = "cc-dock"; dock.dataset.st = "play";
     dock.innerHTML = `<button class="cc-btn cc-ff" type="button" title="${tx(TXT.ffTip)}" aria-label="${tx(TXT.ffTip)}">${svg("ff")}<b>×2</b></button>`
       + `<button class="cc-btn cc-skip" type="button" title="${tx(TXT.skipTip)}" aria-label="${tx(TXT.skipTip)}">${svg("skip")}<span>${tx(TXT.skip)}</span></button>`
-      + `<button class="cc-btn cc-go" type="button" aria-label="${tx(TXT.go)}">${svg("go")}<span>${tx(TXT.go)}</span></button>`;
+      + `<button class="cc-btn cc-go" type="button" aria-label="${tx(TXT.go)}">${svg("go")}<span>${tx(TXT.go)}</span></button>`
+      + `<button class="cc-btn cc-out" type="button" aria-label="${tx(TXT.leave)}"><span>${tx(TXT.leave)}</span></button>`;
     ov.appendChild(dock); dock.addEventListener("animationend", e => { if (e.target === dock) dock.classList.add("shown"); });
     const ffB = dock.querySelector(".cc-ff"), skB = dock.querySelector(".cc-skip");
-    const S = { ov, hooks: hooks || {}, st: "play", held: false, latch: false, ff: false, saved: null, dead: false };
+    const S = { ov, hooks: hooks || {}, st: "play", held: false, latch: false, ff: false, saved: null, dead: false, leaving: false };
     const fit = () => { const s = Math.max(2, Math.min(4, Math.round(innerHeight / 270))); dock.style.setProperty("--s", s); dock.style.setProperty("--r", s >= 4 ? 3 : 2); dock.style.setProperty("--u", s >= 4 ? 3 : 2); };
     fit(); addEventListener("resize", fit);
 
@@ -115,7 +117,7 @@ window.AIQ = window.AIQ || {};
       if (S.ff && S.st === "wait") S.ff = false;                                               // el juego espera al jugador: se acabo la prisa
       const eff = S.st !== "play" ? 1 : S.ff ? FF : (S.held || S.latch) ? 2 : 1;
       if (cur === S) setSpeed(eff); mute(eff === FF);
-      dock.dataset.st = S.st; dock.classList.toggle("is-fast", eff === 2); dock.classList.toggle("is-ff", eff === FF);
+      dock.dataset.st = S.st; dock.classList.toggle("has-out", !!S.hooks.leave && S.hooks.leaveBtn !== false && !S.leaving); dock.classList.toggle("is-fast", eff === 2); dock.classList.toggle("is-ff", eff === FF);
       ffB.classList.toggle("on", eff === 2); skB.classList.toggle("on", eff === FF);
     };
     cur = S;
@@ -133,13 +135,24 @@ window.AIQ = window.AIQ || {};
       try { if (S.hooks.skip) S.hooks.skip(); } catch (e) { try { console.error(e); } catch (x) { /* nada */ } }
       update();
     };
+    /* SALIR (v0.4.51): mientras el juego espera al jugador no hay boton de saltar; aun asi se tiene que poder salir de TODOS los minijuegos (la apuesta ya esta cobrada y el resultado decidido).
+       El juego da su `hooks.leave` (hace por el jugador lo que esperaba: soltar el cubilete, elegir un cubilete al azar, cobrar el globo; la ruleta se levanta de la mesa); despues se salta
+       hasta el resultado y la capa se cierra sola. Esc (con mando, B) y el boton «Salir» lo disparan. */
+    const leaveNow = () => {
+      if (S.dead || S.leaving || !S.hooks.leave) return false; S.leaving = true; update();
+      try { S.hooks.leave(); } catch (e) { try { console.error(e); } catch (x) { /* nada */ } }
+      N.st(() => { if (!S.dead && S.st === "wait") { S.leaving = false; update(); } }, 1500);                // el juego no tenia nada que hacer aqui: se puede volver a intentar
+      return true;
+    };
+    const outB = dock.querySelector(".cc-out");
+    outB.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); }); outB.addEventListener("click", e => { e.stopPropagation(); leaveNow(); });
     const goB = dock.querySelector(".cc-go");
     goB.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); });
     goB.addEventListener("click", e => { e.stopPropagation(); try { if (S.hooks.close) S.hooks.close(); } catch (x) { /* nada */ } });
     skB.addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); });
     skB.addEventListener("click", e => { e.stopPropagation(); skip(); });
     dock.addEventListener("click", e => e.stopPropagation());                                  // nada de esto cierra la capa (tocar la pantalla la cierra al acabar)
-    const onKey = e => { if (S.st !== "play") return; if (e.key === "Shift") { if (!e.repeat) press(); } else if (e.key === "Escape") { e.preventDefault(); skip(); } };
+    const onKey = e => { if (S.st === "wait") { if (e.key === "Escape" && !e.repeat && S.hooks.leave) { e.preventDefault(); e.stopPropagation(); leaveNow(); } return; } if (S.st !== "play") return; if (e.key === "Shift") { if (!e.repeat) press(); } else if (e.key === "Escape") { e.preventDefault(); skip(); } };
     const onKeyUp = e => { if (e.key === "Shift") release(); };
     const onBlur = () => { S.held = false; update(); };
     addEventListener("keydown", onKey, true); addEventListener("keyup", onKeyUp, true); addEventListener("blur", onBlur);
@@ -151,8 +164,8 @@ window.AIQ = window.AIQ || {};
     };
     const wd = N.si(() => { if (!ov.isConnected) destroy(); }, 250);                           // si otra pantalla se lleva la capa, no se queda el sonido callado ni el reloj acelerado
     const api = {
-      waiting(on) { if (S.dead || S.st === "done") return; S.st = on ? "wait" : "play"; if (on) S.latch = false; update(); },   // el juego espera una accion del jugador: sin botones y a x1
-      outcome() { if (S.dead || S.st === "done") return; S.st = "done"; S.ff = S.held = S.latch = false; update(); armEnd(ov, () => S.hooks.close && S.hooks.close()); },   // llega el resultado: se ve entero y a x1, y se puede salir ya
+      waiting(on) { if (S.dead || S.st === "done") return; S.st = on ? "wait" : "play"; if (on) S.latch = false; update(); if (!on && S.leaving) skip(); },   // el juego espera una accion del jugador: sin botones y a x1
+      outcome() { if (S.dead || S.st === "done") return; S.st = "done"; S.ff = S.held = S.latch = false; update(); armEnd(ov, () => S.hooks.close && S.hooks.close()); if (S.leaving) N.st(() => { try { S.hooks.close && S.hooks.close(); } catch (e) { /* nada */ } }, 450); },   // llega el resultado: se ve entero y a x1, y se puede salir ya
       destroy, get fast() { return speed; },
     };
     return api;

@@ -28,3 +28,8 @@
 .cc-skip.on { pointer-events: none; } .cc-skip.on .cc-ic { animation: cc-nudge .16s steps(2) infinite; }
 .cc-dock.is-ff .cc-ff { opacity: .45; pointer-events: none; }
 html.reduce-motion .cc-dock, html.reduce-motion .cc-ff.on .cc-ic, html.reduce-motion .cc-skip.on .cc-ic { animation: none; }
+/* v0.4.51 · «Salir» (solo mientras el juego espera al jugador y si el juego sabe salir: hooks.leave) */
+.cc-out { display: none; }
+.cc-dock[data-st="wait"].has-out { opacity: 1; transform: none; pointer-events: auto; }
+.cc-dock[data-st="wait"].has-out .cc-ff, .cc-dock[data-st="wait"].has-out .cc-skip, .cc-dock[data-st="wait"].has-out .cc-go { display: none; }
+.cc-dock[data-st="wait"].has-out .cc-out { display: inline-flex; }

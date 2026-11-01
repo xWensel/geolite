@@ -2637,6 +2637,7 @@ window.AIQ = window.AIQ || {};
     }
     const lift = async (id, to, ms = 360) => { const c = cups[id], from = c.lift; await run(reduced ? 160 : ms, p => (c.lift = lerp(from, to, easeOut(p)))); };
     let pickResolve = null, pickable = false;
+    sh.hooks.leave = () => { if (pickResolve) pickResolve(Math.floor(Math.random() * 3)); };   // Salir (casino-ctl.js): elige un cubilete al azar y acaba
     const choose = () => new Promise(res => { pickable = true; cups.forEach(c => c.el.classList.add("pick")); pickResolve = id => { pickable = false; cups.forEach(c => { c.el.classList.remove("pick"); c.hl = 0; c.num.classList.remove("hot"); }); pickResolve = null; res(id); }; });
     const pickSlot = s => { if (pickable && pickResolve) { A.sfx.cupClack(2); pickResolve(order[s]); } };
     let sel = -1; const setSel = s => { cups.forEach(c => { c.hl = 0; c.num.classList.remove("hot"); }); sel = s; if (s >= 0) { const c = cups[order[s]]; c.hl = 1; c.num.classList.add("hot"); A.sfx.cupClack(0); } };

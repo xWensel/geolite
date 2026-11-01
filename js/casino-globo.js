@@ -543,6 +543,7 @@ window.AIQ = window.AIQ || {};
       else if (!e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && (e.key === "s" || e.key === "S")) { e.preventDefault(); cycleStake(); } };
     addEventListener("keydown", onKey, true);
     const cleanup = () => { clearInterval(talkIv); removeEventListener("keydown", onKey, true); removeEventListener("resize", onResize); try { A.sfx.gbEngine.stop(); } catch (e) { /* nada */ } };
+    sh.hooks.leave = () => { if (ST.phase === "ready") sh.close(); else if (ST.phase === "fly") cash(0, "manual"); };   // Salir (casino-ctl.js): en la preparacion se levanta; en pleno vuelo cobra
     TST.st = ST; TST.getF = () => F; TST.cashNow = () => cash(0, "manual"); TST.takeoff = () => takeoff(); TST.sc = () => Sn;
 
     loadAll().then(() => { if (!alive()) { cleanup(); sh.bail("capa retirada"); return; } prepNext(); setBtn(); requestAnimationFrame(frameLoop); if (TST.auto) setTimeout(() => { if (!alive()) return; if (TST.auto.stake != null) { stakeI = TST.auto.stake; ST.stake = cx.coinCost(stakeI); } if (TST.auto.autoM != null) ST.autoM = TST.auto.autoM; setBtn(); setTimeout(act, 400); }, 600); });

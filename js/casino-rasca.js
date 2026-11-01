@@ -369,6 +369,9 @@ window.AIQ = window.AIQ || {};
     const up = () => { ST.down = false; };
     stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up); stage.addEventListener("pointerleave", () => { ST.pointerIn = false; });
     const onBlur = () => { up(); keys.clear(); ST.keyHold = false; ST.padHold = false; }; addEventListener("blur", onBlur);   // Alt+Tab con una tecla pulsada: el keyup no llega y la doblon seguia rascando sola
+    let skipReq = false;                                                                      // Saltar / Salir (casino-ctl.js): rasca toda la carta por el jugador (y si aun no se puede, en cuanto se pueda)
+    sh.hooks.skip = () => { skipReq = true; if (ST.phase === "scratch") scratchAll(); };
+    sh.hooks.leave = sh.hooks.skip;
     btnAll.onclick = e => { e.stopPropagation(); scratchAll(); };
     const MOVE = ["arrowleft", "arrowright", "arrowup", "arrowdown", "a", "d", "w", "s"];
     const onKey = e => {
@@ -442,6 +445,7 @@ window.AIQ = window.AIQ || {};
         cardEl.classList.remove("off");
         if (reduced) setCard(0, 0); else await ENTRY[R.entry].call(ENTRY);
         ST.phase = "scratch"; stage.classList.add("scratching"); cur.x = 960; cur.y = 860; setBtns(); hint("hScratch");
+        if (skipReq) later(() => scratchAll(), 400);
         if (TST.auto) later(() => { if (TST.auto.all !== false) scratchAll(); }, TST.auto.delay || 600);                      // _rasca.auto ({ all, delay }): solo pruebas
         await finished; rec.done = true; cx.persist();
         await sleep(400); await speechIdle(); sh.hold(2400);                                                                    // la ultima frase del crupier se oye entera antes de cerrar (tocar la pantalla tambien cierra)

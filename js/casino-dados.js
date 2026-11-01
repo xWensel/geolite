@@ -88,6 +88,7 @@ window.AIQ = window.AIQ || {};
     try { A.dealer.hold(true); } catch (e) { /* sin crupier */ }                                  // el crupier de la esquina calla: aqui habla el de la mesa
     const ov = sh.ov, stage = ov.querySelector(".dd-stage"), reduced = sh.reduced, Q = s => ov.querySelector(s), CANCEL = {};
     ov.classList.remove("spin"); preload();
+    sh.hooks.leave = () => { if (awaiting && !holding) { press(); setTimeout(release, 80); } };                       // Salir (casino-ctl.js): suelta el cubilete por el jugador
     let TS = (TST.slow || 1) * (reduced ? 0.55 : 1);                                              // escala de tiempo (reducir movimiento: todo mas corto; _dice.slow: camara lenta, solo pruebas)
     const fit = () => { const W = ov.clientWidth || innerWidth, H = ov.clientHeight || innerHeight; const kk = A.casFit(ov, W, H);
       stage.style.transform = `translate(${Math.round((W - 1920 * kk) / 2)}px,${Math.round((H - 1080 * kk) / 2)}px) scale(${kk})`; };

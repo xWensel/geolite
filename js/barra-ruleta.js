@@ -334,7 +334,7 @@ window.AIQ = window.AIQ || {};
     function leave() {                                                           // levantarse: con el giro cerrado y sin pagar, se paga ya (la bola ya estaba decidida)
       if (dead) return; const c = clk(); if (locked && resolvedK !== c.k && total() > 0) resolve(c.k, false); sh.close();
     }
-    sh.hooks.skip = null;
+    sh.hooks.skip = null; sh.hooks.leave = leave; sh.hooks.leaveBtn = false;                    // Esc / B: levantarse de la mesa (el boton ya es «Levantarse»)
     hover(null); drawBoard(clk()); hud(); frame();
     return { close: () => sh.close() };
   }
