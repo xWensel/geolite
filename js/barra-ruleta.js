@@ -23,8 +23,10 @@ window.AIQ = window.AIQ || {};
   const IDX = {}; ORDER.forEach((n, i) => (IDX[n] = i));
   const CYCLE = 45, T_BET = 28, T_SPIN = 10, T_END = 38, STEP = Math.PI * 2 / 37, TAU = Math.PI * 2;
   const col = n => (n === 0 ? "g" : RED.has(n) ? "r" : "b");
-  const VALS = [1, 5, 25, 100, 250, 1000], TIER = ["#3f8a60", "#3d6fb0", "#b8272f", "#6b3a8a", "#a8832e", "#26202a"];
+  const VALS = [1, 5, 25, 100, 250, 1000], CHIP = ["g", "b", "r", "k", "p", "o"];     // las fichas del globo de siempre (assets/icons/chip_*.webp, 64 px de arte), una por valor
   const tierOf = v => { let i = 0; VALS.forEach((x, j) => { if (v >= x) i = j; }); return i; };
+  const breakdown = a => { const o = []; for (let i = 5; i >= 0; i--) while (a >= VALS[i] && o.length < 60) { o.push(i); a -= VALS[i]; } return o; };
+  const chipImg = (i, st) => `<img class="ru-ci" alt="" draggable="false" src="assets/icons/chip_${CHIP[i]}.webp"${st ? ` style="${st}"` : ""}>`;
   const short = v => (v >= 10000 ? Math.round(v / 1000) + "k" : v >= 1000 ? (v % 1000 === 0 ? v / 1000 : (v / 1000).toFixed(1).replace(".", ",")) + "k" : String(v));
   let OFF = 0;                                                                   // solo para el boton «cerrar apuestas ya»: adelanta el reloj de la mesa
   const nowS = () => Date.now() / 1000 + OFF;
@@ -98,12 +100,13 @@ window.AIQ = window.AIQ || {};
     const K = A.adv && A.adv.casino && A.adv.casino.core && A.adv.casino.core.CX; if (!K || !K.rouShell) { done(); return; }
     const seed = host.seed, MIN = host.min || 1;
     const html = `<div class="ru-stage"><div class="ru-bg"></div>
-      <div class="ru-top"><div class="ru-phase" data-r="phase"></div><div class="ru-clock" data-r="clock"></div><div class="ru-meta"><span>${esc(tr(U.bal))} <b data-r="bal"></b></span><span>${esc(tr(U.staked))} <b data-r="tot"></b></span><span data-r="play"></span></div></div>
-      <div class="ru-cycle"><b class="s1">28 s</b><b class="s2">10 s</b><b class="s3">7 s</b><i data-r="mark"></i></div>
+      <div class="ru-hud"><div class="ru-t">${esc(tr(BET.n))}</div><div class="ru-s" data-r="play"></div><div class="ru-pips" data-r="pips"></div><div class="ru-sal">${A.icon ? A.icon("chip_r") : ""}<div><b data-r="bal"></b><small>${esc(tr(U.staked))} <span data-r="tot"></span></small></div></div></div>
+      <div class="ru-ph"><span class="ru-phase" data-r="phase"></span><span class="ru-clock" data-r="clock"></span><div class="ru-cyc"><b class="s1"></b><b class="s2"></b><b class="s3"></b><i data-r="mark"></i></div></div>
       <div class="ru-left"><div class="ru-wheel"><canvas data-r="wheel"></canvas><div class="ru-res" data-r="res"></div></div><aside class="ru-board" data-r="board"></aside></div>
       <div class="ru-feltwrap"><div class="ru-felt" data-r="felt"></div></div>
       <div class="ru-info" data-r="info"></div>
-      <div class="ru-tools"><div class="ru-chips" data-r="chips"></div><div class="ru-acts"><button type="button" data-a="undo">${esc(tr(U.undo))}</button><button type="button" data-a="clear">${esc(tr(U.clear))}</button><button type="button" data-a="again">${esc(tr(U.again))}</button><button type="button" data-a="dbl">${esc(tr(U.dbl))}</button><button type="button" data-a="skip">${esc(tr(U.skip))}</button><button type="button" data-a="stand" class="ru-stand">${esc(tr(U.stand))}</button></div></div>
+      <div class="ru-tray"><div class="ru-trin" data-r="chips"></div></div>
+      <div class="ru-acts"><button type="button" class="gb" data-a="undo">${esc(tr(U.undo))}</button><button type="button" class="gb" data-a="clear">${esc(tr(U.clear))}</button><button type="button" class="gb" data-a="again">${esc(tr(U.again))}</button><button type="button" class="gb" data-a="dbl">${esc(tr(U.dbl))}</button><button type="button" class="gb alt" data-a="skip">${esc(tr(U.skip))}</button><button type="button" class="gb out" data-a="stand">${esc(tr(U.stand))}</button></div>
       <div class="ru-say"><span class="ru-av">${A.icon ? A.icon("dealer_mini_s") : ""}</span><span class="ru-sayt" data-r="say"></span></div>
       <div class="ru-pay" data-r="pay"></div><div class="ru-streak" data-r="streak"></div><div class="ru-flash" data-r="flash"></div></div>`;
     let sh = null, dead = false, raf = 0, onResize = null;
@@ -143,7 +146,7 @@ window.AIQ = window.AIQ || {};
     cells[0] = box("zero", 0, 0, Z, 3 * H, "0");
     for (let c = 0; c < 12; c++) for (let rt = 0; rt < 3; rt++) { const n = n3(c, rt); cells[n] = box(col(n), Z + c * W, rt * H, W, H, `<span class="t">${n}</span>`); }
     outs.forEach(o => { const inner = o.txt === "r" ? '<span class="dia" style="background:#b8272f"></span>' : o.txt === "b" ? '<span class="dia" style="background:#15151b;outline:1px solid rgba(209,169,84,.45)"></span>' : esc(o.txt); o.el = box("out", o.rect[0], o.rect[1], o.rect[2], o.rect[3], inner); });
-    const ghost = document.createElement("div"); ghost.className = "ru-ghost"; ghost.style.display = "none"; felt.appendChild(ghost);
+    const ghost = document.createElement("img"); ghost.className = "ru-ghost"; ghost.alt = ""; ghost.style.display = "none"; felt.appendChild(ghost);
     const chipLayer = document.createElement("div"); chipLayer.className = "ru-chiplayer"; felt.appendChild(chipLayer);
     const nova = document.createElement("div"); nova.className = "ru-nova"; nova.textContent = tr(U.closed); felt.appendChild(nova);
     const straight = n => (n === 0 ? mk("straight", [0], tr(U.straight) + " 0", Z / 2, 1.5 * H) : mk("straight", [n], tr(U.straight) + " " + n, 0, 0));
@@ -164,29 +167,42 @@ window.AIQ = window.AIQ || {};
     const avail = () => (locked ? host.coins() : host.coins() - total());
     { const c0 = host.coins(); amount = c0 >= 100 ? 25 : c0 >= 25 ? 5 : 1; }
     const chipsEl = Q("chips");
-    VALS.forEach((v, i) => { const b = document.createElement("button"); b.type = "button"; b.className = "ru-cb"; b.style.background = TIER[i]; b.textContent = short(v); b.setAttribute("aria-label", f(U.chipLbl, { n: v })); b.dataset.v = v;
-      b.onclick = () => { amount = v; syncChips(); sfx("rulPick", i); }; chipsEl.appendChild(b); });
-    { const b = document.createElement("button"); b.type = "button"; b.className = "ru-cb all"; b.textContent = tr(U.all); b.onclick = () => { amount = Math.max(MIN, avail()); syncChips(); sfx("rulPick", 5); }; chipsEl.appendChild(b); }
-    const syncChips = () => chipsEl.querySelectorAll(".ru-cb").forEach(b => b.classList.toggle("on", +b.dataset.v === amount || (b.classList.contains("all") && !VALS.includes(amount))));
+    let drag = null;
+    const syncChips = () => chipsEl.querySelectorAll(".ru-pile").forEach(b => b.classList.toggle("on", +b.dataset.v === amount));
+    const inFelt = p => p[0] >= 0 && p[1] >= 0 && p[0] < felt.offsetWidth && p[1] < felt.offsetHeight;
+    VALS.forEach((v, i) => { const b = document.createElement("div"); b.className = "ru-pile"; b.dataset.v = v; b.setAttribute("role", "button"); b.setAttribute("aria-label", f(U.chipLbl, { n: v })); b.tabIndex = 0;
+      let st = ""; for (let k = 0; k < 5; k++) st += chipImg(i, `top:${(4 - k) * 8}px`);
+      b.innerHTML = `<i class="ru-ar"></i><div class="ru-pc">${st}</div><span class="ru-pl">${fmt(v)}</span>`;
+      b.addEventListener("pointerdown", e => {                                    // pulsar elige la pila; arrastrar saca una ficha y la deja donde sueltes
+        e.preventDefault(); if (e.button) return; amount = v; syncChips(); sfx("rulPick", i); const sx = e.clientX, sy = e.clientY; let moved = false;
+        const mv = ev => { if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) < 8) return; if (!moved) { moved = true; drag = document.createElement("img"); drag.className = "ru-drag"; drag.src = `assets/icons/chip_${CHIP[i]}.webp`; drag.alt = ""; stage.appendChild(drag); ghost.style.display = "none"; }
+          const r = stage.getBoundingClientRect(), k = r.width / 1920; drag.style.left = (ev.clientX - r.left) / k - 32 + "px"; drag.style.top = (ev.clientY - r.top) / k - 32 + "px"; const p = local(ev); hover(inFelt(p) ? betAt(p[0], p[1]) : null, true); };
+        const up = ev => { removeEventListener("pointermove", mv); removeEventListener("pointerup", up); removeEventListener("pointercancel", up); if (!moved) return; const p = local(ev), bb = inFelt(p) ? betAt(p[0], p[1]) : null; if (bb) place(bb, 1, v); else sfx("rulOff"); if (drag) drag.remove(); drag = null; hover(null); };
+        addEventListener("pointermove", mv); addEventListener("pointerup", up); addEventListener("pointercancel", up); });
+      b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { amount = v; syncChips(); sfx("rulPick", i); } });
+      chipsEl.appendChild(b); });
+    { const b = document.createElement("button"); b.type = "button"; b.className = "gb ru-all"; b.textContent = tr(U.all); b.onclick = () => { amount = Math.max(MIN, avail()); syncChips(); sfx("rulPick", 5); infoEl.textContent = f(U.inHand, { n: fmt(amount) }); }; chipsEl.appendChild(b); }
     syncChips();
     const say = (text, ms) => { sayEl.textContent = text; sayEl.classList.remove("pop"); void sayEl.offsetWidth; sayEl.classList.add("pop"); };
-    const hud = () => { Q("bal").textContent = fmt(avail()); Q("tot").textContent = fmt(total()); Q("play").textContent = f(U.play, { n: Math.min(host.play(), host.plays), m: host.plays }) + (host.bote() ? " · " + tr(U.bote) : ""); };
-    function drawChips() {
-      chipLayer.innerHTML = ""; const r = Math.round(W * 0.34);
-      for (const k in bets) { const b = bets[k], e = document.createElement("div"); e.className = "ru-chip" + (b.st === 1 ? " win" : b.st === 0 ? " lose" : ""); e.dataset.k = k;
-        e.style.cssText = `left:${b.cx - r}px;top:${b.cy - r}px;width:${r * 2}px;height:${r * 2}px;background:${TIER[tierOf(b.amount)]};font-size:${b.amount >= 1000 ? 17 : 20}px`; e.textContent = short(b.amount); chipLayer.appendChild(e); }
-      hud();
-    }
-    function hover(b) {
+    const hud = () => { Q("bal").textContent = fmt(avail()); Q("tot").textContent = fmt(total()); Q("play").textContent = f(U.play, { n: Math.min(host.play(), host.plays), m: host.plays }) + (host.bote() ? " · " + tr(U.bote) : "");
+      const pg = Q("pips"), np = host.plays, cur = Math.min(host.play(), np); let h = ""; for (let i = 1; i <= np; i++) h += `<i class="${i < cur ? "on" : i === cur ? "now" : ""}"></i>`; if (pg.dataset.k !== h) { pg.dataset.k = h; pg.innerHTML = h; } };
+    const stackHtml = b => { const d = breakdown(b.amount).slice(0, 5).reverse(), n = d.length, hh = 64 + (n - 1) * 6; let h = `<div class="ru-stk${b.st === 1 ? " win" : b.st === 0 ? " lose" : ""}" style="left:${b.cx - 32}px;top:${b.cy - 32 - (n - 1) * 6}px;height:${hh}px">`;
+      d.forEach((di, i) => { h += chipImg(di, `top:${(n - 1 - i) * 6}px`); }); return h + `<em style="top:${hh - 4}px">${fmt(b.amount)}</em></div>`; };
+    function drawChips() { chipLayer.innerHTML = Object.keys(bets).map(k => stackHtml(bets[k])).join(""); hud(); if (!hoverB) infoEl.textContent = idleInfo(); }
+    function idleInfo() {                                                         // sin apuesta bajo el cursor: la cobertura de lo apostado (cuantos numeros cubres y lo maximo que cobrarias)
+      const ks = Object.keys(bets); if (!ks.length) return tr(U.hint); let best = 0, cov = 0;
+      for (let n = 0; n < 37; n++) { let t = 0; ks.forEach(k => { if (bets[k].nums.indexOf(n) >= 0) t += bets[k].amount * (bets[k].odds + 1); }); if (t) cov++; best = Math.max(best, t); }
+      return f(U.covAll, { n: cov, m: fmt(best) }); }
+    function hover(b, dragging) {
       hoverB = b; for (const n in cells) cells[n].classList.remove("hl");
-      if (!b) { ghost.style.display = "none"; infoEl.textContent = tr(U.hint); return; }
-      b.nums.forEach(n => cells[n].classList.add("hl")); const r = Math.round(W * 0.34) + 4; ghost.style.cssText = `display:block;left:${b.cx - r}px;top:${b.cy - r}px;width:${r * 2}px;height:${r * 2}px`;
+      if (!b) { ghost.style.display = "none"; infoEl.textContent = idleInfo(); return; }
+      b.nums.forEach(n => cells[n].classList.add("hl")); if (!dragging) { ghost.src = `assets/icons/chip_${CHIP[tierOf(amount)]}.webp`; ghost.style.cssText = `display:block;left:${b.cx - 32}px;top:${b.cy - 32}px`; } else ghost.style.display = "none";
       infoEl.textContent = `${describe(b)} · ${fmt(amount)} → ${fmt(amount * (b.odds + 1))}` + (bets[b.key] ? ` · ${fmt(bets[b.key].amount)}` : "");
     }
-    function place(b, sign) {
+    function place(b, sign, a0) {
       if (locked || phNow() !== "bet") return;
-      if (sign < 0) { const e = bets[b.key]; if (!e) return; const a = Math.min(amount, e.amount); e.amount -= a; if (e.amount <= 0) delete bets[b.key]; sfx("rulOff"); drawChips(); return; }
-      const a = amount; if (a < MIN) return; if (a > avail()) { infoEl.textContent = tr(U.noChips); sfx("deny"); return; }
+      if (sign < 0) { const e = bets[b.key]; if (!e) return; const a = Math.min(a0 || amount, e.amount); e.amount -= a; if (e.amount <= 0) delete bets[b.key]; sfx("rulOff"); drawChips(); return; }
+      const a = a0 || amount; if (a < MIN) return; if (a > avail()) { infoEl.textContent = tr(U.noChips); sfx("deny"); return; }
       if (bets[b.key]) bets[b.key].amount += a; else bets[b.key] = { type: b.type, nums: b.nums, odds: b.odds, cx: b.cx, cy: b.cy, label: b.label, amount: a };
       stack.push({ key: b.key, a }); sfx("rulChip", tierOf(a), stack.length); if (A.haptic) A.haptic([6]); drawChips();
     }
@@ -214,7 +230,6 @@ window.AIQ = window.AIQ || {};
       const h = []; for (let i = 0; i < 60; i++) h.push(resOf(seed, last - i)); const cnt = { r: 0, b: 0, g: 0 }, fq = {}; h.forEach(n => { cnt[col(n)]++; fq[n] = (fq[n] || 0) + 1; });
       const all = []; for (let n = 0; n < 37; n++) all.push([n, fq[n] || 0]); const hotN = all.slice().sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 3), coldN = all.slice().sort((a, b) => a[1] - b[1] || a[0] - b[0]).slice(0, 3), pct = x => Math.round(x / h.length * 100) + " %";
       Q("board").innerHTML = `<div class="ru-lbl">${esc(tr(U.board))}</div><div class="ru-last"><i class="ru-d big ${col(h[0])}">${h[0]}</i><div><div class="ru-lbl">${esc(tr(U.last))}</div></div></div><div class="ru-hist">${h.slice(1, 11).map(disc).join("")}</div>
-        <div class="ru-stats"><div><span>${esc(tr(U.red))}</span><b>${pct(cnt.r)}</b></div><div><span>${esc(tr(U.black))}</span><b>${pct(cnt.b)}</b></div><div><span>${esc(tr(U.zero))}</span><b>${cnt.g}</b></div></div>
         <div class="ru-hc"><span class="ru-lbl">${esc(tr(U.hot))}</span>${hotN.map(x => disc(x[0])).join("")}<span class="ru-lbl">${esc(tr(U.cold))}</span>${coldN.map(x => disc(x[0])).join("")}</div>`;
     }
 
@@ -272,7 +287,7 @@ window.AIQ = window.AIQ || {};
     function chipsFade() { /* las fichas perdidas se apagan (clase lose en drawChips) */ }
     function flyChips() {
       const target = Q("bal").getBoundingClientRect(), sc = stage.getBoundingClientRect().width / 1920 || 1;
-      chipLayer.querySelectorAll(".ru-chip.win").forEach((el, i) => { const r = el.getBoundingClientRect(), dx = (target.left + target.width / 2 - (r.left + r.width / 2)) / sc, dy = (target.top + target.height / 2 - (r.top + r.height / 2)) / sc;
+      chipLayer.querySelectorAll(".ru-stk.win").forEach((el, i) => { const r = el.getBoundingClientRect(), dx = (target.left + target.width / 2 - (r.left + r.width / 2)) / sc, dy = (target.top + target.height / 2 - (r.top + r.height / 2)) / sc;
         setTimeout(() => { if (dead) return; el.animate([{ transform: "translate(0,0) scale(1)", opacity: 1 }, { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 60}px) scale(1.25)`, opacity: 1, offset: 0.4 }, { transform: `translate(${dx}px,${dy}px) scale(.45)`, opacity: 0.1 }], { duration: 820, easing: "cubic-bezier(.5,0,.7,.4)", fill: "forwards" }); sfx("rulCoin", i); }, 1500 + i * 90); });
     }
     function bump() { const b = Q("bal"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
