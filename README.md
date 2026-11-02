@@ -152,7 +152,7 @@ Los efectos de sonido del juego salen del propio motor de audio (`js/audio.js`):
 
 ### Datos, tipografías y licencias
 
-- **Fronteras:** Natural Earth (dominio público) vía `world-atlas` (ISC). **Mares, océanos y lagos** (`data/aguas.js`): polígonos de Natural Earth 10m (dominio público), simplificados. `topojson-client` (ISC).
+- **Fronteras:** Natural Earth (dominio público) vía `world-atlas` (ISC). **Mares, océanos y lagos** (`data/aguas.js`): polígonos de Natural Earth 10m (dominio público), simplificados. **Lagos y embalses del mapa** (`data/lagos.js`, ~2.000, aparecen con el zoom): Natural Earth 10m y su suplemento europeo (dominio público), simplificados al zoom máximo. `topojson-client` (ISC).
 - **Enciclopedia:** textos de Wikipedia y fotos de Wikimedia Commons (CC BY-SA y dominio público) empaquetados con su atribución por tarjeta; la lista completa de autores y licencias está en `credits.html` y dentro del juego, en Ajustes > Datos > Créditos y licencias. El rodillo de los créditos finales (`js/final.js`, el de los finales del juego) se puede ver cuando quieras desde Ajustes > Datos > «Ver los créditos».
 - **Modo Clásico:** lugares, datos y puntuación propios de Geolite.
 - **Tipografías:** Silkscreen, Jersey 15, Pixelify Sans y Fusion Pixel (SIL OFL).

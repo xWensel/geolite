@@ -181,5 +181,5 @@ window.AIQ = window.AIQ || {};
     return { features, byName, all };
   }
 
-  A.geo = { D2R, R_KM, project, unproject, haversine, inFeature, distToFeature, innerPoint, buildWorld };
+  A.geo = { D2R, R_KM, project, unproject, haversine, inPoly, inFeature, distToFeature, innerPoint, buildWorld };
 })(window.AIQ);

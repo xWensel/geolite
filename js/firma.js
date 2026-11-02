@@ -63,7 +63,9 @@ float sdAt(vec2 q){
 struct MS { vec2 p; vec2 q; vec2 uv; float land; float sd; float coast; float border; float cls; vec2 grad; float pid; float col10; };
 vec4 mskAt(vec2 q){ vec4 m = texture(uMsk, UV(q)); m.g = texture(uBrd, UV(q)).r; return m; }
 MS ms(vec2 p){
-  MS s; s.p = p; s.q = p - uPorig; s.uv = s.q / uR; s.sd = sdAt(s.q); s.land = smoothstep(.75, -.75, s.sd); s.grad = vec2(0);
+  MS s; s.p = p; s.q = p - uPorig; s.uv = s.q / uR; s.sd = sdAt(s.q);
+  if (s.sd > 0.) s.sd *= 1. + texture(uBrd, UV(s.q)).g;   // lago (js/map.js, v0.4.52): la costa, la mitad de ancha hacia el agua
+  s.land = smoothstep(.75, -.75, s.sd); s.grad = vec2(0);
   vec4 m = mskAt(s.q);
   if (m.r < .5 && s.land > .01) { for (int k = 0; k < 8; k++) { float an = float(k) * .785398; vec4 m2 = mskAt(s.q + vec2(cos(an), sin(an)) * 1.5); if (m2.r > .5) { m = vec4(m.r, m.g, m2.b, m2.a); break; } } }
   float cb = floor(m.b * 255. + .5);
@@ -168,7 +170,7 @@ void main(){
   vec2 cen = uR * .5;   // la sombra proyectada sale de la lampara vista desde el CENTRO de la pantalla: con la direccion y el largo de cada pixel, al subir o bajar un pais cerca de la lampara la sombra giraba hacia un lado y crecia
   vec2 l2 = normalize(uLamp.xy - cen + 1e-4);
   float off = uCanto * (1.2 + 2.2 * length(cen - uLamp.xy) / max(200., uLamp.z));
-  float sh = uCanto > 0. ? Soft(p + l2 * off) * (1. - s.land) : 0.;
+  float sh = uCanto > 0. ? Soft(p + l2 * off) * (1. - s.land) * (1. - .75 * texture(uBrd, UV(s.q)).g) : 0.;   // en un lago, la sombra de la tierra se aclara
   vec3 V = vec3(0, 0, 1), Hh = normalize(Ld + V);
   float shin = mix(220., 6., rough), nh = max(dot(N, Hh), 0.);
   float spec = pow(nh, shin) * (shin + 8.) / 120.;

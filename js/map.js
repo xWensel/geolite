@@ -20,6 +20,7 @@ window.AIQ = window.AIQ || {};
   const TWO_PI = Math.PI * 2;
   const wrapCx = x => x - TWO_PI * Math.round(x / TWO_PI);                 // el mundo se repite de izquierda a derecha: cualquier x vale modulo una vuelta
   const FLAG_EXT = 18;                                     // v0.2.15: celdas que se alarga el mastil de la bandera del acierto (lo que sube la tela)
+  const LK_W = 0.72;                                       // v0.4.52: grosor de la orilla de un lago respecto a la costa
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const easeIO = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const easeOutBounce = t => {
@@ -71,6 +72,10 @@ void main(){ vec2 p=orp((xf(a_pos,a_ct)-u_center)*u_scale)+u_off; gl_Position=ve
 precision mediump float; out vec4 o; void main(){ o=vec4(1.0); }`;
   const FS_SOLID = `#version 300 es
 precision mediump float; uniform vec4 u_col; out vec4 o; void main(){ o=u_col; }`;
+  /* lagos (js/lagos.js): en la mascara de la firma (salida 1) dejan de ser tierra, y en la de fronteras (salida 2) el verde dice «lago» (js/firma.js:
+     la tinta de la costa se adelgaza hacia el agua y la sombra de la tierra se aclara, para que un lago pequeno se lea como agua y no como un agujero) */
+  const FS_HOLE = `#version 300 es
+precision mediump float; layout(location=0) out vec4 o; layout(location=1) out vec4 o1; layout(location=2) out vec4 o2; void main(){ o=vec4(0.0); o1=vec4(0.0); o2=vec4(0.0,1.0,0.0,1.0); }`;
 
   const NOISE = `
 float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
@@ -820,14 +825,21 @@ void main(){
   /* el oceano, una version por mesa: FS_OCEAN lleva el agua de TODAS las mesas (u_style, u_mat) y el compilador de la GPU (D3D en Windows) tardaba
      ~10 s con la cache vacia (primer arranque, o tras actualizar el controlador) en compilarlo entero, con el juego congelado. Con la mesa fija como
      constante, cada version solo lleva su rama; se compila al ponerla (la de la mesa puesta, al arrancar) y se guarda */
+  const oceanSrc = (style, mat) => FS_OCEAN.replace("uniform int u_style;", "const int u_style=" + (style | 0) + ";").replace("uniform int u_mat;", "const int u_mat=" + (mat | 0) + ";");
   function oceanProg(gl, cache, style, mat) {
     const key = style + "|" + mat; let p = cache.get(key); if (p) return p;
-    const src = FS_OCEAN.replace("uniform int u_style;", "const int u_style=" + (style | 0) + ";").replace("uniform int u_mat;", "const int u_mat=" + (mat | 0) + ";");
-    p = compile(gl, VS_FULL, src); cache.set(key, p); return p;
+    p = compile(gl, VS_FULL, oceanSrc(style, mat)); cache.set(key, p); return p;
+  }
+  /* LAGOS (v0.4.52, js/lagos.js): el agua de un lago es la misma mesa que el mar. Es el oceano de la mesa (mismo fragmento: degradado, material,
+     aguas someras, reticula) dibujado sobre los triangulos del lago, que se mueven con su continente en los retos; u_lakeA, el fundido del zoom */
+  function lakeProg(gl, cache, style, mat) {
+    const key = "lago|" + style + "|" + mat; let p = cache.get(key); if (p) return p;
+    const src = oceanSrc(style, mat).replace("out vec4 o;", "out vec4 o; uniform float u_lakeA;").replace("o=vec4(ocean,1.0);", "o=vec4(ocean,u_lakeA);");
+    p = compile(gl, VS_FILL, src); cache.set(key, p); return p;
   }
   function buildPrograms(gl) {
     return {
-      sil: compile(gl, VS_FILL, FS_SIL), solid: compile(gl, VS_FILL, FS_SOLID), land: compile(gl, VS_MSK, FS_LAND), hatch: compile(gl, VS_FILL, FS_HATCH),
+      sil: compile(gl, VS_FILL, FS_SIL), solid: compile(gl, VS_FILL, FS_SOLID), hole: compile(gl, VS_FILL, FS_HOLE), land: compile(gl, VS_MSK, FS_LAND), hatch: compile(gl, VS_FILL, FS_HATCH),
       line: compile(gl, VS_LINE, FS_LINE), blur: compile(gl, VS_FULL, FS_BLUR), post: compile(gl, VS_FULL, FS_POST), swirl: compile(gl, VS_FULL, FS_SWIRL),
     };
   }
@@ -1280,10 +1292,64 @@ void main(){
       this.sctBuf = buf(gl.ARRAY_BUFFER, new Uint8Array(sct)); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(2, 1);
       this.brdBuf = buf(gl.ARRAY_BUFFER, this._borderFlags(segs)); gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(3, 1);
       gl.bindVertexArray(null);
+      this._initLagos(buf);
       this.vaoEmpty = gl.createVertexArray();
       this.T = {}; // objetivos de render
       this.debx = null;   // el pase de los debufos (js/debufos.js) vive en ESTE contexto: con uno nuevo se rehace
       this.fir = null; this._mrtC = null;   // y el de la firma de las mesas (js/firma.js)
+    }
+    /* LAGOS (v0.4.52, js/lagos.js): triangulos y orillas, ordenados por rango (icut/scut: donde empieza cada rango) para dibujar solo los que se ven.
+       Cada lago va con el poligono de tierra que lo contiene: su continente y su copia propia del mundo, con la misma cuenta que los paises, asi
+       que se mueve con el en los retos (Pangea, Big bang...). Las orillas son los tramos sobre tierra del juego (el resto ya es costa) */
+    _initLagos(buf) {
+      this.lk = null;
+      const L = A.lagos && A.lagos.list(), ec = earcutFn(); if (!L || !L.length || !ec) return;
+      const gl = this.gl, inPoly = A.geo.inPoly, cand = [];
+      for (const f of this.world.features) for (const p of f.polys) cand.push(p);
+      const home = lk => {
+        const ring = lk.rings[0], st = Math.max(1, Math.floor(ring.length / 6));
+        for (let i = 0; i < ring.length; i += st) { const [lo, la] = ring[i];
+          for (const p of cand) { const b = p.bbox; if (lo >= b[0] && lo <= b[2] && la >= b[1] && la <= b[3] && inPoly(lo, la, p)) return p; } }
+        for (const p of cand) { const b = p.bbox, c = lk.bbox; if (c[0] <= b[2] && c[2] >= b[0] && c[1] <= b[3] && c[3] >= b[1]) return p; }
+        return null;
+      };
+      const pos = [], ct = [], idx = [], segs = [], sct = [], icut = new Int32Array(14), scut = new Int32Array(14);
+      let r = -1;
+      for (const lk of L) {
+        while (r < lk.rank) { r++; icut[r] = idx.length; scut[r] = segs.length / 4; }
+        const p = home(lk), pc = p ? p.ct : 6;
+        const own = p && pc < 6 ? TWO_PI * Math.round((this.contCen[pc][0] - (p.bbox[0] + p.bbox[2]) / 2 * D2R) / TWO_PI) : 0;
+        const flat = [], holes = []; let off = 0;
+        lk.rings.forEach((ring, ri) => { if (ri) holes.push(off); for (const [lo, la] of ring) { const [x, y] = project(lo, la); flat.push(x, y); } off += ring.length; });
+        const tri = ec(flat, holes, 2), sh = lk.shores.map(s => s.map(([lo, la]) => project(lo, la)));
+        for (const shift of own ? [0, own] : [0]) {
+          const w = pc < 6 ? Math.round((shift - own) / TWO_PI) : 0, code = pc + 8 * (w + 2), base = pos.length / 2;
+          for (let i = 0; i < flat.length; i += 2) { pos.push(flat[i] + shift, flat[i + 1]); ct.push(code); }
+          for (const t of tri) idx.push(base + t);
+          for (const q of sh) for (let i = 0; i < q.length - 1; i++) { segs.push(q[i][0] + shift, q[i][1], q[i + 1][0] + shift, q[i + 1][1]); sct.push(code); }
+        }
+      }
+      while (r < 13) { r++; icut[r] = idx.length; scut[r] = segs.length / 4; }
+      const vaoFill = gl.createVertexArray(); gl.bindVertexArray(vaoFill);
+      buf(gl.ARRAY_BUFFER, new Float32Array(pos)); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      buf(gl.ARRAY_BUFFER, new Uint8Array(ct.length)); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+      buf(gl.ARRAY_BUFFER, new Uint8Array(ct)); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+      buf(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(idx));
+      const vaoLine = gl.createVertexArray(); gl.bindVertexArray(vaoLine);
+      buf(gl.ARRAY_BUFFER, new Float32Array([0, -1, 0, 1, 1, -1, 1, 1])); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      const segBuf = buf(gl.ARRAY_BUFFER, new Float32Array(segs)); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0); gl.vertexAttribDivisor(1, 1);
+      const sctBuf = buf(gl.ARRAY_BUFFER, new Uint8Array(sct)); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(2, 1);
+      const brdBuf = buf(gl.ARRAY_BUFFER, new Uint8Array(sct.length)); gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(3, 1);   // borde 0: una orilla es costa (no baila, el mapa mudo la deja)
+      gl.bindVertexArray(null);
+      this.lk = { vaoFill, vaoLine, segBuf, sctBuf, brdBuf, icut, scut };
+    }
+    _lkFill(r0, r1) { const k = this.lk, n = k.icut[r1] - k.icut[r0]; if (n) this.gl.drawElements(this.gl.TRIANGLES, n, this.gl.UNSIGNED_INT, k.icut[r0] * 4); }
+    _lkShore(r0, r1) {
+      const gl = this.gl, k = this.lk, s0 = k.scut[r0], n = k.scut[r1] - s0; if (!n) return;
+      gl.bindBuffer(gl.ARRAY_BUFFER, k.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, s0 * 16);
+      gl.bindBuffer(gl.ARRAY_BUFFER, k.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, s0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, k.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, s0);
+      gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n);
     }
     /* la firma de las mesas (js/firma.js): vecinos de cada pais (los que comparten un tramo de frontera) y su coloreado (una vez por mapa) */
     _paisIds(segs, segF) {
@@ -2044,6 +2110,7 @@ void main(){
       const cw = wrapCx(v.cx), hwx = (this._orient().on ? Math.max(W, H) * 0.75 : st.crt ? W * 0.56 : W * 0.5) / v.s, cxs = [cw];
       if (cw + hwx > BX1 + 1e-3) cxs.push(cw - TWO_PI);
       if (cw - hwx < BX0 - 1e-3) cxs.push(cw + TWO_PI);
+      const LKR = this.lk ? A.lagos.runs(A.lagos.alphas(v.s / this.minS)) : [];   // lagos (js/lagos.js): los rangos que se ven a este zoom
       const silW = Math.max(2, Math.round(W / 3)), silH = Math.max(2, Math.round(H / 3));
       const sil = this._target("sil", silW, silH), bA = this._target("bA", silW, silH), bN = this._target("bN", silW, silH), bW = this._target("bW", silW, silH);
       const bX = st.wide ? this._target("bX", silW, silH) : null;
@@ -2072,6 +2139,12 @@ void main(){
       gl.bindFramebuffer(gl.FRAMEBUFFER, sil.fbo); gl.viewport(0, 0, silW, silH); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(P.sil); this._setDist(P.sil); this._u(P.sil, "u_off", 0, 0); this._u(P.sil, "u_scale", scale(silW)); this._u(P.sil, "u_res", silW, silH);
       gl.bindVertexArray(this.vaoFill); for (const cc of cxs) { this._u(P.sil, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); }
+      if (LKR.length) {                                                 // los lagos no son tierra: la silueta se vacia donde estan
+        gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.useProgram(P.solid); this._setDist(P.solid);
+        this._u(P.solid, "u_off", 0, 0); this._u(P.solid, "u_scale", scale(silW)); this._u(P.solid, "u_res", silW, silH); gl.bindVertexArray(this.lk.vaoFill);
+        for (const cc of cxs) { this._u(P.solid, "u_center", cc, v.cy); for (const [r0, r1, a] of LKR) { this._u(P.solid, "u_col", 0, 0, 0, a); this._lkFill(r0, r1); } }
+        gl.disable(gl.BLEND);
+      }
 
       // 2) desenfoques (estrecho y ancho) en la GPU: ancho constante en pantalla
       gl.bindVertexArray(this.vaoEmpty); gl.useProgram(P.blur);
@@ -2094,19 +2167,6 @@ void main(){
       gl.bindFramebuffer(gl.FRAMEBUFFER, mrt ? mrt.fbo : scene.fbo); gl.viewport(0, 0, sw, sh); DB(C0, NO, NO);
       const sc = scale(sw), gp = this._gridParams();
       const PO = oceanProg(gl, this._oc || (this._oc = new Map()), st.style || 0, ms.mat || 0);   // la version del oceano de esta mesa (se compila una vez)
-      gl.useProgram(PO); gl.bindVertexArray(this.vaoEmpty);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(PO.u.u_blurN, 0);
-      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bW.tex); gl.uniform1i(PO.u.u_blurW, 1);
-      if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(PO.u.u_swirl, 2); }
-      gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, (bX || bW).tex); gl.uniform1i(PO.u.u_blurX, 3);
-       this._u(PO, "u_mc1", ...ms.mc1); this._u(PO, "u_mc2", ...ms.mc2); this._u(PO, "u_mp", ...ms.mp);
-      this._u(PO, "u_center", cw, v.cy); this._u(PO, "u_scale", sc); this._u(PO, "u_res", sw, sh); this._u(PO, "u_dpr", dpr * RS); this._setDist(PO);
-      this._u(PO, "u_oTop", ...ms.oTop); this._u(PO, "u_oBot", ...ms.oBot); this._u(PO, "u_shallow", ...ms.shallow); this._u(PO, "u_grid", ...ms.grid); this._u(PO, "u_tropic", ...ms.tropic);
-      this._u(PO, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(PO, "u_felt", f[0], f[1], f[2], FIR ? 0 : f[3]); }   // con la firma, la lampara es la comun (no una segunda)
-      this._u(PO, "u_time", this.fxOn === false ? 0 : now / 1000); 
-      { const it = this._it, hv = this.mouse, live = this._livingMat(), age = it && live ? (now - it.t) / 1000 : -1;
-        this._u(PO, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
-        this._u(PO, "u_hv", hv && live ? hv.x * sw / this.W : -9999, hv && live ? (this.H - hv.y) * sh / this.H : -9999); }
       { let nb = 0;                                                                                      // Periodico: la pagina con notas de la Enciclopedia entra entre 30x y 60x de zoom
         if (ms.mat === 33 && A.periodico) { nb = Math.min(1, Math.max(0, (v.s / this.minS - 30) / 30));
           if (nb > 0) { const c0 = this.screenToLonLat(this.W / 2, this.H / 2), pg = A.periodico.page(c0[0], c0[1]);
@@ -2114,10 +2174,28 @@ void main(){
             if (!this._newsTex) { this._newsTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, this._newsTex); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); this._newsVer = -1; }
             gl.bindTexture(gl.TEXTURE_2D, this._newsTex);
             if (this._newsVer !== pg.ver) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pg.canvas); this._newsVer = pg.ver; }
-            gl.uniform1i(PO.u.u_news, 4); this._u(PO, "u_nw", nb, pg.W, pg.H, 0); gl.activeTexture(gl.TEXTURE0); this._nw = [nb, pg.W, pg.H]; } }
-        if (!(nb > 0)) { this._u(PO, "u_nw", 0, 1024, 640, 0); this._nw = null; } }
-      this._u(PO, "u_sw1", ...ms.sw[0]); this._u(PO, "u_sw2", ...ms.sw[1]); this._u(PO, "u_sw3", ...ms.sw[2]);
-      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; this._u(PO, "u_calm", st.remolino === false ? 2.25 : this._calm); }   // sin remolino: el color medio del oceano, liso   // la calma entra poco a poco (~0,7 s)
+            gl.activeTexture(gl.TEXTURE0); this._nw = [nb, pg.W, pg.H]; } }
+        if (!(nb > 0)) this._nw = null; }
+      { const ck = this.calm || 0, c0 = this._calm == null ? ck : this._calm; this._calm = Math.abs(ck - c0) < 0.01 ? ck : c0 + (ck - c0) * 0.08; if (this._calm !== ck) this.dirty = true; }   // sin remolino: el color medio del oceano, liso   // la calma entra poco a poco (~0,7 s)
+      const calmU = st.remolino === false ? 2.25 : this._calm;
+      const oceanU = PO => {                                              // los uniformes del oceano de esta mesa (el mar y los lagos: el mismo agua)
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bN.tex); gl.uniform1i(PO.u.u_blurN, 0);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bW.tex); gl.uniform1i(PO.u.u_blurW, 1);
+        if (swT) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, swT.tex); gl.uniform1i(PO.u.u_swirl, 2); }
+        gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, (bX || bW).tex); gl.uniform1i(PO.u.u_blurX, 3);
+         this._u(PO, "u_mc1", ...ms.mc1); this._u(PO, "u_mc2", ...ms.mc2); this._u(PO, "u_mp", ...ms.mp);
+        this._u(PO, "u_center", cw, v.cy); this._u(PO, "u_scale", sc); this._u(PO, "u_res", sw, sh); this._u(PO, "u_dpr", dpr * RS); this._setDist(PO);
+        this._u(PO, "u_oTop", ...ms.oTop); this._u(PO, "u_oBot", ...ms.oBot); this._u(PO, "u_shallow", ...ms.shallow); this._u(PO, "u_grid", ...ms.grid); this._u(PO, "u_tropic", ...ms.tropic);
+        this._u(PO, "u_gp", gp.a, gp.b, gp.t, st.gridA); { const f = st.felt || [0, 0, 1, 0]; this._u(PO, "u_felt", f[0], f[1], f[2], FIR ? 0 : f[3]); }   // con la firma, la lampara es la comun (no una segunda)
+        this._u(PO, "u_time", this.fxOn === false ? 0 : now / 1000); 
+        { const it = this._it, hv = this.mouse, live = this._livingMat(), age = it && live ? (now - it.t) / 1000 : -1;
+          this._u(PO, "u_it", it ? it.x * sw / this.W : 0, it ? (this.H - it.y) * sh / this.H : 0, age >= 0 && age < 6 ? age : -1, 0);
+          this._u(PO, "u_hv", hv && live ? hv.x * sw / this.W : -9999, hv && live ? (this.H - hv.y) * sh / this.H : -9999); }
+        this._u(PO, "u_sw1", ...ms.sw[0]); this._u(PO, "u_sw2", ...ms.sw[1]); this._u(PO, "u_sw3", ...ms.sw[2]);
+        if (this._nw) { gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D, this._newsTex); gl.uniform1i(PO.u.u_news, 4); this._u(PO, "u_nw", ...this._nw, 0); gl.activeTexture(gl.TEXTURE0); } else this._u(PO, "u_nw", 0, 1024, 640, 0);
+        this._u(PO, "u_calm", calmU);
+      };
+      gl.useProgram(PO); gl.bindVertexArray(this.vaoEmpty); oceanU(PO);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       gl.bindVertexArray(this.vaoFill);
@@ -2136,6 +2214,20 @@ void main(){
       this._u(P.land, "u_scale", sc); this._u(P.land, "u_res", sw, sh); this._u(P.land, "u_fx", st.ao, st.grain, 0, 0);
       if (this._palFor !== ms) { this._palFor = ms; this._pal = new Float32Array(24); ms.pal.forEach((c, i) => this._pal.set(c, i * 3)); } gl.uniform3fv(P.land.u.u_pal, this._pal);
       for (const cc of cxs) { this._u(P.land, "u_center", cc, v.cy); gl.drawElements(gl.TRIANGLES, this.idxCount, gl.UNSIGNED_INT, 0); }
+      /* LAGOS (js/lagos.js): el agua de la mesa (su oceano) pintada en el lago, con el fundido del zoom. En las mesas de material nuevo de la firma, que
+         repintan desde la mascara, el lago deja de ser tierra en ella y lo pintan como su mar */
+      if (LKR.length) {
+        const PL = lakeProg(gl, this._oc, st.style || 0, ms.mat || 0);
+        DB(C0, NO, NO); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(PL); oceanU(PL); this._u(PL, "u_off", 0, 0); gl.bindVertexArray(this.lk.vaoFill);
+        for (const cc of cxs) { this._u(PL, "u_center", cc, v.cy); for (const [r0, r1, a] of LKR) { this._u(PL, "u_lakeA", a); this._lkFill(r0, r1); } }
+        gl.disable(gl.BLEND);
+        if (mrt && FIR.cur && FIR.cur.def) {                             // solo las mesas de material nuevo repintan desde la mascara: en las demas, el lago queda pintado sobre la carta (sin la sombra de la tierra, que llenaba de negro los pequenos)
+          DB(NO, C1, C2); gl.useProgram(P.hole); this._setDist(P.hole); this._u(P.hole, "u_off", 0, 0); this._u(P.hole, "u_scale", sc); this._u(P.hole, "u_res", sw, sh);
+          for (const cc of cxs) { this._u(P.hole, "u_center", cc, v.cy); for (const [r0, r1, a] of LKR) if (a >= 0.5) this._lkFill(r0, r1); }
+        }
+        gl.activeTexture(gl.TEXTURE0); gl.bindVertexArray(this.vaoFill);
+      }
 
       DB(C0, NO, NO);
       gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -2181,10 +2273,18 @@ void main(){
         DB(C0, NO, NO);
         this._u(P.line, "u_width", lw); this._u(P.line, "u_off", st.lineOff[0] * dpr * RS, st.lineOff[1] * dpr * RS); this._u(P.line, "u_col", st.lineOffCol[0], st.lineOffCol[1], st.lineOffCol[2], st.lineOffCol[3] * lcov);
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.segCount);
+        if (LKR.length) { this._u(P.line, "u_lmode", 0); this._u(P.line, "u_width", lw * LK_W); gl.bindVertexArray(this.lk.vaoLine);
+          for (const [r0, r1, a] of LKR) { this._u(P.line, "u_col", st.lineOffCol[0], st.lineOffCol[1], st.lineOffCol[2], st.lineOffCol[3] * lcov * a); this._lkShore(r0, r1); }
+          gl.bindVertexArray(this.vaoLine); }
       }
       DB(C0, NO, C2);
       this._u(P.line, "u_width", lw); this._u(P.line, "u_off", 0, 0); this._u(P.line, "u_col", st.line[0], st.line[1], st.line[2], st.line[3] * lcov);
       this._u(P.line, "u_ccol", ...ms.ccol); this._u(P.line, "u_lmat", ms.lmat); this._u(P.line, "u_ldpr", dpr * RS * 2);
+      if (LKR.length) {                                                 // orillas de los lagos: la tinta de la costa de la mesa, algo mas fina, con su fundido
+        this._u(P.line, "u_lmode", 0); this._u(P.line, "u_width", lw * LK_W); gl.bindVertexArray(this.lk.vaoLine);
+        for (const [r0, r1, a] of LKR) { this._u(P.line, "u_col", st.line[0], st.line[1], st.line[2], st.line[3] * lcov * a); this._lkShore(r0, r1); }
+        gl.bindVertexArray(this.vaoLine); this._u(P.line, "u_width", lw); this._u(P.line, "u_col", st.line[0], st.line[1], st.line[2], st.line[3] * lcov);
+      }
       const lensOn = this.lens && this.lens.r > 0 && this.dist.spec && (this._eff().wob > 0.002 || this._eff().lineA < 0.98);
       if (lensOn) {                                                     // fuera de la lupa: fronteras deformadas; dentro: las verdaderas
         const [lx, ly] = this._crt(this.lens.x, this.lens.y), k = dpr * RS, e = this._eff();

@@ -18,6 +18,14 @@ window.AIQ = window.AIQ || {};
   A.mapSens = A.mapSens || { pan: 1, zoom: 1 };     // multiplicador en vivo: lo muta Ajustes, lo leen ambos motores de mapa (este y map.js)
   const { project, unproject, D2R } = A.geo;
   const BX0 = -Math.PI, BX1 = Math.PI, BY0 = -1.5, BY1 = 2.1;      // limites del mundo (Miller)
+  /* LAGOS (v0.4.52, js/lagos.js): trazados en coordenadas del mundo. Se recortan de la tierra y asoma el oceano (el del CSS) */
+  let LK = null;
+  const lakes2d = () => {
+    if (LK) return LK;
+    const pathOf = (rings, close) => { const P = new Path2D(); for (const r of rings) { r.forEach(([lo, la], k) => { const [x, y] = project(lo, la); if (k) P.lineTo(x, y); else P.moveTo(x, y); }); if (close) P.closePath(); } return P; };
+    LK = (A.lagos ? A.lagos.list() : []).map(l => { const [x0, y0] = project(l.bbox[0], l.bbox[1]), [x1, y1] = project(l.bbox[2], l.bbox[3]); return { rank: l.rank, fill: pathOf(l.rings, true), shore: pathOf(l.shores, false), bb: [x0, y0, x1, y1] }; });
+    return LK;
+  };
 
   const INK = "#14232b", PAPER = "#f2e9d6", RED = "#e0492b", BRASS = "#c8963e";
   const OCEAN_TOP = "#12414f", OCEAN_BOT = "#092632";
@@ -134,6 +142,7 @@ window.AIQ = window.AIQ || {};
       const land = mk(texW, texH), lc = land.getContext("2d");
       lc.setTransform(sc, 0, 0, -sc, -BX0 * sc, BY1 * sc); lc.lineJoin = "round"; lc.lineCap = "round";
       for (const f of this.world.features) { lc.fillStyle = f.color; lc.fill(f.path); }
+      lc.globalCompositeOperation = "destination-out"; for (const l of lakes2d()) if (l.rank <= 2) lc.fill(l.fill, "evenodd"); lc.globalCompositeOperation = "source-over";   // los grandes lagos ya a mundo entero
       lc.strokeStyle = "rgba(38,52,58,.45)"; lc.lineWidth = 1.15 / sc; lc.stroke(this.world.all);
       // resplandor de costas: silueta desenfocada, dibujado bajo la tierra (una sola vez)
       let combo = land;
@@ -375,6 +384,12 @@ window.AIQ = window.AIQ || {};
       const vis = this.world.features.filter(f => f.wrap || (f.px1 >= x0 && f.px0 <= x1 && f.py1 >= y0 && f.py0 <= y1));
       for (const [w, a] of [[18, 0.06], [8, 0.10], [3.5, 0.16]]) { c.strokeStyle = `rgba(${this.shore || SHORE},${a})`; c.lineWidth = w / s; for (const f of vis) c.stroke(f.path); }
       for (const f of vis) { c.fillStyle = f.color; c.fill(f.path); }
+      if (A.lagos) {                                                     // lagos: cada rango entra con su fundido (el mismo que en el mapa WebGL)
+        const a = A.lagos.alphas(s / this.minS), lv = lakes2d().filter(l => a[l.rank] > 0.003 && l.bb[2] >= x0 && l.bb[0] <= x1 && l.bb[3] >= y0 && l.bb[1] <= y1);
+        c.globalCompositeOperation = "destination-out"; for (const l of lv) { c.globalAlpha = a[l.rank]; c.fill(l.fill, "evenodd"); }
+        c.globalCompositeOperation = "source-over"; c.strokeStyle = "rgba(38,52,58,.5)"; c.lineWidth = clamp(s / 300, 0.6, 1.5) / s * 0.72;
+        for (const l of lv) { c.globalAlpha = a[l.rank]; c.stroke(l.shore); } c.globalAlpha = 1;
+      }
       c.strokeStyle = "rgba(38,52,58,.5)"; c.lineWidth = clamp(s / 300, 0.6, 1.5) / s; for (const f of vis) c.stroke(f.path);
       this.sharp = { cv: this._sharpCv, v, w: cw / dpr, h: ch / dpr };
     }
