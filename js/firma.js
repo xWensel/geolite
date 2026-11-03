@@ -127,10 +127,18 @@ float gEmis = 0.;
 ` + body + `
 /* el mar de las mesas nuevas va quieto en pantalla: se hornea UNA vez (uSeaOnly) y, lejos de la costa (uSeaFar px), cada fotograma solo lo copia */
 uniform float uSeaFar; uniform sampler2D uSeaA, uSeaB;
+uniform vec3 uRioC; uniform float uRioCK;   // rios: color propio de la mesa (neon, boli) sobre su mar; 0 = solo su mar
 void main(){ vec2 q = qFrag();
   if (uSeaOnly < .5 && uSeaFar > 0. && sdAt(q) > uSeaFar) { o0 = texture(uSeaA, UV(q)); o1 = texture(uSeaB, UV(q)); return; }
   MS s = ms(q + uPorig); if (uSeaOnly > .5) { s.land = 0.; s.sd = 99.; s.border = 0.; s.coast = 0.; }
-  vec3 alb; float h; vec3 mat; mesaBake(s, alb, h, mat); o0 = vec4(clamp(alb, 0., 1.), clamp(h, 0., 1.)); o1 = vec4(clamp(mat, 0., 1.), gEmis); }`;
+  vec3 alb; float h; vec3 mat; mesaBake(s, alb, h, mat);
+  if (uSeaOnly < .5 && uSeaFar > 0.) {   // rios (js/map.js, v0.4.53: azul de la mascara de fronteras): el mismo mar de la mesa, por debajo de la frontera
+    vec4 bq = texture(uBrd, UV(q)); float rb = bq.b * (1. - bq.r) * s.land;
+    if (rb > .002) { vec4 sa = texture(uSeaA, UV(q)); vec3 w = sa.rgb; float lw = luma(w), wl = luma(alb) - .25;   // mas clara si es mucho mas oscura que la tierra (js/rios.js)
+      if (lw < wl) w = mix(w, vec3(1.), clamp((wl - lw) / max(1. - lw, .01), 0., 1.));
+      alb = mix(alb, mix(w, uRioC, uRioCK), rb); h = mix(h, sa.a, rb); mat = mix(mat, texture(uSeaB, UV(q)).rgb, rb); }
+  }
+  o0 = vec4(clamp(alb, 0., 1.), clamp(h, 0., 1.)); o1 = vec4(clamp(mat, 0., 1.), gEmis); }`;
   const HUELLA_DEF = `
 void mesaHuella(MS s, vec2 d, float age, inout vec3 alb, inout float h, inout vec3 mat){
   float r = length(d), ring = exp(-pow((r - 21.) / 2.2, 2.));
@@ -141,6 +149,7 @@ vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){ vec3 F0 = mix(vec3(.04), gAlb
   const LIGHT = def => FC + MATLIB + `
 out vec4 o;
 uniform sampler2D uBake, uMat; uniform vec3 uLamp, uLampCol; uniform float uLampI, uCanto, uSombra, uKs, uAmb, uEnv, uNorm, uPoolK, uBrillo;
+uniform vec3 uRioC; uniform float uRioE;   // rios con luz propia (el neon de Vegas): el horneado ya los pinto con su color
 uniform vec2 uAniso; uniform vec4 uBarrido; uniform vec4 uHuella;
 vec3 gN, gL, gLp, gLc, gAlb, gMat; float gFall, gSh, gEm;
 vec4 B(vec2 q){ return texture(uBake, UV(q)); }
@@ -189,6 +198,7 @@ void main(){
   col *= 1. - sh * uSombra * .5;
   gN = N; gL = Ld; gLp = vec3(uLamp.xy, uLamp.z); gLc = lc; gAlb = alb; gMat = m; gFall = fall; gSh = sh;
   col = mesaVivo(s, col);
+  if (uRioE > 0.) { vec4 bq = texture(uBrd, UV(p)); col += uRioC * bq.b * (1. - bq.r) * s.land * uRioE; }
   if (uBarrido.x >= 0. && uBarrido.x < 1.6) {
     vec2 dir = vec2(cos(uBarrido.z), sin(uBarrido.z));
     vec2 qq = vec2(dot(p / uR - .5, dir) * 1.4 - (uBarrido.x * 1.9 - .95), dot(p / uR - .5, vec2(-dir.y, dir.x)));
@@ -703,7 +713,7 @@ vec3 mesaVivo(MS s, vec3 col){
   /* CUADERNO: hoja de cuadros, diez rotuladores (vecinos nunca repiten), sangrado en la fibra, margen rojo, flexo y cerco de cafe */
   NUEVAS.cuaderno = {
     luz: { lmpI: 0.5, lmpZ: 900, lmpK: 0.65, canto: 0, sombra: 0, amb: 0.72, ks: 0.6, env: 1, poolK: 0.6 },
-    uni: { uCuad: 26, uMarg: 118, uSangra: 1.8, uTrazo: 1.8, uCafe: 1, uPant: 0.55 },
+    uni: { uCuad: 26, uMarg: 118, uSangra: 1.8, uTrazo: 1.8, uCafe: 1, uPant: 0.55, uRioC: [0.16, 0.3, 0.72], uRioCK: 0.9 },
     bake: `
 uniform float uCuad, uMarg, uSangra, uTrazo, uCafe;
 vec3 mk(int c){
@@ -793,7 +803,7 @@ vec3 mesaVivo(MS s, vec3 col){
      Se enciende parpadeando al poner la mesa y en el premio; el clic manda un pulso por los tubos; algun tramo viejo titila de vez en cuando */
   NUEVAS.vegas = {
     luz: { lmpI: 0.3, lmpZ: 700, lmpK: 0.55, canto: 0, sombra: 0, amb: 0.06, ks: 1, env: 1, poolK: 0.75 },
-    uni: { uPared: [0.042, 0.04, 0.05], uCostaC: [0x3f / 255, 0xe9 / 255, 1], uFronC: [1, 0x4f / 255, 0xcf / 255], uRad: 3.4, uHalo: 1.6, uBri: 1.3 },
+    uni: { uPared: [0.042, 0.04, 0.05], uCostaC: [0x3f / 255, 0xe9 / 255, 1], uFronC: [1, 0x4f / 255, 0xcf / 255], uRad: 3.4, uHalo: 1.6, uBri: 1.3, uRioC: [0x3f / 255, 0xe9 / 255, 1], uRioCK: 0.8, uRioE: 0.9 },
     neon: true,
     bake: `
 uniform vec3 uPared;

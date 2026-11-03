@@ -26,6 +26,14 @@ window.AIQ = window.AIQ || {};
     LK = (A.lagos ? A.lagos.list() : []).map(l => { const [x0, y0] = project(l.bbox[0], l.bbox[1]), [x1, y1] = project(l.bbox[2], l.bbox[3]); return { rank: l.rank, fill: pathOf(l.rings, true), shore: pathOf(l.shores, false), bb: [x0, y0, x1, y1] }; });
     return LK;
   };
+  /* RIOS (v0.4.53, js/rios.js): un trazado por rango */
+  let RV = null;
+  const rios2d = () => {
+    if (RV) return RV;
+    RV = Array.from({ length: 13 }, () => new Path2D());
+    for (const t of (A.rios ? A.rios.list() : [])) t.line.forEach(([lo, la], k) => { const [x, y] = project(lo, la); if (k) RV[t.rank].lineTo(x, y); else RV[t.rank].moveTo(x, y); });
+    return RV;
+  };
 
   const INK = "#14232b", PAPER = "#f2e9d6", RED = "#e0492b", BRASS = "#c8963e";
   const OCEAN_TOP = "#12414f", OCEAN_BOT = "#092632";
@@ -88,6 +96,7 @@ window.AIQ = window.AIQ || {};
       if (!st || !this.world) return;
       const hex = h => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h || ""); return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : null; };
       const casino = st === (window.AIQ.MAPSTYLES || {}).casino, sh = hex(st.shallow);
+      this.rioC = A.rios ? "rgb(" + A.rios.color(st).map(v => Math.round(v * 255)).join(",") + ")" : null;
       this.ocT = casino ? OCEAN_TOP : st.oceanTop || OCEAN_TOP; this.ocB = casino ? OCEAN_BOT : st.oceanBot || OCEAN_BOT; this.shore = casino || !sh ? SHORE : sh.join(",");
       const app = document.getElementById("app"); if (app) app.style.background = casino ? "" : `linear-gradient(${this.ocT}, ${this.ocB})`;
       for (const f of this.world.features) { if (f.c0 === undefined) f.c0 = f.color; f.color = (!casino && st.land && st.land[f.ci]) || f.c0; }
@@ -389,6 +398,10 @@ window.AIQ = window.AIQ || {};
         c.globalCompositeOperation = "destination-out"; for (const l of lv) { c.globalAlpha = a[l.rank]; c.fill(l.fill, "evenodd"); }
         c.globalCompositeOperation = "source-over"; c.strokeStyle = "rgba(38,52,58,.5)"; c.lineWidth = clamp(s / 300, 0.6, 1.5) / s * 0.72;
         for (const l of lv) { c.globalAlpha = a[l.rank]; c.stroke(l.shore); } c.globalAlpha = 1;
+      }
+      if (A.rios) {                                                      // rios: el agua de la mesa, cada rango con su fundido y su grosor (como en el mapa WebGL)
+        const z = s / this.minS, a = A.rios.alphas(z), P = rios2d(); c.strokeStyle = this.rioC || "rgb(57,165,140)";
+        for (let r = 0; r < 13 && a[r] > 0.003; r++) { c.globalAlpha = a[r]; c.lineWidth = A.rios.width(r, z, a[r]) / s; c.stroke(P[r]); } c.globalAlpha = 1;
       }
       c.strokeStyle = "rgba(38,52,58,.5)"; c.lineWidth = clamp(s / 300, 0.6, 1.5) / s; for (const f of vis) c.stroke(f.path);
       this.sharp = { cv: this._sharpCv, v, w: cw / dpr, h: ch / dpr };

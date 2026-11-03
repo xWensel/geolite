@@ -52,15 +52,15 @@ window.AIQ = window.AIQ || {};
     land: ["#c9a46a", "#a65f46", "#6f8a6a", "#8a6f9e", "#b98a52", "#5f7f93", "#c48f7a"], line: [0.14, 0.1, 0.08, 0.9], shadow: { off: [2, -3], col: [0.2, 0.17, 0.13, 0.18] }, grid: "#8a847c", gridA: 0.14, tropic: "#a0703a" });
   A.MAPSTYLES.nero = MS({ mat: 2, oceanTop: "#1f1e21", oceanBot: "#0b0b0d", shallow: "#2a2826", mc1: "#d8b469", mc2: "#5a5650", mp: [0.03, 1.4, 0, 2], felt: [0, 0.25, 0, 0.05],
     land: ["#f1e6cf", "#dccaa0", "#efd9c4", "#d6d1bb", "#e4dccb", "#ead7a2", "#faf4e6"], line: [0.1, 0.08, 0.05, 0.95], shadow: { off: [3, -4], col: [0, 0, 0, 0.6] }, grid: "#d8b469", gridA: 0, tropic: "#f0d890" });
-  A.MAPSTYLES.pizarra = MS({ mat: 3, oceanTop: "#2f3d37", oceanBot: "#1c2622", shallow: "#34443d", mc1: "#e8efe9", mc2: "#26322e", mp: [0.09, 0, 0, 2], felt: [0, 0, 0, 0.04], lmat: 1,
+  A.MAPSTYLES.pizarra = MS({ rio: "#a9cdf0", mat: 3, oceanTop: "#2f3d37", oceanBot: "#1c2622", shallow: "#34443d", mc1: "#e8efe9", mc2: "#26322e", mp: [0.09, 0, 0, 2], felt: [0, 0, 0, 0.04], lmat: 1,
     land: ["#f2efe6", "#f6d9a0", "#f4b9b0", "#bfe3c4", "#b9d4f2", "#e5c6f0", "#fff6c9"], line: [0.95, 0.96, 0.93, 0.92], lineW: 2.0, shadow: null, grid: "#e8efe9", gridA: 0.1, tropic: "#f6d9a0" });
   A.MAPSTYLES.vegas = MS({ mat: 4, oceanTop: "#140b28", oceanBot: "#05030c", shallow: "#140b28", mc1: "#22d8ff", mp: [0.4, 0, 0, 1], felt: [0, 0, 0, 0.05], lmat: 2, coast: [0.2, 0.9, 1, 1],
     land: ["#1f1338", "#26133c", "#16223e", "#2c1132", "#1a1c36", "#22163a", "#2c1c44"], line: [1, 0.25, 0.68, 1], lineW: 2.2, shadow: null, grid: "#7a3cff", gridA: 0.2, tropic: "#ffd84a", hl: "#ffd84a" });
-  A.MAPSTYLES.nautica = MS({ mat: 5, wide: true, oceanTop: "#e2cf9f", oceanBot: "#cdb27c", shallow: "#e8d8ae", mc1: "#5a3a1e", mc2: "#a8783e", mp: [9, 0, 0, 2], felt: [0, 0, 0.25, 0.03],
+  A.MAPSTYLES.nautica = MS({ rio: "#7a6444", mat: 5, wide: true, oceanTop: "#e2cf9f", oceanBot: "#cdb27c", shallow: "#e8d8ae", mc1: "#5a3a1e", mc2: "#a8783e", mp: [9, 0, 0, 2], felt: [0, 0, 0.25, 0.03],
     land: ["#f6ebcc", "#f2d9b0", "#e9e0b6", "#f3cfbb", "#e3e4bf", "#f7e3a8", "#fbf2dc"], line: [0.32, 0.19, 0.08, 0.92], lineW: 1.8, shadow: { off: [2, -3], col: [0.35, 0.22, 0.08, 0.25] }, grid: "#6a4a26", gridA: 0.22, tropic: "#a8452a" });
   A.MAPSTYLES.fondo = MS({ mat: 6, wide: true, oceanTop: "#0f2c4e", oceanBot: "#071830", shallow: "#8fd0da", mc1: "#5fb1c8", mc2: "#c8f0f4", mp: [2.0, 0, 0, 1], felt: [0, 0.1, 0.12, 0.04],
     land: ["#e9dcb0", "#cfd9a4", "#e3c99a", "#d8e2b8", "#efe2c0", "#c9d6a0", "#f4ead0"], line: [0.12, 0.15, 0.1, 0.85], shadow: { off: [3, -4], col: [0.01, 0.04, 0.1, 0.5] }, grid: "#a9dde6", gridA: 0.12, tropic: "#ffe2a0" });
-  A.MAPSTYLES.cianotipo = MS({ mat: 8, oceanTop: "#1f528e", oceanBot: "#123a6e", shallow: "#25609e", mc1: "#dbe8ff", mp: [0, 0, 0, 2], felt: [0, 0, 0, 0.04],
+  A.MAPSTYLES.cianotipo = MS({ rio: "#e8f0ff", mat: 8, oceanTop: "#1f528e", oceanBot: "#123a6e", shallow: "#25609e", mc1: "#dbe8ff", mp: [0, 0, 0, 2], felt: [0, 0, 0, 0.04],
     land: ["#3e74b4", "#3568a6", "#4880bf", "#2f5f9a", "#5289c6", "#3a6eae", "#5c93cf"], line: [0.92, 0.95, 1, 0.95], lineW: 1.8, shadow: null, grid: "#dbe8ff", gridA: 0.2, tropic: "#dbe8ff", ink: "#0f2a4e", paper: "#f4f8ff" });
   A.MAPSTYLES.laton = MS({ mat: 9, oceanTop: "#b8862e", oceanBot: "#77511a", shallow: "#c4943a", mc1: "#3e2a0c", mc2: "#f2d38a", mp: [150, 0, 0, 2], felt: [0, 0.3, 0.05, 0],
     land: ["#2a2420", "#3a2a22", "#24302c", "#352a30", "#2c2c26", "#3a3224", "#433a30"], line: [0.95, 0.78, 0.4, 0.95], shadow: { off: [3, -4], col: [0.15, 0.08, 0, 0.6] }, grid: "#3e2a0c", gridA: 0.18, tropic: "#3e2a0c" });
@@ -99,7 +99,7 @@ window.AIQ = window.AIQ || {};
     land: ["#f2c9a0", "#c9dfa8", "#f0e0a0", "#e8b8c0", "#b8d0e8", "#d8c8e8", "#f8e8c8"], line: [0.28, 0.22, 0.2, 0.75], lineW: 1.5, shadow: null, gridA: 0 });
   A.MAPSTYLES.aurora = MS({ mat: 23, animated: true, oceanTop: "#0e1c36", oceanBot: "#040812", shallow: "#0e1c36", mc1: "#3dffa0", mc2: "#9a6aff", mp: [1, 0, 0, 1], felt: [0, 0.2, 0, 0],
     land: ["#e8eef6", "#d4dce8", "#e2e0f0", "#d0e4e0", "#eceae4", "#dce6f4", "#f6f8fc"], line: [0.05, 0.08, 0.16, 0.95], shadow: { off: [3, -4], col: [0, 0, 0.04, 0.6] }, gridA: 0 });
-  A.MAPSTYLES.tesoro = MS({ mat: 24, animated: true, oceanTop: "#7a4e10", oceanBot: "#7a4e10", shallow: "#7a4e10", mc1: "#6e440c", mc2: "#ffe08a", mp: [0.006, 0.6, 0, 2], felt: [0, 0.3, 0, 0],
+  A.MAPSTYLES.tesoro = MS({ rio: "#e0b04a", mat: 24, animated: true, oceanTop: "#7a4e10", oceanBot: "#7a4e10", shallow: "#7a4e10", mc1: "#6e440c", mc2: "#ffe08a", mp: [0.006, 0.6, 0, 2], felt: [0, 0.3, 0, 0],
     land: ["#2a2018", "#33251c", "#26241e", "#3a2a22", "#2e2820", "#382c1c", "#40342a"], line: [0.98, 0.84, 0.5, 0.95], coast: [0.98, 0.84, 0.5, 1], shadow: { off: [3, -4], col: [0.2, 0.1, 0, 0.6] }, gridA: 0, ink: "#2a1a0c" });
   A.MAPSTYLES.recreativa = MS({ mat: 25, animated: true, wide: true, crt: true, oceanTop: "#142a7a", oceanBot: "#0a1448", shallow: "#142a7a", mc1: "#4aa8ff", mc2: "#e8f6ff", mp: [2.0, 0.8, 0, 2], felt: [0, 0, 0, 0],
     land: ["#58c858", "#a8e060", "#e8d870", "#48a848", "#d8b860", "#88d080", "#f0e8a0"], line: [0.04, 0.1, 0.04, 1], shadow: { off: [3, -4], col: [0, 0, 0.1, 0.6] }, gridA: 0 });
@@ -128,9 +128,9 @@ window.AIQ = window.AIQ || {};
     land: ["#f1ead8", "#e6dcc0", "#f0d9c8", "#dfe6cf", "#e9e2d3", "#efe0b4", "#fbf7ec"], line: [0.1, 0.12, 0.08, 0.95], shadow: { off: [3, -4], col: [0, 0.06, 0.03, 0.55] }, gridA: 0 });
   A.MAPSTYLES.vitral = MS({ mat: 35, oceanTop: "#26407a", oceanBot: "#1a2a58", shallow: "#26407a", mc1: "#0c0c12", mp: [16, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#f3ecd8", "#eadfc2", "#f4e2d4", "#e5e8d6", "#efe9db", "#f1e3b8", "#fbf6e8"], line: [0.05, 0.05, 0.08, 0.95], shadow: null, gridA: 0 });
-  A.MAPSTYLES.radar = MS({ mat: 36, animated: true, oceanTop: "#1a0d03", oceanBot: "#0c0601", shallow: "#1a0d03", mc1: "#ff9f1a", mc2: "#ffe0a0", mp: [1.3, 0, 0, 2], felt: [0, 0, 0, 0],
+  A.MAPSTYLES.radar = MS({ rio: "#ff9f1a", mat: 36, animated: true, oceanTop: "#1a0d03", oceanBot: "#0c0601", shallow: "#1a0d03", mc1: "#ff9f1a", mc2: "#ffe0a0", mp: [1.3, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#3a2208", "#47290a", "#2f1c06", "#523009", "#3d2509", "#4a2c0a", "#2b1905"], line: [0.62, 0.36, 0.06, 0.85], shadow: null, gridA: 0 });
-  A.MAPSTYLES.matrix = MS({ mat: 37, animated: true, oceanTop: "#030a05", oceanBot: "#010302", shallow: "#030a05", mc1: "#27e860", mc2: "#d6ffe3", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
+  A.MAPSTYLES.matrix = MS({ rio: "#27e860", mat: 37, animated: true, oceanTop: "#030a05", oceanBot: "#010302", shallow: "#030a05", mc1: "#27e860", mc2: "#d6ffe3", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#0f3a1c", "#14481f", "#0b2d16", "#18522a", "#103a1d", "#1a5a2c", "#0c3017"], line: [0.3, 1, 0.5, 0.9], shadow: null, gridA: 0 });
   A.MAPSTYLES.lava = MS({ mat: 38, animated: true, oceanTop: "#2a0f3a", oceanBot: "#14061f", shallow: "#2a0f3a", mc1: "#ff5a2a", mc2: "#ffd54a", mp: [0.3, 0, 0, 2], felt: [0, 0.2, 0, 0],
     land: ["#f4e7d4", "#ead9bf", "#f2dccd", "#e6e3cf", "#efe5d4", "#f1dfb6", "#faf2e4"], line: [0.12, 0.04, 0.16, 0.95], shadow: { off: [3, -4], col: [0.05, 0, 0.1, 0.6] }, gridA: 0 });
@@ -152,11 +152,11 @@ window.AIQ = window.AIQ || {};
     land: ["#fff3c0", "#c8f0c8", "#ffd0d0", "#c8d8ff", "#f0d0ff", "#ffe0b0", "#e0f4f4"], line: [0.15, 0.15, 0.15, 0.95], shadow: null, gridA: 0 });
   A.MAPSTYLES.policroma = MS({ mat: 49, animated: true, oceanTop: "#1a1030", oceanBot: "#1a1030", shallow: "#1a1030", mp: [1, 0.6, 0, 2], felt: [0, 0, 0, 0],
     land: ["#f6f2ff", "#f2eeff", "#faf4ff", "#eef2ff", "#f4f0ff", "#f8f4ff", "#ffffff"], line: [0.1, 0.05, 0.2, 0.95], shadow: { off: [3, -4], col: [0.05, 0, 0.1, 0.5] }, gridA: 0 });
-  A.MAPSTYLES.hiperespacio = MS({ mat: 52, animated: true, oceanTop: "#050a22", oceanBot: "#02051a", shallow: "#050a22", mc1: "#6a3aa8", mc2: "#cfe0ff", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
+  A.MAPSTYLES.hiperespacio = MS({ rio: "#9a7cff", mat: 52, animated: true, oceanTop: "#050a22", oceanBot: "#02051a", shallow: "#050a22", mc1: "#6a3aa8", mc2: "#cfe0ff", mp: [1, 0, 0, 2], felt: [0, 0, 0, 0],
     land: ["#2a3a5a", "#324468", "#26364e", "#3a4c74", "#2c3e5e", "#34486c", "#243248"], line: [0.6, 0.8, 1, 0.9], shadow: null, gridA: 0 });
   A.MAPSTYLES.granadino = MS({ mat: 41, oceanTop: "#f4f2ec", oceanBot: "#e9e6dd", shallow: "#dde5f4", mc1: "#212a7c", mc2: "#b4b1aa", mp: [72, 0, 0, 2], felt: [0, 0.1, 0.3, 0.03],
     land: ["#c9a06c", "#d8b886", "#b98d5a", "#e0c79c", "#a8794a", "#d2ae78", "#c19a6b"], line: [0.09, 0.11, 0.4, 0.95], lineW: 2.0, shadow: { off: [3, -4], col: [0.08, 0.1, 0.3, 0.3] }, gridA: 0 });
-  A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, mat: 54, animated: true, remolino: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
+  A.MAPSTYLES.plataformas = { ...A.MAPSTYLES.casino, rio: "#3f78e0", mat: 54, animated: true, remolino: true, crt: false, swirl: ["#0e2a7a", "#2c63d8", "#8fb8ff"], shallow: "#3f78e0", postGrain: 0.02, vignette: 0.45,
     land: ["#c84c0c", "#d8641c", "#b84410", "#e07a2a", "#c05818", "#d06a20", "#e8a050"], line: [0.25, 0.08, 0.02, 0.95], grid: "#8fb8ff", gridA: 0.08, tropic: "#ffd98a" };
 
   /* el catalogo, en orden. own(P): cuando es tuya (del perfil: los logros y, por si el perfil es anterior a algun logro, lo que guardan las

@@ -151,13 +151,13 @@ void main(){
 }`;
   const FS_LINE = `#version 300 es
 precision highp float; in float v_d; in float v_hw; in float v_brd; uniform vec4 u_col; uniform float u_lineA; uniform vec3 u_lens; uniform float u_lmode; layout(location=0) out vec4 o; layout(location=2) out vec4 o2;
-uniform vec4 u_ccol; uniform float u_lmat; uniform float u_ldpr;
+uniform vec4 u_ccol; uniform float u_lmat; uniform float u_ldpr; uniform float u_rio;
 ${NOISE}
 void main(){ float a=clamp(v_hw-abs(v_d)+0.5,0.0,1.0); float m=1.0; if(u_lmode>0.5){ float inl=1.0-smoothstep(u_lens.z-6.0,u_lens.z,length(gl_FragCoord.xy-u_lens.xy)); m=u_lmode<1.5?1.0-inl:inl; }
   vec3 lc=(u_ccol.a>0.0&&v_brd<0.5)?u_ccol.rgb:u_col.rgb; float la=u_col.a;
   if(u_lmat>0.5&&u_lmat<1.5) la*=0.6+0.4*hash(floor(gl_FragCoord.xy/max(u_ldpr,1.0)));            // tiza
   else if(u_lmat>1.5) lc=mix(lc,vec3(1.0),0.6*clamp(1.0-abs(v_d)/max(v_hw*0.5,0.5),0.0,1.0));     // neon: alma blanca
-  float cv=a*mix(1.0,u_lineA,v_brd)*m; o=vec4(lc,la*cv); o2=v_brd>0.5?vec4(1.0,0.0,0.0,cv):vec4(0.0); }`;   // Mapa mudo: solo desaparecen las fronteras interiores (a_brd=1); las costas siempre se ven
+  float cv=a*mix(1.0,u_lineA,v_brd)*m; o=vec4(lc,la*cv); o2=u_rio>0.5?vec4(0.0,0.0,1.0,la*cv):v_brd>0.5?vec4(1.0,0.0,0.0,cv):vec4(0.0); }`;   // u_rio: un rio (azul de la mascara: js/firma.js lo pinta con su mar)   // Mapa mudo: solo desaparecen las fronteras interiores (a_brd=1); las costas siempre se ven
 
   /* LA FIRMA DE LAS MESAS (js/firma.js): la tierra lleva el dato de su pais (clase << 4 + rotulador del cuaderno, y su azar) para la mascara */
   const VS_MSK = VS_FILL.replace("layout(location=2) in float a_ct;", "layout(location=2) in float a_ct; layout(location=3) in vec2 a_id;")
@@ -1293,6 +1293,7 @@ void main(){
       this.brdBuf = buf(gl.ARRAY_BUFFER, this._borderFlags(segs)); gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(3, 1);
       gl.bindVertexArray(null);
       this._initLagos(buf);
+      this._initRios(buf);
       this.vaoEmpty = gl.createVertexArray();
       this.T = {}; // objetivos de render
       this.debx = null;   // el pase de los debufos (js/debufos.js) vive en ESTE contexto: con uno nuevo se rehace
@@ -1344,12 +1345,46 @@ void main(){
       this.lk = { vaoFill, vaoLine, segBuf, sctBuf, brdBuf, icut, scut };
     }
     _lkFill(r0, r1) { const k = this.lk, n = k.icut[r1] - k.icut[r0]; if (n) this.gl.drawElements(this.gl.TRIANGLES, n, this.gl.UNSIGNED_INT, k.icut[r0] * 4); }
-    _lkShore(r0, r1) {
-      const gl = this.gl, k = this.lk, s0 = k.scut[r0], n = k.scut[r1] - s0; if (!n) return;
+    _lkShore(r0, r1) { this._segRange(this.lk, this.lk.scut, r0, r1); }
+    /* segmentos [cut[r0], cut[r1]) de un juego de lineas por rango (orillas, rios), con su VAO ya puesto */
+    _segRange(k, cut, r0, r1) {
+      const gl = this.gl, s0 = cut[r0], n = cut[r1] - s0; if (!n) return;
       gl.bindBuffer(gl.ARRAY_BUFFER, k.segBuf); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, s0 * 16);
       gl.bindBuffer(gl.ARRAY_BUFFER, k.sctBuf); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, s0);
       gl.bindBuffer(gl.ARRAY_BUFFER, k.brdBuf); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, s0);
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, n);
+    }
+    /* RIOS (v0.4.53, js/rios.js): segmentos ordenados por rango (rcut). Cada tramo viene ya cortado por pais (data/rios.js): va con el poligono de
+       ese pais que lo contiene, su continente y su copia propia del mundo (la misma cuenta que los paises y los lagos) */
+    _initRios(buf) {
+      this.rv = null;
+      const L = A.rios && A.rios.list(); if (!L || !L.length) return;
+      const gl = this.gl, inPoly = A.geo.inPoly, all = []; for (const f of this.world.features) for (const p of f.polys) all.push(p);
+      const polyOf = (pais, lo, la) => {
+        const f = this.world.byName[pais], cand = f ? f.polys : all;
+        for (const p of cand) { const b = p.bbox; if (lo >= b[0] && lo <= b[2] && la >= b[1] && la <= b[3] && inPoly(lo, la, p)) return p; }
+        return f ? f.polys.reduce((a, b) => ((b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) > (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) ? b : a)) : null;
+      };
+      const segs = [], sct = [], rcut = new Int32Array(14); let r = -1;
+      for (const t of L) {
+        while (r < t.rank) { r++; rcut[r] = segs.length / 4; }
+        const ln = t.line, m = ln.length > 2 ? ln[1] : [(ln[0][0] + ln[1][0]) / 2, (ln[0][1] + ln[1][1]) / 2];
+        const p = polyOf(t.pais, m[0], m[1]), pc = p ? p.ct : 6;
+        const own = p && pc < 6 ? TWO_PI * Math.round((this.contCen[pc][0] - (p.bbox[0] + p.bbox[2]) / 2 * D2R) / TWO_PI) : 0;
+        const q = ln.map(([lo, la]) => project(lo, la));
+        for (const shift of own ? [0, own] : [0]) {
+          const w = pc < 6 ? Math.round((shift - own) / TWO_PI) : 0, code = pc + 8 * (w + 2);
+          for (let i = 0; i < q.length - 1; i++) { segs.push(q[i][0] + shift, q[i][1], q[i + 1][0] + shift, q[i + 1][1]); sct.push(code); }
+        }
+      }
+      while (r < 13) { r++; rcut[r] = segs.length / 4; }
+      const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+      buf(gl.ARRAY_BUFFER, new Float32Array([0, -1, 0, 1, 1, -1, 1, 1])); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      const segBuf = buf(gl.ARRAY_BUFFER, new Float32Array(segs)); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0); gl.vertexAttribDivisor(1, 1);
+      const sctBuf = buf(gl.ARRAY_BUFFER, new Uint8Array(sct)); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(2, 1);
+      const brdBuf = buf(gl.ARRAY_BUFFER, new Uint8Array(sct.length)); gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.UNSIGNED_BYTE, false, 0, 0); gl.vertexAttribDivisor(3, 1);
+      gl.bindVertexArray(null);
+      this.rv = { vao, segBuf, sctBuf, brdBuf, rcut };
     }
     /* la firma de las mesas (js/firma.js): vecinos de cada pais (los que comparten un tramo de frontera) y su coloreado (una vez por mapa) */
     _paisIds(segs, segF) {
@@ -2227,6 +2262,21 @@ void main(){
           for (const cc of cxs) { this._u(P.hole, "u_center", cc, v.cy); for (const [r0, r1, a] of LKR) if (a >= 0.5) this._lkFill(r0, r1); }
         }
         gl.activeTexture(gl.TEXTURE0); gl.bindVertexArray(this.vaoFill);
+      }
+      /* RIOS (js/rios.js): con el agua de la mesa, cada rango con su fundido y su grosor, por debajo de las fronteras. En la mascara de fronteras
+         marcan su azul: las mesas de material nuevo de la firma los pintan con su propio mar (js/firma.js) */
+      const zz = v.s / this.minS, RVA = this.rv ? A.rios.alphas(zz) : null;
+      if (RVA && RVA[0] > 0.003) {
+        const rc = this._rioC && this._rioFor === st ? this._rioC : (this._rioFor = st, this._rioC = A.rios.color(st));
+        const lcovR = mos < 0.999 ? 0.6 : 1;
+        DB(C0, NO, C2); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(P.line); gl.bindVertexArray(this.rv.vao); this._setDist(P.line);
+        this._u(P.line, "u_wob", 0); this._u(P.line, "u_wt", 0); this._u(P.line, "u_lineA", 1); this._u(P.line, "u_lmode", 0); this._u(P.line, "u_off", 0, 0);
+        this._u(P.line, "u_scale", sc); this._u(P.line, "u_res", sw, sh); this._u(P.line, "u_ccol", 0, 0, 0, 0); this._u(P.line, "u_lmat", ms.lmat); this._u(P.line, "u_ldpr", dpr * RS * 2); this._u(P.line, "u_rio", 1);
+        for (const cc of cxs) { this._u(P.line, "u_center", cc, v.cy);
+          for (let r = 0; r < 13; r++) { const a = RVA[r]; if (a <= 0.003) break;
+            this._u(P.line, "u_width", A.rios.width(r, zz, a) * dpr * RS); this._u(P.line, "u_col", rc[0], rc[1], rc[2], a * lcovR); this._segRange(this.rv, this.rv.rcut, r, r + 1); } }
+        this._u(P.line, "u_rio", 0); this._u(P.line, "u_lmat", 0); gl.disable(gl.BLEND); gl.bindVertexArray(this.vaoFill);
       }
 
       DB(C0, NO, NO);
