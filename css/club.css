@@ -30,6 +30,7 @@
 
 /* ---------- la tarjeta de socio de la portada: su sitio, arriba a la izquierda (la carta la dibuja js/socio.js; estilos en css/socio.css) */
 .hh-top .hh-socio-w { position: absolute; left: 0; top: 74px; z-index: 2; }
+.hh-top .hh-socio-w.sc-off { visibility: hidden; }   /* v0.4.57: no cabe a su tamano sin pisar las cartas (js/hub.js, socioFit): ese rato no sale */
 @keyframes sc-gain { to { transform: scale(1.12); } }
 @keyframes sc-spin { 50% { transform: scaleX(.2); } }
 

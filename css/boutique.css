@@ -33,9 +33,9 @@
 .bq-railw { grid-column: 1 / 4; grid-row: 2; min-width: 0; min-height: 0; }
 .bq-rail { height: 100%; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
 .bq-rsp { flex: 1 1 0; min-height: 0; }
-.bq-rx { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 12px; row-gap: 3px; margin: 0; padding: 10px 14px 10px 12px; border: 0; cursor: pointer; text-align: left;
+.bq-rx { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 12px; row-gap: 3px; margin: 0; padding: 10px 14px 10px 12px; border: 0; cursor: pointer; text-align: left;
   font: inherit; color: var(--gx-txt); clip-path: var(--gx-notch); background: #0b2118; box-shadow: inset 0 0 0 2px rgba(212, 160, 74, .35); }
-.bq-rxi { grid-row: 1 / 3; display: grid; place-items: center; }
+.bq-rxi { grid-row: 1 / 3; display: grid; place-items: center; }   /* v0.4.57: la columna mide lo que el icono (48 px): con 32 se montaba sobre el nombre */
 .bq-rxi .ic { display: block; width: 48px; height: 48px; image-rendering: pixelated; }
 .bq-rx b { font-family: var(--sans); font-weight: 400; font-size: 22px; line-height: 1; min-width: 0; overflow-wrap: anywhere; }
 .bq-rx em { font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-txt-2); font-variant-numeric: tabular-nums; white-space: nowrap; }

@@ -88,7 +88,37 @@ window.AIQ = window.AIQ || {};
     el._mcKey = key;
   };
   const mcMemo = new Map();
-  addEventListener("resize", () => { if (document.querySelector(".hh")) requestAnimationFrame(mcFit); });
+  /* v0.4.57: TU CARTA DE SOCIO NUNCA PISA NADA. Su sitio es arriba a la izquierda, sobre la columna de la placa de Retos; pero va a escala entera de
+     pixeles reales y en algunas ventanas (1920x1080 en Original, 1440x900, 1920x1200...) es mas ancha que esa columna y se metia debajo del Clasico.
+     Entonces se aparta hacia el borde de la ventana lo justo, a pixel entero; si ni pegada al margen cabe a su tamano (ventanas por debajo del de
+     diseno), ese rato no sale en la portada: como el crupier, nunca se encoge (tu carta sigue en el Perfil). Cuenta lo que se levanta al pasar el
+     raton (las cartas suben hasta 34 px) y se mide con las cartas ya repartidas */
+  const SO_GAP = 10, SO_EDGE = 16, SO_LIFT = 34;
+  function socioFit() {
+    const el = document.querySelector("#dlg > .hh"), w = el && el.querySelector(".hh-top > .hh-socio-w"); if (!w) return;
+    if (innerWidth <= 900) { w.style.removeProperty("left"); w.classList.remove("sc-off"); return; }   // movil: la carta va en la columna, sin flotar (css/club.css)
+    const deal = el.getAnimations ? el.getAnimations({ subtree: true }).filter(a => a.playState === "running" && a.animationName === "deal") : [];
+    if (deal.length) { Promise.all(deal.map(a => a.finished)).then(socioFit, socioFit); return; }   // se mide con las cartas ya en la mesa
+    const z = w.currentCSSZoom || 1, cur = w.getBoundingClientRect(); if (cur.width < 20) return;   // aun sin dibujar: la vuelve a medir el observador
+    const dx = (parseFloat(w.style.left) || 0) * z, s = { left: cur.left - dx, top: cur.top, width: cur.width };   // su sitio de siempre (sin el desliz de antes)
+    const nx = w.querySelector(".hh-socio-nx"), bot = Math.max(cur.bottom, nx ? nx.getBoundingClientRect().bottom : 0), top = cur.top, g = SO_GAP * z;
+    const rg = document.createRange(), tag = el.querySelector(".hh-tag"), rs = [...el.querySelectorAll(".hh-cards > .mcard, .hh-deck > *, .hh-resume, .hh-logo, .hh-top > button, .menu-tools")].map(e => {
+      const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top - (e.classList.contains("mcard") ? SO_LIFT * z : 0), b: r.bottom }; });
+    if (tag) { rg.selectNodeContents(tag); const r = rg.getBoundingClientRect(); rs.push({ l: r.left, r: r.right, t: r.top, b: r.bottom }); }
+    const near = rs.filter(r => r.r - r.l > 2 && r.t < bot + g && r.b > top - g), hits = x => near.filter(r => r.l < x + s.width + g && r.r > x - g);
+    let x = s.left;                                                    // se desliza a la izquierda hasta que nada de su franja la toque
+    for (let i = 0; i < 12; i++) { const h = hits(x); if (!h.length) break; x = Math.min(...h.map(r => r.l)) - g - s.width; }
+    const dpr = window.devicePixelRatio || 1; if (x < s.left - 0.5) x = Math.floor(x * dpr) / dpr;   // a pixel entero de pantalla: el dibujo no cae entre dos
+    const off = x < SO_EDGE || hits(x).length > 0;
+    w.classList.toggle("sc-off", off);
+    if (off || x >= s.left - 0.5) w.style.removeProperty("left"); else w.style.left = ((x - s.left) / z).toFixed(4) + "px";
+  }
+  let soObs = null;
+  const socioWatch = () => {                                           // la carta se dibuja (y cambia de medida) despues de pintar la portada
+    const h = document.querySelector("#dlg .hh-socio-w #socioCard"); if (!h || !window.ResizeObserver) return;
+    if (soObs) soObs.disconnect(); soObs = new ResizeObserver(() => requestAnimationFrame(socioFit)); soObs.observe(h);
+  };
+  addEventListener("resize", () => { if (document.querySelector(".hh")) requestAnimationFrame(() => { mcFit(); socioFit(); }); });
   let homeDealt = false;
   function home() {
     pday = null;                                                     // la practica de otro dia se acaba al volver a la portada
@@ -133,8 +163,9 @@ window.AIQ = window.AIQ || {};
       <span class="hh-ver">Geolite · v${A.VERSION}</span>${A.parche ? A.parche.button() : ""}`, "home");               // fuera de .hh: no cuenta para la composicion ni para A.fitK
     if (A.geoLogo) A.geoLogo.mount(document.querySelector("#dlg .hh-logo"));   // el logo vivo: la Tierra gira bajo la chistera (js/geologo.js)
     wireTools(); A.podio.wire(); if (A.parche) A.parche.wire();                                      // Clasificacion: js/podio.js
-    mcFit(); fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
+    mcFit(); fitNames(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitNames(); socioFit(); });
     if (A.relieve) A.relieve.alinea();                                // v0.3.199: las cartas laterales sobre las columnas de sus placas
+    socioWatch(); socioFit();                                         // v0.4.57: y tu carta, sin pisarlas
     if (A.laton) { const hh = document.querySelector("#dlg .hh"); requestAnimationFrame(() => requestAnimationFrame(() => A.laton.monta(hh))); }   // el filo de laton de las placas, al pixel (js/laton.js), ya a la escala de la portada
     if (A.salir) A.salir.wire();                                      // salir del juego: js/salir.js
     $("codexBtn").onclick = () => A.codex.open();                     // la Enciclopedia ya suena al abrirse
@@ -656,5 +687,5 @@ window.AIQ = window.AIQ || {};
   const adventureHtml = () => { const sv = A.adv.hasSave(); return avHtml(sv && A.adv.summary(), sv).replace(/ (id|aria-labelledby)="[^"]*"/g, ""); };
   /* Bloque J: la pantalla que abres entra desde el lado de la placa que pulsaste (solo transform y opacity; css/gala.css, gx-from) */
   document.addEventListener("pointerdown", e => { const b = e.target.closest && e.target.closest(".plq"); if (!b) return; const r = b.getBoundingClientRect(); document.documentElement.style.setProperty("--hub-from", (((r.left + r.width / 2) / innerWidth - 0.5) * 2).toFixed(2)); }, true);
-  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, mcFit, dailyHtml, classicHtml, adventureHtml, profileHtml: () => A.camino.warmHtml(), pf: PF };   // sin ids: es la copia del precalentamiento
+  A.hub = { render: id => screen(id || "home"), screen, plaque, frame: scr, wireTools, tools, mcFit: () => { mcFit(); socioFit(); }, socioFit, dailyHtml, classicHtml, adventureHtml, profileHtml: () => A.camino.warmHtml(), pf: PF };   // sin ids: es la copia del precalentamiento
 })(window.AIQ);
