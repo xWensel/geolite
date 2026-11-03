@@ -31,5 +31,17 @@ window.AIQ = window.AIQ || {};
     });
     return list;
   }
-  A.lagos = { Z, alphas, runs, list: decode };
+  /* v0.4.55: NIVELES DE DETALLE de lagos y rios (generalizacion, para js/map.js y js/map2d.js): con el detalle de 70x, a poco zoom miles de entrantes
+     de menos de un pixel se amontonaban en una mancha (la orilla del Victoria). Cada nivel guarda la forma con un error menor de 0,8 px (en 1920 px)
+     hasta su zoom (6x, 20x); el ultimo es el detalle entero */
+  const LOD_Z = [6, 20, 0], lodTol = z => (Math.PI * 2) / (1920 * z) * 0.8, lodOf = z => (z < 6 ? 0 : z < 20 ? 1 : 2);   // con el grano de las costas (50m)
+  function simplify(pts, tol) {                                       // Douglas-Peucker en coordenadas del mundo ([x, y])
+    const n = pts.length; if (n < 3) return pts;
+    const keep = new Uint8Array(n); keep[0] = keep[n - 1] = 1; const st = [0, n - 1], t2 = tol * tol;
+    while (st.length) { const b = st.pop(), a = st.pop(), [ax, ay] = pts[a], [bx, by] = pts[b], dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy; let best = -1, bi = -1;
+      for (let i = a + 1; i < b; i++) { const [px, py] = pts[i]; let t = L ? ((px - ax) * dx + (py - ay) * dy) / L : 0; t = t < 0 ? 0 : t > 1 ? 1 : t; const ex = px - ax - t * dx, ey = py - ay - t * dy, d = ex * ex + ey * ey; if (d > best) { best = d; bi = i; } }
+      if (best > t2) { keep[bi] = 1; st.push(a, bi, bi, b); } }
+    const out = []; for (let i = 0; i < n; i++) if (keep[i]) out.push(pts[i]); return out;
+  }
+  A.lagos = { Z, alphas, runs, list: decode, LOD_Z, lodTol, lodOf, simplify };
 })(window.AIQ);

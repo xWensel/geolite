@@ -136,7 +136,7 @@ void main(){ vec2 q = qFrag();
     vec4 bq = texture(uBrd, UV(q)); float rb = bq.b * (1. - bq.r) * s.land;
     if (rb > .002) { vec4 sa = texture(uSeaA, UV(q)); vec3 w = sa.rgb; float lw = luma(w), wl = luma(alb) - .25;   // mas clara si es mucho mas oscura que la tierra (js/rios.js)
       if (lw < wl) w = mix(w, vec3(1.), clamp((wl - lw) / max(1. - lw, .01), 0., 1.));
-      alb = mix(alb, mix(w, uRioC, uRioCK), rb); h = mix(h, sa.a, rb); mat = mix(mat, texture(uSeaB, UV(q)).rgb, rb); }
+      alb = mix(alb, mix(w, uRioC, uRioCK), rb); mat = mix(mat, texture(uSeaB, UV(q)).rgb, rb); }   // la altura, la de la tierra: con la del mar el rio quedaba hundido como un surco oscuro (Medianoche, La banca)
   }
   o0 = vec4(clamp(alb, 0., 1.), clamp(h, 0., 1.)); o1 = vec4(clamp(mat, 0., 1.), gEmis); }`;
   const HUELLA_DEF = `
@@ -380,7 +380,7 @@ vec3 mesaBarrido(MS s, float b, vec2 q, vec3 col){
   /* CAMARA ACORAZADA: laton cepillado con brillo anisotropo, paises de ebano incrustado, remaches en el marco */
   NUEVAS.laton = {
     luz: { lmpI: 1.5, lmpZ: 520, lmpK: 0.55, canto: 0.6, sombra: 0.7, amb: 0.34, ks: 1, env: 1.2, aniso: [1, 0], poolK: 0.75 },
-    uni: { uCep: 1.7, uRem: 1 },
+    uni: { uCep: 1.7, uRem: 1, uRioC: [0.47, 0.64, 0.76], uRioCK: 0.85 },   // rios en azul acero: con su mar (laton) se confundian con las fronteras grabadas
     bake: `
 uniform float uCep, uRem;
 float lRem(vec2 p, out float ring){
