@@ -643,7 +643,7 @@ window.AIQ = window.AIQ || {};
     if (id !== "boutique" && A.boutique) A.boutique.leave();         // v0.3.132: salir de la boutique a mitad de una prueba devuelve tu mesa al mapa
     C().S.hub = id; if (A.coverMap) { if (id !== "profile" && id !== "camino") A.coverMap("profile", false); if (id !== "daily") A.coverMap("daily", false); if (id !== "classic") A.coverMap("classic", false); if (id !== "adventure") A.coverMap("adventure", false); if (id !== "patch") A.coverMap("patch", false); }
     const naipe = A.relieve ? A.relieve.antes(id, de) : null;             // v0.3.199 (Bloque F, paso 3): la pantalla se reparte como un naipe desde su pieza (js/relieve.js)
-    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), barra: () => A.barra.open(), retos: () => A.clubRetos.open(), camino }[id] || home)();
+    ({ home, classic: () => campaigns("classic"), adventure, daily, profile, patch: () => A.parche.open(), duelo: () => A.duelo.open(), boutique: () => A.boutique.open(), barra: () => A.barra.on() && A.barra.open(), retos: () => A.clubRetos.open(), camino }[id] || home)();
     if (naipe) A.relieve.despues(naipe, id);
     C().refreshSkinBits && C().refreshSkinBits();
     if (id !== "home" && A.dealer && A.dealer.aside) A.dealer.aside();     // v0.3.172: si hablaba en la portada, termina la frase sin tapar la pantalla nueva

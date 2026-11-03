@@ -1512,7 +1512,12 @@ ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style
   };
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
     const hadCtl = !!navigator.serviceWorker.controller;                                          // sin controlador previo es la primera visita: nada que avisar
-    navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtl) A.updNotice(); });
+    /* v0.4.56: el cambio de service worker NO basta para avisar. Como todo se carga "red primero", la pagina ya corre la version publicada y, justo despues, el
+       service worker de esa misma version toma el control: el aviso salia tras cada publicacion aunque no hubiera nada mas nuevo. Ahora se pregunta al
+       servidor que version hay publicada (VERSION, sin cache) y solo se avisa si es distinta de la que corre */
+    const checkNew = () => fetch("VERSION?t=" + Date.now(), { cache: "no-store" }).then(r => (r.ok ? r.text() : "")).then(t => { t = String(t || "").trim();
+      if (/^\d+\.\d+\.\d+$/.test(t) && t !== A.VERSION) A.updNotice(); }).catch(() => { /* sin red: nada que avisar */ });
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtl) checkNew(); });
     navigator.serviceWorker.register("sw.js").then(reg => {
       const look = () => { try { reg.update().catch(() => {}); } catch (e) { /* sin red */ } };
       setInterval(look, 30 * 60 * 1000); document.addEventListener("visibilitychange", () => { if (!document.hidden) look(); });   // una pestana olvidada tambien se entera

@@ -4,6 +4,8 @@
  *   (minimo 25, sin tope), semilla propia por partida, sin levantarte antes. Las fichas finales dan tickets (1 por cada 10) para el canje.
  *   Jugada 10 y 20: BOTE (la ganancia paga doble). Tras 3 aciertos seguidos, el crupier puede regalar una ficha dorada (el siguiente pago, doble).
  * Es un MODULO: se activa y se quita con A.barra.setOn(false) (localStorage atlasiq.barra.on); sin el, la portada no muestra la placa y los juegos siguen en la Aventura.
+ * v0.4.56: RETIRADA POR AHORA (se sigue trabajando en ella para una expansion). BARRA = false la apaga para todos: sin placa en la portada, sin entrada y sin
+ *   los titulos de la carta que se canjean con sus tickets (salvo los ya canjeados). Su codigo sigue entero: para devolverla, BARRA = true.
  * EL ADAPTADOR: los juegos de js/casino-*.js se escriben contra un `cx` (monedero, semilla, pantalla). Aqui se les da un cx propio (`mkCx`): run = el monedero de la partida,
  *   r = el numero de jugada (la semilla), coinCost = la apuesta libre, rouShell = el de la Aventura avisando al cerrarse. Los cuatro juegos de adventure.js (Rojo o negro,
  *   Moneda, Ruleta de premios, Trile) ensenan sus pantallas con A.adv.casino.core y aqui solo se decide el resultado y el pago.
@@ -86,8 +88,9 @@ window.AIQ = window.AIQ || {};
   const f = (t, o) => A.tx(t).replace(/\{(\w)\}/g, (m, k) => (o && o[k] != null ? o[k] : m));
   const fmt = n => Math.round(n).toLocaleString(A.lang === "en" ? "en-US" : A.lang || "es");
   /* ---------- el modulo: activo o no ---------- */
+  const BARRA = false;                                              // v0.4.56: retirada por ahora (ver la cabecera)
   const KEYON = "atlasiq.barra.on";
-  const isOn = () => { try { return localStorage.getItem(KEYON) !== "0"; } catch (e) { return true; } };
+  const isOn = () => { if (!BARRA) return false; try { return localStorage.getItem(KEYON) !== "0"; } catch (e) { return true; } };
   const prof = () => { const P = A.profile.get(); const b = (P.barra = P.barra && typeof P.barra === "object" ? P.barra : {}); b.tickets = b.tickets | 0; b.best = b.best | 0; b.runs = b.runs | 0; b.free = b.free || ""; b.hist = Array.isArray(b.hist) ? b.hist : []; return b; };
   const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const spendTickets = n => { const b = prof(); n = Math.max(0, Math.round(n)); if (b.tickets < n) return false; b.tickets -= n; saveP(); return true; };

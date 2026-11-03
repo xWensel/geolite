@@ -175,7 +175,7 @@ window.AIQ = window.AIQ || {};
   const titleName = id => (TIT[id] ? P6(TIT[id].n) : "");
   const titleHow = id => { const t = TIT[id]; if (!t) return ""; if (t.tk) return P6(TX.byBarra).replace("{n}", t.tk); if (t.lv) return P6(TX.byLv).replace("{n}", t.lv); if (t.ach) { const a = achOf(t.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; } return t.duel ? P6(TX.byDuel).replace("{n}", A.fmt(Math.min(duelWins(), t.duel))) : ""; };
   const titleFull = id => (TIT[id] && TIT[id].p) || 0, titlePrice = id => deal("t:" + id, titleFull(id));
-  const titles = () => TITLES.map(t => ({ id: t.id, kind: t.p ? "tienda" : "hito", owned: titleOwned(t.id), price: titlePrice(t.id), name: titleName(t.id), how: titleHow(t.id) }));
+  const titles = () => TITLES.filter(t => !t.tk || titleOwned(t.id) || (A.barra && A.barra.on())).map(t => ({ id: t.id, kind: t.p ? "tienda" : "hito", owned: titleOwned(t.id), price: titlePrice(t.id), name: titleName(t.id), how: titleHow(t.id) }));   // v0.4.56: sin La Barra de la casa, sus titulos de tickets no se ofrecen (los ya canjeados, si)
   const tkTitles = () => TITLES.filter(t => t.tk).map(t => ({ id: t.id, tk: t.tk, owned: titleOwned(t.id), name: titleName(t.id) }));
   function redeemTitle(id) { const t = TIT[id]; if (!t || !t.tk || titleOwned(id) || !A.barra || !A.barra.spendTickets(t.tk)) return false; const c = club(); c.tt[id] = Date.now(); c.tit = id; A.profile.save(); return true; }   // el canje de La Barra de la casa
   function buyTitle(id) { const t = TIT[id]; if (!t || !t.p || titleOwned(id) || !A.club || !A.club.spend || !A.club.spend(titlePrice(id))) return false; const c = club(); c.tt[id] = Date.now(); c.tit = id; A.profile.save(); return true; }
