@@ -199,7 +199,9 @@
     $("plate").classList.toggle("clue", !!o.clue);
   }
   /* nota de campo al revelar (y al cambiar de idioma con el ticket abierto: antes ahi se perdia el dato de la Wikipedia y el de las pistas) */
-  const factLine = o => (o.clue ? `${A.t("res.was")}: ${A.tx(o.answer)}${A.tx(o.fact) ? " — " + A.tx(o.fact) : ""}` : A.tx(o.fact) || A.factOf(o));
+  const factLine0 = o => (o.clue ? `${A.t("res.was")}: ${A.tx(o.answer)}${A.tx(o.fact) ? " — " + A.tx(o.fact) : ""}` : A.tx(o.fact) || A.factOf(o));
+  /* v0.4.54: y, al final, el agua de la respuesta (el rio y el lago o embalse cercanos: js/rios.js) */
+  const factLine = o => { const b = factLine0(o), w = A.rios && A.rios.nota ? A.rios.nota(o) : ""; return w ? (b ? b + "  ·  " + w : w) : b; };
   function setTimer(left) {
     const f = Math.max(0, left / S.limit);
     $("timeFill").style.transform = `scaleX(${f})`;

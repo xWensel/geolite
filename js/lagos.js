@@ -23,11 +23,11 @@ window.AIQ = window.AIQ || {};
   let list = null;
   function decode() {
     if (list) return list;
-    list = (A.LAGOS || []).map(([rank, res, rings, shores]) => {
+    list = (A.LAGOS || []).map(([rank, res, rings, shores, n]) => {
       const R = rings.map(un), S = shores === 1 ? R : shores.map(un);
       let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
       for (const [lo, la] of R[0]) { if (lo < x0) x0 = lo; if (lo > x1) x1 = lo; if (la < y0) y0 = la; if (la > y1) y1 = la; }
-      return { rank, res, rings: R, shores: S, bbox: [x0, y0, x1, y1] };
+      return { rank, res, rings: R, shores: S, bbox: [x0, y0, x1, y1], n: n || 0 };
     });
     return list;
   }

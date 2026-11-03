@@ -674,7 +674,8 @@ window.AIQ = window.AIQ || {};
   /* la tira de papel de abajo: la bandera, el nombre y el dato del lugar */
   function factShow(q, label, fl) {
     const F = $("duFact"), isC = q.t === "c", sub = isC || q.clue ? "" : A.tx(q.sub) || "", pid = q.cid[q.cid.length - 1];
-    const fact = shortFact(A.tx(q.fact) || (A.factOf ? A.factOf({ cid: [pid] }) : ""));
+    const f0 = shortFact(A.tx(q.fact) || (A.factOf ? A.factOf({ cid: [pid] }) : "")), w = A.rios && A.rios.nota ? A.rios.nota(q) : "";   // v0.4.54: el agua de la respuesta (js/rios.js)
+    const fact = w ? (f0 ? f0 + "  ·  " + w : w) : f0;
     F.innerHTML = `<div class="gx-paper${fl.length ? "" : " nf"}">${fl.length ? `<img class="fg" src="assets/flags/p/${A.mediaKey(fl[0])}.webp" alt="" draggable="false">` : ""}<div><b>${esc(label)}${sub ? " · " + esc(sub) : ""}</b>${fact ? `<span>${esc(fact)}</span>` : ""}</div><span class="tag hidden" id="duNext"></span></div>`;
     F.classList.remove("hidden"); factFit();
   }

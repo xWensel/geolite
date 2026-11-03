@@ -37,8 +37,59 @@ window.AIQ = window.AIQ || {};
   function decode() {
     if (list) return list;
     const R = A.RIOS || { p: [], r: [] };
-    list = R.r.map(([rank, p, line]) => ({ rank, pais: R.p[p], line: un(line) }));
+    list = R.r.map(([rank, p, line, n]) => {
+      const L = un(line); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      for (const [lo, la] of L) { if (lo < x0) x0 = lo; if (lo > x1) x1 = lo; if (la < y0) y0 = la; if (la > y1) y1 = la; }
+      return { rank, pais: R.p[p], line: L, n: n || 0, bbox: [x0, y0, x1, y1] };
+    });
     return list;
   }
-  A.rios = { Z, alphas, width, color, list: decode };
+
+  /* ---------------------------------------------------------------- AGUA CERCANA (v0.4.54): la nota de campo del veredicto
+     El rio con nombre a menos de 15 km de la respuesta (entre varios, el mas importante si estan casi igual de cerca: km + 1,2 por rango) y el lago
+     o embalse con nombre a menos de 10 km (0 si la respuesta esta dentro). Nombres de Natural Earth en el idioma del jugador. Solo despues de
+     responder: nunca da pistas. */
+  const RIO_KM = 15, LAGO_KM = 10;
+  const LI = { es: 0, "es-419": 0, en: 1, fr: 2, pt: 3, de: 4, it: 5, zh: 6, ko: 7, ja: 8, ru: 9, pl: 10 };
+  const nameOf = row => { if (!row) return ""; const i = LI[A.lang] != null ? LI[A.lang] : 1; return row[i] || row[1] || ""; };
+  /* distancia en km de un punto a un segmento, en el plano local del punto (exacta a estas distancias) */
+  function segKm(lon, lat, a, b) {
+    const kx = 111.32 * Math.cos(lat * Math.PI / 180), ky = 110.57;
+    const ax = (a[0] - lon) * kx, ay = (a[1] - lat) * ky, bx = (b[0] - lon) * kx, by = (b[1] - lat) * ky, dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+    const t = L ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / L)) : 0; return Math.hypot(ax + t * dx, ay + t * dy);
+  }
+  const inRing = (x, y, r) => { let c = false; for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const [xi, yi] = r[i], [xj, yj] = r[j]; if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c; } return c; };
+  function cerca(lon, lat) {
+    const mx = 0.25 / Math.max(0.2, Math.cos(lat * Math.PI / 180)), my = 0.15;   // ~15 km de margen en grados
+    let rio = null, best = 1e9;
+    for (const t of decode()) {
+      if (!t.n || lon < t.bbox[0] - mx || lon > t.bbox[2] + mx || lat < t.bbox[1] - my || lat > t.bbox[3] + my) continue;
+      let d = 1e9; for (let i = 0; i < t.line.length - 1; i++) d = Math.min(d, segKm(lon, lat, t.line[i], t.line[i + 1]));
+      const sc = d + 1.2 * t.rank; if (d <= RIO_KM && sc < best) { best = sc; rio = { n: t.n, km: d }; }
+    }
+    let lago = null;
+    for (const l of (A.lagos ? A.lagos.list() : [])) {
+      if (!l.n || lon < l.bbox[0] - mx || lon > l.bbox[2] + mx || lat < l.bbox[1] - my || lat > l.bbox[3] + my) continue;
+      let d = inRing(lon, lat, l.rings[0]) && !l.rings.slice(1).some(h => inRing(lon, lat, h)) ? 0 : 1e9;
+      if (d) for (const r of l.rings) for (let i = 0; i < r.length - 1; i++) d = Math.min(d, segKm(lon, lat, r[i], r[i + 1]));
+      if (d <= LAGO_KM && (!lago || d < lago.km)) lago = { n: l.n, km: d, res: l.res };
+    }
+    return { rio: rio && { name: nameOf((A.RIOS.n || [])[rio.n - 1]), km: rio.km }, lago: lago && { name: nameOf((A.LAGOS_N || [])[lago.n - 1]), km: lago.km, res: lago.res } };
+  }
+  const TX = { rio: "Río|River|Cours d’eau|Rio|Fluss|Fiume||河流|강|川|Река|Rzeka", lago: "Lago|Lake|Lac|Lago|See|Lago||湖泊|호수|湖|Озеро|Jezioro",
+    emb: "Embalse|Reservoir|Réservoir|Represa|Stausee|Bacino||水库|저수지|貯水池|Водохранилище|Zbiornik" };
+  /* palabras que ya dicen que es (entonces no se repite la etiqueta); en chino, coreano y japones el nombre ya lleva su 河 / 湖 / 강 */
+  const TIPO = /(^|[\s-])(lago|lake|lac|see|presa|embalse|reservoir|réservoir|dam|barrage|represa|stausee|talsperre|bacino|diga|lagoa|озеро|водохранилище|река|jezioro|zbiornik|rzeka|river|rio|río|fleuve|rivière|fluss|fiume)([\s-]|$)/i;
+  function item(k, x) {
+    if (!x.name) return "";
+    const w = A.pick6(TX[k]), lab = /^(zh|ko|ja)/.test(A.lang) || TIPO.test(x.name) || x.name.toLowerCase().endsWith(w.toLowerCase()) ? "" : w + (A.lang === "fr" ? " : " : ": ");   // Genfersee, Bodensee: ya lo dice
+    return lab + x.name + (x.km >= 1 && A.fmtDist ? " (" + A.fmtDist(x.km) + ")" : "");
+  }
+  /* la linea de la nota de campo para la respuesta de una pregunta (un lugar: ni pais, ni masa de agua, ni zona) */
+  function nota(o) {
+    if (!o || o.t === "c" || o.area || o.zone || o.lat == null || o.lon == null) return "";
+    const c = cerca(o.lon, o.lat);
+    return [c.rio && item("rio", c.rio), c.lago && item(c.lago.res ? "emb" : "lago", c.lago)].filter(Boolean).join("  ·  ");
+  }
+  A.rios = { Z, alphas, width, color, list: decode, cerca, nota };
 })(window.AIQ);
