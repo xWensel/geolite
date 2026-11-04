@@ -77,10 +77,9 @@ window.AIQ = window.AIQ || {};
     pubCarga();                                                       // el publico de la sala (v0.3.201), en segundo plano
     setTimeout(jugCarga, 1600);                                       // los juguetes (v0.3.202): su hoja de sonidos, despues
     /* pestana oculta: se suspende el audio y se pausa la cancion (si no, seguiria avanzando en silencio y encadenando pistas sin que nadie las oiga) */
-    let hidPlay = [];
     document.addEventListener("visibilitychange", () => {
       if (!ctx) return;
-      if (document.hidden) { hidPlay = decks.filter(d => d && !d.el.paused); hidPlay.forEach(pauseAll); ctx.suspend(); }
+      if (document.hidden) { hidPlay = decks.filter(d => d && d === decks[di] && !d.el.paused && !halt); decks.forEach(d => d && pauseAll(d)); ctx.suspend(); }   // la que se iba fundiendo no vuelve: al volver, solo la que suena
       else { ctx.resume(); if (A.audio.musicOn) hidPlay.forEach(playAll); hidPlay = []; }
     });
     return true;
@@ -359,6 +358,7 @@ window.AIQ = window.AIQ || {};
   const BEAT0 = () => (isCl() ? 60 : 51);                              // primer pulso (ms): las de antes, 59-62 ms; la banda, 50-53 ms (medido en los mp3)
   const XF = 1.4;                                                       // segundos de fundido entre dos canciones
   let cur = -1, mode = 0, moment = "home", di = -1, resume = null, momT = 0, muf = false, bar = false, en = false;
+  let halt = false, hidPlay = [];                                       // halt: la musica parada a proposito (A.music.stop); hidPlay: lo que vuelve a sonar al volver a la pestana
   const decks = [], recent = [];                                        // dos platos: mientras uno entra, el otro sale
 
   function deck(k) {
@@ -369,21 +369,31 @@ window.AIQ = window.AIQ || {};
       const e = new Audio(); e.crossOrigin = "anonymous"; e.preload = "auto"; e.loop = false;   // si algun dia sale de otro dominio: sin CORS, WebAudio la silenciaria
       const g = ctx.createGain(); g.gain.value = c === 0 ? 1 : 0.0001; ctx.createMediaElementSource(e).connect(g).connect(trim); els.push(e); lg.push(g);
     }
-    const el = els[0], d = (decks[k] = { el, els, lg, trim, fade, idx: -1, leaving: false, tm: 0, sync: 0 });   // la capa 0 lleva el reloj
-    /* la cancion se acaba: la siguiente entra fundida un poco antes del final (o, si no se pudo, al terminar). De paso, cada 2 s, las capas al reloj */
+    const el = els[0], d = (decks[k] = { el, els, lg, trim, fade, idx: -1, leaving: false, tm: 0, sync: 0, gen: 0, wt: 0 });   // la capa 0 lleva el reloj
+    /* la cancion se acaba: la siguiente entra fundida un poco antes del final (o, si no se pudo, al terminar). De paso, cada medio segundo, las capas al reloj */
     el.addEventListener("timeupdate", () => {
-      if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.25) change(pick(), "fade");
-      const now = performance.now(); if (now - d.sync > 2000) { d.sync = now; align(d); }
+      if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.5) change(pick(), "fade");   // +0,5: la siguiente espera a tener sus tres capas listas
+      const now = performance.now(); if (now - d.sync > 500) { d.sync = now; align(d); }
     });
     el.addEventListener("ended", () => { if (decks[di] === d && !d.leaving) change(pick(), "soft"); });
     ["playing", "pause", "seeked", "waiting"].forEach(ev => el.addEventListener(ev, () => { if (decks[di] === d && A.music.onBeat) A.music.onBeat(); }));
     els.slice(1).forEach(e => e.addEventListener("playing", () => align(d)));
     return d;
   }
-  /* las capas 1 y 2 siguen a la 0: si alguna se ha separado mas de 30 ms (arranque, salto, pestana oculta), se recoloca */
+  /* las capas 1 y 2 siguen a la 0. v0.4.58: antes se recolocaban DE UN SALTO cada 2 s si se separaban 30 ms; cada salto es un hueco audible y,
+     en una maquina justa, la capa saltada llegaba otra vez tarde y volvia a saltar (la banda de la partida a trompicones cada 2 s). Ahora se
+     acercan cambiando un pelo su velocidad (como mucho un 0,6 %, una decima de semitono: no se oye) y solo saltan si se han ido mas de 0,15 s
+     (un atasco del disco o de la red). Mientras la cinta frena (freno) no se toca nada: ella manda en la velocidad */
   function align(d) {
-    if (d.el.paused || d.el.readyState < 2) return; const t0 = d.el.currentTime;
-    d.els.slice(1).forEach(e => { if (e.getAttribute("src") && !e.paused && e.readyState >= 2 && Math.abs(e.currentTime - t0) > 0.03) { try { e.currentTime = t0 + 0.012; } catch (er) { /* aun sin datos */ } } });
+    if (fren) return; const on = !d.el.paused && d.el.readyState >= 2, t0 = d.el.currentTime;
+    d.els.slice(1).forEach(e => {
+      if (!e.getAttribute("src")) return;
+      if (!on || e.paused || e.readyState < 2) { if (e.playbackRate !== 1) e.playbackRate = 1; return; }
+      const err = e.currentTime - t0;                                   // > 0: la capa va por delante
+      if (Math.abs(err) > 0.15) { try { e.playbackRate = 1; e.currentTime = t0 + 0.03; } catch (er) { /* aun sin datos */ } return; }
+      const r = Math.abs(err) < 0.008 ? 1 : 1 - Math.max(-0.006, Math.min(0.006, err * 0.25));
+      if (Math.abs(e.playbackRate - r) > 0.0004) { try { e.preservesPitch = false; e.playbackRate = r; } catch (er) { /* sin cambio de velocidad */ } }
+    });
   }
   const playAll = d => d.els.forEach(e => { if (e.getAttribute("src")) e.play().catch(() => {}); });
   const pauseAll = d => d.els.forEach(e => e.pause());
@@ -407,18 +417,32 @@ window.AIQ = window.AIQ || {};
     return o[Math.floor(Math.random() * o.length)];
   }
   /* suena la pista i. how: "fade" (fundido de XF s), "soft" (entra en un cuarto de segundo) o "cut" (de golpe). at: segundo desde el que sigue */
+  /* v0.4.58: las tres capas ARRANCAN JUNTAS. Antes cada una sonaba en cuanto le llegaban sus datos (unas decimas de diferencia entre ellas: la
+     banda iba con eco los primeros segundos de cada cancion). Ahora se espera a que las tres puedan sonar (como mucho 1,5 s) y se les da al play
+     en el mismo instante; el fundido de entrada y el de salida de la anterior empiezan entonces (la anterior sigue sonando mientras tanto) */
   function useTrack(i, how = "soft", at = 0) {
     const t = ctx.currentTime, old = di >= 0 ? decks[di] : null, k = di === 0 ? 1 : 0, d = deck(k), f = how === "fade" ? XF : how === "soft" ? 0.25 : 0.03;
-    clearTimeout(d.tm); d.leaving = false; d.idx = i; cur = i; recent.push(i); if (recent.length > 6) recent.shift();
-    d.els.forEach((e, c) => { const f = stem(i, c); if (!f) { e.pause(); e.removeAttribute("src"); return; } e.src = A.media(f); try { e.currentTime = at; } catch (er) { /* aun sin datos: empieza desde el principio */ } });
+    clearTimeout(d.tm); clearTimeout(d.wt); d.leaving = false; d.idx = i; cur = i; halt = false; recent.push(i); if (recent.length > 6) recent.shift();
+    d.fade.gain.cancelScheduledValues(t); d.fade.gain.setValueAtTime(0.0001, t);
+    d.els.forEach((e, c) => { e.playbackRate = 1; const f = stem(i, c); if (!f) { e.pause(); e.removeAttribute("src"); return; } e.src = A.media(f); try { e.currentTime = at; } catch (er) { /* aun sin datos: empieza desde el principio */ } });
     d.trim.gain.value = (isCl() ? TRIM_CL : TRIM_BA)[i]; { const w = want(); d.lg.forEach((g, c) => { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(w[c] ? 1 : 0.0001, t); }); }
-    playAll(d);
-    d.fade.gain.cancelScheduledValues(t); d.fade.gain.setValueAtTime(0.0001, t); d.fade.gain.linearRampToValueAtTime(1, t + f);
-    if (old) {
-      old.leaving = true; old.fade.gain.cancelScheduledValues(t); old.fade.gain.setValueAtTime(old.fade.gain.value, t); old.fade.gain.linearRampToValueAtTime(0.0001, t + f);
-      old.tm = setTimeout(() => { if (decks[di] !== old) pauseAll(old); }, f * 1000 + 150);
-    }
+    if (old) old.leaving = true;
     di = k;
+    const gen = ++d.gen, els = d.els.filter(e => e.getAttribute("src"));
+    const begin = () => {
+      if (d.gen !== gen) return; d.gen++; clearTimeout(d.wt);
+      if (decks[di] !== d) return;                                      // otra cancion le quito el sitio antes de arrancar
+      const t = ctx.currentTime;
+      if (document.hidden) { if (!hidPlay.includes(d)) hidPlay.push(d); } else if (!halt) playAll(d);
+      d.fade.gain.cancelScheduledValues(t); d.fade.gain.setValueAtTime(0.0001, t); d.fade.gain.linearRampToValueAtTime(1, t + f);
+      if (old && old !== d && old.leaving) {
+        old.fade.gain.cancelScheduledValues(t); old.fade.gain.setValueAtTime(old.fade.gain.value, t); old.fade.gain.linearRampToValueAtTime(0.0001, t + f);
+        clearTimeout(old.tm); old.tm = setTimeout(() => { if (decks[di] !== old) pauseAll(old); }, f * 1000 + 150);
+      }
+    };
+    const ready = () => { if (els.every(e => e.readyState >= 3)) begin(); };
+    els.forEach(e => e.addEventListener("canplay", ready, { once: true }));
+    d.wt = setTimeout(begin, 1500); ready();
   }
   /* cambio de cancion con su aviso (js/jukebox.js) */
   function change(i, how, at) { useTrack(i, how, at); if (A.music.onChange) A.music.onChange(i); }
@@ -435,7 +459,7 @@ window.AIQ = window.AIQ || {};
   A.music = {
     start() {
       if (!A.audio.musicOn || !init()) return;
-      if (cur < 0) useTrack(0, "cut"); else playAll(decks[di]);   // la primera es siempre la del arranque
+      halt = false; if (cur < 0) useTrack(0, "cut"); else playAll(decks[di]);   // la primera es siempre la del arranque
     },
     /* las flechas del reproductor: la anterior y la siguiente de la LISTA entera, en orden (1, 2, 3... y vuelta a la 1); el grupo del momento
        solo manda cuando la cancion acaba sola */
@@ -447,7 +471,7 @@ window.AIQ = window.AIQ || {};
     title(i = cur) { const n = NAMES[i]; if (!n) return ""; const k = A.LANGS.findIndex(l => l.code === A.lang); return n[k] || n[1]; },
     go(i, quiet) { if (FILES[i] == null || !A.audio.musicOn || !init()) return; if (quiet) useTrack(i, "soft"); else change(i, "soft"); },   // salta a una cancion (quiet: sin aviso; los creditos finales ponen el vals)
     now() { return A.music.title(); },
-    stop() { decks.forEach(d => d && pauseAll(d)); },
+    stop() { halt = true; decks.forEach(d => d && pauseAll(d)); },
     /* 0 portada (en calma), 1 partida (entra la banda), 2 ultimos segundos (entra la tension): las capas entran en el siguiente pulso */
     mode(m) { if (m === mode) return; mode = m; tone(); layers("pulso"); },
     duck(level = 0.3, ms = 1400) {

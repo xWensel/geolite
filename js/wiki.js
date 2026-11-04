@@ -76,13 +76,15 @@ window.AIQ = window.AIQ || {};
     " aprox séc sec bzw z.b u.a d.h nr jh chr v.chr n.chr geb gest engl franz griech span ital port arab mio mrd" +     // abreviaturas de de/pt/it
     " ok tzw m.in np ul woj pow św mgr inż ang niem łac gr hiszp wł ros tys mln mld zob por ur zm n.p.m p.n.e n.e" +   // polaco
     " гг вв т.е т.д т.п др пр см ок им ул англ фр нем лат греч исп араб тыс млн млрд км н.э св ст род ум пос обл").split(" "));   // ruso
-  A.sentences = raw => {
+  /* loose (la Adivinanza): tambien es final de frase un ano ("...en 1485. Historicamente"), un parentesis ("(1879). Fue") y la era ("490 a. C. Enfrento") */
+  A.sentences = (raw, loose) => {
     const t = String(raw || "").replace(/\s+/g, " ").trim(), out = []; let start = 0, m;
-    if (/[぀-ヿ㐀-鿿]/.test(t)) return t.split(/(?<=[。！？])/).map(x => x.trim()).filter(Boolean);   // chino y japones: sin espacios entre frases
+    if (/[぀-ヿ㐀-鿿]/.test(t)) return t.split(loose ? /(?<=[。！？])|(?<=\.)\s+/ : /(?<=[。！？])/).map(x => x.trim()).filter(Boolean);   // chino y japones: sin espacios entre frases (la descripcion va unida con ". ")
     const re = /[.!?…]["»”)]?(?=\s+["«“¿¡(]?[\p{Lu}\p{Lo}0-9])/gu;
     while ((m = re.exec(t))) {
       const w = (t.slice(start, m.index).match(/([\p{L}.]+)$/u) || [])[1] || "", tok = w.toLowerCase().replace(/\.$/, "");
-      if (tok.length <= 1 || ABBR.has(tok)) continue;
+      const end = loose && (/(^|[\s(–-])\d{3,4}$|\)$|\d\s?k?m$/.test(t.slice(start, m.index)) || ERA.test(t.slice(start, m.index + 1)));
+      if (!end && (tok.length <= 1 || ABBR.has(tok))) continue;
       out.push(t.slice(start, m.index + m[0].length).trim()); start = m.index + m[0].length;
     }
     const rest = t.slice(start).trim(); if (rest) out.push(rest); return out;
@@ -107,6 +109,28 @@ window.AIQ = window.AIQ || {};
     if (s && !/[.!?…»”)。！？」]$/.test(s)) s += /[぀-ヿ㐀-鿿]/.test(s) ? "。" : ".";
     if (frag && s) s = s[0].toUpperCase() + s.slice(1);
     return s;
+  };
+  /* v0.4.58: la pista de la Adivinanza, CORTA. Antes era el dato entero (la mitad pasaba de 190 letras y alguna llegaba a 440: un parrafo de
+     huecos). Ahora: la primera frase (casi siempre la descripcion: "Capital de Nigeria.") y las siguientes solo si caben hasta cap letras y no
+     repiten lo ya dicho ("Escritor yugoslavo, Nobel en 1961. Ivo Andric fue un escritor yugoslavo que gano el Nobel..."). Si la primera ya se
+     pasa, se corta en su ultima coma (o punto y coma) antes del tope; si no tiene donde cortar, entera: mejor larga que rota */
+  A.shortFact = (t, cap) => {
+    t = String(t || "").replace(/\s*[(（]([^()（）]*)[)）]/g, (m, x) => (/\d/.test(x) && x.length <= 16 ? m : "")).replace(/\s+([,.;:，。])/g, "$1").trim();   // fuera los parentesis (otros nombres, idiomas); las fechas se quedan
+    const cjk = /[぀-ヿ㐀-鿿]/.test(t), n = s => [...s].length;
+    cap = cap || (cjk ? 60 : /[가-힯]/.test(t) ? 75 : 120);
+    const S = A.sentences(t, true).map(x => (cjk ? x.replace(/\.$/, "。") : x)); if (!S.length) return t;   // en chino y japones, la descripcion trae punto latino
+    const toks = s => { const f = s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase(); if (cjk) { const c = [...f.replace(/[\s\p{P}]/gu, "")], o = new Set(); for (let i = 0; i < c.length - 1; i++) o.add(c[i] + c[i + 1]); return o; } return new Set((f.match(/\p{L}{4,}/gu) || []).map(w => w.slice(0, 5))); };   // por su raiz: "Belice" y "Belize", "capital" y "capitales"
+    let out = S[0], seen = toks(out);
+    for (const s of S.slice(1)) {
+      const k = toks(s); let rep = 0; k.forEach(w => { if (seen.has(w)) rep++; });
+      if (k.size && rep / k.size >= 0.5) continue;                     // repite la anterior con otras palabras
+      const x = out + (cjk ? "" : " ") + s; if (n(x) > cap) break; out = x; k.forEach(w => seen.add(w));
+    }
+    if (n(out) <= cap) return out;
+    const head = [...out].slice(0, cap).join(""), re = cjk ? /[，、；,;]/g : /[,;](?=\s)|\s[—–]\s/g;
+    let p = -1, m; while ((m = re.exec(head))) p = m.index;
+    if (p >= cap * 0.3) { const c = undangle(head.slice(0, p).replace(/[,;\s—–]+$/, "")); if (n(c) >= cap * 0.3) return c + (cjk ? "。" : "."); }
+    return out;
   };
   /* dato curioso corto (descripcion + 1.a frase) para las notas de campo; se usa en la Aventura */
   A.factOf = o => { const id = o.cid && o.cid[0]; return id ? A.cleanFact(A.wiki.factOf(id, A.wlang())) : ""; };

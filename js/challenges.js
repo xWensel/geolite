@@ -435,10 +435,14 @@ window.AIQ = window.AIQ || {};
   const LOOK_RU = { а: "a", б: "6", в: "ß", г: "r", д: "ð", е: "є", ж: "×", з: "3", и: "u", к: "ќ", м: "m", н: "h", о: "ø", п: "n", р: "þ", с: "¢", т: "†", у: "ў", х: "x", ц: "µ", ч: "4", ш: "w", ь: "b", я: "R" };
   const lookOf = ch => LOOK_UP[ch] || LOOK[ch] || (LOOK_RU[ch.toLowerCase()] && (ch !== ch.toLowerCase() ? LOOK_RU[ch.toLowerCase()].toUpperCase() : LOOK_RU[ch]));
   const VOWELS = /[aeiouáéíóúàèìòùâêîôûäëïöüãõåæœAEIOUÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÄËÏÖÜÃÕÅаеёиоуыэюяАЕЁИОУЫЭЮЯ]/;
+  /* v0.4.58: la pista, corta (A.shortFact, js/wiki.js: la primera frase y lo que quepa hasta ~120 letras) y con algo que leer: si al tapar el
+     nombre apenas queda nada a la vista ("Авра́м ▮▮▮▮."), no hay adivinanza y la placa ensena el nombre */
   function riddleText(o) {
     let t = ""; try { t = (A.tx(o.fact) || (A.factOf && A.factOf(o)) || "").trim(); } catch (e) { t = ""; }
+    if (t && A.shortFact) t = A.shortFact(t);
     if (!t || t.length < 12) return null;
-    return maskName(o, t);
+    const m = maskName(o, t), seen = [...m.replace(/▮/g, "")].filter(isLetter).length;
+    return seen >= (CJK.test(m) ? 4 : 10) ? m : null;
   }
   /* tapa el nombre del lugar (en todos sus idiomas) dentro de un texto: la pista de la placa y la nota del pie. Un hueco por letra, sin recortar
      el texto. Compara sin acentos ni marcas (el ruso de Wikipedia trae el acento de entonacion: "Дака́р") y recompone el hangul (partido en jamo,
