@@ -1281,6 +1281,14 @@ window.AIQ = window.AIQ || {};
     vit: L6("Vitrina legendaria|Legendary showcase|Vitrine légendaire|Vitrine lendária|Legendäre Vitrine|Vetrina leggendaria||传说展柜|전설 진열장|レジェンダリーの陳列棚|Легендарная витрина|Legendarna gablota"),
     vitOn: L6("hay una|there is one|il y en a une|há uma|es gibt eine|ce n'è una||有一件|하나 있어요|1つある|есть одна|jest jedna"),
     vitOff: L6("desde el acto II|from act II|dès l'acte II|a partir do ato II|ab Akt II|dall'atto II||第二幕起|2막부터|第2幕から|со II акта|od aktu II"),
+    /* v0.4.59: el cofre dice que rareza es cada cifra (antes "55 / 35 / 10 %" a secas: no se veia que el 10 % es legendaria) */
+    chestPer: L6("por carta|per card|par carte|por carta|pro Karte|per carta||每张卡|카드당|1枚ごと|на карту|na kartę"),
+    chestNow: L6("Este cofre|This chest|Ce coffre|Este baú|Diese Truhe|Questo scrigno||这个宝箱|이 상자|この宝箱|Этот сундук|Ta skrzynia"),
+    skip: L6("Sin abrirlo|Leave it closed|Sans l'ouvrir|Sem abrir|Ungeöffnet|Senza aprirlo||不打开|열지 않으면|開けずに|Не открывая|Bez otwierania"),
+    vitHave: L6("ya tienes la de este acto|you already have this act's|tu as déjà celle de cet acte|você já tem a deste ato|du hast die dieses Akts schon|hai già quella di questo atto||本幕的已经到手|이번 막 것은 이미 있어요|この幕の分はもう持っている|у тебя уже есть легендарная этого акта|masz już tę z tego aktu"),
+    vitNone: L6("no quedan|none left|il n'en reste plus|não restam|keine mehr übrig|non ne restano||已经没有了|남은 게 없어요|もう残っていない|больше нет|nie zostało"),
+    legRule: L6("Una legendaria por acto: la del cofre o la de la vitrina.|One legendary per act: the chest's or the showcase's.|Une légendaire par acte : celle du coffre ou celle de la vitrine.|Uma lendária por ato: a do baú ou a da vitrine.|Eine legendäre pro Akt: die aus der Truhe oder die aus der Vitrine.|Una leggendaria per atto: quella dello scrigno o quella della vetrina.||每幕一件传说：来自宝箱或展柜。|막마다 전설 하나: 상자에서 나오거나 진열장에서 사거나.|1幕につきレジェンダリーは1つ：宝箱か陳列棚のどちらか。|Одна легендарная за акт: из сундука или с витрины.|Jedna legendarna na akt: ze skrzyni albo z gabloty."),
+    diana: L6("Cada diana|Each bullseye|Chaque mouche|Cada mosca|Jeder Volltreffer|Ogni centro||每次正中靶心|과녁 명중마다|ど真ん中ごとに|Каждое яблочко|Każdy strzał w dziesiątkę"),
     prices: L6("Precios ahora|Prices now|Prix actuels|Preços agora|Preise jetzt|Prezzi ora||当前价格|현재 가격|現在の価格|Цены сейчас|Ceny teraz"),
     prov: L6("Provisión|Provision|Provision|Provisão|Proviant|Provviste||补给|식량|食料|Запас|Zapas"),
     swap: L6("Cambiar cartas|Swap cards|Changer les cartes|Trocar cartas|Karten tauschen|Cambia carte||换牌|카드 교체|カード交換|Замена карт|Wymiana kart"),
@@ -1290,19 +1298,32 @@ window.AIQ = window.AIQ || {};
   };
   const ecoTicket = () => {
     const r = roundNo() + 1, boss = isBoss(), act = run.act, tx = k => A.tx(ETK[k]);
-    const base = clearBase(boss), a = gain(base), b = gain(base + STEPS.length), cap = sumFlag("interest") || 2, div = sumFlag("interestDiv") || 10, intr = Math.min(cap, Math.floor(run.coins / div));
+    const base = clearBase(boss), a = gain(base), b = gain(base + (has("marginHalf") ? Math.floor(STEPS.length / 2) : STEPS.length)), cap = sumFlag("interest") || 2, div = sumFlag("interestDiv") || 10, intr = Math.min(cap, Math.floor(run.coins / div));   // la Mesa de minimos paga la mitad del margen
     const rt = shopRates(r), legDone = !!(run.legAct && run.legAct[act]), steps = ["+10 %", "+25 %", "+50 %", "×2"];
+    /* el cofre del jefe (offers(true)): se sortea la rareza de cada carta, rara 55 / epica 35 / legendaria 10, entre las que aun pueden salir.
+       Se abre con el acto siguiente ya empezado (su legendaria es la de ese acto): mientras haya un jefe con cofre por delante (actos I y II) o
+       estes delante de el, se ensena */
+    const R = A.RELICS, left = t => Object.keys(R).some(id => R[id].r === t && !owned(id) && useful(id)), legLeft = left(3);
+    const inChest = run.phase === "chest", chestAhead = inChest || act < 2;
+    const cw = [0, 55, 35, 10].map((v, t) => (left(t) ? v : 0)), cs = cw.reduce((n, v) => n + v, 0) || 1, ct = cw.map(v => Math.round(v * 100 / cs));
+    const skipK = gain(Math.round(2.5 * (1 + 0.25 * (inChest ? act : act + 1))) + (sumFlag("chestSkip") || 0));   // chestSkip() con la inflacion del acto en que se abre
+    const vit = act < 1 ? tx("vitOff") : legDone ? tx("vitHave") : legLeft ? tx("vitOn") : tx("vitNone");
     const rc = rerollCost(), rcol = ["#b7bfc4", "#4f9bff", "#c78bf0", "#ffd95a"], rn = k => A.tx(R_NAMES[k]);
     let strip = ""; for (let q = 1; q <= 12; q++) { const t = shopRates(q); strip += `<span class="${q === r ? "now " : ""}${q % 4 === 0 ? "bs" : ""}"><i class="c" style="height:${Math.round(t[0] * 0.4)}px"></i><i class="r" style="height:${Math.round(t[1] * 0.4)}px"></i><i class="e" style="height:${Math.round(t[2] * 1.1)}px"></i></span>`; }
     return `<div class="tk"><h4><span>${tx("t")}</span><b>${run.coins}</b></h4>`
       + `<div class="sc"><div class="st"><span>${tx("round")} · R${r}${boss ? " · " + tx("boss") : ""}</span><em>${tx("act")} ${["I", "II", "III"][Math.min(2, act)]}</em></div>`
       + `<div class="ln"><span>${tx("clear")}</span><span><b>+${a}</b> · ${tx("upto")} <b>+${b}</b></span></div>`
       + `<div class="stp">${steps.map(s => `<span><b>+1</b>${s}</span>`).join("")}</div>`
+      + `<div class="ln"><span>${tx("diana")}</span><span><b>+${gain(1)}</b></span></div>`
       + `<div class="ln"><span>${tx("fail")}</span><span>${tx("failD")}</span></div>`
       + `<div class="ln"><span>${tx("int")}</span><span><b>+${intr}</b> · ${tx("per").replace("{d}", div).replace("{m}", cap)}</span></div></div>`
       + `<div class="sc"><div class="st"><span>${tx("shop")}</span><em>${tx("slot")}</em></div><div class="rt">${rt.map((v, i) => `<b class="s${i}" style="flex:${v}">${v >= 5 ? v + "%" : ""}</b>`).join("")}</div>`
       + `<div class="lg">${[0, 1, 2].map(i => `<span><i style="background:${rcol[i]}"></i>${rn(i)}</span>`).join("")}</div>`
-      + `<div class="ln"><span>${tx("chest")}</span><span>55 / 35 / 10 %</span></div><div class="ln"><span>${tx("vit")}</span><span>${act >= 1 && !legDone ? tx("vitOn") : tx("vitOff")}</span></div></div>`
+      + `<div class="ln"><span>${tx("vit")}</span><span>${vit}</span></div></div>`
+      + (chestAhead && !run.inf ? `<div class="sc"><div class="st"><span>${inChest ? tx("chestNow") : tx("chest")}</span><em>${tx("chestPer")}</em></div>`
+        + `<div class="rt">${ct.map((v, i) => (v ? `<b class="s${i}" style="flex:${v}">${v}%</b>` : "")).join("")}</div>`
+        + `<div class="lg">${[1, 2, 3].filter(i => ct[i]).map(i => `<span><i style="background:${rcol[i]}"></i>${rn(i)}</span>`).join("")}</div>`
+        + `<div class="ln"><span>${tx("skip")}</span><span><b>+${skipK}</b></span></div><div class="fine">${tx("legRule")}</div></div>` : "")
       + `<div class="sc"><div class="st"><span>${tx("prices")}</span><em>${run.asc ? "A" + run.asc + " · " : ""}${tx("act")} ${["I", "II", "III"][Math.min(2, act)]}</em></div><div class="pr4">${[4, 6, 9, 14].map((c, i) => `<span style="--c:${rcol[i]}"><small>${rn(i)}</small>${price(c)}</span>`).join("")}</div>`
       + `<div class="ln"><span>${tx("prov")} <b>${lifePrice()}</b></span><span>${tx("swap")} <b>${rc === 0 ? tx("free") : rc}</b></span></div></div>`
       + `<div class="sc"><div class="st"><span>${tx("path")}</span><em>R1 · R12</em></div><div class="strip">${strip}</div><div class="fine">${tx("sell")}</div></div></div>`;
