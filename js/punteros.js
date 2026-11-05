@@ -199,10 +199,13 @@ window.AIQ = window.AIQ || {};
       return y >= 8 && hd > 3.4 ? "D" : "M"; }, { M: "#f2b33d", L: "#ffe08a", D: "#b8741a", W: "#fff7e6", ...STEEL }) },
   };
   const pinCache = {};
-  function pinCanvas(id) {
-    if (!PIN[id]) return null;
-    if (!pinCache[id]) { const cv = document.createElement("canvas"); cv.width = 16; cv.height = 24; const c = cv.getContext("2d"); PIN[id].draw((x, y, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), 1, 1); }); pinCache[id] = cv; }
-    return pinCache[id];
+  /* el lienzo de 16 x 24 de una chincheta; la de la casa, con la tinta y el papel de la mesa (sk: { ink, paper }, la de siempre si no se da) */
+  function pinCanvas(id, sk) {
+    let draw = PIN[id] && PIN[id].draw, key = id;
+    if (id === "casa") { if (!CASA_PIN) return null; const ink = (sk && sk.ink) || INK, paper = (sk && sk.paper) || "#f3eddc"; key = "casa|" + ink + "|" + paper; draw = CASA_PIN(ink, paper); }
+    if (!draw) return null;
+    if (!pinCache[key]) { const cv = document.createElement("canvas"); cv.width = 16; cv.height = 24; const c = cv.getContext("2d"); draw((x, y, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), 1, 1); }); pinCache[key] = cv; }
+    return pinCache[key];
   }
 
   /* ---------------------------------------------------------------- LAS LINEAS: de a (tu chincheta) a b (el lugar), e = cuanto se ha trazado (0-1).
@@ -308,7 +311,10 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- las piezas nuevas (js/punteros-mas.js, cargado antes): reciben estas herramientas y
      se anaden a RET, PIN, LIN y DIA, detras de las de siempre */
-  (A.punterosMas || []).forEach(f => f({ SHAPE, RET, PIN, LIN, DIA, N, XT, skin, pinArt, needleAt, STEEL, fold, band2, mixC, linBegin, diaBegin, fade, DIA_LEN, INK, WHITE }));
+  const KIT = { SHAPE, RET, PIN, LIN, DIA, N, XT, skin, pinArt, needleAt, STEEL, fold, band2, mixC, linBegin, diaBegin, fade, DIA_LEN, INK, WHITE, artCv, CHIPC, cardSpr, casa: {} };
+  (A.punterosMas || []).forEach(f => f(KIT));
+  /* v0.4.60: la chincheta y la linea DE LA CASA tambien al pixel (KIT.casa.pin / .lin, de js/punteros-mas.js), con la tinta y el papel de la mesa puesta */
+  const CASA_PIN = KIT.casa.pin || null, CASA_LIN = KIT.casa.lin || null;
 
   /* ---------------------------------------------------------------- el catalogo y el estado */
   const CATS = { ret: ["casa", ...Object.keys(RET)], pin: ["casa", ...Object.keys(PIN)], lin: ["casa", ...Object.keys(LIN)], dia: ["casa", ...Object.keys(DIA)] };
@@ -356,7 +362,8 @@ window.AIQ = window.AIQ || {};
     } else if (s === "lin") {
       const k = Math.max(1, Math.floor(H / 60)), a1 = [Math.round(W * .18), Math.round(H * .78)], b1 = [Math.round(W * .82), Math.round(H * .3)], e = Math.min(1, ((t * 1000) % 2600) / 1200);
       isle(W * .68, H * .66, W * .44, H * .42, .3);
-      if (LIN[id]) LIN[id].draw(c, a1, b1, e, { k }); else { c.save(); c.setTransform(sc, 0, 0, sc, 0, 0); c.setLineDash([1, 9]); c.lineCap = "round"; c.lineWidth = 4; c.strokeStyle = "rgba(22,36,28,.9)"; seg(c, a1.map(v => v / sc), b1.map(v => v / sc), e); c.lineWidth = 1.5; c.strokeStyle = "rgba(242,233,214,.7)"; c.lineDashOffset = 5; seg(c, a1.map(v => v / sc), b1.map(v => v / sc), e); c.restore(); }
+      const L = id === "casa" ? CASA_LIN : LIN[id];
+      if (L) L.draw(c, a1, b1, e, { k }); else { c.save(); c.setTransform(sc, 0, 0, sc, 0, 0); c.setLineDash([1, 9]); c.lineCap = "round"; c.lineWidth = 4; c.strokeStyle = "rgba(22,36,28,.9)"; seg(c, a1.map(v => v / sc), b1.map(v => v / sc), e); c.lineWidth = 1.5; c.strokeStyle = "rgba(242,233,214,.7)"; c.lineDashOffset = 5; seg(c, a1.map(v => v / sc), b1.map(v => v / sc), e); c.restore(); }
       vecPin(c, b1[0], b1[1], "#e8283a", PAPER, k * .3);
     } else {
       /* la diana sale del lugar (abajo): las piezas a escala entera; las pequenas casi no paran y van desfasadas (si no, la tienda se queda vacia a la vez) */
@@ -375,7 +382,7 @@ window.AIQ = window.AIQ || {};
   A.punteros = {
     SLOTS, CATS, TX, slotName: s => P6(TX[s]), slotPlural: s => P6(TX[s + "P"]), slotDesc: s => P6(TX[s + "D"]), name, price, full, give, owned, current, wear, buy, code, parse,
     ret: () => RET[current("ret")] || CASA, corners, centerPin, _shape: SHAPE, _grid: grid,
-    pinCanvas, drawLine: (c, a, b, e, id, o) => { const L = LIN[id]; if (!L) return false; L.draw(c, a, b, e, o); return true; },
+    pinCanvas, drawLine: (c, a, b, e, id, o) => { const L = id === "casa" ? CASA_LIN : LIN[id]; if (!L) return false; L.draw(c, a, b, e, o); return true; },
     diana: (c, x, y, t, id, P, o) => { const D = DIA[id]; if (!D) return false; D.draw(c, x, y, t, P, o); return true; }, parts, DIA_MS,
     thumb, list: s => CATS[s].slice(),
     tryOn: (s, id) => { TRY = has(s, id) ? { s, id } : null; }, tryOff: () => { TRY = null; },

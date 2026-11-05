@@ -2544,7 +2544,7 @@ void main(){
     _line(c, m, G, Aa, age) {
       const k = clamp((age - 300) / 500, 0, 1), e = easeIO(k); if (k <= 0) return;
       const lin = A.punteros ? (m.skin && m.skin.lin) || A.punteros.current("lin") : "casa";   // la linea de la tienda (js/punteros.js)
-      if (lin !== "casa" && A.punteros.drawLine(c, G, Aa, e, lin, { dpr: this.dpr })) return m.dist && k >= 1 ? [G, Aa] : null;
+      if (A.punteros && A.punteros.drawLine(c, G, Aa, e, lin, { dpr: this.dpr, ink: this.sk.ink, paper: this.sk.paper })) return m.dist && k >= 1 ? [G, Aa] : null;   // v0.4.60: la de la casa tambien al pixel
       c.save(); c.setLineDash([1, 9]); c.lineCap = "round"; c.lineWidth = 4; c.strokeStyle = this._rgba(this.sk.ink, 0.9);
       const segs = [[G, Aa]];                                           // las dos chinchetas ya van en la copia mas cercana: el camino corto, cruce o no el antimeridiano
       const trace = () => { c.beginPath(); for (const [a, b] of segs) { c.moveTo(a[0], a[1]); c.lineTo(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e); } c.stroke(); };
@@ -2698,7 +2698,7 @@ void main(){
     }
     /* tu chincheta: la de la tienda (js/punteros.js, al pixel a x2 con la punta en el sitio) o la de siempre; cae igual, con su rebote */
     _myPin(c, x, y, age, m) {
-      const id = A.punteros ? (m && m.skin && m.skin.pin) || A.punteros.current("pin") : "casa", pc = id !== "casa" && A.punteros.pinCanvas(id);
+      const id = A.punteros ? (m && m.skin && m.skin.pin) || A.punteros.current("pin") : "casa", pc = A.punteros && A.punteros.pinCanvas(id, this.sk);   // v0.4.60: la de la casa tambien al pixel, con la tinta y el papel de la mesa
       if (m && m.clava) return this._pinClava(c, x, y, age, m.clava, pc, id);
       if (!pc) return this._pin(c, x, y, this.sk.ink, this.sk.paper, age, 1);
       if (age < 0) return;

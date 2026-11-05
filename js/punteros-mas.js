@@ -11,12 +11,14 @@
  * Todo PIXEL ART simétrico al píxel, con el contorno de tinta de siempre y escala entera. REGLA: nada salta, vuela ni flota; las dianas viven pegadas
  * al lugar (el mapa se rasga, se hiela, se dora, se tuesta) y las que lo rodean llevan ring: 1 (en la tienda se ven centradas, como la onda de oro).
  * Precios con las bandas de siempre: retículo 200, chincheta 120, línea 120-150, diana 250-300.
+ * Y los retoques votados (v0.4.60): la chincheta y la línea de la casa, al píxel (con la tinta y el papel de la mesa: KIT.casa), y la lluvia de
+ * fichas y los naipes al aire, que ya no lanzan nada al aire (se apilan y se abren en abanico sobre el lugar).
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
   /* ============================================================ RETÍCULOS Y CHINCHETAS ============================================================ */
   (A.punterosMas = A.punterosMas || []).push(T => {
-    const { SHAPE, RET, PIN, N, XT, skin, pinArt, needleAt, STEEL, fold, band2 } = T;
+    const { SHAPE, RET, PIN, N, XT, skin, pinArt, needleAt, STEEL, fold, band2, mixC } = T;
     const DEG = 57.29578;
     Object.assign(XT, { Zr: "#e8283a", Zrd: "#a8142e", Zn: "#3a2f58", Znd: "#1d0a3d", Zv: "#3fb54a", Zvd: "#136b3e", Zb: "#f3f0fa", Zbd: "#c9cde0",
       Zp: "#e5408f", Zt: "#e8283a", Ztl: "#ff6b5e", Ztd: "#a8142e" });
@@ -215,6 +217,15 @@ window.AIQ = window.AIQ || {};
       if (ax <= 2 && y === 8) return "k";
       return y <= 6 ? "L" : "C"; }, { M: "#f5a623", D: "#c46a1b", W: "#fff7e6", C: "#ffd95a", L: "#fff3b0", k: "#6e3414", h: "#b06a34", b: "#c46a1b", ...STEEL }) };
 
+    /* RETOQUE. LA DE LA CASA, AL PÍXEL: la gota de tinta con su aro y su ojo de papel (antes, vectores). Toma la tinta y el papel de la mesa */
+    T.casa.pin = (ink, paper) => pinArt((ax, y) => {
+      if (!inDrop(ax, y)) return 0;
+      const edge = [-1, 0, 1].some(a => [-1, 0, 1].some(b => !inDrop(Math.abs(ax + a), y + b)));   // aro de 1 px sin huecos (vecinos en diagonal)
+      if (edge) return y <= 3 ? "W" : y >= 15 ? "D" : "P";
+      const e = Math.abs(y - 7) === 2 ? ax <= 1 : Math.abs(y - 7) < 2 && ax <= 2;
+      if (e) return y <= 6 && !(y === 6 && ax === 2) ? "W" : "P";
+      return "K"; }, { W: mixC(paper, "#ffffff", .45), P: paper, D: mixC(paper, ink, .22), K: ink });
+
     N.ruleta = "La ruleta|The roulette|La roulette|A roleta|Das Roulette|La roulette||轮盘|룰렛|ルーレット|Рулетка|Ruletka";
     N.orejas = "Las orejas de Comodín|Comodín's ears|Les oreilles de Comodín|As orelhas do Comodín|Comodíns Ohren|Le orecchie di Comodín||科莫丁的耳朵|코모딘의 귀|コモディンの耳|Уши Комодина|Uszy Comodína";
     N.timon = "El timón|The helm|La barre|O leme|Das Steuerrad|Il timone||舵轮|조타륜|舵輪|Штурвал|Ster";
@@ -230,7 +241,7 @@ window.AIQ = window.AIQ || {};
 
   /* ============================================================ LÍNEAS Y DIANAS ============================================================ */
   (A.punterosMas = A.punterosMas || []).push(T => {
-    const { LIN, DIA, N, INK, WHITE, linBegin, diaBegin, fade, mixC, DIA_LEN } = T;
+    const { LIN, DIA, N, INK, WHITE, linBegin, diaBegin, fade, mixC, DIA_LEN, artCv, CHIPC, cardSpr } = T;
 
     /* ------------------------------------------------------------ ayudantes: un conjunto de píxeles de arte con su papel y su contorno */
     const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]], N8 = [...N4, [1, 1], [1, -1], [-1, 1], [-1, -1]];
@@ -368,6 +379,13 @@ window.AIQ = window.AIQ || {};
         spr.hole.forEach(([x, y]) => ring.set(fx + x, fy + y, null, 0));                     // el hueco: sin tinta ni color
         ring.draw(c, g.put, 8); }
       c.restore(); } };
+
+    /* RETOQUE. LA DE LA CASA, AL PÍXEL: la misma línea de puntos (un punto cada 5 píxeles de arte = 10 px, como el setLineDash [1, 9]), cada punto
+       una pepita de papel con su contorno de tinta redondo (los de la mesa puesta); paso exacto en el eje mayor, así el ritmo no baila */
+    T.casa.lin = { draw(c, a, b, e, o) {
+      const g = geo(c, a, b, o), ex = g.dx / g.Lc, ey = g.dy / g.Lc, ps = new PS(), paper = (o && o.paper) || "#f2e9d6";
+      for (let j = 0; j * 5 <= g.Lc * e + 1e-6; j++) { const x = Math.round(g.A[0] + j * 5 * ex), y = Math.round(g.A[1] + j * 5 * ey); ps.set(x, y, paper); }
+      ps.draw(c, g.put, 4, (o && o.ink) || INK); c.restore(); } };
 
     /* ============================================================ DIANAS ============================================================ */
 
@@ -507,6 +525,34 @@ window.AIQ = window.AIQ || {};
         else if (d < R + .5) ring.set(gx, gy, inB ? WHITE : d >= R - .5 ? (gy < 0 ? C.oro[0] : C.oro[2]) : d >= R - 1.5 ? C.oro[1] : (gy > 0 ? C.oro[0] : C.oro[2])); }
       layer(c, X, Y, k, 20, Math.min(1, t / .05) * fade(t, 1.05, DIA_LEN), (g, put) => { tint.draw(g, put, 0); ring.draw(g, put, 4); });
       c.restore(); } };
+
+    /* RETOQUE. LLUVIA DE FICHAS, SIN NADA QUE VUELE (misma pieza, mismo id): las fichas se apilan de golpe en el lugar, una torre que crece ficha a
+       ficha (cada una aparece solo su propio grosor por encima y se asienta), se asienta toda al final con un leve vaivén de las de arriba, y se
+       desvanece. Las fichas son las del juego (mismos colores y las incrustaciones blancas de chipSpr), vistas de lado para poder apilarlas */
+    const STACK = {};
+    const stackSpr = col => STACK[col] || (STACK[col] = artCv(13, 8, (x, y) => {
+      const dx = x - 6, top = ((dx) / 5.45) ** 2 + ((y - 2) / 2.2) ** 2 <= 1, side = y >= 2 && y <= 4 && Math.abs(dx) <= 5 && !top, low = ((dx) / 5.45) ** 2 + ((y - 4) / 2.2) ** 2 <= 1 && y > 2;
+      if (top) return (dx === 0 && y === 1) || (Math.abs(dx) === 4 && y === 2) ? "W" : y <= 1 ? "L" : "M";
+      if (side || low) return Math.abs(dx) === 3 || dx === 0 ? "W" : y >= 5 ? "D" : "M";
+      return 0; }, { M: col, L: mixC(col, WHITE, .45), D: mixC(col, INK, .3), W: WHITE }));
+    DIA.lluvia.draw = function (c, x, y, t, P, o) { if (t > DIA_LEN) return; const { X, Y, k } = diaBegin(c, x, y, o);
+      const n = 6, step = 3;
+      const T0 = i => .04 + i * .085 * (1 - i * .06), last = T0(n - 1);
+      layer(c, X, Y, k, 24, fade(t, 1.05, DIA_LEN), (c, put, X, Y) => { for (let i = 0; i < n; i++) { const ti = T0(i); if (t < ti) break;
+        const drop = t < ti + .035 ? step : 0, wob = i >= n - 3 && t > last + .06 && t < last + .16 ? (t < last + .11 ? 1 : -1) * (i === n - 1 ? 1 : i === n - 2 ? 1 : 0) : 0;
+        const cv = stackSpr(CHIPC[i % 4]); c.drawImage(cv, X - (k >> 1) + (wob - 6) * k, Y - (k >> 1) + (-6 - i * step - drop) * k, cv.width * k, cv.height * k); } });
+      c.restore(); };
+
+    /* RETOQUE. NAIPES, SIN NADA QUE VUELE (misma pieza, mismo id): un abanico de 9 naipes boca arriba (los de cardSpr) que se abre sobre el lugar,
+       carta a carta desde el centro hacia los dos lados a la vez, deslizándose sobre la mesa como cuando el crupier extiende la baraja; los de fuera,
+       un poco más bajos. Simétrico: la de en medio queda encima de todas */
+    DIA.naipes.draw = function (c, x, y, t, P, o) { if (t > DIA_LEN) return; const { X, Y, k } = diaBegin(c, x, y, o);
+      layer(c, X, Y, k, 24, Math.min(1, t / .05) * fade(t, 1.05, DIA_LEN), (c, put, X, Y) => {
+        for (let a = 4; a >= 0; a--) for (const sg of a ? [-1, 1] : [1]) {
+          const q = easeOut(clamp01((t - .06 - a * .07) / .14)), tx = sg * a * 4 * q, ty = Math.round(a * a * .4) * q;
+          const cv = cardSpr(7, 0, a % 2 === 0);
+          c.drawImage(cv, X - (k >> 1) + (Math.round(tx) - 4) * k, Y - (k >> 1) + (Math.round(ty) - 5 - 8) * k, cv.width * k, cv.height * k); } });
+      c.restore(); };
 
     /* ------------------------------------------------------------ los nombres (es|en|fr|pt|de|it||zh|ko|ja|ru|pl) */
     Object.assign(N, {
