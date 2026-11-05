@@ -12,6 +12,7 @@
  *   A.punteros.pinCanvas(id) / line(...) / diana(...)   dibujos para el mapa
  *   A.punteros.code() / parse(code)       el estilo en una cadena corta («oro.hilo.onda»), para el Duelo
  *   A.punteros.thumb(cv, slot, id, t)     la miniatura animada de la tienda
+ * Las 22 piezas de las seis familias (ruleta, Comodin, tesoro, neon, hielo y oro; v0.4.60) viven en js/punteros-mas.js.
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -68,9 +69,9 @@ window.AIQ = window.AIQ || {};
   const isHex = h => /^#[0-9a-f]{6}$/i.test(h);
   const mixC = (a, b, k) => { if (!isHex(a)) return a; const A1 = hexRGB(a), B1 = hexRGB(b); return "#" + A1.map((v, i) => Math.round(v + (B1[i] - v) * k).toString(16).padStart(2, "0")).join(""); };
   const alphaC = (a, k) => { if (!isHex(a)) return a; const A1 = hexRGB(a); return `rgba(${A1[0]},${A1[1]},${A1[2]},${k})`; };
-  const TONES = {};
+  const TONES = {}, XT = {};                                          // XT: papeles de color fijo de las piezas nuevas (js/punteros-mas.js)
   const tones = col => TONES[col] || (TONES[col] = { M: col, L: mixC(col, WHITE, .5), D: mixC(col, INK, .3), W: WHITE, R: "#ff4f45", Q: "#ff9d90", V: "#e3d2ae", O: INK,
-    m: col, n: mixC(col, "#ffffff", .7), a: alphaC(col, .42), b: alphaC(col, .16), f: alphaC(col, .22), k: INK, G: GOLD2, S: mixC(col, "#ffffff", .8) });
+    m: col, n: mixC(col, "#ffffff", .7), a: alphaC(col, .42), b: alphaC(col, .16), f: alphaC(col, .22), k: INK, G: GOLD2, S: mixC(col, "#ffffff", .8), ...XT });
   const fold = (ax, ay) => (ax >= ay ? [ax, ay] : [ay, ax]);           // al octante: u >= v
   const band2 = (out, y) => (out ? (y < 0 ? "L" : "M") : (y > 0 ? "L" : "M"));   // banda de 2 px con la luz de arriba
   const SHAPE = {
@@ -305,6 +306,10 @@ window.AIQ = window.AIQ || {};
   };
   const DIA_MS = 1900;                                                   // el compas de los anillos de siempre (js/map.js)
 
+  /* ---------------------------------------------------------------- las piezas nuevas (js/punteros-mas.js, cargado antes): reciben estas herramientas y
+     se anaden a RET, PIN, LIN y DIA, detras de las de siempre */
+  (A.punterosMas || []).forEach(f => f({ SHAPE, RET, PIN, LIN, DIA, N, XT, skin, pinArt, needleAt, STEEL, fold, band2, mixC, linBegin, diaBegin, fade, DIA_LEN, INK, WHITE }));
+
   /* ---------------------------------------------------------------- el catalogo y el estado */
   const CATS = { ret: ["casa", ...Object.keys(RET)], pin: ["casa", ...Object.keys(PIN)], lin: ["casa", ...Object.keys(LIN)], dia: ["casa", ...Object.keys(DIA)] };
   const DEF = { ret: RET, pin: PIN, lin: LIN, dia: DIA };
@@ -355,7 +360,7 @@ window.AIQ = window.AIQ || {};
       vecPin(c, b1[0], b1[1], "#e8283a", PAPER, k * .3);
     } else {
       /* la diana sale del lugar (abajo): las piezas a escala entera; las pequenas casi no paran y van desfasadas (si no, la tienda se queda vacia a la vez) */
-      const ring = id === "onda" || id === "casa", k = Math.max(1, Math.floor((H * (big ? .6 : .72)) / 38)), X = Math.round(W / 2), Y = Math.round(H * (ring ? .56 : .8));   // los aros, centrados
+      const ring = id === "onda" || id === "casa" || !!(DIA[id] && DIA[id].ring), k = Math.max(1, Math.floor((H * (big ? .6 : .72)) / 38)), X = Math.round(W / 2), Y = Math.round(H * (ring ? .56 : .8));   // los aros, centrados
       const cyc = (DIA_LEN + (big ? .5 : .25)) * 1000, off = big ? 0 : (CATS.dia.indexOf(id) * 397) % cyc, tt = ((t * 1000 + off) % cyc) / 1000;
       isle(X, Y, 27 * k, 9 * k, 0);
       vecPin(c, X, Y, "#e8283a", PAPER, k * .3);
