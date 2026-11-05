@@ -18,6 +18,10 @@
  * EL GATO ES FISICO: siempre de pie o tumbado SOBRE algo (una placa, el borde de una tarjeta, un boton, el estrado). Nunca anda ni se para en el aire:
  * para cambiar de altura salta (hopTo). Cada pantalla le da su suelo de verdad.
  * Con Movimiento en Minimo no anda ni salta: se queda sentado (o dormido) y solo responde a las caricias.
+ * v0.4.60, SU VESTUARIO (js/vestuario.js, pestana «Comodín» de la tienda): A.comodin.dress(look) le cambia pelaje, ojos, pajarita y pieza en todas
+ * partes; .thumb(look, k) es su retrato sentado (tarjetas de la tienda) y .preview(host, look) el gato del probador. Se recolorea su atlas con el
+ * mapa de partes (js/comodin-ropa.js) y se pinta la pieza encima; con un ojo de cada color hay un segundo atlas para cuando mira a la izquierda
+ * (se pinta en espejo, y el ojo azul tiene que seguir en su lado).
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
@@ -35,6 +39,50 @@ window.AIQ = window.AIQ || {};
     img.onload = () => { ready = true; waiting.splice(0).forEach(f => f()); };
     img.src = DATA().atlas;
   }
+
+  /* ---------------------------------------------------------------- v0.4.60: Comodin vestido. look = { pelo: [pelo, luz, lineas, nariz] | null,
+     ojos: rampa | null, hetero, paj: color | null, pieza: id | null } (js/vestuario.js gato.look). Los atlas vestidos se guardan por ropa */
+  const ROPA = () => A.COMODIN_ROPA;
+  let partes = null, piezas = {}, ropaBusy = false; const ropaWait = [];
+  function loadRopa(fn) {
+    if (partes) return fn && fn();
+    if (fn) ropaWait.push(fn);
+    if (ropaBusy || !ROPA()) return; ropaBusy = true;
+    load(() => {
+      const R = ROPA(), ims = [["_", R.partes]].concat(Object.entries(R.piezas || {})); let left = ims.length; const got = {};
+      ims.forEach(([k, src]) => { const im = new Image(); im.onload = im.onerror = () => { got[k] = im; if (--left) return;
+        const W = img.naturalWidth, H = img.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+        const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(got._, 0, 0); const pd = x.getImageData(0, 0, W, H).data, P = new Uint8Array(W * H);
+        for (let i = 0; i < P.length; i++) P[i] = pd[i * 4 + 3] ? pd[i * 4] : 0;
+        partes = P; delete got._; piezas = got; ropaWait.splice(0).forEach(f => f()); }; im.src = src; });
+    });
+  }
+  const hexN = h => parseInt(String(h).replace("#", ""), 16);
+  const lookKey = L => (L ? JSON.stringify([L.pelo, L.ojos, L.hetero, L.paj, L.pieza]) : "");
+  const isPlain = L => !L || (!L.pelo && !L.ojos && !L.paj && !L.pieza);
+  const dressed = new Map();
+  /* el atlas vestido (espejo: el de mirar a la izquierda, con el ojo azul cambiado de lado) */
+  function dressAtlas(L, espejo) {
+    const key = lookKey(L) + (espejo ? "|e" : ""); if (dressed.has(key)) return dressed.get(key);
+    const W = img.naturalWidth, H = img.naturalHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0); const im = x.getImageData(0, 0, W, H), d = im.data, R = ROPA();
+    const pel = L.pelo && L.pelo.map(hexN), paj = L.paj && hexN(L.paj), ojo = {};
+    if (L.ojos) R.ojo.forEach((h, i) => { ojo[hexN(h)] = hexN(L.ojos[i]); });
+    const eyeLab = L.hetero ? (espejo ? 6 : 5) : 0;
+    for (let i = 0; i < partes.length; i++) {
+      const lab = partes[i]; if (!lab) continue; const j = i * 4; let v = null;
+      if (lab <= 4) { if (pel) v = pel[lab - 1]; }
+      else if (lab <= 6) { if (L.ojos && (!eyeLab || lab === eyeLab)) { const o = ojo[(d[j] << 16) | (d[j + 1] << 8) | d[j + 2]]; if (o != null) v = o; } }
+      else if (lab === 7 && paj != null) v = paj;
+      if (v != null) { d[j] = v >> 16; d[j + 1] = (v >> 8) & 255; d[j + 2] = v & 255; }
+    }
+    x.putImageData(im, 0, 0);
+    if (L.pieza && piezas[L.pieza]) x.drawImage(piezas[L.pieza], 0, 0);
+    dressed.set(key, c); while (dressed.size > 6) dressed.delete(dressed.keys().next().value);
+    return c;
+  }
+  let LOOK = null;                                  // la ropa que lleva en la casa (null = la de siempre)
+  const srcFor = (L, dir) => (isPlain(L) || !partes ? img : dressAtlas(L, L.hetero && dir < 0));
 
   /* el puntero, para seguirlo por el suelo (raton; con mando, la mira) */
   const PT = { x: -1e4, y: -1e4, at: 0, in: false, h: [] };
@@ -200,18 +248,19 @@ window.AIQ = window.AIQ || {};
     }
     draw(force) {
       if (this.dead || !ready || !this.k) return;
-      const name = this.frameName(), key = name + "|" + this.k + "|" + (DARK ? DARK : 0) + "|" + (this.blink ? 1 : 0);
+      const L = this.o.look !== undefined ? this.o.look : LOOK, name = this.frameName(), key = name + "|" + this.k + "|" + (DARK ? DARK : 0) + "|" + (this.blink ? 1 : 0) + "|" + lookKey(L) + "|" + this.dir;
       if (!force && key === this.key) return; this.key = key;
       const d = DATA(), r = d.r[name], k = this.k, c = this.ctx; if (!r) return;
       c.clearRect(0, 0, this.cv.width, this.cv.height);
+      const eyeC = L && L.ojos && !L.hetero ? L.ojos[1] : "#fdd742";                  // en el apagon, sus ojos de su color
       if (DARK === "ojos") {                                                          // apagon total: solo sus ojos (y parpadea)
-        if (!this.blink) { c.fillStyle = "#fdd742"; for (const [x, y] of eyes(name)) c.fillRect((r[4] + x) * k, (r[5] + y) * k, k, k); }
+        if (!this.blink) { c.fillStyle = eyeC; for (const [x, y] of eyes(name)) c.fillRect((r[4] + x) * k, (r[5] + y) * k, k, k); }
         return;
       }
-      c.drawImage(img, r[0], r[1], r[2], r[3], r[4] * k, r[5] * k, r[2] * k, r[3] * k);
+      c.drawImage(srcFor(L, this.dir), r[0], r[1], r[2], r[3], r[4] * k, r[5] * k, r[2] * k, r[3] * k);
       if (DARK) {                                                                      // el apagon: silueta de tinta y solo los ojos encendidos
         c.globalCompositeOperation = "source-atop"; c.fillStyle = "#01003f"; c.fillRect(0, 0, this.cv.width, this.cv.height); c.globalCompositeOperation = "source-over";
-        c.fillStyle = "#fdd742"; for (const [x, y] of eyes(name)) c.fillRect((r[4] + x) * k, (r[5] + y) * k, k, k);
+        c.fillStyle = eyeC; for (const [x, y] of eyes(name)) c.fillRect((r[4] + x) * k, (r[5] + y) * k, k, k);
       }
     }
     tick() {
@@ -225,7 +274,41 @@ window.AIQ = window.AIQ || {};
     poke() { if (!this.dead) { clearTimeout(this.timer); this.timer = setTimeout(() => this.tick(), 0); } }
     destroy() { this.dead = true; clearTimeout(this.timer); this.cv.remove(); this.hit.remove(); }
   }
-  addEventListener("resize", () => { if (C) C.fit(); });
+  addEventListener("resize", () => { if (C) C.fit(); if (PV) PV.fit(); });
+
+  /* el retrato sentado con esa ropa (tarjetas de la tienda): el fotograma «base» recortado a su caja, a k pixeles por pixel ("" mientras carga) */
+  const thumbs = new Map();
+  function thumb(L, k = 1) {
+    if (!ready || (!partes && !isPlain(L))) { load(() => loadRopa()); return ""; }
+    const key = lookKey(L) + "@" + k; if (thumbs.has(key)) return thumbs.get(key);
+    const r = DATA().r.base, c = document.createElement("canvas"); c.width = r[2] * k; c.height = r[3] * k; const x = c.getContext("2d"); x.imageSmoothingEnabled = false;
+    x.drawImage(srcFor(L, 1), r[0], r[1], r[2], r[3], 0, 0, r[2] * k, r[3] * k);
+    const u = c.toDataURL(); thumbs.set(key, u); while (thumbs.size > 80) thumbs.delete(thumbs.keys().next().value); return u;
+  }
+  /* el probador de la tienda: un Comodin propio (no el de la casa: ese sigue donde este), sentado, que mira y de vez en cuando se lava o se
+     despereza, con la ropa que te pruebas. Escala entera: la mayor que cabe en su caja */
+  let PV = null;
+  class Probador {
+    constructor(host, L) { this.host = host; this.L = L; this.cv = document.createElement("canvas"); this.cv.className = "cm-pv"; this.cv.setAttribute("aria-hidden", "true"); host.appendChild(this.cv);
+      this.x = this.cv.getContext("2d"); this.anim = null; this.next = performance.now() + 1600; this.dead = false; this.key = "";
+      load(() => loadRopa(() => { this.fit(); this.tick(); })); }
+    fit() { if (this.dead || !ready) return; const d = DATA(), dpr = window.devicePixelRatio || 1, z = this.host.currentCSSZoom || 1, b = d.box, bw = b[2] - b[0] + 8, bh = b[3] - b[1] + 6;
+      const rw = this.host.clientWidth * z * dpr, rh = this.host.clientHeight * z * dpr; if (!rw) return;
+      const k = Math.max(1, Math.floor(Math.min(rw / bw, rh / bh))), per = 1 / (z * dpr);
+      if (k !== this.k) { this.k = k; this.cv.width = d.W * k; this.cv.height = d.H * k; this.x = this.cv.getContext("2d"); this.x.imageSmoothingEnabled = false; this.key = ""; }
+      const cx = (b[0] + b[2]) / 2, s = this.cv.style; s.width = d.W * k * per + "px"; s.height = d.H * k * per + "px";
+      s.left = Math.round(rw / 2 - cx * k) * per + "px"; s.top = Math.round(rh - d.floor * k - 3 * k) * per + "px"; this.draw(); }
+    set(L) { this.L = L; this.key = ""; loadRopa(() => this.draw()); }
+    draw() { if (this.dead || !ready || !this.k) return; const a = this.anim, name = a ? a.f[Math.min(a.f.length - 1, a.i)] : "base", key = name + "|" + lookKey(this.L) + "|" + this.k;
+      if (key === this.key) return; this.key = key; const r = DATA().r[name], k = this.k; if (!r) return;
+      this.x.clearRect(0, 0, this.cv.width, this.cv.height); this.x.drawImage(srcFor(this.L, 1), r[0], r[1], r[2], r[3], r[4] * k, r[5] * k, r[2] * k, r[3] * k); }
+    tick() { if (this.dead) return; const now = performance.now();
+      if (!this.anim && now > this.next && !reduced()) { const an = DATA().anim[Math.random() < 0.7 ? "espera" : "caricia"]; this.anim = { f: an.f, i: 0, t: now }; }
+      const a = this.anim; if (a) { while (now - a.t >= FMS) { a.t += FMS; a.i++; } if (a.i >= a.f.length) { this.anim = null; this.next = now + rnd(3500, 6500); } }
+      if (this.host.isConnected) this.draw(); else return this.destroy();
+      this.timer = setTimeout(() => this.tick(), this.anim ? 55 : 160); }
+    destroy() { this.dead = true; clearTimeout(this.timer); this.cv.remove(); if (PV === this) PV = null; }
+  }
 
   A.comodin = {
     show(o) {
@@ -258,5 +341,9 @@ window.AIQ = window.AIQ || {};
       C.st = "busy"; C.play(n, { after: () => { C.st = "sit"; C.anim = null; } }); return true;
     },
     load,
+    /* v0.4.60: su vestuario */
+    dress(L) { LOOK = isPlain(L) ? null : L; const go = () => { if (C) { C.key = ""; C.poke(); } }; if (LOOK) load(() => loadRopa(go)); else go(); },
+    look: () => LOOK, thumb, ropa: fn => load(() => loadRopa(fn)),
+    preview(host, L) { if (PV) PV.destroy(); if (!host || !DATA()) return null; PV = new Probador(host, L); return PV; },
   };
 })(window.AIQ);

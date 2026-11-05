@@ -61,7 +61,12 @@ window.AIQ = window.AIQ || {};
       gafas: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
       cristal: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
       chistera: "Chistera|Top hat|Haut-de-forme|Cartola|Zylinder|Cilindro||礼帽|실크해트|シルクハット|Цилиндр|Cylinder",
+      gpelo: "Pelaje|Coat|Pelage|Pelagem|Fell|Pelo||毛色|털|毛並み|Шерсть|Futro",
+      gojos: "Ojos|Eyes|Yeux|Olhos|Augen|Occhi||眼睛|눈|目|Глаза|Oczy",
+      gpaj: "Pajarita|Bow tie|Nœud papillon|Gravata-borboleta|Fliege|Papillon||领结|나비넥타이|蝶ネクタイ|Бабочка|Mucha",
+      gpieza: "Pieza|Piece|Pièce|Peça|Extra|Pezzo||饰品|소품|小物|Аксессуар|Dodatek",
     },
+    gato: "Comodín|Comodín|Comodín|Comodín|Comodín|Comodín||Comodín|Comodín|Comodín|Комодин|Comodín",       // v0.4.60: la pestana del gato
     wear: "Ponértelo|Put it on|Le mettre|Vestir|Anziehen|Indossalo||穿上|착용하기|着る|Надеть|Załóż",
     off: "Quitártelo|Take it off|L'enlever|Tirar|Ausziehen|Toglilo||脱下|벗기|脱ぐ|Снять|Zdejmij",
     empty: "Aún no tienes ropa del vestuario. Cada nivel del Club te paga fichas de oro.|You don't have anything from the wardrobe yet. Every Club level pays you gold chips.|Tu n'as encore rien de la garde-robe. Chaque niveau du Club te paie en jetons d'or.|Você ainda não tem nada do guarda-roupa. Cada nível do Clube paga fichas de ouro.|Du hast noch nichts aus der Garderobe. Jede Club-Stufe zahlt dir Goldchips.|Non hai ancora niente del guardaroba. Ogni livello del Club ti paga in fiche d'oro.||你还没有衣橱里的衣服。俱乐部每升一级都付你金筹码。|아직 의상실 옷이 없어요. 클럽 레벨마다 골드 칩을 받아요.|衣装はまだ何もない。クラブのレベルが上がるたびに金のチップがもらえる。|Из гардероба пока ничего нет. Каждый уровень клуба платит золотыми фишками.|Nie masz jeszcze nic z garderoby. Każdy poziom klubu płaci złotymi żetonami.",
@@ -189,7 +194,7 @@ window.AIQ = window.AIQ || {};
     const own = ES().owned(k), g = T.ganga === k && !own;
     return `<button type="button" class="bq-it bq-hit${ST.hsel === k ? " sel" : ""}${own ? " got" : ""}" data-hk="${esc(k)}" aria-pressed="${ST.hsel === k}">
       ${g ? `<em class="bq-ganga">${esc(P6(HX.ganga).replace("{p}", Math.round(ES().GANGA * 100)))}</em>` : i === 5 ? `<em class="bq-sorp">${esc(P6(HX.surprise))}</em>` : ""}${ES().wished(k) && !own ? `<i class="bq-wdot">${A.icon("heart")}</i>` : ""}
-      ${hThumb(k)}<span class="bq-hk">${esc(P6(HX.k[ES().kindOf(k)]))}</span><span class="bq-prow"><b class="bq-nm">${esc(ES().name(k))}</b>${own ? `<em class="bq-own">${esc(P6(HX.bought))}</em>` : hPrice(k)}</span></button>`;
+      ${hThumb(k)}<span class="bq-hk">${esc(P6(ES().kindOf(k) === "v" && isG(k.slice(2)) ? VX.gato : HX.k[ES().kindOf(k)]))}</span><span class="bq-prow"><b class="bq-nm">${esc(ES().name(k))}</b>${own ? `<em class="bq-own">${esc(P6(HX.bought))}</em>` : hPrice(k)}</span></button>`;
   }
   function hGridHtml() {
     const T = ES().today(), lp = ES().lotePrice();
@@ -234,7 +239,9 @@ window.AIQ = window.AIQ || {};
     const dp = window.devicePixelRatio || 1;
     document.querySelectorAll("#dlg canvas[data-hp]").forEach(cv => { const r = cv.getBoundingClientRect(), W = Math.max(16, Math.round(r.width * dp)), H = Math.max(12, Math.round(r.height * dp)); cv.width = W; cv.height = H; const [s, id] = cv.dataset.hp.split(":"); try { PU().thumb(cv, s, id, 0); } catch (e) { /* sin miniatura */ } });
     document.querySelectorAll("#dlg img[data-hv]").forEach(im => {
-      if (!V()) return; im.src = V().thumb(V().with(im.dataset.hv), 1);
+      if (!V()) return; const g = isG(im.dataset.hv), u = g ? A.comodin && A.comodin.thumb(gLook(im.dataset.hv), 1) : V().thumb(V().with(im.dataset.hv), 1);
+      if (g && !u) { if (A.comodin && !hPaint.w) { hPaint.w = 1; A.comodin.ropa(() => { hPaint.w = 0; hPaint(); }); } return; }
+      im.src = u;
       const fit = () => { const box = im.parentElement, z = box.currentCSSZoom || 1, d = z * dp, rb = box.getBoundingClientRect(), k = Math.max(1, Math.floor(Math.min((rb.width / z) * d / im.naturalWidth, (rb.height / z) * d / im.naturalHeight) + 0.01)); im.style.width = (im.naturalWidth * k) / d + "px"; im.style.height = (im.naturalHeight * k) / d + "px"; };
       if (im.complete && im.naturalWidth) fit(); else im.onload = fit;
     });
@@ -270,7 +277,7 @@ window.AIQ = window.AIQ || {};
   function hGo() {
     const k = ST.hsel; if (!k || k === "lote" || k === "regalo") return; const [w, a, b] = k.split(":");
     if (w === "m") { ST.sel = a; ST.tab = "all"; const L = list(), i = L.findIndex(m => m.id === a); ST.page = i >= 0 ? Math.floor(i / PERM()) : 0; }
-    else if (w === "v") { ST.vsel = a; const it = V().get(a); ST.vtab = it.r === "l" ? "l" : it.r === "p" ? "pieza" : it.slot; const L = vOf(ST.vtab), i = L.findIndex(x => x.id === a); ST.vpage = i >= 0 ? Math.floor(i / PERV()) : 0; }
+    else if (w === "v") { ST.vsel = a; const it = V().get(a); ST.vtab = it.r === "l" || it.r === "p" ? "pieza" : it.r === "g" ? "gato" : it.slot; const L = vOf(ST.vtab), i = L.findIndex(x => x.id === a); ST.vpage = i >= 0 ? Math.floor(i / PERV()) : 0; }
     else if (w === "p") { ST.psel = a + ":" + b; ST.ptab = a; const L = pOf(a), i = L.findIndex(x => x.join(":") === ST.psel); ST.ppage = i >= 0 ? Math.floor(i / PERP()) : 0; }
     else { ST.csel = (w === "k" ? "m" : w) + ":" + a; ST.ctab = w === "i" ? "obj" : w === "t" ? "tit" : "marco"; const L = cOf(ST.ctab), i = L.findIndex(x => x.k === ST.csel); ST.cpage = i >= 0 ? Math.floor(i / cPer()) : 0; }
     setCat(keyCat(k));
@@ -311,7 +318,10 @@ window.AIQ = window.AIQ || {};
 
   /* ---------------------------------------------------------------- el vestuario: las 12 piezas (6 x 2) y el probador a la derecha */
   /* las pestanas: un hueco cada una (los 12 colores de la carta, en su orden), las legendarias y lo tuyo; 12 por pagina */
-  const vOf = t => { const all = V().items; return t === "l" ? all.filter(i => i.r === "l") : t === "pieza" ? all.filter(i => i.r === "p") : t === "mine" ? all.filter(i => !i.casa && V().owned(i.id)) : all.filter(i => i.slot === t && i.r !== "l"); };
+  const vOf = t => { const all = V().items; return t === "pieza" ? all.filter(i => i.r === "l").concat(all.filter(i => i.r === "p")) : t === "gato" ? all.filter(i => i.r === "g") : t === "mine" ? all.filter(i => !i.casa && V().owned(i.id)) : all.filter(i => i.slot === t && i.r !== "l"); };
+  /* v0.4.60: las piezas de Comodin (r = "g") llevan su retrato de gato (js/comodin.js) en vez del crupier */
+  const isG = id => { const it = V().get(id); return !!it && it.r === "g"; };
+  const gLook = id => V().gato.look(V().with(id));
   const vList = () => vOf(ST.vtab);
   const vState = id => V().wearing(id) ? "on" : V().owned(id) ? "got" : "";
   const vPrice = id => `<span class="bq-pr">${fi()}<b>${A.fmt(V().price(id))}</b></span>`;               // (en la ficha, el precio va en el boton de comprar)
@@ -319,7 +329,7 @@ window.AIQ = window.AIQ || {};
   function vItem(it) {
     const s = vState(it.id);
     return `<button type="button" class="bq-it bq-vit${it.id === ST.vsel ? " sel" : ""}${s ? " " + s : ""}${it.r === "l" ? " leg" : ""}" data-vid="${it.id}" aria-pressed="${it.id === ST.vsel}">
-      <span class="bq-th bq-vth"><img src="${V().thumb(V().with(it.id), 1)}" alt="" width="96" height="112" decoding="async"></span>
+      <span class="bq-th bq-vth${it.r === "g" ? " g" : ""}">${it.r === "g" ? `<img data-gid="${it.id}" alt="" decoding="async">` : `<img src="${V().thumb(V().with(it.id), 1)}" alt="" width="96" height="112" decoding="async">`}</span>
       <b class="bq-nm">${esc(V().name(it.id))}</b>
       <span class="bq-vp">${s === "on" ? `<em class="bq-own on">${esc(P6(VX.on))}</em>` : it.casa ? `<em class="bq-own">${esc(P6(VX.casa))}</em>` : s ? `<em class="bq-own">${esc(P6(VX.mine))}</em>` : vPrice(it.id)}</span></button>`;
   }
@@ -327,7 +337,7 @@ window.AIQ = window.AIQ || {};
     const L = vList(), per = PERV(), pages = Math.max(1, Math.ceil(L.length / per)); ST.vpage = Math.min(ST.vpage, pages - 1);
     const items = L.slice(ST.vpage * per, ST.vpage * per + per);
     const tab = (k, tx) => `<button type="button" class="bq-tab bq-vtab${ST.vtab === k ? " on" : ""}" data-vtab="${k}" aria-pressed="${ST.vtab === k}"><span>${esc(P6(tx))}</span><i>${vOf(k).length}</i></button>`;
-    return `<div class="bq-bar"><nav class="bq-tabs">${tab("traje", VX.traje)}${tab("antifaz", VX.antifaz)}${tab("pajarita", VX.pajarita)}${tab("pieza", VX.piezas)}${tab("l", TX.leg)}${tab("mine", VX.mine)}</nav>
+    return `<div class="bq-bar"><nav class="bq-tabs">${tab("traje", VX.traje)}${tab("antifaz", VX.antifaz)}${tab("pajarita", VX.pajarita)}${tab("pieza", VX.piezas)}${tab("gato", VX.gato)}${tab("mine", VX.mine)}</nav>
       <div class="bq-pager"${pages > 1 ? "" : " hidden"}><button type="button" class="gx-btn sm gho" id="bqVPrev"${ST.vpage ? "" : " disabled"} aria-label="‹">‹</button><span>${ST.vpage + 1} / ${pages}</span><button type="button" class="gx-btn sm gho" id="bqVNext"${ST.vpage < pages - 1 ? "" : " disabled"} aria-label="›">›</button></div></div>
       <div class="bq-items vest" id="bqItems">${items.length ? items.map(vItem).join("") : `<p class="bq-empty">${esc(P6(VX.empty))}</p>`}</div>`;
   }
@@ -340,7 +350,7 @@ window.AIQ = window.AIQ || {};
     else if (have < p) act = `<button type="button" class="gx-btn wide bq-short" id="bqBuy" aria-disabled="true"><span class="bq-fit">${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`;
     else act = `<button type="button" class="gx-btn pri wide${ST.armed === id ? " armed" : ""}" id="bqBuy"><span>${esc(ST.armed === id ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${fi("sm")}${A.fmt(p)}</span></button>`;
     return `<span class="bq-prob${leg ? " leg" : ""}"><span class="bq-probl">${esc(P6(VX.prob))}</span><span class="bq-probh" id="bqProb"></span></span>
-      <span class="gx-eyb bq-tier">${esc(P6(leg ? VX.tierL : it.casa ? VX.casaL : VX.tierR))} · ${esc(P6(VX.slot[it.slot]))}</span>
+      <span class="gx-eyb bq-tier">${esc(P6(it.r === "g" ? VX.gato : leg ? VX.tierL : it.casa ? VX.casaL : VX.tierR))} · ${esc(P6(VX.slot[it.slot]))}</span>
       <h3 class="gx-t-m bq-dn">${esc(V().name(id))}</h3>
       <p class="bq-dd">${esc(V().desc(id))}</p>
       <div class="bq-acts">${act}</div>`;
@@ -348,7 +358,16 @@ window.AIQ = window.AIQ || {};
   /* las miniaturas, nitidas: el retrato a 1 pixel por pixel de arte y la caja lo amplia un numero ENTERO de veces en pixeles reales de pantalla
      (la figura centrada y de pie en el borde de abajo; lo que sobra arriba es el hueco de la chistera que salta) */
   function fitThumbs() {
-    document.querySelectorAll("#dlg .bq-vth").forEach(b => {
+    let wait = false;
+    document.querySelectorAll("#dlg .bq-vth.g img[data-gid]").forEach(im => {          // Comodin: su retrato sentado, entero y de pie en el borde de abajo
+      const u = A.comodin && A.comodin.thumb(gLook(im.dataset.gid), 1); if (!u) { wait = true; return; }
+      const fit = () => { const b = im.parentElement, z = b.currentCSSZoom || 1, dpr = window.devicePixelRatio || 1, per = 1 / (z * dpr), rw = b.clientWidth * z * dpr, rh = b.clientHeight * z * dpr, w = im.naturalWidth, h = im.naturalHeight;
+        if (!rw || !w) return; const k = Math.max(1, Math.floor(Math.min(rw / (w + 10), rh / (h + 6)))), st = im.style;
+        st.width = w * k * per + "px"; st.height = h * k * per + "px"; st.left = Math.round((rw - w * k) / 2) * per + "px"; st.top = Math.round(rh - h * k - 2 * k) * per + "px"; };
+      if (im.getAttribute("src") !== u) { im.onload = fit; im.src = u; } else fit();
+    });
+    if (wait && A.comodin && !fitThumbs.w) { fitThumbs.w = 1; A.comodin.ropa(() => { fitThumbs.w = 0; fitThumbs(); }); }
+    document.querySelectorAll("#dlg .bq-vth:not(.g)").forEach(b => {
       const im = b.querySelector("img"); if (!im) return;
       const z = b.currentCSSZoom || 1, dpr = window.devicePixelRatio || 1, per = 1 / (z * dpr), rw = b.clientWidth * z * dpr, rh = b.clientHeight * z * dpr;
       if (!rw) return;
@@ -358,10 +377,11 @@ window.AIQ = window.AIQ || {};
     });
   }
   /* el probador: el crupier de verdad (respira, parpadea y hace sus gestos) con lo que llevas mas la pieza elegida */
-  function dropProb() { if (ST.spr) { try { ST.spr.destroy(); } catch (e) {} ST.spr = null; } }
+  function dropProb() { if (ST.spr) { try { ST.spr.destroy(); } catch (e) {} ST.spr = null; } if (ST.gpv) { ST.gpv.destroy(); ST.gpv = null; } }
   function mountProb() {
     dropProb();
     const host = $("bqProb"); if (!host || !A.crupier || !V()) return;
+    if (isG(ST.vsel)) { if (A.comodin && A.comodin.preview) ST.gpv = A.comodin.preview(host, gLook(ST.vsel)); return; }   // v0.4.60: Comodin en su probador
     try { ST.spr = A.crupier.mount(host, { atlas: V().atlasFor(V().with(ST.vsel)), floor: true }); } catch (e) { ST.spr = null; }
     if (ST.spr) { if (SV.face) ST.spr.set(SV.face, { quiet: true }); if (SV.talking) ST.spr.talk(true); }   // bloque D: el probador se rehace al elegir; si hablaba, sigue
     if (SV.halo) { const pb = document.querySelector("#dlg .bq-prob"); if (pb) pb.classList.add("halo"); }
@@ -439,7 +459,7 @@ window.AIQ = window.AIQ || {};
   }
   /* te pruebas algo (lo eliges en la rejilla: el maniquí se lo pone; si ya era tuyo, te lo pones de verdad) */
   function vTried(id, put) {
-    const it = V().get(id); if (!it) return; const now = Date.now(); SV.last = now; SV.nTry++;
+    const it = V().get(id); if (!it) return; const now = Date.now(); SV.last = now; if (it.r === "g") return; SV.nTry++;
     SV.tries = SV.tries.filter(t => now - t < 12000); SV.tries.push(now);
     if (ST.spr) ST.spr.play("r_prueba_ropa");
     const o = { face: rnd(["smug", "sly", "laugh", "tramando", "admirado"]) };
@@ -469,12 +489,13 @@ window.AIQ = window.AIQ || {};
     vSay(keys, o);
   }
   function vTookOff() {
-    SV.last = Date.now(); const w = V().worn();
+    SV.last = Date.now(); if (isG(ST.vsel)) return; const w = V().worn();
     if (!Object.values(w).some(Boolean) && vSay("shopHouse", { face: "aliviado" })) return;
     vSay(Math.random() < 0.5 ? "shopTakeOff" : "shopStore", { face: rnd(["sad", "innocent", "sly"]) });
   }
   function vBought(id) {
     SV.bought = true; SV.last = Date.now(); reg();
+    if (isG(id)) { if (ST.gpv) ST.gpv.set(gLook(id)); return; }
     const key = id === "chistera_dorada" ? "shopBuyGoldHat" : V().count() === 1 ? "shopFirstBuy" : "shopBuy";
     if (!(A.trastadas && A.trastadas.lanza && A.trastadas.lanza("desfile", { id, key }))) {   // el desfile, si toca (una vez cada poco); si no, la reaccion de compra
       if (ST.spr) ST.spr.play("r_compra"); vSay(key, { prio: true, face: "orgulloso" });

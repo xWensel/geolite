@@ -163,6 +163,7 @@ body.bq-try #layer { opacity: 0; pointer-events: none; transition: opacity .28s 
 .bq-prob.leg { box-shadow: 0 0 0 2px var(--gx-o), 0 0 0 5px var(--gx-rim), 0 0 0 7px var(--gx-o), 0 8px 0 4px rgba(22, 36, 28, .3); }
 .bq-probh { position: absolute; inset: 0; }
 .bq-probh .cr-cv { top: auto; bottom: 0; transform: translateX(-50%); }
+.bq-probh .cm-pv { position: absolute; image-rendering: pixelated; pointer-events: none; }                 /* v0.4.60: Comodin en el probador (js/comodin.js) */
 .bq-probl { position: absolute; left: 10px; top: 10px; z-index: 1; font-family: var(--mono); font-size: 16px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; padding: 4px 7px 3px; color: var(--gx-ink);
   background: var(--gx-rim); box-shadow: inset 0 2px 0 var(--gx-rim-hi), inset 0 -2px 0 var(--gx-rim-lo), 0 0 0 2px var(--gx-o); }
 /* comprada: el probador se enciende (sin escalar: el crupier sigue a pixel entero) */

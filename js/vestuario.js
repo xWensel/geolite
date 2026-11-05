@@ -4,7 +4,7 @@
  * de js/crupier-data.js) dice que es cada pixel (1 traje, 2 chistera, 3 cinta de la chistera, 4 antifaz, 5 pajarita, 6 y 7 sus lunares; y en
  * otros bits, el clavel de la solapa) y aqui
  * se recolorea el atlas UNA vez al cambiar de ropa; el crupier (js/crupier.js) dibuja con ese atlas, sin coste en cada fotograma.
- * Todo en la paleta Geolite 32; el contorno sigue en tinta. Una CARTA de 12 colores, la misma y en el mismo orden para el traje, el antifaz
+ * Todo en la paleta geolite40; el contorno sigue en tinta. Una CARTA de 20 colores (12 hasta la v0.4.59), la misma y en el mismo orden para el traje, el antifaz
  * y la pajarita (con la cinta de la chistera a juego); el de la casa de cada hueco es gratis. La chistera sigue al traje salvo la dorada (legendaria).
  * Bloque D: seis piezas de guino (corazon, espada y mando en la solapa, en el hueco del clavel; gafas sobre el antifaz; cristal en la cinta de la
  * chistera; pocion en el chaleco, en el hueco de la cadena), pintadas tal cual como capas por fotograma (js/crupier-guinos.js, como la pluma).
@@ -19,7 +19,7 @@ window.AIQ = window.AIQ || {};
   /* colores del arte de Pixel Lab que cambia cada hueco. El antifaz va entero en oro (arreglado en el atlas el 2026-10-16):
      brillo fff3b0, claro fdd742, medio f5a623, sombra bajo el ala c46a1b, pliegue 3c240a */
   const SRC = { main: 0x4a1d96, sh: 0x301252, rHi: 0xe8283a, rLo: 0xa8142e, gHi: 0xfdd742, gMid: 0xf5a623, gLt: 0xfff3b0, gSh: 0xc46a1b, gDp: 0x3c240a };
-  /* LA CARTA DE COLORES: los mismos 12, en el mismo orden, para el traje, el antifaz y la pajarita (que lleva a juego la cinta de la chistera).
+  /* LA CARTA DE COLORES: los mismos 20, en el mismo orden, para el traje, el antifaz y la pajarita (que lleva a juego la cinta de la chistera).
      Todo en la paleta Geolite 32. traje: [color, sombra]; antifaz: [claro, medio, brillo, sombra bajo el ala, pliegue]; pajarita: [color, sombra].
      casa: el hueco en el que ese color es el de siempre (gratis y tuyo desde el principio: el traje morado, el antifaz de oro y la pajarita roja).
      n: el color como adjetivo en los 12 idiomas, "masculino|femenino" donde cambia (es, pt, de, it, ru, pl); el nombre se monta con NAME */
@@ -48,6 +48,24 @@ window.AIQ = window.AIQ || {};
       n: ["de plata", "Silver", "argenté", "prateado|prateada", "Silberner|Silberne", "argentato|argentata", "", "银色", "은빛", "銀の", "Сереб­ряный|Сереб­ряная", "Srebrny|Srebrna"] },
     { k: "negro", traje: ["#3a2f58", "#301252"], antifaz: ["#3a2f58", "#301252", "#8a8fa8", "#301252", "#1d0a3d"], pajarita: ["#3a2f58", "#301252"],
       n: ["negro|negra", "Black", "noir", "preto|preta", "Schwarzer|Schwarze", "nero|nera", "", "黑色", "검은", "黒の", "Чёрный|Чёрная", "Czarny|Czarna"] },
+    /* v0.4.60 («La tienda, más llena»): ocho colores más, al final de la carta (las prendas guardadas no cambian de sitio). El marfil lleva los
+       lunares oscuros, como la plata */
+    { k: "marfil", traje: ["#fff3b0", "#c6b497"], antifaz: ["#fff3b0", "#c6b497", "#f3f0fa", "#a78f78", "#3c240a"], pajarita: ["#fff3b0", "#c6b497"], lunares: ["#8f7467", "#6e3414"],
+      n: ["marfil", "Ivory", "ivoire", "marfim", "Elfenbein­farbener|Elfenbein­farbene", "avorio", "", "象牙色", "아이보리", "アイボリーの", "Молоч­ный|Молоч­ная", "Kremowy|Kremowa"] },
+    { k: "arena", traje: ["#c6b497", "#8f7467"], antifaz: ["#c6b497", "#a78f78", "#fff3b0", "#8f7467", "#3c240a"], pajarita: ["#c6b497", "#8f7467"],
+      n: ["arena", "Sand", "sable", "areia", "Sand­farbener|Sand­farbene", "sabbia", "", "沙色", "모래색", "砂色の", "Песоч­ный|Песоч­ная", "Piaskowy|Piaskowa"] },
+    { k: "chocolate", traje: ["#6e3414", "#3c240a"], antifaz: ["#6e3414", "#6e3414", "#b06a34", "#3c240a", "#1d0a3d"], pajarita: ["#6e3414", "#3c240a"],
+      n: ["chocolate", "Chocolate", "chocolat", "chocolate", "Schoko­brauner|Schoko­braune", "cioccolato", "", "巧克力色", "초콜릿색", "チョコレート色の", "Шоко­ладный|Шоко­ладная", "Czeko­ladowy|Czeko­ladowa"] },
+    { k: "coral", traje: ["#ff6b5e", "#c4614a"], antifaz: ["#ff6b5e", "#c4614a", "#ffd3b6", "#a8142e", "#301252"], pajarita: ["#ff6b5e", "#c4614a"],
+      n: ["coral", "Coral", "corail", "coral", "Korallen­roter|Korallen­rote", "corallo", "", "珊瑚色", "산호색", "コーラルの", "Корал­ловый|Корал­ловая", "Koralowy|Koralowa"] },
+    { k: "lima", traje: ["#a6e05a", "#3fb54a"], antifaz: ["#a6e05a", "#a6e05a", "#fff3b0", "#3fb54a", "#136b3e"], pajarita: ["#a6e05a", "#3fb54a"],
+      n: ["lima", "Lime", "vert citron", "verde-limão", "Limetten­grüner|Limetten­grüne", "verde lime", "", "青柠色", "라임색", "ライムグリーンの", "Лаймо­вый|Лаймо­вая", "Limon­kowy|Limon­kowa"] },
+    { k: "celeste", traje: ["#7ac8ff", "#1689fb"], antifaz: ["#7ac8ff", "#7ac8ff", "#f3f0fa", "#1689fb", "#301252"], pajarita: ["#7ac8ff", "#1689fb"],
+      n: ["celeste", "Sky blue", "bleu ciel", "azul-celeste", "Himmel­blauer|Himmel­blaue", "celeste", "", "天蓝色", "하늘색", "空色の", "Голубой|Голубая", "Błękitny|Błękitna"] },
+    { k: "lavanda", traje: ["#9c7ce6", "#6e40c4"], antifaz: ["#9c7ce6", "#6e40c4", "#f3f0fa", "#4a1d96", "#301252"], pajarita: ["#9c7ce6", "#6e40c4"],
+      n: ["lavanda", "Lavender", "lavande", "lavanda", "Lavendel­farbener|Lavendel­farbene", "lavanda", "", "薰衣草色", "라벤더색", "ラベンダーの", "Лаван­довый|Лаван­довая", "Lawen­dowy|Lawen­dowa"] },
+    { k: "carbon", traje: ["#5c565b", "#3a2f58"], antifaz: ["#6b747d", "#5c565b", "#b6bbb8", "#3a2f58", "#1d0a3d"], pajarita: ["#5c565b", "#0a0a0c"],
+      n: ["gris carbón", "Charcoal", "anthracite", "grafite", "Anthrazit­grauer|Anthrazit­graue", "antracite", "", "炭灰色", "차콜", "チャコールの", "Графи­товый|Графи­товая", "Grafi­towy|Grafi­towa"] },
   ];
   const BY = Object.fromEntries(COLORS.map(c => [c.k, c]));
   const CHISTERA = { dorada: ["#f5a623", "#c46a1b"] };
@@ -87,7 +105,7 @@ window.AIQ = window.AIQ || {};
      lleva (atlas.ov). El oro de las alas del veneciano toma el color del antifaz */
   const BUY = ["traje", "antifaz", "pajarita"];
   const nameOf = (slot, c) => NAME[slot].map((pat, i) => { if (i === 6) return ""; const [m, f] = c.n[i].split("|"); return pat.replace("{m}", m).replace("{f}", f || m); }).join("|");
-  /* el catalogo: por hueco, los 12 colores en el orden de la carta; al final, la legendaria. id = <hueco>_<color> */
+  /* el catalogo: por hueco, los 20 colores en el orden de la carta; al final, la legendaria. id = <hueco>_<color> */
   const ITEMS = BUY.flatMap(slot => COLORS.map(c => ({ id: slot + "_" + c.k, slot, v: c.k, r: "r", casa: c.casa === slot, n: nameOf(slot, c), d: c.casa === slot ? DESC.casa : DESC[slot] })))
     .concat([{ id: "pieza_lunares", slot: "lunares", v: "si", r: "p", casa: false,
       n: "Lunares|Polka dots|Pois|Bolinhas|Punkte|Pois||波点|물방울무늬|水玉|Горошек|Grochy",
@@ -126,6 +144,37 @@ window.AIQ = window.AIQ || {};
     .concat([{ id: "chistera_dorada", slot: "chistera", v: "dorada", r: "l", casa: false,
       n: "Chistera dorada|Golden top hat|Haut-de-forme doré|Cartola dourada|Goldener Zylinder|Cilindro dorato||金色礼帽|황금 실크해트|金のシルクハット|Золотой цилиндр|Złoty cylinder",
       d: "Solo la chistera, en oro, vaya donde vaya: en la cabeza, en la mano o contra el pecho.|Just the top hat, in gold, wherever it goes: on his head, in his hand or against his chest.|Seulement le haut-de-forme, en or, où qu'il soit : sur la tête, à la main ou contre la poitrine.|Só a cartola, em ouro, onde quer que esteja: na cabeça, na mão ou no peito.|Nur der Zylinder, in Gold, wo immer er ist: auf dem Kopf, in der Hand oder an der Brust.|Solo il cilindro, d'oro, ovunque sia: in testa, in mano o sul petto.||只有礼帽是金的，无论在头上、手里还是胸前。|실크해트만 금빛으로. 머리 위든 손이든 가슴이든.|シルクハットだけを金に。頭でも手でも胸でも。|Только цилиндр, золотой, где бы он ни был: на голове, в руке или у груди.|Tylko cylinder, złoty, gdziekolwiek jest: na głowie, w dłoni czy przy piersi." }]);
+  /* ---------------------------------------------------------------- v0.4.60: EL VESTUARIO DE COMODIN, el gato de la casa (pestana «Comodín» del
+     vestuario). Cuatro huecos: pelaje, ojos, pajarita (la carta de colores menos el gris carbon y el negro; la de la casa es la granate) y una pieza.
+     Se recolorea su atlas con el mapa de partes (js/comodin-ropa.js) y se le pinta la pieza encima: nada se redibuja. r = "g". Lo puesto vive en
+     P.vest.wear con las claves gpelo, gojos, gpaj y gpieza (null = el de la casa / nada) */
+  const GN = {
+    pelo: { casa: "Esmoquin|Tuxedo|Smoking|Smoking|Smoking|Smoking||燕尾服花色|턱시도|タキシード|Смокинг|Smoking", gris: "Gris perla|Pearl grey|Gris perle|Cinza-pérola|Perlgrau|Grigio perla||珍珠灰|진주 회색|グレー|Жемчужно-серый|Perłowoszary",
+      pelirrojo: "Pelirrojo|Ginger|Roux|Ruivo|Rotes Fell|Rosso||橘猫|치즈 태비|茶トラ|Рыжий|Rudy", chocolate: "Chocolate|Chocolate|Chocolat|Chocolate|Schokobraun|Cioccolato||巧克力色|초콜릿색|チョコ|Шоколадный|Czekoladowy",
+      crema: "Crema|Cream|Crème|Creme|Creme|Crema||奶油色|크림색|クリーム|Кремовый|Kremowy", blanco: "Blanco|White|Blanc|Branco|Weiß|Bianco||白色|흰색|白|Белый|Biały" },
+    ojos: { casa: "Ojos ámbar|Amber eyes|Yeux ambre|Olhos âmbar|Bernsteinaugen|Occhi ambra||琥珀色眼睛|호박색 눈|琥珀色の目|Янтарные глаза|Bursztynowe oczy", verde: "Ojos verdes|Green eyes|Yeux verts|Olhos verdes|Grüne Augen|Occhi verdi||绿色眼睛|초록 눈|緑の目|Зелёные глаза|Zielone oczy",
+      azul: "Ojos azules|Blue eyes|Yeux bleus|Olhos azuis|Blaue Augen|Occhi azzurri||蓝色眼睛|파란 눈|青い目|Голубые глаза|Niebieskie oczy",
+      hetero: "Un ojo de cada color|Odd eyes|Yeux vairons|Olhos de cores diferentes|Zweifarbige Augen|Occhi di due colori||异色瞳|오드아이|オッドアイ|Разноглазие|Różnobarwne oczy" },
+    pieza: { antifaz: "Antifaz de oro|Gold mask|Loup doré|Máscara dourada|Goldene Maske|Maschera dorata||金色面具|금빛 가면|金の仮面|Золотая маска|Złota maska",
+      antifaz_rojo: "Antifaz rojo|Red mask|Loup rouge|Máscara vermelha|Rote Maske|Maschera rossa||红色面具|빨간 가면|赤の仮面|Красная маска|Czerwona maska",
+      cascabel: "Cascabel|Bell|Grelot|Guizo|Glöckchen|Sonaglio||铃铛|방울|鈴|Бубенчик|Dzwoneczek", monoculo: "Monóculo|Monocle|Monocle|Monóculo|Monokel|Monocolo||单片眼镜|외알 안경|片眼鏡|Монокль|Monokl",
+      medalla: "Medalla de la casa|House medal|Médaille de la maison|Medalha da casa|Medaille des Hauses|Medaglia della casa||本店奖章|하우스 메달|店のメダル|Медаль заведения|Medal kasyna" },
+  };
+  const GD = {
+    gpelo: "El pelaje entero de Comodín, de las orejas a la cola.|Comodín's whole coat, from ears to tail.|Tout le pelage de Comodín, des oreilles à la queue.|A pelagem inteira do Comodín, das orelhas ao rabo.|Comodíns ganzes Fell, von den Ohren bis zum Schwanz.|Tutto il pelo di Comodín, dalle orecchie alla coda.||Comodín 的全身毛色，从耳朵到尾巴。|귀부터 꼬리까지, Comodín의 털 전체.|耳からしっぽまで、Comodínの毛並みまるごと。|Вся шерсть Комодина, от ушей до хвоста.|Całe futro Comodína, od uszu po ogon.",
+    gojos: "El color de sus ojos. Los cierra igual cuando le acaricias.|The colour of his eyes. He still closes them when you pet him.|La couleur de ses yeux. Il les ferme quand même quand tu le caresses.|A cor dos olhos dele. Ele fecha igual quando você faz carinho.|Die Farbe seiner Augen. Er schließt sie trotzdem, wenn du ihn streichelst.|Il colore dei suoi occhi. Li chiude lo stesso quando lo accarezzi.||它眼睛的颜色。摸它的时候，它照样会眯起眼。|눈 색깔. 쓰다듬으면 똑같이 눈을 감아요.|目の色。なでると、やっぱり目を閉じる。|Цвет его глаз. Когда его гладишь, он всё равно их закрывает.|Kolor jego oczu. I tak je zamyka, gdy go głaszczesz.",
+    gpaj: "Su pajarita, de la carta de colores del crupier.|His bow tie, from the dealer's colour chart.|Son nœud papillon, du nuancier du croupier.|A gravata-borboleta dele, da cartela de cores do crupiê.|Seine Fliege, aus der Farbkarte des Croupiers.|Il suo papillon, dalla tavolozza del croupier.||它的领结，取自荷官的色卡。|딜러 색상표에서 고른 나비넥타이.|ディーラーのカラーチャートから選んだ蝶ネクタイ。|Его бабочка, из палитры крупье.|Jego mucha, z palety kolorów krupiera.",
+    gpieza: "Una pieza para Comodín. Solo una a la vez: es un gato, no un perchero.|A piece for Comodín. Only one at a time: he's a cat, not a coat rack.|Une pièce pour Comodín. Une seule à la fois : c'est un chat, pas un portemanteau.|Uma peça para o Comodín. Uma de cada vez: é um gato, não um cabide.|Ein Extra für Comodín. Immer nur eins: Er ist eine Katze, kein Kleiderständer.|Un pezzo per Comodín. Uno alla volta: è un gatto, non un attaccapanni.||给 Comodín 的饰品。一次只能戴一件：它是猫，不是衣帽架。|Comodín의 소품. 한 번에 하나만: 고양이지 옷걸이가 아니니까요.|Comodínの小物。一度にひとつだけ。猫であって、コート掛けじゃない。|Аксессуар для Комодина. Только один за раз: он кот, а не вешалка.|Dodatek dla Comodína. Tylko jeden naraz: to kot, nie wieszak.",
+  };
+  const GPRICE = { gpelo: 250, gojos: 150, gpaj: 150, gpieza: 300 };
+  const GSLOTS = ["gpelo", "gojos", "gpaj", "gpieza"];
+  const GPAJ = COLORS.filter(c => c.k !== "carbon" && c.k !== "negro");                 // votado: sin el gris carbon ni el negro
+  const GCASA = { gpelo: "casa", gojos: "casa", gpaj: "granate" };
+  const GVAL = { gpelo: Object.keys(GN.pelo), gojos: Object.keys(GN.ojos), gpaj: GPAJ.map(c => c.k), gpieza: Object.keys(GN.pieza) };
+  const gItem = (slot, v, n) => ({ id: "gato_" + slot.slice(1) + "_" + v, slot, v, r: "g", casa: GCASA[slot] === v, n, d: GCASA[slot] === v ? DESC.casa : GD[slot] });
+  ITEMS.push(...[].concat(
+    GVAL.gpelo.map(v => gItem("gpelo", v, GN.pelo[v])), GVAL.gojos.map(v => gItem("gojos", v, GN.ojos[v])),
+    GPAJ.map(c => gItem("gpaj", c.k, nameOf("pajarita", c))), GVAL.gpieza.map(v => gItem("gpieza", v, GN.pieza[v]))));
   /* el color de la casa de cada hueco: llevarlo = no llevar nada en ese hueco (null) */
   const CASA = Object.fromEntries(COLORS.filter(c => c.casa).map(c => [c.casa, c.k]));
 
@@ -138,9 +187,18 @@ window.AIQ = window.AIQ || {};
   /* lo puesto por hueco: el color (o null = el de la casa); un color guardado que ya no existe vuelve al de la casa */
   const norm = w => { const o = {}; SLOTS.forEach(s => { const v = (w && w[s]) || null; o[s] = v && (s === "chistera" ? CHISTERA[v] : PIEZAS.includes(s) ? okVal(s, v) : BY[v] && v !== CASA[s]) ? v : null; }); return o; };
   const worn = () => norm(st().wear);
-  const wearing = id => { const it = get(id), w = worn(); if (!it) return false; return it.casa ? w[it.slot] === null : w[it.slot] === it.v; };
-  const withItem = (id, base) => { const it = get(id), o = { ...(base || worn()) }; if (!it) return o; o[it.slot] = it.casa ? null : it.v; return o; };
-  const full = id => { const it = get(id); return !it || it.casa ? 0 : it.r === "l" ? PRICE.l : it.r === "p" ? PRICE.p : PRICE[it.slot] || 250; };
+  const wearing = id => { const it = get(id); if (!it) return false; const w = it.r === "g" ? gWorn() : worn(); return it.casa ? w[it.slot] === null : w[it.slot] === it.v; };
+  /* la ropa que llevas + esa pieza (del crupier o, si la pieza es de Comodin, la de Comodin) */
+  const withItem = (id, base) => { const it = get(id), o = { ...(base || (it && it.r === "g" ? gWorn() : worn())) }; if (!it) return o; o[it.slot] = it.casa ? null : it.v; return o; };
+  const full = id => { const it = get(id); return !it || it.casa ? 0 : it.r === "g" ? GPRICE[it.slot] : it.r === "l" ? PRICE.l : it.r === "p" ? PRICE.p : PRICE[it.slot] || 250; };
+  /* lo que lleva Comodin (null = lo de la casa); un valor guardado que ya no existe vuelve al de la casa */
+  const gNorm = w => { const o = {}; GSLOTS.forEach(s => { const v = (w && w[s]) || null; o[s] = v && GVAL[s].includes(v) && v !== GCASA[s] ? v : null; }); return o; };
+  const gWorn = () => gNorm(st().wear);
+  /* la ropa de Comodin en colores, para js/comodin.js: pelaje [pelo, luz, lineas, nariz], rampa de los ojos, pajarita y pieza */
+  const gLook = o => { const R = A.COMODIN_ROPA || {}, pj = o.gpaj && BY[o.gpaj];
+    return { pelo: (o.gpelo && R.pelajes && R.pelajes[o.gpelo]) || null, ojos: o.gojos ? (R.ojos && R.ojos[o.gojos === "hetero" ? "azul" : o.gojos]) || null : null, hetero: o.gojos === "hetero",
+      paj: pj ? pj.pajarita[0] : null, pieza: o.gpieza || null }; };
+  const gApply = () => { if (A.comodin && A.comodin.dress) A.comodin.dress(gLook(gWorn())); };
   const price = id => { const f = full(id), o = A.escaparate && A.escaparate.off ? A.escaparate.off("v:" + id) : 0; return o && f ? Math.round(f * (1 - o) / 10) * 10 : f; };   // con la ganga del escaparate (js/escaparate.js)
   const keyOf = o => SLOTS.map(s => o[s] || "-").join("|");
 
@@ -371,12 +429,12 @@ onmessage = e => { try {
   function wear(id) {
     const it = get(id); if (!it || !owned(id)) return false;
     st().wear[it.slot] = it.casa ? null : it.v;                                  // el de la casa = nada encima
-    save(); apply(); return true;
+    save(); if (it.r === "g") gApply(); else apply(); return true;
   }
   function takeOff(id) {
     const it = get(id); if (!it || it.casa) return;
     const w = st().wear; if (w[it.slot] === it.v) w[it.slot] = null;
-    save(); apply();
+    save(); if (it.r === "g") gApply(); else apply();
   }
   function buy(id) {
     const it = get(id); if (!it || it.casa || owned(id) || !A.club || !A.club.spend) return false;
@@ -388,11 +446,14 @@ onmessage = e => { try {
   A.vestuario = {
     items: ITEMS, SLOTS, BUY, colors: COLORS.map(c => c.k), get, owned, worn, wearing, wear, takeOff, buy, give, price, full, keyOf,
     with: withItem, atlasFor, thumb, ready: prep, apply, preview, previewing: () => !!prev,
+    gato: { worn: gWorn, look: gLook, apply: gApply, slots: GSLOTS },             // v0.4.60: Comodin (js/comodin.js lo dibuja)
     name: id => A.pick6(get(id).n), desc: id => A.pick6(get(id).d),
     count: () => ITEMS.filter(i => !i.casa && owned(i.id)).length,
     _base: () => base, _scan: scan, _px: () => PX.map(Boolean),
   };
   /* al arrancar, el crupier sale con la ropa que lleve el perfil */
-  if (document.readyState === "loading") addEventListener("DOMContentLoaded", () => setTimeout(() => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); else setTimeout(() => prep(), 6000); } }, 0));   // sin ropa: se prepara despues, en el hilo aparte (la tienda ya abre sin tiron)
-  else setTimeout(() => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); else setTimeout(() => prep(), 6000); } }, 0);
+  /* sin ropa, el crupier se prepara despues, en el hilo aparte (la tienda ya abre sin tiron); Comodin sale vestido si lo va */
+  const boot = () => { if (A.profile && A.crupier) { const w = worn(); if (!isDefault(w)) prep(apply); else setTimeout(() => prep(), 6000); } if (A.profile && GSLOTS.some(s => gWorn()[s])) gApply(); };
+  if (document.readyState === "loading") addEventListener("DOMContentLoaded", () => setTimeout(boot, 0));
+  else setTimeout(boot, 0);
 })(window.AIQ);
