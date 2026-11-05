@@ -1277,6 +1277,8 @@ window.AIQ = window.AIQ || {};
     wheelLand: old("wheelLand", t => { thump(t, { vol: 0.14, f0: 160, f1: 60, dur: 0.1 }); bell(84, t, { vol: 0.06, dur: 0.7, rev: 0.4 }); bell(91, t + 0.07, { vol: 0.05, dur: 0.9, rev: 0.5 }); }),
     bankPin: old("bankPin", t => { thump(t, { vol: 0.12, f0: 340, f1: 130, dur: 0.05 }); bell(88, t + 0.02, { vol: 0.06, dur: 0.5, rev: 0.4 }); bell(95, t + 0.1, { vol: 0.05, dur: 0.7, rev: 0.4 }); }),
     /* el corazon y el fondo grave de la sala mientras llega el jefe (el zumbido se apaga solo a los 10 s o al cerrarlo) */
+    /* v0.4.64: el arranque de un tubo de neón (Luces de neón, js/neon.js): tic-tic del cebador y el clonc del tubo al lucir. Corto y bajito */
+    neonOn: old("neonOn", t => { [0, 0.05, 0.1].forEach((d, i) => noise(t + d, 0.012, { hp: 3800 + i * 300, vol: 0.022 })); thump(t + 0.17, { vol: 0.07, f0: 150, f1: 70, dur: 0.06 }); noise(t + 0.17, 0.16, { hp: 5200, vol: 0.006 }); }),
     latido: old("latido", t => { thump(t, { vol: 0.3, f0: 72, f1: 38, dur: 0.16 }); thump(t + 0.24, { vol: 0.2, f0: 64, f1: 36, dur: 0.14 }); }),
     zumbido: (() => {
       let g = null, os = [];

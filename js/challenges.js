@@ -1135,13 +1135,15 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ bandera: filtro CSS para js/adventure.js (renderFlag) */
-  A.chal.flagFx = () => {
+  /* main: la bandera de la pregunta, donde el neón es una lámpara de verdad (js/neon.js) y no un filtro; las copias pequeñas (el Oráculo) siguen
+     con el giro de color, para no enseñar sus colores de verdad */
+  A.chal.flagFx = main => {
     if (S.suspended || !S.on) return null;
     const f = kindOn("flag").map(c => {
       const p = par(c);
       switch (c.id) {
         case "flaginvert": return S.fx.noNegative ? null : "invert(1)";              // el Sello de la casa le devuelve sus colores
-        case "flaghue": return `hue-rotate(${p.deg}deg)`;
+        case "flaghue": return main && A.neon ? null : `hue-rotate(${p.deg}deg)`;
         case "flagblur": return `blur(${p.px}px)`;
         case "flagdark": return `brightness(${p.b})`;
         case "flaggray": return `grayscale(${p.amt})`;
@@ -1152,10 +1154,13 @@ window.AIQ = window.AIQ || {};
   };
 
   function flagClass(el, o) {
-    const img = el && el.querySelector(".ask-flag"); if (!img || S.suspended || !S.on) return;
+    const img = el && el.querySelector(".ask-flag"); if (!img || S.suspended || !S.on) { if (A.neon) A.neon.unmount(); return; }
+    if (A.neon && !kindOn("flag").some(c => c.id === "flaghue")) A.neon.unmount();
     kindOn("flag").forEach(c => {
       const p = par(c); img.classList.add("fx-" + c.id);
-      if (c.id === "flaghue") { img.style.setProperty("--fh0", (p.deg * 0.6) + "deg"); img.style.setProperty("--fh1", (p.deg * 1.4) + "deg"); img.style.setProperty("--fns", (p.spd || 3.4) + "s"); }
+      /* v0.4.64: Luces de neón = la lámpara de cuadro (js/neon.js). El jefe «Neón de fronteras falsas» lleva su velocidad (m.spd): el doble de
+         rápido y un tubo moribundo. La Lupa del tasador (colorMul) sube la luz de sala */
+      if (c.id === "flaghue") { if (A.neon) A.neon.mount(img, { lv: lvOf(c), boss: !!(c.m && c.m.spd), mul: S.fx.colorMul == null ? 1 : S.fx.colorMul, seed: (S.round | 0) * 31 + (S.q | 0) }); else { img.style.setProperty("--fh0", (p.deg * 0.6) + "deg"); img.style.setProperty("--fh1", (p.deg * 1.4) + "deg"); } }
       if (c.id === "flagdark") img.style.setProperty("--fb", p.b);
     });
     flagNew(el, o);   // tanda 14: la bandera de espaldas, a trozos o al viento

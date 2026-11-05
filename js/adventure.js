@@ -1053,7 +1053,7 @@ window.AIQ = window.AIQ || {};
     if (!rec) { el.textContent = A.tx(o.name); return; }                          // sin datos empaquetados todavia: se ve el nombre, nunca un hueco vacio
     const src = `assets/flags/${A.mediaKey(o.name.en)}.svg`;
     el.innerHTML = `<img class="ask-flag" src="${src}" alt="" draggable="false">`;
-    const img = el.querySelector(".ask-flag"), fx = A.chal.flagFx && A.chal.flagFx();
+    const img = el.querySelector(".ask-flag"), fx = A.chal.flagFx && A.chal.flagFx(true);
     if (img && fx) img.style.filter = fx;
   };
   /* el viento desvia el clic */
