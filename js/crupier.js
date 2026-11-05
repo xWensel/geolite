@@ -122,11 +122,24 @@ window.AIQ = window.AIQ || {};
       s.push([7, 300], ...up.reverse());
       return { frames: s, hit: 10, keep: 1 };
     })(),
+    /* v0.4.63, la carta del truco (huevo de su abanico, js/huevos.js): el gesto aprobado «el truco» (e_truco) en dos tiempos. Saca la carta y la
+       enseña (0-8) y se queda así hasta release() (su frase y su segundo de más); al soltar, se esfuma y enseña la mano vacía (9-14), la carta
+       vuelve (15-17), la sostiene y la guarda en el abanico (18-23). hit = el fotograma en que la guarda (suena el naipe) */
+    truco: (() => {
+      const s = [];
+      for (let f = 0; f <= 8; f++) s.push([f, 100]);
+      for (let f = 9; f <= 13; f++) s.push([f, 100]);
+      s.push([14, 700], [15, 100], [16, 100], [17, 1500]);
+      for (let f = 18; f <= 23; f++) s.push([f, 100]);
+      return { src: "e_truco", frames: s, hold: 1, peak: 8, keep: 1, hit: 19 };
+    })(),
   };
+  /* la pinta que enseña la carta del truco (A.crupier.pinta): null = la de Pixel Lab tal cual (el corazón de la trastada del ticket) */
+  let PINTA = null;
   const gfx = {};   // gesto de Pixel Lab -> { frames: [[indice del fotograma, ms]], peak, hold, lock }
   function gx(id) {
     if (gfx[id] || GC[id]) return gfx[id] || GC[id];
-    if (GQ[id]) { const g = D().gest[id], q = GQ[id]; return g ? (gfx[id] = { pm: g, frames: q.frames, peak: -1, hold: false, lock: false, keep: !!q.keep, hit: q.hit }) : null; }
+    if (GQ[id]) { const q = GQ[id], g = D().gest[q.src || id]; return g ? (gfx[id] = { pm: g, frames: q.frames, peak: q.peak != null ? q.peak : -1, hold: !!q.hold, lock: false, keep: !!q.keep, hit: q.hit }) : null; }   // src: los dibujos de otro gesto
     const g = D().gest[id]; if (!g) return null; const t = tOf(id, g.frames.length); if (!t) return null;   // "jot@suspicious": la variante con esa cara, al tiempo del gesto
     const n = g.frames.length, cut = t.includes("cut"), ida = g.ida && !cut;
     const seq = []; for (let i = 0; i < n; i++) seq.push(i); if (ida) for (let i = n - 2; i >= 0; i--) seq.push(i);
@@ -135,7 +148,8 @@ window.AIQ = window.AIQ || {};
     return (gfx[id] = { pm: g, frames: seq.map((f, i) => [f, per + (i === peak ? extra : 0)]), peak, hold: t.includes("hold"), lock: t.includes("lock") });
   }
   const exprId = id => EX[id] ? id : ALIAS.expr[id] || "sly";
-  const gestId = id => { if (!id) return null; const g = GC[id] || GT[id] || GQ[id] || NUEVO.test(id) ? id : ALIAS.gest[id]; return g && (GC[g] || (D().gest[g] && (GT[g] || GQ[g] || NUEVO.test(g)))) ? g : null; };
+  const gestId = id => { if (!id) return null; const g = GC[id] || GT[id] || GQ[id] || NUEVO.test(id) ? id : ALIAS.gest[id]; return g && (GC[g] || (GQ[g] && D().gest[GQ[g].src || g]) || (D().gest[g] && (GT[g] || NUEVO.test(g)))) ? g : null; };
+  const gsrc = id => (GQ[id] && GQ[id].src) || id;                       // el gesto de los dibujos (truco -> e_truco)
 
   /* ------------------------------------------------------------ composicion: un lienzo de trabajo de 96x112 compartido */
   let work, wctx;
@@ -168,8 +182,9 @@ window.AIQ = window.AIQ || {};
     c.clearRect(0, 0, W, H);
     put(c, d.master);
     let eo = [0, 0], mo = [0, 0];                         // donde estan los ojos y la boca (desplazamiento al pixel; null = no estan a la vista)
+    const gd = p.g ? d.gest[gsrc(p.g)] : null;
     if (p.g) {
-      const g = d.gest[p.g]; put(c, R(g.frames[p.f]), 0, 0, true);
+      const g = gd; put(c, R(g.frames[p.f]), 0, 0, true);
       [eo, mo] = g.al[p.f];
       if (p.e !== "sly" && g.cara !== p.e) { if (eo) put(c, R("fe_" + p.e), eo[0], eo[1]); if (mo) put(c, R("fm_" + p.e), mo[0], mo[1]); }   // la variante ya lleva su cara
     } else if (p.e !== "sly") put(c, R("face_" + p.e), 0, 0, true);
@@ -182,8 +197,12 @@ window.AIQ = window.AIQ || {};
     if (p.m && mo) put(c, R("mouth_" + p.m), mo[0], mo[1]);
     if (p.m2 && mo) put(c, R("tm_" + p.e), mo[0], mo[1]);
     if (p.tear >= 0 && eo) { const t = d.tear[p.tear]; put(c, R("tear"), eo[0] + t[0], eo[1] + t[1]); }
-    if (p.g) { const oc = d.gest[p.g].oc; if (oc && oc[p.f]) put(c, R(oc[p.f])); }   // lo que tapa la cara (cartas, mano) vuelve encima de ella
-    { const ov = cur && cur.ov; if (ov) { const k = p.g ? d.gest[p.g].frames[p.f] : "master"; for (const L of ov) { const r = L.r[k]; if (r) c.drawImage(L.img, r[0], r[1], r[2], r[3], r[4], r[5], r[2], r[3]); } } }   // v0.3.135: capas del vestuario por fotograma (antifaz veneciano, pluma), ya recortadas por lo que tienen delante
+    if (p.g) { const oc = gd.oc; if (oc && oc[p.f]) put(c, R(oc[p.f])); }   // lo que tapa la cara (cartas, mano) vuelve encima de ella
+    { const ov = cur && cur.ov; if (ov) { const k = p.g ? gd.frames[p.f] : "master"; for (const L of ov) { const r = L.r[k]; if (r) c.drawImage(L.img, r[0], r[1], r[2], r[3], r[4], r[5], r[2], r[3]); } } }   // v0.3.135: capas del vestuario por fotograma (antifaz veneciano, pluma), ya recortadas por lo que tienen delante
+    if (PINTA && p.g && gsrc(p.g) === "e_truco" && A.TRUCO_CARTA) {        // v0.4.63: la pinta de la carta del truco (js/truco-carta.js), encima de todo lo de la ropa
+      const s = (A.TRUCO_CARTA[PINTA] || {})[p.f];
+      if (s) for (const q of s.split(";")) { const [x, y, col] = q.split(","); c.fillStyle = "#" + col; c.fillRect(+x, +y, 1, 1); }
+    }
     if (E.dark) { if (OJOS) c.clearRect(0, 0, W, H); else darken(c); if (!p.off && eo) put(c, R("glow_" + p.e), eo[0], eo[1]); }   // OJOS: el apagon total de la salida, solo sus ojos
     if (p.z) put(c, R("zz_" + p.z));
     if (p.w) for (const [y0, y1, dx] of p.w) { const band = c.getImageData(0, y0, W, y1 - y0); c.clearRect(0, y0, W, y1 - y0); c.putImageData(band, dx, y0); }
@@ -391,6 +410,7 @@ window.AIQ = window.AIQ || {};
     ojos(on) { OJOS = !!on; live.forEach(s => { s.key = ""; s.poke(); }); },        // con la cara "dark": solo los ojos (el apagon de la salida)
     atlas: () => img, isReady: () => loaded,
     list: () => Object.keys(EX),
+    pinta: v => { PINTA = v && A.TRUCO_CARTA && A.TRUCO_CARTA[v] ? v : null; live.forEach(sp => { sp.key = ""; sp.poke && sp.poke(); }); },   // v0.4.63: la carta del truco
     gestures: () => [...Object.keys(GT).filter(g => D().gest[g]), ...Object.keys(D().gest).filter(g => NUEVO.test(g)), ...Object.keys(GQ).filter(g => D().gest[g]), ...Object.keys(GC)],
     /* bloque D: los gestos por grupo (la mesa del crupier) y el humor */
     groups: () => {

@@ -382,7 +382,7 @@ window.AIQ = window.AIQ || {};
     const ZONAS = [                                                                  // fracciones de su figura (el lado de su hueco): [x0, x1, y0, y1, bolsa, cuantas]
       ["cartas", .64, .96, .15, .42, "hvCartas", 2], ["antifaz", .27, .57, .40, .52, "hvAntifaz", 2], ["bigote", .30, .52, .53, .62, "hvBigote", 3], ["pajarita", .30, .54, .63, .74, "hvPajarita", 3]
     ];
-    const cuenta = {};
+    const cuenta = {}, truco = { ultima: null, de: null };
     H._zonas = ZONAS;
     document.addEventListener("pointerdown", e => {
       if (e.button !== 0 || !D() || !D().el || !D().homeShown || !D().homeShown()) return;
@@ -392,8 +392,16 @@ window.AIQ = window.AIQ || {};
       e.stopPropagation(); e.preventDefault();
       const n = cuenta[z[0]] || 0;
       const cad = z[0] === "cartas";
+      /* v0.4.63, LA CARTA DEL TRUCO (votada el 5-nov): saca una carta del abanico con su gesto «el truco» y la enseña justo al decir «¿Era esta?»;
+         una pinta al azar (nunca dos seguidas la misma). Al reír se esfuma, enseña la mano vacía, vuelve la misma y la guarda. Suena el naipe al
+         sacarla y al guardarla */
+      const naipe = () => { if (A.sfx && A.sfx.card) A.sfx.card(); };
+      let pinta = null;
+      if (cad && A.crupier && A.crupier.pinta) { const q = ["corazon", "rombo", "pica", "trebol"].filter(x => x !== truco.ultima); pinta = q[Math.floor(Math.random() * q.length)]; }
       const ok = dice("traje", z[5], { i: cad ? 0 : Math.min(n, z[6] - 1), mood: z[0] === "bigote" ? "angry" : cad ? "sly" : "laugh", gap: 1500, libre: true,
-        done: cad ? () => { const t = D().nth(z[5], 1); if (t && D().homeShown()) D().say(t, { mood: "laugh", hold: hold(t) }); } : undefined });
+        say: cad ? { tail: [700, "truco", () => setTimeout(naipe, 250), naipe] } : undefined,
+        done: cad ? () => { const t = D().nth(z[5], 1); if (t && D().homeShown()) D().say(t, { mood: "laugh", hold: hold(t), gesture: null, sigue: true, done: () => setTimeout(() => { if (truco.de === pinta) A.crupier.pinta(null); }, 2500) }); } : undefined });
+      if (ok && pinta) { truco.ultima = truco.de = pinta; A.crupier.pinta(pinta); }
       if (ok) cuenta[z[0]] = n + 1;
     }, true);
   })();

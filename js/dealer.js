@@ -2946,7 +2946,7 @@ window.AIQ = window.AIQ || {};
     const X = faceFor(line, o), mood = o.mood || "sly", V = voiceFor(line, o), srcS = tagsToSent(typeof line === "string" ? line : A.tx(line)), PM = parseMarks(o.force ? srcS : personal(srcS)), text = PM.plain;
     const inline = !!el.closest("#vdDealer"), home = D.onHome && !D.host && !inline && homeCorner ? " home " + homeCorner : "";
     const peek = pres === "home" && home ? " stay" : "";   // bloque D: habla desde su sitio fijo
-    spr.release(); spr.set(X.e, { quiet: !!X.g }); if (X.g) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " aside" : peek.includes("peek") ? peek : home + peek); bubble.classList.add("on");
+    if (!o.sigue) spr.release(); spr.set(X.e, { quiet: !!X.g || !!o.sigue }); if (X.g && !o.sigue) spr.play(X.g); el.className = "dealer in " + mood + (D.host ? " big" : "") + (inline ? " inline" : "") + (o.camp && !D.host && !inline ? " camp" : o.screen && !D.host && !inline ? " aside" : peek.includes("peek") ? peek : home + peek); bubble.classList.add("on");
     if (o.pos) { el.removeAttribute("style"); el.className = "dealer in lvpos lv-" + o.pos + " " + mood; document.body.appendChild(el); }   // la mesa elige donde sale: una esquina o el centro grande, por encima de todo
     else if (el.parentNode === document.body) (D.host || $("app")).appendChild(el);
     bbkFit(); if (V) bubble.dataset.v = V; else delete bubble.dataset.v; tagEl.textContent = V === "libreta" ? A.tx(TAG_LIBRETA) : V === "senal" ? "Don Crupier.exe" : "";   // la voz del bocadillo (css/bocadillo.css); la mesa en vivo la elige con o.sty
@@ -3004,7 +3004,13 @@ window.AIQ = window.AIQ || {};
     grow(0);
     if (mood === "laugh") A.sfx.laugh && A.sfx.laugh();
     let i = 0, at = 0; const chars = [...text], step = mood === "laugh" ? 44 : (VSTEP[V] || 34);
+    /* v0.4.63, o.tail = [ms, gesto, alSacar, alToque]: lanza ese gesto cuando a la frase le quedan ms por escribir (la carta del truco llega justo
+       con «¿Era esta?» en cualquier idioma). o.sigue: la frase no toca el gesto que ya lleva (ni la chistera de la risa) */
+    const restMs = []; { let acc = 0; for (let j = chars.length - 1; j >= 0; j--) { acc += step + (/[.,!?…。，！？、]/.test(chars[j]) ? 140 : 0); restMs[j] = acc; } }
+    let tailDone = !o.tail;
+    const tailNow = () => { if (tailDone || lineN !== me || (i < chars.length && restMs[i] > o.tail[0])) return; tailDone = true; spr.play(o.tail[1], null, o.tail[3]); if (o.tail[2]) o.tail[2](); };
     const tick = () => {
+      tailNow();
       if (!el.isConnected) { rehome(); fitCorner(); }                        // otra pantalla sustituyo la suya: termina la frase en la esquina (antes se callaba a media frase)
       if (i >= chars.length) {
         typing = false; doneAt = Date.now(); txt.style.height = ""; el.classList.add("done"); spr.talk(false); later(() => spr.release(), LINGER);   // un gesto sostenido dura su frase y su segundo de mas
