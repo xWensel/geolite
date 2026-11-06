@@ -200,7 +200,7 @@ window.AIQ = window.AIQ || {};
     
     ["fado", Q, "Fado", "Fado", 38.7223, -9.1393, ["lisbon"]],
     ["reggae", Q, "Reggae", "Reggae", 18.0179, -76.8099, ["c:Jamaica", "rose-hall-great-house"]],
-    ["salsa-music", Q, "Salsa music", "Salsa", 18.4655, -66.1057, ["san-juan", "havana", "cali"]],
+    ["salsa-music", Q, "Salsa music", "Salsa", 23.1136, -82.3666, ["havana", "san-juan", "cali"]],
     ["kilimanjaro-snows", Q, "Mount Kilimanjaro", "Nieves del Kilimanjaro", -3.0674, 37.3556, ["mount-kilimanjaro", "nairobi"]],
     ["himalaya", Q, "Himalayas", "Himalaya", 28.0, 86.0, ["mount-everest", "kathmandu", "thimphu", "k2"]],
     ["dead-sea-scrolls-cave", Q, "Dead Sea Scrolls", "Manuscritos del mar Muerto", 31.7413, 35.4592, ["dead-sea", "dead-sea-scrolls", "jerusalem"]],
