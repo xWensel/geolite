@@ -1867,7 +1867,7 @@ window.AIQ = window.AIQ || {};
     const ascChip = ascI ? `<span class="tb-asc" ${A.ttAttr(A.T("Ascensión", "Ascension") + " " + run.asc + " · " + ascI.n, ascI.d + (ascI.k ? " " + ascI.k : ""))}>${ic(ASC_CHIP[run.asc])}<em>${run.asc}</em></span>` : "";
     C().dialog(`<div class="table mesa gx-camp${chest ? " chest" : ""}${again ? " again" : ""}">
       <header class="tb-head"><div class="tb-title"><span class="gx-eyb tag">${A.tx(info.n)} · ${actSub(info)}</span><span class="tb-trow"><h2 class="gx-t-m">${chest ? A.T("Cofre del jefe", "Boss chest") : A.T("Campamento", "Camp")}</h2>${ascChip}</span></div>
-        ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins" data-tf="coins" data-pin="1">${CN()}<b>${run.coins}</b></div></div></header>
+        ${routeHtml()}<div class="tb-right"><button class="gx-btn sm tb-menu" id="shopMenu" type="button">${A.icon("u_pause", "t24")}<span>${A.T("Menú", "Menu")}</span>${A.gala.keyHint("Esc", "menu")}</button><div class="tb-coins" id="shopCoins" data-tf="coins" data-pin="1">${CN()}<b>${run.coins}</b></div></div></header>
       <section class="tb-shop gx-pnl">${note ? `<p class="tb-note">${note}</p>` : ""}<section class="offers" style="--n:${Math.max(1, run.stock.length)}">${cards}${chest ? "" : `<div class="tb-actions"><button class="tb-deck" id="rerollBtn" type="button"><span class="tb-dk">${ic("dice")}</span><span>${A.T("Cambiar cartas", "New cards")}</span><em>${rc ? CN() + rc : A.T("gratis", "free")}</em></button></div>`}</section></section>
       ${chest ? "" : supHtml()}
       <footer class="tb-tray gx-pnl">

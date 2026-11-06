@@ -81,7 +81,7 @@ window.AIQ = window.AIQ || {};
     const btn = $("rankBtn"); if (btn) btn.setAttribute("aria-expanded", "true");
     layer.insertAdjacentHTML("beforeend", `<div class="pd-wrap" id="pdWrap"><div class="gx-veil"></div>
       <section class="pd-screen gx-stage" id="podio" role="dialog" aria-modal="true" aria-labelledby="pdH" tabindex="-1">
-        <header class="pd-head"><button type="button" class="gx-btn sm pd-x" id="pdX">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+        <header class="pd-head"><button type="button" class="gx-btn sm pd-x" id="pdX">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l" id="pdH"><span class="pd-ic">${A.icon("m_rank")}</span>${TITLE()}</h2>
           <div class="pd-tabset" id="pdTabs">${tabsHtml()}</div></header>
         <div class="pd-body wait" id="pdBody" data-fresh="1">${body(null, true)}</div>

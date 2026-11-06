@@ -82,7 +82,7 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ el boton (portada) */
   let hoverAt = 0;
-  const button = () => `<button class="menu-gear menu-quit" id="quitBtn" type="button" aria-label="${esc(t6(TX.tip))}" data-tip="tip.quit" data-key="Esc">${A.icon("u_quit")}</button>`;
+  const button = () => `<button class="menu-gear menu-quit" id="quitBtn" type="button" aria-label="${esc(t6(TX.tip))}" data-tip="tip.quit" data-key="Esc">${A.icon("u_quit", "t24")}</button>`;
   function wire() {
     const b = $("quitBtn"); if (!b) return; const t0 = Date.now();
     b.onclick = () => open();

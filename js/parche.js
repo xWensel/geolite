@@ -129,7 +129,7 @@ window.AIQ = window.AIQ || {};
       items += `<button type="button" class="pt-item" data-id="${esc(p.id)}"><b>v${esc(p.id)}</b><span>${esc(tx(p.name))}</span>${fresh.has(p.id) ? `<i class="pt-nw" ${A.ttAttr(t("new"))}></i>` : ""}</button>`; });
     c.dialog(`<div class="gx-veil"></div><section class="pt-screen gx-stage" aria-labelledby="ptH">
       <div class="gx-grid pt-grid pt" data-nosq>
-        <header class="pt-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${esc(t("close"))}</span>${A.gala.keyHint("Esc", "b")}</button>
+        <header class="pt-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${esc(t("close"))}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l pt-h" id="ptH"><span class="pt-hic">${A.icon("m_patch")}</span>${esc(t("title"))}</h2>
           <span class="pt-cnt">${esc(t("count").replace("{n}", A.fmt(ps.length)).replace("{v}", ps[0].id))}</span>${A.hub.tools()}</header>
         <div class="gx-sh pt-left"><nav class="gx-pnl pt-rail" aria-label="${esc(t("patches"))}"><div class="pt-items">${items}</div>

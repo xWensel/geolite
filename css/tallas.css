@@ -1,0 +1,37 @@
+/* Geolite - tallas de icono (Bloque G). Un icono solo se pinta en una de estas tallas, medidas a k = 1 (1280x720). Cada talla es el tamano nativo
+   del icono o una version dibujada a esa medida (assets/icons/<id>_<talla>.webp, TALLA en js/icons.js), nunca un reescalado a medias.
+   Va la ultima y con !important porque manda sobre las medidas sueltas de cada pantalla: un hueco ya no puede quedar a 22 o 28 px.
+   Con la escala «Original» (no entera) o un hueco que no es una talla, A.icFit (js/icons.js) pone cada icono al mayor multiplo entero de pixeles
+   reales que cabe en su hueco, con la version dibujada que mejor lo llena, y lo centra; el hueco no cambia. */
+:root body img.ic.t16 { width: 16px !important; height: 16px !important; }
+:root body img.ic.t24 { width: 24px !important; height: 24px !important; }
+:root body img.ic.t32 { width: 32px !important; height: 32px !important; }
+:root body img.ic.t48 { width: 48px !important; height: 48px !important; }
+:root body img.ic.t64 { width: 64px !important; height: 64px !important; }
+:root body img.ic.t96 { width: 96px !important; height: 96px !important; }
+:root body img.ic.t128 { width: 128px !important; height: 128px !important; }
+:root body img.ic.t16, :root body img.ic.t24, :root body img.ic.t32, :root body img.ic.t48, :root body img.ic.t64, :root body img.ic.t96, :root body img.ic.t128 { max-width: none; max-height: none; flex: none; object-fit: contain; }
+
+/* Iconos cuya medida depende del sitio (la moneda, la ficha de oro, el dado): la talla y su version dibujada van aqui, juntas, por sitio.
+   content: url() cambia la imagen sin tocar el HTML (Chromium/Electron); si en otra escala cabe mejor otra version, A.icFit la cambia en linea. */
+:root body img.ic.ic-coin.cn, :root body .pk-meta .cn, :root body .pk-act em .cn { width: 16px !important; height: 16px !important; content: url(../assets/icons/coin_16.webp); }
+:root body .offer .buy img.ic-coin.cn, :root body .tb-deck em img.ic-coin.cn { width: 24px !important; height: 24px !important; content: url(../assets/icons/coin_24.webp); }
+:root body .tb-coins img.ic-coin.cn { width: 32px !important; height: 32px !important; content: url(../assets/icons/coin_32.webp); }
+:root body img.bq-fi, :root body .bq-wal .bq-fi, :root body .bq-pr.big .bq-fi, :root body img.ck-fi { width: 32px !important; height: 32px !important; content: url(../assets/icons/ficha_oro_32.webp); }
+:root body img.bq-fi.sm, :root body .bq-offer .bq-pr .bq-fi, :root body .bq-pr .bq-fi, :root body .bq-vp .bq-fi, :root body img.ck-fi.sm { width: 24px !important; height: 24px !important; content: url(../assets/icons/ficha_oro_24.webp); }
+:root body .bq-prow .bq-pr .bq-fi, :root body img.ck-fi.rt { width: 16px !important; height: 16px !important; content: url(../assets/icons/ficha_oro_16.webp); }
+:root body #chalReroll img.ic-dice { width: 24px !important; height: 24px !important; content: url(../assets/icons/dice_24.webp); }
+:root body .tb-dk img.ic-dice { width: 32px !important; height: 32px !important; content: url(../assets/icons/dice_32.webp); }
+/* dentro de los juegos del casino (.rou) la moneda la mide el propio juego (Lluvia de fichas la escala con su tablero): ahi no hay talla todavia */
+:root body .rou img.ic.ic-coin.cn { width: 1.2em !important; height: 1.2em !important; content: normal; }
+
+/* Huecos que pasan a una talla entera del arte que ya hay (Bloque G, D6; sin dibujo nuevo) */
+:root body img.ic.ic-heart, :root body img.ic.ic-heart_empty { width: 24px !important; height: 24px !important; }                        /* corazones: 24 nativos (antes 22, 28 y 30) */
+/* objetos de las cartas del Campamento: el hueco de 72 se queda y A.icFit pone cada uno a su rejilla (48 o 64) centrado (antes 72 = x1,5 o x1,13) */
+:root body .tool.pc-hand .tl-ico img.ic { width: 48px !important; height: 48px !important; }                                             /* herramienta en la mano: 48 (antes 42) */
+@media (min-width: 900px) and (min-height: 520px) {
+  :root body .gx-vd-medal { width: 128px; height: 128px; } :root body .gx-vd-medal > img.ic { width: 128px !important; height: 128px !important; }   /* ficha del veredicto: 64 x2 (antes 120) */
+}
+:root body .pd-medal img.ic, :root body #duRkIc img.ic { width: 64px !important; height: 64px !important; }                               /* medallas del podio y ficha de liga del Duelo: 64 nativos (antes 56) */
+:root body .cx-tic img.ic, :root body .cl-hic img.ic, :root body .pd-ic img.ic { width: 64px !important; height: 64px !important; }       /* iconos de cabecera: 64 nativos (antes 48) */
+:root body #settings .lang-flag { width: 52px !important; height: 36px !important; }                                                      /* banderas del idioma: 52x36 nativos (antes 40x28) */

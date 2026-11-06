@@ -524,7 +524,7 @@ window.AIQ = window.AIQ || {};
     root.innerHTML = `
       <div class="cx-shell">
         <header class="cx-head">
-          <button class="gx-btn sm cx-back" id="cxBack" type="button">${A.icon("u_back")}<b></b>${A.gala.keyHint("Esc", "b")}</button>
+          <button class="gx-btn sm cx-back" id="cxBack" type="button">${A.icon("u_back", "t24")}<b></b>${A.gala.keyHint("Esc", "b")}</button>
           <div class="cx-ttl"><h2 class="gx-t-l"><span class="cx-tic">${A.icon("m_codex")}</span><span data-cx="title"></span></h2><nav class="cx-crumb" id="cxCrumb"></nav></div>
           <label class="cx-search">${A.icon("lens", "sm")}<input id="cxSearch" type="search" autocomplete="off" spellcheck="false"></label>
         </header>
@@ -532,7 +532,7 @@ window.AIQ = window.AIQ || {};
           <nav class="cx-nav" id="cxNav"></nav>
           <main class="cx-main" id="cxMain" tabindex="-1"></main>
           <div class="cx-stage" id="cxStage"><span class="cx-mtip hidden" id="cxTip"></span><div class="cx-leg" id="cxLeg"></div>
-            <div class="cx-zoom"><button type="button" data-zoom="in" data-tip="tip.in" data-key="+">${A.icon("u_plus")}</button><button type="button" data-zoom="out" data-tip="tip.out" data-key="−">${A.icon("u_minus")}</button><button type="button" data-zoom="home" data-tip="tip.home" data-key="0">${A.icon("u_home")}</button></div></div>
+            <div class="cx-zoom"><button type="button" data-zoom="in" data-tip="tip.in" data-key="+">${A.icon("u_plus", "t24")}</button><button type="button" data-zoom="out" data-tip="tip.out" data-key="−">${A.icon("u_minus", "t24")}</button><button type="button" data-zoom="home" data-tip="tip.home" data-key="0">${A.icon("u_home", "t24")}</button></div></div>
         </div>
         <div class="cx-light hidden" id="cxLight"></div>
       </div><div class="cx-brk" aria-hidden="true"></div><div class="cx-pw" aria-hidden="true"><i></i><i></i><b></b></div>`;   // v0.3.50: el visor (escuadras de laton) y el encendido y apagado del aparato

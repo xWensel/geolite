@@ -12,9 +12,9 @@ window.AIQ = window.AIQ || {};
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const BOOK = () => A.icon("m_codex");
   /* solo el engranaje en la esquina: idioma, pantalla completa y el resto viven en Ajustes */
-  const tools = () => `<div class="menu-tools"><button class="menu-gear" id="menuGear" aria-label="${A.t("tip.set")}" data-tip="tip.set">${A.icon("u_set")}</button></div>`;
+  const tools = () => `<div class="menu-tools"><button class="menu-gear" id="menuGear" aria-label="${A.t("tip.set")}" data-tip="tip.set">${A.icon("u_set", "t24")}</button></div>`;
   const wireTools = () => { const c = C(); $("menuGear").onclick = () => c.openSettings(!c.S.settingsOpen); };
-  const top = (back) => `<div class="menu-top">${back ? `<button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button>` : `<img class="menu-rose" src="assets/icons/logo_mark.png" alt="" draggable="false">`}${tools()}</div>`;
+  const top = (back) => `<div class="menu-top">${back ? `<button class="hub-back" id="hubBack">${A.icon("u_back", "sm t24")}${T("Menú", "Menu")}</button>` : `<img class="menu-rose" src="assets/icons/logo_mark.png" alt="" draggable="false">`}${tools()}</div>`;
   const shell = (inner, back) => `<div class="menu-in hub">${top(back)}${inner}<p class="menu-foot">Geolite · v${A.VERSION}</p></div>`;
   /* donde va una partida guardada (A.adv.summary): tras el Acto III ya no hay rondas numeradas (antes decia "Acto 4 · Ronda 1") */
   const CONT_RUN = () => A.pick6("Continuar expedición|Continue expedition|Reprendre l'expédition|Continuar expedição|Expedition fortsetzen|Riprendi la spedizione||继续远征|원정 계속하기|遠征を再開|Продолжить экспедицию|Kontynuuj wyprawę");
@@ -157,7 +157,7 @@ window.AIQ = window.AIQ || {};
         <div class="hh-deck${clubPlq ? " five" : ""}">
           ${clubPlq ? clubPlq[0] : ""}${plaque("plq-codex", "codexBtn", "m_codex", A.t("codex.title"), `${A.fmt(cx.u)} / ${A.fmt(cx.t)}`, (100 * cx.u) / Math.max(1, cx.t), A.ttAttr(A.t("codex.title"), A.tip6("Fichas de lugares, historia y datos clave: se descubren acertando cerca.|Cards for places, history and key facts: found by pinning close.|Cartes de lieux, d'histoire et de faits clés : on les découvre en visant juste.|Cartas de lugares, história e dados-chave: descobertas ao acertar perto.|Karten zu Orten, Geschichte und Kernfakten: entdeckt durch genaue Treffer.|Schede di luoghi, storia e dati chiave: si scoprono colpendo vicino.||地点、历史与关键信息的卡片：准确标出即可发现。|장소, 역사, 핵심 정보 카드: 가깝게 맞히면 발견됩니다.|場所・歴史・重要な事実のカード：近くに当てると見つかる。|Карточки мест, истории и ключевых фактов: открываются точными попаданиями.|Karty miejsc, historii i kluczowych faktów: odkrywasz je celnymi trafieniami.")))}
           ${A.podio.button()}
-          ${plaque("plq-prof", "profBtn", "m_prof", T("Perfil", "Profile"), `${A.icon("u_star")}${A.fmt(A.ach.count())} / ${A.fmt(A.ach.total())}`, (100 * A.ach.count()) / Math.max(1, A.ach.total()), A.ttAttr(T("Perfil", "Profile"), A.tip6("Tu camino en el Club, tus logros y tus récords.|Your path in the Club, your achievements and your records.|Ton parcours au Club, tes succès et tes records.|Seu caminho no Clube, suas conquistas e seus recordes.|Dein Weg im Club, deine Erfolge und deine Rekorde.|Il tuo cammino nel Club, i tuoi obiettivi e i tuoi record.||你在俱乐部的会员之路、成就和纪录。|클럽에서의 길, 업적과 기록.|クラブでの道のり、実績と記録。|Твой путь в клубе, достижения и рекорды.|Twoja ścieżka w Klubie, osiągnięcia i rekordy.")))}${clubPlq ? clubPlq[1] : ""}
+          ${plaque("plq-prof", "profBtn", "m_prof", T("Perfil", "Profile"), `${A.icon("u_star", "t16")}${A.fmt(A.ach.count())} / ${A.fmt(A.ach.total())}`, (100 * A.ach.count()) / Math.max(1, A.ach.total()), A.ttAttr(T("Perfil", "Profile"), A.tip6("Tu camino en el Club, tus logros y tus récords.|Your path in the Club, your achievements and your records.|Ton parcours au Club, tes succès et tes records.|Seu caminho no Clube, suas conquistas e seus recordes.|Dein Weg im Club, deine Erfolge und deine Rekorde.|Il tuo cammino nel Club, i tuoi obiettivi e i tuoi record.||你在俱乐部的会员之路、成就和纪录。|클럽에서의 길, 업적과 기록.|クラブでの道のり、実績と記録。|Твой путь в клубе, достижения и рекорды.|Twoja ścieżka w Klubie, osiągnięcia i rekordy.")))}${clubPlq ? clubPlq[1] : ""}
         </div>
       </div></div>
       <span class="hh-ver">Geolite · v${A.VERSION}</span>${A.parche ? A.parche.button() : ""}`, "home");               // fuera de .hh: no cuenta para la composicion ni para A.fitK
@@ -189,7 +189,7 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ------------------------------------------------------------------ marco comun de las sub-pantallas (a pantalla completa, sobre el mapa) */
-  const scr = (title, inner, cls = "", foot = "") => `<div class="scr ${cls}"><header class="scr-head"><button class="hub-back" id="hubBack">${A.icon("u_back", "sm")}${T("Menú", "Menu")}</button><h2>${title}</h2>${tools()}</header><div class="scr-body">${inner}</div>${foot}</div>`;   // foot: barra fija bajo la lista que se desplaza (Clasico)
+  const scr = (title, inner, cls = "", foot = "") => `<div class="scr ${cls}"><header class="scr-head"><button class="hub-back" id="hubBack">${A.icon("u_back", "sm t24")}${T("Menú", "Menu")}</button><h2>${title}</h2>${tools()}</header><div class="scr-body">${inner}</div>${foot}</div>`;   // foot: barra fija bajo la lista que se desplaza (Clasico)
 
   /* ------------------------------------------------------------------ Clasico: campanas */
   /* portada de cada campana: minicarta pixel art (un protagonista sobre el foco de su color), assets/gen/camp_<id>.webp */
@@ -240,7 +240,7 @@ window.AIQ = window.AIQ || {};
     const counts = ["gold", "silver", "bronze"].map(m => `<span class="cl-mc" ${A.ttAttr(A.pick6("Medallas|Medals|Médailles|Medalhas|Medaillen|Medaglie||奖牌|메달|メダル|Медали|Medale"), "")}>${A.icon("medal_" + m)}<b>${camps.filter(x => medal(x.id) === m).length}</b></span>`).join("");
     return `<div class="gx-veil"></div><section class="cl-screen gx-stage s-classic" aria-labelledby="clH" data-nosq>
       <div class="gx-grid cl-grid">
-        <header class="cl-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+        <header class="cl-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l cl-h" id="clH"><span class="cl-hic">${A.icon("globe")}</span>${T("Clásico", "Classic")}</h2>
           <span class="cl-meds">${counts}<span class="cl-of">${A.pick6("de {n} campañas|of {n} campaigns|sur {n} campagnes|de {n} campanhas|von {n} Kampagnen|su {n} campagne||共 {n} 个战役|캠페인 {n}개 중|{n}キャンペーン中|из {n} кампаний|z {n} kampanii").replace("{n}", camps.length)}</span></span>${tools()}</header>
         <div class="gx-sh cl-left"><section class="gx-pnl cl-mesa"><div class="cl-cards" id="clCards">${cards}</div></section></div>
@@ -309,7 +309,7 @@ window.AIQ = window.AIQ || {};
       : `<button type="button" class="gx-btn pri wide" id="goBtn" data-primary><span class="av-bl">${NEW}</span>${A.gala.keyHint("Enter", "a")}</button><span class="av-sub" id="avNewSub">${newSub}</span>`;
     return `<div class="gx-veil"></div><section class="av-screen gx-stage s-adv" aria-labelledby="avH" data-nosq>
       <div class="gx-grid av-grid">
-        <header class="av-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+        <header class="av-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l av-h" id="avH"><span class="av-hic">${A.icon("boss_hat")}</span>${T("Aventura", "Adventure")}</h2>
           <span class="av-rel">${A.icon("cards")}<span>${A.RELIC_IDS.length} ${T("reliquias por descubrir", "relics to discover")}</span></span>${tools()}</header>
         <div class="gx-sh av-left"><section class="gx-pnl av-mesa">
@@ -440,7 +440,7 @@ window.AIQ = window.AIQ || {};
     const sumTip = prac ? P6("Práctica: no cuenta para la clasificación|Practice: doesn't count for the leaderboard|Entraînement : ne compte pas pour le classement|Treino: não conta para o placar|Training: zählt nicht für die Rangliste|Allenamento: non conta per la classifica||练习：不计入排行榜|연습: 리더보드 미반영|練習：ランキング対象外|Тренировка: в таблицу не идёт|Trening: nie liczy się do rankingu") : P6("Suma de tus 3 intentos|Sum of your 3 attempts|Somme de tes 3 essais|Soma das suas 3 tentativas|Summe deiner 3 Versuche|Somma dei tuoi 3 tentativi||你 3 次尝试的总和|시도 3번의 합계|3回の挑戦の合計|Сумма трёх попыток|Suma twoich 3 podejść");
     const sumVal = st.done ? A.fmt(st.total) : "—";                     // sin jugar, una raya (el "0" de la letra de cifras parecia un bloque)
     const clock = `<p class="dia-clock" ${A.ttAttr(P6("Nuevo reto en|New challenge in|Nouveau défi dans|Novo desafio em|Neue Herausforderung in|Nuova sfida tra||新挑战倒计时|새 도전까지|次のチャレンジまで|Новое испытание через|Nowe wyzwanie za"), P6("El reto cambia a tu medianoche. Los intentos que no juegues hoy se pierden.|The challenge changes at your midnight. Attempts you don't play today are lost.|Le défi change à minuit, heure locale. Les essais non joués aujourd'hui sont perdus.|O desafio muda à sua meia-noite. As tentativas que você não jogar hoje se perdem.|Die Herausforderung wechselt um deine Mitternacht. Nicht gespielte Versuche verfallen.|La sfida cambia alla tua mezzanotte. I tentativi non giocati oggi vanno persi.||挑战在你当地的午夜更换。今天没用掉的尝试会作废。|도전은 현지 시간 자정에 바뀌어요. 오늘 하지 않은 시도는 사라져요.|デイリーチャレンジは現地時間の深夜0時に切り替わる。今日プレイしなかった挑戦は消える。|Испытание меняется в твою полночь. Несыгранные сегодня попытки сгорают.|Wyzwanie zmienia się o twojej północy. Niezagrane dziś podejścia przepadają."))}>${A.icon("hourglass")}<span>${P6("Nuevo reto en|Next one in|Prochain dans|Próximo em|Nächste in|Prossima tra||下次挑战|다음 도전까지|次のチャレンジまで|Новое через|Następne za")}</span><b id="drClock">${hms(DY.msToNext())}</b></p>`;
-    const backToday = `<button type="button" class="gx-btn sm dia-today" id="drToday">${A.icon("u_back")}<span>${P6("Volver a hoy|Back to today|Retour à aujourd'hui|Voltar para hoje|Zurück zu heute|Torna a oggi||回到今天|오늘로 돌아가기|今日に戻る|Вернуться к сегодня|Wróć do dziś")}</span></button>`;
+    const backToday = `<button type="button" class="gx-btn sm dia-today" id="drToday">${A.icon("u_back", "t24")}<span>${P6("Volver a hoy|Back to today|Retour à aujourd'hui|Voltar para hoje|Zurück zu heute|Torna a oggi||回到今天|오늘로 돌아가기|今日に戻る|Вернуться к сегодня|Wróć do dziś")}</span></button>`;
     /* la tabla de aqui es solo del Reto diario (la Aventura esta en la Clasificacion de la portada); en la practica, la de ese dia */
     const tabs = prac ? [["prac", dShort]] : [["today", P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś")], ["yday", P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj")]];
     const OTRO = P6("Otro día|Another day|Un autre jour|Outro dia|Anderer Tag|Altro giorno||其他日期|다른 날|別の日|Другой день|Inny dzień");
@@ -449,7 +449,7 @@ window.AIQ = window.AIQ || {};
     const stat = (l, v) => `<div class="gx-lead-row"><span>${l}</span><s></s><b>${v}</b></div>`;
     return `<div class="gx-veil"></div><section class="dia-screen gx-stage s-daily${prac ? " s-prac" : ""}" aria-labelledby="diaH" data-nosq>
       <div class="gx-grid dia-grid">
-        <header class="dia-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+        <header class="dia-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l dia-h" id="diaH"><span class="dia-hic">${A.icon("dice")}</span>${T("Reto diario", "Daily challenge")}</h2>
           <span class="dia-meta"><span class="dia-seed" ${seedTip}>${A.icon("dice")}<b>${DY.code(day)}</b></span>${otherBtn}</span>${tools()}</header>
         <div class="gx-sh dia-left"><section class="gx-pnl dia-mesa">
@@ -614,7 +614,7 @@ window.AIQ = window.AIQ || {};
       const g = got(a), hid = a.secret && !g, pr = !g && prog[a.id];
       const badge = hid ? `<span class="ic badge">${A.icon(A.ACH_FRAME[a.ev] || "blank_boss", "bd-base")}${A.icon("lock", "bd-in")}</span>` : A.badge(a.id);
       const how = hid ? `${A.icon("dealer_mini", "pf-hint")}<span>${esc(A.pick6(SECRET_HINT[a.id] || "") || T("Logro secreto", "Secret achievement"))}</span>` : esc(A.tx(a.desc));
-      const meta = g ? `<span class="pf-got">${A.icon("u_star")}<em>${pfDay(P.ach[a.id])}</em></span><button type="button" class="gx-btn sm gho pf-ec" data-ach="${a.id}" ${A.ttAttr(P6p("onCard"), P6p("onCardT"))}><span>${esc(P6p("onCard"))}</span></button>`
+      const meta = g ? `<span class="pf-got">${A.icon("u_star", "t24")}<em>${pfDay(P.ach[a.id])}</em></span><button type="button" class="gx-btn sm gho pf-ec" data-ach="${a.id}" ${A.ttAttr(P6p("onCard"), P6p("onCardT"))}><span>${esc(P6p("onCard"))}</span></button>`
         : pr ? `<b>${A.fmt(pr[0])} / ${A.fmt(pr[1])}</b><span class="gx-bar"><i style="width:${pfPct(pr[0], pr[1])}%"></i></span>` : "";
       return `<li class="pf-row${g ? " got" : ""}${hid ? " hid" : ""}"><span class="pf-chip">${badge}</span><span class="pf-tx"><b>${hid ? "???" : esc(A.tx(a.name))}</b><i>${how}</i></span><span class="pf-mt">${meta}</span></li>`;
     };

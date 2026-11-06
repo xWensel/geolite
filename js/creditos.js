@@ -26,7 +26,7 @@ window.AIQ = window.AIQ || {};
   function build() {
     sh = document.createElement("div"); sh.id = "crSh"; sh.className = "cr-sh"; sh.hidden = true; sh.setAttribute("role", "dialog"); sh.setAttribute("aria-modal", "true");
     sh.innerHTML = `<div class="gx-veil cr-veil"></div><section class="gx-stage cr-stage"><div class="gx-grid cr-grid">
-      <header class="cr-top"><button type="button" class="gx-btn sm cr-back">${A.icon("u_back")}<span></span>${A.gala.keyHint("Esc", "b")}</button>
+      <header class="cr-top"><button type="button" class="gx-btn sm cr-back">${A.icon("u_back", "t24")}<span></span>${A.gala.keyHint("Esc", "b")}</button>
         <h1 class="gx-t-l cr-title"></h1><label class="cr-q">${A.icon ? A.icon("lens", "sm") : ""}<input type="search" id="crQ" autocomplete="off" spellcheck="false"></label></header>
       <nav class="cr-ix" id="crIx"></nav>
       <div class="gx-sh cr-pw"><div class="gx-paper cr-paper"><div class="cr-body" tabindex="-1"><div class="cr-in"></div></div></div></div>

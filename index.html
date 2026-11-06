@@ -69,6 +69,7 @@
 <link rel="stylesheet" href="css/celebra.css">
 <link rel="stylesheet" href="css/veredicto.css">
 <link rel="stylesheet" href="css/acunar.css">
+<link rel="stylesheet" href="css/tallas.css">
 <script src="js/boot.js"></script>
 <style>
 /* pantalla de carga: negro y, si tarda mas de 0,4 s, la marquesina de la casa con sus bombillas (js/marquesina.js). Lo primero que se ve al abrir
@@ -114,16 +115,16 @@
 
   <!-- carril de zoom -->
   <div class="sh rail-sh" id="railSh"><aside id="rail" class="cut ink">
-    <button id="zoomIn" data-tip="tip.in" data-key="+" aria-label="Acercar"><i class="uic" data-ic="u_plus"></i></button>
+    <button id="zoomIn" data-tip="tip.in" data-key="+" aria-label="Acercar"><i class="uic" data-ic="u_plus" data-t="24"></i></button>
     <div class="zscale" aria-hidden="true"><i id="zoomFill"></i></div>
-    <button id="zoomOut" data-tip="tip.out" data-key="−" aria-label="Alejar"><i class="uic" data-ic="u_minus"></i></button>
-    <button id="zoomHome" data-tip="tip.home" data-key="0" aria-label="Vista inicial"><i class="uic" data-ic="u_home"></i></button>
+    <button id="zoomOut" data-tip="tip.out" data-key="−" aria-label="Alejar"><i class="uic" data-ic="u_minus" data-t="24"></i></button>
+    <button id="zoomHome" data-tip="tip.home" data-key="0" aria-label="Vista inicial"><i class="uic" data-ic="u_home" data-t="24"></i></button>
   </aside></div>
 
   <!-- dock inferior -->
   <div class="sh dock-sh" id="dockSh"><nav id="dock" class="cut ink">
-    <button id="setBtn" data-tip="tip.set" aria-label="Ajustes" aria-expanded="false"><i class="uic" data-ic="u_set"></i></button>
-    <button id="pauseBtn" class="hidden" data-tip="tip.pause" data-key="P" aria-label="Pausa"><i class="uic" data-ic="u_pause"></i></button>
+    <button id="setBtn" data-tip="tip.set" aria-label="Ajustes" aria-expanded="false"><i class="uic" data-ic="u_set" data-t="24"></i></button>
+    <button id="pauseBtn" class="hidden" data-tip="tip.pause" data-key="P" aria-label="Pausa"><i class="uic" data-ic="u_pause" data-t="24"></i></button>
   </nav></div>
 
   <!-- nota de campo (curiosidad) -->
@@ -136,7 +137,7 @@
   <div class="set-veil hidden" id="setVeil"></div>
   <div class="set-sh hidden" id="setSh"><section id="settings" role="dialog" aria-labelledby="setH1">
     <header class="set-top">
-      <button class="set-back" id="setClose"><i class="uic" data-ic="u_back"></i><span data-i="set.close"></span></button>
+      <button class="set-back" id="setClose"><i class="uic" data-ic="u_back" data-t="24"></i><span data-i="set.close"></span></button>
       <div class="set-title"><i class="set-h-ic" data-ic="chips"></i><h1 id="setH1" data-i="set.title"></h1></div>
       <div class="set-ver">GEOLITE · V<span id="setVer"></span></div>
     </header>
@@ -183,7 +184,7 @@
             <p class="set-note" data-i="set.win.d"></p>
           </div>
           <div class="set-card hidden" id="uiCard"><h3 data-i="scr.scale"></h3>
-            <div class="seg s3" data-seg="uisz"><button data-v="100" data-i="ui.big"></button><button data-v="85" data-i="ui.mid"></button><button data-v="70" data-i="ui.small"></button><i></i></div>
+            <div class="seg s3" data-seg="uisz"><button data-v="pix" data-i="ui.pix"></button><button data-v="orig" data-i="ui.mid"></button><button data-v="big" data-i="ui.big"></button><i></i></div>
             <p class="set-note" data-i="ui.d"></p>
           </div>
         </div>

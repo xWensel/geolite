@@ -307,7 +307,7 @@ window.AIQ = window.AIQ || {};
     const have = A.club ? A.club.fichas() : 0, lv = A.club ? P6(A.club.tx.lv).replace("{n}", A.club.level()) : "";
     return `<div class="gx-veil bq-veil"></div><section class="bq-screen gx-stage" aria-labelledby="bqH" data-nosq>
       <div class="gx-grid bq-grid">
-        <header class="bq-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
+        <header class="bq-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
           <h2 class="gx-t-l bq-h" id="bqH"><span class="bq-hic">${A.icon("purse")}</span><span><span class="gx-eyb">${esc(A.club ? P6(A.club.tx.club) : "")}${lv ? " · " + esc(lv) : ""}</span>${esc(P6(TX.title))}</span></h2>
           <span class="bq-walw"><span class="bq-wal" aria-label="${esc(A.club ? P6(A.club.tx.fichas) : "")}">${A.moneda.html("chip")}<b id="bqWal">${A.fmt(have)}</b></span></span>${A.hub.tools()}</header>
         <div class="bq-railw">${railHtml()}</div>

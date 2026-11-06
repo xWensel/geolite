@@ -10,7 +10,7 @@
     quality: "auto", settingsOpen: false, lastTimeStr: "", intro: true, reduce: false, booting: true, skin: "casino",
     hub: "home", ranked: null, run: null, tool: null, hits: 0,
     cursor: true, tips: true, songToast: true, setTab: "general",
-    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiScale: 85, motion: "full", bgAudio: true, curSize: "n", luces: "full", musica: "banda", sonidos: "lounge",
+    panSens: 100, zoomSens: 100, units: "km", contrast: false, colorblind: "off", qSize: "n", shake: true, softFlash: false, flashSeen: false, uiMode: "orig", motion: "full", bgAudio: true, curSize: "n", luces: "full", musica: "banda", sonidos: "lounge",
   };
   /* mientras corre el reloj de una pregunta (phase "asking") no hay pausa: el dock se esconde (body.q-live, css/partida.css) y Esc abre el cartel «El reloj sigue» sin parar nada */
   (() => { let ph = S.phase; Object.defineProperty(S, "phase", { get: () => ph, set: v => { ph = v; document.body.classList.toggle("q-live", v === "asking"); }, enumerable: true }); })();
@@ -35,11 +35,13 @@
       /* v0.3.2: Movimiento en tres niveles (antes "Reducir movimiento" + "Destellos suaves", que se bloqueaba con el primero) */
       S.motion = ["full", "soft", "min"].includes(d.motion) ? d.motion : d.reduce ? "min" : d.softFlash ? "soft" : "full";
       S.reduce = S.motion === "min"; S.softFlash = S.motion !== "full";
-      S.uiScale = d.uiScale === 70 || (d.uiScale < 78) ? 70 : d.uiScale === 100 || (d.uiScale >= 93) ? 100 : 85;   // v0.3.2: Grande (100) / Original (85, antes «Media»; es la de serie desde la v0.3.232) / Compacta (70)
+      /* Bloque G: Pixel perfecto (escala entera) / Original (la de serie, v0.3.243) / Grande (llena la ventana). Los guardados de antes traen uiScale:
+         100 = Grande, 70 = Compacta (que ya no existe: la mas cercana es Pixel perfecto), lo demas = Original */
+      S.uiMode = ["pix", "orig", "big"].includes(d.uiMode) ? d.uiMode : d.uiScale >= 93 ? "big" : d.uiScale > 0 && d.uiScale < 78 ? "pix" : "orig";
     } catch (e) { A.lang = "en"; }
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, volV: 2, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, sonidos: S.sonidos, musica: S.musica, ambiente: S.ambiente, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiScale: S.uiScale, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
+    try { localStorage.setItem(KEY, JSON.stringify({ lang: A.lang, sfx: A.audio.sfxOn, music: A.audio.musicOn, vol: A.audio.vol, volV: 2, prog: S.prog, mode: S.mode, campId: S.campId, quality: S.quality, intro: S.intro, reduce: S.reduce, skin: S.skin, sonidos: S.sonidos, musica: S.musica, ambiente: S.ambiente, cursor: S.cursor, tips: S.tips, tour: S.tour, songToast: S.songToast, setTab: S.setTab, panSens: S.panSens, zoomSens: S.zoomSens, units: S.units, contrast: S.contrast, colorblind: S.colorblind, qSize: S.qSize, uiMode: S.uiMode, shake: S.shake, softFlash: S.softFlash, flashSeen: S.flashSeen, motion: S.motion, bgAudio: S.bgAudio, curSize: S.curSize, luces: S.luces })); } catch (e) { /* sin almacenamiento */ }
   }
 
   const lv = () => S.camp.levels[S.level];
@@ -386,7 +388,7 @@
     document.documentElement.classList.toggle("hi-contrast", S.contrast);
   }
   /* Tamano del texto (v0.3.2): la placa de la pregunta (--ask-scale) y todo lo que se lee en partida (--ts: pistas, bocadillo del crupier, carta grande, ayudas) */
-  function applyQSize() { const k = S.qSize === "xl" ? 1.3 : S.qSize === "l" ? 1.15 : 1, r = document.documentElement.style; r.setProperty("--ask-scale", k); r.setProperty("--ts", k); }
+  function applyQSize() { const k = S.qSize === "xl" ? 1.3 : S.qSize === "l" ? 1.15 : 1, r = document.documentElement.style; r.setProperty("--ask-scale", k); r.setProperty("--ts", k); if (A.icFit) A.icFit(); }   // Bloque G: los iconos medidos en em, a su pixel otra vez
   /* Sonar en segundo plano = no: el juego calla al irte a otra ventana y vuelve al volver */
   function applyBg() { const away = !S.bgAudio && (document.hidden || !document.hasFocus()); if (A.audio.duck) A.audio.duck(away); }
   addEventListener("blur", applyBg); addEventListener("focus", applyBg); document.addEventListener("visibilitychange", applyBg);
@@ -414,7 +416,7 @@
       clearTimeout(tm); rs.classList.remove("armed");
       A.audio.setVol("master", 0.7); A.audio.setVol("music", 1); A.audio.setVol("sfx", 1); A.audio.setVol("amb", 1); A.audio.sfxOn = true; A.audio.setMusic(true); A.audio.unlock();
       S.quality = "auto"; map.setQuality("auto"); S.luces = "full"; A.casa.set("full"); S.ambiente = "hoy"; A.casa.ambiente("hoy"); S.sonidos = "lounge"; A.audio.setSonidos("lounge"); S.musica = "banda"; A.audio.setMusica("banda"); S.motion = "full"; applyMotion(); S.bgAudio = true; applyBg(); S.curSize = "n"; if (A.cursor.setSize) A.cursor.setSize(false); if (A.keys) A.keys.reset(); S.intro = true; S.cursor = true; S.tips = true; S.tour = true; if (A.tour) A.tour.reset(); S.songToast = true; S.shake = true; applyShake(); A.cursor.set(true); A.tt.enable(true);
-      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiScale = 85; setK(); dispatchEvent(new Event("resize"));
+      S.panSens = 100; S.zoomSens = 100; applySens(); S.units = "km"; S.contrast = false; S.colorblind = "off"; applyVisualFX(); S.qSize = "n"; applyQSize(); if (A.mando && A.mando.resetSettings) A.mando.resetSettings(); S.uiMode = "orig"; setK(); dispatchEvent(new Event("resize"));
       save(); A.sfx.card(); syncSettings(); rs.textContent = A.t("set.reset.done"); setTimeout(syncSettings, 2200);
     }; }
   /* Pantalla (v0.2.27): Ventana / Pantalla completa y la escala de la interfaz en todos; en el cliente de escritorio (window.geoliteHost.screenInfo)
@@ -445,14 +447,18 @@
     };
     const monRow = I => I.displays.length < 2 ? null : { vals: I.displays, at: I.displays.findIndex(d => d.id === I.display),
       fmt: d => String(d.n), tip: d => A.t("scr.mon") + " " + d.n + " \u00b7 " + (d.label ? d.label + " \u00b7 " : "") + X([d.w, d.h]), pick: d => host.setScreen({ display: d.id }) };
-    /* Interfaz (v0.3.2): Grande = la escala automatica, que ya llena la ventana; Media y Compacta dejan mas mapa a la vista. Solo sale si la ventana
-       es mayor que el tamano de diseno (a 1280x720 no hay nada que elegir) y Media solo si se distingue de Compacta. Nunca baja de k = 1 */
+    /* Interfaz (Bloque G): Pixel perfecto = la interfaz salta por escalones enteros de pixeles reales (x1, x2, x3...: el arte y la letra pixelada
+       salen enteros); Original = la de serie (85 % de lo que cabe, nunca menos de 1); Grande = la escala continua, que llena la ventana.
+       Una opcion que en esta ventana da el mismo tamano que otra anterior no sale (a 1366x768 Original es Pixel perfecto); si solo queda una, la tarjeta tampoco */
     const uiSync = () => {
-      const card = $("uiCard"), r = kRange(), on = innerWidth >= 900 && innerHeight >= 520 && r.auto >= 1.1; card.classList.toggle("hidden", !on); if (!on) return;
-      const mid = r.auto * 0.85 > Math.max(1, r.auto * 0.7) + 0.04, sg = card.querySelector(".seg"); sg.querySelector('[data-v="85"]').classList.toggle("hidden", !mid); sg.classList.toggle("s3", mid);
-      segSet(sg, String(!mid && S.uiScale === 85 ? 70 : S.uiScale));
+      const card = $("uiCard"), sg = card.querySelector(".seg"), w = innerWidth, h = innerHeight, small = w < 1280 || h < 720, ok = w >= 900 && h >= 520 && !small;
+      const ks = { pix: kPix(w, h), orig: kOrig(w, h), big: kBig(w, h) }, seen = [], shown = {};
+      for (const v of ["pix", "orig", "big"]) { const b = sg.querySelector(`[data-v="${v}"]`), dup = seen.find(x => Math.abs(ks[x] - ks[v]) < 0.02); shown[v] = dup || v; b.classList.toggle("hidden", !!dup); if (!dup) seen.push(v); }
+      const on = ok && seen.length > 1; card.classList.toggle("hidden", !on); if (!on) return;
+      sg.classList.toggle("s3", seen.length === 3); sg.style.setProperty("--n", seen.length);
+      segSet(sg, shown[S.uiMode] || "orig");
     };
-    $("uiCard").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (!b || +b.dataset.v === S.uiScale) return; S.uiScale = +b.dataset.v; save(); A.sfx.ui(); setK(); dispatchEvent(new Event("resize")); sync(); });
+    $("uiCard").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (!b || b.classList.contains("on")) return; S.uiMode = ["pix", "orig", "big"].includes(b.dataset.v) ? b.dataset.v : "orig"; save(); A.sfx.ui(); setK(); dispatchEvent(new Event("resize")); sync(); });
     const sync = () => {
       segSet(seg, cur());
       if (scr && S.settingsOpen) { info = host.screenInfo(); row("scrSize", sizeRow(info)); row("scrMon", monRow(info)); }
@@ -562,11 +568,19 @@
   /* altura ocupada por el pie de pagina: las cartas de herramienta se colocan justo encima */
   /* escala de la interfaz: en pantallas grandes todo el HUD y los menus crecen (k = 1 en 1280x720, hasta 1,85) para aprovechar el espacio */
   const uiK = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--k")) || 1;
-  /* v0.2.27: Ajustes > Pantalla > Interfaz multiplica la k automatica. Nunca baja de 1 (el tamano de diseno: la letra no se hace ilegible) ni pasa
-     de lo que cabe en la ventana (min(w/1280, h/720): mismas proporciones que a 1280x720, asi que nada se solapa ni hace falta desplazarse) */
-  const kRange = (w = innerWidth, h = innerHeight) => { const geo = Math.min(w / 1280, h / 720), auto = Math.max(1, Math.min(1.85, geo)); return { auto, lo: 1 / auto, hi: Math.max(1, geo) / auto }; };
-  /* ventana por debajo del tamano de diseno (960x600 es la menor de la lista de Ajustes): la escala baja de 1 hasta un 0,72 para que las pantallas quepan enteras (antes se quedaba en 1 y la tienda, el Perfil o Ajustes se salian por abajo) */
-  const setK = () => { const w = innerWidth, h = innerHeight, r = kRange(w, h), small = (w < 1280 || h < 720) && w >= 900 && h >= 520, k = small ? Math.max(0.72, Math.min(w / 1280, h / 720)) : (w < 900 || h < 520) ? 1 : Math.max(1, r.auto * Math.min(100, S.uiScale || 100) / 100); document.documentElement.style.setProperty("--k", k.toFixed(3)); };
+  /* Bloque G: la interfaz se disena a 1280x720 (k = 1). Ajustes > Pantalla > Interfaz tiene tres tamanos:
+     - Original (de serie, v0.3.243): el 85 % de lo que cabe, nunca menos de 1 (en 1920x1080, 1,275). Los iconos se ponen igualmente a escala entera
+       de pixeles reales dentro de su hueco (A.icFit, js/icons.js).
+     - Pixel perfecto: escalones ENTEROS de pixeles reales, k * devicePixelRatio = 1, 2, 3... (el mayor que cabe): cada pixel de arte y de letra
+       pixelada ocupa un numero entero de pixeles de la pantalla, tambien con el escalado de Windows.
+     - Grande: la escala continua que llena la ventana (entre 1 y 1,85).
+     Ventana menor que 1280x720 (en pixeles reales con Pixel perfecto): la escala baja en continuo hasta 0,72 para que todo quepa (v0.3.221) */
+  const kBig = (w = innerWidth, h = innerHeight) => Math.max(1, Math.min(1.85, w / 1280, h / 720));
+  const kOrig = (w = innerWidth, h = innerHeight) => Math.max(1, kBig(w, h) * 0.85);
+  const kPix = (w = innerWidth, h = innerHeight) => { const d = devicePixelRatio || 1; return Math.max(1, Math.floor(Math.min(w * d / 1280, h * d / 720) + 0.001)) / d; };
+  const setK = () => { const w = innerWidth, h = innerHeight, d = devicePixelRatio || 1, pix = S.uiMode === "pix", f = pix ? d : 1, small = (w * f < 1280 || h * f < 720) && w >= 900 && h >= 520,
+    k = small ? Math.max(0.72, Math.min(w / 1280, h / 720)) : (w < 900 || h < 520) ? 1 : pix ? kPix(w, h) : S.uiMode === "big" ? kBig(w, h) : kOrig(w, h);
+    document.documentElement.style.setProperty("--k", k.toFixed(4)); };
   /* ajuste fino: si una pantalla escalada (inicio, campamento, veredicto...) no cabe en la ventana, se baja SU k hasta que quepa entera (nunca hay que desplazarse: esto es un juego de escritorio) */
   const FIT = ".hh, .scr, .table, .vd";
   /* huella de lo que decide el ajuste (pantalla, ventana, escala, fuentes y medidas): si no ha cambiado desde el ultimo, el resultado seria el mismo
@@ -654,6 +668,9 @@
   A.fitMark = () => queueMicrotask(() => { const d = $("dlg"); if (!d || !d.isConnected) return; fitNew = dlgNew; fitLast = fitSig(d, d.querySelector(":scope > " + FIT.split(", ").join(", :scope > "))); });
   setK(); A.uiK = uiK; A.fitK = fitK;
   addEventListener("resize", () => { setK(); fitSoon(); fitIntro(); });
+  /* la ventana pasa a otro monitor con otro escalado de Windows: cambia devicePixelRatio (y con el, el escalon entero) aunque no cambie su tamano */
+  const dprWatch = () => { if (!window.matchMedia) return; const m = matchMedia(`(resolution: ${devicePixelRatio || 1}dppx)`); m.addEventListener("change", () => { setK(); fitSoon(); fitIntro(); dprWatch(); }, { once: true }); };
+  dprWatch();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSoon);
   /* pantalla nueva: se ajusta en el mismo fotograma en que se pinta por primera vez (sale ya ajustada, sin salto) y luego dos repasos por si algo llega tarde */
   if (window.MutationObserver && $("dlg")) { const d = $("dlg"); new MutationObserver(m => { if (m.some(x => x.addedNodes.length)) { dlgNew++; clearTimeout(fitT); requestAnimationFrame(fitK); setTimeout(fitK, 260); setTimeout(fitK, 700); } }).observe(d, { childList: true }); }
@@ -1056,7 +1073,7 @@
       ${adv && adv.coins ? `<div class="tk-coins">${A.icon("coin", "cn")}+${adv.coins} ${adv.coins === 1 ? A.pick6("doblón|doubloon|doublon|dobrão|Dublone|doblone||枚金币|도블론|ダブロン|дублон|dublon") : A.T("doblones", "doubloons")}</div>` : ""}
       ${guess ? `<div class="tk-cx l${cxr.level}" data-tt="${A.t("codex.title")}
 ${cxTip(o)}"><span>${A.t("codex.title")}</span><i>${[0, 1, 2].map(i => `<u style="--jd:${jpAt(i)}"></u>`).join("")}</i><b style="--jd:${jpAt(Math.max(0, cxr.level - 1))}">${cxr.added.length ? "+" + cxr.added.length : cxr.level ? "" : "&gt;" + fmtKm(A.codexLimits && o.cid ? A.codexLimits({ id: o.cid[0], cids: o.cid })[0] : 300)}</b></div>` : ""}
-      <button class="btn-ink" id="nextBtn" data-primary><span>${!last ? A.t("btn.next") : S.run ? A.pick6("Terminar ronda|Finish round|Terminer la manche|Concluir rodada|Runde beenden|Termina il round||结束本回合|라운드 종료|ラウンドを終了|Завершить раунд|Zakończ rundę") : A.t("btn.finish")}</span><span class="ar">${A.icon("u_next", "sm")}</span> <kbd class="k-kb">${A.icon("u_enter", "sm")}</kbd><i class="gl" data-gl="a"></i></button>
+      <button class="btn-ink" id="nextBtn" data-primary><span>${!last ? A.t("btn.next") : S.run ? A.pick6("Terminar ronda|Finish round|Terminer la manche|Concluir rodada|Runde beenden|Termina il round||结束本回合|라운드 종료|ラウンドを終了|Завершить раунд|Zakończ rundę") : A.t("btn.finish")}</span><span class="ar">${A.icon("u_next", "sm")}</span> <kbd class="k-kb">${A.icon("u_enter", "sm t24")}</kbd><i class="gl" data-gl="a"></i></button>
     </div>`;
     $("factText").textContent = factLine(o);
     $("plate").classList.remove("hurry");
