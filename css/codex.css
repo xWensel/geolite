@@ -352,8 +352,8 @@ html[data-skin="casino"] .cx-toast { border-radius: 14px; }
 /* ventanas bajas: el indice entero sin desplazarse */
 @media (max-height: 680px) and (min-width: 900px) {
   .cx-head { padding: 12px 0 10px; } .cx-ttl h2 { font-size: 48px; } .cx-tic .ic { width: 40px; height: 40px; }
-  .cx-nav { padding: 8px 10px 10px; } .cx-nav hr { margin: 2px 6px; } .cx-nv { min-height: 40px; padding: 4px 8px 9px 6px; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 8px; }
-  .cx-nvi, .cx-nvi .ic { width: 28px; height: 28px; } .cx-nv .cx-mb { left: 42px; bottom: 3px; height: 3px; }
+  .cx-nav { padding: 8px 10px 10px; } .cx-nav hr { margin: 2px 6px; } .cx-nv { min-height: 40px; padding: 4px 8px 9px 6px; column-gap: 8px; }
+  .cx-nv .cx-mb { left: 42px; bottom: 3px; height: 3px; }
 }
 
 /* ---------- ventanas pequenas y moviles (alli si se desplaza todo) ---------- */
