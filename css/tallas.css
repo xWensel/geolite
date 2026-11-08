@@ -14,12 +14,12 @@
 
 /* Iconos cuya medida depende del sitio (la moneda, la ficha de oro, el dado): la talla y su version dibujada van aqui, juntas, por sitio.
    content: url() cambia la imagen sin tocar el HTML (Chromium/Electron); si en otra escala cabe mejor otra version, A.icFit la cambia en linea. */
-:root body img.ic.ic-coin.cn, :root body .pk-meta .cn, :root body .pk-act em .cn { width: 16px !important; height: 16px !important; content: url(../assets/icons/coin_16.webp); }
-:root body .offer .buy img.ic-coin.cn, :root body .tb-deck em img.ic-coin.cn { width: 24px !important; height: 24px !important; content: url(../assets/icons/coin_24.webp); }
-:root body .tb-coins img.ic-coin.cn { width: 32px !important; height: 32px !important; content: url(../assets/icons/coin_32.webp); }
-:root body img.bq-fi, :root body .bq-wal .bq-fi, :root body .bq-pr.big .bq-fi, :root body img.ck-fi { width: 32px !important; height: 32px !important; content: url(../assets/icons/ficha_oro_32.webp); }
-:root body img.bq-fi.sm, :root body .bq-offer .bq-pr .bq-fi, :root body .bq-pr .bq-fi, :root body .bq-vp .bq-fi, :root body img.ck-fi.sm { width: 24px !important; height: 24px !important; content: url(../assets/icons/ficha_oro_24.webp); }
-:root body .bq-prow .bq-pr .bq-fi, :root body img.ck-fi.rt { width: 16px !important; height: 16px !important; content: url(../assets/icons/ficha_oro_16.webp); }
+:root body img.ic.ic-coin.cn, :root body .pk-meta .cn, :root body .pk-act em .cn { width: 16px !important; height: 16px !important; }
+:root body .offer .buy img.ic-coin.cn, :root body .tb-deck em img.ic-coin.cn { width: 24px !important; height: 24px !important; }
+:root body .tb-coins img.ic-coin.cn { width: 32px !important; height: 32px !important; }
+:root body img.bq-fi, :root body .bq-wal .bq-fi, :root body .bq-pr.big .bq-fi, :root body img.ck-fi { width: 32px !important; height: 32px !important; }
+:root body img.bq-fi.sm, :root body .bq-offer .bq-pr .bq-fi, :root body .bq-pr .bq-fi, :root body .bq-vp .bq-fi, :root body img.ck-fi.sm { width: 24px !important; height: 24px !important; }
+:root body .bq-prow .bq-pr .bq-fi, :root body img.ck-fi.rt { width: 16px !important; height: 16px !important; }
 :root body #chalReroll img.ic-dice { width: 24px !important; height: 24px !important; content: url(../assets/icons/dice_24.webp); }
 :root body .tb-dk img.ic-dice { width: 32px !important; height: 32px !important; content: url(../assets/icons/dice_32.webp); }
 /* dentro de los juegos del casino (.rou) la moneda la mide el propio juego (Lluvia de fichas la escala con su tablero): ahi no hay talla todavia */
