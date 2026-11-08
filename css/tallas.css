@@ -20,8 +20,8 @@
 :root body img.bq-fi, :root body .bq-wal .bq-fi, :root body .bq-pr.big .bq-fi, :root body img.ck-fi { width: 32px !important; height: 32px !important; }
 :root body img.bq-fi.sm, :root body .bq-offer .bq-pr .bq-fi, :root body .bq-pr .bq-fi, :root body .bq-vp .bq-fi, :root body img.ck-fi.sm { width: 24px !important; height: 24px !important; }
 :root body .bq-prow .bq-pr .bq-fi, :root body img.ck-fi.rt { width: 16px !important; height: 16px !important; }
-:root body #chalReroll img.ic-dice { width: 24px !important; height: 24px !important; content: url(../assets/icons/dice_24.webp); }
-:root body .tb-dk img.ic-dice { width: 32px !important; height: 32px !important; content: url(../assets/icons/dice_32.webp); }
+:root body #chalReroll img.ic-dice { width: 24px !important; height: 24px !important; }
+:root body .tb-dk img.ic-dice { width: 32px !important; height: 32px !important; }
 /* dentro de los juegos del casino (.rou) la moneda la mide el propio juego (Lluvia de fichas la escala con su tablero): ahi no hay talla todavia */
 :root body .rou img.ic.ic-coin.cn { width: 1.2em !important; height: 1.2em !important; content: normal; }
 

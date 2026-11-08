@@ -12,17 +12,8 @@ window.AIQ = window.AIQ || {};
   /* Tallas (Bloque G, css/tallas.css): algunos iconos tienen versiones dibujadas a mano a otra rejilla (assets/icons/<id>_<n>.webp), la MISMA pieza
      redibujada a 16, 24, 32 o 48 px. TALLA: id -> [rejilla del original, tallas dibujadas]. Con la clase t16/t24/t32/t48/t64 el icono sale ya en esa talla;
      despues A.icFit (abajo) elige la version y el tamano que mejor caben en su hueco a escala entera de pixeles reales */
-  const TALLA = {
-    a_target: [64, [32]], bet_coin: [96, [32]], bet_dados: [48, [32]], 
-    bet_globo: [48, [32]], bet_rasca: [48, [32]], bet_red: [48, [32]], bet_wheel: [48, [32]],
-    boss_hat: [48, [24]], chip_b: [64, [32, 48]], chip_g: [64, [32, 48]], chip_k: [64, [32, 48]], chip_o: [64, [32, 48]], chip_p: [64, [32, 48]],
-    chip_r: [64, [32, 48]], chips: [64, [32]], coupon: [64, [48]], crosshair: [64, [48]], dice: [64, [24, 32]],
-    k_sea: [64, [32]], m_patch: [48, [32]], medal_bronze: [64, [32]], medal_gold: [64, [32]], medal_silver: [64, [32]],
-    sonar: [48, [32]], sup_cafe: [48, [32]], sup_seguro: [48, [32]], t_battle: [48, [24]], t_capital: [48, [24]], t_city: [48, [24]],
-    t_country: [48, [24]], t_curio: [48, [24]], t_event: [48, [24]], t_landmark: [48, [24]], t_nature: [48, [24]], t_person: [48, [24]],
-    tonic: [64, [32]], u_back: [48, [24, 32]], u_enter: [48, [24, 32]], u_home: [48, [24, 32]], u_minus: [48, [24, 32]], u_pause: [48, [24, 32]],
-    u_plus: [48, [24, 32]], u_quit: [48, [24, 32]], u_set: [48, [24, 32]], u_star: [48, [16, 24, 32]], worldmap: [64, [32]],
-  };
+  const TALLA = {};   // sin versiones redibujadas: se usan los dibujos originales y A.icFit solo los dimensiona y centra
+
   A.TALLA = TALLA;
   /* lo que un icono puede pasarse de su hueco, en pixeles reales: 2 (uno por lado: 32 en un hueco de 30,6, los botones en 1080p) o el 5 % en los
      grandes (un objeto de 48 a x2 en el hueco de 91,8 del Campamento en 1080p): el dibujo lleva margen transparente y el hueco va dentro de su caja */
