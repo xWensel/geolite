@@ -124,11 +124,11 @@ body.cx-on .cx-toast { display: none !important; }                     /* su car
 .cx-medal > b { font-family: var(--sans); font-weight: 400; font-size: 26px; line-height: .95; white-space: nowrap; font-variant-numeric: tabular-nums; } .cx-medal > b i { font-style: normal; font-size: 18px; color: var(--gx-txt-2); }
 .cx-medal.bronze > b { color: var(--b1); } .cx-medal.silver > b { color: var(--s1); } .cx-medal.gold > b { color: var(--g2); }
 .cx-medal > span { font-size: 18px; line-height: 1.05; color: var(--gx-txt); overflow-wrap: break-word; } .cx-medal > em { font-style: normal; font-size: 18px; color: var(--gx-txt-2); }
-.cx-sum-c { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 18px; }
+.cx-sum-c { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 248px), 1fr)); gap: 8px 18px; }
 /* los cuatro tipos, en columna como en caja: icono, nombre ..... cifra */
-.cx-chip2 { display: grid; grid-template-columns: 48px minmax(0, max-content) minmax(6px, 1fr) auto; min-width: 0; align-items: baseline; gap: 8px; padding: 0; background: none; box-shadow: none; }
+.cx-chip2 { display: grid; grid-template-columns: 48px minmax(min-content, max-content) minmax(6px, 1fr) auto; min-width: 0; align-items: baseline; gap: 8px; padding: 0; background: none; box-shadow: none; }
 .cx-chip2::after { content: ""; grid-column: 3; grid-row: 1; border-bottom: 2px dotted currentColor; opacity: .32; transform: translateY(-5px); }
-.cx-chip2 .ic { width: 48px; height: 48px; align-self: center; } .cx-chip2 b { min-width: 0; font-family: var(--sans); font-weight: 400; font-size: 18px; line-height: 1; overflow-wrap: break-word; }
+.cx-chip2 .ic { width: 48px; height: 48px; align-self: center; } .cx-chip2 b { min-width: 0; font-family: var(--sans); font-weight: 400; font-size: 18px; line-height: 1; overflow-wrap: normal; hyphens: manual; }
 .cx-chip2 em { grid-column: 4; font-style: normal; font-size: 20px; color: var(--cx1); white-space: nowrap; font-variant-numeric: tabular-nums; } .cx-chip2 em i { font-style: normal; font-size: 18px; color: var(--gx-txt-2); }
 .cx-mtip { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 6px 8px; pointer-events: none; white-space: nowrap; clip-path: var(--gx-notch);
   background: rgba(5, 18, 16, .95); box-shadow: inset 0 0 0 2px var(--gx-o), inset 0 0 0 4px rgba(78, 227, 193, .55); } .cx-mtip.hidden { display: none; } .cx-mtip.flip { transform: translateX(calc(-100% - 28px)); }
