@@ -69,6 +69,7 @@ window.AIQ = window.AIQ || {};
 
   /* ================================================================== datos */
   const E = {}, order = [], chain = {}, fame = {}, neQ = {}, neEn = {};   // fame: nivel*100 + puesto 0-99 del banco (menos = mas famoso); neQ/neEn: pais Natural Earth -> QID / nombre ingles
+  const FUSION = A.CODEX_FUSION || {}, fus = id => FUSION[id] || id;   // ficha duplicada -> la que se queda
   let world = null, map = null, store = { unlocked: {}, seen: {} };
   const listeners = [];
 
@@ -234,6 +235,17 @@ window.AIQ = window.AIQ || {};
       (chain[id] || []).concat(e.country ? chain["c:" + e.country] || [] : []).forEach(x => { if (E[x]) reach.add(x); });
     });
     for (let i = order.length - 1; i >= 0; i--) if (!reach.has(order[i])) { delete E[order[i]]; order.splice(i, 1); }
+    // 8) fichas duplicadas (A.CODEX_FUSION, data/codex.js): la que sobra desaparece, lo que colgaba de ella pasa a la que se queda y lo ya ganado se traslada
+    for (const a in FUSION) {
+      const t = FUSION[a]; if (!E[t]) continue;
+      chain[t] = (chain[t] || []).concat((chain[a] || []).filter(x => x !== t && !(chain[t] || []).includes(x)));
+      [["", ""], ["~h", "~h"], ["~k", "~k"]].forEach(([sa, st]) => {
+        const u = store.unlocked[a + sa]; if (u) { const v = store.unlocked[t + st]; if (!v || (u.tier || 0) > (v.tier || 0)) store.unlocked[t + st] = u; delete store.unlocked[a + sa]; }
+        if (store.seen[a + sa]) { store.seen[t + st] = 1; delete store.seen[a + sa]; }
+        if (E[a + sa]) { delete E[a + sa]; const i = order.indexOf(a + sa); if (i >= 0) order.splice(i, 1); }
+      });
+      if (store.best && store.best[a] != null) { if (store.best[t] == null || store.best[a] < store.best[t]) store.best[t] = store.best[a]; delete store.best[a]; }
+    }
     // los personajes sin nada relacionado no existen; el resto se numera
     order.forEach((id, i) => { E[id].no = i + 1; });
   }
@@ -252,13 +264,14 @@ window.AIQ = window.AIQ || {};
   A.codexUnlock = (q, km) => {
     const out = { added: [], level: 0 };
     if (km == null || !q.cid) return out;
-    const first = q.cid.map(c => E[c]).find(Boolean), sc = (first && SCALE[first.type]) || 1;   // las pistas llevan antes su propio id ("clue:<id>") y luego el del lugar
+    const cids = q.cid.map(fus);
+    const first = cids.map(c => E[c]).find(Boolean), sc = (first && SCALE[first.type]) || 1;   // las pistas llevan antes su propio id ("clue:<id>") y luego el del lugar
     const level = km <= LIM[2] * sc ? 3 : km <= LIM[1] * sc ? 2 : km <= LIM[0] * sc ? 1 : 0;
     /* tu mejor distancia por lugar (km de verdad, sin la escala de las zonas enormes): el «anillo casi» de la ficha la usa (js/acunar.js) */
-    const B = store.best || (store.best = {}); let mejor = 0; for (const cid of q.cid) if (E[cid] && !E[cid].parent && (B[cid] == null || km < B[cid])) { B[cid] = Math.round(km * 10) / 10; mejor = 1; }
+    const B = store.best || (store.best = {}); let mejor = 0; for (const cid of cids) if (E[cid] && !E[cid].parent && (B[cid] == null || km < B[cid])) { B[cid] = Math.round(km * 10) / 10; mejor = 1; }
     out.level = level; if (!level) { if (mejor) save(); return out; }
     const lateral = x => (E[x].type === "event" || E[x].type === "battle") ? 2 : 3;
-    for (const cid of q.cid) {
+    for (const cid of cids) {
       const e = E[cid]; if (!e) continue;
       unlockOne(cid, level, out.added);
       if (level >= 2 && E[cid + "~h"]) unlockOne(cid + "~h", level, out.added);
@@ -274,7 +287,7 @@ window.AIQ = window.AIQ || {};
   /* tarjetas de cada continente [desbloqueadas, total] (logros por continente) */
   const byCont = () => { const o = {}; ["eu", "as", "af", "na", "sa", "oc"].forEach(c => { const s = sumStats(contGroups(c)); o[c] = [s.u, s.t]; }); return o; };
   const emitStats = () => { if (A.ach) { const st = stats(); A.ach.emit("codex", { u: st.u, t: st.t, by: byType(), cont: byCont() }); } };
-  A.codexLimits = e => { const id = (e && e.cids && e.cids.find(c => E[c])) || (e && (e.parent || e.id)), sc = (E[id] && SCALE[E[id].type]) || 1; return LIM.map(x => x * sc); };   // cids: las pistas llevan antes "clue:<id>"
+  A.codexLimits = e => { const id = (e && e.cids && e.cids.map(fus).find(c => E[c])) || (e && (e.parent || e.id)), sc = (E[id] && SCALE[E[id].type]) || 1; return LIM.map(x => x * sc); };   // cids: las pistas llevan antes "clue:<id>"
   A.continent = continent; A.continentMap = continentMap;
   function stats() { let u = 0; order.forEach(id => { if (isUnlocked(id)) u++; }); return { u, t: order.length }; }
   A.codexStats = stats;
@@ -1340,12 +1353,12 @@ window.AIQ = window.AIQ || {};
 
   A.codex = {
     init(w, m) { world = w; map = m; load(); build(); },
-    open, close, isOpen, stats, entry: id => E[id], has: id => !!E[id],
+    open, close, isOpen, stats, entry: id => E[fus(id)], has: id => !!E[fus(id)],
     /* ¿esta el monton en la esquina? (el crupier no habla encima: js/dealer.js) */
     toastOn() { const el = $("cxToast"), S = A.core && A.core.S; return !!el && !el.classList.contains("hidden") && !el.classList.contains("out") && el.classList.contains("pile") && el.getClientRects().length > 0 && !!S && S.phase === "reveal"; },
     toastAside() { const el = $("cxToast"); if (el && el._leave && !el.classList.contains("hidden") && !el.classList.contains("out")) el._leave(); },   // empieza otra pregunta: el monton se aparta y deja el mapa libre
     unlocked: () => order.filter(isUnlocked), total: () => order.length,
-    isUnlocked: id => !!store.unlocked[id],
+    isUnlocked: id => !!store.unlocked[fus(id)],
     _load: (id, lang) => loadContent(E[id], lang || A.wlang()), _toast: ids => toast(ids),
     _index: () => index(), _groupStats: key => gStats(index().gs[key]), _map: () => map, _ui: () => ui,
     ids: () => order.slice(),

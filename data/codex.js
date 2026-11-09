@@ -140,8 +140,8 @@ window.AIQ = window.AIQ || {};
     ["vietnam-war", E, "Vietnam War", "Guerra de Vietnam", 21.0285, 105.8542, ["hanoi", "ho-chi-minh-city"]],
     ["korean-war", E, "Korean War", "Guerra de Corea", 39.0392, 125.7625, ["pyongyang", "seoul"]],
     ["apartheid", E, "Apartheid", "Apartheid", -25.7479, 28.2293, ["pretoria", "cape-town"]],
-    ["suez-canal-opening", E, "Suez Canal", "Canal de Suez", 30.5, 32.35, ["suez-canal", "cairo"]],
-    ["building-the-panama-canal", E, "Panama Canal", "Canal de Panamá", 9.08, -79.68, ["panama-canal", "panama-city"]],
+    ["suez-canal-opening", E, "Opening of the Suez Canal", "Inauguración del Canal de Suez", 30.5, 32.35, ["suez-canal", "cairo"]],
+    ["building-the-panama-canal", E, "Building of the Panama Canal", "Construcción del Canal de Panamá", 9.08, -79.68, ["panama-canal", "panama-city"]],
     ["california-gold-rush", E, "California Gold Rush", "Fiebre del oro de California", 38.5816, -121.4944, ["san-francisco", "sacramento", "golden-gate-bridge"]],
     ["great-depression", E, "Great Depression", "Gran Depresión", 40.7128, -74.006, ["new-york-city"]],
     ["renaissance", E, "Renaissance", "Renacimiento", 43.7696, 11.2558, ["rome", "milan", "leaning-tower-of-pisa"]],
@@ -201,7 +201,7 @@ window.AIQ = window.AIQ || {};
     ["fado", Q, "Fado", "Fado", 38.7223, -9.1393, ["lisbon"]],
     ["reggae", Q, "Reggae", "Reggae", 18.0179, -76.8099, ["c:Jamaica", "rose-hall-great-house"]],
     ["salsa-music", Q, "Salsa music", "Salsa", 23.1136, -82.3666, ["havana", "san-juan", "cali"]],
-    ["kilimanjaro-snows", Q, "Mount Kilimanjaro", "Nieves del Kilimanjaro", -3.0674, 37.3556, ["mount-kilimanjaro", "nairobi"]],
+    ["kilimanjaro-snows", Q, "Snows of Kilimanjaro", "Nieves del Kilimanjaro", -3.0674, 37.3556, ["mount-kilimanjaro", "nairobi"]],
     ["himalaya", Q, "Himalayas", "Himalaya", 28.0, 86.0, ["mount-everest", "kathmandu", "thimphu", "k2"]],
     ["dead-sea-scrolls-cave", Q, "Dead Sea Scrolls", "Manuscritos del mar Muerto", 31.7413, 35.4592, ["dead-sea", "dead-sea-scrolls", "jerusalem"]],
   ].filter(e => e[2]);
@@ -216,4 +216,7 @@ window.AIQ = window.AIQ || {};
     if (A.CODEX_AMBIG.includes(k) && tail) k = A.CODEX_ALIAS[k + "-" + A.slug(tail)] || k + "-" + A.slug(tail);
     return A.CODEX_ALIAS[k] || k;
   };
+  /* Fichas duplicadas: el mismo lugar con dos fichas (la capital de una ciudad-estado y su pais, la ciudad y su capital, dos puntos de un mismo asedio).
+   * { ficha que desaparece: ficha que se queda }. Las preguntas que apuntaban a la primera desbloquean la segunda (js/codex.js: A.codexUnlock) y las partidas guardadas se trasladan. */
+  A.CODEX_FUSION = { "monaco-q235": "c:Monaco", "singapore": "c:Singapore", "vatican-city": "c:Vatican", "taipei": "taipei-q1867", "siege-of-constantinople-q27900": "siege-of-constantinople", "great-hanshin-earthquake": "kobe-earthquake" };
 })(window.AIQ);

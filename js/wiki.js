@@ -133,7 +133,7 @@ window.AIQ = window.AIQ || {};
     return out;
   };
   /* dato curioso corto (descripcion + 1.a frase) para las notas de campo; se usa en la Aventura */
-  A.factOf = o => { const id = o.cid && o.cid[0]; return id ? A.cleanFact(A.wiki.factOf(id, A.wlang())) : ""; };
+  A.factOf = o => { const id0 = o.cid && o.cid[0], id = id0 && ((A.CODEX_FUSION || {})[id0] || id0); return id ? A.cleanFact(A.wiki.factOf(id, A.wlang())) : ""; };
   const loadShort = lang => (shortC[lang] ? Promise.resolve(shortC[lang]) : fetch(`data/wiki/${lang}-s.json`).then(r => (r.ok ? r.json() : {})).then(j => (shortC[lang] = j), () => ({})));
   A.wiki.loadShort = loadShort; loadShort((A.wlang && A.wlang()) || "es");
 })(window.AIQ);
