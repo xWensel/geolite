@@ -75,3 +75,9 @@ img, canvas { image-rendering: pixelated; }
 .toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 120px); padding: 10px 16px; background: var(--inkd); box-shadow: inset 0 0 0 2px var(--gold); font-family: var(--mono); font-size: 16px; color: var(--gold); transition: transform .3s cubic-bezier(.2, 1.4, .4, 1); z-index: 60; max-width: calc(100vw - 32px); text-align: center; }
 .toast.on { transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { .dot { animation: none; } * { transition: none !important; } }
+
+/* v0.4.70: la cabecera comun de las tres mesas (el crupier, moderacion y contenido) */
+.mnav { display: flex; flex-wrap: wrap; gap: 2px; margin-left: 8px; }
+.mnav a { font-family: var(--mono); font-size: 8px; text-transform: uppercase; text-decoration: none; color: var(--sub); padding: 8px 10px 7px; box-shadow: inset 0 0 0 1px var(--line); background: var(--panel2); white-space: nowrap; }
+.mnav a:hover { color: var(--ink); background: #2e2350; }
+.mnav a[aria-current="page"] { color: var(--inkd); background: var(--gold); box-shadow: none; }

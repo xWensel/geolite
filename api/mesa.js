@@ -12,7 +12,12 @@
                                               su partida), cat (accion de Comodin), vest (ropa en directo { hueco: valor | null } o null = la suya) o tras (trastada)
      GET ?log=1                           ->  lo ultimo que has dicho (200 frases, 7 dias)
      POST { op: "cam", sid } / GET ?rtc=sid / POST { op: "rtc", sid, sdp } / POST { op: "camoff", sid }
-                                          ->  la camara: se la pides, recoges su oferta WebRTC, le devuelves tu respuesta y cuelgas
+                                          ->  la camara: se la pides (el jugador la acepta o no: la oferta llega con deny), recoges su oferta WebRTC, le
+                                              devuelves tu respuesta y cuelgas
+     POST { op: "shot", sid, v } / GET ?shot=sid  ->  v0.4.70: las fotos de respaldo (si el video no conecta): v true las pide, false las corta; GET la ultima
+     POST { op: "hand", sid, t, x, y }    ->  v0.4.70: el guante sin video (con las fotos): t tap | move | hide, x e y de 0 a 1 en su ventana
+   v0.4.70: cada orden lleva su numero (q, de vivo:seq) y el juego cuenta en su latido la ultima que ha recibido (st.ak) y la ultima frase que ha
+   empezado a decir (st.dk): la mesa sabe si ha llegado. El GET de la lista deja vivo:open 8 s: con la mesa abierta, todas las partidas laten cada 4 s.
    Clasificacion (moderacion de las tablas de api/submit.js):
      GET ?lb=adv-all&o=0                  ->  { ok, rows: [{ id, name, score, ip, ban }], count }  50 filas desde el puesto o, con el id y la red cifrada
      GET ?bans=1                          ->  { ok, ids: [...], ips: [...] }  los vetados
@@ -29,9 +34,21 @@ const POS = ["tl", "tr", "bl", "br", "c"];   // donde sale el crupier (la mesa n
 const HUMOR = ["contento", "tenso", "picado", "aburrido", "admirado"];
 const CAT = ["espera", "levanta", "anda", "salta", "zarpa", "caricia", "regana", "duerme", "despierta"];   // A.comodin.act
 const TRAS = ["mapa", "apagon", "ventana", "guante", "sello", "ticket", "cartas", "telon", "moneda", "ficha", "siesta", "desfile", "creditos"];   // A.trastadas.run; creditos (v0.3.235): los creditos de la Ascension V sin jubilar (antes, un boton temporal en Ajustes)
-const SLOT = /^[a-z_]{1,16}$/;
+const SLOT = /^[a-z_]{1,16}$/, PID = /^[a-z0-9_]{1,24}$/, LI = /^[A-Za-z0-9_]{1,40}#\d{1,3}$/;
+const PTR = ["ret", "pin", "lin", "dia"], GATO = ["gpelo", "gojos", "gpaj", "gpieza"], HUEVO = ["cae", "hum", "baile"];   // v0.4.70: puntero, ropa de Comodin y huevos de la casa
+/* un objeto { hueco: valor | null } con huecos de la lista (o null = lo suyo) */
+const slots = (v, ok) => {
+  if (v === null) return null;
+  if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
+  const o = {}; for (const k of Object.keys(v)) { const x = v[k]; if (!ok.includes(k) || !(x === null || (typeof x === "string" && PID.test(x)))) return undefined; o[k] = x; }
+  return o;
+};
 /* lo que llega en una accion, ya validado (o undefined si no vale) */
 function actVal(a, v) {
+  if (a === "ptr") return slots(v, PTR);
+  if (a === "gato") return slots(v, GATO);
+  if (a === "mesa") return v === null || (typeof v === "string" && PID.test(v)) ? v : undefined;
+  if (a === "huevo") return HUEVO.includes(v) ? v : undefined;
   if (a === "gest") return typeof v === "string" && GEST.test(v) ? v : undefined;
   if (a === "face") return typeof v === "string" && WORD.test(v) && v ? v : undefined;
   if (a === "gaze") return v === null || v === "duda" || v === -1 || v === 1 || v === 2 ? v : undefined;
@@ -69,8 +86,9 @@ module.exports = async (req, res) => {
         return res.status(200).json({ ok: true, count: +count || 0, rows: ids.map((id, i) => ({ id, name: nm[i] || "—", score: sc[i], ip: ips[i] || "", ban: bid.includes(id) || (!!ips[i] && bip.includes(ips[i])) })) });
       }
       if (req.query && req.query.bans) { const [ids, ips] = await kv.pipeline([["SMEMBERS", "ban:id"], ["SMEMBERS", "ban:ip"]]); return res.status(200).json({ ok: true, ids: ids || [], ips: ips || [] }); }
+      if (req.query && req.query.shot) { const id = String(req.query.shot); if (!SID.test(id)) return res.status(400).json({ ok: false }); const [o] = await kv.pipeline([["GET", "vivo:shot:" + id]]); let s = null; try { s = JSON.parse(o); } catch (e) { /* aun no */ } return res.status(200).json({ ok: true, img: s ? s.img : null, at: s ? s.at : 0 }); }
       if (req.query && req.query.log) { const [l] = await kv.pipeline([["LRANGE", "vivo:log", 0, 199]]); return res.status(200).json({ ok: true, log: (l || []).map(x => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean) }); }
-      const [, ids] = await kv.pipeline([["ZREMRANGEBYSCORE", "vivo:idx", 0, now - 80000], ["ZRANGE", "vivo:idx", 0, 199, "WITHSCORES"]]);
+      const [, ids] = await kv.pipeline([["ZREMRANGEBYSCORE", "vivo:idx", 0, now - 80000], ["ZRANGE", "vivo:idx", 0, 199, "WITHSCORES"], ["SET", "vivo:open", 1, "EX", 8]]);   // la mesa abierta: todas laten mas rapido
       const sids = [], at = {}; for (let i = 0; i < (ids || []).length; i += 2) { sids.push(ids[i]); at[ids[i]] = +ids[i + 1]; }
       let list = [];
       if (sids.length) {
@@ -101,50 +119,52 @@ module.exports = async (req, res) => {
     const sid = b.sid, wk = "vivo:w:" + sid;
     if (b.op === "watch") { await kv.pipeline([["SET", wk, 1, "EX", 45]]); return res.status(200).json({ ok: true }); }
     if (b.op === "unwatch") { await kv.pipeline([["DEL", wk]]); return res.status(200).json({ ok: true }); }
+    /* v0.4.70: todas las ordenes van por aqui: llevan su numero (q) para que el juego confirme en su latido (st.ak) que le han llegado */
+    const ik = "vivo:in:" + sid;
+    const order = async (msg, o = {}) => {
+      const [st, q] = await kv.pipeline([["GET", "vivo:s:" + sid], ["INCR", "vivo:seq"]]);
+      if (o.needLive && !st) return { st: null, q: 0 };
+      let who = ""; try { who = JSON.parse(st).n || ""; } catch (x) { /* ya no esta */ }
+      const log = o.log ? [["LPUSH", "vivo:log", JSON.stringify({ sid, who, t: o.log, e: msg.e || "", q, at: now })], ["LTRIM", "vivo:log", 0, 199], ["EXPIRE", "vivo:log", 604800]] : [];
+      await kv.pipeline([...(o.pre || []), ["RPUSH", ik, JSON.stringify(Object.assign(msg, { q, at: now }))], ["EXPIRE", ik, o.ttl || 90], ["SET", wk, 1, "EX", 45], ...log]);
+      return { st, q };
+    };
+    const sent = r => res.status(200).json({ ok: true, live: !!r.st, q: r.q });
     if (b.op === "cam" || b.op === "camoff" || b.op === "rtc") {     // la camara: pedirla, colgarla o devolver la respuesta WebRTC al juego
-      const ik = "vivo:in:" + sid; let msg;
+      let msg;
       if (b.op === "rtc") { const sdp = typeof b.sdp === "string" ? b.sdp : ""; if (!sdp || sdp.length > 20000) return res.status(400).json({ ok: false }); msg = { k: "rtc", sdp }; }
       else msg = { k: b.op };
-      await kv.pipeline([...(b.op === "cam" ? [["DEL", "vivo:rtc:" + sid]] : []), ["RPUSH", ik, JSON.stringify(msg)], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
-      return res.status(200).json({ ok: true });
+      return sent(await order(msg, { pre: b.op === "cam" ? [["DEL", "vivo:rtc:" + sid], ["DEL", "vivo:shot:" + sid]] : [] }));
+    }
+    if (b.op === "shot") return sent(await order({ k: "shot", v: !!b.v }));   // las fotos de respaldo: pedirlas (se renuevan cada 20 s) o cortarlas
+    if (b.op === "hand") {                                           // el guante por el latido (cuando no hay video ni canal directo)
+      const t = ["tap", "move", "hide"].includes(b.t) ? b.t : "", x = +b.x, y = +b.y;
+      if (!t || (t !== "hide" && !(x >= 0 && x <= 1 && y >= 0 && y <= 1))) return res.status(400).json({ ok: false });
+      return sent(await order({ k: "hand", t, x: +x.toFixed(4) || 0, y: +y.toFixed(4) || 0 }, { ttl: 20 }));
     }
     if (b.op === "fx") {                                             // una ficha: el efecto cae al momento en su partida
       const fx = String(b.fx || ""); if (!FX.includes(fx)) return res.status(400).json({ ok: false });
       const v = typeof b.v === "boolean" ? b.v : Number.isInteger(b.v) && b.v >= 0 && b.v <= 5 ? b.v : undefined;   // interruptor o contador
-      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
-      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "fx", fx, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
-      return res.status(200).json({ ok: true, live: !!st });
+      return sent(await order({ k: "fx", fx, v }));
     }
     if (b.op === "ch") {                                             // un reto del juego: se monta en su ronda al momento y se queda hasta quitarlo
       const ch = String(b.ch || ""); if (ch !== "*" && !CH.includes(ch)) return res.status(400).json({ ok: false });
       const v = ch === "*" ? 0 : Number.isInteger(b.v) && b.v >= 0 && b.v <= 3 ? b.v : 0;
-      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
-      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "ch", ch, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
-      return res.status(200).json({ ok: true, live: !!st });
+      return sent(await order({ k: "ch", ch, v }));
     }
     if (b.op === "gift") {                                           // fichas de oro para ponerse guapo: la orden llega por el latido y se cobra una sola vez (id)
       const n = b.n === undefined ? 300 : b.n; if (!Number.isInteger(n) || n < 1 || n > 5000) return res.status(400).json({ ok: false });
-      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
-      if (!st) return res.status(200).json({ ok: true, live: false });   // ya no esta: no se guarda nada para nadie
-      let who = ""; try { who = JSON.parse(st).n || ""; } catch (x) { /* ya no esta */ }
-      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "gift", n, id: crypto.randomBytes(6).toString("hex"), at: now })], ["EXPIRE", ik, 300], ["SET", wk, 1, "EX", 45], ["LPUSH", "vivo:log", JSON.stringify({ sid, who, t: "Regalo de la casa: " + n + " fichas de oro", e: "", at: now })], ["LTRIM", "vivo:log", 0, 199], ["EXPIRE", "vivo:log", 604800]]);
-      return res.status(200).json({ ok: true, live: true });
+      return sent(await order({ k: "gift", n, id: crypto.randomBytes(6).toString("hex") }, { needLive: true, ttl: 300, log: "Regalo de la casa: " + n + " fichas de oro" }));   // si ya no esta, no se guarda nada para nadie
     }
-    if (b.op === "act") {                                            // el crupier y Comodin, al momento: gesto, cara, mirada, humor, Comodin, ropa o trastada
+    if (b.op === "act") {                                            // el crupier y Comodin, al momento: gesto, cara, mirada, humor, Comodin, ropa, puntero, mesa, huevo o trastada
       const a = String(b.a || ""), v = actVal(a, b.v === undefined ? undefined : b.v); if (v === undefined) return res.status(400).json({ ok: false });
-      const ik = "vivo:in:" + sid, [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
-      await kv.pipeline([["RPUSH", ik, JSON.stringify({ k: "act", a, v, at: now })], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45]]);
-      return res.status(200).json({ ok: true, live: !!st });
+      return sent(await order({ k: "act", a, v }));
     }
     if (b.op === "say") {
       const t = [...String(b.t || "").normalize("NFC").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/[<>]/g, "").replace(/\s+/g, " ").trim()].slice(0, 160).join("");
-      const e = WORD.test(b.e || "") ? b.e || "" : "", g = GEST.test(b.g || "") ? b.g : "", s = STY.includes(b.s) ? b.s : "", p = POS.includes(b.p) ? b.p : "";
+      const e = WORD.test(b.e || "") ? b.e || "" : "", g = GEST.test(b.g || "") ? b.g : "", s = STY.includes(b.s) ? b.s : "", p = POS.includes(b.p) ? b.p : "", li = LI.test(b.li || "") ? b.li : "";
       if (!t) return res.status(400).json({ ok: false });
-      const msg = JSON.stringify({ t, e, g, s, p, at: now }), ik = "vivo:in:" + sid;
-      const [st] = await kv.pipeline([["GET", "vivo:s:" + sid]]);
-      let who = ""; try { who = JSON.parse(st).n || ""; } catch (x) { /* ya no esta */ }
-      await kv.pipeline([["RPUSH", ik, msg], ["EXPIRE", ik, 90], ["SET", wk, 1, "EX", 45], ["LPUSH", "vivo:log", JSON.stringify({ sid, who, t, e, at: now })], ["LTRIM", "vivo:log", 0, 199], ["EXPIRE", "vivo:log", 604800]]);
-      return res.status(200).json({ ok: true, live: !!st });
+      return sent(await order({ t, e, g, s, p, ...(li ? { li } : {}) }, { log: t }));   // li: una frase del juego por su clave: le llega en SU idioma (t, en espanol, si su version no la tiene)
     }
     res.status(400).json({ ok: false });
   } catch (e) { res.status(502).json({ ok: false, reason: "kv" }); }

@@ -3094,6 +3094,8 @@ window.AIQ = window.AIQ || {};
      nombre, ni el tutorial, ni el arranque; si en 90 s no le dejan hablar, se pierde. o: { mood, face, gest } */
   const LIVE_TAG = "EN DIRECTO|LIVE|EN DIRECT|AO VIVO|LIVE|IN DIRETTA|EN VIVO|直播中|생방송|生放送|В ЭФИРЕ|NA ŻYWO";
   let liveT = 0, liveAt = 0;
+  /* v0.4.70: por que la mesa del crupier tiene que esperar ahora (lo cuenta su latido: la mesa lo ensena) */
+  D.liveWait = () => held ? "nombre" : atTable ? "casino" : napping || napWant ? "siesta" : tourOn() ? "tutorial" : A.core && A.core.S.booting ? "arranque" : "";
   D.live = (t, o = {}, until = Date.now() + 90000) => {
     clearTimeout(liveT); if (!t || Date.now() > until) return false;
     if (held || atTable || napping || napWant || tourOn() || !A.crupier || (A.core && A.core.S.booting)) { liveT = setTimeout(() => D.live(t, o, until), 1500); return false; }   // tampoco encima del aviso de fotosensibilidad del arranque
@@ -3102,7 +3104,7 @@ window.AIQ = window.AIQ || {};
     let screen;
     if (!D.on && !D.host) { if (D.onHome && (homeCorner = homeCorner || pickCorner())) screen = undefined; else screen = true; }
     const pos = o.pos || (A.chfx && A.chfx.liveOn && A.chfx.liveOn() ? "bl" : "");   // con efectos de la mesa puestos (tapan toda la pantalla) habla por delante de ellos: si la mesa no elige sitio, abajo a la izquierda
-    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, sty: o.sty || "", pos, force: true, live: true, screen, hold: 700 + t.length * 22, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); } });   // el clic del foco al entrar en antena
+    D.say(t, { mood: o.mood || "sly", face: o.face, gesture: o.gest || null, sty: o.sty || "", pos, force: true, live: true, screen, hold: 700 + t.length * 22, start: () => { if (Date.now() - liveAt > 20000 && A.sfx.spot) A.sfx.spot(); liveAt = Date.now(); if (o.started) try { o.started(); } catch (e) { /* la mesa: solo cuenta */ } } });   // el clic del foco al entrar en antena
     return true;
   };
   /* tanda 16: LA SIESTA DEL CRUPIER. Duerme en su esquina de la partida, sin globo y sin reaccionar a nada (napping calla D.say); nap(false) lo despierta sin

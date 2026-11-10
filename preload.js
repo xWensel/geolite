@@ -22,6 +22,8 @@ contextBridge.exposeInMainWorld("geoliteHost", {
   steamAvailable: () => ipcRenderer.invoke("steam:available"),
   /* la mesa del crupier mira tu partida (js/vivo.js): identificador de la captura de ESTA ventana del juego */
   vivoCam: () => ipcRenderer.invoke("vivo:cam"),
+  /* v0.4.70: una foto de ESTA ventana (JPEG en base64, 960 px como mucho) para las fotos de respaldo cuando el video no conecta */
+  vivoShot: () => ipcRenderer.invoke("vivo:shot"),
   /* { account, app } de Steam Cloud, o null sin Steam (Ajustes > Datos) */
   steamCloud: () => ipcRenderer.invoke("steam:cloud"),
   steamUnlock: (id) => ipcRenderer.invoke("steam:unlock", id),

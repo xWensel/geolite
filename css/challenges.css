@@ -556,6 +556,21 @@ html.reduce-motion #vivoGift { transition: none; }
 #vivoGlove.tap .vg-ring { animation: vgRing .6s ease-out .06s; }
 @keyframes vgRing { from { width: 4px; height: 4px; opacity: 1; } to { width: 64px; height: 64px; opacity: 0; } }
 html.reduce-motion #vivoGlove.tap .vg-ring, html.reduce-motion #vivoEye i { animation: none; }
+/* v0.4.70: «Cortar» en el piloto (lo unico del piloto que se puede tocar) y el permiso antes de mirar: la carta de laton del regalo, con el crupier y tres botones */
+#vivoEye button { pointer-events: auto; margin-left: 6px; padding: 6px 9px; font: inherit; font-size: 16px; color: #fff3f4; background: #a8142e; border: 0; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .3), 0 2px 0 rgba(0, 0, 0, .45); cursor: pointer; }
+#vivoEye button:hover, #vivoEye button:focus-visible { background: #e8283a; outline: 0; }
+#vivoAsk { position: fixed; left: 50%; top: 72px; z-index: 2147483300; width: min(640px, calc(100vw - 32px)); display: flex; align-items: flex-start; gap: 16px; padding: 14px 18px 16px 14px; background: #1b1409; color: #f6e7bd; box-shadow: inset 0 0 0 3px #d9a441, 0 6px 0 rgba(0, 0, 0, .5); transform: translate(-50%, -160%); transition: transform .35s steps(6); }
+#vivoAsk.on { transform: translate(-50%, 0); }
+html.reduce-motion #vivoAsk { transition: none; }
+#vivoAsk img { width: 104px; height: 104px; flex: none; image-rendering: pixelated; }
+#vivoAsk .va-t { display: grid; gap: 8px; min-width: 0; }
+#vivoAsk b { font-family: var(--mono); font-weight: 400; font-size: 16px; line-height: 1.15; letter-spacing: .04em; color: #d9a441; text-transform: uppercase; }
+#vivoAsk span { font-family: var(--sans); font-size: 24px; line-height: 1.1; }
+#vivoAsk .va-b { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+#vivoAsk button { font-family: var(--mono); font-size: 16px; text-transform: uppercase; padding: 9px 14px; border: 0; cursor: pointer; color: #f6e7bd; background: #3a2a12; box-shadow: inset 0 0 0 2px #6e4514, 0 3px 0 rgba(0, 0, 0, .5); }
+#vivoAsk button[data-r="si"] { color: #1d0a3d; background: #fdd742; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25), 0 3px 0 rgba(0, 0, 0, .5); }
+#vivoAsk button:hover, #vivoAsk button:focus-visible { outline: 0; filter: brightness(1.15); }
+#vivoAsk button:active { transform: translateY(2px); }
 
 
 /* donde sale el crupier cuando habla la mesa (js/dealer.js, o.pos): esquinas o centro grande, por encima de todo */

@@ -324,7 +324,8 @@ window.AIQ = window.AIQ || {};
   const has = (s, id) => CATS[s] && CATS[s].includes(id);
   const owned = (s, id) => id === "casa" || !!st().own[s + ":" + id];
   let TRY = null;                                                         // «Probar en el mapa» (la tienda): la pieza se ve aunque aun no sea tuya
-  const current = s => { if (TRY && TRY.s === s) return TRY.id; const w = st().wear[s]; return has(s, w) && owned(s, w) ? w : "casa"; };
+  let MESA = {};                                                          // v0.4.70: lo que le pone la mesa del crupier (js/vivo.js), hueco a hueco
+  const current = s => { if (MESA[s] && has(s, MESA[s])) return MESA[s]; if (TRY && TRY.s === s) return TRY.id; const w = st().wear[s]; return has(s, w) && owned(s, w) ? w : "casa"; };
   const full = (s, id) => (id === "casa" ? 0 : (DEF[s][id] || {}).p || 0);
   const price = (s, id) => { const f = full(s, id), o = A.escaparate && A.escaparate.off ? A.escaparate.off("p:" + s + ":" + id) : 0; return o && f ? Math.round(f * (1 - o) / 10) * 10 : f; };   // con la ganga del escaparate
   function wear(s, id) { if (!has(s, id) || !owned(s, id)) return false; st().wear[s] = id; A.profile.save(); return true; }
@@ -386,6 +387,7 @@ window.AIQ = window.AIQ || {};
     diana: (c, x, y, t, id, P, o) => { const D = DIA[id]; if (!D) return false; D.draw(c, x, y, t, P, o); return true; }, parts, DIA_MS,
     thumb, list: s => CATS[s].slice(),
     tryOn: (s, id) => { TRY = has(s, id) ? { s, id } : null; }, tryOff: () => { TRY = null; },
+    mesa: o => { MESA = {}; if (o && typeof o === "object") SLOTS.forEach(s => { if (o[s] && has(s, o[s])) MESA[s] = o[s]; }); },   // v0.4.70: null = lo suyo
     /* el truco de pruebas (js/truco.js): todo tuyo */
     _todo: () => { const p = st(); SLOTS.forEach(s => CATS[s].forEach(id => { if (id !== "casa") p.own[s + ":" + id] = p.own[s + ":" + id] || Date.now(); })); A.profile.save(); },
   };

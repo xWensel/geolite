@@ -446,7 +446,8 @@ onmessage = e => { try {
   A.vestuario = {
     items: ITEMS, SLOTS, BUY, colors: COLORS.map(c => c.k), get, owned, worn, wearing, wear, takeOff, buy, give, price, full, keyOf,
     with: withItem, atlasFor, thumb, ready: prep, apply, preview, previewing: () => !!prev,
-    gato: { worn: gWorn, look: gLook, apply: gApply, slots: GSLOTS },             // v0.4.60: Comodin (js/comodin.js lo dibuja)
+    gato: { worn: gWorn, look: gLook, apply: gApply, slots: GSLOTS },
+    hex: (slot, k) => { const c = BY[k]; const v = c && (c[slot] || c.traje); return v ? v[0] : null; },   // v0.4.70: la muestra de un color (la mesa del crupier)             // v0.4.60: Comodin (js/comodin.js lo dibuja)
     name: id => A.pick6(get(id).n), desc: id => A.pick6(get(id).d),
     count: () => ITEMS.filter(i => !i.casa && owned(i.id)).length,
     _base: () => base, _scan: scan, _px: () => PX.map(Boolean),
