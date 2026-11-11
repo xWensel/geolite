@@ -102,6 +102,9 @@ html.reduce-motion .du-st *, html.reduce-motion .du-st *::before, html.reduce-mo
 .du-st .regl span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; } .du-st .regl .ic { width: 32px; height: 32px; } .du-st .regl b { font-weight: 400; color: var(--gx-ttl); }
 .du-st .ft { grid-column: 1 / 13; grid-row: 3; position: relative; }
 .du-st .ft .seatw { position: absolute; left: 0; bottom: -4px; width: 128px; height: 128px; }
+/* revision final: el crupier va a su tamano unico y ya no cabe en el pie de 132 px. En la sala, tu ficha acaba encima de su chistera (el papel ya no se estira hasta el pie), el baja hasta el borde del escenario y su globo sale a su lado, por debajo del tablero, con la cola hacia el */
+.du-st .lob .socio { align-self: start; } .du-st .lob .socio .gx-paper { height: auto; grid-template-rows: none; }
+.du-st .lob .ft .seatw { bottom: -32px; } .du-st .ft .seatw .dealer.big .dl-bubble[data-tail="l"] { --bbt: 0px; max-width: 440px; padding-bottom: 12px; padding-left: calc(var(--bbl) + 16px); }
 .du-st .ft .gx-acts { position: absolute; right: 0; bottom: 0; align-items: center; gap: 28px; }
 
 /* ---------------------------------------------------------------- 2 · CARA A CARA */

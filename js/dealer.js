@@ -2754,7 +2754,7 @@ window.AIQ = window.AIQ || {};
   function busyRects() {
     const out = [], mark = r => { if (r && r.width >= 2 && r.height >= 2) out.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }); };
     const root = $("dlg"), rg = document.createRange(), seen = n => { const c = getComputedStyle(n); return c.visibility !== "hidden" && c.opacity !== "0"; };
-    for (const host of [root, $("hud"), $("dock")].filter(Boolean)) {
+    for (const host of [root, $("hud"), $("dock"), $("codex")].filter(Boolean)) {   // la Enciclopedia es pantalla propia (fuera de #dlg): sin ella, se sentaba encima de la lista de continentes
       host.querySelectorAll("img, canvas, svg, button, input, select, [role=button], [data-tt]").forEach(e => { if (!e.closest(".dealer") && seen(e)) mark(e.getBoundingClientRect()); });
       host.querySelectorAll("div, section, ul, article").forEach(e => {
         const r = e.getBoundingClientRect(); if (r.width < 200 || r.height < 120 || r.width > innerWidth - 40) return;
@@ -2777,7 +2777,7 @@ window.AIQ = window.AIQ || {};
     const W = Math.ceil(innerWidth / ASIDE_G), H = Math.ceil(innerHeight / ASIDE_G), busy = new Uint8Array(W * H), M = 10;
     const mark = r => { if (!r || r.width < 2 || r.height < 2) return; const x0 = Math.max(0, Math.floor((r.left - M) / ASIDE_G)), x1 = Math.min(W - 1, Math.floor((r.right + M) / ASIDE_G)), y0 = Math.max(0, Math.floor((r.top - M) / ASIDE_G)), y1 = Math.min(H - 1, Math.floor((r.bottom + M) / ASIDE_G)); for (let y = y0; y <= y1; y++) busy.fill(1, y * W + x0, y * W + x1 + 1); };
     const root = $("dlg"), rg = document.createRange(), seen = n => { const c = getComputedStyle(n); return c.visibility !== "hidden" && c.opacity !== "0"; };
-    for (const host of [root, $("hud"), $("dock")].filter(Boolean)) {
+    for (const host of [root, $("hud"), $("dock"), $("codex")].filter(Boolean)) {   // la Enciclopedia es pantalla propia (fuera de #dlg): sin ella, se sentaba encima de la lista de continentes
       host.querySelectorAll("img, canvas, svg, button, input, select, [role=button], [data-tt]").forEach(e => { if (!e.closest(".dealer") && seen(e)) mark(e.getBoundingClientRect()); });
       host.querySelectorAll("div, section, ul, article").forEach(e => {               // los bordes de los paneles: dentro de uno o fuera, nunca a caballo
         const r = e.getBoundingClientRect(); if (r.width < 200 || r.height < 120 || r.width > innerWidth - 40) return;
@@ -3047,6 +3047,7 @@ window.AIQ = window.AIQ || {};
     ensure();
     if (speaking()) { pend = null; leaving = false; clearTimeout(leaveT); } else { clear(); D.busy = false; bubble.classList.remove("on"); }
     D.host = host || null; if (host) host.appendChild(el); else $("app").appendChild(el);
+    if (host && host.dataset.tail) bubble.dataset.tail = host.dataset.tail; else delete bubble.dataset.tail;   // el asiento dice por donde sale la cola (css/bocadillo.css): a su lado, hacia el
     el.classList.toggle("big", !!host); el.classList.remove("camp", "screen"); if (host) el.classList.remove("inline", "home", ...HOME_CORNERS);   // lo del Campamento o del Perfil no le sigue
     fitCorner();                                                      // v0.3.35: en un hueco ajeno se quita la altura y el tamano que le dio la esquina (en la pausa flotaba 76 px); de vuelta, los recalcula
   };
