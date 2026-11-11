@@ -127,6 +127,8 @@ window.AIQ = window.AIQ || {};
       const oldMin = this.minS;
       this.minS = Math.max(W / (BX1 - BX0), H / (BY1 - BY0));
       this.maxS = this.minS * 120;
+      /* camara rota (el mapa se creo con la ventana oculta: sin topes, home() daba NaN y el mapa se quedaba en negro toda la sesion): se vuelve a casa */
+      if (!isFinite(this.view.s + this.view.cx + this.view.cy)) { this.anim = null; this.tv = null; this.inertia = null; this.drift = null; this.view = this.home(); }
       if (oldMin && Math.abs(this.minS - oldMin) > 1e-6) { const k = this.minS / oldMin; this.view.s *= k; if (this.tv) this.tv.s *= k; if (this.anim) { this.anim.from.s *= k; this.anim.to.s *= k; } if (this.drift) this.drift.base.s *= k; }   // se conserva el nivel de zoom al cambiar el tamano
       this.view.s = clamp(this.view.s, this.minS, this.maxS);
       this._clamp(this.view);
