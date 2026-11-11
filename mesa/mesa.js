@@ -58,7 +58,6 @@
   /* las fichas: rayo uno por clic; interruptores (se quedan); contadores x1-x5 */
   const CHIPS = [["rayo", "Rayo", "shot"], ["tormenta", "Tormenta", "on"], ["lluvia", "Lluvia", "on"], ["apagon", "Apagón", "on"], ["terremoto", "Terremoto", "on"], ["humo", "Humo", "on"], ["cristal", "Cristal roto", "n"], ["huellas", "Huellas", "n"], ["ventana", "Error falso", "n"]];
   const KIND_ = Object.fromEntries(CHIPS.map(c => [c[0], c[2]])), NAME_ = Object.fromEntries(CHIPS.map(c => [c[0], c[1]]));
-  const DEB = [["frost", "Escarcha", 0], ["frosted", "Esmerilado", 0], ["tiles", "Teselas", 0], ["signal", "Señal rota", 0], ["card", "Carta", 0], ["myopia", "Miopía", 1], ["blur", "Borroso", 1], ["flicker", "Parpadeo", 1], ["mosaic", "Píxeles", 1], ["battery", "Batería", 1]];
   /* los retos de la Aventura (A.CHAL): id, nombre, tipo, icono, que hace, niveles */
   const RETOS = [
     ["shaky","Letras temblorosas","text","ch_shaky","El nombre baila y tiembla: cuesta leerlo.","Bailan y tiemblan|Más fuerte|Se dispersan y vuelven"],
@@ -117,16 +116,42 @@
     ["flagwet","Bandera mojada","flag","ch_flagwet","La bandera está pintada a la acuarela y le cae agua: los colores se corren hasta hacerse barro.","Barro en 8 s|En 6 s|En 4 s, chorrea más"]
   ];
   const RMAP = Object.fromEntries(RETOS.map(r => [r[0], r]));
-  const RK = [["sel", "Los que más sorprenden"], ["map", "Mapa"], ["text", "Nombre"], ["ptr", "Puntero"], ["wall", "Pantalla"], ["rule", "Reglas"], ["flag", "Banderas"], ["on", "Puestos"]];
-  const RNOTE = { trap: "cambia las preguntas al repartirlas: se nota desde la ronda siguiente", storm: "no hace nada en el modo infinito" };
-  const SEL = ["ctrlz", "crack", "hang", "battery", "card", "frost", "cmirror", "flip", "stormnight", "clouds", "myopia", "ghost", "spread", "trap", "babel", "signal"];
-  const PACKS = [
-    ["Cuarta pared", "Cristal roto, No responde, Batería baja y La carta que se cuela.", [["crack", 2], ["hang", 1], ["battery", 1], ["card", 2]]],
-    ["Pesadilla del casino", "Noche de tormenta, Rayos y Terremoto: el mapa se desmorona.", [["stormnight", 1], ["lightning", 1], ["quake", 2]]],
-    ["Resaca", "Miopía, mapa borroso, luces parpadeantes y pulso: nada está quieto.", [["myopia", 2], ["blur", 1], ["flicker", 1], ["tremble", 1]]],
-    ["Mundo al revés", "Mundo del revés, controles invertidos y continentes barajados.", [["flip", 3], ["cmirror", 1], ["spread", 3]]],
-    ["Hielo y humo", "Escarcha, humo de sala y lluvia: hay que limpiar para ver.", [["frost", 2], ["clouds", 1], ["rain", 1]]],
-    ["Espías", "Torre de Babel, pasaporte falso, sin país y pregunta trampa: el nombre miente.", [["babel", 1], ["fakepass", 1], ["nocountry", 1], ["trap", 1]]]
+  /* EFECTOS (voto del 11-nov: «todo lo que se pone encima de su pantalla, junto y con sentido»): una ficha por idea. Cae encima de TODA su
+     pantalla y en cualquier sitio (menus, Campamento, pregunta; tambien en el Clasico). Cada una dice como se manda: con la ficha del juego
+     (op fx: golpe, ON o x1-x5) o con el reto de pantalla completa (op ch, x1-x3; js/chfx.js X.mesaSet). Apagon y Tormenta juntan los dos por niveles.
+     Antes habia gemelos (la ficha Lluvia y el reto Lluvia hacian lo mismo en la misma capa): ahora cada cosa sale una sola vez. */
+  const SCR = [
+    { id: "rayo", n: "Rayo", d: "Le cae un rayo en la pantalla. Uno por clic.", shot: "rayo" },
+    { id: "tormenta", n: "Tormenta", d: "Lluvia y rayos; a más nivel, de noche: solo ve cuando cae un rayo.", L: ["Lluvia y rayos", "Y de noche", "Noche cerrada"], lv: [[["fx", "tormenta", true]], [["fx", "tormenta", true], ["ch", "stormnight", 1]], [["fx", "tormenta", true], ["ch", "stormnight", 3]]] },
+    { id: "lluvia", n: "Lluvia", d: "La lluvia le empaña la pantalla; la limpia agitando el ratón.", on: "lluvia" },
+    { id: "humo", n: "Humo", d: "Humo de puro que entra por los dos lados; lo aparta con el ratón.", on: "humo" },
+    { id: "apagon", n: "Apagón", d: "Se le va la luz: primero baja y solo ve cerca del puntero; a tope, se va del todo.", L: ["Luz baja: ve cerca del puntero", "Solo una linterna", "Se va la luz del todo"], lv: [[["ch", "dark", 1]], [["ch", "dark", 3]], [["fx", "apagon", true]]] },
+    { id: "parpadeo", n: "Parpadeo", d: "Las luces se le van cuando menos se lo espera.", ch: "flicker" },
+    { id: "terremoto", n: "Terremoto", d: "Toda su pantalla tiembla.", on: "terremoto" },
+    { id: "cristal", n: "Cristal roto", d: "Golpes en su cristal: mueve el mapa para ver bajo las grietas. Hasta ×5.", n5: "cristal" },
+    { id: "huellas", n: "Huellas", d: "Huellas de dedos en su cristal. Hasta ×5.", n5: "huellas" },
+    { id: "ventana", n: "Error falso", d: "Ventanas de error falsas que tiene que cerrar. Hasta ×5.", n5: "ventana" },
+    { id: "bateria", n: "Batería", d: "Su pantalla se queda sin batería poco a poco.", ch: "battery" },
+    { id: "borroso", n: "Borroso", d: "Todo desenfocado.", ch: "blur" },
+    { id: "miopia", n: "Miopía", d: "Nítido solo donde apunta; el resto, borroso.", ch: "myopia" },
+    { id: "pixeles", n: "Píxeles", d: "Todo a muy baja resolución.", ch: "mosaic" },
+    { id: "gris", n: "Desteñido", d: "Su pantalla pierde los colores; a tope, en negativo.", ch: "flaggray" },
+    { id: "neon", n: "Neón", d: "Las luces del casino le cambian los colores de toda la pantalla.", L: ["Los colores se tuercen", "Más", "Colores de feria"], ch: "flaghue" },
+  ];
+  const SMAP = Object.fromEntries(SCR.map(s => [s.id, s]));
+  const SCRUSED = new Set(SCR.flatMap(s => s.ch ? [s.ch] : s.lv ? s.lv.flat().filter(o => o[0] === "ch").map(o => o[1]) : []));   // los retos que manda Efectos
+  /* los retos de la pregunta que ya no salen: gemelos de un efecto (lo mismo, en la misma capa) o que no se ven en directo */
+  const RTWIN = { rain: "lluvia", clouds: "humo", quake: "terremoto", crack: "cristal", hang: "ventana", lightning: "tormenta", flagblur: "borroso", flagdark: "apagon" };
+  const ROUT = { wrongborders: "casi no se nota y tú no lo ves", frosted: "lo mismo que Borroso con Miopía", riddle: "cambia la pregunta: no se ve como broma", nocountry: "casi no se nota", fakepass: "casi no se nota", silence: "no se ve: solo si usa herramientas", trap: "llega en la ronda siguiente, no ahora", flagback: "solo en rondas de bandera", flagpuzzle: "solo en rondas de bandera", flagwind: "solo en rondas de bandera", flagwet: "solo en rondas de bandera" };
+  const RG = { map: "map", wall: "map", text: "text", ptr: "ptr", rule: "rule" };   // Ctrl+Z, Escarcha y La carta actuan sobre el mapa de su pregunta
+  const QRET = RETOS.filter(r => RG[r[2]] && !SCRUSED.has(r[0]) && !RTWIN[r[0]] && !ROUT[r[0]]);
+  const RK = [["map", "El mapa"], ["text", "El nombre"], ["ptr", "Su puntero"], ["rule", "Las reglas"]];
+  const RNOTE = { storm: "no hace nada en el modo infinito", cmirror: "también fuera de la pregunta" };
+  const COMBOS = [
+    ["Cuarta pared", "Golpes en su cristal, huellas, una ventana de error y la batería que se acaba.", [["cristal", 2], ["huellas", 2], ["ventana", 1], ["bateria", 1]]],
+    ["Pesadilla del casino", "Tormenta de noche, terremoto y luces que se van.", [["tormenta", 2], ["terremoto", 1], ["parpadeo", 1]]],
+    ["Resaca", "Miopía, todo borroso y luces que parpadean.", [["miopia", 2], ["borroso", 1], ["parpadeo", 1]]],
+    ["Fin de fiesta", "Luz baja, humo y lluvia.", [["apagon", 1], ["humo", 1], ["lluvia", 1]]],
   ];
   /* el crupier: caras y gestos (ids de js/crupier-data.js) */
   const CARA = { sly: "normal", laugh: "risa", angry: "enfado", shock: "sorpresa", wink: "guiño", suspicious: "sospecha", smug: "chulería", sad: "tristeza", nervous: "nervios",
@@ -291,7 +316,7 @@
     const L = $("list");
     if (!list.length) { L.innerHTML = `<div class="empty"><div class="cam"><div class="dface" id="emptyFace"></div></div><b>Nadie jugando</b>Ahora mismo no hay partidas abiertas. El crupier baraja solo.</div>`; const h = $("emptyFace"); if (h && !h._s) { h._s = mount(h); h._s.play("shuffle"); } return; }
     L.innerHTML = list.map(x => {
-      const st = x.st, F = fxs[x.sid], C = chs[x.sid], nc = C ? Object.keys(C).length : 0, nf = nFx(F), pend = (said[x.sid] || []).some(e => e.st === "sent" && Date.now() - e.at > 6000), ago = Math.round((Date.now() - (x.t || Date.now())) / 1000);
+      const st = x.st, F = fxs[x.sid], C = chs[x.sid], nc = nQ(C), nf = nScr(F, C), pend = (said[x.sid] || []).some(e => e.st === "sent" && Date.now() - e.at > 6000), ago = Math.round((Date.now() - (x.t || Date.now())) / 1000);
       return `<button class="seat${x.sid === sel ? " sel" : ""}" data-sid="${x.sid}" type="button">${x.w ? `<i class="ear" title="Te está escuchando: su partida pregunta cada 2 s"></i>` : ""}
         <i class="flag" style="background-image:url(${flagOf(st.l)})"></i>
         <span class="nm"><b class="${st.n ? "" : "anon"}">${esc(st.n || "Sin nombre")}</b><i>${esc(LANGS[st.l] || st.l)}</i></span>
@@ -348,7 +373,7 @@
       <h3>${esc(where(st))}</h3>
       ${doing(st) ? `<div class="q">${doing(st)}</div>` : ""}
       <div class="facts">${F.map(([k, v]) => `<div class="fct"><span>${k}</span><b>${v}</b></div>`).join("")}</div>
-      ${msg ? `<div>${m === "ask" || m === "conn" || m === "wait" ? '<i class="spin"></i>' : ""}<div class="q" style="margin-top:8px"><b>${msg[0]}</b></div><p class="why">${msg[1]}</p></div>` : `<p class="why">${st.cam ? "«Ver su pantalla» le pide permiso; mientras mires, a él le sale «TE ESTÁ MIRANDO» y puede cortarlo." : "Su pantalla solo se ve en la versión de escritorio. Lo de aquí es lo que cuenta su partida cada pocos segundos."}</p>`}
+      ${msg ? `<div>${m === "ask" || m === "conn" || m === "wait" ? '<i class="spin"></i>' : ""}<div class="q" style="margin-top:8px"><b>${msg[0]}</b></div><p class="why">${msg[1]}</p></div>` : `<p class="why">${st.cam ? "«Ver su pantalla» le pide permiso; mientras mires, a él le sale «TE ESTÁ MIRANDO»." : "Su pantalla solo se ve en la versión de escritorio. Lo de aquí es lo que cuenta su partida cada pocos segundos."}</p>`}
     </div>`;
   }
   async function camStart() {
@@ -431,9 +456,8 @@
   function paintPuesto() {
     const el = $("puesto"); if (!sel) { el.innerHTML = `<span class="lb">Lo que le tienes puesto</span><span class="none">Elige una partida.</span>`; return; }
     const F = fxOf(sel), C = chOf(sel), P = putOf(sel), it = [];
-    ["lluvia", "tormenta", "apagon", "terremoto", "humo"].forEach(k => { if (F[k]) it.push([`/mesa/fichas/${k}.webp`, NAME_[k], "", () => fxSet(k, false)]); });
-    ["cristal", "huellas", "ventana"].forEach(k => { if (F[k]) it.push([`/mesa/fichas/${k}.webp`, NAME_[k], "×" + F[k], () => fxSet(k, 0)]); });
-    Object.keys(C).forEach(id => { const r = RMAP[id]; if (r) it.push([`../assets/icons/${r[3]}.webp`, r[1], pips(C[id]), () => retoSet(id, 0)]); });
+    SCR.forEach(s => { const v = sLv(s, F, C); if (v) it.push([sArt(s), s.n, s.on ? "" : s.n5 ? "×" + v : "nivel " + v, () => scrSet(s, 0)]); });
+    Object.keys(C).forEach(id => { if (SCRUSED.has(id)) return; const r = RMAP[id]; if (r) it.push(["../assets/icons/" + r[3] + ".webp", r[1], pips(C[id]), () => retoSet(id, 0)]); });
     if (P.vest) it.push(["", "Ropa de la mesa", "", () => vestSend(null)]);
     if (P.gato) it.push(["", "Comodín vestido", "", () => gatoSend(null)]);
     if (P.ptr) it.push(["", "Puntero", Object.values(P.ptr).filter(Boolean).map(v => A.punteros ? A.punteros.name(Object.keys(P.ptr).find(s => P.ptr[s] === v), v) : v).join(", "), () => ptrSend(null)]);
@@ -458,7 +482,7 @@
   const DTABS = [["efectos", "Efectos", "/mesa/fichas/rayo.webp"], ["retos", "Retos", "../assets/icons/ch_flip.webp"], ["trastadas", "Trastadas", "../assets/icons/vivo_hand.webp"], ["crupier", "El crupier", "../assets/icons/dealer_mini_s.webp"], ["vestuario", "Vestuario", ""], ["regalo", "Regalo", "../assets/icons/ficha_oro.webp"]];
   let dtab = LS.get("tab", "efectos"); if (!DTABS.some(t => t[0] === dtab)) dtab = "efectos";
   function paintTabs() {
-    const nCh = sel ? Object.keys(chOf(sel)).filter(id => !DEB.some(d => d[0] === id)).length : 0, nf = sel ? nFx(fxOf(sel)) + DEB.filter(d => chOf(sel)[d[0]]).length : 0, P = sel ? putOf(sel) : {}, nv = ["vest", "gato", "ptr", "mesa"].filter(k => P[k]).length, nc = ["humor"].filter(k => P[k]).length + (P.gaze != null ? 1 : 0);
+    const nCh = sel ? nQ(chOf(sel)) : 0, nf = sel ? nScr(fxOf(sel), chOf(sel)) : 0, P = sel ? putOf(sel) : {}, nv = ["vest", "gato", "ptr", "mesa"].filter(k => P[k]).length, nc = ["humor"].filter(k => P[k]).length + (P.gaze != null ? 1 : 0);
     const bd = { efectos: nf, retos: nCh, vestuario: nv, crupier: nc };
     $("dtabs").innerHTML = DTABS.map(([k, n, img], i) => `<button class="dtab" type="button" role="tab" aria-selected="${k === dtab}" data-k="${k}" title="Alt+${i + 1}">${img ? `<img src="${img}" alt="">` : ""}${n}${bd[k] ? `<small>${bd[k]}</small>` : ""}</button>`).join("");
     QA(".dtab", $("dtabs")).forEach(b => b.onclick = () => showTab(b.dataset.k));
@@ -487,20 +511,63 @@
   }
 
   /* ---- efectos: fichas y debufos */
-  function dEfectos() {
-    const el = $("dEfectos"), F = sel ? fxOf(sel) : null, C = sel ? chOf(sel) : {}, off = !sel || noRetos();
-    el.innerHTML = `<div class="sec"><h4>Fichas <small>Caen sobre toda su pantalla, esté donde esté, y se quedan hasta que las quites</small></h4><div class="tray" id="tray">${CHIPS.map(([id, n, k]) => { const v = F ? F[id] : null, lit = k === "on" ? !!v : k === "n" ? v > 0 : false; return `<button class="chip${lit ? " lit" : ""}${k === "on" && v ? " on" : ""}" data-fx="${id}" type="button" title="${n}"${ndis()}><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b>${k === "on" ? "ON" : k === "n" && v ? "×" + v : ""}</b></button>`; }).join("")}</div><span class="hint"><em>Clic</em> poner · <em>Clic derecho</em> quitar · el rayo cae a cada clic · cristal, huellas y error falso suman hasta ×5</span></div>
-      <div class="sec"><h4>Debufos <small>Los retos visuales de la Aventura hechos ficha, ×1 a ×3</small></h4>${noRetos() ? `<div class="warn">Está en el Clásico: los debufos solo existen en la Aventura y el Reto diario.</div>` : ""}<div class="tray" id="tray2">${DEB.map(([id, n, g]) => { const v = C[id] || 0; return `<button class="chip${v ? " lit" : ""}" data-deb="${id}" type="button" title="${n}${g ? " · toda su pantalla" : " · el mapa de su pregunta"}"${off ? " disabled" : ""}><img src="/mesa/fichas/${id}.webp" alt=""><span>${n}</span><b>${v ? "×" + v : ""}</b></button>`; }).join("")}</div><span class="hint">Miopía, borroso, parpadeo, píxeles y batería cubren toda su pantalla; el resto, el mapa de su pregunta.</span></div>`;
-    wireLR(el, ".chip[data-fx]", (c, d) => chipHit(c, d));
-    wireLR(el, ".chip[data-deb]", (c, d) => { if (!sel || c.disabled) return; const id = c.dataset.deb, v = (chOf(sel)[id] || 0) + d; if (v < 0 || v > 3) return deny(c); fly(c, `/mesa/fichas/${id}.webp`, d < 0); retoSet(id, v); });
+  /* ---- efectos: todo lo que cae encima de su pantalla (SCR), con su nivel sacado de lo que le hay puesto */
+  const sMax = s => s.shot ? 0 : s.on ? 1 : s.n5 ? 5 : 3;
+  const sArt = s => "/mesa/fichas/" + (s.shot || s.on || s.n5 || (s.ch && { flicker: "flicker", battery: "battery", blur: "blur", myopia: "myopia", mosaic: "mosaic" }[s.ch]) || s.id) + ".webp";
+  const opOn = (F, C, [k, id, v]) => k === "fx" ? F[id] === v : (C[id] || 0) === v;
+  function sLv(s, F, C) {
+    if (s.shot) return 0; if (s.on) return F[s.on] ? 1 : 0; if (s.n5) return F[s.n5] || 0; if (s.ch) return C[s.ch] || 0;
+    for (let i = s.lv.length - 1; i >= 0; i--) if (s.lv[i].every(o => opOn(F, C, o))) return i + 1;
+    return s.lv.some(L => L.some(([k, id]) => k === "fx" ? F[id] : C[id])) ? 1 : 0;
   }
-  async function chipHit(c, d) {
-    if (!sel || c.disabled) return; const id = c.dataset.fx, k = KIND_[id], F = fxOf(sel); let v;
-    if (k === "shot") { if (d < 0) return; v = undefined; }
-    else if (k === "on") { if (d < 0 && !F[id]) return deny(c); v = d > 0 ? !F[id] : false; }
-    else { const n = F[id] + d; if (n < 0 || n > 5) return deny(c); v = n; }
-    fly(c, `/mesa/fichas/${id}.webp`, k === "on" ? !v : k === "n" ? d < 0 : false);
-    fxSet(id, v);
+  const sLevels = s => s.L || (s.ch && RMAP[s.ch] && RMAP[s.ch][5] ? RMAP[s.ch][5].split("|") : null);
+  const sTip = s => { const L = sLevels(s); return s.n + " — " + s.d + (L ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : ""); };
+  const nScr = (F, C) => F || C ? SCR.filter(s => sLv(s, F || {}, C || {}) > 0).length : 0;
+  const nQ = C => C ? Object.keys(C).filter(id => !SCRUSED.has(id)).length : 0;
+  /* poner un efecto a un nivel: manda solo lo que cambia (en Apagon y Tormenta, la ficha y el reto que toquen) */
+  function scrSet(s, v, quiet) {
+    if (!sel) return; const sid = sel, F = fxOf(sid), C = chOf(sid), ops = [];
+    const label = s.shot ? s.n : v ? s.n + ": " + (s.on ? "puesto" : "×" + v) : s.n + ": quitado";
+    if (s.shot) ops.push(["fx", s.shot, undefined]);
+    else if (s.on) ops.push(["fx", s.on, !!v]);
+    else if (s.n5) ops.push(["fx", s.n5, v]);
+    else if (s.ch) ops.push(["ch", s.ch, v]);
+    else {
+      const want = v ? s.lv[v - 1] : [], keys = [];
+      s.lv.flat().forEach(([k, id]) => { if (!keys.some(x => x[0] === k && x[1] === id)) keys.push([k, id]); });
+      keys.forEach(([k, id]) => { const w = want.find(o => o[0] === k && o[1] === id), val = w ? w[2] : k === "fx" ? false : 0; if (!opOn(F, C, [k, id, val])) ops.push([k, id, val]); });
+    }
+    ops.forEach(([k, id, val], i) => {
+      const last = i === ops.length - 1, ok = quiet || !last ? "" : s.shot ? "¡Rayo! Cae en 1-2 s." : label + ".";
+      if (k === "fx") { if (val !== undefined) F[id] = val; fxAt[sid] = Date.now(); order(sid, { op: "fx", fx: id, v: val }, i ? "" : label, { ok }); }
+      else { if (val) C[id] = val; else delete C[id]; chAt[sid] = Date.now(); order(sid, { op: "ch", ch: id, v: val }, i ? "" : label, { ok }); }
+    });
+    paintPuesto(); paintDrawer(); paintSeats();
+  }
+  function scrHit(c, d) {
+    if (!sel || c.disabled) return; const s = SMAP[c.dataset.s], F = fxOf(sel), C = chOf(sel), now = sLv(s, F, C);
+    if (s.shot) { if (d < 0) return; fly(c, sArt(s), false); return scrSet(s); }
+    const v = s.on ? (d > 0 ? (now ? 0 : 1) : 0) : now + d;
+    if (v < 0 || v > sMax(s) || (s.on && d < 0 && !now)) return deny(c);
+    fly(c, sArt(s), v < now); scrSet(s, v);
+  }
+  const comboOn = (cb, F, C) => cb[2].every(([id, v]) => sLv(SMAP[id], F, C) === v);
+  function comboSet(cb) {
+    if (!sel) return; const F = fxOf(sel), C = chOf(sel), on = comboOn(cb, F, C);
+    clink(); spr.play(on ? "snap" : "magic_pass");
+    cb[2].forEach(([id, v]) => scrSet(SMAP[id], on ? 0 : v, true));
+    toast(cb[0] + ": " + (on ? "quitado" : "puesto") + ".", 1800);
+  }
+  function dEfectos() {
+    const el = $("dEfectos"), F = sel ? fxOf(sel) : {}, C = sel ? chOf(sel) : {};
+    const chip = s => { const v = sel ? sLv(s, F, C) : 0; return '<button class="chip' + (v ? " lit" : "") + (s.on && v ? " on" : "") + '" data-s="' + s.id + '" type="button" title="' + esc(sTip(s)) + '"' + ndis() + '><img src="' + sArt(s) + '" alt=""><span>' + esc(s.n) + "</span><b>" + (s.on ? "ON" : v ? "×" + v : "") + "</b></button>"; };
+    const combo = (cb, i) => '<button class="cb' + (sel && comboOn(cb, F, C) ? " lit" : "") + '" type="button" data-i="' + i + '" title="' + esc(cb[1]) + '"' + ndis() + '><span class="pile" style="width:' + (64 + 16 * (cb[2].length - 1)) + 'px">'
+      + cb[2].map(([id], j) => '<img src="' + sArt(SMAP[id]) + '" alt="" style="left:' + j * 16 + 'px">').join("") + "</span><b>" + esc(cb[0]) + "</b></button>";
+    el.innerHTML = '<div class="efx"><div class="sec"><h4>Encima de su pantalla <small>en cualquier sitio, también en el Clásico, y hasta que lo quites</small></h4><div class="tray">' + SCR.map(chip).join("") + "</div>"
+      + '<span class="hint"><em>Clic</em> pone o sube · <em>clic derecho</em> baja o quita · pasa el ratón y ves cada nivel</span></div>'
+      + '<div class="sec combos"><h4>Combos <small>un clic los pone, otro los quita</small></h4>' + COMBOS.map(combo).join("") + "</div></div>";
+    wireLR(el, ".chip[data-s]", (c, d) => scrHit(c, d));
+    QA(".cb", el).forEach(b => b.onclick = () => comboSet(COMBOS[+b.dataset.i]));
   }
   function fxSet(id, v, quiet) {
     if (!sel) return; const k = KIND_[id], F = fxOf(sel); if (k !== "shot") F[id] = v; fxAt[sel] = Date.now();
@@ -509,40 +576,36 @@
     paintPuesto(); paintDrawer(); paintSeats();
   }
 
-  /* ---- retos */
-  let rtab = LS.get("rtab", "sel"), rq = "";
+  /* ---- retos: SOLO lo que cambia su pregunta de la Aventura (el mapa, el nombre, su puntero y las reglas). Lo que cae encima de su pantalla
+     esta en Efectos. Cada reto es su icono del juego a 48 px (escala entera), su nombre y tres casillas de nivel en el color de su grupo */
+  let rtab = LS.get("rtab2", "map"), rq = "";
+  const RKC = { text: "#c9a3ff", map: "#5fd6b8", rule: "#fe5f55", ptr: "#fdd742" };
+  const pp = v => '<i class="pp">' + [1, 2, 3].map(i => '<s' + (v >= i ? ' class="on"' : "") + '></s>').join("") + "</i>";
   function dRetos() {
-    const el = $("dRetos"), C = sel ? chOf(sel) : {}, off = !sel || noRetos(), packOn = pk => pk[2].every(([id, v]) => C[id] === v);
-    const pool = rtab === "sel" ? SEL.map(id => RMAP[id]) : rtab === "on" ? RETOS.filter(r => C[r[0]]) : RETOS.filter(r => r[2] === rtab);
-    const shown = rq ? RETOS.filter(r => norm(r[1] + " " + r[4]).includes(norm(rq))) : pool;
-    el.innerHTML = `${noRetos() ? `<div class="warn">Está en el Clásico: los retos solo existen en la Aventura y el Reto diario. Se los puedes poner cuando entre en una.</div>` : selSt && (isMenu(selSt) || selSt.sc === "campamento") ? `<div class="warn" style="background:rgba(253,215,66,.1);box-shadow:inset 0 0 0 1px rgba(253,215,66,.4);color:var(--sub)">Fuera de la pregunta solo se notan los que cubren toda su pantalla (borroso, miopía, píxeles, batería, rayos, lluvia…); el resto espera a su próxima pregunta de la Aventura.</div>` : ""}
-      <div class="sec"><h4>Paquetes <small>un clic pone varios a la vez; otro clic los quita</small></h4><div class="packs">${PACKS.map((pk, i) => `<button class="pk${sel && packOn(pk) ? " lit" : ""}" type="button" data-i="${i}"${off ? " disabled" : ""}><b>${esc(pk[0])}</b><span>${esc(pk[1])}</span></button>`).join("")}</div></div>
-      <div class="sec"><div class="row">${RK.map(([k, n]) => { const c = k === "on" ? Object.keys(C).length : k === "sel" ? 0 : RETOS.filter(r => r[2] === k && C[r[0]]).length; return `<button class="chipb${k === rtab && !rq ? " on" : ""}" type="button" data-k="${k}">${n}${c ? ` ×${c}` : ""}</button>`; }).join("")}<span style="flex:1"></span><input id="rq" class="find" style="min-width:200px" type="search" placeholder="Buscar reto…" value="${esc(rq)}"><button class="chipb red" id="rclear" type="button"${off || !Object.keys(C).length ? " disabled" : ""}>Quitar todos</button></div>
-      <div class="rgrid">${shown.map(r => rcHtml(C, r, off)).join("") || `<p class="hint">Ninguno.</p>`}</div><span class="hint"><em>Clic</em> subir de nivel (●●●) · <em>Clic derecho</em> bajarlo · pasa el ratón para ver qué hace cada nivel</span></div>`;
-    QA(".pk", el).forEach(b => b.onclick = () => retoPack(PACKS[+b.dataset.i]));
-    QA(".row .chipb[data-k]", el).forEach(b => b.onclick = () => { rtab = b.dataset.k; rq = ""; LS.set("rtab", rtab); dRetos(); });
+    const el = $("dRetos"), C = sel ? chOf(sel) : {}, off = !sel || noRetos(), nOn = nQ(C);
+    if (!RK.some(([k]) => k === rtab)) rtab = "map";
+    const pool = QRET.filter(r => RG[r[2]] === rtab), shown = rq ? QRET.filter(r => norm(r[1] + " " + r[4]).includes(norm(rq))) : pool;
+    const warn = noRetos() ? '<div class="warn">Está en el Clásico: los retos solo existen en la Aventura. Lo que cae encima de su pantalla está en Efectos.</div>'
+      : sel && selSt && selSt.ph !== "asking" ? '<div class="warn soft">Ahora no está contestando: lo que le pongas le espera en su próxima pregunta de la Aventura.</div>' : "";
+    const tabs = RK.map(([k, n]) => { const c = QRET.filter(r => RG[r[2]] === k && C[r[0]]).length; return '<button class="chipb' + (k === rtab && !rq ? " on" : "") + '" type="button" data-k="' + k + '">' + n + (c ? " <small>" + c + "</small>" : "") + "</button>"; }).join("");
+    el.innerHTML = warn + '<div class="rbar">' + tabs + '<input id="rq" class="find" type="search" placeholder="Buscar reto…" value="' + esc(rq) + '"></div>'
+      + '<div class="rgrid">' + (shown.map(r => rcHtml(C, r, off)).join("") || '<p class="hint">Ninguno.</p>') + "</div>"
+      + '<div class="rfoot"><span class="hint">Solo mientras contesta · <em>clic</em> sube de nivel · <em>clic derecho</em> lo baja · pasa el ratón y ves cada nivel</span>'
+      + '<button class="chipb red" id="rclear" type="button"' + (off || !nOn ? " disabled" : "") + ">Quitar los retos</button></div>";
+    QA(".rbar .chipb[data-k]", el).forEach(b => b.onclick = () => { rtab = b.dataset.k; rq = ""; LS.set("rtab2", rtab); dRetos(); });
     const qi = $("rq"); qi.oninput = () => { rq = qi.value; const p = qi.selectionStart; dRetos(); const q2 = $("rq"); q2.focus(); q2.setSelectionRange(p, p); };
-    $("rclear").onclick = () => { if (!sel) return; chs[sel] = {}; chAt[sel] = Date.now(); clink(); order(sel, { op: "ch", ch: "*", v: 0 }, "Quitas todos los retos", { ok: "Retos quitados." }); paintDrawer(); paintPuesto(); };
+    $("rclear").onclick = () => { if (!sel) return; const ids = Object.keys(chOf(sel)).filter(id => !SCRUSED.has(id)); clink(); ids.forEach(id => retoSet(id, 0)); toast("Retos quitados.", 1400); };
     wireLR(el, ".rc", (c, d) => { if (!sel || c.disabled) return; const id = c.dataset.id, n = (chOf(sel)[id] || 0) + d; if (n < 0 || n > 3) return deny(c); clink(); spr.play(d > 0 ? "magic_pass" : "snap"); retoSet(id, n); });
   }
   function rcHtml(C, r, off) {
-    const [id, n, k, ico, d, lv] = r, v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (k === "flag" ? "\nSolo se nota en las rondas de bandera." : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
-    return `<button class="rc${v ? " lit" : ""}" type="button" data-id="${id}" title="${esc(tip)}"${off ? " disabled" : ""}><img src="../assets/icons/${ico}.webp" alt=""><span>${esc(n)}</span><i>${pips(v)}</i></button>`;
+    const [id, n, k, ico, d, lv] = r, v = C[id] || 0, L = lv ? lv.split("|") : [], tip = n + " — " + d + (L.length ? "\n" + L.map((x, i) => (i + 1) + ": " + x).join("\n") : "") + (RNOTE[id] ? "\n" + RNOTE[id] + "." : "");
+    return '<button class="rc' + (v ? " lit" : "") + '" type="button" data-id="' + id + '" style="--cc:' + RKC[RG[k]] + '" title="' + esc(tip) + '"' + (off ? " disabled" : "") + '><img src="../assets/icons/' + ico + '.webp" alt=""><span>' + esc(n) + "</span>" + pp(v) + "</button>";
   }
   function retoSet(id, v) {
     if (!sel) return; const C = chOf(sel), r = RMAP[id]; if (v) C[id] = v; else delete C[id]; chAt[sel] = Date.now();
     order(sel, { op: "ch", ch: id, v }, r ? `${r[1]}: ${v ? "nivel " + v : "quitado"}` : id, { ok: r ? (v ? `${r[1]}: nivel ${v}${RNOTE[id] ? " (" + RNOTE[id] + ")" : ""}` : `${r[1]}: quitado.`) : "" });
     paintDrawer(); paintPuesto(); paintSeats();
   }
-  async function retoPack(pk) {
-    if (!sel || noRetos()) return; const C = chOf(sel), on = pk[2].every(([id, v]) => C[id] === v), sid = sel;
-    chAt[sid] = Date.now(); clink(); spr.play(on ? "snap" : "magic_pass");
-    for (const [id, v] of pk[2]) { if (on) delete C[id]; else C[id] = v; }
-    paintDrawer(); paintPuesto();
-    for (const [id, v] of pk[2]) await order(sid, { op: "ch", ch: id, v: on ? 0 : v }, "");
-    logAdd(sid, { q: 0, t: `${pk[0]}: ${on ? "quitado" : "puesto"}`, st: "recv" }); toast(`${pk[0]}: ${on ? "quitado" : "puesto (" + pk[2].length + " retos)"}.`, 1800);
-  }
-
   /* ---- trastadas, huevos y Comodin */
   function dTrastadas() {
     const el = $("dTrastadas");
@@ -797,9 +860,9 @@
   function palBuild() {
     const it = [], need = fn => () => { if (!sel) { toast("Primero elige una partida."); return; } fn(); };
     FR.forEach(f => it.push({ k: "Frase", t: plain(f.es), s: (MNAME[f.mom] || f.mom) + (f.voz ? " · voz " + (VNAME[f.voz] || f.voz) : ""), n: f.n, ic: "", run: () => loadF(f), now: need(() => send(f)) }));
-    RETOS.forEach(r => it.push({ k: "Reto", t: r[1], s: r[4], n: norm(r[1] + " " + r[4]), ic: `../assets/icons/${r[3]}.webp`, run: need(() => { if (noRetos()) return toast("Los retos solo existen en la Aventura."); const v = ((chOf(sel)[r[0]] || 0) % 3) + 1; retoSet(r[0], v); }) }));
-    PACKS.forEach(pk => it.push({ k: "Paquete", t: pk[0], s: pk[1], n: norm(pk[0] + " " + pk[1]), ic: "", run: need(() => retoPack(pk)) }));
-    CHIPS.forEach(([id, n, k]) => it.push({ k: "Ficha", t: n, s: k === "shot" ? "uno por clic" : k === "on" ? "poner o quitar" : "suma ×1 a ×5", n: norm(n + " ficha"), ic: `/mesa/fichas/${id}.webp`, run: need(() => { const F = fxOf(sel); fxSet(id, k === "shot" ? undefined : k === "on" ? !F[id] : Math.min(5, F[id] + 1)); }) }));
+    SCR.forEach(s => it.push({ k: "Efecto", t: s.n, s: s.d, n: norm(s.n + " " + s.d + " efecto"), ic: sArt(s), run: need(() => { const v = sLv(s, fxOf(sel), chOf(sel)); scrSet(s, s.shot ? undefined : s.on ? (v ? 0 : 1) : v >= sMax(s) ? 0 : v + 1); }) }));
+    COMBOS.forEach(cb => it.push({ k: "Combo", t: cb[0], s: cb[1], n: norm(cb[0] + " " + cb[1] + " combo"), ic: "", run: need(() => comboSet(cb)) }));
+    QRET.forEach(r => it.push({ k: "Reto", t: r[1], s: r[4], n: norm(r[1] + " " + r[4]), ic: "../assets/icons/" + r[3] + ".webp", run: need(() => { if (noRetos()) return toast("Los retos solo existen en la Aventura."); const v = ((chOf(sel)[r[0]] || 0) % 3) + 1; retoSet(r[0], v); }) }));
     TRAS.forEach(([id, n, c]) => it.push({ k: "Trastada", t: n, s: c, n: norm(n + " " + c + " trastada"), ic: "", run: need(() => act("tras", id, "Trastada: " + n + ".", "Trastada: " + n)) }));
     HUEVOS.forEach(([id, n, c]) => it.push({ k: "Huevo", t: n, s: c, n: norm(n + " " + c + " huevo"), ic: "", run: need(() => act("huevo", id, n + ".", "Huevo: " + n)) }));
     CAT.forEach(([id, n]) => it.push({ k: "Comodín", t: n, s: "el gato, al momento", n: norm(n + " comodin gato"), ic: "", run: need(() => act("cat", id, "Comodín: " + n.toLowerCase() + ".", "Comodín: " + n.toLowerCase())) }));
@@ -817,7 +880,7 @@
   function palClose() { $("shade").hidden = true; }
   function palDraw() {
     const q = norm($("pq").value).split(/\s+/).filter(Boolean);
-    const PRI = { Partida: 0, Mesa: 1, Reto: 2, Paquete: 3, Ficha: 4, Trastada: 5, Huevo: 6, "Comodín": 7, Gesto: 8, Cara: 9, Voz: 10, Puntero: 11, Ropa: 12, Frase: 30 };
+    const PRI = { Partida: 0, Mesa: 1, Efecto: 2, Combo: 3, Reto: 4, Trastada: 5, Huevo: 6, "Comodín": 7, Gesto: 8, Cara: 9, Voz: 10, Puntero: 11, Ropa: 12, Frase: 30 };
     const score = x => (PRI[x.k] ?? 20) * 10 + (q.length && norm(x.t).startsWith(q[0]) ? 0 : q.length && norm(x.t).includes(q[0]) ? 3 : 6);
     palRes = (q.length ? palItems.filter(x => q.every(w => x.n.includes(w))) : palItems.filter(x => x.k !== "Frase")).map((x, i) => [score(x), i, x]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(r => r[2]).slice(0, 80);
     palI = Math.min(palI, Math.max(0, palRes.length - 1));

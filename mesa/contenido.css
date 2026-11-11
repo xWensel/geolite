@@ -161,3 +161,11 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; background: r
 /* cierre: filas que llevan a la categoria */
 table tr.go { cursor: pointer; }
 table tr.go:hover td { background: rgba(255, 210, 74, .10); }
+/* la cabecera comun de las mesas (voto del 10-nov): la barra de arriba resta su alto a la columna y al panel */
+:root { --barh: 52px; }
+.app { min-height: calc(100vh - var(--barh)); }
+.side { top: var(--barh); height: calc(100vh - var(--barh)); padding-top: 12px; }
+.top { top: var(--barh); }
+@media (min-width: 1500px) { .app, .side, .main { height: calc(100vh - var(--barh)); } .top { top: 0; } }
+@media (min-width: 2200px) { .bar { zoom: .869565; } .app, .side, .main { height: calc((100vh - var(--barh)) / 1.15); } }   /* la cabecera deshace el zoom de la pagina: igual que en las otras mesas */
+@media (min-width: 1500px) and (max-height: 1150px) { .bar { zoom: 1.176471; } .app, .side, .main { height: calc((100vh - var(--barh)) / .85); } }

@@ -186,18 +186,16 @@ window.AIQ = window.AIQ || {};
     if (!kept) { shots(false); askClose("no"); camOk = camAlways(); }
     if (!pc && !shotOn) { pilot(false); glove(null); }
   }
-  /* EL PERMISO (v0.4.70): la primera vez en cada sesion (salvo «Cuando quiera», que se recuerda y se quita en Ajustes > Datos) el jugador decide.
-     Sin contestar en 30 s es que no. Mientras mira, el piloto de arriba lleva «Cortar» */
+  /* EL PERMISO (v0.4.70): la primera vez en cada sesion el jugador decide (salvo «Cuando quiera», que se recuerda hasta que apaga el directo en Ajustes > Datos).
+     Sin contestar en 30 s es que no. Mientras mira sale el piloto de siempre («TE ESTA MIRANDO»), sin botones: lo justo, voto del 10-nov */
   const CAMK = KEY + ".cam", camAlways = () => { try { return localStorage.getItem(CAMK) === "1"; } catch (e) { return false; } };
   let camOk = camAlways(), asking = null;
   const ASK = {
     t: "Don Crupier quiere ver tu partida|The Dealer wants to watch your game|Don Croupier veut regarder ta partie|Dom Crupiê quer ver sua partida|Don Croupier möchte deine Partie sehen|Don Croupier vuole guardare la tua partita||荷官先生想看看你的对局|딜러 나리가 당신의 게임을 보고 싶어 해요|ドン・ディーラーがきみのプレイを見たがっている|Дон Крупье хочет посмотреть твою партию|Don Krupier chce zobaczyć twoją rozgrywkę",
-    d: "Solo verá la ventana del juego, nada más. Mientras mire saldrá arriba «TE ESTÁ MIRANDO» y podrás cortarlo cuando quieras.|He’ll only see the game window, nothing else. While he watches, “HE’S WATCHING YOU” stays at the top and you can cut it off at any time.|Il ne verra que la fenêtre du jeu, rien d’autre. Tant qu’il regarde, « IL TE REGARDE » reste affiché en haut et tu peux couper quand tu veux.|Ele só vai ver a janela do jogo, mais nada. Enquanto ele olha, “ELE ESTÁ TE OLHANDO” fica no alto e você pode cortar quando quiser.|Er sieht nur das Spielfenster, sonst nichts. Solange er zuschaut, steht oben „ER SIEHT DICH“, und du kannst jederzeit abbrechen.|Vedrà solo la finestra del gioco, nient’altro. Finché guarda, in alto resta «TI STA GUARDANDO» e puoi interrompere quando vuoi.||他只会看到游戏窗口，别的都看不到。他观看期间，顶部会一直显示“他在看着你”，你随时可以中断。|게임 창만 볼 수 있고 다른 건 못 봐요. 보는 동안 위쪽에 “지켜보고 있다”가 표시되며, 언제든 끊을 수 있어요.|見えるのはゲームの画面だけ。見ている間は上に「見ているぞ」と出て、いつでも切れる。|Он увидит только окно игры, больше ничего. Пока он смотрит, вверху горит «ОН СМОТРИТ НА ТЕБЯ», и ты можешь прервать это в любой момент.|Zobaczy tylko okno gry, nic więcej. Dopóki patrzy, na górze świeci „PATRZY NA CIEBIE”, a ty możesz to przerwać w każdej chwili.",
+    d: "Solo verá la ventana del juego, nada más. Mientras mire saldrá arriba «TE ESTÁ MIRANDO». El directo se apaga en Ajustes > Datos.|He’ll only see the game window, nothing else. While he watches, “HE’S WATCHING YOU” stays at the top. You can turn the live mode off in Settings > Data.|Il ne verra que la fenêtre du jeu, rien d’autre. Tant qu’il regarde, « IL TE REGARDE » reste affiché en haut. Le direct se coupe dans Paramètres > Données.|Ele só vai ver a janela do jogo, mais nada. Enquanto ele olha, “ELE ESTÁ TE OLHANDO” fica no alto. O ao vivo se desliga em Definições > Dados.|Er sieht nur das Spielfenster, sonst nichts. Solange er zuschaut, steht oben „ER SIEHT DICH“. Den Live-Modus schaltest du unter Einstellungen > Daten aus.|Vedrà solo la finestra del gioco, nient’altro. Finché guarda, in alto resta «TI STA GUARDANDO». La diretta si spegne in Impostazioni > Dati.|Solo verá la ventana del juego, nada más. Mientras mire saldrá arriba «TE ESTÁ MIRANDO». La transmisión en vivo se apaga en Ajustes > Datos.|他只会看到游戏窗口，别的都看不到。他观看期间，顶部会一直显示“他在看着你”。可在设置 > 数据中关闭直播。|게임 창만 볼 수 있고 다른 건 못 봐요. 보는 동안 위쪽에 “지켜보고 있다”가 표시돼요. 생방송은 설정 > 데이터에서 끌 수 있어요.|見えるのはゲームの画面だけ。見ている間は上に「見ているぞ」と出る。生放送は設定 > データで切れる。|Он увидит только окно игры, больше ничего. Пока он смотрит, вверху горит «ОН СМОТРИТ НА ТЕБЯ». Эфир можно выключить в Настройки > Данные.|Zobaczy tylko okno gry, nic więcej. Dopóki patrzy, na górze świeci „PATRZY NA CIEBIE”. Transmisję wyłączysz w Ustawienia > Dane.",
     no: "Ahora no|Not now|Pas maintenant|Agora não|Jetzt nicht|Non ora||现在不行|지금은 안 돼요|今はダメ|Не сейчас|Nie teraz",
     si: "Déjale|Let him|D’accord|Deixa|Na gut|Va bene||让他看|보여 줄게요|いいよ|Пусть смотрит|Niech patrzy",
     al: "Cuando quiera|Any time|Quand il veut|Sempre que quiser|Jederzeit|Quando vuole||随时都行|언제든 괜찮아요|いつでもどうぞ|Когда захочет|Kiedy zechce",
-    cut: "Cortar|Stop|Couper|Cortar|Beenden|Interrompi||中断|끊기|切る|Прервать|Przerwij",
-    set: "Dejarle ver la ventana del juego sin preguntar|Let him see the game window without asking|Le laisser voir la fenêtre du jeu sans demander|Deixar ele ver a janela do jogo sem perguntar|Das Spielfenster ohne Nachfrage zeigen|Lasciargli vedere la finestra del gioco senza chiedere||无需询问，直接让他查看游戏窗口|묻지 않고 게임 창을 보여 주기|確認せずにゲーム画面を見せる|Показывать окно игры без вопроса|Pokazuj okno gry bez pytania",
   };
   function ask() {
     askClose("no");
@@ -257,9 +255,8 @@ window.AIQ = window.AIQ || {};
   function pilot(on_) {
     let el = $("vivoEye");
     if (!on_) { if (el) { el.classList.remove("on"); setTimeout(() => { if (!pc && !shotOn && el.isConnected) el.remove(); }, 400); } return; }
-    if (!el) { el = document.createElement("div"); el.id = "vivoEye"; el.innerHTML = `<img src="${A.crupierArt ? A.crupierArt("dealer_mini", "assets/icons/dealer_mini.webp") : "assets/icons/dealer_mini.webp"}" data-cart="dealer_mini" data-cdef="assets/icons/dealer_mini.webp" alt=""><i></i><b></b><button type="button"></button>`; document.body.appendChild(el);
-      el.querySelector("button").onclick = () => { camOff(); post({ sid, rtc: { type: "deny" } }).catch(() => {}); }; }   // v0.4.70: cortar cuando quieras (la mesa se entera)
-    el.querySelector("b").textContent = A.pick6(EYE); el.querySelector("button").textContent = A.pick6(ASK.cut); requestAnimationFrame(() => el.classList.add("on"));
+    if (!el) { el = document.createElement("div"); el.id = "vivoEye"; el.innerHTML = `<img src="${A.crupierArt ? A.crupierArt("dealer_mini", "assets/icons/dealer_mini.webp") : "assets/icons/dealer_mini.webp"}" data-cart="dealer_mini" data-cdef="assets/icons/dealer_mini.webp" alt=""><i></i><b></b>`; document.body.appendChild(el); }
+    el.querySelector("b").textContent = A.pick6(EYE); requestAnimationFrame(() => el.classList.add("on"));
     if (A.sfx && A.sfx.spot) A.sfx.spot();
   }
   /* la mano del crupier (Pixel Lab, 64x64: el indice arriba, gemelos y menique estirado; vivo_hand_tap/back/bounce: aprieta, vuelve y rebota):
@@ -330,15 +327,11 @@ window.AIQ = window.AIQ || {};
   function card() {
     const grid = document.querySelector('[data-pane="data"] .set-grid'); if (!grid || $("vivoCard")) return;
     const c = document.createElement("div"); c.className = "set-card"; c.id = "vivoCard";
-    c.innerHTML = `<div class="row-sw"><div class="rs-t"><label></label><small></small></div><button class="sw" role="switch" aria-checked="true"><i></i></button></div><div class="row-sw vivo-cam"><div class="rs-t"><label></label></div><button class="sw" role="switch" aria-checked="false"><i></i></button></div>`;
+    c.innerHTML = `<div class="row-sw"><div class="rs-t"><label></label><small></small></div><button class="sw" role="switch" aria-checked="true"><i></i></button></div>`;
     const cloud = $("cloudCard"); grid.insertBefore(c, cloud ? cloud.nextSibling : null);
-    c.querySelector(".vivo-cam .sw").addEventListener("click", () => {         // v0.4.70: la camara sin preguntar (o vuelve a preguntar)
-      const v = !camAlways(); try { if (v) localStorage.setItem(CAMK, "1"); else localStorage.removeItem(CAMK); } catch (e) { /* sin almacenamiento */ }
-      camOk = v || (camOk && !!(pc || shotOn)); if (A.sfx && A.sfx.toggle) A.sfx.toggle(v); sync();
-    });
     c.querySelector(".sw").addEventListener("click", () => {
       const v = !on(); try { localStorage.setItem(KEY, v ? "1" : "0"); } catch (e) { /* sin almacenamiento */ }
-      if (A.sfx && A.sfx.toggle) A.sfx.toggle(true); if (v) sched(300); else { clearTimeout(timer); fast = false; camOff(); fxOff(); bye(); sched(30000); }
+      if (A.sfx && A.sfx.toggle) A.sfx.toggle(true); if (v) sched(300); else { clearTimeout(timer); fast = false; try { localStorage.removeItem(CAMK); } catch (e) { /* sin almacenamiento */ } camOff(); camOk = false; fxOff(); bye(); sched(30000); }   // apagar el directo olvida tambien «Cuando quiera»
       sync();
     });
     sync();
@@ -347,7 +340,6 @@ window.AIQ = window.AIQ || {};
     const c = $("vivoCard"); if (!c) return;
     c.querySelector("label").textContent = A.pick6(TXT.t); c.querySelector("small").textContent = A.pick6(TXT.d);
     const sw = c.querySelector(".sw"); sw.setAttribute("aria-checked", on()); sw.setAttribute("aria-label", A.pick6(TXT.t));
-    const cw = c.querySelector(".vivo-cam"); if (cw) { cw.classList.toggle("hidden", !host || !on()); cw.querySelector("label").textContent = A.pick6(ASK.set); const s2 = cw.querySelector(".sw"); s2.setAttribute("aria-checked", camAlways()); s2.setAttribute("aria-label", A.pick6(ASK.set)); }
     c.classList.toggle("hidden", !URL_);
   }
   A.vivo = { sync, state, invert, sid: () => sid, _ask: ask, _shots: shots };
