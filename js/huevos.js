@@ -5,7 +5,7 @@
  *   B  un objeto de la casa se rebela, sin el (el reverso de tu carta, el ticket, el cartel de Esc, la Enciclopedia)
  *   C  la casa lee algo real (la hora redonda, el otro lado del mundo, tu nombre)
  * REGLAS (las de siempre): LA PARTIDA ES SAGRADA (ninguno de A ni de C sale mientras contestas o lees el ticket: A.dealer.call/homeShown lo cuidan);
- * el crupier es un regalo (como mucho un huevo cada 2 minutos y cada uno con su pausa); nunca dan nada (ni fichas ni logros: el premio es la frase);
+ * el crupier es un regalo (como mucho un huevo cada 2 minutos y cada uno con su pausa); nunca dan nada (ni fichas ni logros: el premio es la frase; desde el 12-nov, con su voto, dos logros secretos para toda la libreta: el primero y los 16);
  * con Movimiento: Minimo no hay temblor ni caidas, solo la frase. Cada uno que descubres se apunta en su libreta del Perfil (A.huevos.found).
  * Los textos, en js/huevos-textos.js (12 idiomas). Las frases del crupier se funden en sus bolsas (A.dealer.lines).
  *   A.huevos.found(id)  apunta un descubrimiento     A.huevos.n(id)  veces     A.huevos.list  [{id, t}] en orden de libreta
@@ -27,7 +27,7 @@ window.AIQ = window.AIQ || {};
   ].map(([id, t]) => ({ id, t }));
   H.n = id => st.f[id] || 0;
   H.count = () => H.list.filter(h => st.f[h.id]).length;
-  H.found = id => { st.f[id] = (st.f[id] || 0) + 1; save(); if (A.profile && A.profile.touch) try { A.profile.touch(); } catch (e) { /* aun no */ } return st.f[id]; };
+  H.found = id => { st.f[id] = (st.f[id] || 0) + 1; save(); if (A.ach) setTimeout(() => A.ach.emit("casa", { kind: "egg", n: H.count(), of: H.list.length }), 2600);   /* revision de logros (12-nov): «Curioso» y «La libreta llena»; despues de su frase */ if (A.profile && A.profile.touch) try { A.profile.touch(); } catch (e) { /* aun no */ } return st.f[id]; };
   H._reset = () => { st = { f: {} }; save(); lastAt = 0; sesion = {}; };
 
   /* ------------------------------------------------------------------ utilidades */

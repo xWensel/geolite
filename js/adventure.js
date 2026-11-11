@@ -1548,7 +1548,7 @@ window.AIQ = window.AIQ || {};
   function winScreen() {
     run.won = true; run.act++; run.round = 0; run.attempt = 0; run.phase = "win"; persist(); A.sfx.victory(); A.music.moment("win");   // tres actos completados: la cancion de la victoria
     const PA = run.practice ? {} : A.profile.get().adv; PA.wins = (PA.wins || 0) + 1; PA.deckWins = PA.deckWins || {}; PA.deckWins[run.deck] = (PA.deckWins[run.deck] || 0) + 1; A.profile.save();
-    A.ach.emit("adv", { kind: "win", deck: run.deck });
+    A.ach.emit("adv", { kind: "win", deck: run.deck, bare: !run.shopped });   // bare: «Con lo puesto», ni una compra en el Campamento
     if (!run.practice && A.clubRetos) A.clubRetos.ev("advWin");
     showWinChoice();
   }
@@ -2758,7 +2758,7 @@ window.AIQ = window.AIQ || {};
     document.querySelectorAll("[data-sup]").forEach(b => (b.onclick = () => {
       const s = SUPS.find(x => x.id === b.dataset.sup), c = supCost(s); run.sup = run.sup || {};
       if (run.sup[s.id]) { run.coins += typeof run.sup[s.id] === "number" ? run.sup[s.id] : run.sup[s.id] === "gift" ? 0 : c; run.sup[s.id] = false; A.sfx.sell(); }   // devuelve lo que pagaste (vender el Vale entre medias ya no regala 1)
-      else { if (run.coins < c) { A.sfx.deny(); shake(b); return; } run.coins -= c; run.sup[s.id] = c; supFresh = s.id; run.visitBuys = (run.visitBuys || 0) + 1; A.sfx.buy(); if (SUPS.filter(x => x.id !== "tonic").every(x => run.sup[x.id])) A.ach.emit("adv", { kind: "supplies" }); }
+      else { if (run.coins < c) { A.sfx.deny(); shake(b); return; } run.coins -= c; run.sup[s.id] = c; run.shopped = 1; supFresh = s.id; run.visitBuys = (run.visitBuys || 0) + 1; A.sfx.buy(); if (SUPS.filter(x => x.id !== "tonic").every(x => run.sup[x.id])) A.ach.emit("adv", { kind: "supplies" }); }
       persist(); renderShop(false);
     }));
   }
@@ -2795,7 +2795,7 @@ window.AIQ = window.AIQ || {};
     if (legOn) return;
     const i = +el.dataset.ix, s = run.stock[i]; if (!s || run.bought.includes(i)) return;   // data-ix (no data-i: cambiar de idioma reescribe todo [data-i] con A.t)
     const qf = !chest && A.celebra && A.celebra.antesDeComprar ? A.celebra.antesDeComprar(el, i, { n: run.visitBuys || 0 }) : null;   // v0.3.203: lo que cambia se quema en oro al repintar (js/celebra.js)
-    if (s.k === "life") { const c = lifePrice(); if (run.lives >= run.maxLives) { A.sfx.deny(); shake(el); return; } if (run.coins < c) return noFunds(el); run.coins -= c; run.lives++; run.lifeBuys = (run.lifeBuys || 0) + 1; run.bought.push(i); A.sfx.buy(); persist(); renderShop(chest); if (qf) qf(); return; }
+    if (s.k === "life") { const c = lifePrice(); if (run.lives >= run.maxLives) { A.sfx.deny(); shake(el); return; } if (run.coins < c) return noFunds(el); run.coins -= c; run.lives++; run.lifeBuys = (run.lifeBuys || 0) + 1; run.shopped = 1; run.bought.push(i); A.sfx.buy(); persist(); renderShop(chest); if (qf) qf(); return; }
     if (s.k === "perk") {
       const p = A.RELICS[s.id], c = chest ? 0 : cardCost(s);
       if (owned(s.id)) return;                                            // 0.2.5: un amuleto no se compra dos veces (tiendas guardadas de antes, con su recarga)
@@ -2820,7 +2820,7 @@ window.AIQ = window.AIQ || {};
     }
     if (s.fix) run.fixUsed = `${roundNo()}:${run.attempt}`;              // ya cobraste la rebaja de esta revancha
     const leg = (chest || s.vit) && s.k === "perk" && A.RELICS[s.id].r === 3;   // la de la vitrina tambien tiene su secuencia       // la legendaria del cofre: su propia secuencia (y sus sonidos)
-    run.bought.push(i); run.visitBuys = (run.visitBuys || 0) + 1; if (!leg) A.sfx.buy(); persist();
+    if (!chest) run.shopped = 1; run.bought.push(i); run.visitBuys = (run.visitBuys || 0) + 1; if (!leg) A.sfx.buy(); persist();   // shopped: «Con lo puesto» (el cofre del jefe no es comprar)
     if (chest) { run.stock = null; run.bought = []; if (leg) run.phase = "shop"; persist(); return leg ? legendary(el) : openShop(false); }   // guardada ya en la tienda: si se cierra a mitad, la reliquia es tuya y no vuelve el cofre
     if (leg) return legendary(el);
     renderShop(chest); if (qf) qf();
@@ -2968,7 +2968,7 @@ window.AIQ = window.AIQ || {};
     const pf = proofOf(run);
     if (!daily) A.rank.submit("adv-all", { score: final, extra: { deck: run.deck, asc: run.asc, r: run.cleared }, pf });
     if (!daily) A.rank.day.submit(final, pf);                                                      // "Hoy" y "Ayer" de la Aventura: la mejor expedicion del dia (el Reto diario tiene sus tablas)
-    A.ach.emit("adv", { kind: "end", score: final, won: !!run.won });
+    A.ach.emit("adv", { kind: "end", score: final, won: !!run.won, round: run.cleared + 1, dead: !win && run.lives <= 0 });
     /* Reto diario: el intento se cierra y suma a la puntuacion global del dia (las partidas del formato antiguo, sin numero de intento, cuentan como el primero) */
     let day = null, sent = null;
     if (wasRanked && board) {

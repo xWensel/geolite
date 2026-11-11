@@ -3829,7 +3829,7 @@ window.AIQ = window.AIQ || {};
      entonces se despierta de golpe con una excusa (o, a veces, con el logro falso de mirar el techo) */
   function startDoze() {
     if (!el || !D.onHome || !afkAt || lastInput > afkAt) return;
-    dozing = true; bubble.classList.remove("on"); el.classList.add("doze"); spr.play("yawn", () => { if (dozing) spr.set("sleep"); });   // bosteza y se queda traspuesto (zetas y cabeceo en el sprite)
+    dozing = true; bubble.classList.remove("on"); el.classList.add("doze"); spr.play("yawn", () => { if (dozing) { spr.set("sleep"); if (A.ach) A.ach.emit("casa", { kind: "siesta" }); } });   // bosteza y se queda traspuesto (zetas y cabeceo en el sprite)
     if (A.comodin && A.comodin.on()) setTimeout(() => { if (dozing && A.comodin.state() !== "sleep") A.comodin.act("duerme"); }, 1400);   // bloque D: la siesta de la mesa: el gato se duerme tambien
     clearTimeout(homeT); homeT = setTimeout(homeTick, 1000);                         // mientras duerme, mira cada segundo si has vuelto
   }
@@ -4223,7 +4223,7 @@ window.AIQ = window.AIQ || {};
       if (!once.achRun && LINES.achRun) { once.achRun = 1; newsSay(say1("achRun", { a: tx6(a.name) }), "shock"); }   // rara: con frase (una vez por sesion, que los primeros logros llegan seguidos)
       return;
     }
-    if (!once.achGen && Math.random() < 0.15) { once.achGen = 1; newsSay(say1("achGen", { a: tx6(a.name) }), "sly"); }
+    if (a.tier === 4 || (!once.achGen && Math.random() < 0.15)) { once.achGen = 1; newsSay(say1("achGen", { a: tx6(a.name) }), "sly"); }
   };
   /* EL PODIO HABLA: al abrir la Clasificacion (js/podio.js, sin tocarlo) lee tu puesto de lo que pinta y lo comenta (como mucho cada 2 min) */
   let podAt = -1e9;

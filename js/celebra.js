@@ -177,10 +177,10 @@ void main(){
   }
 
   /* el aviso de logro: aparece quemandose en oro. Devuelve false si no hay quema (el aviso entra como siempre) */
-  function logro(el) {
+  function logro(el, tr = 0) {
     if (!QM || !el) return false;
     const f = enciende(el, 1); el.classList.add("qm"); el._qm = f;
-    const ms = quieto() ? 420 : 760; halo(el, ms, 0.8);
+    const ms = quieto() ? 420 : 760 + 140 * Math.max(0, Math.min(5, tr));   // L8: cuanto mas dificil el logro, mas dura la quema (hasta 1,46 s) halo(el, ms, 0.8);
     anima(el, 0, 1, ms, an => { an.cancel(); if (el._qm === f) { apaga(el, f); el._qm = null; } });
     return true;
   }

@@ -87,6 +87,7 @@ window.AIQ = window.AIQ || {};
     stamp: "Puesta|On|Posée|Em uso|Aktiv|In uso||已用|적용|使用中|Выбрано|Użyte",
   };
   const V = () => A.vestuario;
+  const bought = () => { if (A.ach) A.ach.emit("casa", { kind: "buy" }); };   // revision de logros (12-nov): «De estreno», tu primera compra en la tienda
   /* la muestra de una mesa: un trozo del mapa de 768 x 432 px de pagina, dibujado por el propio mapa a 1x y a 2x (assets/mesas/<id>.webp y <id>@2x.webp); el navegador coge la de su densidad, asi nunca se amplia a trozos ni se suaviza */
   const mesaImg = (id, cls) => `<img${cls ? ` class="${cls}"` : ""} src="assets/mesas/${id}.webp" srcset="assets/mesas/${id}.webp 1x, assets/mesas/${id}@2x.webp 2x" alt=""${cls ? "" : " width=768 height=432"} decoding="async">`;
   const fi = (cls = "") => `<img class="bq-fi${cls ? " " + cls : ""}" src="assets/icons/ficha_oro.webp" alt="">`;
@@ -255,7 +256,7 @@ window.AIQ = window.AIQ || {};
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqHBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
     const full0 = isLote ? ES().lotePrice().full : ES().full(k);       // el precio sin la rebaja de hoy, antes de que sea tuyo (para el ticket)
-    if (!(isLote ? ES().buyLote() : ES().buy(k))) return;
+    if (!(isLote ? ES().buyLote() : ES().buy(k))) return; bought();
     if (!isLote && ES().kindOf(k) === "m") { const id = k.split(":")[1]; M().seen([id]); M().use(id); }
     repaint(); caja(p, full0, have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
@@ -574,7 +575,7 @@ window.AIQ = window.AIQ || {};
     if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
-    if (!PU().buy(s, id)) return;
+    if (!PU().buy(s, id)) return; bought();
     repaint("#bqPTry"); caja(p, PU().full ? PU().full(s, id) : p, have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(2);
@@ -724,7 +725,7 @@ window.AIQ = window.AIQ || {};
     if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } return; }
     if (ST.armed !== k) { ST.armed = k; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === k && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
-    if (!(w === "m" ? SO().buyMarco(id) : w === "t" ? SO().buyTitle(id) : SO().buyIcon(id))) return;
+    if (!(w === "m" ? SO().buyMarco(id) : w === "t" ? SO().buyTitle(id) : SO().buyIcon(id))) return; bought();
     repaint(); caja(p, p, have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
     if (A.casa && A.casa.premio) A.casa.premio(2); else if (A.sfx && A.sfx.jackpot) A.sfx.jackpot(2);
@@ -856,7 +857,7 @@ window.AIQ = window.AIQ || {};
     if (have < p) { if (A.sfx && A.sfx.buzz) A.sfx.buzz(0); const b = $("bqBuy"); if (b) { b.classList.remove("bq-no"); void b.offsetWidth; b.classList.add("bq-no"); } vBroke(id); return; }
     if (ST.armed !== id) { ST.armed = id; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === id && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
-    if (!V().buy(id)) return;
+    if (!V().buy(id)) return; bought();
     const leg = V().get(id).r === "l";
     repaint("#bqOff"); caja(p, V().full(id), have);
     { const w0 = $("bqWal"); if (w0) w0.textContent = A.fmt(have); }
@@ -888,7 +889,7 @@ window.AIQ = window.AIQ || {};
     if (ST.armed !== id) { ST.armed = id; ST.armT = Date.now(); if (A.sfx && A.sfx.ui) A.sfx.ui(); repaint("#bqBuy"); setTimeout(() => { if (ST.armed === id && Date.now() - ST.armT >= 3900) { ST.armed = null; repaint(); } }, 4000); return; }
     ST.armed = null;
     const from = have;
-    if (!M().buy(id)) return;
+    if (!M().buy(id)) return; bought();
     M().seen([id]); M().use(id);                                          // queda puesta ya, sin salir de la tienda: el estreno con cartel es solo de las que se ganan jugando
     repaint("#bqTry");                                                  // ya es tuya: la ficha y la rejilla lo dicen al momento
     caja(p, M().full(id), from);

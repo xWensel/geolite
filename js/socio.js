@@ -108,6 +108,10 @@ window.AIQ = window.AIQ || {};
     { id: "casa", ach: "adv_wins10", n: "De vuelta a casa|Home again|De retour à la maison|De volta para casa|Wieder zu Hause|Di nuovo a casa||凯旋归来|귀환|ただいま帰還|Снова дома|Z powrotem w domu" },
     { id: "banca", duel: 25, n: "Le gana a la banca|Beats the house|Bat la banque|Vence a banca|Schlägt die Bank|Batte il banco||赢过庄家|하우스를 이긴 자|胴元に勝つ者|Обыгры­вает казино|Ogrywa kasyno" },
     { id: "vuelta", ach: "classic_world", n: "La vuelta al mundo|Around the world|Le tour du monde|A volta ao mundo|Einmal um die Welt|Il giro del mondo||环游世界|세계 일주|世界一周|Вокруг света|Dookoła świata" },
+    { id: "col25", achn: 25, n: "Coleccionista|Collector|Collectionneur|Colecionador|Sammler|Collezionista||收藏家|수집가|コレクター|Коллекционер|Kolekcjoner" },   // L9 (12-nov): hitos de la coleccion de logros
+    { id: "col50", achn: 50, n: "De la casa|One of the house|De la maison|Da casa|Zum Haus gehörig|Di casa||自家人|이 집 사람|店の身内|Свой в доме|Swój człowiek" },   // L9 (12-nov): hitos de la coleccion de logros
+    { id: "col75", achn: 75, n: "Leyenda viva|Living legend|Légende vivante|Lenda viva|Lebende Legende|Leggenda vivente||活着的传奇|살아 있는 전설|生ける伝説|Живая легенда|Żywa legenda" },   // L9 (12-nov): hitos de la coleccion de logros
+    { id: "col100", achn: 100, n: "Lo ha visto todo|Seen it all|A tout vu|Já viu de tudo|Hat alles gesehen|Ha visto tutto||见过一切|모든 걸 본 자|すべてを見た者|Видел всё|Widział wszystko" },   // L9 (12-nov): hitos de la coleccion de logros
     { id: "turista", p: 20, n: "Turista accidental|Accidental tourist|Touriste par hasard|Turista acidental|Zufallstourist|Turista per caso||意外的游客|우연한 여행자|うっかり観光客|Случайный турист|Przypadkowy turysta" },
     { id: "mapa", p: 20, n: "Mapa en mano|Map in hand|Carte en main|Mapa na mão|Karte in der Hand|Mappa alla mano||地图在手|지도를 든 자|地図を片手に|С картой в руке|Z mapą w ręku" },
     { id: "butan", p: 30, n: "Perdido en Bután|Lost in Bhutan|Perdu au Bhoutan|Perdido no Butão|Verloren in Bhutan|Perso in Bhutan||迷失不丹|부탄에서 길을 잃다|ブータンで迷子|Потерян в Бутане|Zagubiony w Bhutanie" },
@@ -139,6 +143,7 @@ window.AIQ = window.AIQ || {};
   const TX = {
     byBarra: "Se canjea en La Barra de la casa por {n} tickets|Redeemed at the House Bar for {n} tickets|S'échange au Bar de la maison contre {n} tickets|Troca-se no Bar da casa por {n} tickets|Im Haus-Bar gegen {n} Tickets einlösbar|Si riscatta al Bar della casa con {n} ticket||在赌场吧台用 {n} 张票券兑换|하우스 바에서 티켓 {n}장으로 교환|ハウスのバーでチケット{n}枚と交換|Обменивается в Баре заведения за {n} билетов|Do wymiany w Barze kasyna za {n} biletów",
     secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|숨겨진 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
+    byAchN: "Se gana con {n} logros (llevas {k})|Earned with {n} achievements ({k} so far)|S'obtient avec {n} succès ({k} pour l'instant)|Conquistado com {n} conquistas ({k} até agora)|Freigeschaltet mit {n} Erfolgen (bisher {k})|Si ottiene con {n} obiettivi (finora {k})||达成 {n} 个成就后获得（目前 {k} 个）|업적 {n}개로 획득 (현재 {k}개)|実績{n}個で獲得（現在{k}個）|Даётся за {n} достижений (пока {k})|Za {n} osiągnięć (na razie {k})",
     byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Conquistado com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就「{a}」后获得|업적 「{a}」 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
     byLv: "Se gana en el nivel {n} del Club|Earned at Club level {n}|S'obtient au niveau {n} du Club|Conquistado no nível {n} do Clube|Freigeschaltet mit Club-Stufe {n}|Si ottiene al livello {n} del Club||俱乐部 {n} 级时获得|클럽 레벨 {n}에서 획득|クラブのレベル{n}で手に入る|Даётся на уровне клуба {n}|Zdobywasz na poziomie klubu {n}",
     lockedCard: "Se descubre en el nivel {n}|Revealed at level {n}|Se dévoile au niveau {n}|Revelada no nível {n}|Wird auf Stufe {n} aufgedeckt|Si scopre al livello {n}||{n} 级时揭晓|레벨 {n}에서 공개|レベル{n}で明かされる|Откроется на уровне {n}|Odkryjesz na poziomie {n}",
@@ -169,11 +174,12 @@ window.AIQ = window.AIQ || {};
   function buyIcon(id) { if (iconKind(id) !== "tienda" || iconOwned(id) || !A.club || !A.club.spend || !A.club.spend(iconPrice(id))) return false; const c = club(); c.ic[id] = Date.now(); c.icon = id; A.profile.save(); return true; }
   /* titulos */
   const duelWins = () => { try { return A.duelo && A.duelo.stats ? A.duelo.stats().w : 0; } catch (e) { return 0; } };
-  const titleOwned = id => { const t = TIT[id]; if (!t) return false; if (t.lv) return A.club.level() >= t.lv; return t.ach ? achGot(t.ach) : t.duel ? duelWins() >= t.duel : !!((prof().club || {}).tt || {})[id]; };
+  const achN = () => (A.ach && A.ach.count ? A.ach.count() : 0);
+  const titleOwned = id => { const t = TIT[id]; if (!t) return false; if (t.lv) return A.club.level() >= t.lv; return t.ach ? achGot(t.ach) : t.achn ? achN() >= t.achn : t.duel ? duelWins() >= t.duel : !!((prof().club || {}).tt || {})[id]; };
   const title = () => { const c = prof().club || {}; return c.tit && titleOwned(c.tit) ? c.tit : ""; };
   const setTitle = id => { if (id && !titleOwned(id)) return false; club().tit = id || ""; A.profile.save(); return true; };
   const titleName = id => (TIT[id] ? P6(TIT[id].n) : "");
-  const titleHow = id => { const t = TIT[id]; if (!t) return ""; if (t.tk) return P6(TX.byBarra).replace("{n}", t.tk); if (t.lv) return P6(TX.byLv).replace("{n}", t.lv); if (t.ach) { const a = achOf(t.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; } return t.duel ? P6(TX.byDuel).replace("{n}", A.fmt(Math.min(duelWins(), t.duel))) : ""; };
+  const titleHow = id => { const t = TIT[id]; if (!t) return ""; if (t.tk) return P6(TX.byBarra).replace("{n}", t.tk); if (t.lv) return P6(TX.byLv).replace("{n}", t.lv); if (t.achn) return P6(TX.byAchN).replace("{n}", t.achn).replace("{k}", A.fmt(Math.min(achN(), t.achn))); if (t.ach) { const a = achOf(t.ach); return a ? P6(TX.byAch).replace("{a}", A.tx(a.name)) : ""; } return t.duel ? P6(TX.byDuel).replace("{n}", A.fmt(Math.min(duelWins(), t.duel))) : ""; };
   const titleFull = id => (TIT[id] && TIT[id].p) || 0, titlePrice = id => deal("t:" + id, titleFull(id));
   const titles = () => TITLES.filter(t => !t.tk || titleOwned(t.id) || (A.barra && A.barra.on())).map(t => ({ id: t.id, kind: t.p ? "tienda" : "hito", owned: titleOwned(t.id), price: titlePrice(t.id), name: titleName(t.id), how: titleHow(t.id) }));   // v0.4.56: sin La Barra de la casa, sus titulos de tickets no se ofrecen (los ya canjeados, si)
   const tkTitles = () => TITLES.filter(t => t.tk).map(t => ({ id: t.id, tk: t.tk, owned: titleOwned(t.id), name: titleName(t.id) }));

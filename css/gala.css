@@ -1131,3 +1131,17 @@ html.reduce-motion .bq-screen > .gx-grid, html.reduce-motion .pf-screen > .gx-gr
 
 /* si los botones de una placa no caben en una fila (ruso: Rojo / Negro / Verde + precio), pasan a una segunda en vez de salirse por la izquierda; en los demas idiomas sigue siendo una sola */
 .gx-camp .sup > .bt-pick { flex-wrap: wrap; row-gap: 4px; max-width: 100%; }
+
+/* REVISION DE LOGROS (12-nov, votada). L6: lo que paga el logro, a la derecha del aviso. L7: «te falta poco», con su barra. L8: el sello
+   «Secreto» cae sobre el aviso como el «De broma» del logro falso (css/hub.css), pero dentro del papel */
+html body .ach-toast .ach-pay { flex: none; margin-left: auto; padding-left: 8px; display: flex; align-items: center; gap: 4px; text-decoration: none; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-gold-lo); white-space: nowrap; }
+html body .ach-toast .ck-fi.sm { width: 18px; height: 18px; margin: 0; }
+html body .ach-toast .ach-ico .ck-fi { display: block; margin: 8px; }
+html body .ach-toast .ach-t i.ach-pr, html body #leftCol .ach-toast .ach-t i.ach-pr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-ink); }
+html body .ach-toast .ach-pr .gx-bar { display: block; width: 100%; }
+html body .ach-toast .ach-pr .gx-bar i, html body #leftCol .ach-toast .ach-pr .gx-bar i { position: absolute; inset: 2px auto 2px 2px; max-width: calc(100% - 4px); background: var(--gx-gold-lo); }
+html body .ach-toast .ach-stamp { right: 8px; top: 34%; z-index: 2; font-family: var(--sans); font-size: 24px; }
+html body .ach-toast[data-tr="5"] .ach-pay { align-self: flex-end; margin-bottom: 2px; }   /* el secreto: lo que paga, abajo; el sello, arriba */
+html body .ach-toast.sealed .ach-stamp { animation: ach-stamp .26s cubic-bezier(.3, 1.6, .5, 1) forwards; }
+html.reduce-motion body .ach-toast.sealed .ach-stamp { animation: none; opacity: 1; transform: translateY(-50%) rotate(-12deg); }
+html.lz body #leftCol .ach-toast.free.mini .ach-pay { align-self: center; }

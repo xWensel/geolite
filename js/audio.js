@@ -372,7 +372,7 @@ window.AIQ = window.AIQ || {};
     const el = els[0], d = (decks[k] = { el, els, lg, trim, fade, idx: -1, leaving: false, tm: 0, sync: 0, gen: 0, wt: 0 });   // la capa 0 lleva el reloj
     /* la cancion se acaba: la siguiente entra fundida un poco antes del final (o, si no se pudo, al terminar). De paso, cada medio segundo, las capas al reloj */
     el.addEventListener("timeupdate", () => {
-      if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.5) change(pick(), "fade");   // +0,5: la siguiente espera a tener sus tres capas listas
+      if (decks[di] === d && !d.leaving && el.duration && el.duration - el.currentTime < XF + 0.5) { if (A.profile && A.profile.song) A.profile.song(d.idx, FILES.length); change(pick(), "fade"); }   // ha sonado hasta el final: cuenta para «Melomano»   // +0,5: la siguiente espera a tener sus tres capas listas
       const now = performance.now(); if (now - d.sync > 500) { d.sync = now; align(d); }
     });
     el.addEventListener("ended", () => { if (decks[di] === d && !d.leaving) change(pick(), "soft"); });
@@ -979,7 +979,7 @@ window.AIQ = window.AIQ || {};
       if (F[sn]) F[sn]();
       return { cancel: () => { dead = true; } };
     },
-    ach: go(t => { const b = bus("ach", 0.3); sub(b, t, { v: 0.15, f0: 110, f1: 50, dur: 0.25 }); [0, 2, 4, 6, 8].forEach((d, i) => rhodes(b, deg(d, 55), t + i * 0.015, { v: 0.045, dur: 1.5, pan: (i - 2) * 0.2 })); [5, 7, 9, 10].forEach((d, i) => vibes(b, deg(d, 64), t + 0.1 + i * 0.08, { v: 0.04, dur: 0.9 })); [10, 12].forEach((d, i) => pix(b, deg(d, 72), t + 0.45 + i * 0.07, { v: 0.008 })); A.music.duck(0.7, 1400); }),
+    ach: go((t, up = 0) => { const b = bus("ach", 0.3), dg = (d, m) => deg(d, m + up); sub(b, t, { v: 0.15, f0: 110, f1: 50, dur: 0.25 }); [0, 2, 4, 6, 8].forEach((d, i) => rhodes(b, dg(d, 55), t + i * 0.015, { v: 0.045, dur: 1.5, pan: (i - 2) * 0.2 })); [5, 7, 9, 10].forEach((d, i) => vibes(b, dg(d, 64), t + 0.1 + i * 0.08, { v: 0.04, dur: 0.9 })); [10, 12].forEach((d, i) => pix(b, dg(d, 72), t + 0.45 + i * 0.07, { v: 0.008 })); A.music.duck(0.7, 1400); }),
     buy: go(t => { const b = bus("buy", 0.15); rec(b, "mano", t, { lp: 2400, v: 0.55, len: 0.35 }); [0, 2, 4].forEach((d, i) => vibes(b, deg(d + 5, 60), t + 0.05 + i * 0.05, { v: 0.035, dur: 0.6 })); }),
     sell: go(t => { const b = bus("sell", 0.12); rec(b, "chip", t, { lp: 2600, v: 0.5 }); vibes(b, deg(6, 60), t + 0.02, { v: 0.03, dur: 0.4 }); vibes(b, deg(4, 60), t + 0.1, { v: 0.028, dur: 0.5 }); }),
     clear: go(t => { const b = bus("clear", 0.3); sub(b, t, { v: 0.2, f0: 120, f1: 42, dur: 0.3 }); [0, 1, 2, 3, 4, 5].forEach((d, i) => vibes(b, deg(d + 5, 60), t + 0.06 + i * 0.07, { v: 0.04, dur: 1.0, pan: -0.5 + i * 0.2 })); [0, 2, 4, 6, 8].forEach((d, i) => rhodes(b, deg(d, 55), t + 0.45 + i * 0.012, { v: 0.045, dur: 1.8 })); pix(b, deg(12, 72), t + 0.55, { v: 0.009 }); A.music.duck(0.6, 1800); }),
@@ -1484,7 +1484,7 @@ window.AIQ = window.AIQ || {};
       bell(n, t, { vol: 0.08, dur: 0.4, rev: 0.3 }); bell(n + 7, t + 0.05, { vol: 0.06, dur: 0.6, rev: 0.35 }); noise(t, 0.012, { hp: 6000, vol: 0.05 });
       for (let i = 0; i < 1 + k; i++) bell(n + 12 + (i % 2) * 5, t + 0.09 + i * 0.045, { vol: 0.025, dur: 0.18, rev: 0.25 });
     }),
-    ach: cla("ach", t => { [79, 83, 86, 91].forEach((m, i) => bell(m, t + i * 0.08, { vol: 0.09, dur: 1.2, rev: 0.6 })); pluck(67, t, { vol: 0.12, dur: 0.6, rev: 0.4 }); noise(t + 0.25, 0.5, { hp: 5000, vol: 0.03, sweepTo: 12000, type: "highpass" }); }),
+    ach: cla("ach", (t, up = 0) => { [79, 83, 86, 91].forEach((m, i) => bell(m + up, t + i * 0.08, { vol: 0.09, dur: 1.2, rev: 0.6 })); pluck(67 + up, t, { vol: 0.12, dur: 0.6, rev: 0.4 }); noise(t + 0.25, 0.5, { hp: 5000, vol: 0.03, sweepTo: 12000, type: "highpass" }); }),
     buy: cla("buy", t => { [0, 0.06, 0.12].forEach((d, i) => bell(84 + i * 5, t + d, { vol: 0.07, dur: 0.4, rev: 0.3 })); thump(t, { vol: 0.16, f0: 200, f1: 70, dur: 0.08 }); noise(t + 0.02, 0.05, { hp: 3500, vol: 0.05 }); }),
     sell: cla("sell", t => { bell(76, t, { vol: 0.06, dur: 0.3 }); bell(69, t + 0.07, { vol: 0.06, dur: 0.4 }); noise(t, 0.04, { lp: 2400, vol: 0.06, type: "bandpass", q: 1 }); }),
     clear: cla("clear", t => { thump(t, { vol: 0.3, f0: 130, f1: 40, dur: 0.25 }); [72, 76, 79, 84, 88].forEach((m, i) => pluck(m, t + 0.08 + i * 0.075, { vol: 0.13, dur: 0.9, rev: 0.5 })); bell(96, t + 0.5, { vol: 0.08, dur: 1.4, rev: 0.7 }); A.music.duck(0.35, 1800); }),

@@ -185,7 +185,7 @@ window.AIQ = window.AIQ || {};
     st.raf = requestAnimationFrame(tick);
   }
   function fast(on) { if (!st) return; st.fast = !!on && st.phase === "roll"; $("finHint").classList.toggle("fast", st.fast); }
-  function skip() { if (st && st.phase === "roll") finale(); }
+  function skip() { if (st && st.phase === "roll") { st.skipped = 1; finale(); } }
 
   /* ---------- el final: el crupier bajo su foco, su placa, sus dos frases y el FIN */
   function finale() {
@@ -198,7 +198,7 @@ window.AIQ = window.AIQ || {};
     later(() => {
       const next = () => later(() => {
         e.classList.add("fin"); later(() => { if (A.sfx.stamp) A.sfx.stamp(); const x = e.querySelector(".fin-end-in"); x.classList.remove("shake"); void x.offsetWidth; x.classList.add("shake"); A.haptic && A.haptic([40]); }, 300);
-        later(() => { st.phase = "wait"; $("finBack").classList.add("on"); }, 2200);
+        later(() => { st.phase = "wait"; $("finBack").classList.add("on"); if (!st.skipped && A.ach) A.ach.emit("casa", { kind: "credits" }); }, 2200);   // «Fin de fiesta»: hasta el FIN sin saltarlos
       }, 200);
       if (st.o.finale) st.o.finale($("finStage"), () => tachan(next)); else next();
     }, 1700);
