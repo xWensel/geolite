@@ -441,7 +441,7 @@ window.AIQ = window.AIQ || {};
     const lad = Array.from({ length: CFG.rounds }, (_, i) => `<div class="pop" style="--d:${(0.6 + i * 0.05).toFixed(2)}s"><i style="--h:${8 + Math.round(multOf(i + 1) * 6)}px"></i><span>×${fmtM(multOf(i + 1))}</span></div>`).join("");
     c.dialog(stage("vs", `<div class="top"><span class="gx-eyb">${st.liga ? `${T("Duelo de liga", "League duel")} · ${rankName(rankOf(s.lp))}` : `${A.tx(tb.n)} · ${span(tb)}`}</span></div>
       ${card("l", ME_CHIP, nm || T("Jugador", "Player"), ME(), "me", nt ? room(N.score.me) : row(T("Duelos", "Duels"), s.d) + row(T("Victorias", "Wins"), s.w) + row(T("Racha", "Streak"), s.s || "—"))}
-      <div class="mid"><div class="seatw" id="duVsSeat"></div><b class="rise" style="--d:.35s">${A.fmt(2 * CFG.stack)}</b><span class="gx-note rise" style="--d:.4s">${T("fichas en juego", "chips at stake")}</span></div>
+      <div class="mid"><div class="seatw" id="duVsSeat" data-tail="t"></div><b class="rise" style="--d:.35s">${A.fmt(2 * CFG.stack)}</b><span class="gx-note rise" style="--d:.4s">${T("fichas en juego", "chips at stake")}</span></div>
       ${card("r", RV_CHIP, foe(), RIVAL(), "rv", nt ? room(N.score.rv) : row(T("Nivel", "Level"), st.level) + row(T("Duelos contigo", "Duels with you"), s.d) + row(T("Victorias", "Wins"), s.d - s.w))}
       <div class="lad" style="--n:${CFG.rounds}">${lad}</div>`, `<span class="cnt" id="duCnt"></span>`), "tablewrap");
     A.sfx.intro(); c.map.animateTo(c.map.home(), 1100);
@@ -745,7 +745,7 @@ window.AIQ = window.AIQ || {};
           <p>${tally(now)} ${now.s > 1 ? Tf("Racha de {n} seguidas.", "{n} in a row.", { n: now.s }) : !win && was.s > 1 ? T("Racha cortada.", "Streak broken.") : ""}</p></div></div>`}${club ? `<div class="du-club rise" style="--d:1.05s"><div class="gx-paper">${A.club.strip(club)}</div></div>` : ""}${pol}</div>
       <div class="tk drop" style="--d:.15s"><div class="gx-paper"><span class="gx-eyb">${T("La cuenta", "The tally")}</span>${rows}<div class="gx-hr"></div>${row(T("Tu pila", "Your stack"), A.fmt(me))}</div></div>
       <div class="mesa"><div class="col"><b class="me">${A.fmt(me)}</b><span>${myName() || ME()}</span>${pile("me", me)}</div><div class="col"><b class="rv">${A.fmt(rv)}</b><span>${fo}</span>${pile("rv", rv)}</div><div class="dais"></div></div>
-      <div class="seatw" id="duVdSeat"></div>
+      <div class="seatw" id="duVdSeat" data-tail="r"></div>
       <div class="gx-acts"><button type="button" class="gx-btn gho" id="duExit"><span>${nt ? T("Salir de la sala", "Leave the room") : T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${nt ? primary("duRoom", T("Volver a la sala", "Back to the room")) : `<button type="button" class="gx-btn" id="duTables"><span>${T("Otra mesa", "Another table")}</span></button>${primary("duRematch", T("Revancha", "Rematch"))}`}</div>`), "tablewrap");
     polInit();
     $("duExit").onclick = () => c.showHub("home");
