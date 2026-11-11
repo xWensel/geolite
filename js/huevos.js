@@ -281,7 +281,7 @@ window.AIQ = window.AIQ || {};
     if (st.no || pidiendo || !A.profile || !A.profile.get) return; pidiendo = true;
     try {
       const c = new AbortController(), tm = setTimeout(() => c.abort(), 8000);
-      const r = await fetch("/api/socio", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: A.profile.get().id }), signal: c.signal }); clearTimeout(tm);
+      const r = await fetch((window.geoliteHost ? A.SITE : "") + "/api/socio", { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ id: A.profile.get().id }), signal: c.signal }); clearTimeout(tm);
       const j = await r.json(); if (j && j.ok && j.n > 0) { st.no = j.n; save(); }
     } catch (e) { /* sin red o sin backend: sigue sin numero */ }
     pidiendo = false;

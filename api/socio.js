@@ -5,6 +5,8 @@
 const kv = require("./_kv");
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Access-Control-Allow-Origin", "*");                              // el juego de escritorio llama desde 127.0.0.1
+  if (req.method === "OPTIONS") { res.setHeader("Access-Control-Allow-Methods", "GET, POST"); res.setHeader("Access-Control-Allow-Headers", "content-type"); return res.status(204).end(); }
   if (req.method !== "POST") return res.status(405).json({ ok: false });
   if (!kv.configured) return res.status(503).json({ ok: false, reason: "no-backend" });
   let b; try { b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch (e) { return res.status(400).json({ ok: false, reason: "json" }); }

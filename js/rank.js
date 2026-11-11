@@ -23,9 +23,12 @@ window.AIQ = window.AIQ || {};
   const fetchJ = (url, opt = {}, ms = 8000) => { const c = new AbortController(), t = setTimeout(() => c.abort(), ms); return fetch(url, { ...opt, signal: c.signal }).then(r => r.json()).finally(() => clearTimeout(t)); };
   /* comprobacion de la API global (si no existe, todo sigue en local). Si falla (sin red, servidor dormido) se vuelve a probar al minuto:
      antes un primer fallo dejaba toda la sesion en local y las puntuaciones de esa sesion no llegaban nunca a la clasificacion */
+  /* donde vive la API: en el juego de escritorio (se sirve desde 127.0.0.1) es la web publica, como el Duelo y la mesa; en la web, la propia pagina;
+     en desarrollo en local sin Electron, ninguna. El cuerpo va como text/plain para no pedir permiso previo (CORS) en cada envio */
+  const API = window.geoliteHost ? A.SITE : A.LOCAL || !/^https?:$/.test(location.protocol) ? null : "";
   R.check = () => R._chk || (R._chk = (async () => {
-    if (!/^https?:$/.test(location.protocol) || /localhost|127\.0\.0\.1/.test(location.hostname)) { R.remote = false; return false; }
-    try { const j = await fetchJ("/api/top?board=ping", {}, 2500); R.remote = !!(j && j.ok); } catch (e) { R.remote = false; }
+    if (API == null) { R.remote = false; return false; }
+    try { const j = await fetchJ(API + "/api/top?board=ping", {}, 2500); R.remote = !!(j && j.ok); } catch (e) { R.remote = false; }
     if (!R.remote) setTimeout(() => { R._chk = null; }, 60000);
     return R.remote;
   })());
@@ -38,7 +41,7 @@ window.AIQ = window.AIQ || {};
   let line = Promise.resolve();
   const post = body => (line = line.catch(() => null).then(async () => {
     const k = body && !body.op && A.socio && A.socio.code ? A.socio.code() : "";    // v0.3.174: con cada puntuacion, el estilo de tu carta (api/submit.js, "sty")
-    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(k ? { ...body, k } : body) }, 20000); if (j && j.ok && k) styleSent = k; R.lastErr = j && j.ok ? "" : (j && j.reason) || "net"; return j && j.ok ? j : null; } catch (e) { R.lastErr = "net"; return null; }   // lastErr: por que no entro la ultima puntuacion (proof, time, run, rate, ban, kv, invalid o net); la Barra lo ensena
+    try { const j = await fetchJ(API + "/api/submit", { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify(k ? { ...body, k } : body) }, 20000); if (j && j.ok && k) styleSent = k; R.lastErr = j && j.ok ? "" : (j && j.reason) || "net"; return j && j.ok ? j : null; } catch (e) { R.lastErr = "net"; return null; }   // lastErr: por que no entro la ultima puntuacion (proof, time, run, rate, ban, kv, invalid o net); la Barra lo ensena
   }));
   /* v0.3.174: si vistes la carta de otra forma (icono, titulo, marco, categoria), la Clasificacion la ensena asi: se manda al abrirla, solo si cambio
      y solo si ya estas en alguna tabla. El servidor la guarda una vez por jugador (api/submit.js, op "sty") */
@@ -46,14 +49,14 @@ window.AIQ = window.AIQ || {};
   R.style = async () => {
     const P = A.profile.get(), k = A.socio && A.socio.code ? A.socio.code() : "";
     if (!k || k === styleSent || !Object.values(P.boards || {}).some(l => (l || []).some(r => r.id === P.id)) || !(await R.check())) return false;
-    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ op: "sty", id: P.id, k }) }); if (j && j.ok) { styleSent = k; for (const c in TC) delete TC[c]; return true; } } catch (e) { /* sin red: otra vez sera */ }
+    try { const j = await fetchJ(API + "/api/submit", { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ op: "sty", id: P.id, k }) }); if (j && j.ok) { styleSent = k; for (const c in TC) delete TC[c]; return true; } } catch (e) { /* sin red: otra vez sera */ }
     return false;
   };
   /* boleto de partida (api/submit.js): el servidor lo da al empezar una expedicion y sin el ninguna puntuacion entra ni sube. pf = { run, x }:
      el boleto y el desglose de la partida con que el servidor rehace la cuenta (se guarda con la fila para poder reenviarla) */
   R.ticket = async () => {
     if (!(await R.check())) return null;
-    try { const j = await fetchJ("/api/submit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ op: "run", id: A.profile.get().id }) }); return j && j.ok && j.run ? j.run : null; } catch (e) { return null; }
+    try { const j = await fetchJ(API + "/api/submit", { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ op: "run", id: A.profile.get().id }) }); return j && j.ok && j.run ? j.run : null; } catch (e) { return null; }
   };
   const pfOf = r => (r && r.pf && r.pf.run ? { run: r.pf.run, x: r.pf.x } : {});
   R.localTop = (board, n = 20, o = 0) => ((A.profile.get().boards[board] || []).slice().sort((a, b) => b.score - a.score).slice(o, o + n));
@@ -61,7 +64,7 @@ window.AIQ = window.AIQ || {};
      (el servidor solo devuelve el id de tu propia fila: los de los demas no se ensenan) */
   /* o: desde que puesto (0 = el primero), para pasar paginas de la clasificacion; count = cuantos hay en la tabla */
   R.top = async (board, n = 20, again, o = 0) => {
-    if (await R.check()) { try { const j = await fetchJ(`/api/top?board=${encodeURIComponent(board)}&n=${n}&o=${o}&me=${encodeURIComponent(A.profile.get().id)}`); if (j.ok) {
+    if (await R.check()) { try { const j = await fetchJ(`${API}/api/top?board=${encodeURIComponent(board)}&n=${n}&o=${o}&me=${encodeURIComponent(A.profile.get().id)}`); if (j.ok) {
       /* tus intentos del dia no llegaron (jugaste sin red, servidor dormido, limite de envios): se reenvian una vez y se vuelve a pedir la tabla */
       const st = !again && /^daily-\d{8}$/.test(board) && R.daily.get(board);
       if (st && st.done && (!j.me || j.me.score < st.total)) { await R.daily.submit(board); return R.top(board, n, true, o); }
