@@ -8,15 +8,14 @@ window.AIQ = window.AIQ || {};
   const $ = id => document.getElementById(id), C = () => A.core;
   const t6 = s => A.tip6(s);
 
-  /* cada paso: sel = elemento que se ilumina (si no existe o esta oculto, se salta), txt = es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl */
+  /* cada paso: sel = elemento que se ilumina (si no existe o esta oculto, se salta; una lista = dos focos a la vez: el primero lleva la tarjeta), txt = es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl */
   const TOURS = {
+    /* la primera pregunta la explica el en primera persona y en cuatro pasos (revision final: antes seis cajas neutras) */
     q: [
-      { sel: "#plate", txt: "Este es el lugar que buscas. Debajo del nombre ves su país (o su continente).|This is the place you're looking for. Under the name you see its country (or continent).|Voici le lieu à trouver. Sous le nom, tu vois son pays (ou son continent).|Este é o lugar que você procura. Abaixo do nome está o país (ou o continente).|Das ist der gesuchte Ort. Unter dem Namen siehst du sein Land (oder den Kontinent).|Questo è il luogo che cerchi. Sotto il nome vedi il suo paese (o continente).||这就是你要找的地点。名字下方显示它所在的国家（或大洲）。|이곳이 찾아야 할 장소예요. 이름 아래에 국가(또는 대륙)가 보여요.|これが探す場所。名前の下に国（または大陸）が表示される。|Вот место, которое ты ищешь. Под названием видна его страна (или континент).|Tego miejsca szukasz. Pod nazwą widzisz jego kraj (albo kontynent)." },
-      { sel: "#map", box: "center", txt: "Haz clic en el mapa donde crees que está. Con la rueda o los botones + y − haces zoom. Cuanto más cerca, más puntos.|Click on the map where you think it is. Use the wheel or the + and − buttons to zoom. The closer you are, the more points.|Clique sur la carte où tu penses qu'il se trouve. Molette ou boutons + et − pour zoomer. Plus tu es proche, plus tu gagnes de points.|Clique no mapa onde acha que ele está. Use a roda ou os botões + e − para dar zoom. Quanto mais perto, mais pontos.|Klicke auf die Karte, wo du ihn vermutest. Mit dem Rad oder + und − zoomst du. Je näher, desto mehr Punkte.|Clicca sulla mappa dove pensi che sia. Con la rotella o i pulsanti + e − fai zoom. Più sei vicino, più punti ottieni.||在地图上点击你认为它所在的位置。用滚轮或 + 和 − 按钮缩放。越接近，得分越高。|있다고 생각하는 곳을 지도에서 클릭하세요. 휠이나 +, − 버튼으로 확대/축소할 수 있어요. 가까울수록 점수가 높아요.|あると思う場所を地図でクリック。ホイールか＋と−ボタンでズームできる。近いほど高得点。|Кликни на карте туда, где, по-твоему, это место. Колёсиком или кнопками + и − меняй масштаб. Чем ближе, тем больше очков.|Kliknij na mapie tam, gdzie twoim zdaniem leży. Kółkiem albo przyciskami + i − przybliżasz. Im bliżej, tym więcej punktów." },
-      { sel: ".clock", txt: "El reloj corre: responder rápido también suma puntos.|The clock is ticking: answering fast also earns points.|Le chrono tourne : répondre vite rapporte aussi des points.|O relógio corre: responder rápido também dá pontos.|Die Uhr läuft: schnelle Antworten bringen auch Punkte.|L'orologio corre: anche rispondere in fretta dà punti.||时钟在走：答得快也能得分。|시계가 째깍거려요: 빨리 답해도 점수를 받아요.|時間は刻々と過ぎていく。素早く答えればポイントも上乗せ。|Часы тикают: быстрый ответ тоже приносит очки.|Zegar tyka: szybka odpowiedź też daje punkty." },
-      { sel: "#advBar .ab-top", txt: "Doblones para comprar en el Campamento y provisiones ♥: si fallas una ronda pierdes una, y sin provisiones acaba la expedición.|Doubloons to spend at the Camp and provisions ♥: fail a round and you lose one; with none left, the expedition ends.|Des doublons pour acheter au Campement et des provisions ♥ : rater une manche en coûte une ; sans provisions, l'expédition s'arrête.|Dobrões para gastar no Acampamento e provisões ♥: falhar uma rodada custa uma; sem provisões, a expedição termina.|Dublonen zum Einkaufen im Lager und Proviant ♥: Eine verpatzte Runde kostet einen; ohne Proviant endet die Expedition.|Dobloni da spendere all'Accampamento e provviste ♥: fallire un round ne costa una; senza provviste la spedizione finisce.||金币可在营地消费，补给 ♥：一回合失败会失去一份；全部用完，远征就结束了。|캠프에서 쓸 도블론과 식량 ♥: 라운드에 실패하면 하나를 잃고, 모두 잃으면 원정이 끝나요.|キャンプで使うダブロンと食料♥：ラウンドに失敗すると1つ失い、なくなると遠征は終わり。|Дублоны для Лагеря и запасы ♥: провалишь раунд — потеряешь один; кончатся все — экспедиция окончена.|Dublony do wydania w Obozie i zapasy ♥: oblejesz rundę — tracisz jeden; gdy się skończą, wyprawa dobiega końca." },
-            { sel: "#toolBar .tool", all: true, txt: "Tus herramientas: púlsalas (o su número) para usarlas. Dan pistas, como a cuántos km o hacia dónde está el lugar, y se recargan cada ronda.|Your tools: press them (or their number) to use them. They give clues, like how many km away or which way the place is, and refill every round.|Tes outils : appuie dessus (ou sur leur numéro). Ils donnent des indices, comme la distance en km ou la direction du lieu, et se rechargent à chaque manche.|Suas ferramentas: clique nelas (ou no número) para usá-las. Dão pistas, como a quantos km ou em que direção fica o lugar, e recarregam a cada rodada.|Deine Werkzeuge: Klicke sie an (oder drücke ihre Zahl). Sie geben Hinweise, etwa Entfernung in km oder Richtung des Ortes, und laden sich jede Runde auf.|I tuoi strumenti: premili (o premi il numero). Danno indizi, come la distanza in km o la direzione del luogo, e si ricaricano a ogni round.|Tus herramientas: presiónalas (o su número) para usarlas. Dan pistas, como a cuántos km o hacia dónde está el lugar, y se recargan cada ronda.|你的工具：点击它们（或按对应数字）即可使用。它们会提供线索，比如距离多少公里或地点在哪个方向，每回合都会补满。|도구: 누르거나 번호 키로 사용하세요. 몇 km 떨어졌는지, 어느 방향인지 같은 단서를 주고, 매 라운드 다시 채워져요.|道具：押すか番号キーで使う。何km離れているか、どの方向かなどのヒントをくれて、毎ラウンド補充される。|Твои инструменты: нажми на них (или на их цифру), чтобы использовать. Они дают подсказки — сколько км до места или в какой оно стороне — и пополняются каждый раунд.|Twoje narzędzia: naciśnij je (albo ich numer), żeby użyć. Podpowiadają np. ile km dzieli cię od miejsca albo w którą stronę leży, i odnawiają się co rundę." },
-      { sel: "#ledger", txt: "Cada ronda pide una puntuación mínima. Llega a la marca para superarla.|Every round asks for a minimum score. Reach the mark to clear it.|Chaque manche exige un score minimum. Atteins la marque pour la réussir.|Cada rodada exige uma pontuação mínima. Chegue à marca para superá-la.|Jede Runde verlangt eine Mindestpunktzahl. Erreiche die Marke, um sie zu schaffen.|Ogni round richiede un punteggio minimo. Raggiungi la soglia per superarlo.||每回合都要求一个最低分数。达到就能通过。|매 라운드마다 최소 점수가 있어요. 목표에 도달하면 클리어예요.|各ラウンドには最低スコアがある。到達すればクリア。|Каждый раунд требует минимум очков. Достигни отметки, чтобы пройти.|Każda runda wymaga minimalnego wyniku. Osiągnij go, żeby ją zaliczyć." },
+      { sel: "#plate", txt: "Este es el sitio que te pido. Debajo, su país. De nada.|This is the place I'm asking for. Below it, its country. You're welcome.|Voici le lieu que je te demande. En dessous, son pays. De rien.|Este é o lugar que eu peço. Embaixo, o país dele. De nada.|Das ist der Ort, den ich von dir will. Darunter sein Land. Gern geschehen.|Questo è il posto che ti chiedo. Sotto, il suo paese. Prego.||这就是我要你找的地方。下面是它所在的国家。不用谢。|제가 찾으라는 곳이 바로 여기예요. 아래엔 그 나라가 적혀 있고요. 천만에요.|これが私の出すお題。下にはその国。礼には及ばない。|Вот место, которое я загадал. Ниже — его страна. Не благодари.|Oto miejsce, o które pytam. Niżej jego kraj. Nie ma za co." },
+      { sel: "#map", box: "center", txt: "Pincha en el mapa donde creas que está. Cuanto más cerca, más me cuesta la broma.|Click the map where you think it is. The closer you get, the more it costs me.|Clique sur la carte là où tu penses qu'il se trouve. Plus tu es près, plus ça me coûte cher.|Clique no mapa onde acha que ele fica. Quanto mais perto, mais caro me sai a brincadeira.|Klick auf die Karte, wo du ihn vermutest. Je näher du liegst, desto teurer wird der Spaß für mich.|Clicca sulla mappa dove pensi che sia. Più ti avvicini, più mi costa lo scherzo.|Haz clic en el mapa donde creas que está. Cuanto más cerca, más me cuesta la broma.|在地图上点你觉得它在的位置。你离得越近，我赔得越多。|있을 것 같은 곳을 지도에서 클릭하세요. 가까울수록 제 지갑이 얇아진답니다.|あると思う場所を地図でクリック。近いほど、こちらの懐が痛む。|Кликни на карте туда, где оно, по-твоему, находится. Чем ближе, тем дороже мне обходится эта шутка.|Kliknij na mapie tam, gdzie twoim zdaniem leży. Im bliżej, tym drożej mnie ten żart kosztuje." },
+      { sel: [".clock", "#advBar .ab-top"], txt: "El reloj corre, y la prisa también se paga. Arriba, tus doblones y tus provisiones ♥: sin provisiones, se acabó la expedición.|The clock is ticking, and speed pays too. Up top, your doubloons and your provisions ♥: run out of provisions and the expedition is over.|Le chrono tourne, et la vitesse paie aussi. En haut, tes doublons et tes provisions ♥ : sans provisions, l'expédition est finie.|O relógio corre, e a pressa também paga. Lá em cima, seus dobrões e suas provisões ♥: sem provisões, acabou a expedição.|Die Uhr läuft, und Tempo zahlt sich auch aus. Oben: deine Dublonen und dein Proviant ♥. Ohne Proviant ist die Expedition vorbei.|L'orologio corre, e anche la fretta paga. In alto, i tuoi dobloni e le tue provviste ♥: senza provviste, la spedizione è finita.||时钟在走，答得快也有赏。上面是你的金币和补给 ♥：补给用完，远征就到此为止。|시계는 가고 있고, 빠른 답에도 값을 쳐 드려요. 위쪽엔 도블론과 식량 ♥: 식량이 떨어지면 원정은 끝이에요.|時計は進む。速さにも払おう。上にはダブロンと食料♥。食料が尽きれば遠征は終わりだ。|Часы тикают, и за скорость я тоже плачу. Наверху — твои дублоны и запасы ♥: кончатся запасы — экспедиции конец.|Zegar tyka, a za szybkość też płacę. U góry twoje dublony i zapasy ♥: bez zapasów koniec wyprawy." },
+      { sel: ["#toolBar .tool", "#ledger"], txt: "Tus herramientas dan pistas y se recargan cada ronda. Y esa marca de ahí es lo mínimo que te exijo.|Your tools give clues and refill every round. And that mark over there is the least I expect from you.|Tes outils donnent des indices et se rechargent à chaque manche. Et cette marque, là, c'est le minimum que j'exige.|Suas ferramentas dão pistas e recarregam a cada rodada. E aquela marca ali é o mínimo que eu exijo.|Deine Werkzeuge geben Hinweise und laden sich jede Runde auf. Und die Marke dort ist das Mindeste, was ich verlange.|I tuoi strumenti danno indizi e si ricaricano a ogni round. E quella soglia lì è il minimo che pretendo.||你的工具会给线索，每回合补满。那边的目标分，是我对你的最低要求。|도구는 단서를 주고 매 라운드 다시 채워져요. 그리고 저기 저 목표 점수가 제가 요구하는 최소한이에요.|道具はヒントをくれて、毎ラウンド補充される。そしてあの目標スコアが、私の求める最低ラインだ。|Твои инструменты дают подсказки и пополняются каждый раунд. А вон та отметка — минимум, который я с тебя требую.|Twoje narzędzia dają podpowiedzi i odnawiają się co rundę. A tamten próg to minimum, którego wymagam." },
     ],
     camp: [
       { sel: ".table .offers", txt: "Entre rondas, el Campamento: gasta doblones en cartas. Lee bien lo que hace cada una: todas pueden servirte en algún momento de esta expedición. Las herramientas se recargan cada ronda.|Between rounds, the Camp: spend doubloons on cards. Read each one carefully: every card can help you at some point in this expedition. Tools refill every round.|Entre les manches, le Campement : dépense tes doublons en cartes. Lis bien ce que fait chacune : toutes peuvent te servir à un moment de cette expédition. Les outils se rechargent à chaque manche.|Entre rodadas, o Acampamento: gaste dobrões em cartas. Leia bem o que cada uma faz: todas podem te servir em algum momento desta expedição. As ferramentas recarregam a cada rodada.|Zwischen den Runden das Lager: gib Dublonen für Karten aus. Lies genau, was jede tut: Jede kann dir irgendwann auf dieser Expedition helfen. Werkzeuge laden sich jede Runde auf.|Tra un round e l'altro, l'Accampamento: spendi dobloni in carte. Leggi bene cosa fa ciascuna: tutte possono servirti prima o poi in questa spedizione. Gli strumenti si ricaricano a ogni round.||回合之间是营地：用金币购买卡牌。仔细读每张牌的作用：它们在本次远征中都可能派上用场。工具每回合补满。|라운드 사이엔 캠프: 도블론으로 카드를 사세요. 각 카드가 무엇을 하는지 잘 읽어 보세요. 모두 이번 원정 어딘가에서 쓸모가 있어요. 도구는 매 라운드 채워져요.|ラウンドの合間はキャンプ：ダブロンでカードを買おう。効果をよく読もう。どれもこの遠征のどこかで役に立つ。道具は毎ラウンド補充される。|Между раундами — Лагерь: трать дублоны на карты. Внимательно читай, что делает каждая: любая может пригодиться в этой экспедиции. Инструменты пополняются каждый раунд.|Między rundami jest Obóz: wydajesz dublony na karty. Czytaj uważnie, co robi każda: każda może się przydać w tej wyprawie. Narzędzia odnawiają się co rundę." },
@@ -27,6 +26,7 @@ window.AIQ = window.AIQ || {};
 
   /* textos del paso y del boton de saltar: es | en | fr | pt | de | it | es-419 | zh | ko | ja | ru | pl */
   const EB = "Tutorial · {n} de {m}|Tutorial · {n} of {m}|Tutoriel · {n} sur {m}|Tutorial · {n} de {m}|Tutorial · {n} von {m}|Tutorial · {n} di {m}||教程 · 第 {n}/{m} 步|튜토리얼 · {n}/{m}|チュートリアル · {n}/{m}|Обучение · {n} из {m}|Samouczek · {n} z {m}";
+  const EBQ = "Don Crupier · {n} de {m}|The Dealer · {n} of {m}|Don Croupier · {n} sur {m}|Dom Crupiê · {n} de {m}|Don Croupier · {n} von {m}|Don Croupier · {n} di {m}||荷官先生 · 第 {n}/{m} 步|딜러 나리 · {n}/{m}|ドン・ディーラー · {n}/{m}|Дон Крупье · {n} из {m}|Don Krupier · {n} z {m}";
   const SKIP = "Saltar|Skip|Passer|Pular|Überspringen|Salta||跳过|건너뛰기|スキップ|Пропустить|Pomiń";
 
   let cur = null, froze = false;
@@ -39,12 +39,13 @@ window.AIQ = window.AIQ || {};
     if (on && S.phase === "asking" && !S.paused) { S.paused = true; S.pauseAt = performance.now(); map.setPick(false); froze = true; }
     else if (!on && froze) { froze = false; if (S.paused && S.phase === "asking") { S.pausedAcc += performance.now() - S.pauseAt; S.paused = false; map.setPick(true); } }
   }
+  const sels = s => [].concat(s.sel);
   const visible = el => { if (!el) return false; const r = el.getBoundingClientRect(); return r.width > 4 && r.height > 4 && !el.closest(".hidden") && getComputedStyle(el).visibility !== "hidden"; };
 
   function ensure() {
     let el = $("tour"); if (el) return el;
     el = document.createElement("div"); el.id = "tour"; el.className = "tour hidden";
-    el.innerHTML = `<i class="tour-hole"></i><div class="tour-card"><div class="tour-paper gx-paper"><div class="tour-face"></div><div class="tour-body"><span class="tour-eb gx-eyb"></span><p class="tour-txt"></p></div>
+    el.innerHTML = `<i class="tour-dim"></i><i class="tour-hole"></i><i class="tour-hole b"></i><div class="tour-card"><div class="tour-paper gx-paper"><div class="tour-face"></div><div class="tour-body"><span class="tour-eb gx-eyb"></span><p class="tour-txt"></p></div>
       <div class="tour-nav gx-acts"><button type="button" class="tour-skip gx-btn sm gho"></button><button type="button" class="tour-next gx-btn sm pri" data-primary></button></div></div></div>`;
     $("app").appendChild(el);
     /* bloque D: el crupier entero, a su tamano (el mismo en todas las pantallas), junto al borde: abajo a la izquierda, o a la derecha si ahi esta
@@ -58,16 +59,21 @@ window.AIQ = window.AIQ || {};
   const mouth = n => { if (!face) return; clearInterval(faceT); face.talk(true); let k = 0; faceT = setInterval(() => { face.syl(); if (++k > n) { clearInterval(faceT); face.talk(false); } }, 70); };
 
   function place(step) {
-    const el = $("tour"), hole = el.querySelector(".tour-hole"), card = el.querySelector(".tour-card");
+    const el = $("tour"), holes = el.querySelectorAll(".tour-hole"), card = el.querySelector(".tour-card");
     const vw = innerWidth, vh = innerHeight;
-    let r;
-    if (step.box === "center") { const w = Math.min(vw * 0.5, 520), h = Math.min(vh * 0.32, 240); r = { left: (vw - w) / 2, top: vh * 0.46, width: w, height: h }; }
-    else {
-      const els = [...document.querySelectorAll(step.sel)].filter(visible), p = 8;                    // varios elementos (cartas de herramienta): se ilumina el conjunto
+    let rs;
+    if (step.box === "center") { const w = Math.min(vw * 0.5, 520), h = Math.min(vh * 0.32, 240); rs = [{ left: (vw - w) / 2, top: vh * 0.46, width: w, height: h }]; }
+    else rs = sels(step).map(sel => {
+      const els = [...document.querySelectorAll(sel)].filter(visible), p = 8; if (!els.length) return null;   // varios elementos (cartas de herramienta): se ilumina el conjunto
       const bs = els.map(e => e.getBoundingClientRect()), l = Math.min(...bs.map(b => b.left)), t = Math.min(...bs.map(b => b.top)), rr = Math.max(...bs.map(b => b.right)), bb = Math.max(...bs.map(b => b.bottom));
-      r = { left: l - p, top: t - p, width: rr - l + 2 * p, height: bb - t + 2 * p };
-    }
-    hole.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
+      return { left: Math.round(l - p), top: Math.round(t - p), width: Math.round(rr - l + 2 * p), height: Math.round(bb - t + 2 * p) };
+    }).filter(Boolean);
+    const r = rs[0], r2 = rs[1] || { left: r.left + r.width / 2, top: r.top + r.height / 2, width: 0, height: 0 };   // sin segundo foco: uno de tamano cero (el recorte conserva su forma y se anima)
+    holes[0].style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
+    holes[1].style.cssText = `left:${r2.left}px;top:${r2.top}px;width:${r2.width}px;height:${r2.height}px;opacity:${rs[1] ? 1 : 0}`;
+    /* la penumbra es una capa recortada con los focos como agujeros (antes, la sombra gigante del unico foco: no admitia dos) */
+    const rp = q => { const a = Math.min(14, q.width / 2, q.height / 2), x = q.left, y = q.top, w = q.width, h = q.height; return `M${x + a} ${y}H${x + w - a}A${a} ${a} 0 0 1 ${x + w} ${y + a}V${y + h - a}A${a} ${a} 0 0 1 ${x + w - a} ${y + h}H${x + a}A${a} ${a} 0 0 1 ${x} ${y + h - a}V${y + a}A${a} ${a} 0 0 1 ${x + a} ${y}Z`; };
+    el.querySelector(".tour-dim").style.clipPath = `path(evenodd, "M0 0H${vw}V${vh}H0Z${rp(r)}${rp(r2)}")`;
     const k = parseFloat(document.documentElement.style.getPropertyValue("--k")) || 1;          // la tarjeta crece con la pantalla como los menus (zoom): se mide en pixeles reales
     const cb = card.getBoundingClientRect(), cw = cb.width, ch = cb.height, gap = 14;
     let top = r.top + r.height + gap; if (top + ch > vh - 10) top = r.top - ch - gap; if (top < 10) top = Math.max(10, vh - ch - 12);
@@ -79,7 +85,7 @@ window.AIQ = window.AIQ || {};
       const f = A.crupier && A.crupier.kCss ? A.crupier.kCss() : 243, b = Math.max(84, vh * 0.13), y0 = vh - b - f, y1 = vh - b;
       const hits = (q, x0, x1) => q.left < x1 && q.left + q.width > x0 && q.top < y1 && q.top + q.height > y0;
       const cardR = { left, top, width: cw, height: ch }, L = [16, 16 + f], R = [vw - 16 - f, vw - 16];
-      const leftBad = hits(r, L[0], L[1]) || hits(cardR, L[0], L[1]), rightBad = hits(r, R[0], R[1]) || hits(cardR, R[0], R[1]);
+      const any = (x0, x1) => rs.some(q => hits(q, x0, x1)) || hits(cardR, x0, x1), leftBad = any(L[0], L[1]), rightBad = any(R[0], R[1]);
       cr.classList.toggle("dcha", leftBad && !rightBad);
       cr.classList.toggle("fuera", leftBad && rightBad);                                   // ni a un lado ni al otro: ese paso no sale (no se encoge)
     }
@@ -87,12 +93,12 @@ window.AIQ = window.AIQ || {};
 
   function show(quiet) {
     const tour = cur; if (!tour) return; if (face) face.shown(true);
-    while (tour.i < tour.steps.length) { const s = tour.steps[tour.i]; if (s.box === "center" || [...document.querySelectorAll(s.sel)].some(visible)) break; tour.i++; }
+    while (tour.i < tour.steps.length) { const s = tour.steps[tour.i]; if (s.box === "center" || sels(s).some(sel => [...document.querySelectorAll(sel)].some(visible))) break; tour.i++; }
     if (tour.i >= tour.steps.length) return finish(true);
     const step = tour.steps[tour.i], el = ensure();
-    el.classList.remove("hidden"); requestAnimationFrame(() => el.classList.add("on"));
+    el.classList.remove("hidden"); requestAnimationFrame(() => el.classList.add("on")); document.documentElement.classList.add("tour-on");
     el.querySelector(".tour-txt").textContent = t6(step.txt);
-    el.querySelector(".tour-eb").textContent = t6(EB).replace("{n}", tour.i + 1).replace("{m}", tour.steps.length);        // "Tutorial · 2 de 6"
+    el.querySelector(".tour-eb").textContent = t6(tour.id === "q" ? EBQ : EB).replace("{n}", tour.i + 1).replace("{m}", tour.steps.length);        // "Tutorial · 2 de 6"
     el.querySelector(".tour-skip").innerHTML = `<span>${t6(SKIP)}</span>${A.gala.keyHint("Esc", "b")}`;
     const last = tour.i >= tour.steps.length - 1, nx = el.querySelector(".tour-next");
     nx.innerHTML = `<span>${last ? t6("¡Entendido!|Got it!|Compris !|Entendi!|Verstanden!|Capito!||明白了！|알겠어요!|わかった！|Понятно!|Jasne!") : t6("Siguiente|Next|Suivant|Próximo|Weiter|Avanti||下一步|다음|次へ|Далее|Dalej")}</span>${A.gala.keyHint("Enter", "a")}`;
@@ -106,7 +112,7 @@ window.AIQ = window.AIQ || {};
   }
   function finish(done, skipAll) {
     const tour = cur; cur = null; const el = $("tour"); if (el) { el.classList.remove("on"); setTimeout(() => el.classList.add("hidden"), 220); } if (face) face.shown(false);
-    removeEventListener("resize", onResize); removeEventListener("keydown", onKey, true); freeze(false);
+    removeEventListener("resize", onResize); removeEventListener("keydown", onKey, true); freeze(false); document.documentElement.classList.remove("tour-on");
     if (tour) { P().tour = P().tour || {}; P().tour[tour.id] = 1; if (skipAll) { P().tour.q = P().tour.camp = 1; } A.profile.save(); }
     if (tour && skipAll && A.dealer && A.dealer.tourSkip) A.dealer.tourSkip();         // "¿Saltarte MI tutorial?"
   }

@@ -4,8 +4,10 @@
 .tour { position: fixed; inset: 0; z-index: 9000; opacity: 0; transition: opacity .2s ease; pointer-events: auto; cursor: default; }
 .tour.on { opacity: 1; }
 .tour.hidden { display: none; }
-.tour-hole { position: fixed; border-radius: 14px; pointer-events: none; box-shadow: 0 0 0 200vmax rgba(6, 12, 8, .74), 0 0 0 3px #ffd06b, 0 0 26px 4px rgba(255, 208, 107, .55); transition: left .28s ease, top .28s ease, width .28s ease, height .28s ease; animation: tour-pulse 1.6s ease-in-out infinite; }
-@keyframes tour-pulse { 50% { box-shadow: 0 0 0 200vmax rgba(6, 12, 8, .74), 0 0 0 3px #ffe9a8, 0 0 38px 8px rgba(255, 208, 107, .75); } }
+/* revision final: la penumbra es una capa aparte recortada (clip-path con los focos como agujeros): un paso puede iluminar DOS partes a la vez */
+.tour-dim { position: fixed; inset: 0; pointer-events: none; background: rgba(6, 12, 8, .74); transition: clip-path .28s ease; }
+.tour-hole { position: fixed; border-radius: 14px; pointer-events: none; box-shadow: 0 0 0 3px #ffd06b, 0 0 26px 4px rgba(255, 208, 107, .55); transition: left .28s ease, top .28s ease, width .28s ease, height .28s ease, opacity .2s ease; animation: tour-pulse 1.6s ease-in-out infinite; }
+@keyframes tour-pulse { 50% { box-shadow: 0 0 0 3px #ffe9a8, 0 0 38px 8px rgba(255, 208, 107, .75); } }
 /* la tarjeta: crece con la pantalla (zoom --k) y lleva la penumbra dura del sistema DETRAS */
 .tour-card { position: fixed; z-index: 1; width: min(480px, calc(100 * var(--vw, 1vw) - 20px)); zoom: var(--k, 1); filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); transition: left .28s ease, top .28s ease; }
 .tour-paper { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px 14px; padding: 16px 18px 18px; }
@@ -14,7 +16,7 @@
 .tour-paper .tour-txt { margin: 0; font-family: var(--sans); font-weight: 400; font-size: 20px; line-height: 1.2; color: var(--gx-ink); }
 .tour-nav { grid-column: 1 / -1; justify-content: space-between; flex-wrap: wrap; margin-top: 4px; }
 @media (max-width: 700px) { .tour-face { width: 48px; height: 48px; } .tour-paper { grid-template-columns: 48px minmax(0, 1fr); } }
-html.reduce-motion .tour-hole, html.reduce-motion .tour-card { transition: none; animation: none; }
+html.reduce-motion .tour-hole, html.reduce-motion .tour-card, html.reduce-motion .tour-dim { transition: none; animation: none; }
 
 /* bloque D: el crupier de medio cuerpo asomado por el borde izquierdo (js/tour.js); la tarjeta ya no lleva su cabeza (nunca dos crupieres) */
 .tour-face { display: none; }
@@ -25,4 +27,6 @@ html.reduce-motion .tour-hole, html.reduce-motion .tour-card { transition: none;
 .tour.on .tour-cr.fuera { transform: translateX(calc(-100% - 40px)); }
 .tour-crf { position: relative; width: var(--crk, 243px); height: var(--crk, 243px); filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .4)); }
 html.reduce-motion .tour-cr { transition: none; }
+/* revision final: mientras el explica, el crupier de la partida no se ve (salian dos: el suyo quedaba debajo, o al otro lado en pantallas bajas) */
+html.tour-on #dealer { visibility: hidden; }
 @media (max-width: 700px) { .tour-cr { display: none; } }
