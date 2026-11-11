@@ -394,7 +394,7 @@ window.AIQ = window.AIQ || {};
         <div class="mesas rkw hidden" id="duRowL"><div class="rk"><span id="duRkIc"></span><span><b id="duRk"></b><i id="duRkS"></i></span></div></div>
         <div class="regl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
       </div></div>
-      <div class="ft"><div class="seatw" id="duSalaSeat" data-tail="l"></div><div class="gx-acts"><button type="button" class="gx-btn gho" id="duHow">${T("Cómo se juega", "How to play")}</button>${primary("duGo", T("Sentarse a la mesa", "Take a seat"))}</div></div>`), "tablewrap");
+      <div class="ft"><div class="seatw" id="duSalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts"><button type="button" class="gx-btn gho" id="duHow">${T("Cómo se juega", "How to play")}</button>${primary("duGo", T("Sentarse a la mesa", "Take a seat"))}</div></div>`), "tablewrap");
     const paint = () => { const am = sel.door === "amigo", lg = sel.door === "liga", r = rankOf(stats().lp), rn = rankName(r), pts = r.crupier ? `${r.pts} ${T("puntos", "points")}` : `${r.into} / ${LG.per}`;
       $("duLv").textContent = lvOf(); $("duTm").textContent = rn; $("duRankSub").textContent = `${rn} · ${pts}`;
       $("duRkIc").innerHTML = A.icon(CFG.tables[r.league].chip); $("duRk").textContent = rn; $("duRkS").textContent = `${pts} · ${span(CFG.tables[r.league])} · ${T("La banca sabe", "The house knows")} ${rankLevel(r)}`;
@@ -860,7 +860,7 @@ window.AIQ = window.AIQ || {};
           <div class="regl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
           <p class="est" id="duRoomSt" role="status"></p></div>
         <div class="asi" id="duSwG"></div></div></div>
-      <div class="ft"><div class="seatw" id="duSalaSeat" data-tail="l"></div><div class="gx-acts">${primary("duDeal", T("Repartir", "Deal"))}</div></div>`), "tablewrap");
+      <div class="ft"><div class="seatw" id="duSalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts">${primary("duDeal", T("Repartir", "Deal"))}</div></div>`), "tablewrap");
     $("hubBack").onclick = () => { A.sfx.ui(); netBye(); sel.door = "amigo"; D.open(); };
     $("duMesas").onclick = e => { const b = e.target.closest(".ms"), v = N.R; if (!b || N.role !== "h" || !v || v.st === "play" || b.dataset.t === v.t) return; A.sfx.card(); v.t = b.dataset.t; N.setT = { t: v.t, at: performance.now() }; roomPaint(); sendV({ a: "set", t: v.t }); };
     $("duDeal").onclick = () => { const v = N.R, g = v && v.g; if (N.role !== "h" || !g || !g.in || g.out || N.busy) return A.sfx.deny(); N.busy = true; sendV({ a: "deal" }).then(() => { N.busy = false; }); };

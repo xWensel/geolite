@@ -2970,6 +2970,10 @@ window.AIQ = window.AIQ || {};
       flushW();
       if (V === "libreta") { const re = /\d[\d.,]*(\s?%)?/g; let m; while ((m = re.exec(text))) for (let k = m.index; k < m.index + m[0].length; k++) if (sp[k]) sp[k].classList.add("dl-n"); }
     } else { rest.textContent = text + ZW; txt.replaceChildren(sofar, rest); }
+    /* un asiento puede pedir un tope de renglones (data-lines): si en este idioma la frase sale mas alta, el globo se ensancha a saltos hasta caber
+       (sala del Duelo: con tres renglones la esquina del globo pisaba «Como se juega»). El ancho va en --bbw: lo usa solo el CSS de ese asiento */
+    bubble.style.removeProperty("--bbw"); const mxl = D.host && +D.host.dataset.lines;
+    if (mxl) { txt.style.height = ""; const cs = getComputedStyle(txt), lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2; for (let w = 480; w <= 920 && txt.offsetHeight > (mxl + 0.5) * lh; w += 40) bubble.style.setProperty("--bbw", w + "px"); }
     if (!el.classList.contains("aside")) el.style.left = el.style.width = "";   // lo que le dejo el apartado (D.aside)
     if (!el.classList.contains("peek")) { el.style.right = ""; if (!el.classList.contains("home")) el.style.top = ""; }   // bloque D: ni lo de asomado ni lo de la portada pisan otros sitios
     fitCorner(); spr.fit(); spr.shown(true); spr.talk(true); bubble.style.translate = ""; requestAnimationFrame(cabe);   // v0.3.205: y siempre entero en pantalla
