@@ -306,7 +306,7 @@ window.AIQ = window.AIQ || {};
     const go = sm
       ? `<button type="button" class="gx-btn pri wide" id="contBtn" data-primary><span>${CONT_RUN()}</span>${A.gala.keyHint("Enter", "a")}</button><span class="av-sub">${runLine(sm)}</span>
         <button type="button" class="gx-btn gho sm wide av-new" id="goBtn"><span class="av-bl">${NEW}</span><span class="av-ns" id="avNewSub">${newSub}</span></button>`
-      : `<button type="button" class="gx-btn pri wide" id="goBtn" data-primary><span class="av-bl">${NEW}</span>${A.gala.keyHint("Enter", "a")}</button><span class="av-sub" id="avNewSub">${newSub}</span>`;
+      : `<div class="av-con" id="avCon">${avConHtml()}</div><button type="button" class="gx-btn pri wide" id="goBtn" data-primary><span class="av-bl">${NEW}</span>${A.gala.keyHint("Enter", "a")}</button><span class="av-sub" id="avNewSub">${newSub}</span>`;
     return `<div class="gx-veil"></div><section class="av-screen gx-stage s-adv" aria-labelledby="avH" data-nosq>
       <div class="gx-grid av-grid">
         <header class="av-head"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button>
@@ -325,6 +325,21 @@ window.AIQ = window.AIQ || {};
           <div class="av-go">${go}</div>
         </div></div>
       </div></section>`;
+  };
+  /* revision final: «Sales con». El hueco del boleto (sitio que necesitan la Ascension 5 y la partida guardada) lo ocupa, cuando sobra, la baraja
+     elegida con su equipo, a escala entera (x2; x1 si no cabe; si ni asi, no sale y queda la linea pequeña de siempre bajo el boton) */
+  const avConHtml = () => {
+    const d = A.ADV.DECKS[advSel.deck];
+    const kit = [...d.tools.map(t => `<span class="kt" ${A.kitTip("tool", t)}>${A.icon(A.ADV.TOOLS[t].ico, "kit")}</span>`), ...d.perks.map(p => `<span class="kt" ${A.kitTip("perk", p)}>${A.icon(p, "kit")}</span>`)].join("");
+    return `<span class="av-cart">${A.icon(d.ico)}</span><span class="av-cb"><span class="gx-eyb">${A.pick6("Sales con|You set out with|Tu pars avec|Você parte com|Du startest mit|Parti con||出发套牌|출발 덱|出発デッキ|Ты выходишь с|Wyruszasz z")}</span><b>${A.tx(d.n)}</b>
+      <span class="av-kit">${kit}<span class="av-sts"><span class="av-st" ${A.ttAttr(T("Doblones", "Doubloons"), "")}>${A.icon("coin")}${d.coins}</span><span class="av-st" ${A.ttAttr(T("Provisiones", "Provisions"), "")}>${A.icon("heart")}${d.lives}</span></span></span></span>`;
+  };
+  const avCon = fill => {
+    const el = $("avCon"), go = el && el.parentNode, st = document.querySelector(".av-boleto .av-stats"), ad = $("avAd"); if (!el || !st || !ad) return;
+    if (fill) el.innerHTML = avConHtml();
+    const fits = () => go.getBoundingClientRect().top - st.getBoundingClientRect().bottom >= st.getBoundingClientRect().top - ad.getBoundingClientRect().bottom - 0.5;
+    go.classList.add("con"); el.hidden = false; el.classList.remove("sm");
+    if (!fits()) { el.classList.add("sm"); if (!fits()) { el.hidden = true; go.classList.remove("con"); } }
   };
   /* la Ascension elegida: su nombre, lo que hace, lo que cobra la casa y cuanto multiplica la puntuacion final */
   const avAsc = () => {
@@ -357,21 +372,21 @@ window.AIQ = window.AIQ || {};
     if (advSel.asc > A.profile.get().adv.asc) advSel.asc = 0;
     c.dialog(avHtml(sm, saved), "tablewrap");
     wireTools(); $("hubBack").onclick = () => screen("home");
-    avFit(); requestAnimationFrame(avFit);                            // y otra vez ya a su escala (A.fitK va en el fotograma siguiente, antes de pintar)
+    avFit(); avCon(); requestAnimationFrame(() => { avFit(); avCon(); });                            // y otra vez ya a su escala (A.fitK va en el fotograma siguiente, antes de pintar)
     if (A.coverMap) A.coverMap("adventure", true, () => !!document.querySelector("#dlg .av-screen") && !$("layer").classList.contains("hidden"));   // fieltro opaco: el mapa de detras deja de dibujarse
     const sub = () => { const el = $("avNewSub"); if (el) el.textContent = `${A.tx(D[advSel.deck].n)} · A${advSel.asc}`; };
     $("avDecks").onclick = e => {
       const b = e.target.closest(".av-dk"); if (!b || b.dataset.deck === advSel.deck) return;
       if (b.classList.contains("lk")) return A.sfx.deny();   // cerrada: su ayuda dice como se abre (sin "disabled": la ayuda no saldria)
       advSel.deck = b.dataset.deck; A.sfx.card();
-      document.querySelectorAll(".av-dk").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-pressed", on); }); sub();
+      document.querySelectorAll(".av-dk").forEach(x => { const on = x === b; x.classList.toggle("sel", on); x.setAttribute("aria-pressed", on); }); sub(); avCon(true);
     };
     $("avChips").onclick = e => {
       const b = e.target.closest(".av-asc"); if (!b || +b.dataset.asc === advSel.asc) return;
       if (b.getAttribute("aria-disabled")) return A.sfx.deny();
       advSel.asc = +b.dataset.asc; A.sfx.ui();
       document.querySelectorAll(".av-asc").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
-      $("avAd").innerHTML = avAsc(); sub();
+      $("avAd").innerHTML = avAsc(); sub(); avCon();
     };
     const confirm2 = (btn, msg, act, onArm) => { let armed = false, tm = 0; const lbl = btn.querySelector(".av-bl") || btn, was = lbl.textContent; btn.addEventListener("click", e => { if (armed) { clearTimeout(tm); return act(); } e.stopImmediatePropagation(); armed = true; if (onArm) onArm(); btn.classList.add("armed"); lbl.textContent = msg; A.sfx.deny(); tm = setTimeout(() => { armed = false; btn.classList.remove("armed"); lbl.textContent = was; }, 4000); }, true); };
     const funeral = () => { if (A.dealer && A.dealer.funeral) A.dealer.funeral(A.adv.summary && A.adv.summary()); };   // el crupier le hace un funeral a tu expedicion guardada
