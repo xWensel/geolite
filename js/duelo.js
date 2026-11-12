@@ -238,6 +238,7 @@ window.AIQ = window.AIQ || {};
 
   /* ================================================================== LA INTERFAZ (la maqueta aprobada: sala, cara a cara, partida, revelado y veredicto) */
   let st = null, raf = 0, timers = [];
+  const m8 = () => { const d = A.core && A.core.S.duel; return !!(d && d.m8 && A.mesa8); };   // la partida en curso es una Mesa de ocho (js/mesa8.js)
   const later = (fn, ms) => { const s = st, id = setTimeout(() => { if (s && st === s) fn(); }, ms); timers.push(id); return id; };
   const elapsed = () => { const S = C().S; return ((S.paused ? S.pauseAt : performance.now()) - st.cur.t0 - S.pausedAcc) / 1000; };   // segundos de esta pregunta, sin contar la pausa
   const veiled = () => { const v = $("veil"); return C().S.settingsOpen || (v && !v.classList.contains("hidden")); };
@@ -359,6 +360,7 @@ window.AIQ = window.AIQ || {};
     cv.style.width = cv.style.height = (N * s) / dpr + "px"; return cv;
   }
 
+  D._ = { T, Tf, esc, cut, row, drawQ, refOf, big, stage, primary, fichaCv, fitDk, seat, unseat, speak, DL, myName, veiled, factShow: (q, l, f) => factShow(q, l, f) };   // lo que usa la Mesa de ocho (js/mesa8.js)
   /* ================================================================== 1 · LA SALA: tu ficha de socio y las tres puertas («Retar a un amigo» y «Contra el crupier»; la liga, mas adelante) */
   const sel = { table: "plata", level: null, door: "liga", msg: "" };
   const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."],
@@ -383,24 +385,28 @@ window.AIQ = window.AIQ || {};
         <div class="rows">${row(T("Duelos", "Duels"), s.d)}${row(T("Victorias", "Wins"), s.w)}${row(T("Racha", "Streak"), s.s ? inRow(s.s) : "—")}<div class="gx-lead-row"><span>${T("Tu liga", "Your league")}</span><s></s><b id="duTm"></b></div></div>
       </div></div>
       <div class="puertas gx-sh"><div class="gx-pnl"><span class="gx-eyb">${T("Elige duelo", "Pick a duel")}</span>
-        <div class="doors" id="duDoors">
+        <div class="doors${A.mesa8 ? " d4" : ""}" id="duDoors">
           ${door(0, "liga", `<div class="ill" style="background-image:url(assets/gen/card_compete.webp)"></div>`, T("Duelo de liga", "League duel"), T("La banca a tu medida, con puntos de liga. Sube de división.", "The house, sized to you, with league points. Climb divisions."), T("Con puntos", "With points"), "", true)}
           ${door(1, "amigo", `<div class="ill amigo">${A.icon("chip_o")}${A.icon("chip_p")}</div>`, T("Retar a un amigo", "Challenge a friend"), T("Abre una sala y pásale el código. O entra en la suya.", "Open a room and send them the code. Or join theirs."), T("Con código", "With a code"), "", true)}
           ${door(2, "crupier", `<div class="ill" data-cart="card_adv" data-cdef="assets/gen/card_adv.webp" style="background-image:url(&quot;${A.crupierArt ? A.crupierArt("card_adv", "assets/gen/card_adv.webp") : "assets/gen/card_adv.webp"}&quot;);background-color:#5a1420"></div>`, T("Contra el crupier", "Against the dealer"), T("Práctica contra la banca. Tú eliges cuánto sabe.", "Practice against the house. You choose how much it knows."), T("Práctica", "Practice"), "", true)}
+          ${A.mesa8 ? door(3, "ocho", `<div class="ill ocho" id="duIllOcho"></div>`, A.mesa8.name(), T("Ocho en la mesa. Tres preguntas por ronda y cae el último.", "Eight at the table. Three questions a round and the last one falls."), T("Ocho sillas", "Eight seats"), "", true) : ""}
         </div>
         <div class="amg hidden" id="duRowA"><span id="duAmgTx" role="status"></span><input id="duCode" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="duJoin">${T("Entrar", "Join")}</button></span></div>
         <div class="mesas" id="duRowB"><div class="mss" id="duMesas">${CFG.tables.map(ms).join("")}</div>
           <div class="lvl"><span>${T("La banca sabe", "The house knows")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvDn" aria-label="-">−</button></span><b id="duLv"></b><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvUp" aria-label="+">+</button></span></div></div>
         <div class="mesas rkw hidden" id="duRowL"><div class="rk"><span id="duRkIc"></span><span><b id="duRk"></b><i id="duRkS"></i></span></div></div>
-        <div class="regl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
+        <div class="regl hidden" id="duReglO">${A.mesa8 ? A.mesa8.rules() : ""}</div>
+        <div class="regl" id="duRegl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
       </div></div>
       <div class="ft"><div class="seatw" id="duSalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts"><button type="button" class="gx-btn gho" id="duHow">${T("Cómo se juega", "How to play")}</button>${primary("duGo", T("Sentarse a la mesa", "Take a seat"))}</div></div>`), "tablewrap");
-    const paint = () => { const am = sel.door === "amigo", lg = sel.door === "liga", r = rankOf(stats().lp), rn = rankName(r), pts = r.crupier ? `${r.pts} ${T("puntos", "points")}` : `${r.into} / ${LG.per}`;
+    const paint = () => { const am = sel.door === "amigo", lg = sel.door === "liga", oc = sel.door === "ocho", r = rankOf(stats().lp), rn = rankName(r), pts = r.crupier ? `${r.pts} ${T("puntos", "points")}` : `${r.into} / ${LG.per}`;
       $("duLv").textContent = lvOf(); $("duTm").textContent = rn; $("duRankSub").textContent = `${rn} · ${pts}`;
       $("duRkIc").innerHTML = A.icon(CFG.tables[r.league].chip); $("duRk").textContent = rn; $("duRkS").textContent = `${pts} · ${span(CFG.tables[r.league])} · ${T("La banca sabe", "The house knows")} ${rankLevel(r)}`;
       document.querySelectorAll("#duDoors .doorw.on").forEach(x => { const on = x.dataset.door === sel.door; x.classList.toggle("eleg", on); x.setAttribute("aria-pressed", on); });
-      $("duRowA").classList.toggle("hidden", !am); $("duRowB").classList.toggle("hidden", am || lg); $("duRowL").classList.toggle("hidden", !lg);
-      $("duGo").querySelector("span").textContent = am ? T("Abrir una sala", "Open a room") : lg ? T("Jugar duelo de liga", "Play a league duel") : T("Sentarse a la mesa", "Take a seat"); };
+      $("duRowA").classList.toggle("hidden", !am); $("duRowB").classList.toggle("hidden", am || lg || oc); $("duRowL").classList.toggle("hidden", !lg); $("duRegl").classList.toggle("hidden", oc); $("duReglO").classList.toggle("hidden", !oc);
+      $("duGo").querySelector("span").textContent = am ? T("Abrir una sala", "Open a room") : oc ? T("Ir a la mesa de ocho", "Go to the table of eight") : lg ? T("Jugar duelo de liga", "Play a league duel") : T("Sentarse a la mesa", "Take a seat"); };
+    if (A.mesa8 && $("duIllOcho")) A.mesa8.fan($("duIllOcho"));
+    if (sel.door === "ocho" && !A.mesa8) sel.door = "liga";
     paint(); salaMsg(sel.msg, !!sel.msg); sel.msg = "";
     $("hubBack").onclick = () => { A.sfx.ui(); unseat(); A.hub.screen("home"); };
     $("duDoors").onclick = e => { const b = e.target.closest(".doorw.on"); if (!b || b.dataset.door === sel.door) return; sel.door = b.dataset.door; A.sfx.card(); paint(); };
@@ -412,7 +418,7 @@ window.AIQ = window.AIQ || {};
       document.querySelectorAll("#duMesas .ms").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); }); paint(); };
     const step = d => () => { sel.level = clamp(lvOf() + d, 4, 96); A.sfx.ui(); paint(); };
     $("duLvDn").onclick = step(-4); $("duLvUp").onclick = step(4);
-    $("duGo").onclick = () => { if (sel.door === "amigo") return roomNew(); A.sfx.depart(); D.start(sel.door === "liga" ? { liga: true } : { table: sel.table, level: lvOf() }); };
+    $("duGo").onclick = () => { if (sel.door === "amigo") return roomNew(); if (sel.door === "ocho") { A.sfx.card(); return A.mesa8.open(); } A.sfx.depart(); D.start(sel.door === "liga" ? { liga: true } : { table: sel.table, level: lvOf() }); };
     let k = 0; const how = () => { if (k > 2 || !$("duSalaSeat")) return; speak(line("how", k++), { done: how }); };
     $("duHow").onclick = () => { A.sfx.ui(); if (k > 0 && k < 3) return; k = 0; how(); };   // el crupier lo explica en tres frases
     seat($("duSalaSeat")); if (!greeted) { greeted = true; speak(line("sala", s.d ? 1 : 0)); }
@@ -489,6 +495,7 @@ window.AIQ = window.AIQ || {};
   }
   /* lo que pinta el juego en su marcador (js/game.js, updateHud): aqui, el numero de la pregunta en la placa y el marcador del duelo */
   D.hud = () => {
+    if (m8()) return A.mesa8.hud();                                         // Mesa de ocho (js/mesa8.js): su tira de ocho
     if (!st || !$("duHud")) return; const c = C(), k = Math.max(1, st.k), n = Math.max(CFG.rounds, k), cur = st.cur, ask = st.phase === "ask", sh = st.shown;
     $("askNo").textContent = A.t("ask.no", { n: pad2(k), m: pad2(n) });
     $("duRd").textContent = rungTxt(k); $("duMult").textContent = "×" + fmtM(multOf(k));
@@ -503,7 +510,7 @@ window.AIQ = window.AIQ || {};
   };
   const bal = () => { const sh = st.shown, e = $("duBal"); if (e) e.style.transform = `translateX(${(-100 + (100 * sh.me) / Math.max(1, sh.me + sh.rv)).toFixed(2)}%)`; };
   /* la pausa del juego (js/game.js, veilMenu): nombre del modo, nota y las dos pilas */
-  D.pause = () => (st.net ? { mode: `${NAME()} · ${T("Amistoso", "Friendly")}`,
+  D.pause = () => (m8() ? A.mesa8.pause() : st.net ? { mode: `${NAME()} · ${T("Amistoso", "Friendly")}`,
     note: T("Entre jugadores no hay pausa: el reloj sigue corriendo para los dos. Si sales al menú, pierdes el duelo.", "There's no pause between players: the clock keeps running for both. If you exit to the menu, you lose the duel."),
     rows: row(T("Tus fichas", "Your chips"), A.fmt(st.me)) + row(Tf("Fichas de {name}", "{name}'s chips", { name: foe() }), A.fmt(st.rv)) } : { mode: `${NAME()} · ${A.tx(st.table.n)}`,
     note: T("Contra la banca el reloj tampoco se detiene durante la pregunta.", "Against the house the clock doesn't stop during a question either."),
@@ -569,6 +576,7 @@ window.AIQ = window.AIQ || {};
   }
   /* tu respuesta (js/game.js, reveal): guess = { lon, lat }, o null si se acabo el tiempo. Se queda fijada (tu ficha, clavada en el mapa) y el revelado espera al rival */
   D.answer = guess => {
+    if (m8()) return A.mesa8.answer(guess);
     const cur = st && st.cur; if (!cur || st.phase !== "ask") return;
     if (st.net) {                                                         // entre jugadores: se la manda al servidor y el revelado llega cuando estan las dos (duelView)
       if (cur.meAns || cur.passed) return;
@@ -976,6 +984,7 @@ window.AIQ = window.AIQ || {};
 
   /* salir del duelo (lo llama js/game.js al volver a la portada, y D.start antes de empezar otro) */
   D.leave = again => {
+    if (m8()) A.mesa8.leave(again);
     const c = C(); timers.forEach(clearTimeout); timers = []; document.querySelectorAll(".du-fly").forEach(e => e.remove());
     if (st && st.spr) st.spr.destroy();
     catOff();                                                               // Comodin baja de la mesa

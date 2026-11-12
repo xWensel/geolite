@@ -26,7 +26,9 @@
   };
   const CREAM = ramp("ffffff", "fff4dc", "eedcb8", "c9aa84", "8a6a58"), INK = hex("1d0a3d");
   const COL = { blank_big: "orange", blank_boss: "red", blank_gold: "gold", blank_small: "blue", blank_teal: "teal", blank_green: "mint", blank_purple: "purple",
-    chip_b: "blue", chip_g: "green", chip_k: "dark", chip_p: "purple", chip_r: "red", chip_o: "amber" };
+    chip_b: "blue", chip_g: "green", chip_k: "dark", chip_p: "purple", chip_r: "red", chip_o: "amber", chip_t: "teal", chip_w: "white" };
+  /* la ficha blanca (Mesa de ocho): la rampa crema de las incrustaciones como cuerpo y las incrustaciones en el azul noche de la ficha oscura */
+  R.white = CREAM; const INS = { white: R.dark };
 
   /* ---------- mascaras (Uint8Array de N x N) ---------- */
   /* disco de pixel art de diametro d centrado en el lienzo (d y N de la misma paridad). Se parte del circulo de compas y, en el octante de
@@ -69,7 +71,7 @@
   /* ---------- la ficha ---------- */
   /* N pixeles de arte de lado; o.d = diametro con el contorno (por defecto deja ~1 px de aire por lado a 64). Devuelve RGBA */
   const px = (N, id, o = {}) => {
-    const rp = R[COL[id] || id] || R.red, c = N / 2, d = o.d || N - 2 * Math.floor(N / 48), r = d / 2 - 1, fine = r >= 16;
+    const rp = R[COL[id] || id] || R.red, CR = INS[COL[id] || id] || CREAM, c = N / 2, d = o.d || N - 2 * Math.floor(N / 48), r = d / 2 - 1, fine = r >= 16;
     const out = new Uint8ClampedArray(N * N * 4), put = (p, k) => { out[p * 4] = k[0]; out[p * 4 + 1] = k[1]; out[p * 4 + 2] = k[2]; out[p * 4 + 3] = 255; };
     const full = disc(N, d), face = erode(N, full), in1 = erode(N, face);
     /* ficha pequena (menos de ~36 px): aro mas ancho en proporcion e incrustaciones pegadas al surco, sin filete ni rayitas, para que se siga leyendo */
@@ -88,18 +90,18 @@
       let k;
       if (!G[p]) {                                                                   // aro
         const ins = !Gout[p] && spoke(X, Y, hw), edge = !in1[p];
-        k = ins ? CREAM[1] : rp[2];
-        if (edge && lit > .35) k = ins ? CREAM[0] : rp[1];                            // bisel: luz arriba, sombra abajo
-        else if (edge && lit < -.35) k = ins ? CREAM[2] : rp[3];
+        k = ins ? CR[1] : rp[2];
+        if (edge && lit > .35) k = ins ? CR[0] : rp[1];                            // bisel: luz arriba, sombra abajo
+        else if (edge && lit < -.35) k = ins ? CR[2] : rp[3];
         else if (r >= 12 && in2[p] && !in3[p] && !ins) {                               // brillo corto del aro, a los dos lados de la incrustacion de arriba (en espejo)
           const ang = (Math.atan2(X, -Y) * 180 / Math.PI + 360) % 360;
           if (((ang > 291 && ang < 339) || (ang > 21 && ang < 69)) && !spoke(X, Y, hw + 1.2)) k = rp[0];
         }
       } else if (!G1[p]) k = fine ? rp[4] : rp[3];                                    // surco
-      else if (fine && !G2[p]) k = spoke(X, Y, 1.7) ? CREAM[1] : rp[2];               // filete con rayitas alineadas con las incrustaciones
+      else if (fine && !G2[p]) k = spoke(X, Y, 1.7) ? CR[1] : rp[2];               // filete con rayitas alineadas con las incrustaciones
       else {
                 k = rp[1];                                                                    // centro liso: igual arriba y abajo (sin sombra de centro hundido)
-        if (fine && !G1sq[p] && spoke(X, Y, 1.7)) k = CREAM[1];                       // la rayita en diagonal, maciza (sin pixeles unidos solo por la esquina)
+        if (fine && !G1sq[p] && spoke(X, Y, 1.7)) k = CR[1];                       // la rayita en diagonal, maciza (sin pixeles unidos solo por la esquina)
       }
       put(p, k);
     }
