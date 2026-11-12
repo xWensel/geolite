@@ -288,42 +288,6 @@
   }
  },
  {
-  "id": "codex_50",
-  "hidden": 0,
-  "tier": 1,
-  "ev": "codex",
-  "frame": "blank_teal",
-  "icon": "ach_codex_50",
-  "name": {
-   "english": "Bookworm",
-   "spanish": "Rata de biblioteca",
-   "french": "Rat de bibliothèque",
-   "brazilian": "Rato de biblioteca",
-   "german": "Bücherwurm",
-   "italian": "Topo di biblioteca",
-   "latam": "Ratón de biblioteca",
-   "schinese": "书虫",
-   "koreana": "책벌레",
-   "japanese": "本の虫",
-   "russian": "Книжный червь",
-   "polish": "Mól książkowy"
-  },
-  "desc": {
-   "english": "Collect 50 Encyclopedia cards.",
-   "spanish": "Consigue 50 tarjetas de la Enciclopedia.",
-   "french": "Obtiens 50 cartes de l'Encyclopédie.",
-   "brazilian": "Consiga 50 cartas da Enciclopédia.",
-   "german": "Sammle 50 Enzyklopädie-Karten.",
-   "italian": "Ottieni 50 carte dell'Enciclopedia.",
-   "latam": "Consigue 50 tarjetas de la Enciclopedia.",
-   "schinese": "获得 50 张百科全书卡片。",
-   "koreana": "도감 카드 50장 모으기.",
-   "japanese": "図鑑カードを50枚集める。",
-   "russian": "Собери 50 карточек энциклопедии.",
-   "polish": "Zdobądź 50 kart Encyklopedii."
-  }
- },
- {
   "id": "adv_bribe",
   "hidden": 0,
   "tier": 1,
@@ -393,42 +357,6 @@
    "japanese": "クラシックの1レベルで全問を的中させよう。",
    "russian": "Точно ответь на все вопросы одного уровня «Классики».",
    "polish": "Traf wszystkie pytania na jednym poziomie trybu Klasycznego."
-  }
- },
- {
-  "id": "km_equator",
-  "hidden": 0,
-  "tier": 1,
-  "ev": "q",
-  "frame": "blank_boss",
-  "icon": "ach_km_equator",
-  "name": {
-   "english": "Equatorial blunder",
-   "spanish": "Despiste ecuatorial",
-   "french": "Bévue équatoriale",
-   "brazilian": "Gafe equatorial",
-   "german": "Äquator-Patzer",
-   "italian": "Svista equatoriale",
-   "latam": "Despiste ecuatorial",
-   "schinese": "赤道级失误",
-   "koreana": "적도급 실수",
-   "japanese": "赤道級のうっかり",
-   "russian": "Экваториальный промах",
-   "polish": "Równikowa gafa"
-  },
-  "desc": {
-   "english": "Rack up 40,075 km of total error: one full lap of the Earth.",
-   "spanish": "Acumula 40.075 km de error: una vuelta entera al mundo.",
-   "french": "Cumule 40 075 km d'erreur : un tour complet de la Terre.",
-   "brazilian": "Acumule 40.075 km de erro: uma volta inteira ao mundo.",
-   "german": "Sammle insgesamt 40.075 km Abweichung: einmal um die ganze Erde.",
-   "italian": "Accumula 40.075 km di errore: un giro completo della Terra.",
-   "latam": "Acumula 40.075 km de error: una vuelta entera al mundo.",
-   "schinese": "累计误差达到 40,075 公里：正好绕地球一整圈。",
-   "koreana": "누적 오차 40,075km: 지구를 한 바퀴 돈 셈입니다.",
-   "japanese": "誤差の合計が40,075km：ちょうど地球一周分。",
-   "russian": "Набери 40 075 км ошибки — целый оборот вокруг Земли.",
-   "polish": "Nazbieraj 40 075 km błędu: pełne okrążenie Ziemi."
   }
  },
  {
@@ -540,6 +468,42 @@
   }
  },
  {
+  "id": "shop_first",
+  "hidden": 0,
+  "tier": 1,
+  "ev": "casa",
+  "frame": "blank_green",
+  "icon": "ach_shop_first",
+  "name": {
+   "english": "Brand new",
+   "spanish": "De estreno",
+   "french": "Tout neuf",
+   "brazilian": "Novinho em folha",
+   "german": "Brandneu",
+   "italian": "Nuovo di zecca",
+   "latam": "De estreno",
+   "schinese": "新装上身",
+   "koreana": "새 옷 개시",
+   "japanese": "おろしたて",
+   "russian": "С иголочки",
+   "polish": "Nówka sztuka"
+  },
+  "desc": {
+   "english": "Buy your first piece in the shop.",
+   "spanish": "Compra tu primera pieza en la tienda.",
+   "french": "Achète ta première pièce à la boutique.",
+   "brazilian": "Compre sua primeira peça na loja.",
+   "german": "Kaufe dein erstes Stück im Laden.",
+   "italian": "Compra il tuo primo pezzo in negozio.",
+   "latam": "Compra tu primera pieza en la tienda.",
+   "schinese": "在商店买下你的第一件。",
+   "koreana": "상점에서 첫 아이템을 구매하세요.",
+   "japanese": "ショップで最初の一品を買おう。",
+   "russian": "Купи первую вещь в магазине.",
+   "polish": "Kup pierwszą rzecz w sklepie."
+  }
+ },
+ {
   "id": "streak_10",
   "hidden": 0,
   "tier": 1,
@@ -580,7 +544,7 @@
   "hidden": 0,
   "tier": 1,
   "ev": "club",
-  "frame": "blank_boss",
+  "frame": "blank_gold",
   "icon": "ach_club_10",
   "name": {
    "english": "Card-carrying member",
@@ -717,42 +681,6 @@
    "japanese": "残り1秒未満で命中させよう。",
    "russian": "Попади, когда осталось меньше 1 секунды.",
    "polish": "Traf, gdy zostaje mniej niż sekunda."
-  }
- },
- {
-  "id": "codex_place",
-  "hidden": 0,
-  "tier": 2,
-  "ev": "codex",
-  "frame": "blank_teal",
-  "icon": "ach_codex_place",
-  "name": {
-   "english": "Hidden corners",
-   "spanish": "Rincones perdidos",
-   "french": "Coins perdus",
-   "brazilian": "Cantos escondidos",
-   "german": "Versteckte Winkel",
-   "italian": "Angoli nascosti",
-   "latam": "Rincones perdidos",
-   "schinese": "隐秘角落",
-   "koreana": "숨겨진 구석",
-   "japanese": "秘境めぐり",
-   "russian": "Затерянные уголки",
-   "polish": "Zakamarki świata"
-  },
-  "desc": {
-   "english": "20 landmarks in the Encyclopedia.",
-   "spanish": "20 monumentos en la Enciclopedia.",
-   "french": "20 monuments dans l'Encyclopédie.",
-   "brazilian": "20 monumentos na Enciclopédia.",
-   "german": "20 Wahrzeichen in der Enzyklopädie.",
-   "italian": "20 monumenti nell'Enciclopedia.",
-   "latam": "20 monumentos en la Enciclopedia.",
-   "schinese": "百科全书中收录 20 个地标。",
-   "koreana": "도감에 명소 20곳.",
-   "japanese": "図鑑に名所を20件。",
-   "russian": "20 достопримечательностей в энциклопедии.",
-   "polish": "20 zabytków w Encyklopedii."
   }
  },
  {
@@ -1041,42 +969,6 @@
    "japanese": "図鑑に国を50件。",
    "russian": "50 стран в энциклопедии.",
    "polish": "50 krajów w Encyklopedii."
-  }
- },
- {
-  "id": "codex_250",
-  "hidden": 0,
-  "tier": 2,
-  "ev": "codex",
-  "frame": "blank_teal",
-  "icon": "ach_codex_250",
-  "name": {
-   "english": "Professor",
-   "spanish": "Catedrático",
-   "french": "Professeur",
-   "brazilian": "Professor",
-   "german": "Professor",
-   "italian": "Professore",
-   "latam": "Profesor",
-   "schinese": "教授",
-   "koreana": "교수",
-   "japanese": "教授",
-   "russian": "Профессор",
-   "polish": "Profesor"
-  },
-  "desc": {
-   "english": "Collect 250 Encyclopedia cards.",
-   "spanish": "Consigue 250 tarjetas de la Enciclopedia.",
-   "french": "Obtiens 250 cartes de l'Encyclopédie.",
-   "brazilian": "Consiga 250 cartas da Enciclopédia.",
-   "german": "Sammle 250 Enzyklopädie-Karten.",
-   "italian": "Ottieni 250 carte dell'Enciclopedia.",
-   "latam": "Consigue 250 tarjetas de la Enciclopedia.",
-   "schinese": "获得 250 张百科全书卡片。",
-   "koreana": "도감 카드 250장 모으기.",
-   "japanese": "図鑑カードを250枚集める。",
-   "russian": "Собери 250 карточек энциклопедии.",
-   "polish": "Zdobądź 250 kart Encyklopedii."
   }
  },
  {
@@ -1440,42 +1332,6 @@
   }
  },
  {
-  "id": "codex_city",
-  "hidden": 0,
-  "tier": 2,
-  "ev": "codex",
-  "frame": "blank_teal",
-  "icon": "ach_codex_city",
-  "name": {
-   "english": "World traveler",
-   "spanish": "Turista empedernido",
-   "french": "Globe-trotteur invétéré",
-   "brazilian": "Viajante incansável",
-   "german": "Unermüdlicher Reisender",
-   "italian": "Viaggiatore incallito",
-   "latam": "Turista empedernido",
-   "schinese": "旅行狂人",
-   "koreana": "지칠 줄 모르는 여행자",
-   "japanese": "筋金入りの旅人",
-   "russian": "Заядлый путешественник",
-   "polish": "Zapalony podróżnik"
-  },
-  "desc": {
-   "english": "Collect 100 cities in the Encyclopedia.",
-   "spanish": "Consigue 100 ciudades en la Enciclopedia.",
-   "french": "Obtiens 100 villes dans l'Encyclopédie.",
-   "brazilian": "Consiga 100 cidades na Enciclopédia.",
-   "german": "Sammle 100 Städte in der Enzyklopädie.",
-   "italian": "Ottieni 100 città nell'Enciclopedia.",
-   "latam": "Consigue 100 ciudades en la Enciclopedia.",
-   "schinese": "在百科全书中收集 100 座城市。",
-   "koreana": "도감에 도시 100곳 모으기.",
-   "japanese": "図鑑に都市を100件集める。",
-   "russian": "Собери 100 городов в энциклопедии.",
-   "polish": "Zdobądź 100 miast w Encyklopedii."
-  }
- },
- {
   "id": "codex_curio",
   "hidden": 0,
   "tier": 2,
@@ -1581,42 +1437,6 @@
    "japanese": "1,000問に回答。",
    "russian": "Отвечено на 1000 вопросов.",
    "polish": "1000 odpowiedzi."
-  }
- },
- {
-  "id": "adv_runs10",
-  "hidden": 0,
-  "tier": 3,
-  "ev": "adv",
-  "frame": "blank_big",
-  "icon": "ach_adv_runs10",
-  "name": {
-   "english": "Veteran",
-   "spanish": "Curtido",
-   "french": "Vétéran",
-   "brazilian": "Veterano",
-   "german": "Veteran",
-   "italian": "Veterano",
-   "latam": "Veterano",
-   "schinese": "老手",
-   "koreana": "베테랑",
-   "japanese": "ベテラン",
-   "russian": "Ветеран",
-   "polish": "Weteran"
-  },
-  "desc": {
-   "english": "Start 10 expeditions.",
-   "spanish": "Empieza 10 expediciones.",
-   "french": "Commence 10 expéditions.",
-   "brazilian": "Comece 10 expedições.",
-   "german": "Starte 10 Expeditionen.",
-   "italian": "Inizia 10 spedizioni.",
-   "latam": "Empieza 10 expediciones.",
-   "schinese": "开始 10 次远征。",
-   "koreana": "원정을 10번 시작하세요.",
-   "japanese": "遠征を10回始めよう。",
-   "russian": "Начни 10 экспедиций.",
-   "polish": "Rozpocznij 10 wypraw."
   }
  },
  {
@@ -1800,39 +1620,75 @@
   }
  },
  {
-  "id": "codex_strait",
+  "id": "classic_mix",
   "hidden": 0,
   "tier": 3,
-  "ev": "codex",
-  "frame": "blank_teal",
-  "icon": "ach_codex_strait",
+  "ev": "classic",
+  "frame": "blank_small",
+  "icon": "ach_classic_mix",
   "name": {
-   "english": "Narrow passage",
-   "spanish": "Paso estrecho",
-   "french": "Passage étroit",
-   "brazilian": "Passagem estreita",
-   "german": "Enge Durchfahrt",
-   "italian": "Passaggio stretto",
-   "latam": "Paso estrecho",
-   "schinese": "狭窄水道",
-   "koreana": "좁은 해협",
-   "japanese": "狭き水路",
-   "russian": "Узкий проход",
-   "polish": "Wąskie przejście"
+   "english": "Odds and ends",
+   "spanish": "Cajón de sastre",
+   "french": "Fourre-tout",
+   "brazilian": "Miscelânea",
+   "german": "Kraut und Rüben",
+   "italian": "Di tutto un po'",
+   "latam": "Cajón de sastre",
+   "schinese": "百宝箱",
+   "koreana": "잡동사니",
+   "japanese": "よりどりみどり",
+   "russian": "Всякая всячина",
+   "polish": "Groch z kapustą"
   },
   "desc": {
-   "english": "Collect 8 straits or capes in the Encyclopedia.",
-   "spanish": "Consigue 8 estrechos o cabos en la Enciclopedia.",
-   "french": "Obtiens 8 détroits ou caps dans l'Encyclopédie.",
-   "brazilian": "Consiga 8 estreitos ou cabos na Enciclopédia.",
-   "german": "Sammle 8 Meerengen oder Kaps in der Enzyklopädie.",
-   "italian": "Ottieni 8 stretti o capi nell'Enciclopedia.",
-   "latam": "Consigue 8 estrechos o cabos en la Enciclopedia.",
-   "schinese": "在百科全书中收集 8 个海峡或海角。",
-   "koreana": "도감에 해협 또는 곶 8곳 모으기.",
-   "japanese": "図鑑に海峡・岬を8件集める。",
-   "russian": "Собери 8 проливов или мысов в энциклопедии.",
-   "polish": "Zdobądź 8 cieśnin lub przylądków w Encyklopedii."
+   "english": "Finish Mixed Bag.",
+   "spanish": "Termina Mezcla.",
+   "french": "Termine la campagne Mélange.",
+   "brazilian": "Termine Mistura.",
+   "german": "Beende Gemischt.",
+   "italian": "Termina Miscuglio.",
+   "latam": "Termina Mezcla.",
+   "schinese": "完成“大杂烩”。",
+   "koreana": "믹스를 완료하세요.",
+   "japanese": "「ミックス」を完了しよう。",
+   "russian": "Заверши «Всё вперемешку».",
+   "polish": "Ukończ Mieszankę."
+  }
+ },
+ {
+  "id": "juke_all",
+  "hidden": 0,
+  "tier": 3,
+  "ev": "casa",
+  "frame": "blank_green",
+  "icon": "ach_juke_all",
+  "name": {
+   "english": "Music lover",
+   "spanish": "Melómano",
+   "french": "Mélomane",
+   "brazilian": "Melômano",
+   "german": "Musikliebhaber",
+   "italian": "Melomane",
+   "latam": "Melómano",
+   "schinese": "乐迷",
+   "koreana": "음악 애호가",
+   "japanese": "音楽通",
+   "russian": "Меломан",
+   "polish": "Meloman"
+  },
+  "desc": {
+   "english": "Listen to all 22 songs by the house band.",
+   "spanish": "Escucha las 22 canciones de la banda de la casa.",
+   "french": "Écoute les 22 morceaux de l'orchestre de la maison.",
+   "brazilian": "Ouça as 22 músicas da banda da casa.",
+   "german": "Höre alle 22 Songs der Hausband.",
+   "italian": "Ascolta tutti i 22 brani della band della casa.",
+   "latam": "Escucha las 22 canciones de la banda de la casa.",
+   "schinese": "听完驻场乐队的全部 22 首歌。",
+   "koreana": "하우스 밴드의 22곡을 모두 들으세요.",
+   "japanese": "ハウスバンドの全22曲を聴こう。",
+   "russian": "Послушай все 22 песни оркестра заведения.",
+   "polish": "Posłuchaj wszystkich 22 utworów zespołu kasyna."
   }
  },
  {
@@ -1889,7 +1745,7 @@
    "schinese": "未知之地",
    "koreana": "테라 인코그니타",
    "japanese": "テラ・インコグニタ",
-   "russian": "Terra Incognita",
+   "russian": "Терра инкогнита",
    "polish": "Terra Incognita"
   },
   "desc": {
@@ -2196,42 +2052,6 @@
   }
  },
  {
-  "id": "adv_rich2",
-  "hidden": 0,
-  "tier": 3,
-  "ev": "adv",
-  "frame": "blank_big",
-  "icon": "ach_adv_rich2",
-  "name": {
-   "english": "High roller",
-   "spanish": "Altas apuestas",
-   "french": "Flambeur",
-   "brazilian": "Apostador de peso",
-   "german": "High Roller",
-   "italian": "Giocatore d'alto bordo",
-   "latam": "Altas apuestas",
-   "schinese": "豪赌客",
-   "koreana": "하이 롤러",
-   "japanese": "ハイローラー",
-   "russian": "Хайроллер",
-   "polish": "Gruba ryba"
-  },
-  "desc": {
-   "english": "Hold 100 doubloons at once.",
-   "spanish": "Ten 100 doblones a la vez.",
-   "french": "Possède 100 doublons à la fois.",
-   "brazilian": "Tenha 100 dobrões ao mesmo tempo.",
-   "german": "Besitze 100 Dublonen gleichzeitig.",
-   "italian": "Possiedi 100 dobloni insieme.",
-   "latam": "Ten 100 doblones a la vez.",
-   "schinese": "同时持有 100 枚金币。",
-   "koreana": "동시에 도블론 100개를 보유하세요.",
-   "japanese": "同時にダブロンを100枚保持しよう。",
-   "russian": "Накопи 100 дублонов.",
-   "polish": "Miej naraz 100 dublonów."
-  }
- },
- {
   "id": "speed_master",
   "hidden": 0,
   "tier": 3,
@@ -2412,42 +2232,6 @@
   }
  },
  {
-  "id": "q_5000",
-  "hidden": 0,
-  "tier": 4,
-  "ev": "q",
-  "frame": "blank_boss",
-  "icon": "ach_q_5000",
-  "name": {
-   "english": "Geographer",
-   "spanish": "Geógrafo",
-   "french": "Géographe",
-   "brazilian": "Geógrafo",
-   "german": "Geograf",
-   "italian": "Geografo",
-   "latam": "Geógrafo",
-   "schinese": "地理学家",
-   "koreana": "지리학자",
-   "japanese": "地理学者",
-   "russian": "Географ",
-   "polish": "Geograf"
-  },
-  "desc": {
-   "english": "5,000 questions answered.",
-   "spanish": "5.000 preguntas respondidas.",
-   "french": "5 000 réponses données.",
-   "brazilian": "5.000 perguntas respondidas.",
-   "german": "5.000 Fragen beantwortet.",
-   "italian": "Rispondi a 5.000 domande.",
-   "latam": "5.000 preguntas respondidas.",
-   "schinese": "回答了 5000 道题。",
-   "koreana": "5,000개의 문제에 답했습니다.",
-   "japanese": "5,000問に回答。",
-   "russian": "Отвечено на 5000 вопросов.",
-   "polish": "5000 odpowiedzi."
-  }
- },
- {
   "id": "classic_gold5",
   "hidden": 0,
   "tier": 4,
@@ -2520,42 +2304,6 @@
   }
  },
  {
-  "id": "adv_asc3",
-  "hidden": 0,
-  "tier": 4,
-  "ev": "adv",
-  "frame": "blank_big",
-  "icon": "ach_adv_asc3",
-  "name": {
-   "english": "Ascension III",
-   "spanish": "Ascensión III",
-   "french": "Ascension III",
-   "brazilian": "Ascensão III",
-   "german": "Aufstieg III",
-   "italian": "Ascensione III",
-   "latam": "Ascensión III",
-   "schinese": "进阶 III",
-   "koreana": "어센션 III",
-   "japanese": "アセンションIII",
-   "russian": "Восхождение III",
-   "polish": "Wniebowstąpienie III"
-  },
-  "desc": {
-   "english": "Win an expedition at Ascension 3 or higher.",
-   "spanish": "Gana una expedición en Ascensión 3 o más.",
-   "french": "Gagne une expédition en Ascension 3 ou plus.",
-   "brazilian": "Vença uma expedição na Ascensão 3 ou mais.",
-   "german": "Gewinne eine Expedition ab Aufstieg 3.",
-   "italian": "Vinci una spedizione all'Ascensione 3 o superiore.",
-   "latam": "Gana una expedición en Ascensión 3 o más.",
-   "schinese": "在进阶 3 级或以上赢得远征。",
-   "koreana": "어센션 3 이상에서 원정에서 승리하세요.",
-   "japanese": "アセンション3以上で遠征に勝利しよう。",
-   "russian": "Выиграй экспедицию на Восхождении 3 или выше.",
-   "polish": "Wygraj wyprawę na Wniebowstąpieniu 3 lub wyższym."
-  }
- },
- {
   "id": "adv_flawless3",
   "hidden": 0,
   "tier": 4,
@@ -2596,7 +2344,7 @@
   "hidden": 0,
   "tier": 4,
   "ev": "club",
-  "frame": "blank_boss",
+  "frame": "blank_gold",
   "icon": "ach_club_100",
   "name": {
    "english": "The house is yours",
@@ -2661,78 +2409,6 @@
    "japanese": "図鑑に国を190件。",
    "russian": "190 стран в энциклопедии.",
    "polish": "190 krajów w Encyklopedii."
-  }
- },
- {
-  "id": "adv_asc4",
-  "hidden": 0,
-  "tier": 4,
-  "ev": "adv",
-  "frame": "blank_big",
-  "icon": "ach_adv_asc4",
-  "name": {
-   "english": "Ascension IV",
-   "spanish": "Ascensión IV",
-   "french": "Ascension IV",
-   "brazilian": "Ascensão IV",
-   "german": "Aufstieg IV",
-   "italian": "Ascensione IV",
-   "latam": "Ascensión IV",
-   "schinese": "进阶 IV",
-   "koreana": "어센션 IV",
-   "japanese": "アセンションIV",
-   "russian": "Восхождение IV",
-   "polish": "Wniebowstąpienie IV"
-  },
-  "desc": {
-   "english": "Win an expedition at Ascension 4 or higher.",
-   "spanish": "Gana una expedición en Ascensión 4 o más.",
-   "french": "Gagne une expédition en Ascension 4 ou plus.",
-   "brazilian": "Vença uma expedição na Ascensão 4 ou mais.",
-   "german": "Gewinne eine Expedition ab Aufstieg 4.",
-   "italian": "Vinci una spedizione all'Ascensione 4 o superiore.",
-   "latam": "Gana una expedición en Ascensión 4 o más.",
-   "schinese": "在进阶 4 级或以上赢得远征。",
-   "koreana": "어센션 4 이상에서 원정에서 승리하세요.",
-   "japanese": "アセンション4以上で遠征に勝利しよう。",
-   "russian": "Выиграй экспедицию на Восхождении 4 или выше.",
-   "polish": "Wygraj wyprawę na Wniebowstąpieniu 4 lub wyższym."
-  }
- },
- {
-  "id": "bull_500",
-  "hidden": 0,
-  "tier": 4,
-  "ev": "q",
-  "frame": "blank_boss",
-  "icon": "ach_bull_500",
-  "name": {
-   "english": "Map legend",
-   "spanish": "Leyenda del mapa",
-   "french": "Légende de la carte",
-   "brazilian": "Lenda do mapa",
-   "german": "Kartenlegende",
-   "italian": "Leggenda della mappa",
-   "latam": "Leyenda del mapa",
-   "schinese": "地图传奇",
-   "koreana": "지도의 전설",
-   "japanese": "地図の伝説",
-   "russian": "Легенда карты",
-   "polish": "Legenda mapy"
-  },
-  "desc": {
-   "english": "500 bullseyes in total.",
-   "spanish": "500 dianas en total.",
-   "french": "Mets dans le mille 500 fois au total.",
-   "brazilian": "500 tiros na mosca no total.",
-   "german": "500 Volltreffer insgesamt.",
-   "italian": "500 centri in totale.",
-   "latam": "500 blancos perfectos en total.",
-   "schinese": "累计正中靶心 500 次。",
-   "koreana": "총 500번 명중.",
-   "japanese": "合計500回命中。",
-   "russian": "Всего 500 яблочек.",
-   "polish": "Łącznie 500 dziesiątek."
   }
  },
  {
@@ -2913,6 +2589,42 @@
    "japanese": "遠征に10回勝利しよう。",
    "russian": "Выиграй 10 экспедиций.",
    "polish": "Wygraj 10 wypraw."
+  }
+ },
+ {
+  "id": "adv_bare",
+  "hidden": 0,
+  "tier": 4,
+  "ev": "adv",
+  "frame": "blank_big",
+  "icon": "ach_adv_bare",
+  "name": {
+   "english": "Travelling light",
+   "spanish": "Con lo puesto",
+   "french": "Les mains dans les poches",
+   "brazilian": "Com a roupa do corpo",
+   "german": "Mit leichtem Gepäck",
+   "italian": "Con quello che ho addosso",
+   "latam": "Con lo puesto",
+   "schinese": "轻装上阵",
+   "koreana": "빈손으로",
+   "japanese": "身ひとつで",
+   "russian": "Налегке",
+   "polish": "Z pustymi rękami"
+  },
+  "desc": {
+   "english": "Win an expedition without buying anything at the Camp.",
+   "spanish": "Gana una expedición sin comprar nada en el Campamento.",
+   "french": "Gagne une expédition sans rien acheter au Campement.",
+   "brazilian": "Vença uma expedição sem comprar nada no Acampamento.",
+   "german": "Gewinne eine Expedition, ohne im Lager etwas zu kaufen.",
+   "italian": "Vinci una spedizione senza comprare nulla all'Accampamento.",
+   "latam": "Gana una expedición sin comprar nada en el Campamento.",
+   "schinese": "不在营地买任何东西，赢下一次远征。",
+   "koreana": "캠프에서 아무것도 사지 않고 원정에서 승리하세요.",
+   "japanese": "キャンプで何も買わずに遠征に勝利しよう。",
+   "russian": "Выиграй экспедицию, ничего не купив в Лагере.",
+   "polish": "Wygraj wyprawę, nie kupując niczego w Obozie."
   }
  },
  {
@@ -3561,6 +3273,294 @@
    "japanese": "ディーラーに偽の実績をつかまされる。",
    "russian": "Крупье подсовывает тебе фальшивое достижение.",
    "polish": "Krupier podsuwa ci fałszywe osiągnięcie."
+  }
+ },
+ {
+  "id": "km_equator",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "q",
+  "frame": "blank_boss",
+  "icon": "ach_km_equator",
+  "name": {
+   "english": "Equatorial blunder",
+   "spanish": "Despiste ecuatorial",
+   "french": "Bévue équatoriale",
+   "brazilian": "Gafe equatorial",
+   "german": "Äquator-Patzer",
+   "italian": "Svista equatoriale",
+   "latam": "Despiste ecuatorial",
+   "schinese": "赤道级失误",
+   "koreana": "적도급 실수",
+   "japanese": "赤道級のうっかり",
+   "russian": "Экваториальный промах",
+   "polish": "Równikowa gafa"
+  },
+  "desc": {
+   "english": "Rack up 40,075 km of total error: one full lap of the Earth.",
+   "spanish": "Acumula 40.075 km de error: una vuelta entera al mundo.",
+   "french": "Cumule 40 075 km d'erreur : un tour complet de la Terre.",
+   "brazilian": "Acumule 40.075 km de erro: uma volta inteira ao mundo.",
+   "german": "Sammle insgesamt 40.075 km Abweichung: einmal um die ganze Erde.",
+   "italian": "Accumula 40.075 km di errore: un giro completo della Terra.",
+   "latam": "Acumula 40.075 km de error: una vuelta entera al mundo.",
+   "schinese": "累计误差达到 40,075 公里：正好绕地球一整圈。",
+   "koreana": "누적 오차 40,075km: 지구를 한 바퀴 돈 셈입니다.",
+   "japanese": "誤差の合計が40,075km：ちょうど地球一周分。",
+   "russian": "Набери 40 075 км ошибки — целый оборот вокруг Земли.",
+   "polish": "Nazbieraj 40 075 km błędu: pełne okrążenie Ziemi."
+  }
+ },
+ {
+  "id": "egg_first",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "casa",
+  "frame": "blank_green",
+  "icon": "ach_egg_first",
+  "name": {
+   "english": "Curious",
+   "spanish": "Curioso",
+   "french": "Curieux",
+   "brazilian": "Curioso",
+   "german": "Neugierig",
+   "italian": "Curioso",
+   "latam": "Curioso",
+   "schinese": "好奇心",
+   "koreana": "호기심",
+   "japanese": "好奇心",
+   "russian": "Любопытный",
+   "polish": "Ciekawski"
+  },
+  "desc": {
+   "english": "Find your first house egg.",
+   "spanish": "Encuentra tu primer huevo de la casa.",
+   "french": "Trouve ton premier œuf de la maison.",
+   "brazilian": "Encontre seu primeiro ovo da casa.",
+   "german": "Finde dein erstes Ei des Hauses.",
+   "italian": "Trova il tuo primo uovo della casa.",
+   "latam": "Encuentra tu primer huevo de la casa.",
+   "schinese": "找到你的第一个彩蛋。",
+   "koreana": "첫 번째 하우스 이스터 에그를 찾으세요.",
+   "japanese": "最初の隠しネタを見つけよう。",
+   "russian": "Найди свою первую пасхалку заведения.",
+   "polish": "Znajdź pierwsze jajko kasyna."
+  }
+ },
+ {
+  "id": "egg_all",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "casa",
+  "frame": "blank_green",
+  "icon": "ach_egg_all",
+  "name": {
+   "english": "The full notebook",
+   "spanish": "La libreta llena",
+   "french": "Le carnet rempli",
+   "brazilian": "A caderneta cheia",
+   "german": "Das volle Notizbuch",
+   "italian": "Il taccuino pieno",
+   "latam": "La libreta llena",
+   "schinese": "写满的小本子",
+   "koreana": "가득 찬 수첩",
+   "japanese": "埋まった手帳",
+   "russian": "Полный блокнот",
+   "polish": "Pełny notes"
+  },
+  "desc": {
+   "english": "Find all 16 house eggs.",
+   "spanish": "Encuentra los 16 huevos de la casa.",
+   "french": "Trouve les 16 œufs de la maison.",
+   "brazilian": "Encontre os 16 ovos da casa.",
+   "german": "Finde alle 16 Eier des Hauses.",
+   "italian": "Trova tutte le 16 uova della casa.",
+   "latam": "Encuentra los 16 huevos de la casa.",
+   "schinese": "找到全部 16 个彩蛋。",
+   "koreana": "하우스 이스터 에그 16개를 모두 찾으세요.",
+   "japanese": "隠しネタを16個すべて見つけよう。",
+   "russian": "Найди все 16 пасхалок заведения.",
+   "polish": "Znajdź wszystkie 16 jajek kasyna."
+  }
+ },
+ {
+  "id": "adv_77",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "adv",
+  "frame": "blank_big",
+  "icon": "ach_adv_77",
+  "name": {
+   "english": "Seven, seven",
+   "spanish": "Siete, siete",
+   "french": "Sept, sept",
+   "brazilian": "Sete, sete",
+   "german": "Sieben, sieben",
+   "italian": "Sette, sette",
+   "latam": "Siete, siete",
+   "schinese": "七，七",
+   "koreana": "칠, 칠",
+   "japanese": "七、七",
+   "russian": "Семь, семь",
+   "polish": "Siedem, siedem"
+  },
+  "desc": {
+   "english": "Hold exactly 77 doubloons at once.",
+   "spanish": "Ten exactamente 77 doblones a la vez.",
+   "french": "Aie exactement 77 doublons en même temps.",
+   "brazilian": "Tenha exatamente 77 dobrões de uma vez.",
+   "german": "Besitze genau 77 Dublonen auf einmal.",
+   "italian": "Possiedi esattamente 77 dobloni in una volta.",
+   "latam": "Ten exactamente 77 doblones a la vez.",
+   "schinese": "同时持有恰好 77 枚金币。",
+   "koreana": "더블룬을 정확히 77개 보유하세요.",
+   "japanese": "ダブロンをちょうど77枚持とう。",
+   "russian": "Имей ровно 77 дублонов одновременно.",
+   "polish": "Miej dokładnie 77 dublonów naraz."
+  }
+ },
+ {
+  "id": "adv_short",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "adv",
+  "frame": "blank_big",
+  "icon": "ach_adv_short",
+  "name": {
+   "english": "Consolation prize",
+   "spanish": "Premio de consolación",
+   "french": "Lot de consolation",
+   "brazilian": "Prêmio de consolação",
+   "german": "Trostpreis",
+   "italian": "Premio di consolazione",
+   "latam": "Premio de consolación",
+   "schinese": "安慰奖",
+   "koreana": "위로상",
+   "japanese": "残念賞",
+   "russian": "Утешительный приз",
+   "polish": "Nagroda pocieszenia"
+  },
+  "desc": {
+   "english": "Lose an expedition in the first round.",
+   "spanish": "Pierde una expedición en la primera ronda.",
+   "french": "Perds une expédition dès la première manche.",
+   "brazilian": "Perca uma expedição na primeira rodada.",
+   "german": "Verliere eine Expedition in der ersten Runde.",
+   "italian": "Perdi una spedizione al primo round.",
+   "latam": "Pierde una expedición en la primera ronda.",
+   "schinese": "在第一轮就输掉远征。",
+   "koreana": "첫 라운드에서 원정에 패배하세요.",
+   "japanese": "最初のラウンドで遠征に負けよう。",
+   "russian": "Проиграй экспедицию в первом раунде.",
+   "polish": "Przegraj wyprawę w pierwszej rundzie."
+  }
+ },
+ {
+  "id": "comeback",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "q",
+  "frame": "blank_boss",
+  "icon": "ach_comeback",
+  "name": {
+   "english": "Comeback",
+   "spanish": "Remontada",
+   "french": "Remontada",
+   "brazilian": "Virada",
+   "german": "Comeback",
+   "italian": "Rimonta",
+   "latam": "Remontada",
+   "schinese": "逆转",
+   "koreana": "역전",
+   "japanese": "逆転",
+   "russian": "Камбэк",
+   "polish": "Powrót"
+  },
+  "desc": {
+   "english": "Hit a bullseye right after missing by more than 5,000 km.",
+   "spanish": "Haz diana justo después de fallar por más de 5.000 km.",
+   "french": "Fais mouche juste après avoir raté de plus de 5 000 km.",
+   "brazilian": "Acerte na mosca logo depois de errar por mais de 5.000 km.",
+   "german": "Triff ins Schwarze direkt nach einem Fehler von über 5.000 km.",
+   "italian": "Fai centro subito dopo aver sbagliato di oltre 5.000 km.",
+   "latam": "Haz diana justo después de fallar por más de 5,000 km.",
+   "schinese": "在偏差超过 5,000 公里之后立刻命中靶心。",
+   "koreana": "5,000km 넘게 빗나간 직후 명중하세요.",
+   "japanese": "5,000km以上外した直後にど真ん中を当てよう。",
+   "russian": "Попади в яблочко сразу после промаха больше чем на 5 000 км.",
+   "polish": "Traf w dziesiątkę zaraz po pudle o ponad 5000 km."
+  }
+ },
+ {
+  "id": "siesta",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "casa",
+  "frame": "blank_green",
+  "icon": "ach_siesta",
+  "name": {
+   "english": "The nap",
+   "spanish": "La siesta",
+   "french": "La sieste",
+   "brazilian": "A soneca",
+   "german": "Das Nickerchen",
+   "italian": "Il pisolino",
+   "latam": "La siesta",
+   "schinese": "午睡",
+   "koreana": "낮잠",
+   "japanese": "お昼寝",
+   "russian": "Сиеста",
+   "polish": "Drzemka"
+  },
+  "desc": {
+   "english": "Leave the title screen alone until the dealer nods off.",
+   "spanish": "Deja la portada quieta hasta que el crupier se duerma.",
+   "french": "Laisse l'écran titre tranquille jusqu'à ce que le croupier s'assoupisse.",
+   "brazilian": "Deixe a tela inicial quieta até o crupiê cochilar.",
+   "german": "Lass den Titelbildschirm in Ruhe, bis der Croupier einnickt.",
+   "italian": "Lascia stare la schermata iniziale finché il croupier non si appisola.",
+   "latam": "Deja la portada quieta hasta que el crupier se duerma.",
+   "schinese": "别碰标题画面，直到荷官打起瞌睡。",
+   "koreana": "딜러가 졸 때까지 타이틀 화면을 그대로 두세요.",
+   "japanese": "ディーラーが居眠りするまでタイトル画面を放っておこう。",
+   "russian": "Не трогай главный экран, пока крупье не задремлет.",
+   "polish": "Zostaw ekran tytułowy w spokoju, aż krupier przyśnie."
+  }
+ },
+ {
+  "id": "credits_end",
+  "hidden": 1,
+  "tier": 5,
+  "ev": "casa",
+  "frame": "blank_green",
+  "icon": "ach_credits_end",
+  "name": {
+   "english": "Last one out",
+   "spanish": "Fin de fiesta",
+   "french": "Le dernier à partir",
+   "brazilian": "O último a sair",
+   "german": "Der Letzte geht",
+   "italian": "L'ultimo ad andarsene",
+   "latam": "Fin de fiesta",
+   "schinese": "最后离场",
+   "koreana": "마지막 손님",
+   "japanese": "最後のお客",
+   "russian": "Последний гость",
+   "polish": "Ostatni gość"
+  },
+  "desc": {
+   "english": "Stay through the end credits until THE END, without skipping.",
+   "spanish": "Quédate en los créditos finales hasta el FIN, sin saltarlos.",
+   "french": "Reste pendant le générique jusqu'au mot FIN, sans le passer.",
+   "brazilian": "Fique nos créditos finais até o FIM, sem pular.",
+   "german": "Bleib beim Abspann bis zum ENDE, ohne zu überspringen.",
+   "italian": "Resta ai titoli di coda fino alla FINE, senza saltarli.",
+   "latam": "Quédate en los créditos finales hasta el FIN, sin saltarlos.",
+   "schinese": "看完片尾字幕直到“终”，不要跳过。",
+   "koreana": "엔딩 크레딧을 건너뛰지 않고 끝까지 보세요.",
+   "japanese": "エンドロールをスキップせず「終」まで見届けよう。",
+   "russian": "Досмотри финальные титры до слова «КОНЕЦ», не пропуская.",
+   "polish": "Zostań na napisach końcowych do KOŃCA, bez pomijania."
   }
  },
  {

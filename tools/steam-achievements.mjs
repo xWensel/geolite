@@ -15,7 +15,7 @@ const read = f => fs.readFileSync(path.join(ROOT, f), "utf8");
 const OUT = path.join(ROOT, "docs", "steam"); fs.mkdirSync(OUT, { recursive: true });
 
 const A = { icon: () => "", iconize() {}, T: (es, en) => en, tx: o => o.en };
-const ctx = { window: { AIQ: A }, document: {}, localStorage: { getItem: () => null, setItem() {} } }; vm.createContext(ctx);
+const ctx = { window: { AIQ: A }, document: {}, localStorage: { getItem: () => null, setItem() {} }, setTimeout() {} };   /* js/profile.js programa el cobro de atrasos: aqui no hace falta */ vm.createContext(ctx);
 for (const f of ["js/i18n2.js", "js/i18n3.js", "js/i18n4.js", "js/i18n5.js", "js/profile.js"]) if (fs.existsSync(path.join(ROOT, f))) vm.runInContext(read(f), ctx);
 const ICON = vm.runInContext("(" + read("js/icons.js").match(/A\.ACH_ICON = (\{[\s\S]*?\});/)[1] + ")", ctx);      // excepciones; sin entrada: ach_<id>
 const FRAME = vm.runInContext("(" + read("js/icons.js").match(/A\.ACH_FRAME = (\{[\s\S]*?\});/)[1] + ")", ctx);
