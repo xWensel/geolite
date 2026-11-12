@@ -19,9 +19,8 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ LAS CIFRAS (todas aqui) */
   const CFG = {
-    seats: 8, perRound: 3,
+    seats: 8, minSeats: 3, perRound: 3,                 // de minSeats a seats en la mesa (dos es un duelo): se juega con los que se sienten, sin rellenar
     secs: 12, rush: 5,                                  // segundos por pregunta; lo que le queda al resto cuando ha fijado media mesa
-    sacos: [0, 0, 1, 1, 2, 2, null],                    // el saco de cada ronda (data/duelo-niveles.js: 0 Bronce, 1 Plata, 2 Oro, null = todo, el del Crupier)
     bots: [16, 24, 32, 40, 48, 56, 66],                 // cuanto sabe cada banca (la misma escala 1-100 del Duelo); se reparten por los asientos al azar
     revealSecs: 4.4, roundSecs: 6,                      // lo que dura el revelado de una pregunta y el cartel «cae el ultimo»
     rev: { me: 500, rv: 700, gap: 80, lines: 1100, fact: 1200, pts: 1700 },   // el revelado, en ms: tu ficha, las demas (una cada gap), las lineas, la tira del dato y los puntos
@@ -33,12 +32,17 @@ window.AIQ = window.AIQ || {};
   const sacoName = sc => (sc == null ? A.tx(D.CFG.tables[3].n) : A.tx(D.CFG.tables[sc].n));
 
   /* ------------------------------------------------------------------ la mesa: estado, pregunta, cuentas y caida (lo usan igual la partida y la simulacion) */
+  /* el saco de la ronda k de R (data/duelo-niveles.js: 0 Bronce, 1 Plata, 2 Oro, null = todo, el del Crupier): la final siempre es del Crupier y las
+     demas se reparten de Bronce a Oro (con ocho: B B P P O O C; con cinco: B P O C; con tres: B C) */
+  const sacoOf = (k, R) => (k >= R ? null : Math.min(2, Math.floor(((k - 1) * 3) / Math.max(1, R - 1))));
+  const seatsOf = n => Math.max(CFG.minSeats, Math.min(CFG.seats, Math.round(+n) || CFG.seats));
   function mkState(o = {}) {
+    const N = seatsOf(o.seats);
     const seed = String(o.seed || Math.random().toString(36).slice(2, 8)), rs = A.rng(seed + ":seats"), lv = CFG.bots.slice();
     for (let i = lv.length - 1; i > 0; i--) { const j = Math.floor(rs() * (i + 1)); [lv[i], lv[j]] = [lv[j], lv[i]]; }
     const pl = [{ i: 0, me: true, chip: CFG.chips[0], name: "", alive: true, out: 0, rp: 0, sp: 0, rq: [], rt: 0, up: 0 }];
-    for (let i = 1; i < CFG.seats; i++) pl.push({ i, me: false, chip: CFG.chips[i], name: `${T("Banca", "House")} ${ROM[i - 1]}`, lv: lv[i - 1], alive: true, out: 0, rp: 0, sp: 0, rq: [], rt: 0, up: 0 });
-    return { m8: true, seed, pl, R: CFG.seats - 1, k: 0, qi: 0, nq: 0, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":bots"), ra: A.rng(seed + ":auto"), auto: o.auto || null,
+    for (let i = 1; i < N; i++) pl.push({ i, me: false, chip: CFG.chips[i], name: `${T("Banca", "House")} ${ROM[i - 1]}`, lv: lv[i - 1], alive: true, out: 0, rp: 0, sp: 0, rq: [], rt: 0, up: 0 });
+    return { m8: true, seed, pl, N, R: N - 1, k: 0, qi: 0, nq: 0, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":bots"), ra: A.rng(seed + ":auto"), auto: o.auto || null,
       table: { saco: 0 }, used: new Set(), lastCont: null, lastCat: null, log: [], rounds: [], cur: null, over: null, phase: "", secs: 0, net: null };
   }
   const alive = st => st.pl.filter(p => p.alive);
@@ -47,7 +51,7 @@ window.AIQ = window.AIQ || {};
   const cmp = (a, b) => b.rp - a.rp || bestQ(b) - bestQ(a) || a.rt - b.rt || a.i - b.i;
   const order = st => alive(st).sort(cmp).concat(st.pl.filter(p => !p.alive).sort((a, b) => b.out - a.out));
   function startRound(st) {
-    st.k++; st.qi = 0; st.table = { saco: CFG.sacos[Math.max(0, CFG.sacos.length - st.R + st.k - 1)] };
+    st.k++; st.qi = 0; st.table = { saco: sacoOf(st.k, st.R) };
     alive(st).forEach(p => { p.rp = 0; p.sp = 0; p.rq = []; p.rt = 0; p.up = 0; });
   }
   function nextQ(st) {
@@ -83,7 +87,7 @@ window.AIQ = window.AIQ || {};
   M.sim = (o = {}) => {
     const n = o.n || 300, la = o.la == null ? 50 : o.la, places = Array(CFG.seats + 1).fill(0), secsAll = []; let wins = 0, botWin = {};
     for (let g = 0; g < n; g++) {
-      const st = mkState({ seed: (o.seed || "sim") + ":" + g }); let secs = 0;
+      const st = mkState({ seed: (o.seed || "sim") + ":" + g, seats: o.seats }); let secs = 0;
       while (!st.over) {
         startRound(st);
         for (let j = 0; j < CFG.perRound; j++) {
@@ -119,32 +123,36 @@ window.AIQ = window.AIQ || {};
   M.stats = stats;
 
   const LN = {
-    sala: [["Ocho sillas y una sola corona. Yo solo reparto.", "Eight chairs and a single crown. I only deal."], ["Siete bancas y tú. Alguna tendrá que caer primero.", "Seven houses and you. One of them has to fall first."]],
-    win: [["La mesa entera para ti. La corona te sienta bien.", "The whole table is yours. The crown suits you."], ["Siete bancas caídas. Tendré que dar explicaciones.", "Seven houses down. I'll have some explaining to do."]],
+    sala: [["Muchas sillas y una sola corona. Yo solo reparto.", "Plenty of chairs and a single crown. I only deal."], ["Elige cuántos os sentáis. Alguien tendrá que caer primero.", "Pick how many sit down. Someone has to fall first."]],
+    win: [["La mesa entera para ti. La corona te sienta bien.", "The whole table is yours. The crown suits you."], ["Toda la mesa caída. Tendré que dar explicaciones.", "The whole table down. I'll have some explaining to do."]],
     lose: [["La mesa se queda en casa. Siempre hay una silla.", "The table stays with the house. There's always a chair."], ["Caer no es perder. Bueno, sí. Pero se aprende.", "Falling isn't losing. Well, it is. But you learn."]],
     quit: [["¿Te levantas? La silla se queda caliente un rato.", "Getting up? The chair stays warm for a while."]],
   };
   const lnAt = {}, line = k => { const a = LN[k], i = (lnAt[k] = lnAt[k] == null ? Math.floor(Math.random() * a.length) : (lnAt[k] + 1) % a.length); return T(a[i][0], a[i][1]); };
 
   /* las reglas, en una linea (la sala del Duelo las ensena al elegir esta puerta, y la sala de ocho debajo de los asientos) */
-  M.rules = () => `<span>${A.icon("boss_hat")}<b>${CFG.seats - 1}</b> ${T("rondas", "rounds")}</span><span>${A.icon("chip_k")}<b>${CFG.perRound}</b> ${T("preguntas por ronda", "questions a round")}</span><span>${A.icon("coin")}${T("Cae <b>el último</b> de cada ronda", "<b>The last one</b> falls each round")}</span>`;
+  M.rules = n => `<span>${A.icon("boss_hat")}${n ? `<b>${n - 1}</b> ${n === 2 ? T("ronda", "round") : T("rondas", "rounds")}` : Tf("De <b>{a}</b> a <b>{b}</b> en la mesa", "<b>{a}</b> to <b>{b}</b> at the table", { a: CFG.minSeats, b: CFG.seats })}</span><span>${A.icon("chip_k")}<b>${CFG.perRound}</b> ${T("preguntas por ronda", "questions a round")}</span><span>${A.icon("coin")}${T("Cae <b>el último</b> de cada ronda", "<b>The last one</b> falls each round")}</span>`;
   /* la ilustracion de la puerta: las ocho fichas en dos filas */
   M.fan = el => { el.innerHTML = `<div class="m8-fan">${CFG.chips.map(c => `<span data-chip="${c}"></span>`).join("")}</div>`; chips(el, "[data-chip]", 32, 16); };
 
   /* ================================================================== 1 · LA SALA DE OCHO */
-  M.open = () => {
+  M.open = again => {
     const c = C(), S = c.S; if (S.booting || S.phase !== "title") return;
     D.pool(); K.fitDk(); S.hub = "duelo";
-    const s = stats(), pl = mkState({ seed: "sala" }).pl;
+    const s = stats(), N = (M.seats = seatsOf(M.seats)), pl = mkState({ seed: "sala", seats: N }).pl;
+    const free = i => `<div class="m8-seat free rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><span>${T("Silla libre", "Empty chair")}</span></div>`;
     const seat = (p, i) => `<div class="m8-seat gx-sh rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><div class="gx-paper">${chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3><span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`;
-    c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("Prototipo · contra la banca", "Prototype · against the house")}</span></div>
-      <div class="m8-room"><div class="m8-seats8">${pl.map(seat).join("")}</div>
-        <div class="regl">${M.rules()}</div>
+    c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("Prototipo · práctica sin red", "Prototype · offline practice")}</span></div>
+      <div class="m8-room"><div class="m8-seats8">${pl.map(seat).join("")}${Array.from({ length: CFG.seats - N }, (_, i) => free(N + i)).join("")}</div>
+        <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One chair fewer")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b>${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span>${M.rules(N)}</div>
         <div class="regl"><span>${T("Mesas jugadas", "Tables played")} <b>${s.d}</b></span><span>${T("Coronas", "Crowns")} <b>${s.w}</b></span><span>${T("La dificultad sube sola: Bronce, Plata, Oro y, en la final, el Crupier", "Difficulty climbs by itself: Bronze, Silver, Gold and, in the final, the Dealer")}</span></div></div>
       <div class="ft"><div class="seatw" id="m8SalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts">${K.primary("m8Go", T("Repartir", "Deal"))}</div></div>`), "tablewrap");
     chips($("dlg"), ".m8-cs", 56, 28);
     $("hubBack").onclick = () => { A.sfx.ui(); D.open(); };
-    $("m8Go").onclick = () => { A.sfx.depart(); M.start(); };
+    $("m8Go").onclick = () => { A.sfx.depart(); M.start({ seats: M.seats }); };
+    const step = d => () => { const n = seatsOf(M.seats + d); if (n === M.seats) return; M.seats = n; A.sfx.ui(); K.seat(null); M.open(true); const b = $(d < 0 ? "m8Dn" : "m8Up"); if (b && !b.disabled) b.focus(); };
+    $("m8Dn").onclick = step(-1); $("m8Up").onclick = step(1);
+    if (again) { K.seat($("m8SalaSeat")); if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden")); return; }
     K.seat($("m8SalaSeat")); K.speak(line("sala"));
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
   };
@@ -168,7 +176,7 @@ window.AIQ = window.AIQ || {};
     document.body.classList.remove("title-on"); document.body.classList.add("duelo-on", "mesa8-on");
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden"); $("factText").textContent = ""; c.chrome(true);
     add("m8Hud", "m8-hud du-st", `<div class="gx-pnl"><div class="m8-top"><span id="m8Rd"></span><span class="mid" id="m8Q"></span><span id="m8Sub"></span></div>
-      <div class="m8-row" id="m8Row">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span></div>`).join("")}</div></div>`);
+      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span></div>`).join("")}</div></div>`);
     chips($("m8Hud"), ".m8-cs", 40, 20);
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Abandonar", "Leave")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
@@ -343,7 +351,7 @@ window.AIQ = window.AIQ || {};
     if (st.over) return finish();                                         // era la final: directo al veredicto
     st.phase = "round"; S.phase = "intro"; c.map.clearMarks(); pinsClear(); c.map.animateTo(c.map.home(), 900);
     for (const id of ["m8Hud", "duTools", "duFact"]) $(id).classList.add("hidden"); $("plate").classList.add("hidden");
-    const nLeft = alive(st).length, myPos = r.tab.findIndex(x => x.i === 0) + 1, meOut = out.me, next = CFG.sacos[Math.max(0, CFG.sacos.length - st.R + st.k)];
+    const nLeft = alive(st).length, myPos = r.tab.findIndex(x => x.i === 0) + 1, meOut = out.me, next = sacoOf(st.k + 1, st.R);
     const tied = r.margin === 0, why = tied ? Tf("Empató a puntos con {name} y tenía peor su mejor pregunta.", "Tied on points with {name}, with a weaker best question.", { name: nameOf(prev) })
       : Tf("Se quedó a {n} puntos de {name}.", "Finished {n} points behind {name}.", { n: A.fmt(r.margin), name: nameOf(prev) });
     const whyMe = tied ? Tf("Empataste a puntos con {name} y su mejor pregunta fue mejor que la tuya.", "You tied on points with {name}, whose best question beat yours.", { name: nameOf(prev) })
@@ -399,15 +407,15 @@ window.AIQ = window.AIQ || {};
     const list = still.map(p => prow(p, "·")).join("") + ranked.map(p => prow(p, p.place)).join("");
     const crown = winner || null;
     c.dialog(K.stage("du-fin m8-fin", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("{n} preguntas", "{n} questions", { n: st.nq })}</span>
-        <h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : m.quit ? T("Te levantas", "You get up") : Tf("Puesto {a} de {b}", "Place {a} of {b}", { a: m.place, b: CFG.seats })}</h2><p class="gx-lead">${lead}</p>
+        <h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : m.quit ? T("Te levantas", "You get up") : Tf("Puesto {a} de {b}", "Place {a} of {b}", { a: m.place, b: st.N })}</h2><p class="gx-lead">${lead}</p>
         <div class="rows">${stat}</div>${club ? `<div class="du-club rise" style="--d:1.05s"><div class="gx-paper">${A.club.strip(club)}</div></div>` : ""}</div>
       <div class="m8-tk gx-sh drop" style="--d:.15s"><div class="gx-paper"><span class="gx-eyb">${T("La mesa", "The table")}</span><table class="m8-tb pod">${list}</table></div></div>
       <div class="m8-win rise" style="--d:.5s">${crown ? `${A.icon("crown", "cr")}<span class="m8-cs big" data-chip="${crown.chip}"></span><b>${nameOf(crown)}</b>` : ""}<span>${T("Tus coronas", "Your crowns")}: ${now.w} · ${T("Mesas", "Tables")}: ${now.d}</span>${extra}</div>
       <div class="seatw" id="m8VdSeat" data-tail="r"></div>
-      <div class="gx-acts"><button type="button" class="gx-btn gho" id="m8Exit"><span>${T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${K.primary("m8Again", T("Otra mesa de ocho", "Another table of eight"))}</div>`), "tablewrap");
+      <div class="gx-acts"><button type="button" class="gx-btn gho" id="m8Exit"><span>${T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${K.primary("m8Again", T("Otra mesa", "Another table"))}</div>`), "tablewrap");
     chips($("dlg"), ".m8-cs.big", 128, 32); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
     $("m8Exit").onclick = () => c.showHub("home");
-    $("m8Again").onclick = () => M.start({ auto: s.auto });
+    $("m8Again").onclick = () => M.start({ auto: s.auto, seats: s.N });
     K.seat($("m8VdSeat")); K.speak(line(m.quit ? "quit" : win ? "win" : "lose"), win ? { gesture: "hat_tip" } : { face: "sly" });
     if (club) A.club.play(club, document.querySelector("#dlg .du-club"), 1900);
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));

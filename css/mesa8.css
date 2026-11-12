@@ -16,6 +16,8 @@
 .m8-seat .m8-cs { width: 56px; height: 56px; grid-row: span 2; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35)); }
 .m8-seat h3 { font-size: 28px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: end; }
 .m8-seat .tag { justify-self: start; align-self: start; }
+.m8-seat.free { display: grid; place-items: center; min-height: 96px; box-sizing: border-box; box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .16); font-size: 20px; color: var(--gx-txt-2); }
+.du-st .m8-room .regl .lvl b { color: var(--gx-ttl); }
 .du-st .m8-room .regl { flex-wrap: wrap; gap: 8px 26px; }
 
 /* ---------------------------------------------------------------- 2 · la tira de ocho (en lugar del marcador de dos) */
@@ -25,7 +27,7 @@
 .m8-top b { font-weight: 400; color: var(--gx-ttl); } .m8-top span { min-width: 0; overflow: hidden; text-overflow: ellipsis; } .m8-top span:last-child { text-align: right; }
 .m8-top .mid { background: var(--gx-gold); color: #120c02; padding: 6px 12px 5px; box-shadow: 0 3px 0 var(--gx-gold-lo); }
 .m8-row { position: relative; height: 122px; margin-top: 10px; }
-.m8-s { position: absolute; left: 0; top: 0; width: 12.5%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 6px 4px 4px; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.m8-s { position: absolute; left: 0; top: 0; width: calc(100% / max(var(--n, 8), 5)); height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 6px 4px 4px; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
 .m8-s::before { content: ""; position: absolute; inset: 0 2px; box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .14); pointer-events: none; }
 .m8-s .m8-cs { width: 40px; height: 40px; }
 .m8-s .m8n { display: block; max-width: 100%; margin-top: 2px; font-size: 18px; line-height: 22px; height: 22px; color: var(--gx-txt); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
