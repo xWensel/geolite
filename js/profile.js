@@ -350,10 +350,10 @@ window.AIQ = window.AIQ || {};
       : a.near ? `<span class="ach-ico">${A.badge(x.id)}</span><span class="ach-t"><em>${A.pick6(TXL.near)}</em><b>${A.tx(x.name)}</b><i class="ach-pr"><span class="gx-bar"><i style="width:${Math.round(100 * a.v[0] / a.v[1])}%"></i></span><span>${fx(a.v[0])} / ${fx(a.v[1])}</span></i></span>`
       : `<span class="ach-ico">${A.badge(a.id)}</span><span class="ach-t"><em>${A.T("Logro desbloqueado", "Achievement unlocked")}</em><b>${A.tx(a.name)}</b><i>${A.tx(a.desc)}</i></span>${a._pay ? `<u class="ach-pay">+${a._pay}${FICHA()}</u>` : ""}${a.secret ? `<b class="ach-stamp">${A.pick6(TXL.sec)}</b>` : ""}`;
     el.classList.remove("hidden", "in", "out", "qm", "sealed"); el.classList.toggle("soft", soft); el.dataset.tr = tr; zoneSig = ""; place(el); A.restyle(el); el.classList.add("in");
-    /* L8: EL AVISO CRECE CON EL LOGRO. El sonido sube con el tramo (0, +2, +4 semitonos; +7 los secretos), la quema dura mas, la Maestria
-       se lleva el aplauso de la sala y al secreto le cae su sello */
-    if (soft) { if (A.sfx.ui) A.sfx.ui(); } else A.sfx.ach(a.secret ? 7 : tr >= 4 ? 4 : tr >= 2 ? 2 : 0);
-    if (!soft && tr === 4 && A.publico) A.publico("jackpot", 0.35);
+    /* L8: EL AVISO CRECE CON EL LOGRO. El sonido sube con el tramo (nivel 0, 1 o 2 de A.sfx.ach; 3 los secretos), la quema dura mas, la Maestria
+       se lleva el aplauso de la sala (cuando el acorde ya ha sonado: el retraso de A.publico va en ms) y al secreto le cae su sello */
+    if (soft) { if (A.sfx.ui) A.sfx.ui(); } else A.sfx.ach(a.secret ? 3 : tr >= 4 ? 2 : tr >= 2 ? 1 : 0);
+    if (!soft && tr === 4 && A.publico) A.publico("jackpot", 450);
     if (!soft && a.secret) setTimeout(() => { if (el.dataset.tr === "5" && !el.classList.contains("hidden")) { el.classList.add("sealed"); if (A.sfx.stamp) A.sfx.stamp(); if (A.haptic) A.haptic([30, 40, 70]); } }, 1100);
     if (!soft && A.celebra && A.celebra.logro) A.celebra.logro(el, tr);                       // v0.3.203: aparece quemandose en oro, en su sitio (js/celebra.js)
     clearInterval(zoneT); zoneT = setInterval(() => place(el), 250);              // la pantalla puede cambiar con el aviso a la vista
