@@ -157,7 +157,7 @@ window.AIQ = window.AIQ || {};
      continente y, si se puede, de la misma categoria. Primero se sortea el continente (peso = raiz de cuantas hay, para que Europa no salga una ronda si y otra
      no) y luego la pregunta */
   function drawQ(st) {
-    const sc = st.table.saco, P = pool().filter(e => sc == null || e.sc === sc), free = e => !st.used.has(e.key);
+    const sc = st.table.saco, bd = st.band, P = pool().filter(e => (sc == null || e.sc === sc) && (!bd || (e.d >= bd[0] && e.d <= bd[1]))), free = e => !st.used.has(e.key);   // st.band: franja de dificultad [min, max] (La mesa, js/mesa8.js)
     let cand = P.filter(e => free(e) && e.cont !== st.lastCont && e.cat !== st.lastCat);
     if (!cand.length) cand = P.filter(e => free(e) && e.cont !== st.lastCont);
     if (!cand.length) cand = P.filter(free);

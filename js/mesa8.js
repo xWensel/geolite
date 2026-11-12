@@ -1,5 +1,6 @@
 /*
- * Geolite - MESA DE OCHO (prototipo, entrega 1: tu y siete bancas, sin red). Votado el 12-nov-2026 (maqueta «Mesa de ocho», B1-B11).
+ * Geolite - LA MESA (prototipo, entrega 1: tu y las bancas, sin red). Votado el 12-nov-2026 (maqueta «Mesa de ocho», B1-B11); el 13-nov pasa a llamarse
+ * «La mesa» (de 3 a 8, con los que se sienten) y la dificultad deja los sacos: todo el contenido, de menos a mas, poco a poco.
  *  - Ocho en la mesa. Cada ronda son 3 preguntas, las mismas para todos y a la vez; al acabar la ronda CAE el que menos puntos ha hecho en ella.
  *    Los puntos vuelven a cero en cada ronda. Con ocho son 7 rondas y 21 preguntas; la ultima ronda es la final, entre dos.
  *  - Puntos de cada pregunta: los del Duelo (solo precision, A.duelo.ptsOf). La dificultad sube sola: rondas 1-2 del saco de Bronce, 3-4 Plata,
@@ -20,21 +21,23 @@ window.AIQ = window.AIQ || {};
   /* ------------------------------------------------------------------ LAS CIFRAS (todas aqui) */
   const CFG = {
     seats: 8, minSeats: 3, perRound: 3,                 // de minSeats a seats en la mesa (dos es un duelo): se juega con los que se sienten, sin rellenar
+    diff: { from: 28, to: 72, half: 14 },                // dificultad de la primera y de la ultima pregunta, y el ancho de la franja (bandOf)
     secs: 12, rush: 5,                                  // segundos por pregunta; lo que le queda al resto cuando ha fijado media mesa
     bots: [16, 24, 32, 40, 48, 56, 66],                 // cuanto sabe cada banca (la misma escala 1-100 del Duelo); se reparten por los asientos al azar
     revealSecs: 4.4, roundSecs: 6,                      // lo que dura el revelado de una pregunta y el cartel «cae el ultimo»
     rev: { me: 500, rv: 700, gap: 80, lines: 1100, fact: 1200, pts: 1700 },   // el revelado, en ms: tu ficha, las demas (una cada gap), las lineas, la tira del dato y los puntos
     chips: ["chip_o", "chip_p", "chip_r", "chip_b", "chip_g", "chip_k", "chip_t", "chip_w"],
   };
-  const NAME6 = "Mesa de ocho|Table of eight";
-  const NAME = () => T("Mesa de ocho", "Table of eight"), ME = () => T("Tú", "You");
+  const NAME6 = "La mesa|The table";
+  const NAME = () => T("La mesa", "The table"), ME = () => T("Tú", "You");
   const ROM = ["I", "II", "III", "IV", "V", "VI", "VII"];
-  const sacoName = sc => (sc == null ? A.tx(D.CFG.tables[3].n) : A.tx(D.CFG.tables[sc].n));
 
   /* ------------------------------------------------------------------ la mesa: estado, pregunta, cuentas y caida (lo usan igual la partida y la simulacion) */
   /* el saco de la ronda k de R (data/duelo-niveles.js: 0 Bronce, 1 Plata, 2 Oro, null = todo, el del Crupier): la final siempre es del Crupier y las
      demas se reparten de Bronce a Oro (con ocho: B B P P O O C; con cinco: B P O C; con tres: B C) */
-  const sacoOf = (k, R) => (k >= R ? null : Math.min(2, Math.floor(((k - 1) * 3) / Math.max(1, R - 1))));
+  /* la dificultad: TODO el banco (como la mesa del Crupier del Duelo), de menos a mas y poco a poco. Cada pregunta sale de una franja de dificultad absoluta
+     (1-100) centrada en un valor que sube en linea recta de diff.from (la primera) a diff.to (la ultima); la franja mide diff.half a cada lado */
+  const bandOf = (n, total) => { const F = CFG.diff, c = F.from + ((F.to - F.from) * (n - 1)) / Math.max(1, total - 1); return [c - F.half, c + F.half]; };
   const seatsOf = n => Math.max(CFG.minSeats, Math.min(CFG.seats, Math.round(+n) || CFG.seats));
   function mkState(o = {}) {
     const N = seatsOf(o.seats);
@@ -43,7 +46,7 @@ window.AIQ = window.AIQ || {};
     const pl = [{ i: 0, me: true, chip: CFG.chips[0], name: "", alive: true, out: 0, rp: 0, sp: 0, rq: [], rt: 0, up: 0 }];
     for (let i = 1; i < N; i++) pl.push({ i, me: false, chip: CFG.chips[i], name: `${T("Banca", "House")} ${ROM[i - 1]}`, lv: lv[i - 1], alive: true, out: 0, rp: 0, sp: 0, rq: [], rt: 0, up: 0 });
     return { m8: true, seed, pl, N, R: N - 1, k: 0, qi: 0, nq: 0, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":bots"), ra: A.rng(seed + ":auto"), auto: o.auto || null,
-      table: { saco: 0 }, used: new Set(), lastCont: null, lastCat: null, log: [], rounds: [], cur: null, over: null, phase: "", secs: 0, net: null };
+      table: { saco: null }, band: null, used: new Set(), lastCont: null, lastCat: null, log: [], rounds: [], cur: null, over: null, phase: "", secs: 0, net: null };
   }
   const alive = st => st.pl.filter(p => p.alive);
   const bestQ = p => (p.rq.length ? Math.max(...p.rq) : 0);
@@ -51,11 +54,11 @@ window.AIQ = window.AIQ || {};
   const cmp = (a, b) => b.rp - a.rp || bestQ(b) - bestQ(a) || a.rt - b.rt || a.i - b.i;
   const order = st => alive(st).sort(cmp).concat(st.pl.filter(p => !p.alive).sort((a, b) => b.out - a.out));
   function startRound(st) {
-    st.k++; st.qi = 0; st.table = { saco: sacoOf(st.k, st.R) };
+    st.k++; st.qi = 0;
     alive(st).forEach(p => { p.rp = 0; p.sp = 0; p.rq = []; p.rt = 0; p.up = 0; });
   }
   function nextQ(st) {
-    st.qi++; st.nq++; const e = K.drawQ(st), cur = (st.cur = { e, q: e.q, d: e.d, secs: CFG.secs, play: {}, lock: {}, ans: null, rushed: false });
+    st.qi++; st.nq++; st.band = bandOf(st.nq, st.R * CFG.perRound); const e = K.drawQ(st), cur = (st.cur = { e, q: e.q, d: e.d, secs: CFG.secs, play: {}, lock: {}, ans: null, rushed: false });
     alive(st).forEach(p => { if (!p.me) { const b = D.botPlay(st.rb, e.q, e.d, p.lv); b.at = Math.min(b.t, CFG.secs - 0.4); cur.play[p.i] = b; } });
     return cur;
   }
@@ -85,13 +88,13 @@ window.AIQ = window.AIQ || {};
   /* cientos de mesas con el banco, la puntuacion y las reglas del juego (sin interfaz ni esperas). la = cuanto sabe quien ocupa tu asiento.
      Devuelve con que frecuencia gana, en que puesto queda y cuanto dura (preguntando + revelados + carteles) */
   M.sim = (o = {}) => {
-    const n = o.n || 300, la = o.la == null ? 50 : o.la, places = Array(CFG.seats + 1).fill(0), secsAll = []; let wins = 0, botWin = {};
+    const n = o.n || 300, la = o.la == null ? 50 : o.la, places = Array(CFG.seats + 1).fill(0), secsAll = [], dq = []; let wins = 0, botWin = {};
     for (let g = 0; g < n; g++) {
       const st = mkState({ seed: (o.seed || "sim") + ":" + g, seats: o.seats }); let secs = 0;
       while (!st.over) {
         startRound(st);
         for (let j = 0; j < CFG.perRound; j++) {
-          const cur = nextQ(st), al = alive(st), raw = {}, pos = {};
+          const cur = nextQ(st), al = alive(st), raw = {}, pos = {}; (dq[st.nq - 1] = dq[st.nq - 1] || []).push(cur.d);
           al.forEach(p => { if (p.me) { const b = D.botPlay(st.ra, cur.q, cur.d, la); raw[0] = Math.min(b.t, CFG.secs - 0.4); pos[0] = b; } else { raw[p.i] = cur.play[p.i].at; pos[p.i] = cur.play[p.i]; } });
           const t = lockTimes(raw, al.length), ans = {}; al.forEach(p => (ans[p.i] = { lon: pos[p.i].lon, lat: pos[p.i].lat, t: t[p.i] }));
           settleQ(st, ans); secs += Math.max(...Object.values(t)) + CFG.revealSecs;
@@ -101,7 +104,7 @@ window.AIQ = window.AIQ || {};
       const me = st.pl[0]; places[me.place]++; if (st.over.win) wins++; else botWin[st.pl[st.over.winner].lv] = (botWin[st.pl[st.over.winner].lv] || 0) + 1; secsAll.push(secs);
     }
     secsAll.sort((a, b) => a - b);
-    return { n, la, win: Math.round((1000 * wins) / n) / 10, places: places.slice(1).map(x => Math.round((1000 * x) / n) / 10), botWin, secs: { p10: Math.round(secsAll[Math.floor(n * 0.1)]), p50: Math.round(secsAll[Math.floor(n * 0.5)]), p90: Math.round(secsAll[Math.floor(n * 0.9)]) } };
+    return { n, la, dq: dq.map(a => Math.round(a.reduce((x, y) => x + y, 0) / a.length)), win: Math.round((1000 * wins) / n) / 10, places: places.slice(1).map(x => Math.round((1000 * x) / n) / 10), botWin, secs: { p10: Math.round(secsAll[Math.floor(n * 0.1)]), p50: Math.round(secsAll[Math.floor(n * 0.5)]), p90: Math.round(secsAll[Math.floor(n * 0.9)]) } };
   };
 
   /* ================================================================== LA INTERFAZ */
@@ -145,7 +148,7 @@ window.AIQ = window.AIQ || {};
     c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("Prototipo · práctica sin red", "Prototype · offline practice")}</span></div>
       <div class="m8-room"><div class="m8-seats8">${pl.map(seat).join("")}${Array.from({ length: CFG.seats - N }, (_, i) => free(N + i)).join("")}</div>
         <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One chair fewer")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b>${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span>${M.rules(N)}</div>
-        <div class="regl"><span>${T("Mesas jugadas", "Tables played")} <b>${s.d}</b></span><span>${T("Coronas", "Crowns")} <b>${s.w}</b></span><span>${T("La dificultad sube sola: Bronce, Plata, Oro y, en la final, el Crupier", "Difficulty climbs by itself: Bronze, Silver, Gold and, in the final, the Dealer")}</span></div></div>
+        <div class="regl"><span>${T("Mesas jugadas", "Tables played")} <b>${s.d}</b></span><span>${T("Coronas", "Crowns")} <b>${s.w}</b></span><span>${T("Todo el contenido. La dificultad sube poco a poco", "All the content. Difficulty climbs little by little")}</span></div></div>
       <div class="ft"><div class="seatw" id="m8SalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts">${K.primary("m8Go", T("Repartir", "Deal"))}</div></div>`), "tablewrap");
     chips($("dlg"), ".m8-cs", 56, 28);
     $("hubBack").onclick = () => { A.sfx.ui(); D.open(); };
@@ -195,7 +198,7 @@ window.AIQ = window.AIQ || {};
     if (!st || !$("m8Hud")) return; const ord = st.pl.filter(p => p.alive).sort((a, b) => b.sp - a.sp || cmp(a, b)).concat(st.pl.filter(p => !p.alive).sort((a, b) => b.out - a.out));
     const cur = st.cur, askN = st.phase === "ask", nAl = alive(st).length, total = st.R * CFG.perRound, fin = nAl === 2;
     $("askNo").textContent = A.t("ask.no", { n: pad2(Math.max(1, st.nq)), m: pad2(total) });
-    $("m8Rd").innerHTML = fin ? `${T("La final", "The final")} · <b>${sacoName(st.table.saco)}</b>` : `${T("Ronda", "Round")} <b>${Math.max(1, st.k)}</b> / ${st.R} · <b>${sacoName(st.table.saco)}</b>`;
+    $("m8Rd").innerHTML = fin ? `<b>${T("La final", "The final")}</b>` : `${T("Ronda", "Round")} <b>${Math.max(1, st.k)}</b> / ${st.R}`;
     $("m8Q").textContent = `${T("Pregunta", "Question")} ${Math.max(1, st.qi)} / ${CFG.perRound}`;
     $("m8Sub").innerHTML = fin ? T("Quien gane se queda la mesa", "Winner takes the table") : `${T("Quedan", "Left")} <b>${nAl}</b> · ${T("cae el último", "the last one falls")}`;
     const scored = st.qi > 1 || st.phase === "reveal", locked = p => !!cur && cur.lock[p.i] != null;
@@ -211,7 +214,7 @@ window.AIQ = window.AIQ || {};
     });
     document.body.classList.toggle("duelo-lock", !!(askN && cur && cur.rushed && me().alive && !locked(me())));   // el reloj de la placa, en rojo
   };
-  M.pause = () => ({ mode: `${NAME()} · ${T("Prototipo", "Prototype")}`, note: T("En la mesa de ocho el reloj no se detiene durante la pregunta.", "At the table of eight the clock doesn't stop during a question."),
+  M.pause = () => ({ mode: `${NAME()} · ${T("Prototipo", "Prototype")}`, note: T("En la mesa el reloj no se detiene durante la pregunta.", "At the table the clock doesn't stop during a question."),
     rows: K.row(T("Ronda", "Round"), `${Math.max(1, st.k)} / ${st.R}`) + K.row(T("Quedan en la mesa", "Left at the table"), alive(st).length) + (me().alive ? K.row(T("Tus puntos de la ronda", "Your points this round"), A.fmt(me().rp || 0)) : "") });
 
   /* ---------------- las fichas sobre el mapa: una por jugador, con su nombre y su distancia. Siguen la camara del mapa (map.lonLatToScreen, sin medir la
@@ -351,7 +354,7 @@ window.AIQ = window.AIQ || {};
     if (st.over) return finish();                                         // era la final: directo al veredicto
     st.phase = "round"; S.phase = "intro"; c.map.clearMarks(); pinsClear(); c.map.animateTo(c.map.home(), 900);
     for (const id of ["m8Hud", "duTools", "duFact"]) $(id).classList.add("hidden"); $("plate").classList.add("hidden");
-    const nLeft = alive(st).length, myPos = r.tab.findIndex(x => x.i === 0) + 1, meOut = out.me, next = sacoOf(st.k + 1, st.R);
+    const nLeft = alive(st).length, myPos = r.tab.findIndex(x => x.i === 0) + 1, meOut = out.me;
     const tied = r.margin === 0, why = tied ? Tf("Empató a puntos con {name} y tenía peor su mejor pregunta.", "Tied on points with {name}, with a weaker best question.", { name: nameOf(prev) })
       : Tf("Se quedó a {n} puntos de {name}.", "Finished {n} points behind {name}.", { n: A.fmt(r.margin), name: nameOf(prev) });
     const whyMe = tied ? Tf("Empataste a puntos con {name} y su mejor pregunta fue mejor que la tuya.", "You tied on points with {name}, whose best question beat yours.", { name: nameOf(prev) })
@@ -361,7 +364,7 @@ window.AIQ = window.AIQ || {};
     const secs = st.auto && st.auto.round != null ? st.auto.round / 1000 : CFG.roundSecs;
     c.dialog(K.stage("m8-rd", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k} de {n}", "round {k} of {n}", { k: r.k, n: st.R })}</span><h2 class="gx-t-l">${meOut ? T("Caes tú", "You fall") : Tf("Cae {name}", "{name} falls", { name: nameOf(out) })}</h2>
         <p>${meOut ? whyMe + " " + T("Puedes seguir mirando la partida desde tu asiento.", "You can keep watching from your seat.") : why}</p>
-        <div class="rows">${K.row(T("Quedan en la mesa", "Left at the table"), nLeft)}${wasIn && !meOut ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(nLeft === 2 ? T("La final", "The final") : `${T("Ronda", "Round")} ${r.k + 1}`, sacoName(next))}</div></div>
+        <div class="rows">${K.row(T("Quedan en la mesa", "Left at the table"), nLeft)}${wasIn && !meOut ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? T("la final", "the final") : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
       <div class="m8-tk gx-sh drop" style="--d:.1s"><div class="gx-paper"><span class="gx-eyb">${Tf("La ronda {k}", "Round {k}", { k: r.k })} · ${T("los puntos vuelven a cero en la siguiente", "points go back to zero next round")}</span>
         <table class="m8-tb n${r.tab.length}"><tr><th></th><th>${T("Jugador", "Player")}</th>${r.qs.map(q => `<th>${esc(qName(q))}</th>`).join("")}<th>${T("Ronda", "Round")}</th></tr>${rows}</table></div></div>
       <div class="m8-ft"><div class="m8-bar"><span id="m8Cnt"></span><u><s style="animation-duration:${secs}s"></s></u></div><div class="gx-acts">${meOut ? `<button type="button" class="gx-btn" id="m8Out"><span>${T("Salir", "Exit")}</span></button>` : ""}${K.primary("m8Next", meOut ? T("Seguir mirando", "Keep watching") : T("Siguiente ronda", "Next round"))}</div></div>`), "tablewrap");
