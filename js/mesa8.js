@@ -27,7 +27,7 @@ window.AIQ = window.AIQ || {};
     diff: { from: 28, to: 72, half: 14 },                // dificultad de la primera y de la ultima pregunta, y el ancho de la franja (bandOf)
     secs: 12, rush: 5,                                  // segundos por pregunta; lo que le queda al resto cuando ha fijado media mesa
     bots: [16, 24, 32, 40, 48, 56, 66],                 // cuanto sabe cada banca (la misma escala 1-100 del Duelo); se reparten por los asientos al azar
-    revealSecs: 4.4, roundSecs: 6, finSecs: 3.8,        // lo que dura el revelado de una pregunta, el cartel «cae el ultimo» y la entrada de la final
+    revealSecs: 4.4, roundSecs: 6, finSecs: 3.8, fallMs: 1100,   // lo que dura el revelado de una pregunta, el cartel «cae el ultimo», la entrada de la final y la caida en la tira (v0.4.78)
     rev: { me: 500, rv: 700, gap: 80, lines: 1100, fact: 1200, pts: 1700 },   // el revelado, en ms: tu ficha, las demas (una cada gap), las lineas, la tira del dato y los puntos
     chips: ["chip_o", "chip_p", "chip_r", "chip_b", "chip_g", "chip_k", "chip_t", "chip_w"],
   };
@@ -106,7 +106,7 @@ window.AIQ = window.AIQ || {};
           const t = lockTimes(raw, al.length), ans = {}; al.forEach(p => (ans[p.i] = { lon: pos[p.i].lon, lat: pos[p.i].lat, t: t[p.i] }));
           settleQ(st, ans); secs += Math.max(...Object.values(t)) + CFG.revealSecs;
         }
-        endRound(st); if (!st.over) secs += CFG.roundSecs;
+        endRound(st); secs += CFG.fallMs / 1000; if (!st.over) secs += CFG.roundSecs;
       }
       const me = st.pl[0]; places[me.place]++; if (st.over.win) wins++; else botWin[st.pl[st.over.winner].lv] = (botWin[st.pl[st.over.winner].lv] || 0) + 1; secsAll.push(secs);
     }
@@ -197,7 +197,7 @@ window.AIQ = window.AIQ || {};
     document.body.classList.remove("title-on"); document.body.classList.add("duelo-on", "mesa8-on");
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden"); $("factText").textContent = ""; c.chrome(true);
     add("m8Hud", "m8-hud du-st", `<div class="gx-pnl"><div class="m8-top"><span id="m8Rd"></span><span class="mid" id="m8Q"></span><span id="m8Sub"></span></div>
-      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span></div>`).join("")}<span class="m8-fx hidden" id="m8Fx">${T("Fuera", "Out")}</span><span class="m8-vs hidden" id="m8Vs">VS</span></div></div><div class="m8-watch hidden" id="m8Watch"></div><div class="m8-note hidden" id="m8Note" role="status"></div>`);
+      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span><span class="m8-stp"></span></div>`).join("")}<span class="m8-fx hidden" id="m8Fx">${T("Fuera", "Out")}</span><span class="m8-vs hidden" id="m8Vs">VS</span></div></div><div class="m8-watch hidden" id="m8Watch"></div><div class="m8-note hidden" id="m8Note" role="status"></div>`);
     chips($("m8Hud"), ".m8-cs", 40, 20);
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Abandonar", "Leave")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
@@ -236,8 +236,11 @@ window.AIQ = window.AIQ || {};
     const wt = $("m8Watch"); if (wt) { const on = !m.alive && st.phase !== "end"; wt.classList.toggle("hidden", !on); if (on) wt.textContent = m.quit ? T("Te has levantado", "You got up") : Tf("Mirando · caíste en la ronda {k}", "Watching · you fell in round {k}", { k: m.out }); }
     ord.forEach((p, n) => {
       const e = row.children[p.i], last = p.alive && scored && n === nAl - 1;
-      const cls = "m8-s" + (p.me ? " me" : "") + (!p.alive ? " out" : "") + (last ? " dz" : "") + (p.alive && askN ? (locked(p) ? " lk" : " th") : "");
+      const fal = !!st.fall && st.fall.out === p.i, cls = "m8-s" + (p.me ? " me" : "") + (!p.alive ? " out" : "") + (last ? " dz" : "") + (fal ? " fall" : "") + (p.alive && askN ? (locked(p) ? " lk" : " th") : "");
       if (e.className !== cls) e.className = cls;
+      /* v0.4.78: la caida en la propia tira (sello rojo) y tu «A salvo» (sello verde) antes del cartel de la ronda */
+      const sp = e.querySelector(".m8-stp"), sk = fal ? "bad" : st.fall && st.fall.safe && p.me && p.alive ? "ok" : "", sc = "m8-stp" + (sk ? " on " + sk : "");
+      if (sp.className !== sc) { sp.className = sc; sp.textContent = sk === "bad" ? T("Fuera", "Out") : sk === "ok" ? T("A salvo", "Safe") : ""; }
       const tx = `translateX(${xs[p.i]}px)`; if (e.style.transform !== tx) e.style.transform = tx;
       const cm = !p.alive ? "s" : fin ? "f" : "n"; if (e.dataset.cm !== cm) { e.dataset.cm = cm; const s = e.querySelector(".m8-cs"), z = { s: [32, 16], f: [56, 28], n: [40, 20] }[cm]; s.textContent = ""; s.appendChild(chipIn(p.chip, z[0], z[1])); }   // la ficha, siempre a escala entera
       const set = (s, v) => { const x = e.querySelector(s); if (x.textContent !== v) x.textContent = v; };
@@ -286,12 +289,26 @@ window.AIQ = window.AIQ || {};
     return out;
   }
 
+  /* v0.4.78 (P6): quien ha caido, en la practica contra el juego, ve el lugar mientras los demas piensan y cada ficha cae en el mapa al fijarse.
+     Entre jugadores no: con amigos en una llamada seria soplar la respuesta */
+  function peek(cur) {
+    const c = C(), map = c.map, q = cur.q, af = A.waters && A.waters.of(q), isC = q.t === "c" || !!af, fC = isC && !af ? c.world.byName[q.key] : null; let tg0 = null, span, labelAt = null;
+    if (af) { span = [[af.bbox[0], af.bbox[1]], [af.bbox[2], af.bbox[3]]]; labelAt = [q.lon, q.lat]; }
+    else if (isC) { const b = K.big(fC).bbox; span = [[b[0], b[1]], [b[2], b[3]]]; labelAt = [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; }
+    else { tg0 = [q.lon, q.lat]; span = [tg0]; }
+    const tgt = tg0 || labelAt, fl = c.flagsOf(q);
+    map.setMarks({ guess: null, answer: tg0, highlight: fC ? q.key : null, area: af || null, label: q.clue ? A.tx(q.answer) : A.tx(q.name), labelAt, dist: "", pop: null, flags: fl.length ? fl.map(c.flagImg) : null });
+    pinsClear(); st.pins.tgt = [tgt[0], tgt[1], fC && fC.ct]; st.peek = { near: lon => lon + 360 * Math.round((tgt[0] - lon) / 360) };
+    const fpts = isC ? span.map(p => [p[0], p[1], fC && fC.ct]) : [[tg0[0], tg0[1]]];
+    requestAnimationFrame(() => { if (!st || st.cur !== cur || st.phase !== "ask") return; if (map.frameReveal) map.frameReveal(fpts, obstacles(), { l: 110, r: 110, t: 96, b: 44 }, 1100); else map.fitPoints(fpts.map(p => [p[0], p[1]]), undefined, 1100); });
+  }
+
   /* ---------------- la pregunta: la misma para toda la mesa, con el reloj y la placa del juego */
   const elapsed = () => { const S = C().S; return ((S.paused ? S.pauseAt : performance.now()) - st.cur.t0 - S.pausedAcc) / 1000; };
   function ask() {
     const c = C(), S = c.S; if (st.qi === 0 || st.qi >= perOf(st) || st.cut) { st.cut = null; startRound(st); }
     finKill();
-    const cur = nextQ(st), m = me(); st.phase = "ask"; st.ptsOn = false;
+    const cur = nextQ(st), m = me(); st.phase = "ask"; st.ptsOn = false; st.fall = null; st.peek = null;
     if (!st.t0) st.t0 = performance.now();
     S.qs.push(cur.q); S.qi = st.nq - 1; S.camp.levels[0].seconds = cur.secs; S.camp.levels[0].kind = cur.q.kind || "city";
     if (A.coverMap) A.coverMap("duelo", false);
@@ -300,13 +317,15 @@ window.AIQ = window.AIQ || {};
     c.nextQuestion();                                                     // placa, reloj, mapa listo para el clic y M.hud()
     cur.t0 = performance.now();
     if (st.net) { const nt = st.net; cur.t0 = S.t0 = Rd().perfAt(nt.s); nt.ack = false; netLoop(); }   // el reloj es el del servidor: empieza para todos a la vez
-    if (!m.alive) { c.map.setPick(false); document.body.classList.add("mesa8-watch"); }
+    if (!m.alive) { c.map.setPick(false); document.body.classList.add("mesa8-watch"); if (!st.net) peek(cur); }   // P6: mirando en la practica, ves el lugar y como caen las fichas (entre amigos seria soplarla)
+    if (st.qi === 1 && perOf(st) === CFG.finalQs && A.music.energia) A.music.energia(true);   // P5: en la final entra la capa de tension de la cancion (la banda sube) hasta el veredicto
     if (st.auto && m.alive) { cur.auto = D.botPlay(st.ra, cur.q, cur.d, st.auto.level == null ? 50 : st.auto.level); cur.autoAt = Math.min(cur.auto.t, cur.secs - 0.4); }
     M.hud();
   }
   /* alguien fija (t = segundos de la pregunta). Con media mesa fijada, al resto le quedan rush segundos: el reloj de la placa salta a ese tiempo */
   function lock(p, t) {
     const cur = st.cur, S = C().S; cur.lock[p.i] = t;
+    if (st.peek && !p.me && cur.play[p.i]) { const b = cur.play[p.i], pm = pinAdd(p, st.peek.near(b.lon), b.lat, { drop: true }); pinTag(pm, K.cut(p.name, 13)); if (A.sfx.bankPin) A.sfx.bankPin(); }
     const al = alive(st), n = al.filter(x => cur.lock[x.i] != null).length;
     if (n >= al.length) return resolve();
     if (!cur.rushed && n >= Math.ceil(al.length / 2)) {
@@ -348,6 +367,7 @@ window.AIQ = window.AIQ || {};
     const c = C(), S = c.S, map = c.map, cur = st.cur, q = cur.q, R = CFG.rev, m = me(); if (st.phase !== "ask") return;
     const tEnd = elapsed(); st.secs += tEnd;
     st.phase = "reveal"; S.phase = "reveal"; S.tense = false; map.setPick(false); A.music.mode(1); $("plate").classList.remove("hurry"); document.body.classList.remove("duelo-lock");
+    if (st.peek) { pinsClear(); st.peek = null; }
     const ans = {}; if (z) { alive(st).forEach(p => (ans[p.i] = ansOf(z.a[p.seat]))); if (!ans[0] && st.pins) { const mp = st.pins.list.find(x => x.p.me); if (mp) { mp.el.remove(); st.pins.list.splice(st.pins.list.indexOf(mp), 1); } } cur.ans = ans[0] ? { lon: ans[0].lon, lat: ans[0].lat } : null; }   // una respuesta que llego fuera de plazo no cuenta
     else alive(st).forEach(p => { if (p.me) ans[0] = cur.ans && cur.lock[0] != null ? { ...cur.ans, t: cur.lock[0] } : null; else { const b = cur.play[p.i]; ans[p.i] = { lon: b.lon, lat: b.lat, t: cur.lock[p.i] != null ? cur.lock[p.i] : Math.min(b.at, tEnd) }; } });
     const wasAlive = m.alive, rd = settleQ(st, ans), mine = rd.rows[0], g = wasAlive && ans[0], tok = st.nq, live = () => st && st.nq === tok && st.phase === "reveal";
@@ -397,10 +417,20 @@ window.AIQ = window.AIQ || {};
     const total = st.auto && st.auto.next != null ? st.auto.next : CFG.revealSecs * 1000, endR = !!st.cut || st.qi >= perOf(st);
     /* entre jugadores: «listo para la siguiente» sale ya, con los que seguiran en pie (lo calculan igual todos); la pregunta empieza a la hora que diga el servidor.
        Antes de la final, al cartel de la ronda se le suma su entrada */
-    if (st.net && !st.over) { const al = alive(st).sort(cmp), nxt = endR && !st.cut ? al.slice(0, -1) : al; if (nxt.length >= 2) netReady(st.nq + 1, total + (endR ? CFG.roundSecs * 1000 + (nxt.length === 2 ? CFG.finSecs * 1000 : 0) : 0), nxt.map(p => p.seat).sort().join(",")); }
-    const go = () => { if (!live()) return; if (K.veiled() && !st.net) return later(go, 400); alive(st).forEach(p => (p.sp = p.rp)); if (st.over) return finish(); if (endR) roundEnd(); else if (!st.net) ask(); };
+    if (st.net && !st.over) { const al = alive(st).sort(cmp), nxt = endR && !st.cut ? al.slice(0, -1) : al; if (nxt.length >= 2) netReady(st.nq + 1, total + (endR ? (st.cut ? 0 : CFG.fallMs) + CFG.roundSecs * 1000 + (nxt.length === 2 ? CFG.finSecs * 1000 : 0) : 0), nxt.map(p => p.seat).sort().join(",")); }
+    const go = () => { if (!live()) return; if (K.veiled() && !st.net) return later(go, 400); alive(st).forEach(p => (p.sp = p.rp)); if (st.over) return finish(); if (endR) { if (st.cut) roundEnd(); else fallShow(); } else if (!st.net) ask(); };
     for (let n = 3; n >= 1; n--) if (total - n * 1000 > R.fact) later(() => { const e = $("duNext"); if (live() && e) { e.textContent = endR ? Tf("La cuenta en {n}", "Tally in {n}", { n }) : Tf("Sigue en {n}", "Next in {n}", { n }); e.classList.remove("hidden"); } }, total - n * 1000);
     later(go, total);
+  }
+
+  /* v0.4.78 (P1 y P2): antes del cartel, la caida en la propia tira. El asiento del ultimo se apaga con un sello rojo «Fuera» y un golpe seco; si sigues en
+     pie (y no es la final), tu asiento lleva un sello verde «A salvo» con su nota. Dura CFG.fallMs y sigue al cartel */
+  function fallShow() {
+    const tab = alive(st).sort(cmp), last = tab[tab.length - 1], tok = st.nq, m = me(), fin = tab.length === 2;
+    st.fall = { out: last.i, safe: false }; M.hud();
+    if (A.sfx.passFalse) A.sfx.passFalse(); else A.sfx.stamp();
+    if (m.alive && !last.me && !fin) later(() => { if (!st || st.nq !== tok || !st.fall) return; st.fall.safe = true; M.hud(); if (A.sfx.sealPop) A.sfx.sealPop(); }, 360);
+    later(() => { if (st && st.nq === tok && st.phase === "reveal") roundEnd(); }, st.auto && st.auto.fall != null ? st.auto.fall : CFG.fallMs);
   }
 
   /* ================================================================== 4 · CAE EL ULTIMO: la cuenta de la ronda y quien se va. Dura unos segundos y sigue sola */
@@ -419,14 +449,15 @@ window.AIQ = window.AIQ || {};
     const whyMe = !out ? "" : tied ? Tf("Empataste a puntos con {name} y su mejor pregunta fue mejor que la tuya.", "You tied on points with {name}, whose best question beat yours.", { name: nameOf(prev) })
       : Tf("Te quedaste a {n} puntos de {name}.", "You finished {n} points behind {name}.", { n: A.fmt(r.margin), name: nameOf(prev) });
     const goneTx = cut ? (cut.gone.length === 1 ? Tf("{name} se ha levantado.", "{name} got up.", { name: nameOf(st.pl[cut.gone[0]]) }) : Tf("Se han levantado {n} jugadores.", "{n} players got up.", { n: cut.gone.length })) : "";
-    const rows = r.tab.map((x, n) => { const p = st.pl[x.i], dz = x.i === r.out, gn = !!cut && cut.gone.includes(x.i);
-      return `<tr class="${p.me ? "me" : ""}${dz || gn ? " dz" : ""}"><td>${gn ? "·" : n + 1}</td><td><span>${chipSlot(p)}<em>${nameOf(p)}</em>${dz ? `<b class="tg">${T("Fuera", "Out")}</b>` : gn ? `<b class="tg">${T("Se levantó", "Got up")}</b>` : p.me ? `<b class="tg o">${ME()}</b>` : ""}</span></td>${x.rq.map(v => `<td>${A.fmt(v)}</td>`).join("")}<td>${A.fmt(x.rp)}</td></tr>`; }).join("");
+    const best = !cut && r.tab.length > 1 && r.tab[0].rp > 0 ? r.tab[0] : null;   // P4 (v0.4.78): quien mas puntos hizo en la ronda, con su etiqueta dorada
+    const rows = r.tab.map((x, n) => { const p = st.pl[x.i], dz = x.i === r.out, gn = !!cut && cut.gone.includes(x.i), bs = !!best && x.i === best.i;
+      return `<tr class="${p.me ? "me" : ""}${dz || gn ? " dz" : ""}"><td>${gn ? "·" : n + 1}</td><td><span>${chipSlot(p)}<em>${nameOf(p)}</em>${dz ? `<b class="tg">${T("Fuera", "Out")}</b>` : gn ? `<b class="tg">${T("Se levantó", "Got up")}</b>` : (bs ? `<b class="tg bs">${T("Mejor", "Round's best")}</b>` : "") + (p.me ? `<b class="tg o">${ME()}</b>` : "")}</span></td>${x.rq.map(v => `<td>${A.fmt(v)}</td>`).join("")}<td>${A.fmt(x.rp)}</td></tr>`; }).join("");
     const secs = st.auto && st.auto.round != null ? st.auto.round / 1000 : CFG.roundSecs;
     const h2 = cut ? T("Quedan dos", "Two left") : meOut ? T("Caes tú", "You fall") : Tf("Cae {name}", "{name} falls", { name: nameOf(out) });
     const lead = cut ? `${goneTx} ${T("Esta ronda no cae nadie: empieza la final.", "Nobody falls this round: the final starts now.")}` : meOut ? whyMe + " " + T("Puedes seguir mirando la partida desde tu asiento.", "You can keep watching from your seat.") : why;
     c.dialog(K.stage("m8-rd", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k} de {n}", "round {k} of {n}", { k: r.k, n: st.R })}</span><h2 class="gx-t-l">${h2}</h2>
         <p>${lead}</p>
-        <div class="rows">${K.row(T("Quedan en la mesa", "Still in the game"), nLeft)}${wasIn && !meOut && m.alive ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? Tf("la final, a {n} preguntas", "the final, {n} questions", { n: CFG.finalQs }) : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
+        <div class="rows">${K.row(T("Quedan en la mesa", "Still in the game"), nLeft)}${best ? K.row(T("Mejor de la ronda", "Best of the round"), `${nameOf(st.pl[best.i])} · ${A.fmt(best.rp)}`) : ""}${wasIn && !meOut && m.alive ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? Tf("la final, a {n} preguntas", "the final, {n} questions", { n: CFG.finalQs }) : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
       <div class="m8-tk gx-sh drop" style="--d:.1s"><div class="gx-paper"><span class="gx-eyb">${Tf("La ronda {k}", "Round {k}", { k: r.k })} · ${T("los puntos vuelven a cero en la siguiente", "points go back to zero next round")}</span>
         <table class="m8-tb n${r.tab.length}"><tr><th></th><th>${T("Jugador", "Player")}</th>${r.qs.map(q => `<th>${esc(qName(q))}</th>`).join("")}<th>${T("Ronda", "Round")}</th></tr>${rows}</table></div></div>
       <div class="m8-ft"><div class="m8-bar"><span id="m8Cnt"></span><u><s style="animation-duration:${secs}s"></s></u></div><div class="gx-acts">${meOut ? `<button type="button" class="gx-btn" id="m8Out"><span>${T("Salir", "Exit")}</span></button>` : ""}${st.net ? "" : K.primary("m8Next", meOut ? T("Seguir mirando", "Keep watching") : nLeft === 2 ? T("A la final", "To the final") : T("Siguiente ronda", "Next round"))}</div></div>`), "tablewrap");
@@ -482,7 +513,7 @@ window.AIQ = window.AIQ || {};
       cards: st.log.reduce((n, r) => n + (r.cards || 0), 0), order: st.pl.slice().sort((a, b) => (a.place || 0) - (b.place || 0)).map(p => ({ i: p.i, place: p.place || 0, out: p.out })), log: st.log.map(r => ({ k: r.k, qi: r.qi, id: r.id, d: r.d, pts: Object.fromEntries(Object.entries(r.rows).map(([i, x]) => [i, x.pts])) })) };
   }
   function finish() {
-    finKill(); const c = C(), S = c.S, map = c.map, o = st.over, m = me(), win = !!o.win, s = st; st.phase = "end"; S.phase = "levelEnd"; S.skipIntro = null; timers.forEach(clearTimeout); timers = [];
+    finKill(); if (A.music.energia) A.music.energia(false); const c = C(), S = c.S, map = c.map, o = st.over, m = me(), win = !!o.win, s = st; st.phase = "end"; st.fall = null; st.peek = null; S.phase = "levelEnd"; S.skipIntro = null; timers.forEach(clearTimeout); timers = [];
     map.clearMarks(); map.setDecoys([]); map.animateTo(map.home(), 900); map.setPick(false); pinsClear();
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); for (const id of ["m8Hud", "duTools", "duFact"]) { const e = $(id); if (e) e.classList.add("hidden"); }
     document.body.classList.remove("duelo-lock", "mesa8-watch");
@@ -502,15 +533,17 @@ window.AIQ = window.AIQ || {};
     const ord = st.pl.slice().sort((a, b) => (a.place || 0) - (b.place || 0) || a.i - b.i), still = ord.filter(p => !p.place), ranked = ord.filter(p => p.place);
     const prow = (p, n) => `<tr class="${p.me ? "me" : ""}"><td>${n}</td><td><span>${chipSlot(p)}<em>${nameOf(p)}</em>${p.me ? `<b class="tg o">${ME()}</b>` : ""}</span></td><td>${how(p)}</td></tr>`;
     const list = still.map(p => prow(p, "·")).join("") + ranked.map(p => prow(p, p.place)).join("");
-    const crown = winner || null;
+    /* P3 (v0.4.78): el podio. Los tres primeros en escalones (oro en el centro, plata a la izquierda, bronce a la derecha) y la corona en el ganador */
+    const podP = [2, 1, 3].map(n => st.pl.find(p => p.place === n)).filter(Boolean);
+    const pod = podP.length ? `<div class="m8-pod">${podP.map(p => `<div class="ps p${p.place}${p.me ? " me" : ""}">${p.place === 1 ? A.icon("crown", "cr") : ""}<span class="m8-cs ${p.place === 1 ? "g" : "s"}" data-chip="${p.chip}"></span><b>${nameOf(p)}</b><u>${p.place}</u></div>`).join("")}</div>` : "";
     c.dialog(K.stage("du-fin m8-fin", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("{n} preguntas", "{n} questions", { n: st.nq })}</span>
         <h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : m.quit ? T("Te levantas", "You get up") : Tf("Puesto {a} de {b}", "Place {a} of {b}", { a: m.place, b: st.N })}</h2><p class="gx-lead">${lead}</p>
         <div class="rows">${stat}</div>${club ? `<div class="du-club rise" style="--d:1.05s"><div class="gx-paper">${A.club.strip(club)}</div></div>` : ""}</div>
       <div class="m8-tk gx-sh drop" style="--d:.15s"><div class="gx-paper"><span class="gx-eyb">${T("La mesa", "The table")}</span><table class="m8-tb pod">${list}</table></div></div>
-      <div class="m8-win rise" style="--d:.5s">${crown ? `${A.icon("crown", "cr")}<span class="m8-cs big" data-chip="${crown.chip}"></span><b>${nameOf(crown)}</b>` : ""}<span>${T("Tus coronas", "Your crowns")}: ${now.w} · ${T("Mesas", "Tables")}: ${now.d}</span>${extra}</div>
+      <div class="m8-win rise" style="--d:.5s">${pod}<span>${T("Tus coronas", "Your crowns")}: ${now.w} · ${T("Mesas", "Tables")}: ${now.d}</span>${extra}</div>
       <div class="seatw" id="m8VdSeat" data-tail="r"></div>
       <div class="gx-acts"><button type="button" class="gx-btn gho" id="m8Exit"><span>${T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${s.net ? K.primary("m8Room", T("Volver a la sala", "Back to the room")) : K.primary("m8Again", T("Otra mesa", "Another table"))}</div>`), "tablewrap");
-    chips($("dlg"), ".m8-cs.big", 128, 32); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
+    chips($("dlg"), ".m8-pod .m8-cs.g", 64, 32); chips($("dlg"), ".m8-pod .m8-cs.s", 48, 24); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
     $("m8Exit").onclick = () => c.showHub("home");
     if (s.net) { $("m8Exit").querySelector("span").textContent = T("Salir de la sala", "Leave the room"); $("m8Room").onclick = () => roomBack(!o.quit && !o.closed); }
     else $("m8Again").onclick = () => M.start({ auto: s.auto, seats: s.N });
@@ -684,7 +717,7 @@ window.AIQ = window.AIQ || {};
 
   /* salir de la mesa (js/game.js -> A.duelo.leave): recoge sus piezas */
   M.leave = again => {
-    const c = C(); timers.forEach(clearTimeout); timers = []; finKill();
+    const c = C(); timers.forEach(clearTimeout); timers = []; finKill(); if (st && A.music.energia) A.music.energia(false);
     if (!again) K.unseat(); else K.seat(null);
     for (const id of ["m8Hud", "duTools", "duFact", "m8Pins"]) { const e = $(id); if (e) e.remove(); }
     document.body.classList.remove("duelo-on", "duelo-lock", "mesa8-on", "mesa8-watch"); if (A.codex && A.codex.toastAside) A.codex.toastAside();

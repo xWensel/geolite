@@ -99,6 +99,10 @@ window.AIQ = window.AIQ || {};
     "{n}-round cap with equal stacks: a draw.": ["Plafond de {n} manches et piles égales : égalité.", "Limite de {n} rodadas com pilhas iguais: empate.", "Limit von {n} Runden bei gleichen Stapeln: Unentschieden.", "Limite di {n} round con pile uguali: pareggio.", null, "达到 {n} 回合上限且筹码相同：平局。", "{n}라운드 상한, 칩 더미 동일: 무승부.", "上限{n}ラウンドでチップが同数：引き分け。", "Предел — {n} раундов, стопки равны: ничья.", "Limit {n} rund przy równych stosach: remis."],
     "Draw": ["Égalité", "Empate", "Unentschieden", "Pareggio", null, "平局", "무승부", "引き分け", "Ничья", "Remis"],
     /* v0.4.77: la tira que te dice como vas, los que se levantan, la ronda cortada y la final de cinco con su entrada */
+    /* v0.4.78: la caida y el «a salvo» en la tira, y la mejor de la ronda */
+    "Safe": ["À l'abri", "A salvo", "Sicher", "In salvo", null, "安全", "생존", "セーフ", "В игре", "W grze"],
+    "Round's best": ["Top", "Melhor", "Top", "Migliore", null, "最佳", "최고", "トップ", "Лидер", "Lider"],
+    "Best of the round": ["Top de la manche", "Melhor da rodada", "Top der Runde", "Migliore del round", null, "本回合最佳", "이번 라운드 최고", "このラウンドのトップ", "Лидер раунда", "Lider rundy"],
     "Ahead by {n}": ["Devant de {n}", "Na frente por {n}", "{n} vorn", "Avanti di {n}", null, "领先 {n}", "{n}점 앞서요", "{n}点リード", "Впереди на {n}", "Prowadzisz o {n}"],
     "Behind by {n}": ["Derrière de {n}", "Atrás por {n}", "{n} zurück", "Indietro di {n}", null, "落后 {n}", "{n}점 뒤져요", "{n}点ビハインド", "Отстаёшь на {n}", "Tracisz {n}"],
     "{n} short of safety": ["Il te manque {n} pour te sauver", "Faltam {n} para você se salvar", "Dir fehlen {n} zur Rettung", "Ti mancano {n} per salvarti", null, "还差 {n} 分脱险", "탈락을 피하려면 {n}점 더", "セーフまであと{n}点", "До спасения {n}", "Do ratunku brakuje {n}"],

@@ -146,3 +146,24 @@ body.mesa8-on .rail-sh { top: 62%; }
 @keyframes m8-pip { from { translate: 0 -6px; } to { translate: 0 0; } }
 /* v0.4.77: la fila de debajo de las puertas mide lo mismo sea cual sea la puerta elegida: las puertas no crecen ni encogen al cambiar de modo */
 .du-st .puertas #duRowA, .du-st .puertas #duRowB, .du-st .puertas #duRowL, .du-st .puertas #duRowO { min-height: 64px; box-sizing: border-box; }
+
+/* ---------------------------------------------------------------- v0.4.78: la caida y el «a salvo» en la tira, la mejor de la ronda y el podio */
+.m8-s .m8-stp { position: absolute; left: 50%; top: 16px; z-index: 2; translate: -50% 0; rotate: -8deg; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; padding: 5px 8px 4px; opacity: 0; pointer-events: none; }
+.m8-s .m8-stp.on { opacity: 1; animation: m8-stp .3s cubic-bezier(.2, .9, .3, 1.25) both; }
+.m8-s .m8-stp.bad { background: var(--gx-red); color: #fff; box-shadow: inset 0 0 0 2px var(--gx-red-hi), 0 3px 0 rgba(2, 6, 4, .6); }
+.m8-s .m8-stp.ok { background: #17603a; color: #eafff0; box-shadow: inset 0 0 0 2px #7ef0a0, 0 3px 0 rgba(2, 6, 4, .6); rotate: 6deg; }
+.m8-s.fall .m8-cs { filter: grayscale(1) brightness(.6); transition: filter .25s steps(3); } .m8-s.fall .m8n, .m8-s.fall .m8p { opacity: .55; }
+@keyframes m8-stp { from { scale: 1.8; opacity: 0; } 70% { scale: .94; opacity: 1; } to { scale: 1; opacity: 1; } }
+html.reduce-motion .m8-s .m8-stp.on { animation: none; } html.reduce-motion .m8-s.fall .m8-cs { transition: none; }
+.m8-tb .tg.bs { background: var(--gx-gold); color: #120c02; box-shadow: inset 0 0 0 2px var(--gx-gold-hi); } .m8-tb .tg + .tg { margin-left: -4px; }
+.m8-win .m8-pod { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 6px; width: 100%; margin-bottom: 10px; }
+.m8-pod .ps { display: grid; justify-items: center; gap: 4px; min-width: 0; --st: #b9c2c8; --sl: #6c7780; animation: m8-pod .42s cubic-bezier(.2, .9, .3, 1.2) both; }
+.m8-pod .p2 { grid-column: 1; animation-delay: .75s; } .m8-pod .p1 { grid-column: 2; --st: var(--gx-gold); --sl: var(--gx-gold-lo); animation-delay: .95s; } .m8-pod .p3 { grid-column: 3; --st: #c7834a; --sl: #7a4720; animation-delay: .6s; }
+.m8-pod .cr { width: 48px; height: 48px; image-rendering: pixelated; margin-bottom: -10px; position: relative; z-index: 1; }
+.m8-pod .m8-cs { filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .6)); } .m8-pod .m8-cs.g { width: 64px; height: 64px; } .m8-pod .m8-cs.s { width: 48px; height: 48px; }
+.m8-win .m8-pod b { font-weight: 400; font-size: 20px; line-height: 1.1; color: var(--gx-txt); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m8-win .m8-pod .p1 b { font-size: 24px; color: var(--gx-gold-hi); } .m8-win .m8-pod .me b { color: var(--gx-gold-hi); }
+.m8-pod u { display: grid; justify-items: center; align-content: start; width: 100%; box-sizing: border-box; padding-top: 7px; text-decoration: none; font-family: var(--mono); font-size: 16px; line-height: 1; color: #120c02; background: var(--st); box-shadow: inset 0 -6px 0 var(--sl); }
+.m8-pod .p1 u { height: 92px; } .m8-pod .p2 u { height: 64px; } .m8-pod .p3 u { height: 44px; }
+@keyframes m8-pod { from { opacity: 0; translate: 0 24px; } to { opacity: 1; translate: 0 0; } }
+html.reduce-motion .m8-pod .ps { animation: none; }

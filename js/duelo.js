@@ -377,7 +377,7 @@ window.AIQ = window.AIQ || {};
     const s = stats(), nm = myName();
     const door = (i, id, ill, t, d, tag, cls, on) => `<div class="doorw ${on ? "on" : "off"} rise" style="--d:${(0.1 + i * 0.08).toFixed(2)}s"${on ? ` data-door="${id}" role="button" tabindex="0"` : ""}><div class="gx-paper door">${ill}<h3 class="ink">${t}</h3><p>${d}</p><span class="tag ${cls}">${tag}</span></div></div>`;
     const ms = t => `<button type="button" class="ms${t.id === sel.table ? " on" : ""}" data-t="${t.id}" aria-pressed="${t.id === sel.table}">${A.icon(t.chip)}<span><b>${A.tx(t.n)}</b><i>${span(t)}</i></span></button>`;
-    c.dialog(stage("lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l" id="duH">${NAME()}</h2><span class="gx-eyb">${T("Prototipo", "Prototype")}</span></div>
+    c.dialog(stage("lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${A.t("set.close")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l" id="duH">${NAME()}</h2></div>
       <div class="socio gx-sh fromL"><div class="gx-paper"><span class="gx-eyb">${T("Tu ficha", "Your chip")}</span>
         <div class="who">${A.icon(ME_CHIP)}<div><b>${nm || T("Jugador", "Player")}</b><span id="duRankSub"></span></div></div>
         <p class="gx-note">${T("Duelos de liga contra la banca: gana puntos y sube de división. Con un amigo, amistosos sin puntos.", "League duels against the house: earn points and climb divisions. With a friend, friendlies without points.")}</p>
