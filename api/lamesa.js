@@ -12,8 +12,10 @@
      { a: "quit", pid, code, n }                   se levanta de la partida n (sigue en la sala)
      { a: "claim", pid, code, n, seat }            ese asiento lleva mas de 15 s sin dar senal: queda fuera de la partida n
      { a: "back", pid, code, over }                de vuelta a la sala tras el veredicto (over: la partida ha terminado para todos)
-     { a: "bye", pid, code }                       se levanta de la sala (si es el anfitrion y no hay partida, la sala se cierra)
-   Responde el estado visto por quien pregunta: { ok, now, code, me (su asiento), st, n, seed, pl (asientos de la partida), seats[8], closed, rd }.
+     { a: "bye", pid, code }                       se levanta de la sala
+   EL ANFITRION (campo h, el asiento que reparte) es quien abrio la sala; si se va o lleva mas de 30 s sin dar senal, pasa al asiento mas bajo que siga
+   dando senal. La sala solo se cierra cuando no queda nadie.
+   Responde el estado visto por quien pregunta: { ok, now, code, me (su asiento), host (el asiento que reparte), st, n, seed, pl (asientos de la partida), seats[8], rd }.
    seats[i] = null o { n (nombre), c (punteros), k (carta), on (da senal), ago, in (esta en la sala), out (se ha ido) }.
    rd = la pregunta q: s (empieza), e (acaba), rdy (mi «listo» esta apuntado), mine (mi respuesta esta guardada), lk (asientos que ya han fijado) y, cuando
    la pregunta se CIERRA (han respondido todos los que siguen en pie y no se han ido, o ha pasado el plazo), z = { a: { asiento: respuesta o "0" }, outs: [asientos
@@ -22,7 +24,7 @@
    Sin datos personales: pid es aleatorio en cada arranque del juego y solo se guarda el nombre que el jugador ya usa en la clasificacion. */
 const kv = require("./_kv");
 const crypto = require("crypto");
-const TTL = 3600, START_IN = 1200, GRACE = 1500, GONE = 15000, SEATS = 8, MIN = 3, READY_MAX = 6000;
+const TTL = 3600, START_IN = 1200, GRACE = 1500, GONE = 15000, HOST_GONE = 30000, MIN = 3, READY_MAX = 6000, BEAT = 5000;
 const AB = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const CODE = /^[A-HJKMNP-Z2-9]{5}$/, PID = /^[a-z0-9]{10,24}$/, VER = /^[\w.\-/]{1,48}$/, ROUND = /^(f|r|s|c|u|w|al|a|x|z|o):/, AL = /^[0-7](,[0-7]){0,7}$/;
 const rnd = n => { const b = crypto.randomBytes(n); let s = ""; for (let i = 0; i < n; i++) s += AB[b[i] % AB.length]; return s; };
@@ -45,7 +47,7 @@ const needOf = (R, n, b) => { const o = outsOf(R, n); return list(R["al:" + b]).
 function view(R, code, me, now, n, q) {
   const ago = i => Math.max(0, now - (+R["s" + i] || 0));
   const seats = ALL.map(i => (R["p" + i] ? { n: R["n" + i] || "", c: R["c" + i] || "", k: R["k" + i] || "", on: ago(i) < 10000, ago: Math.min(ago(i), 999999), in: R["r" + i] === "1", out: R["x" + i] === "1" } : null));
-  const o = { ok: true, now, code, me, st: R.st || "lobby", n: +R.n || 0, seats, closed: R.x0 === "1" };
+  const o = { ok: true, now, code, me, host: +R.h || 0, st: R.st || "lobby", n: +R.n || 0, seats };
   if (o.st === "play") { o.seed = R.seed; o.pl = list(R.pl); }
   if (n != null && n === o.n) o.outs = outsOf(R, n);
   if (q && n === o.n) {
@@ -70,17 +72,17 @@ module.exports = async (req, res) => {
     if (a === "new") {
       for (let i = 0; i < 4; i++) {
         const code = rnd(5), got = await run([["HSETNX", key(code), "p0", pid]]);
-        if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "n0", clean(b.name), "c0", cos(b.c), "k0", kv.style(b.k), "s0", now, "r0", 1, "st", "lobby", "n", 0, "ver", ver]]), code, 0, now));
+        if (+got[0] === 1) return send(view(await write(code, [["HSET", key(code), "n0", clean(b.name), "c0", cos(b.c), "k0", kv.style(b.k), "s0", now, "r0", 1, "h", 0, "st", "lobby", "n", 0, "ver", ver]]), code, 0, now));
       }
       return res.status(503).json({ ok: false, why: "busy" });
     }
     const code = String(b.code || "").toUpperCase(); if (!CODE.test(code)) return send({ ok: false, why: "none" });
     let R = await read(code);
-    if (!R.p0) return send({ ok: false, why: "none" });
+    if (!R.ver && !R.st) return send({ ok: false, why: "none" });
     let me = ALL.find(i => R["p" + i] === pid); if (me == null) me = -1;
     if (a === "join") {
       if (me < 0) {
-        if (R.x0 === "1") return send({ ok: false, why: "none" });       // el anfitrion la cerro
+        if (!ALL.some(i => R["p" + i] && R["x" + i] !== "1")) return send({ ok: false, why: "none" });   // ya no queda nadie
         if (R.ver && ver !== R.ver) return send({ ok: false, why: "ver" });
         if (R.st === "play") return send({ ok: false, why: "play" });
         for (const i of ALL) {                                            // el primer asiento libre (vacio, o de alguien que ya se fue); si entran dos a la vez, se sienta el primero
@@ -97,7 +99,11 @@ module.exports = async (req, res) => {
     if (me < 0) return send({ ok: false, why: "out" });
     const n = int(b.n, 0, 1e6), q = int(b.q, 1, 99), bk = n + ":" + q, play = R.st === "play" && n === (+R.n || 0), live = play && q != null, pl = list(R.pl), cmds = [];
     const here = i => R["p" + i] && R["x" + i] !== "1" && R["r" + i] === "1";
-    if (a === "deal" && me === 0) {
+    /* el relevo: si el anfitrion se ha ido (o se va ahora, o lleva 30 s sin dar senal), reparte el asiento mas bajo que siga dando senal */
+    let host = +R.h || 0;
+    { const up = i => R["p" + i] && R["x" + i] !== "1" && !(a === "bye" && i === me) && (i === me || now - (+R["s" + i] || 0) < GONE);
+      if (!up(host) && (a === "bye" && host === me || !R["p" + host] || R["x" + host] === "1" || now - (+R["s" + host] || 0) > HOST_GONE)) { const nh = ALL.find(up); if (nh != null && nh !== host) { host = nh; cmds.push(["HSET", key(code), "h", nh]); } } }
+    if (a === "deal" && me === host) {
       const done = R.st !== "play" || pl.every(i => R["o:" + R.n + ":" + i] || R["x" + i] === "1" || R["r" + i] === "1");   // sin partida, o la anterior ya no la juega nadie
       const who = ALL.filter(here);
       if (done && who.length >= MIN) {
@@ -109,7 +115,7 @@ module.exports = async (req, res) => {
       if (R.st === "play") { if (b.over) cmds.push(["HSET", key(code), "st", "lobby"]); else if (pl.includes(me)) cmds.push(["HSETNX", key(code), "o:" + R.n + ":" + me, 1]); }   // vuelve con la partida en marcha: fuera de ella
     } else if (a === "bye") {
       if (R.st === "play" && pl.includes(me)) cmds.push(["HSETNX", key(code), "o:" + R.n + ":" + me, 1]);
-      if (me !== 0 && !(R.st === "play" && pl.includes(me))) cmds.push(["HDEL", key(code), "p" + me, "n" + me, "c" + me, "k" + me, "s" + me, "x" + me, "r" + me]);   // en la sala, el asiento queda libre
+      if (!(R.st === "play" && pl.includes(me))) cmds.push(["HDEL", key(code), "p" + me, "n" + me, "c" + me, "k" + me, "s" + me, "x" + me, "r" + me]);   // en la sala, el asiento queda libre
       else cmds.push(["HSET", key(code), "x" + me, 1]);
     } else if (a === "quit" && play && pl.includes(me)) cmds.push(["HSETNX", key(code), "o:" + n + ":" + me, 1]);
     else if (a === "claim" && play) { const s = int(b.seat, 0, 7); if (s != null && s !== me && pl.includes(s) && now - (+R["s" + s] || 0) > GONE) cmds.push(["HSETNX", key(code), "o:" + n + ":" + s, 1]); }
@@ -135,8 +141,7 @@ module.exports = async (req, res) => {
       }
     }
     if (cmds.length) R = await write(code, a === "bye" ? cmds : [...cmds, ["HSET", key(code), "s" + me, now]]);
-    else if (now - (+R["s" + me] || 0) > 4000) { await run([["HSET", key(code), "s" + me, now], ["EXPIRE", key(code), TTL]]); R["s" + me] = String(now); }
-    if (!R.p0) return send({ ok: false, why: "none" });
+    else if (now - (+R["s" + me] || 0) > BEAT) { await run([["HSET", key(code), "s" + me, now], ["EXPIRE", key(code), TTL]]); R["s" + me] = String(now); }
     if (a === "bye") return send({ ok: true, now, bye: 1 });
     send(view(R, code, me, now, n, q));
   } catch (e) { res.status(502).json({ ok: false, why: "kv" }); }

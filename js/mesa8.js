@@ -147,7 +147,7 @@ window.AIQ = window.AIQ || {};
     const s = stats(), N = (M.seats = seatsOf(M.seats)), pl = mkState({ seed: "sala", seats: N }).pl;
     const free = i => `<div class="m8-seat free rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><span>${T("Silla libre", "Empty chair")}</span></div>`;
     const seat = (p, i) => `<div class="m8-seat gx-sh rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><div class="gx-paper">${chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3><span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`;
-    c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("Prototipo", "Prototype")}</span></div>
+    c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("De 3 a 8 jugadores", "3 to 8 players")}</span></div>
       <div class="m8-room"><div class="amg m8-amg"><span id="m8AmgTx" role="status"></span><input id="m8Code" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Join">${T("Entrar", "Join")}</button></span></div>
         <span class="gx-eyb">${T("Práctica contra el juego", "Practice against the game")}</span><div class="m8-seats8">${pl.map(seat).join("")}${Array.from({ length: CFG.seats - N }, (_, i) => free(N + i)).join("")}</div>
         <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One chair fewer")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b>${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span>${M.rules(N)}</div>
@@ -220,7 +220,7 @@ window.AIQ = window.AIQ || {};
     });
     document.body.classList.toggle("duelo-lock", !!(askN && cur && cur.rushed && me().alive && !locked(me())));   // el reloj de la placa, en rojo
   };
-  M.pause = () => ({ mode: `${NAME()} · ${T("Prototipo", "Prototype")}`, note: T("En la mesa el reloj no se detiene durante la pregunta.", "At the table the clock doesn't stop during a question."),
+  M.pause = () => ({ mode: NAME(), note: T("En la mesa el reloj no se detiene durante la pregunta.", "At the table the clock doesn't stop during a question."),
     rows: K.row(T("Ronda", "Round"), `${Math.max(1, st.k)} / ${st.R}`) + K.row(T("Quedan en la mesa", "Left at the table"), alive(st).length) + (me().alive ? K.row(T("Tus puntos de la ronda", "Your points this round"), A.fmt(me().rp || 0)) : "") });
 
   /* ---------------- las fichas sobre el mapa: una por jugador, con su nombre y su distancia. Siguen la camara del mapa (map.lonLatToScreen, sin medir la
@@ -476,7 +476,7 @@ window.AIQ = window.AIQ || {};
     if (!v.ok) { A.sfx.deny(); return salaMsg(whyTxt(v.why), true); }
     roomSet(v);
   }
-  function roomSet(v) { Object.assign(NT, { code: v.code, me: v.me, R: v, n: v.n, okAt: performance.now(), cut: false, fly: 0, gone: 0, said: "" }); A.sfx.depart(); roomOpen(); netLoop(); }
+  function roomSet(v) { Object.assign(NT, { code: v.code, me: v.me, R: v, n: v.n, okAt: performance.now(), cut: false, fly: 0, gone: 0, said: "", wasGuest: false }); A.sfx.depart(); roomOpen(); netLoop(); }
   function netBye() { const code = NT.code; clearTimeout(NT.tm); NT.tm = 0; NT.code = ""; NT.R = null; NT.busy = false; if (code) Rd().call({ a: "bye", code }, "lamesa"); }
   addEventListener("pagehide", () => { if (NT.code) Rd().bye({ a: "bye", code: NT.code }, "lamesa"); });
   M.room = () => (NT.code ? { code: NT.code, me: NT.me, R: NT.R } : null);
@@ -489,7 +489,7 @@ window.AIQ = window.AIQ || {};
         <div class="m8-seats8" id="m8NetSeats"></div><div class="regl" id="m8NetRules"></div></div>
       <div class="ft"><div class="seatw" id="m8SalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts" id="m8DealW">${K.primary("m8Deal", T("Repartir", "Deal"))}</div></div>`), "tablewrap");
     $("hubBack").onclick = () => { A.sfx.ui(); netBye(); K.seat(null); M.open(); };
-    $("m8Deal").onclick = () => { const v = NT.R; if (!v || NT.me !== 0 || NT.busy || seated(v).length < CFG.minSeats) return A.sfx.deny(); NT.busy = true; sendV({ a: "deal" }).then(() => { NT.busy = false; }); };
+    $("m8Deal").onclick = () => { const v = NT.R; if (!v || NT.me !== v.host || NT.busy || seated(v).length < CFG.minSeats) return A.sfx.deny(); NT.busy = true; sendV({ a: "deal" }).then(() => { NT.busy = false; }); };
     $("m8Copy").onclick = () => { A.sfx.ui(); const b = $("m8Copy"), t = NT.code, old = () => { try { const a = document.createElement("textarea"); a.value = t; a.style.cssText = "position:fixed;left:0;top:0;opacity:0"; document.body.appendChild(a); a.select(); const ok = document.execCommand("copy"); a.remove(); return !!ok; } catch (e) { return false; } };
       let pr; try { pr = navigator.clipboard.writeText(t).then(() => true, old); } catch (e) { pr = Promise.resolve(old()); } pr.then(ok => { b.textContent = ok ? T("Copiado", "Copied") : T("Cópialo a mano", "Copy it by hand"); }); };
     K.seat($("m8SalaSeat")); NT.sig = ""; roomPaint();
@@ -498,22 +498,23 @@ window.AIQ = window.AIQ || {};
   const seated = v => v.seats.map((s, i) => (s && !s.out && s.in ? i : -1)).filter(i => i >= 0);
   function roomPaint() {
     const v = NT.R; if (!v || !inRoom()) return;
-    const host = NT.me === 0, inN = seated(v).length, playing = v.st === "play";
-    const sg = JSON.stringify([v.code, v.st, NT.me, NT.cut, v.closed, v.seats.map(s => s && !s.out && [s.n, s.on, s.in])]); if (sg === NT.sig) return; NT.sig = sg;
+    const host = NT.me === v.host, inN = seated(v).length, playing = v.st === "play";
+    const sg = JSON.stringify([v.code, v.st, NT.me, v.host, NT.cut, v.seats.map(s => s && !s.out && [s.n, s.on, s.in])]); if (sg === NT.sig) return; NT.sig = sg;
     $("m8Cod").textContent = v.code;
     $("m8NetSeats").innerHTML = v.seats.map((s, i) => (s && !s.out
-      ? `<div class="m8-seat gx-sh"><div class="gx-paper">${chipSlot({ chip: CFG.chips[i] })}<h3 class="ink">${esc(s.n) || `${T("Jugador", "Player")} ${i + 1}`}</h3><span class="tag ${i === NT.me ? "me" : !s.on ? "red" : ""}">${i === NT.me ? ME() : !s.on ? T("Sin señal", "No signal") : !s.in ? T("En el veredicto", "At the verdict") : i === 0 ? T("Anfitrión", "Host") : T("En la mesa", "At the table")}</span></div></div>`
+      ? `<div class="m8-seat gx-sh"><div class="gx-paper">${chipSlot({ chip: CFG.chips[i] })}<h3 class="ink">${esc(s.n) || `${T("Jugador", "Player")} ${i + 1}`}</h3><span class="tag ${i === NT.me ? "me" : !s.on ? "red" : ""}">${i === NT.me ? (host ? `${ME()} · ${T("Anfitrión", "Host")}` : ME()) : !s.on ? T("Sin señal", "No signal") : !s.in ? T("En el veredicto", "At the verdict") : i === v.host ? T("Anfitrión", "Host") : T("En la mesa", "At the table")}</span></div></div>`
       : `<div class="m8-seat free"><span>${T("Silla libre", "Empty chair")}</span></div>`)).join("");
     chips($("m8NetSeats"), ".m8-cs", 56, 28);
     $("m8NetRules").innerHTML = M.rules(inN >= CFG.minSeats ? inN : 0);
     $("m8DealW").classList.toggle("hidden", !host); const b = $("m8Deal"), ok = host && inN >= CFG.minSeats && !playing; b.classList.toggle("dis", !ok); b.setAttribute("aria-disabled", !ok);
-    $("m8St").textContent = NT.cut ? T("Sin conexión. Reintentando…", "No connection. Retrying…") : v.closed ? T("El anfitrión se ha ido: la sala está cerrada.", "The host has left: the room is closed.")
+    $("m8St").textContent = NT.cut ? T("Sin conexión. Reintentando…", "No connection. Retrying…")
       : playing ? T("Hay una partida en marcha. Cuando acabe, se reparte otra vez.", "There's a game under way. When it ends, the host deals again.")
       : host ? (inN < CFG.minSeats ? (CFG.minSeats - inN === 1 ? Tf("Pasa el código. Falta 1 para repartir (mínimo {m}).", "Send the code. 1 more needed to deal (minimum {m}).", { m: CFG.minSeats }) : Tf("Pasa el código. Faltan {n} para repartir (mínimo {m}).", "Send the code. {n} more needed to deal (minimum {m}).", { n: CFG.minSeats - inN, m: CFG.minSeats })) : Tf("Sois {n}. Reparte cuando quieras; quien llegue después espera a la siguiente.", "There are {n} of you. Deal whenever you like; latecomers wait for the next one.", { n: inN }))
       : Tf("Sois {n}. Empieza cuando reparta el anfitrión.", "There are {n} of you. It starts when the host deals.", { n: inN });
-    const say = host ? (inN >= CFG.minSeats ? "r_ok" : "r_open") : "r_guest"; if (say !== NT.said) { NT.said = say; K.speak(T(...LNR[say]), { valid: inRoom }); }
+    const say = host ? (NT.wasGuest ? "r_host" : inN >= CFG.minSeats ? "r_ok" : "r_open") : "r_guest"; if (!host) NT.wasGuest = true; if (say !== NT.said) { NT.said = say; K.speak(T(...LNR[say]), { valid: inRoom }); }
   }
-  const LNR = { r_open: ["Sala abierta. Pasa el código; yo voy poniendo sillas.", "Room's open. Send the code; I'll set out chairs."], r_ok: ["Ya sois mesa. Cuando quieras, reparto.", "You've got a table. I'll deal whenever you like."], r_guest: ["Bienvenido a la mesa. Aquí reparte el anfitrión; yo solo miro.", "Welcome to the table. The host deals here; I just watch."] };
+  const LNR = { r_open: ["Sala abierta. Pasa el código; yo voy poniendo sillas.", "Room's open. Send the code; I'll set out chairs."], r_ok: ["Ya sois mesa. Cuando quieras, reparto.", "You've got a table. I'll deal whenever you like."], r_guest: ["Bienvenido a la mesa. Aquí reparte el anfitrión; yo solo miro.", "Welcome to the table. The host deals here; I just watch."],
+    r_host: ["El anfitrión se ha ido. Ahora repartes tú.", "The host has left. You deal now."] };
   /* del veredicto a la sala. over: la partida ha terminado para todos (si no, solo te levantas tu de ella) */
   function roomBack(over) {
     const c = C(); A.sfx.ui();
@@ -524,7 +525,7 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ---------------- el bucle de sondeo (con temporizador, no con fotogramas: con la ventana minimizada la mesa sigue) */
-  function netLoop() { clearTimeout(NT.tm); NT.tm = 0; if (!NT.code) return; NT.tm = setTimeout(netKick, !st || !st.net ? 1500 : st.phase === "ask" || st.phase === "wait" ? 500 : st.phase === "end" ? 3000 : 900); }
+  function netLoop() { clearTimeout(NT.tm); NT.tm = 0; if (!NT.code) return; const nt = st && st.net; NT.tm = setTimeout(netKick, !nt ? 2000 : st.phase === "end" ? 4000 : st.phase === "ask" ? 650 : nt.want > st.nq && nt.s ? Math.max(700, Math.min(4000, Rd().perfAt(nt.s) - performance.now() + 150)) : 700); }
   function netKick(now) {
     clearTimeout(NT.tm); NT.tm = 0; const code = NT.code; if (!code) return;
     const cut = performance.now() - NT.okAt > 4000; if (cut !== NT.cut) { NT.cut = cut; netPaint(); }
