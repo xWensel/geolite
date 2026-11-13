@@ -118,7 +118,7 @@ window.AIQ = window.AIQ || {};
   const oneGender = (t, l) => { if (l !== "fr") return t; const m = t.match(/^(.+?) ou (\S.*)$/); if (!m) return t; const a = m[1].split(" "), b = m[2].split(" "); if (a[0].slice(0, 4).toLowerCase() !== b[0].slice(0, 4).toLowerCase()) return t; return [...a, ...b.slice(a.length)].join(" "); };
   let CN = null;   // nombres del pais en los 11 idiomas por su clave del mapa (c:<clave> de data/places.js)
   const countryNames = () => { if (!CN) { CN = {}; (A.PLACES || []).forEach(r => { if (r[1] === "country") CN[r[0].slice(2)] = r[6]; }); } return CN; };
-  const BORN = { es: "Nació en", en: "Born in", fr: "Né(e) à", pt: "Nasceu em", de: "Geboren in", it: "Nato a", zh: "出生地：", ko: "출생지:", ja: "出身地：", ru: "Место рождения:", pl: "Urodzony w" };
+  const BORN = { es: "Nació en", en: "Born in", fr: "Né(e) à", pt: "Nasceu em", de: "Geboren in", it: "Nato a", zh: "出生地：", ko: "출생지:", ja: "出身地：", ru: "Место рождения:", pl: "Ur. w" };
   let PQ = null;
   function personQ(k) {
     if (!PQ) { PQ = {}; (A.DUELO_PERSONAS || []).forEach(r => (PQ[r[0]] = r)); }

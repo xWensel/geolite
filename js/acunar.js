@@ -28,24 +28,24 @@ window.AIQ = window.AIQ || {};
 
   /* ================================================================ textos (es|en|fr|pt|de|it|es-419|zh|ko|ja|ru|pl) */
   const TX = {
-    camp: "Campaña {c} · superada|Campaign {c} · cleared|Campagne {c} · réussie|Campanha {c} · concluída|Kampagne {c} · geschafft|Campagna {c} · superata||{c} 战役 · 通关|{c} 캠페인 · 클리어|{c} キャンペーン・クリア|Кампания «{c}» · пройдена|Kampania {c} · ukończona",
+    camp: "Campaña {c} · superada|Campaign {c} · cleared|Campagne {c} · réussie|Campanha {c} · concluída|Kampagne {c} · geschafft|Campagna {c} · superata||{c} 战役 · 通关|{c} 캠페인 · 클리어|{c}キャンペーン · クリア|Кампания «{c}» · пройдена|Kampania {c} · zaliczona",
     m1: "Bronce|Bronze|Bronze|Bronze|Bronze|Bronzo||铜|동|銅|Бронза|Brąz",
     m2: "Plata|Silver|Argent|Prata|Silber|Argento||银|은|銀|Серебро|Srebro",
     m3: "Oro|Gold|Or|Ouro|Gold|Oro||金|금|金|Золото|Złoto",
     med1: "Medalla de bronce|Bronze medal|Médaille de bronze|Medalha de bronze|Bronzemedaille|Medaglia di bronzo||铜牌|동메달|銅メダル|Бронзовая медаль|Brązowy medal",
     med2: "Medalla de plata|Silver medal|Médaille d'argent|Medalha de prata|Silbermedaille|Medaglia d'argento||银牌|은메달|銀メダル|Серебряная медаль|Srebrny medal",
     med3: "Medalla de oro|Gold medal|Médaille d'or|Medalha de ouro|Goldmedaille|Medaglia d'oro||金牌|금메달|金メダル|Золотая медаль|Złoty medal",
-    shop: "Geolite · la tienda|Geolite · the boutique|Geolite · la boutique|Geolite · a boutique|Geolite · die Boutique|Geolite · la boutique||Geolite · 精品店|Geolite · 부티크|Geolite・ブティック|Geolite · бутик|Geolite · butik",
-    club: "Club de la casa · {l}|House club · {l}|Club de la maison · {l}|Clube da casa · {l}|Club des Hauses · {l}|Club della casa · {l}||赌场俱乐部 · {l}|하우스 클럽 · {l}|ハウスのクラブ・{l}|Клуб заведения · {l}|Klub kasyna · {l}",
+    shop: "Geolite · la tienda|Geolite · the boutique|Geolite · la boutique|Geolite · a boutique|Geolite · die Boutique|Geolite · la boutique||Geolite · 精品店|Geolite · 부티크|Geolite · ブティック|Geolite · бутик|Geolite · butik",
+    club: "Club de la casa · {l}|House club · {l}|Club de la maison · {l}|Clube da casa · {l}|Club des Hauses · {l}|Club della casa · {l}||赌场俱乐部 · {l}|하우스 클럽 · {l}|ハウスクラブ · {l}|Клуб заведения · {l}|Klub kasyna · {l}",
     price: "Precio|Price|Prix|Preço|Preis|Prezzo||价格|가격|価格|Цена|Cena",
-    offer: "Oferta de la casa −{p} %|House offer −{p}%|Offre de la maison −{p} %|Oferta da casa −{p}%|Angebot des Hauses −{p} %|Offerta della casa −{p}%||赌场优惠 −{p}%|하우스 할인 −{p}%|ハウスの特価 −{p}%|Скидка заведения −{p} %|Oferta kasyna −{p}%",
-    tip: "Propina del crupier|Dealer's tip|Pourboire du croupier|Gorjeta do crupiê|Trinkgeld für den Croupier|Mancia al croupier||荷官小费|딜러 팁|ディーラーへのチップ|Чаевые крупье|Napiwek dla krupiera",
-    total: "Total|Total|Total|Total|Summe|Totale||合计|합계|合計|Итого|Razem",
-    saldo: "Saldo|Balance|Solde|Saldo|Guthaben|Saldo||余额|잔액|残高|Остаток|Saldo",
+    offer: "Oferta de la casa −{p} %|House offer −{p}%|Offre de la maison −{p} %|Oferta da casa −{p}%|Angebot des Hauses −{p} %|Offerta della casa −{p}%||本店特价 −{p}%|하우스 특가 −{p}%|ハウスの特売 −{p}%|Предложение заведения −{p} %|Oferta kasyna −{p}%",
+    tip: "Propina del crupier|Dealer's tip|Pourboire du croupier|Gorjeta do crupiê|Trinkgeld für den Croupier|Mancia al croupier||荷官小费|딜러 팁|ディーラーへの心づけ|Чаевые крупье|Napiwek dla krupiera",
+    total: "Total|Total|Total|Total|Summe|Totale||总计|합계|合計|Итого|Razem",
+    saldo: "Saldo|Balance|Solde|Saldo|Guthaben|Saldo||余额|잔액|残高|Баланс|Saldo",
     thanks: "Gracias por su compra|Thank you for your purchase|Merci de votre achat|Obrigado pela compra|Danke für Ihren Einkauf|Grazie per l'acquisto||感谢惠顾|구매해 주셔서 감사합니다|お買い上げありがとうございます|Спасибо за покупку|Dziękujemy za zakup",
     paid: "PAGADO|PAID|PAYÉ|PAGO|BEZAHLT|PAGATO||已付|결제 완료|支払済|ОПЛАЧЕНО|ZAPŁACONO",
     falta: "Te faltan {km}|{km} to go|Plus que {km}|Faltam {km}|Noch {km}|Mancano {km}||还差 {km}|{km} 남았어요|あと {km}|Осталось {km}|Brakuje {km}",
-    cero: "0 fichas|0 chips|0 jeton|0 fichas|0 Chips|0 fiche||0 筹码|칩 0개|チップ 0 枚|0 фишек|0 żetonów",
+    cero: "0 fichas|0 chips|0 jeton|0 fichas|0 Chips|0 fiche||0 筹码|칩 0개|チップ0枚|0 фишек|0 żetonów",
   };
 
   /* ================================================================ base: color, rejilla nativa, discos (los de js/ficha.js), letras 5x7 */

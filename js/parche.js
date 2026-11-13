@@ -35,17 +35,17 @@ window.AIQ = window.AIQ || {};
     zoom: "Ampliar|Enlarge|Agrandir|Ampliar|Vergrößern|Ingrandisci||放大|확대|拡大|Увеличить|Powiększ",
     hist: "Historial|History|Historique|Histórico|Verlauf|Cronologia||历史|기록|履歴|История|Historia",
     allv: "Todas las versiones|All versions|Toutes les versions|Todas as versões|Alle Versionen|Tutte le versioni||所有版本|모든 버전|すべてのバージョン|Все версии|Wszystkie wersje",
-    foot: "Cada entrada lleva la versión del juego en la que llegó. Las capturas son del juego real.|Each entry shows the game version it arrived in. Screenshots are from the real game.|Chaque entrée indique la version du jeu où elle est arrivée. Les captures viennent du vrai jeu.|Cada entrada indica a versão do jogo em que chegou. As capturas são do jogo real.|Jeder Eintrag nennt die Spielversion, in der er erschien. Die Screenshots stammen aus dem echten Spiel.|Ogni voce indica la versione del gioco in cui è arrivata. Le schermate sono del gioco vero.||每条记录都标有它加入的游戏版本。截图均来自真实游戏。|각 항목에는 추가된 게임 버전이 적혀 있습니다. 스크린샷은 실제 게임 화면입니다.|各項目には追加されたゲームのバージョンを記載。スクリーンショットは実際のゲームのものです。|У каждой записи указана версия игры, в которой она появилась. Скриншоты — из настоящей игры.|Każdy wpis podaje wersję gry, w której się pojawił. Zrzuty ekranu pochodzą z prawdziwej gry.",
+    foot: "Cada entrada lleva la versión del juego en la que llegó. Las capturas son del juego real.|Each entry shows the game version it arrived in. Screenshots are from the real game.|Chaque entrée indique la version du jeu où elle est arrivée. Les captures viennent du vrai jeu.|Cada entrada indica a versão do jogo em que chegou. As capturas são do jogo real.|Jeder Eintrag nennt die Spielversion, in der er erschien. Die Screenshots stammen aus dem echten Spiel.|Ogni voce indica la versione del gioco in cui è arrivata. Le schermate sono del gioco vero.||每条记录都标有它加入的游戏版本。截图均来自真实游戏。|각 항목에는 추가된 게임 버전이 적혀 있어요. 스크린샷은 실제 게임 화면이에요.|各項目には追加されたゲームのバージョンを記載。スクリーンショットは実際のゲームのものです。|У каждой записи указана версия игры, в которой она появилась. Скриншоты — из настоящей игры.|Każdy wpis podaje wersję gry, w której się pojawił. Zrzuty ekranu pochodzą z prawdziwej gry.",
     count: "{n} parches · último v{v}|{n} patches · latest v{v}|{n} patchs · dernier v{v}|{n} patches · mais recente v{v}|{n} Patches · neuester v{v}|{n} patch · ultima v{v}||共 {n} 个补丁 · 最新 v{v}|패치 {n}개 · 최신 v{v}|パッチ {n} 件 · 最新 v{v}|Патчей: {n} · последний v{v}|Patche: {n} · najnowszy v{v}",
-    only: "Estas notas solo están en español e inglés.|These notes are only in Spanish and English.|Ces notes sont uniquement en espagnol et en anglais.|Estas notas só existem em espanhol e inglês.|Diese Notizen gibt es nur auf Spanisch und Englisch.|Queste note sono solo in spagnolo e inglese.||这些说明仅提供西班牙语和英语版本。|이 노트는 스페인어와 영어로만 제공됩니다.|このノートはスペイン語と英語のみです。|Эти заметки есть только на испанском и английском.|Te notatki są tylko po hiszpańsku i angielsku.",
+    only: "Estas notas solo están en español e inglés.|These notes are only in Spanish and English.|Ces notes sont uniquement en espagnol et en anglais.|Estas notas só existem em espanhol e inglês.|Diese Notizen gibt es nur auf Spanisch und Englisch.|Queste note sono solo in spagnolo e inglese.||这些说明仅提供西班牙语和英语版本。|이 노트는 스페인어와 영어로만 제공돼요.|このノートはスペイン語と英語のみです。|Эти заметки есть только на испанском и английском.|Te notatki są tylko po hiszpańsku i angielsku.",
     /* etiquetas de las entradas */
     new_: "Nuevo|New|Nouveau|Novo|Neu|Nuovo||新增|신규|新規|Новое|Nowe",
     change: "Cambio|Change|Changement|Mudança|Änderung|Modifica||调整|변경|変更|Изменение|Zmiana",
-    buff: "Mejora|Improved|Amélioré|Melhorado|Verbessert|Migliorato||加强|개선|強化|Улучшено|Ulepszenie",
-    nerf: "Ajuste|Adjusted|Ajusté|Ajustado|Angepasst|Ritoccato||下调|조정|調整|Подправлено|Korekta",
+    buff: "Mejora|Improved|Amélioration|Melhorado|Verbessert|Migliorato||改进|개선|強化|Улучшено|Ulepszenie",
+    nerf: "Ajuste|Adjusted|Ajustement|Ajustado|Angepasst|Ritoccato||微调|조정|調整|Подправлено|Korekta",
     fix: "Arreglo|Fix|Correctif|Correção|Fehlerbehebung|Correzione||修复|수정|修正|Исправлено|Poprawka",
-    out: "Sale|Removed|Retiré|Removido|Entfernt|Rimosso||移除|제거|削除|Убрано|Usunięto",
-    merge: "Fusión|Merged|Fusionné|Mesclado|Zusammengelegt|Unito||合并|통합|統合|Объединено|Połączono",
+    out: "Sale|Removed|Retrait|Removido|Entfernt|Rimosso||移除|제거|削除|Убрано|Usunięto",
+    merge: "Fusión|Merged|Fusion|Mesclado|Zusammengelegt|Unito||合并|통합|統合|Объединено|Połączono",
   };
   const t = k => A.pick6(TX[k]);
   const tagName = g => t(g === "new" ? "new_" : g);

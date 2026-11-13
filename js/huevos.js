@@ -562,8 +562,8 @@ window.AIQ = window.AIQ || {};
   /* ================================================================== SU LIBRETA (Perfil > Records): una fila mas con una casilla por huevo. Las encontradas se rellenan (por tipo); las demas, en silueta, sin decir como */
   H.libreta = () => {
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    const nombre = T("Libreta del crupier|The dealer's notebook|Le carnet du croupier|O caderno do crupiê|Das Notizbuch des Croupiers|Il taccuino del croupier||荷官的笔记本|딜러의 수첩|ディーラーの手帳|Блокнот крупье|Notes krupiera");
-    const lab = T("Descubiertos|Found|Trouvés|Descobertos|Gefunden|Scoperti||已发现|발견|発見|Найдено|Odkryto");
+    const nombre = T("Libreta del crupier|The dealer's notebook|Le carnet du croupier|Caderneta do crupiê|Das Notizbuch des Croupiers|Il taccuino del croupier||荷官的小本子|딜러의 수첩|ディーラーの手帳|Блокнот крупье|Notes krupiera");
+    const lab = T("Descubiertos|Found|Découverts|Descobertos|Gefunden|Scoperti||已发现|발견|発見|Найдено|Odkryto");
     const cas = H.list.map(h => st.f[h.id] ? `<i class="hv-cas t${h.t}"></i>` : `<i class="hv-cas"></i>`).join("");
     return `<li class="pf-rc hv-lib"><span class="pf-rci" data-ins="m_patch" data-kmax="1"></span><span class="pf-kv"><b class="pf-rcn">${esc(nombre)}</b><i>${esc(lab)}: ${H.count()} / ${H.list.length}</i></span><div class="hv-cass" aria-hidden="true">${cas}</div></li>`;
   };

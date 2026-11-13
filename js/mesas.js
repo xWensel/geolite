@@ -17,11 +17,11 @@ window.AIQ = window.AIQ || {};
   const reduced = () => document.documentElement.classList.contains("reduce-motion");
   const TX = {
     eyb: "Mesa nueva|New table|Nouvelle table|Mesa nova|Neuer Tisch|Nuovo tavolo||新牌桌|새 테이블|新しいテーブル|Новый стол|Nowy stół",
-    casa: "La casa te abre una mesa nueva.|The house opens a new table for you.|La maison t'ouvre une nouvelle table.|A casa abre uma mesa nova para você.|Das Haus öffnet dir einen neuen Tisch.|La casa ti apre un nuovo tavolo.||赌场为你开了一张新牌桌。|하우스가 새 테이블을 열어 줍니다.|ハウスがあなたに新しいテーブルを開きます。|Казино открывает для тебя новый стол.|Kasyno otwiera dla ciebie nowy stół.",
-    mas: "También tienes ya: {l}.|You also now have: {l}.|Tu as aussi : {l}.|Você também já tem: {l}.|Außerdem hast du jetzt: {l}.|Hai anche: {l}.||你还拥有：{l}。|함께 얻은 테이블: {l}.|ほかにも手に入りました：{l}。|Ещё у тебя теперь есть: {l}.|Masz też już: {l}.",
-    keep: "Quedármela|Keep it|La garder|Ficar com ela|Behalten|Tenerlo||就用它|이걸로 하기|これにする|Оставить|Zostawiam",
-    back: "Seguir con la de antes|Stay with the old one|Garder l'ancienne|Continuar com a de antes|Beim alten bleiben|Restare con quello di prima||还是用原来的|원래 테이블 유지|前のテーブルのまま|Вернуть прежний|Zostaję przy starym",
-    note: "Se cambian en La tienda › Mesas.|Change them in The boutique › Tables.|Elles se changent à la boutique › Tables.|Troque na boutique › Mesas.|Wechseln in der Boutique › Tische.|Si cambiano alla boutique › Tavoli.||可在“精品店 › 牌桌”中更换。|부티크 › 테이블에서 바꿀 수 있습니다.|ブティック › テーブルで変更できます。|Меняются в разделе «Бутик › Столы».|Zmienisz je w Butik › Stoły.",
+    casa: "La casa te abre una mesa nueva.|The house opens a new table for you.|La maison t'ouvre une nouvelle table.|A casa abre uma mesa nova para você.|Das Haus öffnet dir einen neuen Tisch.|La casa ti apre un nuovo tavolo.||赌场为你开了一张新牌桌。|하우스가 새 테이블을 열어 줘요.|ハウスがあなたに新しいテーブルを開きます。|Заведение открывает для тебя новый стол.|Kasyno otwiera dla ciebie nowy stół.",
+    mas: "También tienes ya: {l}.|You also now have: {l}.|Tu as aussi : {l}.|Você também já tem: {l}.|Außerdem hast du jetzt: {l}.|Hai anche: {l}.||你还拥有：{l}。|함께 얻은 테이블: {l}.|ほかにも手に入りました：{l}。|Ещё у тебя теперь есть: {l}.|Masz już też: {l}.",
+    keep: "Quedármela|Keep it|La garder|Ficar com ela|Behalten|Lo tengo||就用它|이걸로 하기|これにする|Оставить|Biorę",
+    back: "Seguir con la de antes|Stay with the old one|Garder l'ancienne|Continuar com a de antes|Beim alten bleiben|Resto con quello di prima||还是用原来的|원래 테이블 유지|前のテーブルのまま|Вернуть прежний|Zostaję przy starym",
+    note: "Se cambian en La tienda › Mesas.|Change them in The boutique › Tables.|Elles se changent à la boutique › Tables.|Troque na boutique › Mesas.|Wechseln kannst du in der Boutique › Tische.|Si cambiano alla boutique › Tavoli.||可在“精品店 › 牌桌”中更换。|부티크 › 테이블에서 바꿀 수 있어요.|ブティック › テーブルで変更できます。|Меняются в разделе «Бутик › Столы».|Zmienisz je w: Butik › Stoły.",
   };
   const t = k => A.pick6(TX[k]);
   let live = null, tm = 0, tries = 0, due = false;                       // due: hay un estreno esperando su momento en la portada (el crupier no empieza otra frase: js/dealer.js, homeTick)

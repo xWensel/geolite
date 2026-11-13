@@ -16,22 +16,22 @@ window.AIQ = window.AIQ || {};
   const $ = id => document.getElementById(id), P6 = s => A.pick6(s);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const TX = {
-    title: "El camino del socio|The member's path|Le parcours du membre|O caminho do sócio|Der Weg des Mitglieds|Il cammino del socio||会员之路|회원의 길|会員の道|Путь члена клуба|Ścieżka członka",
-    serie: "Serie {n} · {x}|Series {n} · {x}|Série {n} · {x}|Série {n} · {x}|Serie {n} · {x}|Serie {n} · {x}||第 {n} 系列 · {x}|{n}번째 시리즈 · {x}|シリーズ{n}・{x}|Серия {n} · {x}|Seria {n} · {x}",
+    title: "El camino del socio|The member's path|Le parcours du membre|O caminho do sócio|Der Weg des Mitglieds|Il cammino del socio||会员之路|회원의 길|会員の道|Путь члена клуба|Ścieżka wspólnika",
+    serie: "Serie {n} · {x}|Series {n} · {x}|Série {n} · {x}|Série {n} · {x}|Serie {n} · {x}|Serie {n} · {x}||第 {n} 系列 · {x}|{n}번째 시리즈 · {x}|シリーズ{n} · {x}|Серия {n} · {x}|Seria {n} · {x}",
     levels: "Niveles {a}-{b}|Levels {a}-{b}|Niveaux {a} à {b}|Níveis {a}-{b}|Stufen {a}-{b}|Livelli {a}-{b}||{a}-{b} 级|레벨 {a}-{b}|レベル{a}〜{b}|Уровни {a}–{b}|Poziomy {a}–{b}",
-    you: "Tu sitio en la casa|Your place in the house|Ta place dans la maison|Seu lugar na casa|Dein Platz im Haus|Il tuo posto nella casa||你在赌场的位置|하우스에서의 네 자리|ハウスでのきみの居場所|Твоё место в заведении|Twoje miejsce w kasynie",
+    you: "Tu sitio en la casa|Your place in the house|Ta place dans la maison|Seu lugar na casa|Dein Platz im Haus|Il tuo posto nella casa||你在赌场的位置|하우스 속 내 자리|ハウスでのあなたの居場所|Твоё место в заведении|Twoje miejsce w kasynie",
     sitio: "Sitio|Spot|Place|Lugar|Platz|Posto||位置|자리|居場所|Место|Miejsce",
     trato: "Te llama|Calls you|T'appelle|Te chama de|Nennt dich|Ti chiama||称呼你|부르는 말|呼び方|Зовёт тебя|Mówi do ciebie",
-    nextRank: "Próxima categoría: {x}, en el nivel {n}|Next rank: {x}, at level {n}|Catégorie suivante : {x}, au niveau {n}|Próxima categoria: {x}, no nível {n}|Nächster Rang: {x}, auf Stufe {n}|Prossima categoria: {x}, al livello {n}||下一个身份：{x}，{n} 级|다음 등급: {x}, 레벨 {n}|次の格：{x}（レベル{n}）|Следующая ступень: {x}, на уровне {n}|Następna ranga: {x}, na poziomie {n}",
-    top: "Lo más alto de la casa.|The very top of the house.|Le sommet de la maison.|O topo da casa.|Ganz oben im Haus.|Il vertice della casa.||赌场的最高处。|하우스의 정상이야.|ハウスの頂点。|Вершина заведения.|Szczyt kasyna.",
-    dress: "Vestir tu carta|Dress your card|Habiller ta carte|Vestir sua carta|Karte gestalten|Vesti la tua carta||装扮你的卡|카드 꾸미기|カードを着替える|Оформить карту|Ubierz kartę",
+    nextRank: "Próxima categoría: {x}, en el nivel {n}|Next rank: {x}, at level {n}|Catégorie suivante : {x}, au niveau {n}|Próxima categoria: {x}, no nível {n}|Nächster Rang: {x}, auf Stufe {n}|Prossima categoria: {x}, al livello {n}||下一个身份：{x}，{n} 级|다음 등급: {x}, 레벨 {n}|次の格：{x}（レベル{n}）|Следующая категория: {x}, на уровне {n}|Następna ranga: {x}, na poziomie {n}",
+    top: "Lo más alto de la casa.|The very top of the house.|Le sommet de la maison.|O topo da casa.|Ganz oben im Haus.|Il vertice della casa.||赌场的最高处。|하우스의 정상이에요.|ハウスの頂点。|Вершина заведения.|Szczyt kasyna.",
+    dress: "Vestir tu carta|Dress up your card|Habiller ta carte|Vestir sua carta|Karte gestalten|Vesti la tua carta||装扮会员卡|카드 꾸미기|カードを着替える|Оформить карту|Ubierz kartę",
     cofre: "Cofre {n}|Chest {n}|Coffre {n}|Baú {n}|Truhe {n}|Forziere {n}||宝箱 {n}|금고 {n}|宝箱 {n}|Сундук {n}|Skrzynia {n}",
     borde: "Borde {x}|{x} border|Bordure {x}|Borda {x}|Rand {x}|Bordo {x}||{x}边框|{x} 테두리|{x}の縁|Окантовка «{x}»|Obramowanie {x}",
-    first: "Tu primera carta|Your first card|Ta première carte|Sua primeira carta|Deine erste Karte|La tua prima carta||你的第一张卡|첫 카드|最初のカード|Твоя первая карта|Twoja pierwsza karta",
-    legend: "Pasado el 100: un cofre de la Leyenda cada {n} de experiencia.|Past 100: a Legend's chest every {n} XP.|Après 100 : un coffre de la Légende tous les {n} XP.|Depois do 100: um baú da Lenda a cada {n} de XP.|Ab Stufe 100: alle {n} EP eine Truhe der Legende.|Oltre il 100: un forziere della Leggenda ogni {n} PE.||满 100 级后：每 {n} 经验一个传奇宝箱。|100레벨 이후: 경험치 {n}마다 전설의 금고.|100を超えたら：経験値{n}ごとに伝説の宝箱。|После 100: сундук Легенды за каждые {n} опыта.|Po 100: skrzynia Legendy co {n} PD.",
-    newCard: "¡Carta nueva!|New card!|Nouvelle carte !|Carta nova!|Neue Karte!|Carta nuova!||新卡牌！|새 카드!|新しいカード！|Новая карта!|Nowa karta!",
-    more: "+{n} cartas|+{n} cards|+{n} cartes|+{n} cartas|+{n} Karten|+{n} carte||+{n} 张卡|카드 +{n}장|カード+{n}枚|+{n} карт|+{n} kart",
-    fichas: "+{n} fichas|+{n} chips|+{n} jetons|+{n} fichas|+{n} Chips|+{n} fiche||+{n} 筹码|칩 +{n}|チップ+{n}|+{n} фишек|+{n} żetonów",
+    first: "Tu primera carta|Your first card|Ta première carte|Sua primeira carta|Deine erste Karte|La tua prima carta||你的第一张卡面|첫 카드|最初のカード|Твоя первая карта|Twoja pierwsza karta",
+    legend: "Pasado el 100: un cofre de la Leyenda cada {n} de experiencia.|Past 100: a Legend's chest every {n} XP.|Après 100 : un coffre de la Légende tous les {n} XP.|Depois do 100: um baú da Lenda a cada {n} de XP.|Ab Stufe 100: alle {n} EP eine Truhe der Legende.|Oltre il 100: un forziere della Leggenda ogni {n} PE.||满 100 级后：每 {n} 经验一个传奇宝箱。|100레벨 이후: EXP {n}마다 전설의 금고.|100を超えたら：EXP{n}ごとに伝説の宝箱。|После 100: сундук Легенды за каждые {n} опыта.|Po 100: skrzynia Legendy co {n} PD.",
+    newCard: "¡Carta nueva!|New card!|Nouvelle carte !|Carta nova!|Neue Karte!|Carta nuova!||新卡面！|새 카드!|新しいカード！|Новая карта!|Nowa karta!",
+    more: "+{n} cartas|+{n} cards|+{n} cartes|+{n} cartas|+{n} Karten|+{n} carte||+{n} 张卡面|카드 +{n}장|カード+{n}枚|Карты: +{n}|Karty: +{n}",
+    fichas: "+{n} fichas|+{n} chips|+{n} jetons|+{n} fichas|+{n} Chips|+{n} fiche||+{n} 筹码|칩 +{n}|チップ+{n}|Фишки: +{n}|Żetony: +{n}",
   };
   const S = () => A.socio, C = () => A.club;
   const reduce = () => document.documentElement.classList.contains("reduce-motion");

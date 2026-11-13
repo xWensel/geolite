@@ -155,7 +155,7 @@ html.reduce-motion .gx-layer *, html.reduce-motion .gx-layer { animation-duratio
 .gx-vd-th { display: grid; justify-items: center; gap: 2px; text-align: center; padding-bottom: 2px; }
 .gx-vd-rows { display: grid; gap: 6px; }
 .gx-vd-rows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }   /* diez lugares (Clasico): dos columnas para que quepa sin encoger */
-.gx-vd-ticket .gx-lead-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gx-vd-ticket .gx-lead-row span { min-width: 0; white-space: normal; text-wrap: balance; }   /* un rotulo largo (p. ej. «Totale della spedizione» junto a la cifra grande) pasa a dos lineas: nunca cortado */
 .gx-vd-ticket .gx-lead-row span i { font-style: normal; color: var(--gx-ink-2); }
 .gx-vd-ticket .gx-lead-row.big { font-size: 26px; } .gx-vd-ticket .gx-lead-row.big b { font-size: 40px; line-height: 1; }
 .gx-vd-ticket .gx-lead-row .ic { width: 22px; height: 22px; vertical-align: -4px; margin-right: 6px; image-rendering: pixelated; }

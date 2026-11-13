@@ -211,7 +211,7 @@ const BOSSES = [
   function url(key, f, luz) { const cv = document.createElement("canvas"); paint(cv, render(of(key).P, f, luz == null ? 0.25 : luz), 0); return cv.toDataURL("image/png"); }
 
   const SKIP = "Saltar|Skip|Passer|Pular|Überspringen|Salta||跳过|건너뛰기|スキップ|Пропустить|Pomiń";
-  const PLAQUE = "Cofre de «{t}»|Chest of “{t}”|Coffre de « {t} »|Baú de “{t}”|Truhe von „{t}“|Forziere di «{t}»||“{t}”的宝箱|‘{t}’의 보물상자|「{t}」の宝箱|Сундук «{t}»|Skrzynia „{t}”";
+  const PLAQUE = "Cofre de «{t}»|Chest of “{t}”|Coffre de « {t} »|Baú de “{t}”|Truhe von „{t}“|Forziere di «{t}»||“{t}”的宝箱|‘{t}’의 상자|「{t}」の宝箱|Сундук «{t}»|Skrzynia „{t}”";
 
   /* el telon del cofre: el veredicto se retira y queda el cofre solo sobre la mesa. o = { key, tag, name, tier (1 justa, 2 holgada, 3 aplastante),
      stuck (el primer clic se atasca), onStuck, then } */

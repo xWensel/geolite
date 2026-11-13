@@ -226,17 +226,17 @@ window.AIQ = window.AIQ || {};
       if (e) return y <= 6 && !(y === 6 && ax === 2) ? "W" : "P";
       return "K"; }, { W: mixC(paper, "#ffffff", .45), P: paper, D: mixC(paper, ink, .22), K: ink });
 
-    N.ruleta = "La ruleta|The roulette|La roulette|A roleta|Das Roulette|La roulette||轮盘|룰렛|ルーレット|Рулетка|Ruletka";
-    N.orejas = "Las orejas de Comodín|Comodín's ears|Les oreilles de Comodín|As orelhas do Comodín|Comodíns Ohren|Le orecchie di Comodín||科莫丁的耳朵|코모딘의 귀|コモディンの耳|Уши Комодина|Uszy Comodína";
-    N.timon = "El timón|The helm|La barre|O leme|Das Steuerrad|Il timone||舵轮|조타륜|舵輪|Штурвал|Ster";
+    N.ruleta = "La ruleta|The roulette wheel|La roulette|A roleta|Das Roulette|La roulette||轮盘|룰렛|ルーレット|Рулетка|Ruletka";
+    N.orejas = "Las orejas de Comodín|Comodín's ears|Les oreilles de Joker|As orelhas do Coringa|Comodíns Ohren|Le orecchie di Jolly||Comodín 的耳朵|코모딘의 귀|コモディンの耳|Уши Комодина|Uszy Comodína";
+    N.timon = "El timón|The helm|Le gouvernail|O leme|Das Steuerrad|Il timone||舵轮|조타륜|舵輪|Штурвал|Ster";
     N.copo = "El copo|The snowflake|Le flocon|O floco|Die Schneeflocke|Il fiocco||雪花|눈송이|雪の結晶|Снежинка|Płatek śniegu";
     N.laurel = "El laurel|The laurel|Le laurier|O louro|Der Lorbeer|L'alloro||月桂冠|월계관|月桂冠|Лавровый венок|Laur";
-    N.doblon = "El doblón|The doubloon|Le doublon|O dobrão|Die Dublone|Il doblone||金币|더블룬|ドブロン金貨|Дублон|Dublon";
+    N.doblon = "El doblón|The doubloon|Le doublon|O dobrão|Die Dublone|Il doblone||金币|도블론|ダブロン|Дублон|Dublon";
     N.bola = "La bola|The ball|La bille|A bolinha|Die Kugel|La pallina||小球|구슬|ボール|Шарик|Kulka";
     N.pata = "La pata|The paw|La patte|A pata|Die Pfote|La zampa||猫爪|발자국|肉球|Лапка|Łapka";
-    N.neonpin = "La de neón|Neon pin|La néon|A de neon|Neonpin|Quella al neon||霓虹图钉|네온 핀|ネオンのピン|Неоновая|Neonowa";
+    N.neonpin = "La de neón|Neon pin|En néon|A de neon|Neonpin|Quella al neon||霓虹图钉|네온 핀|ネオンのピン|Неоновая|Neonowa";
     N.caramb = "El carámbano|The icicle|Le glaçon|O pingente de gelo|Der Eiszapfen|Il ghiacciolo||冰柱|고드름|つらら|Сосулька|Sopel";
-    N.fichaoro = "La ficha de oro|The gold chip|Le jeton d'or|A ficha de ouro|Der Goldchip|La fiche d'oro||金筹码|황금 칩|金のチップ|Золотая фишка|Złoty żeton";
+    N.fichaoro = "La ficha de oro|The gold chip|Le jeton d'or|A ficha de ouro|Der Goldchip|La fiche d'oro||金筹码|골드 칩|金のチップ|Золотая фишка|Złoty żeton";
   });
 
   /* ============================================================ LÍNEAS Y DIANAS ============================================================ */
@@ -557,16 +557,16 @@ window.AIQ = window.AIQ || {};
     /* ------------------------------------------------------------ los nombres (es|en|fr|pt|de|it||zh|ko|ja|ru|pl) */
     Object.assign(N, {
       casillas: "Casillas de ruleta|Roulette squares|Cases de roulette|Casas da roleta|Roulettefelder|Caselle della roulette||轮盘格子|룰렛 칸|ルーレットのマス|Клетки рулетки|Pola ruletki",
-      huellas: "Las huellas de Comodín|Comodín's paw prints|Les empreintes de Comodín|As pegadas do Comodín|Comodíns Pfotenabdrücke|Le impronte di Comodín||Comodín的爪印|코모딘의 발자국|コモディンの足あと|Следы Комодина|Ślady Comodína",
+      huellas: "Las huellas de Comodín|Comodín's paw prints|Les empreintes de Joker|As pegadas do Coringa|Comodíns Pfotenabdrücke|Le impronte di Jolly||Comodín 的爪印|코모딘의 발자국|コモディンの足あと|Следы Комодина|Ślady Comodína",
       tubo: "El tubo de neón|The neon tube|Le tube néon|O tubo de neon|Die Neonröhre|Il tubo al neon||霓虹灯管|네온관|ネオン管|Неоновая трубка|Neonowa rurka",
       escarcha: "La escarcha|Hoarfrost|Le givre|A escarcha|Der Raureif|La brina||冰霜线|서리 줄기|霜の筋|Иней|Szron",
       cadena: "La cadena de oro|The gold chain|La chaîne en or|A corrente de ouro|Die Goldkette|La catena d'oro||金链|금 사슬|金の鎖|Золотая цепь|Złoty łańcuch",
-      pleno: "El pleno|Straight up|En plein|O pleno|Plein|Il pieno||单号命中|스트레이트 업|ストレートアップ|Ставка на число|Pełny traf",
+      pleno: "El pleno|Straight up|Le plein|O pleno|Plein|Il pieno||单号命中|스트레이트|ストレートアップ|Ставка на число|Pojedynczy",
       zarpazo: "El zarpazo|The claw swipe|Le coup de griffe|O arranhão|Der Krallenhieb|La zampata||猫爪一挠|할퀴기|ひっかき|Удар когтями|Drapnięcie",
       equis: "La X del tesoro|X marks the spot|Le X du trésor|O X do tesouro|Das Schatz-X|La X del tesoro||藏宝之X|보물의 X|宝のバツ印|Крестик сокровища|X skarbu",
       rotulo: "El rótulo de neón|The neon sign|L'enseigne néon|O letreiro de neon|Das Neonschild|L'insegna al neon||霓虹招牌|네온 간판|ネオンサイン|Неоновая вывеска|Neonowy szyld",
       helada: "La helada|The big freeze|Le gel|A geada|Der Frost|La gelata||冰封|결빙|凍結|Заморозок|Przymrozek",
-      midas: "Toque de Midas|Midas touch|Le toucher de Midas|Toque de Midas|Midas-Berührung|Il tocco di Mida||点石成金|미다스의 손|ミダスの手|Прикосновение Мидаса|Dotyk Midasa",
+      midas: "Toque de Midas|Midas touch|Toucher de Midas|Toque de Midas|Midas-Touch|Tocco di Mida||点石成金|미다스의 손|ミダスの手|Прикосновение Мидаса|Dotyk Midasa",
     });
   });
 })(window.AIQ);

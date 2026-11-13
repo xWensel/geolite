@@ -264,10 +264,12 @@
        ultimo recurso: dos lineas (y un poco mas pequena si una palabra sola no cabe), nunca cortado. Tambien por pasos, todas a la vez */
     const over = el => el.scrollWidth > el.clientWidth + 1;
     const FIT = [
-      el => { el.classList.remove("sq-short", "sq-wrap"); el.style.letterSpacing = el.style.fontSize = ""; },
+      el => { el.classList.remove("sq-short", "sq-wrap"); el.style.letterSpacing = el.style.fontSize = el.style.paddingLeft = el.style.paddingRight = ""; },
       el => el.classList.add("sq-short"),
       ...[1, 0.95, 0.9, 0.86].map(k => (el, fs, mn) => { el.style.letterSpacing = "0px"; el.style.fontSize = Math.max(fs * k, mn).toFixed(2) + "px"; }),
       ...[1, 0.9, 0.8].map((k, i) => (el, fs, mn) => { if (!i) el.classList.add("sq-wrap"); el.style.fontSize = Math.max(fs * k, mn).toFixed(2) + "px"; }),
+      el => { const p = parseFloat(getComputedStyle(el).paddingLeft) || 0; if (p > 4) el.style.paddingLeft = el.style.paddingRight = "4px"; },   // una sola palabra larga a la letra minima («ЭНЦИКЛОПЕДИЯ»): se estrecha el margen interior
+      el => { el.style.letterSpacing = "-1px"; },                               // y, si aun asi no cabe, las letras se juntan 1 px (entero: la letra pixelada sigue nitida)
     ];
     /* mn: la letra minima (css/legible.css): se aprieta el interletrado y se parte en dos lineas, pero no se encoge por debajo */
     let fit = roots.flatMap(r => [...r.querySelectorAll(".sq-fit")]).map(el => ({ el, fs: 0, mn: 0 }));

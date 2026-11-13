@@ -258,9 +258,9 @@ window.AIQ = window.AIQ || {};
   const TXL = {
     near: "Te falta poco|Almost there|Tu y es presque|Falta pouco|Fast geschafft|Ci sei quasi||就差一点|거의 다 왔어요|あと少し|Осталось чуть-чуть|Już prawie",
     logros: "Logros|Achievements|Succès|Conquistas|Erfolge|Obiettivi||成就|업적|実績|Достижения|Osiągnięcia",
-    fichas: "fichas de oro|gold chips|jetons d'or|fichas de ouro|Goldchips|fiche d'oro||金筹码|골드 칩|ゴールドチップ|золотых фишек|złotych żetonów",
-    back: "Por los {n} logros que ya tenías. La casa paga sus deudas.|For the {n} achievements you already had. The house pays its debts.|Pour les {n} succès que tu avais déjà. La maison paie ses dettes.|Pelas {n} conquistas que você já tinha. A casa paga suas dívidas.|Für die {n} Erfolge, die du schon hattest. Das Haus zahlt seine Schulden.|Per i {n} obiettivi che avevi già. La casa paga i suoi debiti.||为你已有的 {n} 个成就。本店有债必还。|이미 달성한 업적 {n}개의 몫입니다. 하우스는 빚을 갚습니다.|すでに持っていた実績{n}個の分。店は借りを返します。|За {n} достижений, которые у тебя уже были. Заведение платит по счетам.|Za {n} osiągnięć, które już masz. Kasyno spłaca długi.",
-    sec: "Secreto|Secret|Secret|Secreto|Geheim|Segreto||秘密|비밀|シークレット|Секрет|Sekret",
+    fichas: "fichas de oro|gold chips|jetons d'or|fichas de ouro|Goldchips|fiche d'oro||金筹码|골드 칩|金のチップ|золотых фишек|złotych żetonów",
+    back: "Por los {n} logros que ya tenías. La casa paga sus deudas.|For the {n} achievements you already had. The house pays its debts.|Pour les {n} succès que tu avais déjà. La maison paie ses dettes.|Pelas {n} conquistas que você já tinha. A casa paga suas dívidas.|Für die {n} Erfolge, die du schon hattest. Das Haus zahlt seine Schulden.|Per i {n} obiettivi che avevi già. La casa paga i suoi debiti.||奖励你已有的 {n} 个成就。赌场有债必还。|이미 달성한 업적 {n}개의 몫이에요. 하우스는 빚을 갚아요.|すでに持っていた実績{n}個の分。ハウスは借りを返します。|За уже полученные достижения: {n}. Заведение платит по счетам.|Za osiągnięcia, które już masz: {n}. Kasyno spłaca długi.",
+    sec: "Secreto|Secret|Secret|Secreto|Geheim|Segreto||隐藏|비밀|シークレット|Секрет|Sekret",
   };
   const FICHA = big => `<img class="ck-fi${big ? "" : " sm"}" src="assets/icons/ficha_oro.webp" alt="" draggable="false">`;   // la ficha de oro del Club, a sus dos tamaños de siempre (32 y 18 px)
   /* v0.3.35: EL AVISO TIENE SU ZONA, nunca tapa titulos ni HUD. En partida va bajo la placa (#leftCol, como siempre). Fuera de ella:
@@ -367,7 +367,7 @@ window.AIQ = window.AIQ || {};
   }
   /* EL LOGRO FALSO del crupier (js/dealer.js): identico a un aviso de verdad (mismo sonido), con su cara en la ficha; al segundo le cae el sello
      "De broma", el crupier se rie y el aviso se tuerce y se cae. No pasa por P.ach, ni por el contador ni por Steam. Va en #app (se ve tambien en el inicio) */
-  const STAMP = "De broma|Just kidding|Pour rire|De brincadeira|Nur Spaß|Per scherzo||开玩笑的|농담|冗談|Шутка|Żart";
+  const STAMP = "De broma|Just kidding|Pour rire|De brincadeira|Nur Spaß|Per scherzo||玩笑|농담|冗談|Шутка|Żart";
   function fakeToast(a) {
     let el = document.getElementById("achFake");
     if (!el) { el = document.createElement("div"); el.id = "achFake"; document.getElementById("app").appendChild(el); }

@@ -19,7 +19,7 @@ window.AIQ = window.AIQ || {};
   /* ================================================================ el sello, en su sitio */
   const SIN_TINTA = {
     win: "Se acabó la tinta. Ya está más que superada.|Out of ink. It's more than cleared already.|Plus d'encre. Elle est plus que réussie.|Acabou a tinta. Já está mais que superada.|Die Tinte ist alle. Mehr als geschafft.|Inchiostro finito. È più che superata.||墨水用完了。早就过关了。|잉크 다 떨어졌어. 이미 통과하고도 남았어.|インク切れだ。もう十分すぎるほどクリアだよ。|Чернила кончились. Раунд пройден с лихвой.|Skończył się tusz. Runda jest aż nadto zaliczona.",
-    lose: "Se acabó la tinta. Y no por sellarla más se arregla.|Out of ink. Stamping it again won't fix it.|Plus d'encre. Tamponner encore n'y changera rien.|Acabou a tinta. Carimbar de novo não resolve.|Die Tinte ist alle. Nochmal stempeln ändert nichts.|Inchiostro finito. Timbrarla ancora non la aggiusta.||墨水用完了。再盖也救不回来。|잉크 다 떨어졌어. 더 찍는다고 달라지진 않아.|インク切れだ。何度押しても結果は変わらないぞ。|Чернила кончились. Сколько ни штампуй, не поможет.|Skończył się tusz. Kolejne pieczątki nic nie zmienią.",
+    lose: "Se acabó la tinta. Y no por sellarla más se arregla.|Out of ink. Stamping it again won't fix it.|Plus d'encre. Tamponner encore n'y changera rien.|Acabou a tinta. Carimbar de novo não resolve.|Die Tinte ist alle. Nochmal stempeln ändert nichts.|Inchiostro finito. Timbrarla ancora non la aggiusta.||墨水用完了。再盖也救不回来。|잉크 다 떨어졌어. 더 찍는다고 달라지진 않아.|インク切れだ。何度押しても結果は変わらないさ。|Чернила кончились. Сколько ни штампуй, не поможет.|Skończył się tusz. Kolejne pieczątki nic nie zmienią.",
   };
   let sellos = 0, deQuien = null;
   document.addEventListener("pointerdown", e => {

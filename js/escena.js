@@ -95,7 +95,7 @@ window.AIQ = window.AIQ || {};
      ella y su cono en la penumbra de la sala tambien (A.casa.vivo). En cada vuelta alta cruje la cadena. Un empujon fuerte (mas de 29 grados):
      la bombilla parpadea y el crupier se asusta. Con Movimiento minimo no se mece: un clic la hace parpadear. Mientras contestas no hay lampara */
   const D2R = Math.PI / 180, quieto = () => document.documentElement.classList.contains("reduce-motion");
-  const SUSTO = { in: "¡Eh! Que esa lámpara la pago yo.|Hey! I'm the one paying for that lamp.|Eh ! C'est moi qui la paie, cette lampe.|Ei! Quem paga essa luminária sou eu.|He! Die Lampe bezahle ich!|Ehi! Quella lampada la pago io.|¡Oye! Esa lámpara la pago yo.|喂！那盏灯可是我出的钱。|야! 그 램프 값은 내가 낸다고.|おい！そのランプは私の払いだぞ。|Эй! За эту лампу плачу я.|Hej! Za tę lampę płacę ja.",
+  const SUSTO = { in: "¡Eh! Que esa lámpara la pago yo.|Hey! I'm the one paying for that lamp.|Eh ! C'est moi qui la paie, cette lampe.|Ei! Quem paga essa luminária sou eu.|He! Die Lampe bezahle ich!|Ehi! Quella lampada la pago io.|¡Oye! Esa lámpara la pago yo.|喂！那盏灯可是我出的钱。|야! 그 램프 값은 내가 낸다고.|おい！ そのランプは私が払ってるんだ。|Эй! За эту лампу плачу я.|Hej! Za tę lampę płacę ja.",
     vd: "Cuidado, que se nos va la luz de la caja.|Careful, or the till loses its light.|Attention, on va perdre la lumière de la caisse.|Cuidado, que a luz do caixa vai embora.|Vorsicht, sonst geht der Kasse das Licht aus.|Attento, che la cassa resta al buio.|Cuidado, que se va la luz de la caja.|小心，收银台的灯要灭了。|조심해, 계산대 불 나가겠다.|気をつけろ、レジの明かりが消えちまう。|Осторожно, касса останется без света.|Uważaj, bo kasa straci światło." };
   const mece = (() => {
     const ML = []; let raf = 0, tPrev = 0;

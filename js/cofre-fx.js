@@ -278,14 +278,14 @@ void main(){
 
   /* ------------------------------------------------------------------ textos (12 idiomas: es, en, fr, pt, de, it, es-419, zh, ko, ja, ru, pl) */
   const STAMP = [
-    "Victoria justa|Narrow win|Victoire de justesse|Vitória apertada|Knapper Sieg|Vittoria di misura||险胜|아슬아슬한 승리|ぎりぎりの勝利|Победа в притык|Zwycięstwo na styk",
+    "Victoria justa|Narrow win|Victoire de justesse|Vitória apertada|Knapper Sieg|Vittoria di misura||险胜|아슬아슬한 승리|ぎりぎりの勝利|Победа впритык|Zwycięstwo na styk",
     "Victoria holgada|Comfortable win|Victoire confortable|Vitória folgada|Klarer Sieg|Vittoria comoda||轻松获胜|여유 있는 승리|余裕の勝利|Уверенная победа|Pewne zwycięstwo",
     "Victoria aplastante|Crushing win|Victoire écrasante|Vitória esmagadora|Vernichtender Sieg|Vittoria schiacciante||压倒性胜利|압도적인 승리|圧倒的な勝利|Разгромная победа|Miażdżące zwycięstwo"
   ];
-  const WIN_T = "El cofre ha dejado de responder.|The chest has stopped responding.|Le coffre ne répond plus.|O baú parou de responder.|Die Truhe reagiert nicht mehr.|Il forziere non risponde più.||宝箱没有响应了。|상자가 응답하지 않습니다.|宝箱が応答しません。|Сундук не отвечает.|Skrzynia przestała odpowiadać.";
-  const WIN_T3 = "Premio.exe no responde. Tampoco hace falta.|Prize.exe is not responding. It doesn't need to.|Prix.exe ne répond pas. Pas besoin.|Premio.exe não responde. Nem precisa.|Preis.exe reagiert nicht. Muss es auch nicht.|Premio.exe non risponde. Non serve.||奖品.exe没有响应。也不需要。|상품.exe가 응답하지 않습니다. 그럴 필요도 없죠.|景品.exeが応答しません。その必要もありません。|Приз.exe не отвечает. И не надо.|Nagroda.exe nie odpowiada. I nie musi.";
+  const WIN_T = "El cofre ha dejado de responder.|The chest has stopped responding.|Le coffre ne répond plus.|O baú parou de responder.|Die Truhe reagiert nicht mehr.|Il forziere non risponde più.|El cofre dejó de responder.|宝箱没有响应了。|상자가 응답하지 않습니다.|宝箱が応答しません。|Сундук не отвечает.|Skrzynia przestała odpowiadać.";
+  const WIN_T3 = "Premio.exe no responde. Tampoco hace falta.|Prize.exe is not responding. It doesn't need to.|Prix.exe ne répond pas. Pas besoin.|Premio.exe não responde. Nem precisa.|Gewinn.exe reagiert nicht. Muss es auch nicht.|Premio.exe non risponde. Tanto non serve.||奖品.exe 未响应。也用不着。|상품.exe가 응답하지 않습니다. 그럴 필요도 없죠.|景品.exeが応答しません。その必要もありません。|Приз.exe не отвечает. И не надо.|Nagroda.exe nie odpowiada. I nie musi.";
   const WIN_OK = "Esperar|Wait|Attendre|Aguardar|Warten|Attendi||等待|기다리기|待機|Ждать|Czekaj";
-  const WIN_N = "premio.exe|prize.exe|prix.exe|premio.exe|preis.exe|premio.exe||奖品.exe|상품.exe|景品.exe|приз.exe|nagroda.exe";
+  const WIN_N = "premio.exe|prize.exe|prix.exe|premio.exe|gewinn.exe|premio.exe||奖品.exe|상품.exe|景品.exe|приз.exe|nagroda.exe";
 
   /* ------------------------------------------------------------------ el escenario */
   function Stage(o) {

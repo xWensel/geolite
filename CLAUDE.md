@@ -37,6 +37,10 @@ Juego de geografia con alma de casino, de Cousins Studios: haces clic en el mapa
 - La version del juego y la de las notas del parche son la misma. Cada entrega lleva su propia entrada en `js/parche-data.js` (si es pequena, 1 o 2 lineas). Un parche publicado nunca se edita.
 - El `README.md` no lleva entradas por entrega: solo se toca si cambia lo que Geolite es (modos, cifras, creditos). El historial vive en las notas del parche y en git.
 
+## Traducciones: un solo nombre para cada cosa
+
+`docs/glosario/<idioma>.md` es el glosario unico de cada idioma (fijado en la v0.4.76 tras revisar los 5.142 textos del juego). Todo texto nuevo, en los 12 idiomas, usa esos terminos y su estilo (trato, comillas, voz del crupier). Si un termino cambia, se cambia en el glosario y en TODO el juego a la vez, nunca en un sitio suelto. Herramientas de la revision (extractor de todos los formatos, aplicador con validacion de huecos y verificador celda a celda): `geolite-art-tools/maquetas-br/tr/`.
+
 ## Build limpia (regla de fondo)
 - El repositorio solo contiene lo que el juego usa HOY: nada de iconos, escenas, codigo, migraciones de guardados antiguos ni carpetas de pruebas que ya no se usen. Antes de cada entrega, lo que sobra se borra (git guarda el historial; la v0.3.0 parte del commit `60acc9a`).
 - `tools/` solo guarda lo que construye y publica el juego: `steam-pack.mjs`, `steam-upload.mjs`, `steam-achievements.mjs`, `steam_icons.py`, `audit-licenses.mjs`, `build-credits.mjs`, `bundle-media.py`, `wiki-thumbs.py`, `publish-media.mjs`, `fetch-media.mjs`, `linux_tar.py`. Los generadores de arte y de datos se retiraron en la v0.3.0; si hicieran falta, se recuperan del historial de git.

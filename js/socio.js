@@ -31,13 +31,13 @@ window.AIQ = window.AIQ || {};
      se mueve) y holografica; la 100, la unica policroma y viva. El material de cada serie es tambien un borde para tu carta y tu chapa (se gana al
      empezar la serie: niveles 1, 11, 21…) */
   const SERIES = [
-    { n: "Papel de la casa|House paper|Papier de la maison|Papel da casa|Papier des Hauses|Carta della casa||本店纸卡|하우스 종이|ハウスの紙|Бумага заведения|Papier kasyna", f: ["#fffaec", "#efe2bf", "#b89a62"], band: "#f6efdc", ink: "#16241c",
+    { n: "Papel de la casa|House paper|Papier de la maison|Papel da casa|Papier des Hauses|Carta della casa||本店纸卡|하우스 종이|ハウスの紙|Бумага заведения|Firmowy papier", f: ["#fffaec", "#efe2bf", "#b89a62"], band: "#f6efdc", ink: "#16241c",
       c: [["bands", ["#5fae7f", "#3d8a5f", "#2d6a4a", "#1f4d38"]], ["dots", ["#6fc9b6", "#3f9a8a", "#2b7468", "#1d5048"]], ["stripes", ["#8aa0cc", "#667fb0", "#4c6491", "#34466a"]], ["bricks", ["#e8c27a", "#c99a4a", "#9a6e2e", "#6a4a1e"]], ["diamonds", ["#a8c98a", "#7fa862", "#587f42", "#3a5a2c"]], ["lattice", ["#9ad0ec", "#6aa8d0", "#4a80a8", "#30587a"]], ["moire", ["#b8a0d8", "#9078b8", "#6a5490", "#46366a"]], ["zigzag", ["#f0a08a", "#d07060", "#a04a40", "#6e2e2a"]], ["tiles", ["#e8eef8", "#7a9ad8", "#3a5ab0", "#1e3070"]], ["rings", ["#86cdec", "#5aa4cf", "#3b77a3", "#264d70"]]] },
     { n: "Tapete|Felt|Tapis|Feltro|Filz|Panno verde||牌桌绒布|펠트|フェルト|Сукно|Sukno", f: ["#f2e2a8", "#3d8a5f", "#1f4d38"], band: "#1f4d38", ink: "#f2e2a8",
       c: [["suits", ["#4fa06e", "#2d6a4a", "#1f4d38", "#0e271c"]], ["checker", ["#3f9a62", "#2d7a4c", "#1f5a38", "#123a24"]], ["argyle", ["#f2e2a8", "#3d8a5f", "#2d6a4a", "#173828"]], ["scales", ["#7bc96f", "#3d8a5f", "#2d6a4a", "#14301f"]], ["herring", ["#5fae7f", "#3d8a5f", "#2d6a4a", "#1f4d38"]], ["plaid", ["#c8323f", "#3d8a5f", "#2d6a4a", "#173828"]], ["dots", ["#f2d58a", "#2d7a4c", "#1f5a38", "#123a24"]], ["diamonds", ["#fdd742", "#3d8a5f", "#1f5a38", "#0e271c"]], ["waves", ["#7bc96f", "#2d7a4c", "#1f5a38", "#0e271c"]], ["rays", ["#7bc96f", "#3d8a5f", "#1f5a38", "#0e271c"]]] },
     { n: "Ruleta|Roulette|Roulette|Roleta|Roulette|Roulette||轮盘|룰렛|ルーレット|Рулетка|Ruletka", f: ["#f6c8c8", "#b0203a", "#5a1420"], band: "#17151c", ink: "#f6efdc",
       c: [["checker", ["#e8505a", "#b0203a", "#2e2b35", "#17151c"]], ["rays", ["#e8505a", "#b8303e", "#8a2030", "#5a1420"]], ["pinwheel", ["#f6efdc", "#c8323f", "#2e2b35", "#17151c"]], ["sunburst", ["#fdd742", "#c8323f", "#8a2030", "#2e2b35"]], ["fans", ["#f6efdc", "#c8323f", "#7a1426", "#17151c"]], ["diamonds", ["#f6efdc", "#c8323f", "#2e2b35", "#17151c"]], ["bricks", ["#2e2b35", "#a01a30", "#7a1426", "#17151c"]], ["moire", ["#e8505a", "#b0203a", "#2e2b35", "#17151c"]], ["zigzag", ["#fdd742", "#c8323f", "#2e2b35", "#17151c"]], ["roulette", ["#3fb54a", "#c8323f", "#2e2b35", "#17151c"]]] },
-    { n: "Cartógrafo|Cartographer|Cartographe|Cartógrafo|Kartograf|Cartografo||制图师|지도 제작자|地図職人|Картограф|Kartograf", f: ["#fff3d0", "#d8c08a", "#8a6e3a"], band: "#eadcae", ink: "#3a2a10",
+    { n: "Cartógrafo|Cartographer|Cartographe|Cartógrafo|Kartograf|Cartografo||制图师|지도 제작자|地図製作者|Картограф|Kartograf", f: ["#fff3d0", "#d8c08a", "#8a6e3a"], band: "#eadcae", ink: "#3a2a10",
       c: [["grid", ["#eadcae", "#cdb67e", "#94804c", "#5e4e2a"]], ["meridians", ["#7a5a2a", "#eadcae", "#cdb67e", "#94804c"]], ["compass", ["#f6efdc", "#cdb67e", "#a88a50", "#6e5428"]], ["contour", ["#6e5428", "#d8c896", "#c2aa70", "#94804c"]], ["waves", ["#cfe0d8", "#a8c4c0", "#7e9e9a", "#4e6e6a"]], ["lattice", ["#6e5428", "#eadcae", "#d8c08a", "#a88a50"]], ["dots", ["#8a2030", "#eadcae", "#d8c08a", "#94804c"]], ["stars", ["#fff3d0", "#d8c08a", "#a88a50", "#6e5428"]], ["herring", ["#eadcae", "#cdb67e", "#94804c", "#5e4e2a"]], ["compass", ["#fdd742", "#c46a1b", "#7a3a10", "#3a1a06"]]] },
     { n: "Mares|Seas|Mers|Mares|Meere|Mari||海洋|바다|海|Моря|Morza", f: ["#cfe6f6", "#22448a", "#0e2050"], band: "#142c60", ink: "#e3eef8",
       c: [["waves", ["#5a88dc", "#3462b4", "#22448a", "#142c60"]], ["scales", ["#86cdec", "#3b77a3", "#264d70", "#142c40"]], ["bands", ["#57bcb2", "#2f8a86", "#1f6466", "#14444a"]], ["moire", ["#7ad8d0", "#2f8a86", "#1f6466", "#0e2c30"]], ["dots", ["#cfe6f6", "#3462b4", "#22448a", "#142c60"]], ["zigzag", ["#e3eef8", "#3462b4", "#22448a", "#0e1c40"]], ["lattice", ["#e8d8a0", "#22448a", "#183670", "#0e1c40"]], ["stars", ["#cfe6f6", "#22448a", "#142c60", "#08142e"]], ["fans", ["#f6c8c8", "#3b77a3", "#264d70", "#142c40"]], ["vortex", ["#86cdec", "#3462b4", "#22448a", "#0e1c40"]]] },
@@ -65,89 +65,89 @@ window.AIQ = window.AIQ || {};
     return s >= 8 ? "lamina" : "";
   }
   const vivaOf = L => kOf(L) === 9;
-  const ED_N = { "": "Lisa|Plain|Simple|Lisa|Schlicht|Liscia||普通|일반|ノーマル|Обычная|Zwykła", lamina: "Lámina|Foil|Métallisée|Laminada|Folie|Laminata||闪箔|포일|フォイル|Фольга|Foliowana", holo: "Holográfica|Holographic|Holographique|Holográfica|Holografisch|Olografica||全息|홀로그램|ホログラフィック|Голографическая|Holograficzna", poli: "Polícroma|Polychrome|Polychrome|Policromática|Polychrom|Policroma||多彩|폴리크롬|ポリクローム|Полихромная|Polichromatyczna" };
+  const ED_N = { "": "Lisa|Plain|Simple|Lisa|Schlicht|Liscia||素面|일반|ノーマル|Обычная|Gładka", lamina: "Lámina|Foil|Métallisée|Laminada|Folie|Laminata||闪箔|포일|フォイル|Фольга|Foliowana", holo: "Holográfica|Holographic|Holographique|Holográfica|Holografisch|Olografica||全息|홀로그램|ホログラフィック|Голографическая|Holograficzna", poli: "Polícroma|Polychrome|Polychrome|Policroma|Polychrom|Policroma||多彩|폴리크롬|ポリクローム|Полихромная|Polichromatyczna" };
   const VIVA_N = "Viva|Living|Vivante|Viva|Lebendig|Viva||动态|살아 있는|ライブ|Живая|Żywa";
-  const CARD_N = "Carta {n}|Card {n}|Carte {n}|Carta {n}|Karte {n}|Carta {n}||第 {n} 张卡|{n}번 카드|カード{n}|Карта {n}|Karta {n}";
+  const CARD_N = "Carta {n}|Card {n}|Carte {n}|Carta {n}|Karte {n}|Carta {n}||卡面 {n}|{n}번 카드|カード{n}|Карта {n}|Karta {n}";
   /* ---------------------------------------------------------------- lo que viste tu carta: ICONOS (el archivo es su rejilla nativa x8) y TITULOS */
   const CASA_IC = ["globe", "boss_hat"];
   const SHOP_IC = { anchor: 50, telescope: 50, lighthouse: 50, eagle: 80, crown: 80, dice: 30, slot: 50, sail: 30, worldmap: 30, columbus: 80, talisman: 30 };
   const IC_N = {
     globe: "El globo|The globe|Le globe|O globo|Der Globus|Il globo||地球仪|지구본|地球儀|Глобус|Globus",
     boss_hat: "La chistera|The top hat|Le haut-de-forme|A cartola|Der Zylinder|Il cilindro||礼帽|실크해트|シルクハット|Цилиндр|Cylinder",
-    anchor: "El ancla|The anchor|L'ancre|A âncora|Der Anker|L'ancora||船锚|닻|いかり|Якорь|Kotwica",
-    telescope: "El telescopio|The telescope|Le télescope|O telescópio|Das Teleskop|Il telescopio||望远镜|망원경|望遠鏡|Телескоп|Teleskop",
+    anchor: "El ancla|The anchor|L'ancre|A âncora|Der Anker|L'ancora||船锚|닻|錨|Якорь|Kotwica",
+    telescope: "El telescopio|The telescope|Le télescope|O telescópio|Das Teleskop|Il telescopio||望远镜|천체 망원경|望遠鏡|Телескоп|Teleskop",
     lighthouse: "El faro|The lighthouse|Le phare|O farol|Der Leuchtturm|Il faro||灯塔|등대|灯台|Маяк|Latarnia morska",
     eagle: "El águila|The eagle|L'aigle|A águia|Der Adler|L'aquila||雄鹰|독수리|ワシ|Орёл|Orzeł",
     crown: "La corona|The crown|La couronne|A coroa|Die Krone|La corona||王冠|왕관|王冠|Корона|Korona",
     dice: "El dado|The die|Le dé|O dado|Der Würfel|Il dado||骰子|주사위|サイコロ|Кубик|Kostka",
-    slot: "La tragaperras|The slot machine|La machine à sous|O caça-níqueis|Der Spielautomat|La slot machine||老虎机|슬롯머신|スロットマシン|Игровой автомат|Jednoręki bandyta",
+    slot: "La tragaperras|The slot machine|La machine à sous|O caça-níqueis|Der Spielautomat|La slot machine|La tragamonedas|老虎机|슬롯머신|スロットマシン|Игровой автомат|Jednoręki bandyta",
     sail: "La vela|The sail|La voile|A vela|Das Segel|La vela||船帆|돛|帆|Парус|Żagiel",
     worldmap: "El mapamundi|The world map|La mappemonde|O mapa-múndi|Die Weltkarte|Il mappamondo||世界地图|세계 지도|世界地図|Карта мира|Mapa świata",
     columbus: "La carabela|The caravel|La caravelle|A caravela|Die Karavelle|La caravella||卡拉维尔帆船|카라벨선|キャラベル船|Каравелла|Karawela",
     glass: "El catalejo|The spyglass|La longue-vue|A luneta|Das Fernrohr|Il cannocchiale||单筒望远镜|망원경|遠眼鏡|Подзорная труба|Luneta",
-    iq_0: "La chincheta|The pin|La punaise|O alfinete|Die Pinnnadel|La puntina||图钉|핀|ピン|Метка|Pinezka",
+    iq_0: "La chincheta|The pin|L'épingle|O pino|Der Pin|Il pin|El pin|图钉|핀|ピン|Метка|Pinezka",
     coupon: "La entrada|The ticket|Le billet d'entrée|O ingresso|Die Eintrittskarte|Il biglietto d'ingresso||入场券|입장권|入場券|Входной билет|Bilet wstępu",
     minbet: "La ficha mínima|The minimum chip|Le jeton minimum|A ficha mínima|Der Mindestchip|La fiche minima||最低注筹码|최소 칩|最低チップ|Минимальная фишка|Żeton minimalny",
     journal: "La libreta del crupier|The dealer's notebook|Le carnet du croupier|A caderneta do crupiê|Das Notizbuch des Croupiers|Il taccuino del croupier||荷官的小本子|딜러의 수첩|ディーラーの手帳|Блокнот крупье|Notes krupiera",
     iq_1: "La maleta|The suitcase|La valise|A mala|Der Koffer|La valigia||行李箱|여행 가방|スーツケース|Чемодан|Walizka",
     cards: "Los naipes|The cards|Les cartes|As cartas|Die Spielkarten|Le carte||扑克牌|카드|トランプ|Карты|Karty",
     chips: "El fajo de fichas|The chip stack|La pile de jetons|A pilha de fichas|Der Chipstapel|La pila di fiche||筹码堆|칩 더미|チップの山|Стопка фишек|Stos żetonów",
-    purse: "El regalo de la casa|The house gift|Le cadeau de la maison|O presente da casa|Das Geschenk des Hauses|Il regalo della casa||本店的礼物|하우스의 선물|ハウスの贈り物|Подарок заведения|Prezent od kasyna",
-    masterkey: "La llave del club|The club key|La clé du club|A chave do clube|Der Clubschlüssel|La chiave del club||俱乐部钥匙|클럽 열쇠|クラブの鍵|Ключ от клуба|Klucz do klubu",
-    pact: "El pergamino de socio|The member's scroll|Le parchemin de membre|O pergaminho de sócio|Die Mitgliedsurkunde|La pergamena del socio||会员卷轴|회원 두루마리|会員の巻物|Свиток члена клуба|Zwój członkowski",
-    hoard: "La hucha|The piggy bank|La tirelire|O cofrinho|Das Sparschwein|Il salvadanaio||存钱罐|돼지 저금통|ブタの貯金箱|Копилка|Skarbonka",
+    purse: "El regalo de la casa|The house gift|Le cadeau de la maison|O presente da casa|Das Geschenk des Hauses|Il regalo della casa||本店赠礼|하우스의 선물|ハウスの贈り物|Подарок заведения|Prezent od kasyna",
+    masterkey: "La llave del club|The club key|La clé du Club|A chave do clube|Der Clubschlüssel|La chiave del club||俱乐部钥匙|클럽 열쇠|クラブの鍵|Ключ от клуба|Klucz do klubu",
+    pact: "El pergamino de socio|The member's scroll|Le parchemin de membre|O pergaminho de sócio|Die Mitgliedsurkunde|La pergamena del socio||会员卷轴|회원 두루마리|会員の巻物|Свиток члена клуба|Zwój wspólnika",
+    hoard: "La hucha|The piggy bank|La tirelire|O cofrinho|Das Sparschwein|Il salvadanaio|La alcancía|存钱罐|돼지 저금통|貯金箱|Копилка|Skarbonka",
     talisman: "La herradura|The horseshoe|Le fer à cheval|A ferradura|Das Hufeisen|Il ferro di cavallo||马蹄铁|말굽|蹄鉄|Подкова|Podkowa",
   };
   /* los titulos: ach = se gana con ese logro; duel = duelos ganados a la banca; p = precio en la tienda */
   const TITLES = [
     { id: "ojo", ach: "bull_100", n: "Ojo de halcón|Hawk eye|Œil de faucon|Olho de falcão|Falkenauge|Occhio di falco||鹰眼|매의 눈|鷹の目|Соко­линый глаз|Sokole oko" },
-    { id: "racha", ach: "streak_20", n: "Racha de oro|Golden streak|Série en or|Sequência de ouro|Goldene Serie|Serie d'oro||黄金连胜|황금 연승|黄金の連勝|Золотая серия|Złota passa" },
-    { id: "enciclo", ach: "codex_1000", n: "Enciclopedia andante|Walking encyclopedia|Encyclo­pédie vivante|Enciclopédia ambulante|Wandelndes Lexikon|Enciclopedia ambulante||活百科全书|걸어 다니는 백과사전|歩く百科事典|Ходячая энцикло­педия|Chodząca encyklopedia" },
+    { id: "racha", ach: "streak_20", n: "Racha de oro|Golden streak|Série en or|Sequência de ouro|Goldene Serie|Serie d'oro||黄金连击|황금 연승|黄金の連勝|Золотая серия|Złota seria" },
+    { id: "enciclo", ach: "codex_1000", n: "Enciclopedia andante|Walking encyclopedia|Encyclopédie vivante|Enciclopédia ambulante|Wandelndes Lexikon|Enciclopedia ambulante||活百科全书|걸어 다니는 백과사전|歩く百科事典|Ходячая энцикло­педия|Chodząca encyklopedia" },
     { id: "capital", ach: "classic_capitals", n: "Mente capital|Capital mind|Esprit capital|Mente capital|Haupt­stadt­kopf|Mente capitale||首都通|수도 박사|首都の達人|Столич­ный ум|Stołeczny umysł" },
-    { id: "mar", ach: "codex_water", n: "Alma marinera|Sea soul|Âme de marin|Alma de marinheiro|See­manns­seele|Anima marinara||航海之魂|바다의 영혼|海の魂|Морская душа|Dusza żeglarza" },
+    { id: "mar", ach: "codex_water", n: "Alma marinera|Sailor's soul|Âme de marin|Alma de marinheiro|See­manns­seele|Anima marinara||航海之魂|바다의 영혼|海の魂|Морская душа|Dusza żeglarza" },
     { id: "casa", ach: "adv_wins10", n: "De vuelta a casa|Home again|De retour à la maison|De volta para casa|Wieder zu Hause|Di nuovo a casa||凯旋归来|귀환|ただいま帰還|Снова дома|Z powrotem w domu" },
-    { id: "banca", duel: 25, n: "Le gana a la banca|Beats the house|Bat la banque|Vence a banca|Schlägt die Bank|Batte il banco||赢过庄家|하우스를 이긴 자|胴元に勝つ者|Обыгры­вает казино|Ogrywa kasyno" },
+    { id: "banca", duel: 25, n: "Le gana a la banca|Beats the house|Bat la banque|Vence a banca|Schlägt die Bank|Batte il banco||赢过庄家|뱅커를 이긴 자|胴元に勝つ者|Обыгры­вает банк|Ogrywa bank" },
     { id: "vuelta", ach: "classic_world", n: "La vuelta al mundo|Around the world|Le tour du monde|A volta ao mundo|Einmal um die Welt|Il giro del mondo||环游世界|세계 일주|世界一周|Вокруг света|Dookoła świata" },
     { id: "col25", achn: 25, n: "Coleccionista|Collector|Collectionneur|Colecionador|Sammler|Collezionista||收藏家|수집가|コレクター|Коллекционер|Kolekcjoner" },   // L9 (12-nov): hitos de la coleccion de logros
-    { id: "col50", achn: 50, n: "De la casa|One of the house|De la maison|Da casa|Zum Haus gehörig|Di casa||自家人|이 집 사람|店の身内|Свой в доме|Swój człowiek" },   // L9 (12-nov): hitos de la coleccion de logros
-    { id: "col75", achn: 75, n: "Leyenda viva|Living legend|Légende vivante|Lenda viva|Lebende Legende|Leggenda vivente||活着的传奇|살아 있는 전설|生ける伝説|Живая легенда|Żywa legenda" },   // L9 (12-nov): hitos de la coleccion de logros
-    { id: "col100", achn: 100, n: "Lo ha visto todo|Seen it all|A tout vu|Já viu de tudo|Hat alles gesehen|Ha visto tutto||见过一切|모든 걸 본 자|すべてを見た者|Видел всё|Widział wszystko" },   // L9 (12-nov): hitos de la coleccion de logros
+    { id: "col50", achn: 50, n: "De la casa|One of the house|De la maison|Da casa|Vom Haus|Di casa||自家人|이 집 사람|ハウスの身内|Из своих|Swój człowiek" },   // L9 (12-nov): hitos de la coleccion de logros
+    { id: "col75", achn: 75, n: "Leyenda viva|Living legend|Légende vivante|Lenda viva|Lebende Legende|Leggenda vivente||活传奇|살아 있는 전설|生ける伝説|Живая легенда|Żywa legenda" },   // L9 (12-nov): hitos de la coleccion de logros
+    { id: "col100", achn: 100, n: "Lo ha visto todo|Seen it all|A tout vu|Já viu de tudo|Hat alles gesehen|Ha visto tutto||见多识广|모든 걸 본 자|すべてを見た者|Ничем не удивить|Widziało się wszystko" },   // L9 (12-nov): hitos de la coleccion de logros
     { id: "turista", p: 20, n: "Turista accidental|Accidental tourist|Touriste par hasard|Turista acidental|Zufallstourist|Turista per caso||意外的游客|우연한 여행자|うっかり観光客|Случайный турист|Przypadkowy turysta" },
     { id: "mapa", p: 20, n: "Mapa en mano|Map in hand|Carte en main|Mapa na mão|Karte in der Hand|Mappa alla mano||地图在手|지도를 든 자|地図を片手に|С картой в руке|Z mapą w ręku" },
-    { id: "butan", p: 30, n: "Perdido en Bután|Lost in Bhutan|Perdu au Bhoutan|Perdido no Butão|Verloren in Bhutan|Perso in Bhutan||迷失不丹|부탄에서 길을 잃다|ブータンで迷子|Потерян в Бутане|Zagubiony w Bhutanie" },
+    { id: "butan", p: 30, n: "Perdido en Bután|Lost in Bhutan|Perdu au Bhoutan|Perdido no Butão|Verloren in Bhutan|Perso in Bhutan||迷失不丹|부탄에서 길을 잃다|ブータンで迷子|Где-то в Бутане|Gdzieś w Bhutanie" },
     { id: "norte", p: 30, n: "Siempre al norte|Always north|Toujours au nord|Sempre ao norte|Immer nach Norden|Sempre a nord||永远向北|언제나 북쪽으로|いつも北へ|Всегда на север|Zawsze na północ" },
-    { id: "chistera", p: 30, n: "Con chistera|Top-hatted|En haut-de-forme|De cartola|Mit Zylinder|Col cilindro||戴礼帽的|실크해트를 쓴|シルクハット姿|В цилиндре|W cylindrze" },
-    { id: "doble", p: 40, n: "Doble o nada|Double or nothing|Quitte ou double|Dobro ou nada|Doppelt oder nichts|Lascia o raddoppia||加倍或归零|더블 오어 낫싱|ダブル・オア・ナッシング|Пан или пропал|Wszystko albo nic" },
-    { id: "rapido", p: 40, n: "Ni idea, pero rápido|No clue, but fast|Aucune idée, mais vite|Sem ideia, mas rápido|Keine Ahnung, aber schnell|Nessuna idea, ma veloce||毫无头绪，但很快|몰라도 빠르게|分からないけど速い|Без понятия, зато быстро|Bez pojęcia, ale szybko" },
-    { id: "invita", p: 60, n: "La casa invita|On the house|C'est la maison qui régale|A casa convida|Geht aufs Haus|Offre la casa||本店请客|하우스가 쏜다|店のおごり|За счёт заведения|Na koszt firmy" },
+    { id: "chistera", p: 30, n: "Con chistera|Top-hatted|En haut-de-forme|De cartola|Mit Zylinder|Col cilindro||头戴礼帽|실크해트를 쓴|シルクハット姿|В цилиндре|W cylindrze" },
+    { id: "doble", p: 40, n: "Doble o nada|Double or nothing|Quitte ou double|Dobro ou nada|Doppelt oder nichts|Lascia o raddoppia||加倍或归零|더블 오어 낫싱|ダブル・オア・ナッシング|Пан или пропал|Podwójnie albo nic" },
+    { id: "rapido", p: 40, n: "Ni idea, pero rápido|No clue, but fast|Aucune idée, mais vite|Sei lá, mas rápido|Keine Ahnung, aber schnell|Nessuna idea, ma veloce||毫无头绪，但够快|몰라도 빠르게|分からないけど速い|Без понятия, зато быстро|Bez pojęcia, ale szybko" },
+    { id: "invita", p: 60, n: "La casa invita|On the house|C'est la maison qui régale|A casa paga|Geht aufs Haus|Offre la casa||本店请客|하우스가 쏜다|ハウスのおごり|За счёт заведения|Na koszt firmy" },
     /* v0.4.35: los premios de La Barra de la casa (js/barra.js, el canje): tk = tickets */
-    { id: "tahur", tk: 60, n: "Tahúr de guante blanco|White-glove gambler|Joueur en gants blancs|Apostador de luvas brancas|Spieler mit weißen Handschuhen|Giocatore in guanti bianchi||戴白手套的赌徒|흰 장갑 도박사|白手袋の勝負師|Игрок в белых перчатках|Gracz w białych rękawiczkach" },
+    { id: "tahur", tk: 60, n: "Tahúr de guante blanco|White-glove gambler|Tricheur en gants blancs|Trapaceiro de luvas brancas|Gentleman-Falschspieler|Giocatore in guanti bianchi||绅士老千|흰 장갑 도박사|白手袋のギャンブラー|Шулер в белых перчатках|Gracz w białych rękawiczkach" },
     { id: "caliente", tk: 80, n: "Mano caliente|Hot hand|Main chaude|Mão quente|Heiße Hand|Mano calda||手气正旺|뜨거운 손|ホットハンド|Горячая рука|Gorąca ręka" },
     { id: "sinfreno", tk: 100, n: "Sin freno|No brakes|Sans frein|Sem freio|Ohne Bremse|Senza freni||不踩刹车|브레이크 없이|ブレーキなし|Без тормозов|Bez hamulców" },
-    { id: "cazabotes", tk: 150, n: "Cazador de botes|Jackpot hunter|Chasseur de jackpots|Caçador de prêmios|Jackpot-Jäger|Cacciatore di jackpot||奖池猎人|잭팟 사냥꾼|ジャックポットハンター|Охотник за джекпотом|Łowca jackpotów" },
-    { id: "duenobarra", tk: 250, n: "Dueño de la Barra|Owner of the Bar|Maître du Bar|Dono do Bar|Herr der Bar|Padrone del Bar||吧台之主|바의 주인|バーの主|Хозяин Бара|Pan Baru" },
-    { id: "casapierde", tk: 400, n: "La casa pierde por una vez|For once, the house loses|Pour une fois, la maison perd|Por uma vez, a casa perde|Einmal verliert das Haus|Per una volta, la casa perde||庄家难得一输|이번만은 하우스가 진다|たまには店が負ける|На этот раз казино проиграло|Raz kasyno przegrywa" },
+    { id: "cazabotes", tk: 150, n: "Cazador de botes|Jackpot hunter|Chasseur de jackpots|Caçador de prêmios|Jackpot-Jäger|Cacciatore di jackpot|Cazador de jackpots|奖池猎人|잭팟 사냥꾼|ジャックポットハンター|Охотник за джекпотом|Łowca jackpotów" },
+    { id: "duenobarra", tk: 250, n: "Dueño de la Barra|Owner of the Bar|Maître du Bar|Dono do Bar|Herr der Bar|Padrone del Bar||吧台之主|바의 주인|バーの主|Хозяин Бара|Rządzi Barem" },
+    { id: "casapierde", tk: 400, n: "La casa pierde por una vez|For once, the house loses|Pour une fois, la maison perd|Por uma vez, a casa perde|Einmal verliert das Haus|Per una volta, la casa perde||庄家难得一输|이번만은 하우스가 진다|たまにはハウスが負ける|На этот раз заведение проиграло|Raz kasyno przegrywa" },
     /* v2: uno cada 10 niveles del camino (lv = el nivel en que se gana) */
-    { id: "billete", lv: 5, n: "Billete de ida|One-way ticket|Aller simple|Passagem de ida|Einfache Fahrt|Biglietto di sola andata||单程票|편도 티켓|片道切符|Билет в один конец|Bilet w jedną stronę" },
-    { id: "tapete", lv: 15, n: "Fiel al tapete|Loyal to the felt|Fidèle au tapis|Fiel ao feltro|Dem Filz treu|Fedele al panno verde||牌桌常驻|펠트의 단골|フェルトに忠実|Верен сукну|Wierny suknu" },
-    { id: "rojo", lv: 25, n: "Todo al rojo|All on red|Tout sur le rouge|Tudo no vermelho|Alles auf Rot|Tutto sul rosso||全押红色|레드에 올인|赤に全部|Всё на красное|Wszystko na czerwone" },
+    { id: "billete", lv: 5, n: "Billete de ida|One-way ticket|Aller simple|Passagem de ida|Einfache Fahrt|Biglietto di sola andata|Boleto de ida|单程票|편도 티켓|片道切符|Билет в один конец|Bilet w jedną stronę" },
+    { id: "tapete", lv: 15, n: "Fiel al tapete|Loyal to the felt|Fidèle au tapis|Fiel ao feltro|Dem Filz treu|Fedele al panno verde||牌桌常驻|펠트의 단골|フェルト一筋|Верность сукну|Wierność suknu" },
+    { id: "rojo", lv: 25, n: "Todo al rojo|All on red|Tout sur le rouge|Tudo no vermelho|Alles auf Rot|Tutto sul rosso||全押红色|빨강에 올인|赤に全賭け|Всё на красное|Wszystko na czerwone" },
     { id: "latitud", lv: 35, n: "Latitud cero|Latitude zero|Latitude zéro|Latitude zero|Breitengrad null|Latitudine zero||零度纬线|위도 0도|緯度ゼロ|Нулевая широта|Szerokość zero" },
     { id: "lobo", lv: 45, n: "Lobo de mar|Old salt|Loup de mer|Lobo do mar|Alter Seebär|Lupo di mare||老水手|바다 사나이|海の男|Морской волк|Wilk morski" },
-    { id: "ley", lv: 55, n: "Plata de ley|Sterling silver|Argent massif|Prata de lei|Sterlingsilber|Argento sterling||纯银|순은|純銀|Серебро высшей пробы|Srebro próby" },
-    { id: "midas", lv: 65, n: "Toque de Midas|Midas touch|Toucher de Midas|Toque de Midas|Midas-Händchen|Tocco di Mida||点石成金|미다스의 손|ミダスの手|Прикосновение Мидаса|Dotyk Midasa" },
+    { id: "ley", lv: 55, n: "Plata de ley|Sterling silver|Argent massif|Prata de lei|Sterlingsilber|Argento sterling||纯银|순은|純銀|Серебро высшей пробы|Srebro wysokiej próby" },
+    { id: "midas", lv: 65, n: "Toque de Midas|Midas touch|Toucher de Midas|Toque de Midas|Midas-Touch|Tocco di Mida||点石成金|미다스의 손|ミダスの手|Прикосновение Мидаса|Dotyk Midasa" },
     { id: "etiqueta", lv: 75, n: "De etiqueta|Black tie|Tenue de soirée|De gala|Abendgarderobe|In abito da sera||盛装出席|정장 차림|正装|При параде|W smokingu" },
-    { id: "neon", lv: 85, n: "Luces de neón|Neon lights|Néons|Luzes de neon|Neonlichter|Luci al neon||霓虹灯下|네온 불빛|ネオンの灯|Неоновые огни|Neonowe światła" },
+    { id: "neon", lv: 85, n: "Luces de neón|Neon lights|Néons|Luzes de neon|Neonlicht|Luci al neon||霓虹灯下|네온 조명|ネオンライト|Неоновые огни|Neony" },
     { id: "casi", lv: 95, n: "Casi leyenda|Almost a legend|Presque une légende|Quase lenda|Fast eine Legende|Quasi leggenda||准传奇|전설 직전|伝説まであと一歩|Почти легенда|Prawie legenda" },
   ];
   const TIT = Object.fromEntries(TITLES.map(t => [t.id, t]));
   const TX = {
-    byBarra: "Se canjea en La Barra de la casa por {n} tickets|Redeemed at the House Bar for {n} tickets|S'échange au Bar de la maison contre {n} tickets|Troca-se no Bar da casa por {n} tickets|Im Haus-Bar gegen {n} Tickets einlösbar|Si riscatta al Bar della casa con {n} ticket||在赌场吧台用 {n} 张票券兑换|하우스 바에서 티켓 {n}장으로 교환|ハウスのバーでチケット{n}枚と交換|Обменивается в Баре заведения за {n} билетов|Do wymiany w Barze kasyna za {n} biletów",
-    secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|숨겨진 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
-    byAchN: "Se gana con {n} logros (llevas {k})|Earned with {n} achievements ({k} so far)|S'obtient avec {n} succès ({k} pour l'instant)|Conquistado com {n} conquistas ({k} até agora)|Freigeschaltet mit {n} Erfolgen (bisher {k})|Si ottiene con {n} obiettivi (finora {k})||达成 {n} 个成就后获得（目前 {k} 个）|업적 {n}개로 획득 (현재 {k}개)|実績{n}個で獲得（現在{k}個）|Даётся за {n} достижений (пока {k})|Za {n} osiągnięć (na razie {k})",
-    byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Conquistado com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就「{a}」后获得|업적 「{a}」 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
-    byLv: "Se gana en el nivel {n} del Club|Earned at Club level {n}|S'obtient au niveau {n} du Club|Conquistado no nível {n} do Clube|Freigeschaltet mit Club-Stufe {n}|Si ottiene al livello {n} del Club||俱乐部 {n} 级时获得|클럽 레벨 {n}에서 획득|クラブのレベル{n}で手に入る|Даётся на уровне клуба {n}|Zdobywasz na poziomie klubu {n}",
+    byBarra: "Se canjea en La Barra de la casa por {n} tickets|Redeemed at the House Bar for {n} tickets|S'échange au Bar de la maison contre {n} tickets|Troca-se no Bar da casa por {n} tickets|An der Bar des Hauses gegen {n} Tickets einlösbar|Si riscatta al Bar della casa con {n} ticket||在赌场吧台用 {n} 张票券兑换|하우스 바에서 티켓 {n}장으로 교환|ハウスのバーでチケット{n}枚と交換|Обменивается в Баре заведения на билеты: {n}|Do wymiany w Barze kasyna za bilety: {n}",
+    secret: "Logro secreto|Secret achievement|Succès secret|Conquista secreta|Geheimer Erfolg|Obiettivo segreto||隐藏成就|비밀 업적|シークレット実績|Секретное достижение|Sekretne osiągnięcie",
+    byAchN: "Se gana con {n} logros (llevas {k})|Earned with {n} achievements ({k} so far)|S'obtient avec {n} succès ({k} pour l'instant)|Desbloqueie com {n} conquistas ({k} até agora)|Freigeschaltet mit {n} Erfolgen (bisher {k})|Si ottiene con {n} obiettivi (finora {k})||达成 {n} 个成就后获得（目前 {k} 个）|업적 {n}개로 획득 (현재 {k}개)|実績{n}個で獲得（現在{k}個）|Даётся за достижения: {n} (у тебя {k})|Wymagane osiągnięcia: {n} (masz {k})",
+    byAch: "Se gana con el logro «{a}»|Earned with the achievement “{a}”|S'obtient avec le succès « {a} »|Desbloqueie com a conquista “{a}”|Freigeschaltet mit dem Erfolg „{a}“|Si ottiene con l'obiettivo «{a}»||完成成就“{a}”后获得|업적 ‘{a}’ 달성 시 획득|実績「{a}」で手に入る|Даётся за достижение «{a}»|Zdobywasz za osiągnięcie „{a}”",
+    byLv: "Se gana en el nivel {n} del Club|Earned at Club level {n}|S'obtient au niveau {n} du Club|Desbloqueie no nível {n} do Clube|Freigeschaltet mit Club-Stufe {n}|Si ottiene al livello {n} del Club||俱乐部 {n} 级时获得|클럽 레벨 {n}에서 획득|クラブのレベル{n}で手に入る|Даётся на уровне клуба {n}|Zdobywasz na poziomie klubu {n}",
     lockedCard: "Se descubre en el nivel {n}|Revealed at level {n}|Se dévoile au niveau {n}|Revelada no nível {n}|Wird auf Stufe {n} aufgedeckt|Si scopre al livello {n}||{n} 级时揭晓|레벨 {n}에서 공개|レベル{n}で明かされる|Откроется на уровне {n}|Odkryjesz na poziomie {n}",
-    byDuel: "Se gana con 25 duelos ganados a la banca (llevas {n})|Earned by winning 25 duels against the house ({n} so far)|S'obtient en gagnant 25 duels contre la banque ({n} pour l'instant)|Conquistado vencendo 25 duelos contra a banca ({n} até agora)|Freigeschaltet mit 25 gewonnenen Duellen gegen die Bank (bisher {n})|Si ottiene vincendo 25 duelli contro il banco (finora {n})||战胜庄家 25 次后获得（目前 {n} 次）|하우스와의 대결 25승 시 획득(현재 {n}승)|胴元との勝負に25回勝つと手に入る（いま{n}勝）|Даётся за 25 побед в дуэлях с казино (пока {n})|Zdobywasz za 25 wygranych pojedynków z kasynem (na razie {n})",
+    byDuel: "Se gana con 25 duelos ganados a la banca (llevas {n})|Earned by winning 25 duels against the house ({n} so far)|S'obtient en gagnant 25 duels contre la banque ({n} pour l'instant)|Desbloqueie vencendo 25 duelos contra a banca ({n} até agora)|Freigeschaltet mit 25 gewonnenen Duellen gegen die Bank (bisher {n})|Si ottiene vincendo 25 duelli contro il banco (finora {n})||战胜庄家 25 次后获得（目前 {n} 次）|뱅커와의 대결 25승 시 획득 (현재 {n}승)|胴元との勝負に25回勝つと手に入る（いま{n}勝）|Даётся за 25 побед в дуэлях с банком (пока {n})|Zdobywasz za 25 wygranych pojedynków z bankiem (na razie {n})",
   };
 
   const prof = () => A.profile.get();
@@ -266,9 +266,9 @@ window.AIQ = window.AIQ || {};
     rows.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === ".") return; const v = pal[ch], x = ox + i, y = oy + j; g[layer](x, y, v); g[layer](W - 1 - x, y, v); g[layer](x, H - 1 - y, v); g[layer](W - 1 - x, H - 1 - y, v); }));
   }
   const MARCOS = [
-    { id: "filete", casa: true, n: "El de la casa|The house frame|Celui de la maison|O da casa|Der des Hauses|Quella della casa||本店边框|하우스 기본|ハウスの額縁|Фирменная рамка|Firmowa ramka",
+    { id: "filete", casa: true, n: "El de la casa|The house frame|Celui de la maison|O da casa|Der vom Haus|Quella della casa||本店边框|하우스 기본|ハウスの額縁|Фирменная рамка|Firmowa ramka",
       draw(g, F) { const dia = (cx, cy) => { [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]].forEach(([dx, dy]) => g.s(cx + dx, cy + dy, F[0])); g.s(cx, cy, F[2]); }; [[4, 4], [g.W - 5, 4], [4, g.H - 5], [g.W - 5, g.H - 5]].forEach(([x, y]) => dia(x, y)); } },
-    { id: "remaches", p: 40, n: "Cámara acorazada|Vault|Chambre forte|Cofre-forte|Tresorraum|Caveau||金库|금고|金庫室|Хранилище|Skarbiec",
+    { id: "remaches", p: 40, n: "Cámara acorazada|Vault|Chambre forte|Cofre-forte|Tresorraum|Caveau|Bóveda|金库|금고실|金庫室|Хранилище|Skarbiec",
       draw(g, F) {
         corners4(g, ["aaaaaab", "abbbbbc", "abbkbbc", "abkkkbc", "abbkbbc", "abbbbbc", "bcccccc"], 0, 0, { a: F[0], b: F[1], c: F[2], k: INK });
         const cx = (g.W - 1) / 2; for (let x = 13; x < cx - 3; x += 8) [x, g.W - 1 - x].forEach(xx => { g.o(xx, 2, F[0]); g.o(xx, g.H - 3, F[0]); });
@@ -278,7 +278,7 @@ window.AIQ = window.AIQ || {};
         corners4(g, Array(11).fill("wwwwwwwww"), -1, -1, { w: "#fffaec" });
         const put = (x0, y0, k, col) => SUIT[k].forEach((r, j) => [...r].forEach((ch, i) => { if (ch === "1") g.o(x0 + i, y0 + j, col); }));
         put(1, 2, 0, "#16241c"); put(g.W - 6, 2, 1, "#d8283f"); put(1, g.H - 7, 3, "#16241c"); put(g.W - 6, g.H - 7, 2, "#d8283f"); } },
-    { id: "rosa", p: 100, n: "Rosa de los vientos|Compass rose|Rose des vents|Rosa dos ventos|Windrose|Rosa dei venti||罗盘玫瑰|나침반 장미|コンパスローズ|Роза ветров|Róża wiatrów",
+    { id: "rosa", p: 100, n: "Rosa de los vientos|Compass rose|Rose des vents|Rosa dos ventos|Windrose|Rosa dei venti||罗盘玫瑰|나침도|コンパスローズ|Роза ветров|Róża wiatrów",
       draw(g, F) {
         const star = []; for (let j = -4; j <= 4; j++) { let r = ""; for (let i = -4; i <= 4; i++) r += (i === 0 && j === 0) ? "r" : (i === 0 || j === 0) ? (Math.abs(i + j) === 4 ? "c" : "a") : (Math.abs(i) === Math.abs(j) && Math.abs(i) <= 2) ? "c" : "."; star.push(r); }
         corners4(g, star, 0, 0, { a: F[0], c: F[2], r: "#d8283f" });

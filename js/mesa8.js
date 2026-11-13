@@ -16,7 +16,10 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const D = A.duelo; if (!D || !D._) return;
-  const K = D._, T = K.T, Tf = K.Tf, esc = K.esc, $ = id => document.getElementById(id), C = () => A.core, pad2 = n => String(n).padStart(2, "0");
+  const K = D._, T = K.T, esc = K.esc, $ = id => document.getElementById(id), C = () => A.core, pad2 = n => String(n).padStart(2, "0");
+  /* un solo punto de diferencia: «1 punto», no «1 puntos» (los idiomas con plural; el resto lo abrevian o no lo tienen) */
+  const ONE = { puntos: "punto", points: "point", pontos: "ponto", Punkten: "Punkt", Punkte: "Punkt", punti: "punto" };
+  const Tf = (es, en, o) => { const t = K.Tf(es, en, o); return o && String(o.n) === "1" ? t.replace(/(^|[^\d.,])1 (puntos|points|pontos|Punkten|Punkte|punti)(?![\p{L}])/u, (m, a, w) => a + "1 " + ONE[w]) : t; };
 
   /* ------------------------------------------------------------------ LAS CIFRAS (todas aqui) */
   const CFG = {
@@ -145,7 +148,7 @@ window.AIQ = window.AIQ || {};
     const c = C(), S = c.S; if (S.booting || S.phase !== "title") return;
     D.pool(); K.fitDk(); S.hub = "duelo";
     const s = stats(), N = (M.seats = seatsOf(M.seats)), pl = mkState({ seed: "sala", seats: N }).pl;
-    const free = i => `<div class="m8-seat free rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><span>${T("Silla libre", "Empty chair")}</span></div>`;
+    const free = i => `<div class="m8-seat free rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><span>${T("Asiento libre", "Empty seat")}</span></div>`;
     const seat = (p, i) => `<div class="m8-seat gx-sh rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><div class="gx-paper">${chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3><span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`;
     c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("De 3 a 8 jugadores", "3 to 8 players")}</span></div>
       <div class="m8-room"><div class="amg m8-amg"><span id="m8AmgTx" role="status"></span><input id="m8Code" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Join">${T("Entrar", "Join")}</button></span></div>
@@ -519,7 +522,7 @@ window.AIQ = window.AIQ || {};
     $("m8Cod").textContent = v.code;
     $("m8NetSeats").innerHTML = v.seats.map((s, i) => (s && !s.out
       ? `<div class="m8-seat gx-sh"><div class="gx-paper">${chipSlot({ chip: CFG.chips[i] })}<h3 class="ink">${esc(s.n) || `${T("Jugador", "Player")} ${i + 1}`}</h3><span class="tag ${i === NT.me ? "me" : !s.on ? "red" : ""}">${i === NT.me ? (host ? `${ME()} · ${T("Anfitrión", "Host")}` : ME()) : !s.on ? T("Sin señal", "No signal") : !s.in ? T("En el veredicto", "At the verdict") : i === v.host ? T("Anfitrión", "Host") : T("En la mesa", "At the table")}</span></div></div>`
-      : `<div class="m8-seat free"><span>${T("Silla libre", "Empty chair")}</span></div>`)).join("");
+      : `<div class="m8-seat free"><span>${T("Asiento libre", "Empty seat")}</span></div>`)).join("");
     chips($("m8NetSeats"), ".m8-cs", 56, 28);
     $("m8NetRules").innerHTML = M.rules(inN >= CFG.minSeats ? inN : 0);
     $("m8DealW").classList.toggle("hidden", !host); const b = $("m8Deal"), ok = host && inN >= CFG.minSeats && !playing; b.classList.toggle("dis", !ok); b.setAttribute("aria-disabled", !ok);

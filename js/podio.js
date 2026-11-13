@@ -16,7 +16,7 @@ window.AIQ = window.AIQ || {};
   const TITLE = () => P6("Clasificación|Leaderboard|Classement|Placar|Rangliste|Classifica|Clasificación|排行榜|리더보드|ランキング|Рейтинг|Ranking");   // corto: cabe en la fila de la portada
   const L_TODAY = () => P6("Hoy|Today|Aujourd'hui|Hoje|Heute|Oggi||今天|오늘|今日|Сегодня|Dziś"), L_YDAY = () => P6("Ayer|Yesterday|Hier|Ontem|Gestern|Ieri||昨天|어제|昨日|Вчера|Wczoraj");
   const MODES = () => [["adv", "dealer_mini_s", A.T("Aventura", "Adventure")], ["daily", "dice", A.T("Reto diario", "Daily challenge")]].filter(m => m[0] !== "daily" || A.dailyOn !== false);   // el Reto diario, retirado por ahora (js/hub.js)
-  const PERS = m => (m === "adv" ? [["all", P6("Histórico|All time|Historique|Histórico|Gesamt|Di sempre||历史|역대|歴代|За всё время|Wszech czasów")], ["today", L_TODAY()], ["yday", L_YDAY()]] : [["today", L_TODAY()], ["yday", L_YDAY()]]);
+  const PERS = m => (m === "adv" ? [["all", P6("Histórico|All time|Historique|Histórico|Gesamt|Di sempre||总榜|역대|歴代|За всё время|Wszech czasów")], ["today", L_TODAY()], ["yday", L_YDAY()]] : [["today", L_TODAY()], ["yday", L_YDAY()]]);
   /* Aventura: la de siempre y la mejor expedicion de hoy / ayer; Reto diario: la puntuacion global (suma de los 3 intentos) de hoy / ayer */
   const boardOf = (m, p) => (m === "daily" ? (p === "yday" ? A.rank.daily.yesterday() : A.rank.daily.board()) : p === "today" ? A.rank.day.board() : p === "yday" ? A.rank.day.yesterday() : "adv-all");
   const ROWS = 7, PER = 4;                                            // 3 en el podio + 4 en la lista; despues, paginas de 4 (v0.3.174: cada fila lleva su chapa)
@@ -106,7 +106,7 @@ window.AIQ = window.AIQ || {};
 
   /* fecha de la tabla del dia ("jueves, 8 de octubre"): deja claro de que dia (y de que modo) es ese Hoy / Ayer */
   const dayOf = b => { const m = /(\d{4})(\d{2})(\d{2})$/.exec(b); if (!m) return ""; const L = (A.LANGS || []).find(l => l.code === A.lang); try { return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString(L ? L.loc : A.lang, { weekday: "long", day: "numeric", month: "long" }); } catch (e) { return ""; } };
-  const RANKS = () => P6("Puestos {a}–{b}|Ranks {a}–{b}|Places {a}–{b}|Posições {a}–{b}|Plätze {a}–{b}|Posizioni {a}–{b}||第 {a}–{b} 名|{a}–{b}위|{a}～{b}位|Места {a}–{b}|Miejsca {a}–{b}");
+  const RANKS = () => P6("Puestos {a}–{b}|Ranks {a}–{b}|Rangs {a}–{b}|Posições {a}–{b}|Plätze {a}–{b}|Posizioni {a}–{b}||第 {a}–{b} 名|{a}–{b}위|{a}～{b}位|Места {a}–{b}|Miejsca {a}–{b}");
   const OF = () => P6("de {n}|of {n}|sur {n}|de {n}|von {n}|su {n}||共 {n} 人|/ {n}명|/ {n}人|из {n}|z {n}");
   const dots = r => (mode === "daily" ? `<span class="lb-tries">${[0, 1, 2].map(i => `<i class="${r.tries && i < r.tries.length ? "on" : ""}"></i>`).join("")}</span>` : "");
   /* el estilo de la carta de una fila: la tuya, la que guardo el servidor (r.c) o ninguna (quien no ha vuelto a jugar desde la v0.3.174) */
@@ -183,7 +183,7 @@ window.AIQ = window.AIQ || {};
   /* SE CUELA EN LA CLASIFICACION (votada 23-oct): 1 de cada 3 sesiones, la primera vez que abres el historico de la Aventura, el oro es suyo
      («Don Crupier · 999.999»). Tocalo (o Intro) y le cae el sello de Descalificado: la tabla de verdad vuelve a su sitio */
   const DQ = { roll: Math.random() < 1 / 3, done: false };
-  const DQ_T = "Descalificado|Disqualified|Disqualifié|Desclassificado|Disqualifiziert|Squalificato||取消资格|실격|失格|Дисквалифицирован|Zdyskwalifikowany";
+  const DQ_T = "Descalificado|Disqualified|Disqualifié|Desclassificado|Disqualifiziert|Squalificato||已取消资格|실격|失格|Дисквалификация|Dyskwalifikacja";
   function paint(el, res) {
     /* se conserva el .pd-left (y su entrada en curso): solo cambia su contenido y la pizarra, sin que nada parpadee ni vuelva a deslizarse */
     const tpl = document.createElement("template"); tpl.innerHTML = body(res);

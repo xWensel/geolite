@@ -11,7 +11,7 @@ window.AIQ = window.AIQ || {};
   const DY = () => A.rank.daily, BACK = 730;                         // dos anos hacia atras: el calendario y la busqueda de codigos
   const loc = () => ((A.LANGS || []).find(l => l.code === A.lang) || { loc: A.lang || "es" }).loc;
   const TITLE = () => P6("Otro día|Another day|Un autre jour|Outro dia|Anderer Tag|Altro giorno||其他日期|다른 날|別の日|Другой день|Inny dzień");
-  const SUB = () => P6("Juega la mano de un día pasado como práctica: no cuenta para la clasificación.|Play a past day's hand as practice: it doesn't count for the leaderboard.|Joue la main d'un jour passé en entraînement : ça ne compte pas pour le classement.|Jogue a mão de um dia passado como treino: não conta para o placar.|Spiel das Blatt eines vergangenen Tages als Training: Es zählt nicht für die Rangliste.|Gioca la mano di un giorno passato come allenamento: non conta per la classifica.||以练习方式玩过去某天的手牌：不计入排行榜。|지난 날의 패를 연습으로 플레이해요. 리더보드에는 반영되지 않아요.|過去の日の手札を練習として遊ぶ。ランキングには反映されない。|Сыграй раздачу прошедшего дня как тренировку: в таблицу не идёт.|Zagraj rozdanie z minionego dnia jako trening: nie liczy się do rankingu.");
+  const SUB = () => P6("Juega la mano de un día pasado como práctica: no cuenta para la clasificación.|Play a past day's hand as practice: it doesn't count toward the leaderboard.|Joue la main d'un jour passé en entraînement : ça ne compte pas pour le classement.|Jogue a mão de um dia passado como treino: não conta para o placar.|Spiel das Blatt eines vergangenen Tages als Training: Es zählt nicht für die Rangliste.|Gioca la mano di un giorno passato come allenamento: non conta per la classifica.||以练习方式重玩过去某天的牌局：不计入排行榜。|지난날의 패를 연습으로 플레이해요. 리더보드에는 반영되지 않아요.|過去の日の手札を練習として遊ぶ。ランキングには反映されない。|Сыграй раздачу прошедшего дня как тренировку: в рейтинг не идёт.|Zagraj rozdanie z minionego dnia jako trening: nie liczy się do rankingu.");
   const midnight = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const cap = s => (s ? s.charAt(0).toLocaleUpperCase(loc()) + s.slice(1) : s);
   const fmtD = (d, o) => { try { return d.toLocaleDateString(loc(), o); } catch (e) { return d.toDateString(); } };
@@ -112,7 +112,7 @@ window.AIQ = window.AIQ || {};
     for (let i = 0; i <= BACK; i++, d.setDate(d.getDate() - 1)) {
       const b = boardOf(d); if (DY().code(b) !== code) continue;
       select(b, true); A.sfx.coin(1);
-      msg.className = "od-msg ok"; msg.textContent = i === 0 ? P6("Es la semilla de hoy|That's today's seed|C'est la graine du jour|É a semente de hoje|Das ist der Seed von heute|È il seme di oggi||这是今天的种子|오늘의 시드예요|今日のシードだ|Это зерно сегодняшнего дня|To dzisiejsze ziarno")
+      msg.className = "od-msg ok"; msg.textContent = i === 0 ? P6("Es la semilla de hoy|That's today's seed|C'est la graine du jour|É a semente de hoje|Das ist der Seed von heute|È il seme di oggi||这是今天的种子|오늘의 시드예요|今日のシードです|Это зерно сегодняшнего дня|To dzisiejsze ziarno")
         : P6("Semilla del {d}|Seed from {d}|Graine du {d}|Semente de {d}|Seed vom {d}|Seme del {d}||{d} 的种子|{d}의 시드|{d}のシード|Зерно за {d}|Ziarno z {d}").replace("{d}", fmtD(d, { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
       return;
     }

@@ -18,7 +18,7 @@
   if (!lang || lang === "es") { try { var nl = String(navigator.language || "es").toLowerCase(); if (!localStorage.getItem("atlasiq.v2")) lang = nl.slice(0, 2); } catch (e) { /* nada */ } }
   /* «Cargando la casa» en los 12 idiomas (el mismo orden que A.LANGS) */
   var TX = { es: "Cargando la casa", "es-419": "Cargando la casa", en: "Opening the house", fr: "La maison s'allume", pt: "Abrindo a casa", de: "Das Haus öffnet", it: "La casa si accende",
-    zh: "赌场正在开门", ko: "하우스를 여는 중", ja: "ハウスを開けています", ru: "Казино открывается", pl: "Dom się otwiera" };
+    zh: "赌场正在开门", ko: "하우스를 여는 중", ja: "ハウスを開けています", ru: "Заведение открывается", pl: "Otwieramy kasyno" };
   /* bombilla de 7x7 pixeles de arte: contorno, cristal, nucleo (paleta geolite40) */
   var BULB = ["..ooo..", ".occco.", "occxcco", "ocxxxco", "occxcco", ".occco.", "..ooo.."];
   var EST = [

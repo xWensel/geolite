@@ -6,7 +6,7 @@
   "use strict";
   const A = window.AIQ = window.AIQ || {};
   let el = null, tm = 0, hover = false, wait = 0, waits = 0, zt = 0;
-  const SONG = "Canción|Song|Chanson|Música|Song|Brano||歌曲|곡|曲|Песня|Utwór";
+  const SONG = "Canción|Song|Morceau|Música|Song|Brano||歌曲|곡|曲|Песня|Utwór";
   const S = () => (A.core && A.core.S) || {};
   const musicOn = () => A.audio && A.audio.musicOn;
 

@@ -153,9 +153,9 @@ window.AIQ = window.AIQ || {};
   };
   /* LA VENTANA DE MENTIRA: una ventana del sistema que no es del sistema */
   const VT = {
-    q: "¿Seguro que es ahí?|Are you sure it's there?|Tu es sûr que c'est là ?|Tem certeza de que é aí?|Bist du sicher, dass es da ist?|Sei sicuro che sia lì?||你确定是那里吗？|정말 거기 맞아?|本当にそこで合ってる？|Ты уверен, что это там?|Na pewno tutaj?",
+    q: "¿Seguro que es ahí?|Are you sure it's there?|Tu es sûr que c'est là ?|Tem certeza de que é aí?|Bist du sicher, dass es da ist?|Sicuro che sia lì?||你确定是那里吗？|정말 거기 맞아?|本当にそこで合ってる？|Точно там?|Na pewno tutaj?",
     si: "Sí|Yes|Oui|Sim|Ja|Sì||是|응|はい|Да|Tak",
-    seguro: "Sí, seguro|Yes, sure|Oui, sûr|Sim, tenho certeza|Ja, sicher|Sì, sicuro||是，确定|응, 확실해|はい、確かです|Да, уверен|Tak, na pewno",
+    seguro: "Sí, seguro|Yes, I'm sure|Oui, sûr|Sim, tenho certeza|Ja, sicher|Sì, sicuro||对，确定|응, 확실해|はい、間違いない|Да, точно|Tak, na pewno",
   };
   FX.ventana = (done) => {
     const box = document.createElement("div"); box.className = "tr-win"; box.setAttribute("aria-hidden", "false");
