@@ -38,6 +38,9 @@ contextBridge.exposeInMainWorld("geoliteHost", {
   onScreenChange: (cb) => { ipcRenderer.on("win:screen", (e, info) => cb(info)); },
   /* boton de encendido de la portada (js/salir.js): cierra el juego */
   quit: () => ipcRenderer.send("app:quit"),
+  /* invitaciones a La mesa (js/steam.js): el codigo con el que se arranco el juego (una sola vez) y los que lleguen con el juego abierto */
+  invite: () => ipcRenderer.sendSync("host:invite"),
+  onInvite: (cb) => { ipcRenderer.on("host:invite", (e, code) => cb(String(code || "").slice(0, 5))); },
   /* abres el juego otra vez con este abierto: main trae esta ventana al frente y el crupier lo comenta (js/dealer.js) */
   onAgain: (cb) => { ipcRenderer.on("host:again", () => cb()); },
   /* mueves la ventana a otro monitor (el crupier lo comenta) */

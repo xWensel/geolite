@@ -6,6 +6,7 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   A.DUELO_TR = Object.assign(A.DUELO_TR || {}, {
+    "You've been invited to a room. Press Join.": ["On vous invite dans une salle. Appuyez sur Entrer.", "Você foi convidado para uma sala. Aperte Entrar.", "Du wurdest in einen Raum eingeladen. Drücke Beitreten.", "Ti hanno invitato in una sala. Premi Entra.", null, "有人邀请你进入房间。请按“加入”。", "방에 초대받았습니다. 입장을 누르세요.", "ルームに招待されました。「入室」を押してください。", "Вас пригласили в комнату. Нажмите «Войти».", "Masz zaproszenie do pokoju. Naciśnij Wejdź."],
     "The table": ["La table", "A mesa", "Der Tisch", "Il tavolo", null, "牌桌", "테이블", "テーブル", "Стол", "Stół"],
     "round": ["manche", "rodada", "Runde", "round", null, "回合", "라운드", "ラウンド", "раунд", "runda"],
     "<b>{a}</b> to <b>{b}</b> at the table": ["De <b>{a}</b> à <b>{b}</b> à la table", "De <b>{a}</b> a <b>{b}</b> na mesa", "<b>{a}</b> bis <b>{b}</b> am Tisch", "Da <b>{a}</b> a <b>{b}</b> al tavolo", null, "牌桌 <b>{a}</b> 至 <b>{b}</b> 人", "테이블에 <b>{a}</b>~<b>{b}</b>명", "テーブルに<b>{a}</b>〜<b>{b}</b>人", "От <b>{a}</b> до <b>{b}</b> за столом", "Od <b>{a}</b> do <b>{b}</b> przy stole"],

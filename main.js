@@ -38,6 +38,12 @@ ipcMain.on("host:truco", (e) => { e.returnValue = true; });   // 30-oct: encendi
 const onDeck = (() => { try { if (steamClient && steamClient.utils.isSteamRunningOnSteamDeck()) return true; } catch (e) { /* steamworks sin utils */ } return process.env.SteamDeck === "1"; })();
 ipcMain.on("host:device", (e) => { e.returnValue = onDeck ? "deck" : "pc"; });
 /* panel de rendimiento (js/perf.js): se enciende desde el arranque con GEOLITE_PERF=1 o --perf; su informe se guarda en la carpeta de datos del juego */
+/* INVITACIONES a La mesa (js/mesa8.js): el codigo de una sala en la linea de ordenes, `--mesa=CODIGO` o `+mesa CODIGO` (como el `+connect` de Steam).
+   Vale al arrancar (la pagina lo pide una sola vez) y con el juego abierto (la segunda instancia se lo pasa a la primera). El dia que haya App ID, la
+   invitacion de Steam (una sala de Steam que solo lleva este codigo; GameLobbyJoinRequested) termina en el mismo aviso "host:invite". */
+const inviteOf = argv => { const a = Array.isArray(argv) ? argv.map(String) : []; let c = ""; a.forEach((x, i) => { const m = /^--mesa=(.+)$/i.exec(x); if (m) c = m[1]; else if (/^\+mesa$/i.test(x) && a[i + 1]) c = a[i + 1]; }); c = c.toUpperCase(); return /^[A-HJKMNP-Z2-9]{5}$/.test(c) ? c : ""; };
+let bootInvite = inviteOf(process.argv);
+ipcMain.on("host:invite", (e) => { e.returnValue = bootInvite; bootInvite = ""; });
 ipcMain.on("host:perf", (e) => { e.returnValue = process.env.GEOLITE_PERF === "1" || process.argv.includes("--perf"); });
 ipcMain.on("perf:save", (e, txt) => { if (alive(win) && e.sender === win.webContents && typeof txt === "string" && txt.length < 20000) { try { fs.writeFileSync(path.join(app.getPath("userData"), "geolite-perf.txt"), txt); } catch (err) { /* sin permisos de escritura */ } } });
 /* teclado de Steam (v0.2.31): el flotante escribe directamente en la casilla; si no se puede, el de Big Picture devuelve el texto. Si Steam no
@@ -317,7 +323,7 @@ async function createWindow() {
 /* una sola instancia: una segunda abriria otro puerto (otro origen) y mostraria el juego sin partidas ni perfil; se trae al frente la primera */
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on("second-instance", () => { if (alive(win)) { if (win.isMinimized()) win.restore(); win.focus(); win.webContents.send("host:again"); } });   // el crupier lo comenta: "solo hay un crupier"
+  app.on("second-instance", (e, argv) => { if (alive(win)) { if (win.isMinimized()) win.restore(); win.focus(); const code = inviteOf(argv); if (code) win.webContents.send("host:invite", code); else win.webContents.send("host:again"); } });   // el crupier lo comenta: "solo hay un crupier"
   app.whenReady().then(() => {
     /* permisos: solo lo que el juego usa (pantalla completa, copiar el resultado al portapapeles, bloqueo del puntero); el resto se deniega */
     const OK = new Set(["fullscreen", "clipboard-sanitized-write", "pointerLock"]);

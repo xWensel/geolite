@@ -157,6 +157,7 @@ window.AIQ = window.AIQ || {};
     salaMsg(M.msg, !!M.msg); M.msg = "";
     { const ci = $("m8Code"); ci.oninput = () => { const v = ci.value.toUpperCase().replace(/[^A-HJKMNP-Z2-9]/g, "").slice(0, 5); if (v !== ci.value) ci.value = v; salaMsg(""); };
       ci.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); roomJoin(ci.value); } }; $("m8Join").onclick = () => roomJoin(ci.value); $("m8New").onclick = roomNew; }
+    if (INV && !again) { $("m8Code").value = INV; INV = ""; salaMsg(T("Te han invitado a una sala. Pulsa Entrar.", "You've been invited to a room. Press Join.")); }   // una invitacion que llego en mitad de otra cosa
     $("hubBack").onclick = () => { A.sfx.ui(); D.open(); };
     $("m8Go").onclick = () => { A.sfx.depart(); M.start({ seats: M.seats }); };
     const step = d => () => { const n = seatsOf(M.seats + d); if (n === M.seats) return; M.seats = n; A.sfx.ui(); K.seat(null); M.open(true); const b = $(d < 0 ? "m8Dn" : "m8Up"); if (b && !b.disabled) b.focus(); };
@@ -477,9 +478,24 @@ window.AIQ = window.AIQ || {};
     roomSet(v);
   }
   function roomSet(v) { Object.assign(NT, { code: v.code, me: v.me, R: v, n: v.n, okAt: performance.now(), cut: false, fly: 0, gone: 0, said: "", wasGuest: false }); A.sfx.depart(); roomOpen(); netLoop(); }
-  function netBye() { const code = NT.code; clearTimeout(NT.tm); NT.tm = 0; NT.code = ""; NT.R = null; NT.busy = false; if (code) Rd().call({ a: "bye", code }, "lamesa"); }
+  function netBye() { const code = NT.code; clearTimeout(NT.tm); NT.tm = 0; NT.code = ""; NT.R = null; NT.busy = false; if (code) byeSend(code, 0); }
+  const byeSend = (code, n) => Rd().call({ a: "bye", code }, "lamesa").then(x => { if (x && !x.ok && x.why === "net" && n < 2 && NT.code !== code) setTimeout(() => { if (NT.code !== code) byeSend(code, n + 1); }, 1200); });   // el «me voy» se reintenta: si se pierde, tu silla tardaria 30 s en quedar libre
   addEventListener("pagehide", () => { if (NT.code) Rd().bye({ a: "bye", code: NT.code }, "lamesa"); });
   M.room = () => (NT.code ? { code: NT.code, me: NT.me, R: NT.R } : null);
+  /* INVITACIONES: el codigo de una sala que llega de fuera del juego (js/steam.js: una invitacion de Steam, o arrancar el juego con --mesa=CODIGO).
+     Con el jugador en los menus, se sienta directamente. En mitad de una partida (o de otra sala) no se le saca de ella: el codigo queda apuntado y
+     aparece escrito la proxima vez que entre en La mesa. Si llega con el juego arrancando, espera a la portada (hasta minuto y medio). */
+  let INV = "", invTm = 0;
+  M.invite = code => {
+    code = String(code || "").toUpperCase().replace(/[^A-HJKMNP-Z2-9]/g, "").slice(0, 5); if (code.length !== 5) return false;
+    INV = code; clearInterval(invTm); invTm = 0;
+    const free = () => { const c = C(), S = c && c.S; return !!(S && !S.booting && S.phase === "title" && !S.settingsOpen && !S.duel && !NT.code && !NT.busy && A.hub && (!$("boot") || $("boot").classList.contains("hidden"))); };
+    const go = () => { if (INV !== code) return; INV = ""; if (!inSala()) M.open(); if (inSala()) { $("m8Code").value = code; roomJoin(code); } else INV = code; };
+    const c0 = C(), booting = !c0 || !c0.S || c0.S.booting || !!($("boot") && !$("boot").classList.contains("hidden"));
+    if (free()) go();
+    else if (booting) { const t0 = performance.now(); invTm = setInterval(() => { if (INV !== code || performance.now() - t0 > 90000) { clearInterval(invTm); invTm = 0; return; } if (free()) { clearInterval(invTm); invTm = 0; go(); } }, 700); }
+    return true;
+  };
 
   /* ---------------- la sala: el codigo, las ocho sillas (se van ocupando) y «Repartir» (el anfitrion, con tres o mas) */
   function roomOpen() {
