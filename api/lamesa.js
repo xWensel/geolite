@@ -98,7 +98,9 @@ module.exports = async (req, res) => {
     }
     if (me < 0) return send({ ok: false, why: "out" });
     const n = int(b.n, 0, 1e6), q = int(b.q, 1, 99), bk = n + ":" + q, play = R.st === "play" && n === (+R.n || 0), live = play && q != null, pl = list(R.pl), cmds = [];
-    const here = i => R["p" + i] && R["x" + i] !== "1" && R["r" + i] === "1";
+    const here = i => R["p" + i] && R["x" + i] !== "1" && R["r" + i] === "1" && (i === me || now - (+R["s" + i] || 0) < GONE);   // en la sala y dando senal
+    /* fuera de partida, el asiento de quien lleva 30 s sin dar senal (cerro el juego, se quedo sin red) queda libre */
+    if (R.st !== "play") for (const i of ALL) if (i !== me && R["p" + i] && now - (+R["s" + i] || 0) > HOST_GONE) { cmds.push(["HDEL", key(code), "p" + i, "n" + i, "c" + i, "k" + i, "s" + i, "x" + i, "r" + i]); delete R["p" + i]; }
     /* el relevo: si el anfitrion se ha ido (o se va ahora, o lleva 30 s sin dar senal), reparte el asiento mas bajo que siga dando senal */
     let host = +R.h || 0;
     { const up = i => R["p" + i] && R["x" + i] !== "1" && !(a === "bye" && i === me) && (i === me || now - (+R["s" + i] || 0) < GONE);
