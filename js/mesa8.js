@@ -23,11 +23,11 @@ window.AIQ = window.AIQ || {};
 
   /* ------------------------------------------------------------------ LAS CIFRAS (todas aqui) */
   const CFG = {
-    seats: 8, minSeats: 3, perRound: 3,                 // de minSeats a seats en la mesa (dos es un duelo): se juega con los que se sienten, sin rellenar
+    seats: 8, minSeats: 3, perRound: 3, finalQs: 5,     // de minSeats a seats en la mesa (dos es un duelo): se juega con los que se sienten, sin rellenar. La final, cinco preguntas (v0.4.77)
     diff: { from: 28, to: 72, half: 14 },                // dificultad de la primera y de la ultima pregunta, y el ancho de la franja (bandOf)
     secs: 12, rush: 5,                                  // segundos por pregunta; lo que le queda al resto cuando ha fijado media mesa
     bots: [16, 24, 32, 40, 48, 56, 66],                 // cuanto sabe cada banca (la misma escala 1-100 del Duelo); se reparten por los asientos al azar
-    revealSecs: 4.4, roundSecs: 6,                      // lo que dura el revelado de una pregunta y el cartel «cae el ultimo»
+    revealSecs: 4.4, roundSecs: 6, finSecs: 3.8,        // lo que dura el revelado de una pregunta, el cartel «cae el ultimo» y la entrada de la final
     rev: { me: 500, rv: 700, gap: 80, lines: 1100, fact: 1200, pts: 1700 },   // el revelado, en ms: tu ficha, las demas (una cada gap), las lineas, la tira del dato y los puntos
     chips: ["chip_o", "chip_p", "chip_r", "chip_b", "chip_g", "chip_k", "chip_t", "chip_w"],
   };
@@ -58,12 +58,14 @@ window.AIQ = window.AIQ || {};
   /* orden de la ronda: mas puntos; a igualdad, la mejor pregunta; luego, quien tardo menos; (y si aun asi, el asiento) */
   const cmp = (a, b) => b.rp - a.rp || bestQ(b) - bestQ(a) || a.rt - b.rt || a.ord - b.ord;
   const order = st => alive(st).sort(cmp).concat(st.pl.filter(p => !p.alive).sort((a, b) => b.out - a.out));
+  /* las preguntas de la ronda: la final (dos en pie al empezarla) tiene cinco; las demas, tres. Se fija al empezar la ronda: si alguien se levanta a mitad, la ronda sigue con las suyas */
+  const perOf = st => st.per || CFG.perRound, totalOf = st => (st.R - 1) * CFG.perRound + CFG.finalQs;
   function startRound(st) {
-    st.k++; st.qi = 0;
+    st.k++; st.qi = 0; st.per = alive(st).length === 2 ? CFG.finalQs : CFG.perRound;
     alive(st).forEach(p => { p.rp = 0; p.sp = 0; p.rq = []; p.rt = 0; p.up = 0; });
   }
   function nextQ(st) {
-    st.qi++; st.nq++; st.band = bandOf(st.nq, st.R * CFG.perRound); const e = K.drawQ(st), cur = (st.cur = { e, q: e.q, d: e.d, secs: CFG.secs, play: {}, lock: {}, ans: null, rushed: false });
+    st.qi++; st.nq++; st.band = bandOf(st.nq, totalOf(st)); const e = K.drawQ(st), cur = (st.cur = { e, q: e.q, d: e.d, secs: CFG.secs, play: {}, lock: {}, ans: null, rushed: false });
     if (!st.net) alive(st).forEach(p => { if (!p.me) { const b = D.botPlay(st.rb, e.q, e.d, p.lv); b.at = Math.min(b.t, CFG.secs - 0.4); cur.play[p.i] = b; } });
     return cur;
   }
@@ -83,7 +85,7 @@ window.AIQ = window.AIQ || {};
   /* fin de la ronda: cae el ultimo. Devuelve { k, saco, tabla (orden de la ronda), out (el que cae), margin (lo que le falto para salvarse) } */
   function endRound(st) {
     const tab = alive(st).sort(cmp), last = tab[tab.length - 1], prev = tab[tab.length - 2];
-    const r = { k: st.k, saco: st.table.saco, tab: tab.map(p => ({ i: p.i, rp: p.rp, rq: p.rq.slice() })), out: last.i, margin: prev.rp - last.rp, qs: st.log.slice(-CFG.perRound).map(x => x.q) };
+    const r = { k: st.k, saco: st.table.saco, tab: tab.map(p => ({ i: p.i, rp: p.rp, rq: p.rq.slice() })), out: last.i, margin: prev.rp - last.rp, qs: st.log.slice(-perOf(st)).map(x => x.q) };
     last.alive = false; last.out = st.k; last.place = tab.length; st.rounds.push(r);
     if (tab.length === 2) { prev.place = 1; st.over = st.over || { win: prev.me, rounds: st.k, winner: prev.i }; }
     return r;
@@ -98,7 +100,7 @@ window.AIQ = window.AIQ || {};
       const st = mkState({ seed: (o.seed || "sim") + ":" + g, seats: o.seats }); let secs = 0;
       while (!st.over) {
         startRound(st);
-        for (let j = 0; j < CFG.perRound; j++) {
+        for (let j = 0, nj = perOf(st); j < nj; j++) {
           const cur = nextQ(st), al = alive(st), raw = {}, pos = {}; (dq[st.nq - 1] = dq[st.nq - 1] || []).push(cur.d);
           al.forEach(p => { if (p.me) { const b = D.botPlay(st.ra, cur.q, cur.d, la); raw[0] = Math.min(b.t, CFG.secs - 0.4); pos[0] = b; } else { raw[p.i] = cur.play[p.i].at; pos[p.i] = cur.play[p.i]; } });
           const t = lockTimes(raw, al.length), ans = {}; al.forEach(p => (ans[p.i] = { lon: pos[p.i].lon, lat: pos[p.i].lat, t: t[p.i] }));
@@ -139,7 +141,7 @@ window.AIQ = window.AIQ || {};
   const lnAt = {}, line = k => { const a = LN[k], i = (lnAt[k] = lnAt[k] == null ? Math.floor(Math.random() * a.length) : (lnAt[k] + 1) % a.length); return T(a[i][0], a[i][1]); };
 
   /* las reglas, en una linea (la sala del Duelo las ensena al elegir esta puerta, y la sala de ocho debajo de los asientos) */
-  M.rules = n => `<span>${A.icon("boss_hat")}${n ? `<b>${n - 1}</b> ${n === 2 ? T("ronda", "round") : T("rondas", "rounds")}` : Tf("De <b>{a}</b> a <b>{b}</b> en la mesa", "<b>{a}</b> to <b>{b}</b> at the table", { a: CFG.minSeats, b: CFG.seats })}</span><span>${A.icon("chip_k")}<b>${CFG.perRound}</b> ${T("preguntas por ronda", "questions a round")}</span><span>${A.icon("coin")}${T("Cae <b>el último</b> de cada ronda", "<b>Last place</b> falls each round")}</span>`;
+  M.rules = (n, short) => `${short ? "" : `<span>${A.icon("boss_hat")}${n ? `<b>${n - 1}</b> ${n === 2 ? T("ronda", "round") : T("rondas", "rounds")}` : Tf("De <b>{a}</b> a <b>{b}</b> en la mesa", "<b>{a}</b> to <b>{b}</b> at the table", { a: CFG.minSeats, b: CFG.seats })}</span>`}<span>${A.icon("chip_k")}<b>${CFG.perRound}</b> ${T("preguntas por ronda", "questions a round")} · <b>${CFG.finalQs}</b> ${T("en la final", "in the final")}</span><span>${A.icon("coin")}${T("Cae <b>el último</b> de cada ronda", "<b>Last place</b> falls each round")}</span>`;
   /* la ilustracion de la puerta: las ocho fichas en dos filas */
   M.fan = el => { el.innerHTML = `<div class="m8-fan">${CFG.chips.map(c => `<span data-chip="${c}"></span>`).join("")}</div>`; chips(el, "[data-chip]", 32, 16); };
 
@@ -147,13 +149,16 @@ window.AIQ = window.AIQ || {};
   M.open = again => {
     const c = C(), S = c.S; if (S.booting || S.phase !== "title") return;
     D.pool(); K.fitDk(); S.hub = "duelo";
-    const s = stats(), N = (M.seats = seatsOf(M.seats)), pl = mkState({ seed: "sala", seats: N }).pl;
-    const free = i => `<div class="m8-seat free rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><span>${T("Asiento libre", "Empty seat")}</span></div>`;
-    const seat = (p, i) => `<div class="m8-seat gx-sh rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"><div class="gx-paper">${chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3><span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`;
+    const s = stats(), N = (M.seats = seatsOf(M.seats));
+    /* an = la silla que entra (al pulsar +): solo ella aparece; las demas se quedan quietas (v0.4.77: antes se redibujaba la sala entera y parpadeaba) */
+    const rs = (i, an) => (an == null ? ` rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"` : i === an ? ` rise" style="--d:0s"` : `"`);
+    const free = (i, an) => `<div class="m8-seat free${rs(i, an)}><span>${T("Asiento libre", "Empty seat")}</span></div>`;
+    const seat = (p, i, an) => `<div class="m8-seat gx-sh${rs(i, an)}><div class="gx-paper">${chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3><span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`;
+    const seatsHtml = (n, an) => mkState({ seed: "sala", seats: n }).pl.map((p, i) => seat(p, i, an)).join("") + Array.from({ length: CFG.seats - n }, (_, i) => free(n + i, an)).join("");
     c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("De 3 a 8 jugadores", "3 to 8 players")}</span></div>
       <div class="m8-room"><div class="amg m8-amg"><span id="m8AmgTx" role="status"></span><input id="m8Code" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Join">${T("Entrar", "Join")}</button></span></div>
-        <span class="gx-eyb">${T("Práctica contra el juego", "Practice against the game")}</span><div class="m8-seats8">${pl.map(seat).join("")}${Array.from({ length: CFG.seats - N }, (_, i) => free(N + i)).join("")}</div>
-        <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One fewer chair")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b>${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span>${M.rules(N)}</div>
+        <span class="gx-eyb">${T("Práctica contra el juego", "Practice against the game")}</span><div class="m8-seats8" id="m8Seats">${seatsHtml(N)}</div>
+        <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One fewer chair")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b id="m8N">${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span><span id="m8Rl" style="display:contents">${M.rules(N)}</span></div>
         <div class="regl"><span>${T("Mesas jugadas", "Tables played")} <b>${s.d}</b></span><span>${T("Coronas", "Crowns")} <b>${s.w}</b></span><span>${T("Todo el contenido. La dificultad sube poco a poco", "All the content. Difficulty climbs little by little")}</span></div></div>
       <div class="ft"><div class="seatw" id="m8SalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts"><button type="button" class="gx-btn" id="m8Go"><span>${T("Practicar", "Practice")}</span></button>${K.primary("m8New", T("Abrir una sala", "Open a room"))}</div></div>`), "tablewrap");
     chips($("dlg"), ".m8-cs", 56, 28);
@@ -163,7 +168,10 @@ window.AIQ = window.AIQ || {};
     if (INV && !again) { $("m8Code").value = INV; INV = ""; salaMsg(T("Te han invitado a una sala. Pulsa Entrar.", "You've been invited to a room. Press Join.")); }   // una invitacion que llego en mitad de otra cosa
     $("hubBack").onclick = () => { A.sfx.ui(); D.open(); };
     $("m8Go").onclick = () => { A.sfx.depart(); M.start({ seats: M.seats }); };
-    const step = d => () => { const n = seatsOf(M.seats + d); if (n === M.seats) return; M.seats = n; A.sfx.ui(); K.seat(null); M.open(true); const b = $(d < 0 ? "m8Dn" : "m8Up"); if (b && !b.disabled) b.focus(); };
+    const step = d => () => { const n = seatsOf(M.seats + d); if (n === M.seats) return; M.seats = n; A.sfx.ui();
+      const box = $("m8Seats"); box.innerHTML = seatsHtml(n, d > 0 ? n - 1 : -1); chips(box, ".m8-cs", 56, 28);
+      $("m8N").textContent = n; $("m8Rl").innerHTML = M.rules(n); $("m8Dn").disabled = n <= CFG.minSeats; $("m8Up").disabled = n >= CFG.seats;
+      const b = $(d < 0 ? "m8Dn" : "m8Up"); if (b && !b.disabled) b.focus(); else { const o = $(d < 0 ? "m8Up" : "m8Dn"); if (o) o.focus(); } };
     $("m8Dn").onclick = step(-1); $("m8Up").onclick = step(1);
     if (again) { K.seat($("m8SalaSeat")); if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden")); return; }
     K.seat($("m8SalaSeat")); K.speak(line("sala"));
@@ -189,7 +197,7 @@ window.AIQ = window.AIQ || {};
     document.body.classList.remove("title-on"); document.body.classList.add("duelo-on", "mesa8-on");
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden"); $("factText").textContent = ""; c.chrome(true);
     add("m8Hud", "m8-hud du-st", `<div class="gx-pnl"><div class="m8-top"><span id="m8Rd"></span><span class="mid" id="m8Q"></span><span id="m8Sub"></span></div>
-      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span></div>`).join("")}</div></div>`);
+      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span></div>`).join("")}<span class="m8-fx hidden" id="m8Fx">${T("Fuera", "Out")}</span><span class="m8-vs hidden" id="m8Vs">VS</span></div></div><div class="m8-watch hidden" id="m8Watch"></div><div class="m8-note hidden" id="m8Note" role="status"></div>`);
     chips($("m8Hud"), ".m8-cs", 40, 20);
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Abandonar", "Leave")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
@@ -206,17 +214,32 @@ window.AIQ = window.AIQ || {};
   /* lo que pinta el juego en su marcador (js/game.js, updateHud -> A.duelo.hud): el numero de la pregunta en la placa y la tira de ocho */
   M.hud = () => {
     if (!st || !$("m8Hud")) return; const ord = st.pl.filter(p => p.alive).sort((a, b) => b.sp - a.sp || cmp(a, b)).concat(st.pl.filter(p => !p.alive).sort((a, b) => b.out - a.out));
-    const cur = st.cur, askN = st.phase === "ask", nAl = alive(st).length, RR = Math.max(1, st.k) + Math.max(0, nAl - 2), total = Math.max(st.nq, (RR - Math.max(1, st.k)) * CFG.perRound + Math.max(1, st.k) * CFG.perRound - (st.k ? 0 : 0)), fin = nAl === 2;
+    const cur = st.cur, askN = st.phase === "ask", nAl = alive(st).length, k1 = Math.max(1, st.k), per = perOf(st), fin = nAl === 2 && per === CFG.finalQs, RR = k1 + Math.max(0, nAl - 2) + (nAl === 2 && !fin ? 1 : 0);
+    const total = Math.max(st.nq, (k1 - 1) * CFG.perRound + per + Math.max(0, RR - k1 - 1) * CFG.perRound + (RR > k1 ? CFG.finalQs : 0));   // lo hecho, esta ronda y las que quedan (la final, de cinco)
     $("askNo").textContent = A.t("ask.no", { n: pad2(Math.max(1, st.nq)), m: pad2(total) });
-    $("m8Rd").innerHTML = fin ? `<b>${T("La final", "The final")}</b>` : `${T("Ronda", "Round")} <b>${Math.max(1, st.k)}</b> / ${RR}`;
-    $("m8Q").textContent = `${T("Pregunta", "Question")} ${Math.max(1, st.qi)} / ${CFG.perRound}`;
-    $("m8Sub").innerHTML = st.net && NT.cut ? T("Sin conexión", "Offline") : st.phase === "wait" ? T("Esperando a la mesa…", "Waiting for the table…") : fin ? T("Quien gane se queda la mesa", "Winner takes the table") : `${T("Quedan", "Still in")} <b>${nAl}</b> · ${T("cae el último", "last place falls")}`;
-    const scored = st.qi > 1 || st.phase === "reveal", locked = p => !!cur && cur.lock[p.i] != null;
+    $("m8Rd").innerHTML = fin ? `<b>${T("La final", "The final")}</b>` : `${T("Ronda", "Round")} <b>${k1}</b> / ${RR}`;
+    $("m8Q").textContent = `${T("Pregunta", "Question")} ${Math.max(1, st.qi)} / ${per}`;
+    const scored = st.qi > 1 || st.phase === "reveal", locked = p => !!cur && cur.lock[p.i] != null, m = me();
+    /* arriba a la derecha: lo que te importa a ti. Cuanto te falta para salvarte o cuanto te sobra (con la ronda ya puntuada); mirando, si caiste */
+    const al = ord.filter(p => p.alive), myAt = al.indexOf(m), gap = myAt < 0 || al.length < 2 ? 0 : myAt === al.length - 1 ? al[al.length - 2].sp - m.sp : m.sp - al[al.length - 1].sp;
+    $("m8Sub").innerHTML = st.net && NT.cut ? T("Sin conexión", "Offline") : st.phase === "wait" ? T("Esperando a la mesa…", "Waiting for the table…")
+      : fin ? (scored && gap ? (myAt === 0 ? `<span class="sv">${Tf("Ganas por {n}", "Ahead by {n}", { n: A.fmt(gap) })}</span>` : `<span class="dn">${Tf("Pierdes por {n}", "Behind by {n}", { n: A.fmt(gap) })}</span>`) : T("Quien gane se queda la mesa", "Winner takes the table"))
+      : scored && myAt >= 0 ? (myAt === al.length - 1 ? `<span class="dn">${gap ? Tf("Te faltan {n} para salvarte", "{n} short of safety", { n: A.fmt(gap) }) : T("Empate en el último puesto", "Tied for last place")}</span>` : `<span class="sv">${Tf("A salvo por {n}", "Safe by {n}", { n: A.fmt(gap) })}</span>`)
+      : `${T("Quedan", "Still in")} <b>${nAl}</b> · ${T("cae el último", "last place falls")}`;
+    /* la tira: asientos de pie del ancho que quepa (en la final, mas anchos y frente a frente) y los caidos recogidos a la derecha */
+    const row = $("m8Row"), dk = dkOf(), nOut = st.pl.length - nAl, FW = 48, FX = nOut ? 14 : 0, VS = fin ? 40 : 0;
+    const room = Math.max(400, ($("m8Hud").getBoundingClientRect().width || 795 * dk) / dk - 32), SW = fin ? 200 : Math.max(88, Math.min(150, Math.floor((room - FX - nOut * FW) / Math.max(1, nAl))));
+    const xs = {}; let x = 0; al.forEach((p, n) => { xs[p.i] = x; x += SW + (fin && n === 0 ? VS : 0); }); const fx0 = x; x += FX; ord.filter(p => !p.alive).forEach(p => { xs[p.i] = x; x += FW; });
+    row.style.setProperty("--sw", SW + "px"); row.style.setProperty("--fw", FW + "px"); $("m8Hud").style.setProperty("--rw", x + "px"); row.style.setProperty("--rw", x + "px"); row.classList.toggle("m8fin", fin);
+    const fxe = $("m8Fx"); fxe.classList.toggle("hidden", !nOut); if (nOut) { fxe.style.transform = `translateX(${fx0 + 4}px)`; fxe.style.width = FX + nOut * FW - 4 + "px"; }
+    const vse = $("m8Vs"); vse.classList.toggle("hidden", !fin); if (fin) vse.style.transform = `translateX(${SW}px)`;
+    const wt = $("m8Watch"); if (wt) { const on = !m.alive && st.phase !== "end"; wt.classList.toggle("hidden", !on); if (on) wt.textContent = m.quit ? T("Te has levantado", "You got up") : Tf("Mirando · caíste en la ronda {k}", "Watching · you fell in round {k}", { k: m.out }); }
     ord.forEach((p, n) => {
-      const e = $("m8Row").children[p.i], last = p.alive && scored && n === nAl - 1;
+      const e = row.children[p.i], last = p.alive && scored && n === nAl - 1;
       const cls = "m8-s" + (p.me ? " me" : "") + (!p.alive ? " out" : "") + (last ? " dz" : "") + (p.alive && askN ? (locked(p) ? " lk" : " th") : "");
       if (e.className !== cls) e.className = cls;
-      const tx = `translateX(${n * 100}%)`; if (e.style.transform !== tx) e.style.transform = tx;
+      const tx = `translateX(${xs[p.i]}px)`; if (e.style.transform !== tx) e.style.transform = tx;
+      const cm = !p.alive ? "s" : fin ? "f" : "n"; if (e.dataset.cm !== cm) { e.dataset.cm = cm; const s = e.querySelector(".m8-cs"), z = { s: [32, 16], f: [56, 28], n: [40, 20] }[cm]; s.textContent = ""; s.appendChild(chipIn(p.chip, z[0], z[1])); }   // la ficha, siempre a escala entera
       const set = (s, v) => { const x = e.querySelector(s); if (x.textContent !== v) x.textContent = v; };
       set(".m8o", p.alive ? String(n + 1) : "");
       set(".m8p", p.alive ? A.fmt(p.sp) : T("Fuera", "Out"));
@@ -266,7 +289,8 @@ window.AIQ = window.AIQ || {};
   /* ---------------- la pregunta: la misma para toda la mesa, con el reloj y la placa del juego */
   const elapsed = () => { const S = C().S; return ((S.paused ? S.pauseAt : performance.now()) - st.cur.t0 - S.pausedAcc) / 1000; };
   function ask() {
-    const c = C(), S = c.S; if (st.qi === 0 || st.qi >= CFG.perRound) startRound(st);
+    const c = C(), S = c.S; if (st.qi === 0 || st.qi >= perOf(st) || st.cut) { st.cut = null; startRound(st); }
+    finKill();
     const cur = nextQ(st), m = me(); st.phase = "ask"; st.ptsOn = false;
     if (!st.t0) st.t0 = performance.now();
     S.qs.push(cur.q); S.qi = st.nq - 1; S.camp.levels[0].seconds = cur.secs; S.camp.levels[0].kind = cur.q.kind || "city";
@@ -328,7 +352,17 @@ window.AIQ = window.AIQ || {};
     else alive(st).forEach(p => { if (p.me) ans[0] = cur.ans && cur.lock[0] != null ? { ...cur.ans, t: cur.lock[0] } : null; else { const b = cur.play[p.i]; ans[p.i] = { lon: b.lon, lat: b.lat, t: cur.lock[p.i] != null ? cur.lock[p.i] : Math.min(b.at, tEnd) }; } });
     const wasAlive = m.alive, rd = settleQ(st, ans), mine = rd.rows[0], g = wasAlive && ans[0], tok = st.nq, live = () => st && st.nq === tok && st.phase === "reveal";
     const real = !st.auto || st.auto.club;
-    if (z) applyOuts(z.outs);                                             // los que se han levantado o han perdido la senal: fuera, los mismos en todos los juegos
+    if (z) {                                                              // los que se han levantado o han perdido la senal: fuera, los mismos en todos los juegos
+      const was = alive(st); applyOuts(z.outs); const gone = was.filter(p => !p.alive);
+      if (gone.length) {
+        noteShow(gone.some(p => p.me) ? T("Te has quedado sin señal: sigues mirando la mesa.", "You lost your connection: you're still watching the table.")
+          : gone.length === 1 ? Tf("{name} se ha levantado de la mesa.", "{name} got up from the table.", { name: nameOf(gone[0]) }) : Tf("Se han levantado {n} jugadores.", "{n} players got up.", { n: gone.length }));
+        /* v0.4.77: si con los que se van quedan dos a mitad de una ronda, la ronda se corta sin que caiga nadie y empieza la final de verdad (antes el
+           marcador pasaba a «La final» en plena ronda y parecia que la ronda se habia acabado con una sola pregunta) */
+        if (!st.over && perOf(st) !== CFG.finalQs && alive(st).length === 2) st.cut = { k: st.k, gone: gone.map(p => p.i) };
+        M.hud();                                                          // su asiento se recoge ya, sin esperar a los puntos
+      }
+    }
     if (g && real && A.club) A.club.q(mine.pts / 1000);                    // el Club de la casa: experiencia por precision (se cobra en el veredicto)
     if (m.alive && real && A.clubRetos) {
       const lim = A.codexLimits ? A.codexLimits({ id: q.cid[0], cids: q.cid }) : [300], wa = !!(A.waters && A.waters.of(q)), ok = !!g && mine.km != null;
@@ -360,9 +394,10 @@ window.AIQ = window.AIQ || {};
     later(() => { if (live()) $("m8Pins").classList.add("ln"); }, R.lines);
     later(() => { if (live()) K.factShow(q, label, fl); }, R.fact);
     later(() => { if (!live()) return; st.ptsOn = true; alive(st).forEach(p => (p.sp = p.rp)); M.hud(); if (A.sfx.golpe) A.sfx.golpe(st.qi - 1); }, R.pts);
-    const total = st.auto && st.auto.next != null ? st.auto.next : CFG.revealSecs * 1000, endR = st.qi >= CFG.perRound;
-    /* entre jugadores: «listo para la siguiente» sale ya, con los que seguiran en pie (lo calculan igual todos); la pregunta empieza a la hora que diga el servidor */
-    if (st.net && !st.over) { const al = alive(st).sort(cmp), nxt = endR ? al.slice(0, -1) : al; if (nxt.length >= 2 || (!endR && nxt.length >= 2)) netReady(st.nq + 1, total + (endR ? CFG.roundSecs * 1000 : 0), nxt.map(p => p.seat).sort().join(",")); }
+    const total = st.auto && st.auto.next != null ? st.auto.next : CFG.revealSecs * 1000, endR = !!st.cut || st.qi >= perOf(st);
+    /* entre jugadores: «listo para la siguiente» sale ya, con los que seguiran en pie (lo calculan igual todos); la pregunta empieza a la hora que diga el servidor.
+       Antes de la final, al cartel de la ronda se le suma su entrada */
+    if (st.net && !st.over) { const al = alive(st).sort(cmp), nxt = endR && !st.cut ? al.slice(0, -1) : al; if (nxt.length >= 2) netReady(st.nq + 1, total + (endR ? CFG.roundSecs * 1000 + (nxt.length === 2 ? CFG.finSecs * 1000 : 0) : 0), nxt.map(p => p.seat).sort().join(",")); }
     const go = () => { if (!live()) return; if (K.veiled() && !st.net) return later(go, 400); alive(st).forEach(p => (p.sp = p.rp)); if (st.over) return finish(); if (endR) roundEnd(); else if (!st.net) ask(); };
     for (let n = 3; n >= 1; n--) if (total - n * 1000 > R.fact) later(() => { const e = $("duNext"); if (live() && e) { e.textContent = endR ? Tf("La cuenta en {n}", "Tally in {n}", { n }) : Tf("Sigue en {n}", "Next in {n}", { n }); e.classList.remove("hidden"); } }, total - n * 1000);
     later(go, total);
@@ -371,34 +406,72 @@ window.AIQ = window.AIQ || {};
   /* ================================================================== 4 · CAE EL ULTIMO: la cuenta de la ronda y quien se va. Dura unos segundos y sigue sola */
   const qName = q => { const n = q.clue ? A.tx(q.answer) : A.tx(q.name); return q.kind === "flag" ? Tf("Bandera de {n}", "Flag of {n}", { n }) : n; };
   function roundEnd() {
-    const c = C(), S = c.S, m = me(), wasIn = m.alive, r = endRound(st), out = st.pl[r.out], prev = st.pl[r.tab[r.tab.length - 2].i];
+    const c = C(), S = c.S, m = me(), cut = st.cut, wasIn = m.alive || !!(cut && cut.gone.includes(0));
+    /* la ronda cortada (v0.4.77): se han levantado y quedan dos. No cae nadie: la tabla de lo jugado y, enseguida, la final */
+    const r = cut ? { k: st.k, tab: st.pl.filter(p => p.alive || cut.gone.includes(p.i)).sort((a, b) => b.alive - a.alive || cmp(a, b)).map(p => ({ i: p.i, rp: p.rp, rq: p.rq.slice() })), out: null, margin: 0, qs: st.log.slice(-st.qi).map(x => x.q) } : endRound(st);
     if (st.over) return finish();                                         // era la final: directo al veredicto
     st.phase = "round"; S.phase = "intro"; c.map.clearMarks(); pinsClear(); c.map.animateTo(c.map.home(), 900);
     for (const id of ["m8Hud", "duTools", "duFact"]) $(id).classList.add("hidden"); $("plate").classList.add("hidden");
-    const nLeft = alive(st).length, myPos = r.tab.findIndex(x => x.i === 0) + 1, meOut = out.me;
-    const tied = r.margin === 0, why = tied ? Tf("Empató a puntos con {name} y tenía peor su mejor pregunta.", "Tied on points with {name}, with a weaker best question.", { name: nameOf(prev) })
+    const out = r.out != null ? st.pl[r.out] : null, prev = out ? st.pl[r.tab[r.tab.length - 2].i] : null;
+    const nLeft = alive(st).length, myPos = r.tab.findIndex(x => x.i === 0) + 1, meOut = !!out && out.me;
+    const tied = r.margin === 0, why = !out ? "" : tied ? Tf("Empató a puntos con {name} y tenía peor su mejor pregunta.", "Tied on points with {name}, with a weaker best question.", { name: nameOf(prev) })
       : Tf("Se quedó a {n} puntos de {name}.", "Finished {n} points behind {name}.", { n: A.fmt(r.margin), name: nameOf(prev) });
-    const whyMe = tied ? Tf("Empataste a puntos con {name} y su mejor pregunta fue mejor que la tuya.", "You tied on points with {name}, whose best question beat yours.", { name: nameOf(prev) })
+    const whyMe = !out ? "" : tied ? Tf("Empataste a puntos con {name} y su mejor pregunta fue mejor que la tuya.", "You tied on points with {name}, whose best question beat yours.", { name: nameOf(prev) })
       : Tf("Te quedaste a {n} puntos de {name}.", "You finished {n} points behind {name}.", { n: A.fmt(r.margin), name: nameOf(prev) });
-    const rows = r.tab.map((x, n) => { const p = st.pl[x.i], dz = x.i === r.out;
-      return `<tr class="${p.me ? "me" : ""}${dz ? " dz" : ""}"><td>${n + 1}</td><td><span>${chipSlot(p)}<em>${nameOf(p)}</em>${dz ? `<b class="tg">${T("Fuera", "Out")}</b>` : p.me ? `<b class="tg o">${ME()}</b>` : ""}</span></td>${x.rq.map(v => `<td>${A.fmt(v)}</td>`).join("")}<td>${A.fmt(x.rp)}</td></tr>`; }).join("");
+    const goneTx = cut ? (cut.gone.length === 1 ? Tf("{name} se ha levantado.", "{name} got up.", { name: nameOf(st.pl[cut.gone[0]]) }) : Tf("Se han levantado {n} jugadores.", "{n} players got up.", { n: cut.gone.length })) : "";
+    const rows = r.tab.map((x, n) => { const p = st.pl[x.i], dz = x.i === r.out, gn = !!cut && cut.gone.includes(x.i);
+      return `<tr class="${p.me ? "me" : ""}${dz || gn ? " dz" : ""}"><td>${gn ? "·" : n + 1}</td><td><span>${chipSlot(p)}<em>${nameOf(p)}</em>${dz ? `<b class="tg">${T("Fuera", "Out")}</b>` : gn ? `<b class="tg">${T("Se levantó", "Got up")}</b>` : p.me ? `<b class="tg o">${ME()}</b>` : ""}</span></td>${x.rq.map(v => `<td>${A.fmt(v)}</td>`).join("")}<td>${A.fmt(x.rp)}</td></tr>`; }).join("");
     const secs = st.auto && st.auto.round != null ? st.auto.round / 1000 : CFG.roundSecs;
-    c.dialog(K.stage("m8-rd", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k} de {n}", "round {k} of {n}", { k: r.k, n: st.R })}</span><h2 class="gx-t-l">${meOut ? T("Caes tú", "You fall") : Tf("Cae {name}", "{name} falls", { name: nameOf(out) })}</h2>
-        <p>${meOut ? whyMe + " " + T("Puedes seguir mirando la partida desde tu asiento.", "You can keep watching from your seat.") : why}</p>
-        <div class="rows">${K.row(T("Quedan en la mesa", "Still in the game"), nLeft)}${wasIn && !meOut ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? T("la final", "the final") : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
+    const h2 = cut ? T("Quedan dos", "Two left") : meOut ? T("Caes tú", "You fall") : Tf("Cae {name}", "{name} falls", { name: nameOf(out) });
+    const lead = cut ? `${goneTx} ${T("Esta ronda no cae nadie: empieza la final.", "Nobody falls this round: the final starts now.")}` : meOut ? whyMe + " " + T("Puedes seguir mirando la partida desde tu asiento.", "You can keep watching from your seat.") : why;
+    c.dialog(K.stage("m8-rd", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k} de {n}", "round {k} of {n}", { k: r.k, n: st.R })}</span><h2 class="gx-t-l">${h2}</h2>
+        <p>${lead}</p>
+        <div class="rows">${K.row(T("Quedan en la mesa", "Still in the game"), nLeft)}${wasIn && !meOut && m.alive ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? Tf("la final, a {n} preguntas", "the final, {n} questions", { n: CFG.finalQs }) : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
       <div class="m8-tk gx-sh drop" style="--d:.1s"><div class="gx-paper"><span class="gx-eyb">${Tf("La ronda {k}", "Round {k}", { k: r.k })} · ${T("los puntos vuelven a cero en la siguiente", "points go back to zero next round")}</span>
         <table class="m8-tb n${r.tab.length}"><tr><th></th><th>${T("Jugador", "Player")}</th>${r.qs.map(q => `<th>${esc(qName(q))}</th>`).join("")}<th>${T("Ronda", "Round")}</th></tr>${rows}</table></div></div>
-      <div class="m8-ft"><div class="m8-bar"><span id="m8Cnt"></span><u><s style="animation-duration:${secs}s"></s></u></div><div class="gx-acts">${meOut ? `<button type="button" class="gx-btn" id="m8Out"><span>${T("Salir", "Exit")}</span></button>` : ""}${st.net ? "" : K.primary("m8Next", meOut ? T("Seguir mirando", "Keep watching") : T("Siguiente ronda", "Next round"))}</div></div>`), "tablewrap");
+      <div class="m8-ft"><div class="m8-bar"><span id="m8Cnt"></span><u><s style="animation-duration:${secs}s"></s></u></div><div class="gx-acts">${meOut ? `<button type="button" class="gx-btn" id="m8Out"><span>${T("Salir", "Exit")}</span></button>` : ""}${st.net ? "" : K.primary("m8Next", meOut ? T("Seguir mirando", "Keep watching") : nLeft === 2 ? T("A la final", "To the final") : T("Siguiente ronda", "Next round"))}</div></div>`), "tablewrap");
     chips($("dlg"), ".m8-cs", 32, 16);
     A.sfx.stamp(); if (meOut) setTimeout(A.sfx.fail, 380);
     const sT = st; let done = false, left = Math.ceil(secs);
     const cnt = $("m8Cnt"), label = () => { if (cnt) cnt.textContent = Tf(nLeft === 2 ? "La final empieza en {n}" : "La ronda {k} empieza en {n}", nLeft === 2 ? "The final starts in {n}" : "Round {k} starts in {n}", { n: Math.max(1, left), k: r.k + 1 }); };
-    const go = () => { if (done || st !== sT || st.phase !== "round" || st.net) return; done = true; clearInterval(iv); S.skipIntro = null; ask(); };   // entre jugadores sigue sola, a la hora del servidor (netGo)
+    /* sigue: a la final, con su entrada; entre jugadores la pregunta sale a la hora del servidor (netGo) y la entrada se juega mientras tanto */
+    const go = () => { if (done || st !== sT || st.phase !== "round") return; done = true; clearInterval(iv); S.skipIntro = null; if (nLeft === 2) return finalIntro(() => { if (!st.net && st === sT && st.phase === "round") ask(); }); if (!st.net) ask(); };
     label(); const iv = setInterval(() => { if (st !== sT || done) return clearInterval(iv); left--; label(); }, 1000);
     if ($("m8Next")) $("m8Next").onclick = go; if ($("m8Out")) $("m8Out").onclick = () => { if (done) return; done = true; clearInterval(iv); quit(); };
-    S.skipIntro = go; later(go, secs * 1000);
+    S.skipIntro = st.net ? null : go; later(go, secs * 1000);
     if (A.coverMap) A.coverMap("duelo", true, () => !!document.querySelector("#dlg .du-wrap") && !$("layer").classList.contains("hidden"));
   }
+
+  /* ================================================================== 4b · LA FINAL: su entrada (v0.4.77). Como la apertura del cofre, por tiempos: CARGA (las dos fichas
+     entran por los lados y tiemblan), GOLPE (chocan en el centro: parada, destello, onda en el tapete y sacudida), SELLO («La final» cae como un sello),
+     PICO (las cinco preguntas se encienden una a una, cada una mas aguda) y REMATE (se recoge). Dura CFG.finSecs; un clic o Intro la salta.
+     Movimiento minimo: sin sacudida, sin onda y destello suave. Vibracion apagada: sin sacudida */
+  let finT = [];
+  function finKill() { finT.forEach(clearTimeout); finT = []; const e = $("m8Fin"); if (e) e.remove(); document.body.classList.remove("m8-fin-on"); }
+  function finalIntro(cb) {
+    finKill(); const c = C(), S = c.S, red = !!S.reduce, shake = !red && S.shake !== false, two = alive(st).sort((a, b) => (b.me ? 1 : 0) - (a.me ? 1 : 0) || a.ord - b.ord);
+    if (two.length !== 2) return cb();
+    c.closeDialog(); if (A.coverMap) A.coverMap("duelo", false);
+    const ov = document.createElement("div"); ov.id = "m8Fin"; ov.className = "m8-fin-ov" + (red ? " rm" : "");
+    ov.innerHTML = `<div class="m8-fin-in"><div class="m8f-ring"></div><div class="m8f-duo">${two.map((p, i) => `<div class="m8f-cl ${i ? "b" : "a"}"><span class="m8f-ch" data-chip="${p.chip}"></span><b class="${p.me ? "me" : ""}">${nameOf(p)}</b></div>`).join("")}</div>
+      <div class="m8f-tt"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k}", "round {k}", { k: st.k + 1 })}</span><h2>${T("La final", "The final")}</h2><p>${Tf("{n} preguntas · quien gane se queda la mesa", "{n} questions · winner takes the table", { n: CFG.finalQs })}</p>
+      <div class="m8f-pips">${Array.from({ length: CFG.finalQs }, () => "<i></i>").join("")}</div></div><div class="m8f-flash"></div></div>`;
+    ov.querySelectorAll(".m8f-ch").forEach(e => e.appendChild(chipIn(e.dataset.chip, 128, 32)));
+    $("app").appendChild(ov); document.body.classList.add("m8-fin-on");
+    const at = (ms, f) => finT.push(setTimeout(f, ms)), sT = st; let ended = false;
+    const end = () => { if (ended) return; ended = true; if (S.skipIntro === end) S.skipIntro = null; ov.classList.add("m8f-out"); finT.push(setTimeout(() => { finKill(); if (st === sT) cb(); }, 320)); };
+    requestAnimationFrame(() => ov.classList.add("m8f-in"));
+    at(120, () => { ov.classList.add("m8f-charge"); if (A.sfx.knock) A.sfx.knock(); });
+    at(860, () => { ov.classList.add("m8f-hit"); if (shake) ov.classList.add("m8f-shk"); A.sfx.stamp(); if (A.haptic && A.haptic.jackpot) A.haptic.jackpot(2); });
+    at(1060, () => ov.classList.add("m8f-seal"));
+    for (let i = 0; i < CFG.finalQs; i++) at(1560 + i * 170, () => { const e = ov.querySelectorAll(".m8f-pips i")[i]; if (e) e.classList.add("on"); if (A.sfx.golpe) A.sfx.golpe(i * 2); });
+    at(CFG.finSecs * 1000 - 320, end);
+    ov.onclick = end; S.skipIntro = end;                                  // Intro o un clic: la final empieza ya
+  }
+
+  /* un aviso corto debajo de la tira (alguien se ha levantado, te has quedado sin senal) */
+  let noteTm = 0;
+  function noteShow(t) { const e = $("m8Note"); if (!e) return; e.textContent = t; e.classList.remove("hidden"); clearTimeout(noteTm); noteTm = setTimeout(() => { const x = $("m8Note"); if (x) x.classList.add("hidden"); }, 5200); }
 
   /* ================================================================== 5 · EL VEREDICTO: la mesa entera en el orden en que cayo, tus datos y la corona */
   function summary() {
@@ -409,7 +482,7 @@ window.AIQ = window.AIQ || {};
       cards: st.log.reduce((n, r) => n + (r.cards || 0), 0), order: st.pl.slice().sort((a, b) => (a.place || 0) - (b.place || 0)).map(p => ({ i: p.i, place: p.place || 0, out: p.out })), log: st.log.map(r => ({ k: r.k, qi: r.qi, id: r.id, d: r.d, pts: Object.fromEntries(Object.entries(r.rows).map(([i, x]) => [i, x.pts])) })) };
   }
   function finish() {
-    const c = C(), S = c.S, map = c.map, o = st.over, m = me(), win = !!o.win, s = st; st.phase = "end"; S.phase = "levelEnd"; S.skipIntro = null; timers.forEach(clearTimeout); timers = [];
+    finKill(); const c = C(), S = c.S, map = c.map, o = st.over, m = me(), win = !!o.win, s = st; st.phase = "end"; S.phase = "levelEnd"; S.skipIntro = null; timers.forEach(clearTimeout); timers = [];
     map.clearMarks(); map.setDecoys([]); map.animateTo(map.home(), 900); map.setPick(false); pinsClear();
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); for (const id of ["m8Hud", "duTools", "duFact"]) { const e = $(id); if (e) e.classList.add("hidden"); }
     document.body.classList.remove("duelo-lock", "mesa8-watch");
@@ -421,7 +494,7 @@ window.AIQ = window.AIQ || {};
       : m.quit ? Tf("Te levantaste en la ronda {k}, con {n} en la mesa.", "You got up in round {k}, with {n} at the table.", { k: m.out, n: m.place })
       : inFinal ? Tf("Caíste en la final, a {n} puntos de {name}.", "You fell in the final, {n} points behind {name}.", { n: A.fmt(fin.margin), name: nameOf(winner) })
       : Tf("Caíste en la ronda {k} de {n}.", "You fell in round {k} of {n}.", { k: m.out, n: st.R });
-    const rw = (a, b) => K.row(a, b), stat = (sum.best ? rw(T("Tu mejor pregunta", "Your best question"), `${esc(K.cut(sum.best.n, 16))} · ${sum.best.km > 0 ? A.fmtDist(sum.best.km) : T("dentro", "inside")}`) : "") + rw(T("Dianas", "Bullseyes"), Tf("{a} de {b}", "{a} of {b}", { a: sum.bulls, b: sum.asked }))
+    const rw = (a, b) => K.row(a, b), stat = (sum.best ? rw(T("Tu mejor pregunta", "Your best question"), `${esc(K.cut(sum.best.n, 22))} · ${sum.best.km > 0 ? A.fmtDist(sum.best.km) : T("dentro", "inside")}`) : "") + rw(T("Dianas", "Bullseyes"), Tf("{a} de {b}", "{a} of {b}", { a: sum.bulls, b: sum.asked }))
       + rw(T("Rondas ganadas", "Rounds won"), Tf("{a} de {b}", "{a} of {b}", { a: sum.roundsWon, b: sum.roundsIn }));
     /* bajo la corona, en pequeno: lo cerca que estuviste de caer y las tarjetas de la Enciclopedia (el recibo del Club necesita el alto de la columna) */
     const extra = (sum.close ? `<span>${T("Más cerca de caer", "Closest to falling")}: ${Tf("ronda {k}, por {n}", "round {k}, by {n}", { k: sum.close.k, n: A.fmt(sum.close.d) })}</span>` : "") + (sum.cards ? `<span>${T("Tarjetas nuevas", "New cards")}: ${sum.cards}</span>` : "");
@@ -455,7 +528,7 @@ window.AIQ = window.AIQ || {};
   const Rd = () => A.dueloRed, send = body => Rd().call({ code: NT.code, ...body }, "lamesa");
   const sendV = body => { const q = ++NT.q, code = NT.code; return send(body).then(x => { if (NT.code !== code) return; if (x && x.ok) { if (q < NT.qa) return; NT.qa = q; } netView(x, code); }); };
   const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
-  let SIG = ""; const sig = () => SIG || (SIG = "m1." + A.VERSION + "." + hash(JSON.stringify([CFG.perRound, CFG.secs, CFG.rush, CFG.diff, D.CFG.scale]) + D.pool().map(e => e.id + ":" + e.d + ":" + e.cont).join("|")));   // solo se sientan juntos juegos que vayan a sacar la misma mesa
+  let SIG = ""; const sig = () => SIG || (SIG = "m1." + A.VERSION + "." + hash(JSON.stringify([CFG.perRound, CFG.finalQs, CFG.secs, CFG.rush, CFG.diff, D.CFG.scale]) + D.pool().map(e => e.id + ":" + e.d + ":" + e.cont).join("|")));   // solo se sientan juntos juegos que vayan a sacar la misma mesa
   const inRoom = () => !!document.querySelector("#dlg .du-wrap .m8-net"), inSala = () => !!document.querySelector("#dlg .du-wrap .m8-lob:not(.m8-net)");
   const myRaw = () => (A.profile && A.profile.get().name) || "";
   const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."], play: ["En esa sala hay una partida en marcha. Entra cuando acabe.", "There's a game in progress in that room. Join when it ends."],
@@ -592,7 +665,7 @@ window.AIQ = window.AIQ || {};
   function netReady(q, wait, al) { const nt = st.net; nt.want = q; nt.s = 0; nt.rdy = false; nt.goAt = performance.now() + wait; nt.al = al; netKick(true); }
   function netGo() {
     const nt = st.net, q = nt.want, left = Math.max(0, Rd().perfAt(nt.s) - performance.now());
-    later(() => { if (nt.want === q && st.nq === q - 1 && (st.phase === "reveal" || st.phase === "round" || st.phase === "wait")) { alive(st).forEach(p => (p.sp = p.rp)); if (st.phase === "reveal" && st.qi >= CFG.perRound) { endRound(st); if (st.over) return finish(); } C().S.skipIntro = null; ask(); } }, left);
+    later(() => { if (nt.want === q && st.nq === q - 1 && (st.phase === "reveal" || st.phase === "round" || st.phase === "wait")) { alive(st).forEach(p => (p.sp = p.rp)); if (st.phase === "reveal" && (st.qi >= perOf(st) || st.cut)) { if (!st.cut) endRound(st); if (st.over) return finish(); } C().S.skipIntro = null; ask(); } }, left);
   }
   function gameView(v) {
     const nt = st.net; if (st.phase === "end" || v.n !== nt.n) return;
@@ -611,12 +684,12 @@ window.AIQ = window.AIQ || {};
 
   /* salir de la mesa (js/game.js -> A.duelo.leave): recoge sus piezas */
   M.leave = again => {
-    const c = C(); timers.forEach(clearTimeout); timers = [];
+    const c = C(); timers.forEach(clearTimeout); timers = []; finKill();
     if (!again) K.unseat(); else K.seat(null);
     for (const id of ["m8Hud", "duTools", "duFact", "m8Pins"]) { const e = $(id); if (e) e.remove(); }
     document.body.classList.remove("duelo-on", "duelo-lock", "mesa8-on", "mesa8-watch"); if (A.codex && A.codex.toastAside) A.codex.toastAside();
     if (c) { c.map.setDecoys([]); c.S.duel = null; c.S.skipIntro = null; } st = null;
     if (NT.code && !again && !NT.keep) netBye();                            // salir al menu en una mesa entre jugadores = levantarse de la sala
   };
-  addEventListener("resize", () => { if (!st) return; K.fitDk(); if (st.pins) { st.pins.rect = null; st.pins.sig = ""; } if ($("m8Hud")) chips($("m8Hud"), ".m8-cs", 40, 20); });
+  addEventListener("resize", () => { if (!st) return; K.fitDk(); if (st.pins) { st.pins.rect = null; st.pins.sig = ""; } if ($("m8Hud")) { $("m8Hud").querySelectorAll(".m8-s").forEach(e => delete e.dataset.cm); M.hud(); } });
 })(window.AIQ);

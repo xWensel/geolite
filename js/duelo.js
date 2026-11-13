@@ -395,7 +395,8 @@ window.AIQ = window.AIQ || {};
         <div class="mesas" id="duRowB"><div class="mss" id="duMesas">${CFG.tables.map(ms).join("")}</div>
           <div class="lvl"><span>${T("La banca sabe", "The house knows")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvDn" aria-label="-">−</button></span><b id="duLv"></b><span class="gx-acts"><button type="button" class="gx-btn sm" id="duLvUp" aria-label="+">+</button></span></div></div>
         <div class="mesas rkw hidden" id="duRowL"><div class="rk"><span id="duRkIc"></span><span><b id="duRk"></b><i id="duRkS"></i></span></div></div>
-        <div class="regl hidden" id="duReglO">${A.mesa8 ? A.mesa8.rules() : ""}</div>
+        ${A.mesa8 ? `<div class="mesas rkw hidden" id="duRowO"><div class="rk"><span>${A.icon("crown")}</span><span><b>${A.mesa8.name()}</b><i id="duOcS"></i></span></div></div>` : ""}
+        <div class="regl hidden" id="duReglO">${A.mesa8 ? A.mesa8.rules(0, true) : ""}</div>
         <div class="regl" id="duRegl"><span>${A.icon("chip_k")}<b>${A.fmt(CFG.stack)}</b> ${T("fichas cada uno", "chips each")}</span><span>${A.icon("boss_hat")}${T("Hasta", "Up to")} <b>${CFG.rounds}</b> ${T("rondas", "rounds")}</span><span>${A.icon("coin")}${T("Paga la <b>diferencia</b> por la ronda", "Pays the <b>difference</b> times the round")}</span></div>
       </div></div>
       <div class="ft"><div class="seatw" id="duSalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts"><button type="button" class="gx-btn gho" id="duHow">${T("Cómo se juega", "How to play")}</button>${primary("duGo", T("Sentarse a la mesa", "Take a seat"))}</div></div>`), "tablewrap");
@@ -404,6 +405,7 @@ window.AIQ = window.AIQ || {};
       $("duRkIc").innerHTML = A.icon(CFG.tables[r.league].chip); $("duRk").textContent = rn; $("duRkS").textContent = `${pts} · ${span(CFG.tables[r.league])} · ${T("La banca sabe", "The house knows")} ${rankLevel(r)}`;
       document.querySelectorAll("#duDoors .doorw.on").forEach(x => { const on = x.dataset.door === sel.door; x.classList.toggle("eleg", on); x.setAttribute("aria-pressed", on); });
       $("duRowA").classList.toggle("hidden", !am); $("duRowB").classList.toggle("hidden", am || lg || oc); $("duRowL").classList.toggle("hidden", !lg); $("duRegl").classList.toggle("hidden", oc); $("duReglO").classList.toggle("hidden", !oc);
+      if ($("duRowO")) { $("duRowO").classList.toggle("hidden", !oc); const ms = A.mesa8.stats(); $("duOcS").textContent = `${T("De 3 a 8 jugadores", "3 to 8 players")} · ${T("Mesas jugadas", "Tables played")} ${ms.d} · ${T("Coronas", "Crowns")} ${ms.w}`; }   // v0.4.77: La mesa tambien tiene su fila: las puertas ya no se estiran al elegirla
       $("duGo").querySelector("span").textContent = am ? T("Abrir una sala", "Open a room") : oc ? T("Ir a la mesa", "Go to the table") : lg ? T("Jugar duelo de liga", "Play a league duel") : T("Sentarse a la mesa", "Take a seat"); };
     if (A.mesa8 && $("duIllOcho")) A.mesa8.fan($("duIllOcho"));
     if (sel.door === "ocho" && !A.mesa8) sel.door = "liga";

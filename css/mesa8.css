@@ -21,13 +21,15 @@
 .du-st .m8-room .regl { flex-wrap: wrap; gap: 8px 26px; }
 
 /* ---------------------------------------------------------------- 2 · la tira de ocho (en lugar del marcador de dos) */
-.m8-hud { position: absolute; z-index: 7; left: 445px; right: 40px; top: 32px; zoom: var(--dk, 1); filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); pointer-events: none; }
-.m8-hud .gx-pnl { padding: 12px 16px 10px; }
+/* v0.4.77: la tira mide lo que la mesa (no toda la franja) y va centrada en el hueco junto a la placa; los que caen se recogen a la derecha en pequeno */
+.m8-hud { position: absolute; z-index: 7; left: 445px; right: 40px; top: 32px; zoom: var(--dk, 1); filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .72)); pointer-events: none; display: flex; flex-direction: column; align-items: center; }
+.m8-hud .gx-pnl { padding: 12px 16px 10px; box-sizing: border-box; width: max(600px, calc(var(--rw, 760px) + 32px)); max-width: 100%; transition: width .45s cubic-bezier(.2, .8, .2, 1); }
+html.reduce-motion .m8-hud .gx-pnl { transition: none; }
 .m8-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--gx-txt-2); white-space: nowrap; }
 .m8-top b { font-weight: 400; color: var(--gx-ttl); } .m8-top span { min-width: 0; overflow: hidden; text-overflow: ellipsis; } .m8-top span:last-child { text-align: right; white-space: normal; text-wrap: balance; line-height: 1.15; }   /* «Quien gane se queda la mesa» y sus traducciones: dos lineas antes que cortada */
 .m8-top .mid { background: var(--gx-gold); color: #120c02; padding: 6px 12px 5px; box-shadow: 0 3px 0 var(--gx-gold-lo); }
-.m8-row { position: relative; height: 122px; margin-top: 10px; }
-.m8-s { position: absolute; left: 0; top: 0; width: calc(100% / max(var(--n, 8), 5)); height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 6px 4px 4px; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.m8-row { position: relative; height: 122px; margin: 10px auto 0; width: var(--rw, 100%); transition: width .45s cubic-bezier(.2, .8, .2, 1); }
+.m8-s { position: absolute; left: 0; top: 0; width: var(--sw, 150px); height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 6px 4px 4px; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
 .m8-s::before { content: ""; position: absolute; inset: 0 2px; box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .14); pointer-events: none; }
 .m8-s .m8-cs { width: 40px; height: 40px; }
 .m8-s .m8n { display: block; max-width: 100%; margin-top: 2px; font-size: 18px; line-height: 22px; height: 22px; color: var(--gx-txt); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -40,7 +42,18 @@
 .m8-s.dz::before { box-shadow: inset 0 0 0 2px var(--gx-red); background: rgba(254, 95, 85, .14); } .m8-s.dz .m8o { color: var(--gx-red-hi); }
 .m8-s.out::before { box-shadow: none; } .m8-s.out .m8-cs { filter: grayscale(1) brightness(.6); opacity: .7; }
 .m8-s.out .m8n, .m8-s.out .m8p { color: var(--gx-txt-2); opacity: .6; } .m8-s.out .m8p { font-family: var(--mono); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; }
-html.reduce-motion .m8-s { transition: none; }
+/* los caidos, a la derecha y en pequeno: su ficha apagada (32 px, 2 px por pixel de arte), sin nombre ni puntos; encima, la palabra «Fuera» una vez */
+.m8-s.out { width: var(--fw, 48px); padding: 30px 0 0; }
+.m8-s.out .m8-cs { width: 32px; height: 32px; } .m8-s.out .m8n, .m8-s.out .m8p, .m8-s.out .m8x, .m8-s.out .m8o { display: none; }
+.m8-row .m8-fx { position: absolute; top: 0; height: 100%; box-sizing: border-box; border-left: 2px dotted rgba(243, 237, 220, .22); padding: 6px 0 0 10px; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; color: var(--gx-txt-2); white-space: nowrap; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+/* la final: dos asientos grandes, frente a frente */
+.m8-row.m8fin .m8-s:not(.out) .m8-cs { width: 56px; height: 56px; } .m8-row.m8fin .m8-s:not(.out) .m8p { font-size: 32px; line-height: 30px; height: 30px; }
+.m8-row.m8fin .m8-s:not(.out) .m8n { font-size: 22px; }
+.m8-row .m8-vs { position: absolute; top: 40px; width: 40px; text-align: center; font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--gx-gold); transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+/* la cuenta de tu ronda, arriba a la derecha: a salvo (verde) o a cuanto de salvarte (rojo); mirando (dorado) */
+.m8-top .sv { color: #7ef0a0; } .m8-top .dn { color: var(--gx-red-hi); } .m8-top .wt { color: var(--gx-gold); }
+.m8-watch { margin-top: 10px; background: var(--gx-gold); color: #120c02; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; padding: 7px 12px 6px; box-shadow: 0 3px 0 var(--gx-gold-lo); white-space: nowrap; }
+html.reduce-motion .m8-s, html.reduce-motion .m8-row, html.reduce-motion .m8-row .m8-fx, html.reduce-motion .m8-row .m8-vs { transition: none; }
 body.mesa8-on .rail-sh { top: 62%; }
 
 /* ---------------------------------------------------------------- 4 · cae el ultimo  /  5 · el veredicto */
@@ -57,7 +70,9 @@ body.mesa8-on .rail-sh { top: 62%; }
 .m8-tb th:nth-child(1), .m8-tb td:nth-child(1) { width: 36px; text-align: left; font-family: var(--mono); font-size: 16px; color: var(--gx-ink-2); }
 .m8-tb th:nth-child(2), .m8-tb td:nth-child(2) { text-align: left; }
 .m8-tb th:nth-child(n+3) { width: 116px; } .m8-tb th:last-child { width: 96px; }
-.m8-tb th:nth-child(n+3):not(:last-child) { white-space: normal; overflow: visible; text-overflow: clip; text-wrap: balance; overflow-wrap: anywhere; line-height: 1.15; vertical-align: bottom; }   /* el nombre de cada pregunta entero, en dos o tres lineas («Parque nacional del Kilimanjaro»), nunca «KUALA L…» */
+.m8-tb th:nth-child(n+3):not(:last-child) { white-space: normal; overflow: visible; text-overflow: clip; text-wrap: balance; overflow-wrap: normal; word-break: normal; line-height: 1.15; vertical-align: bottom; }
+/* v0.4.77: una palabra larga («Martenitsa») ensancha su columna en vez de partirse por la mitad; el nombre del jugador cede el sitio */
+.m8-tb:not(.pod) { table-layout: auto; } .m8-tb:not(.pod) td:nth-child(2) { width: 100%; max-width: 0; }   /* el nombre de cada pregunta entero, en dos o tres lineas («Parque nacional del Kilimanjaro»), nunca «KUALA L…» */
 .m8-tb td:nth-child(2) span { display: flex; align-items: center; gap: 10px; min-width: 0; } .m8-tb em { font-style: normal; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .m8-tb .m8-cs { width: 32px; height: 32px; }
 .m8-tb tr + tr td { border-top: 2px dotted rgba(22, 36, 28, .18); }
@@ -94,3 +109,40 @@ body.mesa8-on .rail-sh { top: 62%; }
 .du-st .puertas .gx-pnl { grid-template-columns: minmax(0, 1fr); }
 .du-st .puertas .regl { flex-wrap: wrap; gap: 6px 22px; }
 .du-st .doors.d4 .door h3, .du-st .doors.d4 .door p { overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------- v0.4.77: avisos de la tira y la entrada de la final */
+.m8-note { margin-top: 8px; max-width: 640px; background: #2a100e; box-shadow: inset 0 0 0 2px var(--gx-red), 0 3px 0 rgba(2, 6, 4, .6); color: #ffd9d4; font-size: 20px; line-height: 1.15; padding: 8px 14px 7px; text-align: center; text-wrap: balance; }
+.m8-fin-ov { position: absolute; inset: 0; z-index: 30; overflow: hidden; background: radial-gradient(ellipse 60% 55% at 50% 46%, rgba(16, 58, 40, .9), rgba(3, 10, 7, .97) 72%); opacity: 0; transition: opacity .25s; cursor: pointer; }
+.m8-fin-ov.m8f-in { opacity: 1; } .m8-fin-ov.m8f-out { opacity: 0; transition: opacity .3s; }
+.m8-fin-in { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; margin: -360px 0 0 -640px; zoom: var(--dk, 1); }
+.m8-fin-ov .m8f-duo { position: absolute; left: 0; right: 0; top: 150px; height: 220px; }
+.m8-fin-ov .m8f-cl { position: absolute; top: 0; width: 280px; display: grid; justify-items: center; gap: 12px; transition: transform .74s cubic-bezier(.6, 0, .95, .55); }
+.m8-fin-ov .m8f-cl.a { left: calc(50% - 204px); transform: translateX(-760px); } .m8-fin-ov .m8f-cl.b { left: calc(50% - 76px); transform: translateX(760px); }   /* centros a 64 px del medio: los cantos se tocan */
+.m8-fin-ov.m8f-charge .m8f-cl { transform: translateX(0); }
+.m8-fin-ov .m8f-ch { width: 128px; height: 128px; display: grid; place-items: center; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .5)); }
+.m8-fin-ov.m8f-charge:not(.m8f-hit) .m8f-ch { animation: m8-trem .1s steps(2) infinite; }
+.m8-fin-ov.m8f-hit .m8f-cl.a { animation: m8-back-a .5s cubic-bezier(.2, .8, .2, 1) both; } .m8-fin-ov.m8f-hit .m8f-cl.b { animation: m8-back-b .5s cubic-bezier(.2, .8, .2, 1) both; }
+.m8-fin-ov .m8f-cl b { font-weight: 400; font-size: 34px; line-height: 1; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .m8-fin-ov .m8f-cl b.me { color: var(--gx-gold-hi); }
+.m8-fin-ov .m8f-ring { position: absolute; left: 50%; top: 214px; width: 0; height: 0; border: 3px solid rgba(248, 180, 73, .85); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0; }
+.m8-fin-ov.m8f-hit .m8f-ring { animation: m8-ring .8s cubic-bezier(.2, .7, .3, 1) both; }
+.m8-fin-ov .m8f-flash { position: absolute; inset: -40px; background: #fff3d6; opacity: 0; pointer-events: none; }
+.m8-fin-ov.m8f-hit .m8f-flash { animation: m8-flash .34s ease-out both; }
+.m8-fin-ov.m8f-shk .m8-fin-in { animation: m8-shk .4s steps(8) both; }
+.m8-fin-ov .m8f-tt { position: absolute; left: 0; right: 0; top: 404px; display: grid; justify-items: center; gap: 12px; text-align: center; opacity: 0; }
+.m8-fin-ov.m8f-seal .m8f-tt { opacity: 1; } .m8-fin-ov.m8f-seal .m8f-tt h2 { animation: m8-seal .34s cubic-bezier(.2, .9, .3, 1.25) both; }
+.m8-fin-ov .m8f-tt h2 { margin: 0; font-weight: 400; font-size: 104px; line-height: .9; color: var(--gx-gold-hi); text-shadow: 0 6px 0 #050b08; }
+.m8-fin-ov .m8f-tt p { margin: 0; font-size: 24px; line-height: 1.2; color: var(--gx-txt); }
+.m8-fin-ov .m8f-pips { display: flex; gap: 14px; margin-top: 8px; } .m8-fin-ov .m8f-pips i { width: 20px; height: 20px; background: rgba(243, 237, 220, .12); box-shadow: inset 0 0 0 2px rgba(243, 237, 220, .3); }
+.m8-fin-ov .m8f-pips i.on { background: var(--gx-gold); box-shadow: 0 3px 0 var(--gx-gold-lo); animation: m8-pip .24s steps(3) both; }
+.m8-fin-ov.rm .m8f-cl { transition: opacity .3s; transform: none; opacity: 0; } .m8-fin-ov.rm.m8f-charge .m8f-cl { opacity: 1; } .m8-fin-ov.rm .m8f-ring { display: none; }
+.m8-fin-ov.rm .m8f-ch, .m8-fin-ov.rm.m8f-hit .m8f-cl, .m8-fin-ov.rm.m8f-seal .m8f-tt h2, .m8-fin-ov.rm .m8f-pips i.on { animation: none; } .m8-fin-ov.rm.m8f-hit .m8f-flash { animation: m8-flash-s .34s ease-out both; }
+@keyframes m8-trem { from { translate: 0 0; } to { translate: 2px -2px; } }
+@keyframes m8-back-a { 0% { transform: translateX(0); } 35% { transform: translateX(-190px); } 100% { transform: translateX(-160px); } }
+@keyframes m8-back-b { 0% { transform: translateX(0); } 35% { transform: translateX(190px); } 100% { transform: translateX(160px); } }
+@keyframes m8-ring { from { width: 40px; height: 40px; opacity: .95; } to { width: 1100px; height: 1100px; opacity: 0; } }
+@keyframes m8-flash { 0% { opacity: .55; } 100% { opacity: 0; } } @keyframes m8-flash-s { 0% { opacity: .18; } 100% { opacity: 0; } }
+@keyframes m8-shk { 0% { translate: 0 0; } 12% { translate: -8px 4px; } 25% { translate: 7px -4px; } 37% { translate: -6px 2px; } 50% { translate: 5px -2px; } 62% { translate: -3px 2px; } 75% { translate: 2px 0; } 100% { translate: 0 0; } }
+@keyframes m8-seal { from { scale: 1.8; opacity: 0; } 70% { scale: .96; opacity: 1; } to { scale: 1; opacity: 1; } }
+@keyframes m8-pip { from { translate: 0 -6px; } to { translate: 0 0; } }
+/* v0.4.77: la fila de debajo de las puertas mide lo mismo sea cual sea la puerta elegida: las puertas no crecen ni encogen al cambiar de modo */
+.du-st .puertas #duRowA, .du-st .puertas #duRowB, .du-st .puertas #duRowL, .du-st .puertas #duRowO { min-height: 64px; box-sizing: border-box; }
