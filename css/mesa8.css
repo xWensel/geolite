@@ -65,7 +65,8 @@ body.mesa8-on .rail-sh { top: 62%; }
 .m8-tb tr.dz td { background: rgba(254, 95, 85, .16); color: var(--gx-red-lo); } .m8-tb tr.dz em { text-decoration: line-through; }
 .m8-tb .tg { flex: none; font-family: var(--mono); font-weight: 400; font-size: 16px; letter-spacing: .04em; text-transform: uppercase; background: var(--gx-red); color: #fff; padding: 4px 7px 3px; }
 .m8-tb .tg.o { background: var(--gx-gold); color: #120c02; }
-.m8-tb.pod td:nth-child(3) { width: 250px; font-size: 20px; } .m8-tb.pod td { padding: 4px 8px 3px; }
+/* la columna del resultado mide lo que su texto (antes 250 px fijos: en portugues o japones tu nombre se quedaba en «Al…» con sitio de sobra) */
+.m8-tb.pod { table-layout: auto; } .m8-tb.pod td:nth-child(2) { width: 100%; max-width: 0; } .m8-tb.pod td:nth-child(3) { width: 1%; max-width: 250px; font-size: 20px; } .m8-tb.pod td { padding: 4px 8px 3px; }
 .du-st .m8-fin > .seatw .dealer.big .dl-bubble { max-width: 300px; }
 .du-st .m8-ft { grid-column: 1 / 13; grid-row: 2; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
 .m8-ft .gx-acts { align-items: center; gap: 12px 24px; }

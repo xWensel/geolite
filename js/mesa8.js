@@ -136,7 +136,7 @@ window.AIQ = window.AIQ || {};
   const lnAt = {}, line = k => { const a = LN[k], i = (lnAt[k] = lnAt[k] == null ? Math.floor(Math.random() * a.length) : (lnAt[k] + 1) % a.length); return T(a[i][0], a[i][1]); };
 
   /* las reglas, en una linea (la sala del Duelo las ensena al elegir esta puerta, y la sala de ocho debajo de los asientos) */
-  M.rules = n => `<span>${A.icon("boss_hat")}${n ? `<b>${n - 1}</b> ${n === 2 ? T("ronda", "round") : T("rondas", "rounds")}` : Tf("De <b>{a}</b> a <b>{b}</b> en la mesa", "<b>{a}</b> to <b>{b}</b> at the table", { a: CFG.minSeats, b: CFG.seats })}</span><span>${A.icon("chip_k")}<b>${CFG.perRound}</b> ${T("preguntas por ronda", "questions a round")}</span><span>${A.icon("coin")}${T("Cae <b>el último</b> de cada ronda", "<b>The last one</b> falls each round")}</span>`;
+  M.rules = n => `<span>${A.icon("boss_hat")}${n ? `<b>${n - 1}</b> ${n === 2 ? T("ronda", "round") : T("rondas", "rounds")}` : Tf("De <b>{a}</b> a <b>{b}</b> en la mesa", "<b>{a}</b> to <b>{b}</b> at the table", { a: CFG.minSeats, b: CFG.seats })}</span><span>${A.icon("chip_k")}<b>${CFG.perRound}</b> ${T("preguntas por ronda", "questions a round")}</span><span>${A.icon("coin")}${T("Cae <b>el último</b> de cada ronda", "<b>Last place</b> falls each round")}</span>`;
   /* la ilustracion de la puerta: las ocho fichas en dos filas */
   M.fan = el => { el.innerHTML = `<div class="m8-fan">${CFG.chips.map(c => `<span data-chip="${c}"></span>`).join("")}</div>`; chips(el, "[data-chip]", 32, 16); };
 
@@ -150,7 +150,7 @@ window.AIQ = window.AIQ || {};
     c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("De 3 a 8 jugadores", "3 to 8 players")}</span></div>
       <div class="m8-room"><div class="amg m8-amg"><span id="m8AmgTx" role="status"></span><input id="m8Code" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Join">${T("Entrar", "Join")}</button></span></div>
         <span class="gx-eyb">${T("Práctica contra el juego", "Practice against the game")}</span><div class="m8-seats8">${pl.map(seat).join("")}${Array.from({ length: CFG.seats - N }, (_, i) => free(N + i)).join("")}</div>
-        <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One chair fewer")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b>${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span>${M.rules(N)}</div>
+        <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One fewer chair")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b>${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span>${M.rules(N)}</div>
         <div class="regl"><span>${T("Mesas jugadas", "Tables played")} <b>${s.d}</b></span><span>${T("Coronas", "Crowns")} <b>${s.w}</b></span><span>${T("Todo el contenido. La dificultad sube poco a poco", "All the content. Difficulty climbs little by little")}</span></div></div>
       <div class="ft"><div class="seatw" id="m8SalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts"><button type="button" class="gx-btn" id="m8Go"><span>${T("Practicar", "Practice")}</span></button>${K.primary("m8New", T("Abrir una sala", "Open a room"))}</div></div>`), "tablewrap");
     chips($("dlg"), ".m8-cs", 56, 28);
@@ -207,7 +207,7 @@ window.AIQ = window.AIQ || {};
     $("askNo").textContent = A.t("ask.no", { n: pad2(Math.max(1, st.nq)), m: pad2(total) });
     $("m8Rd").innerHTML = fin ? `<b>${T("La final", "The final")}</b>` : `${T("Ronda", "Round")} <b>${Math.max(1, st.k)}</b> / ${RR}`;
     $("m8Q").textContent = `${T("Pregunta", "Question")} ${Math.max(1, st.qi)} / ${CFG.perRound}`;
-    $("m8Sub").innerHTML = st.net && NT.cut ? T("Sin conexión", "Offline") : st.phase === "wait" ? T("Esperando a la mesa…", "Waiting for the table…") : fin ? T("Quien gane se queda la mesa", "Winner takes the table") : `${T("Quedan", "Left")} <b>${nAl}</b> · ${T("cae el último", "the last one falls")}`;
+    $("m8Sub").innerHTML = st.net && NT.cut ? T("Sin conexión", "Offline") : st.phase === "wait" ? T("Esperando a la mesa…", "Waiting for the table…") : fin ? T("Quien gane se queda la mesa", "Winner takes the table") : `${T("Quedan", "Still in")} <b>${nAl}</b> · ${T("cae el último", "last place falls")}`;
     const scored = st.qi > 1 || st.phase === "reveal", locked = p => !!cur && cur.lock[p.i] != null;
     ord.forEach((p, n) => {
       const e = $("m8Row").children[p.i], last = p.alive && scored && n === nAl - 1;
@@ -217,12 +217,12 @@ window.AIQ = window.AIQ || {};
       const set = (s, v) => { const x = e.querySelector(s); if (x.textContent !== v) x.textContent = v; };
       set(".m8o", p.alive ? String(n + 1) : "");
       set(".m8p", p.alive ? A.fmt(p.sp) : T("Fuera", "Out"));
-      set(".m8x", !p.alive ? "" : askN ? (locked(p) ? T("Fijada", "Locked") : "") : st.phase === "reveal" && st.ptsOn ? "+" + A.fmt(p.up) : "");
+      set(".m8x", !p.alive ? "" : askN ? (locked(p) ? T("Fijada", "Locked in") : "") : st.phase === "reveal" && st.ptsOn ? "+" + A.fmt(p.up) : "");
     });
     document.body.classList.toggle("duelo-lock", !!(askN && cur && cur.rushed && me().alive && !locked(me())));   // el reloj de la placa, en rojo
   };
   M.pause = () => ({ mode: NAME(), note: T("En la mesa el reloj no se detiene durante la pregunta.", "At the table the clock doesn't stop during a question."),
-    rows: K.row(T("Ronda", "Round"), `${Math.max(1, st.k)} / ${st.R}`) + K.row(T("Quedan en la mesa", "Left at the table"), alive(st).length) + (me().alive ? K.row(T("Tus puntos de la ronda", "Your points this round"), A.fmt(me().rp || 0)) : "") });
+    rows: K.row(T("Ronda", "Round"), `${Math.max(1, st.k)} / ${st.R}`) + K.row(T("Quedan en la mesa", "Still in the game"), alive(st).length) + (me().alive ? K.row(T("Tus puntos de la ronda", "Your points this round"), A.fmt(me().rp || 0)) : "") });
 
   /* ---------------- las fichas sobre el mapa: una por jugador, con su nombre y su distancia. Siguen la camara del mapa (map.lonLatToScreen, sin medir la
      pagina) y solo se escriben cuando cambian. Las etiquetas se apartan unas de otras al colocarse (una vez, no en cada fotograma) */
@@ -382,7 +382,7 @@ window.AIQ = window.AIQ || {};
     const secs = st.auto && st.auto.round != null ? st.auto.round / 1000 : CFG.roundSecs;
     c.dialog(K.stage("m8-rd", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k} de {n}", "round {k} of {n}", { k: r.k, n: st.R })}</span><h2 class="gx-t-l">${meOut ? T("Caes tú", "You fall") : Tf("Cae {name}", "{name} falls", { name: nameOf(out) })}</h2>
         <p>${meOut ? whyMe + " " + T("Puedes seguir mirando la partida desde tu asiento.", "You can keep watching from your seat.") : why}</p>
-        <div class="rows">${K.row(T("Quedan en la mesa", "Left at the table"), nLeft)}${wasIn && !meOut ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? T("la final", "the final") : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
+        <div class="rows">${K.row(T("Quedan en la mesa", "Still in the game"), nLeft)}${wasIn && !meOut ? K.row(T("Tu puesto en la ronda", "Your place this round"), `${myPos} / ${r.tab.length}`) : ""}${K.row(T("Ahora", "Up next"), nLeft === 2 ? T("la final", "the final") : `${T("ronda", "round")} ${r.k + 1}`)}</div></div>
       <div class="m8-tk gx-sh drop" style="--d:.1s"><div class="gx-paper"><span class="gx-eyb">${Tf("La ronda {k}", "Round {k}", { k: r.k })} · ${T("los puntos vuelven a cero en la siguiente", "points go back to zero next round")}</span>
         <table class="m8-tb n${r.tab.length}"><tr><th></th><th>${T("Jugador", "Player")}</th>${r.qs.map(q => `<th>${esc(qName(q))}</th>`).join("")}<th>${T("Ronda", "Round")}</th></tr>${rows}</table></div></div>
       <div class="m8-ft"><div class="m8-bar"><span id="m8Cnt"></span><u><s style="animation-duration:${secs}s"></s></u></div><div class="gx-acts">${meOut ? `<button type="button" class="gx-btn" id="m8Out"><span>${T("Salir", "Exit")}</span></button>` : ""}${st.net ? "" : K.primary("m8Next", meOut ? T("Seguir mirando", "Keep watching") : T("Siguiente ronda", "Next round"))}</div></div>`), "tablewrap");
@@ -455,7 +455,7 @@ window.AIQ = window.AIQ || {};
   let SIG = ""; const sig = () => SIG || (SIG = "m1." + A.VERSION + "." + hash(JSON.stringify([CFG.perRound, CFG.secs, CFG.rush, CFG.diff, D.CFG.scale]) + D.pool().map(e => e.id + ":" + e.d + ":" + e.cont).join("|")));   // solo se sientan juntos juegos que vayan a sacar la misma mesa
   const inRoom = () => !!document.querySelector("#dlg .du-wrap .m8-net"), inSala = () => !!document.querySelector("#dlg .du-wrap .m8-lob:not(.m8-net)");
   const myRaw = () => (A.profile && A.profile.get().name) || "";
-  const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."], play: ["En esa sala hay una partida en marcha. Entra cuando acabe.", "There's a game under way in that room. Join when it ends."],
+  const WHY = { none: ["No hay ninguna sala con ese código.", "There's no room with that code."], full: ["Esa sala ya está completa.", "That room is already full."], play: ["En esa sala hay una partida en marcha. Entra cuando acabe.", "There's a game in progress in that room. Join when it ends."],
     ver: ["Tenéis versiones distintas del juego.", "You're on different versions of the game."], closed: ["La sala se ha cerrado.", "The room was closed."], short: ["El código tiene 5 letras o números.", "The code has 5 letters or digits."],
     net: ["No se ha podido conectar con la sala. Inténtalo otra vez.", "Couldn't reach the room. Try again."], rate: ["Demasiadas salas seguidas. Espera un minuto.", "Too many rooms in a row. Wait a minute."] };
   const whyTxt = w => { const a = WHY[w] || WHY.net; return T(a[0], a[1]); };
@@ -524,7 +524,7 @@ window.AIQ = window.AIQ || {};
     $("m8NetRules").innerHTML = M.rules(inN >= CFG.minSeats ? inN : 0);
     $("m8DealW").classList.toggle("hidden", !host); const b = $("m8Deal"), ok = host && inN >= CFG.minSeats && !playing; b.classList.toggle("dis", !ok); b.setAttribute("aria-disabled", !ok);
     $("m8St").textContent = NT.cut ? T("Sin conexión. Reintentando…", "No connection. Retrying…")
-      : playing ? T("Hay una partida en marcha. Cuando acabe, se reparte otra vez.", "There's a game under way. When it ends, the host deals again.")
+      : playing ? T("Hay una partida en marcha. Cuando acabe, se reparte otra vez.", "There's a game in progress. When it ends, the host deals again.")
       : host ? (inN < CFG.minSeats ? (CFG.minSeats - inN === 1 ? Tf("Pasa el código. Falta 1 para repartir (mínimo {m}).", "Send the code. 1 more needed to deal (minimum {m}).", { m: CFG.minSeats }) : Tf("Pasa el código. Faltan {n} para repartir (mínimo {m}).", "Send the code. {n} more needed to deal (minimum {m}).", { n: CFG.minSeats - inN, m: CFG.minSeats })) : Tf("Sois {n}. Reparte cuando quieras; quien llegue después espera a la siguiente.", "There are {n} of you. Deal whenever you like; latecomers wait for the next one.", { n: inN }))
       : Tf("Sois {n}. Empieza cuando reparta el anfitrión.", "There are {n} of you. It starts when the host deals.", { n: inN });
     const say = host ? (NT.wasGuest ? "r_host" : inN >= CFG.minSeats ? "r_ok" : "r_open") : "r_guest"; if (!host) NT.wasGuest = true; if (say !== NT.said) { NT.said = say; K.speak(T(...LNR[say]), { valid: inRoom }); }
