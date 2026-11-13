@@ -11,17 +11,17 @@
 window.AIQ = window.AIQ || {};
 (function (A) {
   const SITE = A.SITE, LOCAL = A.LOCAL, KEY = "atlasiq.duelo.api";               // v0.3.235: la web publica y "en local" viven en js/support.js
-  const url = () => { let u = ""; try { u = localStorage.getItem(KEY) || ""; } catch (e) { /* sin almacenamiento */ } return u || (LOCAL ? SITE : "") + "/api/duelo"; };
+  const url = api => { let u = ""; try { u = localStorage.getItem(KEY) || ""; } catch (e) { /* sin almacenamiento */ } u = u || (LOCAL ? SITE : "") + "/api/duelo"; return api ? u.replace(/duelo$/, api) : u; };   // api: otra sala del mismo servidor ("lamesa": La mesa, js/mesa8.js)
   const pid = (() => { const AB = "abcdefghijklmnopqrstuvwxyz0123456789", b = new Uint8Array(16); crypto.getRandomValues(b); return [...b].map(x => AB[x % 36]).join(""); })();
   let off = 0, best = Infinity;
-  async function call(body) {
+  async function call(body, api) {
     const c = new AbortController(), k = setTimeout(() => c.abort(), 5000), p0 = performance.now(), d0 = Date.now();
     try {
-      const r = await fetch(url(), { method: "POST", body: JSON.stringify({ ...body, pid }), headers: { "content-type": "text/plain" }, signal: c.signal }), j = await r.json(), rtt = performance.now() - p0;
+      const r = await fetch(url(api), { method: "POST", body: JSON.stringify({ ...body, pid }), headers: { "content-type": "text/plain" }, signal: c.signal }), j = await r.json(), rtt = performance.now() - p0;
       if (j && j.now) { if (rtt <= best) { best = rtt; off = j.now - (d0 + rtt / 2); } else best *= 1.02; }   // la mejor medida manda; se va olvidando por si la red cambia
       return j && typeof j === "object" ? j : { ok: false, why: "net" };
     } catch (e) { return { ok: false, why: "net" }; } finally { clearTimeout(k); }
   }
   A.dueloRed = { call, now: () => Date.now() + off, perfAt: t => performance.now() + (t - Date.now() - off),
-    bye: body => { try { navigator.sendBeacon(url(), JSON.stringify({ ...body, pid })); } catch (e) { /* al cerrar: si no sale, la sala caduca sola */ } } };
+    bye: (body, api) => { try { navigator.sendBeacon(url(api), JSON.stringify({ ...body, pid })); } catch (e) { /* al cerrar: si no sale, la sala caduca sola */ } } };
 })(window.AIQ);

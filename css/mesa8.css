@@ -78,3 +78,12 @@ body.mesa8-on .rail-sh { top: 62%; }
 .m8-win .m8-cs.big { width: 128px; height: 128px; filter: drop-shadow(0 6px 0 rgba(2, 6, 4, .6)); }
 .m8-win b { font-weight: 400; font-size: 40px; line-height: 1; color: var(--gx-gold-hi); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .du-st .m8-fin > .seatw { bottom: 72px; }
+
+/* ---------------------------------------------------------------- la sala con codigo (entre jugadores) */
+.du-st .m8-room .m8-amg { min-height: 0; } .du-st .m8-room > .gx-eyb { margin-top: 2px; }
+.du-st .m8-lob:not(.m8-net) .m8-room { gap: 12px; padding-top: 0; }
+.du-st .m8-lob:not(.m8-net) .m8-seat .gx-paper, .du-st .m8-lob:not(.m8-net) .m8-seat.free { min-height: 80px; padding-top: 10px; padding-bottom: 12px; }
+.m8-codew { display: grid; grid-template-columns: auto auto auto minmax(0, 1fr); gap: 6px 20px; align-items: center; }
+.m8-codew .cod { font-weight: 400; font-size: 60px; line-height: .9; letter-spacing: .1em; padding-left: .1em; color: var(--gx-ttl); text-shadow: 0 4px 0 #050b08; user-select: text; -webkit-user-select: text; }
+.m8-codew .est { margin: 0; font-size: 22px; line-height: 1.15; color: var(--gx-ttl); }
+.du-st .m8-net .gx-btn.dis { opacity: .45; }
