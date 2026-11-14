@@ -129,9 +129,14 @@ window.AIQ = window.AIQ || {};
      Los rivales que maneja el juego no tienen: llevan su ficha. Va en la sala, en la entrada de la final y en el podio; la tira y el mapa siguen con las
      fichas de color (ocho colores se distinguen de un vistazo y son las que caen en el mapa) */
   const SOC = () => (A.socio && A.club && A.socio.badge ? A.socio : null);
-  const styleOf = p => { const so = SOC(); return !so ? null : p.me ? {} : p.k ? so.parse(p.k) : null; };
+  /* la chapa de la casa (los rivales que maneja el juego, o quien llegue sin la suya): una por asiento, siempre la misma (icono de la tienda y marco
+     en rueda, la carta de su nivel) */
+  const houseOf = p => { const so = SOC(); let ic = [], mc = []; try { ic = so.icons().filter(x => x.kind === "tienda").map(x => x.id); mc = so.marcos().map(x => x.id); } catch (e) { /* sin catalogo */ }
+    return { icon: ic.length ? ic[(p.seat * 13 + 5) % ic.length] : "globe", marco: mc.length ? mc[p.seat % mc.length] : "filete", lvl: p.lv || 1 + p.seat * 6 }; };
+  const styleOf = p => { const so = SOC(); return !so ? null : p.me ? {} : (p.k && so.parse(p.k)) || houseOf(p); };
   const hasBd = p => !!styleOf(p);
   const bdIn = (host, p, w) => { const so = SOC(), o = styleOf(p); if (!so || !o || !host) return false; so.badge(host, p.me ? { w } : { w, other: true, t: o.t, marco: o.marco, icon: o.icon, lvl: o.lvl, fondo: o.fondo, mat: o.mat }); return true; };
+  const hasBdAll = () => !!SOC();
   const titleOf = p => { const so = SOC(), o = styleOf(p); if (!so || !o) return ""; const t = p.me ? so.title() : o.title; return t ? so.titleName(t) : ""; };
   /* la chapa con, en su esquina, la ficha de color que llevara en la mesa (la del mapa) */
   const bdSlot = (p, i) => `<span class="m8-bdw"><span class="m8-bd" data-bd="${i}"></span><span class="m8-cs mk" data-chip="${p.chip}"></span></span>`;
@@ -164,7 +169,7 @@ window.AIQ = window.AIQ || {};
     const rs = (i, an) => (an == null ? ` rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"` : i === an ? ` rise" style="--d:0s"` : `"`);
     const free = (i, an) => `<div class="m8-seat free${rs(i, an)}><span>${T("Asiento libre", "Empty seat")}</span></div>`;
     const seat = (p, i, an) => { const bd = hasBd(p), tt = "";   /* en la practica, tu chapa sin titulo (el tuyo ya lo sabes; asi la silla no crece y la sala no pisa al crupier) */ return `<div class="m8-seat gx-sh${bd ? " bd" : ""}${rs(i, an)}><div class="gx-paper">${bd ? bdSlot(p, i) : chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3>${tt ? `<span class="m8-tit">${esc(tt)}</span>` : ""}<span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`; };
-    const paint = box => { chips(box, ".m8-cs:not(.mk)", 56, 28); chips(box, ".m8-cs.mk", 32, 16); box.querySelectorAll(".m8-bd").forEach(e => bdIn(e, mkState({ seed: "sala", seats: 3 }).pl[+e.dataset.bd], 80)); };
+    const paint = box => { chips(box, ".m8-cs:not(.mk)", 56, 28); chips(box, ".m8-cs.mk", 32, 16); const pl = mkState({ seed: "sala", seats: CFG.seats }).pl; box.querySelectorAll(".m8-bd").forEach(e => bdIn(e, pl[+e.dataset.bd], 80)); };
     const seatsHtml = (n, an) => mkState({ seed: "sala", seats: n }).pl.map((p, i) => seat(p, i, an)).join("") + Array.from({ length: CFG.seats - n }, (_, i) => free(n + i, an)).join("");
     c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("De 3 a 8 jugadores", "3 to 8 players")}</span></div>
       <div class="m8-room"><div class="amg m8-amg"><span id="m8AmgTx" role="status"></span><input id="m8Code" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Join">${T("Entrar", "Join")}</button></span></div>
@@ -208,8 +213,9 @@ window.AIQ = window.AIQ || {};
     document.body.classList.remove("title-on"); document.body.classList.add("duelo-on", "mesa8-on");
     $("plate").classList.add("hidden"); $("pauseBtn").classList.add("hidden"); $("streakChip").classList.add("hidden"); $("factText").textContent = ""; c.chrome(true);
     add("m8Hud", "m8-hud du-st", `<div class="gx-pnl"><div class="m8-top"><span id="m8Rd"></span><span class="mid" id="m8Q"></span><span id="m8Sub"></span></div>
-      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}" data-i="${p.i}"><span class="m8o"></span>${chipSlot(p)}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span><span class="m8-stp"></span></div>`).join("")}<span class="m8-fx hidden" id="m8Fx">${T("Fuera", "Out")}</span><span class="m8-vs hidden" id="m8Vs">VS</span></div></div><div class="m8-watch hidden" id="m8Watch"></div><div class="m8-note hidden" id="m8Note" role="status"></div>`);
-    chips($("m8Hud"), ".m8-cs", 40, 20);
+      <div class="m8-row" id="m8Row" style="--n:${st.N}">${st.pl.map(p => `<div class="m8-s${p.me ? " me" : ""}${hasBdAll() ? " bd" : ""}" data-i="${p.i}"><span class="m8o"></span>${hasBdAll() ? `<span class="m8-bdw"><span class="m8-bd"></span><span class="m8-cs mk" data-chip="${p.chip}"></span></span>` : ""}${chipSlot(p, hasBdAll() ? "solo" : "")}<span class="m8n">${nameOf(p)}</span><span class="m8p"></span><span class="m8x"></span><span class="m8-stp"></span></div>`).join("")}<span class="m8-fx hidden" id="m8Fx">${T("Fuera", "Out")}</span><span class="m8-vs hidden" id="m8Vs">VS</span></div></div><div class="m8-watch hidden" id="m8Watch"></div><div class="m8-note hidden" id="m8Note" role="status"></div>`);
+    chips($("m8Hud"), ".m8-cs:not(.mk)", 40, 20); chips($("m8Hud"), ".m8-cs.mk", 24, 12); $("m8Hud").classList.toggle("bd", hasBdAll());
+    $("m8Hud").querySelectorAll(".m8-s").forEach(e => bdIn(e.querySelector(".m8-bd"), st.pl[+e.dataset.i], 80));
     add("duTools", "du-tools du-st gx-acts", `<button type="button" class="gx-btn sm gho" id="duQuit"><span class="a">${T("Abandonar", "Leave")}</span><span class="b">${T("¿Seguro?", "Sure?")}</span></button>`);
     add("duFact", "du-fact du-st hidden", "");
     add("m8Pins", "du-pins du-st m8-pins", `<svg aria-hidden="true"><line class="me"></line></svg>`);
@@ -247,13 +253,13 @@ window.AIQ = window.AIQ || {};
     const wt = $("m8Watch"); if (wt) { const on = !m.alive && st.phase !== "end"; wt.classList.toggle("hidden", !on); if (on) wt.textContent = m.quit ? T("Te has levantado", "You got up") : Tf("Mirando · caíste en la ronda {k}", "Watching · you fell in round {k}", { k: m.out }); }
     ord.forEach((p, n) => {
       const e = row.children[p.i], last = p.alive && scored && n === nAl - 1;
-      const fal = !!st.fall && st.fall.out === p.i, cls = "m8-s" + (p.me ? " me" : "") + (!p.alive ? " out" : "") + (last ? " dz" : "") + (fal ? " fall" : "") + (p.alive && askN ? (locked(p) ? " lk" : " th") : "");
+      const fal = !!st.fall && st.fall.out === p.i, cls = "m8-s" + (p.me ? " me" : "") + (hasBdAll() ? " bd" : "") + (!p.alive ? " out" : "") + (last ? " dz" : "") + (fal ? " fall" : "") + (p.alive && askN ? (locked(p) ? " lk" : " th") : "");
       if (e.className !== cls) e.className = cls;
       /* v0.4.78: la caida en la propia tira (sello rojo) y tu «A salvo» (sello verde) antes del cartel de la ronda */
       const sp = e.querySelector(".m8-stp"), sk = fal ? "bad" : st.fall && st.fall.safe && p.me && p.alive ? "ok" : "", sc = "m8-stp" + (sk ? " on " + sk : "");
       if (sp.className !== sc) { sp.className = sc; sp.textContent = sk === "bad" ? T("Fuera", "Out") : sk === "ok" ? T("A salvo", "Safe") : ""; }
       const tx = `translateX(${xs[p.i]}px)`; if (e.style.transform !== tx) e.style.transform = tx;
-      const cm = !p.alive ? "s" : fin ? "f" : "n"; if (e.dataset.cm !== cm) { e.dataset.cm = cm; const s = e.querySelector(".m8-cs"), z = { s: [32, 16], f: [56, 28], n: [40, 20] }[cm]; s.textContent = ""; s.appendChild(chipIn(p.chip, z[0], z[1])); }   // la ficha, siempre a escala entera
+      const cm = !p.alive ? "s" : fin ? "f" : "n"; if (e.dataset.cm !== cm) { e.dataset.cm = cm; const s = e.querySelector(".m8-cs:not(.mk)"), z = { s: [32, 16], f: [56, 28], n: [40, 20] }[cm]; s.textContent = ""; s.appendChild(chipIn(p.chip, z[0], z[1])); }   // la ficha, siempre a escala entera
       const set = (s, v) => { const x = e.querySelector(s); if (x.textContent !== v) x.textContent = v; };
       set(".m8o", p.alive ? String(n + 1) : "");
       set(".m8p", p.alive ? A.fmt(p.sp) : T("Fuera", "Out"));
@@ -495,10 +501,10 @@ window.AIQ = window.AIQ || {};
     if (two.length !== 2) return cb();
     c.closeDialog(); if (A.coverMap) A.coverMap("duelo", false);
     const ov = document.createElement("div"), bd = two.map(hasBd); ov.id = "m8Fin"; ov.className = "m8-fin-ov" + (red ? " rm" : "") + (bd[0] && bd[1] ? " bd2" : "");
-    ov.innerHTML = `<div class="m8-fin-in"><div class="m8f-ring"></div><div class="m8f-duo">${two.map((p, i) => `<div class="m8f-cl ${i ? "b" : "a"}${bd[i] ? " bd" : ""}">${bd[i] ? `<span class="m8f-bd"></span>` : `<span class="m8f-ch" data-chip="${p.chip}"></span>`}<b class="${p.me ? "me" : ""}">${nameOf(p)}</b>${titleOf(p) ? `<i class="m8f-tit">${esc(titleOf(p))}</i>` : ""}</div>`).join("")}</div>
+    ov.innerHTML = `<div class="m8-fin-in"><div class="m8f-ring"></div><div class="m8f-duo">${two.map((p, i) => `<div class="m8f-cl ${i ? "b" : "a"}${bd[i] ? " bd" : ""}">${bd[i] ? `<span class="m8f-bdw"><span class="m8f-bd"></span><span class="m8-cs mk" data-chip="${p.chip}"></span></span>` : `<span class="m8f-ch" data-chip="${p.chip}"></span>`}<b class="${p.me ? "me" : ""}">${nameOf(p)}</b>${titleOf(p) ? `<i class="m8f-tit">${esc(titleOf(p))}</i>` : ""}</div>`).join("")}</div>
       <div class="m8f-tt"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k}", "round {k}", { k: st.k + 1 })}</span><h2>${T("La final", "The final")}</h2><p>${Tf("{n} preguntas · quien gane se queda la mesa", "{n} questions · winner takes the table", { n: CFG.finalQs })}</p>
       <div class="m8f-pips">${Array.from({ length: CFG.finalQs }, () => "<i></i>").join("")}</div></div><div class="m8f-flash"></div></div>`;
-    ov.querySelectorAll(".m8f-ch").forEach(e => e.appendChild(chipIn(e.dataset.chip, 128, 32)));
+    ov.querySelectorAll(".m8f-ch").forEach(e => e.appendChild(chipIn(e.dataset.chip, 128, 32))); ov.querySelectorAll(".m8-cs.mk").forEach(e => e.appendChild(chipIn(e.dataset.chip, 48, 24)));
     $("app").appendChild(ov); ov.querySelectorAll(".m8f-cl").forEach((e, i) => bdIn(e.querySelector(".m8f-bd"), two[i], 160)); document.body.classList.add("m8-fin-on");
     const at = (ms, f) => finT.push(setTimeout(f, ms)), sT = st; let ended = false;
     const end = () => { if (ended) return; ended = true; if (S.skipIntro === end) S.skipIntro = null; ov.classList.add("m8f-out"); finT.push(setTimeout(() => { finKill(); if (st === sT) cb(); }, 320)); };
@@ -546,7 +552,7 @@ window.AIQ = window.AIQ || {};
     const list = still.map(p => prow(p, "·")).join("") + ranked.map(p => prow(p, p.place)).join("");
     /* P3 (v0.4.78): el podio. Los tres primeros en escalones (oro en el centro, plata a la izquierda, bronce a la derecha) y la corona en el ganador */
     const podP = [2, 1, 3].map(n => st.pl.find(p => p.place === n)).filter(Boolean);
-    const pod = podP.length ? `<div class="m8-pod">${podP.map(p => `<div class="ps p${p.place}${p.me ? " me" : ""}">${p.place === 1 ? A.icon("crown", "cr") : ""}${hasBd(p) ? `<span class="m8-pbd" data-i="${p.i}"></span>` : `<span class="m8-cs ${p.place === 1 ? "g" : "s"}" data-chip="${p.chip}"></span>`}<b>${nameOf(p)}</b><u>${p.place}</u></div>`).join("")}</div>` : "";
+    const pod = podP.length ? `<div class="m8-pod">${podP.map(p => `<div class="ps p${p.place}${p.me ? " me" : ""}">${p.place === 1 ? A.icon("crown", "cr") : ""}${hasBd(p) ? `<span class="m8-pbdw"><span class="m8-pbd" data-i="${p.i}"></span><span class="m8-cs mk" data-chip="${p.chip}"></span></span>` : `<span class="m8-cs ${p.place === 1 ? "g" : "s"}" data-chip="${p.chip}"></span>`}<b>${nameOf(p)}</b><u>${p.place}</u></div>`).join("")}</div>` : "";
     c.dialog(K.stage("du-fin m8-fin", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("{n} preguntas", "{n} questions", { n: st.nq })}</span>
         <h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : m.quit ? T("Te levantas", "You get up") : Tf("Puesto {a} de {b}", "Place {a} of {b}", { a: m.place, b: st.N })}</h2><p class="gx-lead">${lead}</p>
         <div class="rows">${stat}</div>${club ? `<div class="du-club rise" style="--d:1.05s"><div class="gx-paper">${A.club.strip(club)}</div></div>` : ""}</div>
@@ -554,7 +560,7 @@ window.AIQ = window.AIQ || {};
       <div class="m8-win rise" style="--d:.5s">${pod}<span>${T("Tus coronas", "Your crowns")}: ${now.w} · ${T("Mesas", "Tables")}: ${now.d}</span>${extra}</div>
       <div class="seatw" id="m8VdSeat" data-tail="r"></div>
       <div class="gx-acts"><button type="button" class="gx-btn gho" id="m8Exit"><span>${T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${s.net ? K.primary("m8Room", T("Volver a la sala", "Back to the room")) : K.primary("m8Again", T("Otra mesa", "Another table"))}</div>`), "tablewrap");
-    chips($("dlg"), ".m8-pod .m8-cs.g", 64, 32); $("dlg").querySelectorAll(".m8-pbd").forEach(e => bdIn(e, st.pl[+e.dataset.i], 80)); chips($("dlg"), ".m8-pod .m8-cs.s", 48, 24); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
+    chips($("dlg"), ".m8-pod .m8-cs.g", 64, 32); $("dlg").querySelectorAll(".m8-pbd").forEach(e => bdIn(e, st.pl[+e.dataset.i], 80)); chips($("dlg"), ".m8-pod .m8-cs.mk", 24, 12); chips($("dlg"), ".m8-pod .m8-cs.s", 48, 24); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
     $("m8Exit").onclick = () => c.showHub("home");
     if (s.net) { $("m8Exit").querySelector("span").textContent = T("Salir de la sala", "Leave the room"); $("m8Room").onclick = () => roomBack(!o.quit && !o.closed); }
     else $("m8Again").onclick = () => M.start({ auto: s.auto, seats: s.N });
@@ -637,7 +643,7 @@ window.AIQ = window.AIQ || {};
     const host = NT.me === v.host, inN = seated(v).length, playing = v.st === "play";
     const sg = JSON.stringify([v.code, v.st, NT.me, v.host, NT.cut, v.seats.map(s => s && !s.out && [s.n, s.on, s.in, s.k])]); if (sg === NT.sig) return; NT.sig = sg;
     $("m8Cod").textContent = v.code;
-    const who = i => ({ me: i === NT.me, k: v.seats[i].k || "", chip: CFG.chips[i] });
+    const who = i => ({ me: i === NT.me, k: v.seats[i].k || "", chip: CFG.chips[i], seat: i });
     $("m8NetSeats").innerHTML = v.seats.map((s, i) => (s && !s.out
       ? `<div class="m8-seat gx-sh${hasBd(who(i)) ? " bd" : ""}"><div class="gx-paper">${hasBd(who(i)) ? bdSlot(who(i), i) : chipSlot({ chip: CFG.chips[i] })}<h3 class="ink">${esc(s.n) || `${T("Jugador", "Player")} ${i + 1}`}</h3>${titleOf(who(i)) ? `<span class="m8-tit">${esc(titleOf(who(i)))}</span>` : ""}<span class="tag ${i === NT.me ? "me" : !s.on ? "red" : ""}">${i === NT.me ? (host ? `${ME()} · ${T("Anfitrión", "Host")}` : ME()) : !s.on ? T("Sin señal", "No signal") : !s.in ? T("En el veredicto", "At the verdict") : i === v.host ? T("Anfitrión", "Host") : T("En la mesa", "At the table")}</span></div></div>`
       : `<div class="m8-seat free"><span>${T("Asiento libre", "Empty seat")}</span></div>`)).join("");
