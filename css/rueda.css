@@ -44,4 +44,4 @@ html.reduce-motion .hh-rueda .rq-p.hoy { animation: none; }
 .rou.wheel.ready .rou-no { animation: none; opacity: 1; }          /* parada: el titulo («Tu tirada de hoy») se queda; al girar, hace su destello y se va */
 .rou.wheel.rd-oro .wh-ring { filter: saturate(1.25) brightness(1.08); }
 /* nada de la portada por encima de la rueda (la ficha del gato iba en otra capa) */
-body:has(#rouOv) .hv-coin { visibility: hidden; }
+body:has(#rouOv) .hv-coin, body:has(#rouOv) .cm-host { visibility: hidden; }   /* el gato (visitas a la portada, trastadas del mapa) va por encima del apagon: con la rueda abierta, fuera */
