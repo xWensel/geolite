@@ -704,7 +704,8 @@ window.AIQ = window.AIQ || {};
     const wrap = x => ((x + 540) % 360) - 180;
     return { s, n: i, pt: [wrap(lo2 * 180 / Math.PI), clamp(la2 * 180 / Math.PI, -70, 78)], sum: d.s.slice(0, i + 1).reduce((a, b) => a + b, 0) };
   };
-  A.adv.duelHud = () => { const d = run && run.duel && !run.inf ? run.duel : null; if (!d) return null; const bank = d.s.slice(0, d.n || 0).reduce((a, b) => a + b, 0); return { bank, pct: Math.min(100, 100 * bank / Math.max(1, d.T)) }; };
+  A.adv.duelShow = () => { if (run && run.duel) run.duel.shown = null; };
+  A.adv.duelHud = () => { const d = run && run.duel && !run.inf ? run.duel : null; if (!d) return null; const bank = d.s.slice(0, d.shown != null ? d.shown : d.n || 0).reduce((a, b) => a + b, 0); return { bank, pct: Math.min(100, 100 * bank / Math.max(1, d.T)) }; };
   A.adv.introHtml = Lv => {
     if (run.inf) {
       return `<div class="intro-in adv" data-topic="mixed"><div class="intro-left"><div class="intro-num blind">${A.blind("small", "s_compass")}</div><div class="intro-body">
@@ -874,7 +875,7 @@ window.AIQ = window.AIQ || {};
     if (res.dist >= 750) run.rGood++; run.leftSum += Math.max(0, res.left || 0); run.roundScore += res.total; run.qTotal++;
     const prevStreak = run.streak || 0, prevScore = run.roundScore - res.total, goalLv = C().S.camp && C().S.camp.levels && C().S.camp.levels[0];
     run.streak = res.streak || 0; run.qi++; run.qTools = 0;
-    if (run.duel && !run.inf) { run.duel.n = run.qi; res.bank = bankMove(res, run.qi - 1); }   // tanda 16: la banca responde despues que tu
+    if (run.duel && !run.inf) { run.duel.n = run.qi; run.duel.shown = run.qi - 1; res.bank = bankMove(res, run.qi - 1); }   // v0.4.80: la meta del marcador espera a que caiga su chincheta (A.adv.duelShow)   // tanda 16: la banca responde despues que tu
     if (run.inf && !run.infOver) {
       const S = C().S, Lv = S.camp.levels[0];
       Lv.seconds = Math.max(3, Math.round((Lv.seconds - 0.2) * 10) / 10); run.infSeconds = Lv.seconds;
@@ -1504,7 +1505,7 @@ window.AIQ = window.AIQ || {};
       if (conso) { run.coins += conso; run.stats.coinsEarned += conso; }
       run.lastPay = { r: roundNo() + 1, got: conso, ok: 0 };
       persist();
-      if (!A.veredicto) A.sfx.stamp(); setTimeout(A.sfx.lose, 300);
+      if (!A.veredicto) A.sfx.stamp(); setTimeout(() => { if (!(A.veredicto && A.veredicto.casi && A.veredicto.casi())) A.sfx.lose(); }, 300);   // «por un pelo» (v0.4.80): la derrota suena cuando la ultima ficha se cae, no antes
       if (run.lives <= 0) return endRun(false);
       C().verdict({
         kind: "", level: roundNo() + 1, tag: `${A.tx(actInfo(run.act).n)} · ${boss ? A.T("Jefe", "Boss") : A.T("Ronda", "Round") + " " + (run.round + 1)}`, title: A.T("No llegaste al objetivo", "Target missed"),

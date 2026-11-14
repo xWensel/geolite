@@ -156,6 +156,12 @@
   }
   function levelTitle(L) { return A.tx(L.name) + (L.diff ? " · " + A.t("diff." + L.diff) : ""); }
   /* cash (solo al revelar): las cifras ruedan al compas del TOTAL del ticket y la barra arranca a la vez (el resto del cobro, en js/marcador.js) */
+  /* la meta (o la de la banca en su duelo), sola: tambien la llama el revelado cuando cae la chincheta de la banca, sin tocar la barra que rueda */
+  function duelMeta(L = lv()) {
+    { const dh = S.run && A.adv.duelHud ? A.adv.duelHud() : null, lb = $("scNeed").parentNode.firstElementChild;   // tanda 16: Duelo con la banca (la meta es su puntuacion, que sube con cada respuesta suya)
+      if (dh) { lb.textContent = A.tx(A.chal.tl("ui_bank")); $("scNeed").textContent = A.fmt(dh.bank); $("scMark").style.right = (100 - dh.pct) + "%"; S.duelOn = true; }
+      else { if (S.duelOn) { S.duelOn = false; lb.textContent = A.t("score.need"); $("scMark").style.right = ""; } $("scNeed").textContent = L.advance > 1 ? A.fmt(L.advance) : "—"; } }
+  }
   function updateHud(cash) {
     if (S.duel) return A.duelo.hud();                                      // Duelo de fichas (prototipo, js/duelo.js): su marcador son las dos pilas
     const L = lv(), inf = S.run && A.adv.isInfinite && A.adv.isInfinite();
@@ -164,9 +170,7 @@
     if (cash && cash.roll && A.par) A.par.rueda($("scLevel"), S.levelScore, { from: cash.from, ms: cash.ms, delay: Math.max(0, cash.delay), row: 5, clic: false });   // el marcador cuenta con los rodillos del ticket
     else odoSet($("scLevel"), S.levelScore, cash ? { ms: cash.ms, delay: cash.delay } : { ms: 900 });
     $("scTotal").textContent = A.fmt(S.runTotal + S.levelScore);
-    { const dh = S.run && A.adv.duelHud ? A.adv.duelHud() : null, lb = $("scNeed").parentNode.firstElementChild;   // tanda 16: Duelo con la banca (la meta es su puntuacion, que sube con cada respuesta suya)
-      if (dh) { lb.textContent = A.tx(A.chal.tl("ui_bank")); $("scNeed").textContent = A.fmt(dh.bank); $("scMark").style.right = (100 - dh.pct) + "%"; S.duelOn = true; }
-      else { if (S.duelOn) { S.duelOn = false; lb.textContent = A.t("score.need"); $("scMark").style.right = ""; } $("scNeed").textContent = L.advance > 1 ? A.fmt(L.advance) : "—"; } }
+    duelMeta(L);
     $("scBar").style.transition = cash ? `width ${cash.gauge}ms cubic-bezier(.2, .8, .2, 1) ${cash.delay}ms` : "";
     $("scBar").style.width = Math.min(100, (S.levelScore / Math.max(1, L.advance)) * 100) + "%";
     $("scBar").classList.toggle("done", L.advance > 1 && S.levelScore >= L.advance);
@@ -980,7 +984,7 @@
       flags: up ? fl.map(flagImg) : null,
       rings: guess && !isC ? { r: S.run && A.adv.isInfinite && A.adv.isInfinite() ? [...lim, 500] : lim, n: cxr.level, at: [0, 1, 2].map(i => JP_AT + i * JP_MS), casi, oro: SIL && !par.vivo ? 1 : 0 } : null,   // anillos 300/150/75 km: se encienden con los jackpots
     });
-    if (adv && adv.bank && adv.bank.pt) { const bq = S.qi; map.setDecoys([{ lon: adv.bank.pt[0], lat: adv.bank.pt[1], bank: adv.bank.s, bankLabel: A.tx(A.chal.tl("ui_bank")).toUpperCase() + " +" + A.fmt(adv.bank.s), t0: performance.now() + 900 - M0, a: 1 }]); later(() => { if (S.phase === "reveal" && S.qi === bq && A.sfx.bankPin) A.sfx.bankPin(); }, 1500); }   // la chincheta de la banca cae despues de la tuya
+    if (adv && adv.bank && adv.bank.pt) { const bq = S.qi; map.setDecoys([{ lon: adv.bank.pt[0], lat: adv.bank.pt[1], bank: adv.bank.s, bankLabel: A.tx(A.chal.tl("ui_bank")).toUpperCase() + " +" + A.fmt(adv.bank.s), t0: performance.now() - M0, a: 1 }]); later(() => { if (S.phase === "reveal" && S.qi === bq) { if (A.sfx.bankPin) A.sfx.bankPin(); if (A.adv.duelShow) { A.adv.duelShow(); duelMeta(); } } }, 600); }   // v0.4.80: la chincheta de la banca cae PRIMERO y la meta del marcador sube con ella; tu cifra rueda despues contra una meta que ya ves
     const fC = isC ? world.byName[o.key] : null;
     const fpts = (isC ? span.slice(0, 2).map(p => [p[0], p[1], fC && fC.ct]) : [[ans[0], ans[1]]]).concat(span.slice(isC ? 2 : 1).map(p => [p[0], p[1]]), guess ? [[gLon, guess.lat, map.pickCt]] : []);
 

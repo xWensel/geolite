@@ -161,8 +161,9 @@ window.AIQ = window.AIQ || {};
     const red = quieto(), meter = o.meter && o.meter[1] > 1 ? o.meter : null, gana = o.kind === "ok";
     const pts = meter ? meter[0] : 0, goal = meter ? meter[1] : 0, margen = meter && goal ? (pts - goal) / goal : 0;
     const ajustado = gana && meter && pts >= goal && margen < 0.05;
+    const casi = !gana && !!meter && pts > 0 && pts < goal && (goal - pts) / goal < 0.05, pelo = ajustado || casi;   // v0.4.80: por un pelo, tambien al perder
     const tier = clamp(o.superada | 0 || 1, 1, 3);
-    vd.classList.add("vdx"); if (ajustado) vd.classList.add("vdx-aj");
+    vd.classList.add("vdx"); if (pelo) vd.classList.add("vdx-aj"); if (casi) vd.classList.add("vdx-casi");
     const R = CJ.ritmo, sec = u => u / R;                                                      // la linea de tiempo va a ritmo 1 (la de la maqueta); en segundos, / ritmo
 
     /* ---------------- las lineas del ticket: cada una, cuando sale de la ranura y que cifra rueda */
@@ -224,18 +225,18 @@ window.AIQ = window.AIQ || {};
     /* ---------------- el estado de partida */
     const ranura = document.createElement("i"); ranura.className = "vdx-ranura"; ranura.setAttribute("aria-hidden", "true");
     let sala = null;
-    if (!red && !ajustado) { mid.appendChild(ranura); mid.classList.add("vdx-feed"); }
-    lineas.forEach(l => l.items.forEach(x => { if (x.val) { x.val.el.classList.add("odo"); if (!red && !ajustado) x.val.b.style.visibility = "hidden"; } }));
+    if (!red && !pelo) { mid.appendChild(ranura); mid.classList.add("vdx-feed"); }
+    lineas.forEach(l => l.items.forEach(x => { if (x.val) { x.val.el.classList.add("odo"); if (!red && !pelo) x.val.b.style.visibility = "hidden"; } }));
     /* el sello: su golpe cae en su momento (el CSS lo lee de --vdx-sello) */
     let selloS = sec(T.sello);
     /* POR LOS PELOS: el plan de fichas */
     let PL = null;
-    if (ajustado) {
-      const ajT = margen < 0.01 ? 1 : margen < 0.03 ? 2 : 3, NS = 12, steps = []; let at = 0.1;
-      const gfp = goal / pts;                                                                 // la meta en la barra del ajustado (la barra entera = tus puntos)
-      for (let i = 1; i <= NS; i++) { const x = i / NS, frac = gfp * (1 - Math.pow(1 - x, 1.7)) * 0.985; at += 0.045 + (0.04 + 0.24 * AJ.frena) * Math.pow(x, 3); steps.push({ at, frac }); }
+    if (pelo) {
+      const mg = Math.abs(margen), ajT = mg < 0.01 ? 1 : mg < 0.03 ? 2 : 3, NS = 12, steps = []; let at = 0.1;
+      const gfp = casi ? 1 : goal / pts, tgt = casi ? pts / goal : gfp;                         // la meta en la barra (ajustado: la barra entera = tus puntos; casi: = la meta) y hasta donde suben las fichas
+      for (let i = 1; i <= NS; i++) { const x = i / NS, frac = tgt * (1 - Math.pow(1 - x, 1.7)) * 0.985; at += 0.045 + (0.04 + 0.24 * AJ.frena) * Math.pow(x, 3); steps.push({ at, frac }); }
       const dudaAt = at + 0.06 + 0.08 * AJ.frena, cae = dudaAt + AJ.duda * [1.25, 1, 0.7][ajT - 1];
-      PL = { steps, dudaAt, cae, gfp, ajT };
+      PL = { steps, dudaAt, cae, gfp, ajT, tgt };
       selloS = cae + 0.42;
     }
     vd.style.setProperty("--vdx-sello", (red ? 0 : selloS).toFixed(2) + "s");
@@ -262,7 +263,7 @@ window.AIQ = window.AIQ || {};
       if (!vd.isConnected) return api.fin();
       const u = red ? 99 : ((now - t0) / 1000) * R;
       /* el papel: hasta donde ha salido */
-      if (!red && !ajustado) {
+      if (!red && !pelo) {
         let f = head;
         for (let i = 0; i < lineas.length; i++) { const l = lineas[i], a = l.at; if (u >= a) { const p0 = i ? lineas[i - 1].feed : head; f = u < a + 0.08 ? p0 + (l.feed - p0) * easeIO((u - a) / 0.08) : l.feed; } }
         if (u >= T.tear - 0.1) f = Math.max(f, lineas.length ? lineas[lineas.length - 1].feed + (fin - lineas[lineas.length - 1].feed) * easeIO(clamp((u - T.tear + 0.1) / 0.1, 0, 1)) : fin);
@@ -275,7 +276,7 @@ window.AIQ = window.AIQ || {};
       {
         lineas.forEach((l, li) => l.items.forEach(x => {
           if (!x.val) return;
-          if (red || ajustado) { if (!x.ok) { x.ok = 1; A.par && A.par.rueda ? A.par.rueda(x.val.el, x.val.v, { instant: true, from: x.val.v }) : (x.val.el.textContent = A.fmt(x.val.v)); } return; }
+          if (red || pelo) { if (!x.ok) { x.ok = 1; A.par && A.par.rueda ? A.par.rueda(x.val.el, x.val.v, { instant: true, from: x.val.v }) : (x.val.el.textContent = A.fmt(x.val.v)); } return; }
           if (!x.ok && u >= x.t0) {
             x.ok = 1; x.val.b.style.visibility = "";
             if (A.par && A.par.rueda) A.par.rueda(x.val.el, x.val.v, { from: 0, ms: Math.round(sec(x.ms) * 1000), row: Math.min(6, li), tick: x.big }); else x.val.el.textContent = A.fmt(x.val.v);
@@ -291,7 +292,7 @@ window.AIQ = window.AIQ || {};
             }
           }
         }));
-        if (!red && !ajustado && lastU >= 0 && cross(u, T.tear)) son("caja", "corte");
+        if (!red && !pelo && lastU >= 0 && cross(u, T.tear)) son("caja", "corte");
       }
       /* POR LOS PELOS */
       if (PL) {
@@ -299,14 +300,21 @@ window.AIQ = window.AIQ || {};
         if (!red && lastU >= 0) {
           pl.steps.forEach((s, i) => { if (cross(u, s.at)) { son("caja", "ficha", i > pl.steps.length - 5 ? 1 : 2); if (ctr) ctr.rodar(Math.round(pts * s.frac), u, 0.12 + 0.2 * (i / pl.steps.length)); vib(0.08 + 0.02 * i / 3, 0.05, 30); } });
           if (cross(u, pl.dudaAt) && AJ.latido) { son("aliento"); if (pl.ajT === 1) setTimeout(() => { if (vd.isConnected) son("aliento"); }, 520); }
-          if (cross(u, pl.cae)) { son("caja", "ficha", 1); son("caja", "clac", 1.2); if (ctr) ctr.rodar(pts, u, 0.32); son("caja", "timbre", pl.ajT === 1 ? 2 : 1); vib(0.5, 0.3, 220); golpe(1); }
+          if (cross(u, pl.cae)) {
+            if (casi) { son("caja", "ficha", 2); if (A.sfx.passFalse) A.sfx.passFalse(); if (A.sfx.lose) setTimeout(() => { if (vd.isConnected) A.sfx.lose(); }, 260); if (ctr) ctr.rodar(pts, u, 0.32); vib(0.3, 0.15, 160); }   // se cae hacia atras: golpe sordo, sin timbre
+            else { son("caja", "ficha", 1); son("caja", "clac", 1.2); if (ctr) ctr.rodar(pts, u, 0.32); son("caja", "timbre", pl.ajT === 1 ? 2 : 1); vib(0.5, 0.3, 220); golpe(1); }
+          }
         }
         let frac = 0; for (const s of pl.steps) if (u >= s.at) frac = s.frac;
         const cayo = red || u >= pl.cae;
-        barV = cayo ? 1 : frac;
+        barV = cayo ? (casi ? pl.tgt : 1) : frac;
+        if (casi && cayo && meterEl && !meterEl.querySelector(".vdx-falta")) {               // el hueco que falto, en rojo, con su cifra
+          const gap = document.createElement("i"); gap.className = "vdx-hueco"; gap.style.left = (pl.tgt * 100).toFixed(2) + "%"; meterEl.appendChild(gap);
+          const fb = document.createElement("b"); fb.className = "vdx-falta"; fb.textContent = "−" + A.fmt(goal - pts); fb.style.left = ((pl.tgt * 100 + 100) / 2).toFixed(2) + "%"; meterEl.appendChild(fb);
+        }
         if (sala) { const dk = AJ.sala * sm(pl.dudaAt - 0.25, pl.dudaAt + 0.15, u) * (1 - sm(pl.cae, pl.cae + 0.35, u)); sala.style.opacity = dk.toFixed(3); }
         if (red && ctr) ctr.set(pts);
-        if (meterEl) { meterEl.classList.toggle("full", cayo); if (fillEl) { fillEl.style.width = (barV * 100).toFixed(2) + "%"; } const em = meterEl.querySelector("em"); if (em) em.style.left = (pl.gfp * 100).toFixed(2) + "%"; }
+        if (meterEl) { meterEl.classList.toggle("full", cayo && !casi); if (fillEl) { fillEl.style.width = (barV * 100).toFixed(2) + "%"; } const em = meterEl.querySelector("em"); if (em) em.style.left = (pl.gfp * 100).toFixed(2) + "%"; }
         if (barG) pintaFichas(u, frac, cayo);
       } else if (meterEl) {
         if (red) barV = pts / top; else if (ctr) barV = Math.min(pts, ctr.shown()) / top; else { const e = clamp((u - barT0) / barMs, 0, 1); barV = barFrom + (barTo - barFrom) * easeOut(e); }
@@ -325,7 +333,7 @@ window.AIQ = window.AIQ || {};
       const acabado = red || u > Math.max(T.sello, PL ? PL.cae + 0.5 : 0) + 0.6;
       if (acabado && !done) {
         done = true;
-        if (!ajustado) { tk.style.transform = ""; mid.classList.remove("vdx-feed"); ranura.remove(); }
+        if (!pelo) { tk.style.transform = ""; mid.classList.remove("vdx-feed"); ranura.remove(); }
         if (sala) { sala.remove(); sala = null; }
         if (barCv && (red || u > PL.cae + 0.5)) { barCv.remove(); barCv = null; barG = null; }
       }
@@ -338,8 +346,8 @@ window.AIQ = window.AIQ || {};
       if (barCv.width !== W || barCv.height !== H) { barCv.width = W; barCv.height = H; barCv.style.width = W / d / zl + "px"; barCv.style.height = H / d / zl + "px"; barCv.style.left = barCv.style.top = -pad / d / zl + "px"; }
       const g = barG; g.clearRect(0, 0, W, H);
       const t = Math.max(1, Math.round(2 * zl * d)), ix0 = pad + t, iw = W - 2 * pad - 2 * t, iy0 = pad + t, ih = H - 2 * pad - 2 * t;
-      const chipW = Math.max(6, Math.round(12 * escala())), fw = Math.round(iw * (cayo ? 1 : frac));
-      g.fillStyle = cayo ? "rgba(110,52,20,0.55)" : "rgba(120,20,30,0.5)";
+      const chipW = Math.max(6, Math.round(12 * escala())), fw = Math.round(iw * (cayo ? (casi ? PL.tgt : 1) : frac));
+      g.fillStyle = cayo && !casi ? "rgba(110,52,20,0.55)" : "rgba(120,20,30,0.5)";
       for (let x = ix0 + chipW; x < ix0 + fw; x += chipW) g.fillRect(x - 1, iy0 + t, 1, ih - t);
       if (cayo || u < PL.dudaAt - 0.2) return;
       const e = u - (PL.dudaAt - 0.2), tilt = Math.sin(e * 9.5) * Math.min(1, e * 3) * 6 * escala();
@@ -390,7 +398,7 @@ window.AIQ = window.AIQ || {};
       F.forEach((f, i) => g.drawImage(flips[i] ? spr.b : spr.a, cx + f.dx - 16 * f.k, base - 30 * f.k - f.up - (flips[i] ? f.k : 0), 32 * f.k, 32 * f.k));
     }
     const api = {
-      stats: !!lineas.length, selloMs: Math.round(selloS * 1000),
+      stats: !!lineas.length, selloMs: Math.round(selloS * 1000), casi,
       fin() { cancelAnimationFrame(raf); raf = 0; if (sala) sala.remove(); if (vivo === api) vivo = null; },
     };
     raf = requestAnimationFrame(frame);
@@ -398,5 +406,5 @@ window.AIQ = window.AIQ || {};
     return api;
   }
 
-  A.veredicto = { monta, Contador };
+  A.veredicto = { monta, Contador, casi: () => !!(vivo && vivo.casi) };
 })(window.AIQ);
