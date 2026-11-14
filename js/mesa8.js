@@ -48,7 +48,7 @@ window.AIQ = window.AIQ || {};
     for (let i = lv.length - 1; i > 0; i--) { const j = Math.floor(rs() * (i + 1)); [lv[i], lv[j]] = [lv[j], lv[i]]; }
     const mk = (i, seat, o) => ({ i, ord: seat, seat, me: i === 0, chip: CFG.chips[seat], name: "", alive: true, out: 0, rp: 0, sp: 0, rq: [], rt: 0, up: 0, ...o });
     let pl;
-    if (o.net) pl = [o.net.me, ...o.net.pl.filter(s => s !== o.net.me)].map((s, i) => mk(i, s, { name: i ? o.net.names[s] || `${T("Jugador", "Player")} ${s + 1}` : "" }));   // entre jugadores: nadie rellena
+    if (o.net) pl = [o.net.me, ...o.net.pl.filter(s => s !== o.net.me)].map((s, i) => mk(i, s, { name: i ? o.net.names[s] || `${T("Jugador", "Player")} ${s + 1}` : "", k: (o.net.ks && o.net.ks[s]) || "" }));   // entre jugadores: nadie rellena
     else { pl = [mk(0, 0)]; for (let i = 1; i < N; i++) pl.push(mk(i, i, { name: `${T("Banca", "House")} ${ROM[i - 1]}`, lv: lv[i - 1] })); }
     return { m8: true, seed, pl, N: pl.length, R: pl.length - 1, k: 0, qi: 0, nq: 0, rq: A.rng(seed + ":q"), rb: A.rng(seed + ":bots"), ra: A.rng(seed + ":auto"), auto: o.auto || null,
       table: { saco: null }, band: null, used: new Set(), lastCont: null, lastCat: null, log: [], rounds: [], cur: null, over: null, phase: "", secs: 0, net: o.net || null };
@@ -125,6 +125,16 @@ window.AIQ = window.AIQ || {};
     const dk = zoomed ? dkOf() : 1, cv = K.fichaCv(id, css * dk, base); cv.style.width = cv.style.height = parseFloat(cv.style.width) / dk + "px"; cv.className = "m8-chip"; return cv;
   }
   const chips = (root, sel, css, base) => root.querySelectorAll(sel).forEach(e => { e.textContent = ""; e.appendChild(chipIn(e.dataset.chip, css, base)); });
+  /* v0.4.79: LA CHAPA DE SOCIO (js/socio.js: icono, marco y titulo; la del Duelo 1 contra 1). La tuya siempre; la de los demas, la que guarda la sala (k).
+     Los rivales que maneja el juego no tienen: llevan su ficha. Va en la sala, en la entrada de la final y en el podio; la tira y el mapa siguen con las
+     fichas de color (ocho colores se distinguen de un vistazo y son las que caen en el mapa) */
+  const SOC = () => (A.socio && A.club && A.socio.badge ? A.socio : null);
+  const styleOf = p => { const so = SOC(); return !so ? null : p.me ? {} : p.k ? so.parse(p.k) : null; };
+  const hasBd = p => !!styleOf(p);
+  const bdIn = (host, p, w) => { const so = SOC(), o = styleOf(p); if (!so || !o || !host) return false; so.badge(host, p.me ? { w } : { w, other: true, t: o.t, marco: o.marco, icon: o.icon, lvl: o.lvl, fondo: o.fondo, mat: o.mat }); return true; };
+  const titleOf = p => { const so = SOC(), o = styleOf(p); if (!so || !o) return ""; const t = p.me ? so.title() : o.title; return t ? so.titleName(t) : ""; };
+  /* la chapa con, en su esquina, la ficha de color que llevara en la mesa (la del mapa) */
+  const bdSlot = (p, i) => `<span class="m8-bdw"><span class="m8-bd" data-bd="${i}"></span><span class="m8-cs mk" data-chip="${p.chip}"></span></span>`;
   const chipSlot = (p, cls = "") => `<span class="m8-cs ${cls}" data-chip="${p.chip}"></span>`;
 
   const SKEY = "atlasiq.mesa8";
@@ -153,7 +163,8 @@ window.AIQ = window.AIQ || {};
     /* an = la silla que entra (al pulsar +): solo ella aparece; las demas se quedan quietas (v0.4.77: antes se redibujaba la sala entera y parpadeaba) */
     const rs = (i, an) => (an == null ? ` rise" style="--d:${(0.08 + i * 0.05).toFixed(2)}s"` : i === an ? ` rise" style="--d:0s"` : `"`);
     const free = (i, an) => `<div class="m8-seat free${rs(i, an)}><span>${T("Asiento libre", "Empty seat")}</span></div>`;
-    const seat = (p, i, an) => `<div class="m8-seat gx-sh${rs(i, an)}><div class="gx-paper">${chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3><span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`;
+    const seat = (p, i, an) => { const bd = hasBd(p), tt = "";   /* en la practica, tu chapa sin titulo (el tuyo ya lo sabes; asi la silla no crece y la sala no pisa al crupier) */ return `<div class="m8-seat gx-sh${bd ? " bd" : ""}${rs(i, an)}><div class="gx-paper">${bd ? bdSlot(p, i) : chipSlot(p)}<h3 class="ink">${nameOf(p)}</h3>${tt ? `<span class="m8-tit">${esc(tt)}</span>` : ""}<span class="tag ${p.me ? "me" : ""}">${p.me ? ME() : T("La banca", "The house")}</span></div></div>`; };
+    const paint = box => { chips(box, ".m8-cs:not(.mk)", 56, 28); chips(box, ".m8-cs.mk", 32, 16); box.querySelectorAll(".m8-bd").forEach(e => bdIn(e, mkState({ seed: "sala", seats: 3 }).pl[+e.dataset.bd], 80)); };
     const seatsHtml = (n, an) => mkState({ seed: "sala", seats: n }).pl.map((p, i) => seat(p, i, an)).join("") + Array.from({ length: CFG.seats - n }, (_, i) => free(n + i, an)).join("");
     c.dialog(K.stage("lob m8-lob", `<div class="hd"><button type="button" class="gx-btn sm" id="hubBack">${A.icon("u_back", "t24")}<span>${T("Volver", "Back")}</span>${A.gala.keyHint("Esc", "b")}</button><h2 class="gx-t-l">${NAME()}</h2><span class="gx-eyb">${T("De 3 a 8 jugadores", "3 to 8 players")}</span></div>
       <div class="m8-room"><div class="amg m8-amg"><span id="m8AmgTx" role="status"></span><input id="m8Code" type="text" maxlength="5" spellcheck="false" autocomplete="off" autocapitalize="characters" enterkeyhint="go" placeholder="·····" aria-label="${T("Código de la sala", "Room code")}"><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Join">${T("Entrar", "Join")}</button></span></div>
@@ -161,7 +172,7 @@ window.AIQ = window.AIQ || {};
         <div class="regl"><span class="lvl"><span>${T("En la mesa", "At the table")}</span><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Dn" aria-label="${T("Una silla menos", "One fewer chair")}"${N <= CFG.minSeats ? " disabled" : ""}>−</button></span><b id="m8N">${N}</b><span class="gx-acts"><button type="button" class="gx-btn sm" id="m8Up" aria-label="${T("Una silla más", "One more chair")}"${N >= CFG.seats ? " disabled" : ""}>+</button></span></span><span id="m8Rl" style="display:contents">${M.rules(N)}</span></div>
         <div class="regl"><span>${T("Mesas jugadas", "Tables played")} <b>${s.d}</b></span><span>${T("Coronas", "Crowns")} <b>${s.w}</b></span><span>${T("Todo el contenido. La dificultad sube poco a poco", "All the content. Difficulty climbs little by little")}</span></div></div>
       <div class="ft"><div class="seatw" id="m8SalaSeat" data-tail="l" data-lines="2"></div><div class="gx-acts"><button type="button" class="gx-btn" id="m8Go"><span>${T("Practicar", "Practice")}</span></button>${K.primary("m8New", T("Abrir una sala", "Open a room"))}</div></div>`), "tablewrap");
-    chips($("dlg"), ".m8-cs", 56, 28);
+    paint($("m8Seats"));
     salaMsg(M.msg, !!M.msg); M.msg = "";
     { const ci = $("m8Code"); ci.oninput = () => { const v = ci.value.toUpperCase().replace(/[^A-HJKMNP-Z2-9]/g, "").slice(0, 5); if (v !== ci.value) ci.value = v; salaMsg(""); };
       ci.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); roomJoin(ci.value); } }; $("m8Join").onclick = () => roomJoin(ci.value); $("m8New").onclick = roomNew; }
@@ -169,7 +180,7 @@ window.AIQ = window.AIQ || {};
     $("hubBack").onclick = () => { A.sfx.ui(); D.open(); };
     $("m8Go").onclick = () => { A.sfx.depart(); M.start({ seats: M.seats }); };
     const step = d => () => { const n = seatsOf(M.seats + d); if (n === M.seats) return; M.seats = n; A.sfx.ui();
-      const box = $("m8Seats"); box.innerHTML = seatsHtml(n, d > 0 ? n - 1 : -1); chips(box, ".m8-cs", 56, 28);
+      const box = $("m8Seats"); box.innerHTML = seatsHtml(n, d > 0 ? n - 1 : -1); paint(box);
       $("m8N").textContent = n; $("m8Rl").innerHTML = M.rules(n); $("m8Dn").disabled = n <= CFG.minSeats; $("m8Up").disabled = n >= CFG.seats;
       const b = $(d < 0 ? "m8Dn" : "m8Up"); if (b && !b.disabled) b.focus(); else { const o = $(d < 0 ? "m8Up" : "m8Dn"); if (o) o.focus(); } };
     $("m8Dn").onclick = step(-1); $("m8Up").onclick = step(1);
@@ -483,12 +494,12 @@ window.AIQ = window.AIQ || {};
     finKill(); const c = C(), S = c.S, red = !!S.reduce, shake = !red && S.shake !== false, two = alive(st).sort((a, b) => (b.me ? 1 : 0) - (a.me ? 1 : 0) || a.ord - b.ord);
     if (two.length !== 2) return cb();
     c.closeDialog(); if (A.coverMap) A.coverMap("duelo", false);
-    const ov = document.createElement("div"); ov.id = "m8Fin"; ov.className = "m8-fin-ov" + (red ? " rm" : "");
-    ov.innerHTML = `<div class="m8-fin-in"><div class="m8f-ring"></div><div class="m8f-duo">${two.map((p, i) => `<div class="m8f-cl ${i ? "b" : "a"}"><span class="m8f-ch" data-chip="${p.chip}"></span><b class="${p.me ? "me" : ""}">${nameOf(p)}</b></div>`).join("")}</div>
+    const ov = document.createElement("div"), bd = two.map(hasBd); ov.id = "m8Fin"; ov.className = "m8-fin-ov" + (red ? " rm" : "") + (bd[0] && bd[1] ? " bd2" : "");
+    ov.innerHTML = `<div class="m8-fin-in"><div class="m8f-ring"></div><div class="m8f-duo">${two.map((p, i) => `<div class="m8f-cl ${i ? "b" : "a"}${bd[i] ? " bd" : ""}">${bd[i] ? `<span class="m8f-bd"></span>` : `<span class="m8f-ch" data-chip="${p.chip}"></span>`}<b class="${p.me ? "me" : ""}">${nameOf(p)}</b>${titleOf(p) ? `<i class="m8f-tit">${esc(titleOf(p))}</i>` : ""}</div>`).join("")}</div>
       <div class="m8f-tt"><span class="gx-eyb">${NAME()} · ${Tf("ronda {k}", "round {k}", { k: st.k + 1 })}</span><h2>${T("La final", "The final")}</h2><p>${Tf("{n} preguntas · quien gane se queda la mesa", "{n} questions · winner takes the table", { n: CFG.finalQs })}</p>
       <div class="m8f-pips">${Array.from({ length: CFG.finalQs }, () => "<i></i>").join("")}</div></div><div class="m8f-flash"></div></div>`;
     ov.querySelectorAll(".m8f-ch").forEach(e => e.appendChild(chipIn(e.dataset.chip, 128, 32)));
-    $("app").appendChild(ov); document.body.classList.add("m8-fin-on");
+    $("app").appendChild(ov); ov.querySelectorAll(".m8f-cl").forEach((e, i) => bdIn(e.querySelector(".m8f-bd"), two[i], 160)); document.body.classList.add("m8-fin-on");
     const at = (ms, f) => finT.push(setTimeout(f, ms)), sT = st; let ended = false;
     const end = () => { if (ended) return; ended = true; if (S.skipIntro === end) S.skipIntro = null; ov.classList.add("m8f-out"); finT.push(setTimeout(() => { finKill(); if (st === sT) cb(); }, 320)); };
     requestAnimationFrame(() => ov.classList.add("m8f-in"));
@@ -535,7 +546,7 @@ window.AIQ = window.AIQ || {};
     const list = still.map(p => prow(p, "·")).join("") + ranked.map(p => prow(p, p.place)).join("");
     /* P3 (v0.4.78): el podio. Los tres primeros en escalones (oro en el centro, plata a la izquierda, bronce a la derecha) y la corona en el ganador */
     const podP = [2, 1, 3].map(n => st.pl.find(p => p.place === n)).filter(Boolean);
-    const pod = podP.length ? `<div class="m8-pod">${podP.map(p => `<div class="ps p${p.place}${p.me ? " me" : ""}">${p.place === 1 ? A.icon("crown", "cr") : ""}<span class="m8-cs ${p.place === 1 ? "g" : "s"}" data-chip="${p.chip}"></span><b>${nameOf(p)}</b><u>${p.place}</u></div>`).join("")}</div>` : "";
+    const pod = podP.length ? `<div class="m8-pod">${podP.map(p => `<div class="ps p${p.place}${p.me ? " me" : ""}">${p.place === 1 ? A.icon("crown", "cr") : ""}${hasBd(p) ? `<span class="m8-pbd" data-i="${p.i}"></span>` : `<span class="m8-cs ${p.place === 1 ? "g" : "s"}" data-chip="${p.chip}"></span>`}<b>${nameOf(p)}</b><u>${p.place}</u></div>`).join("")}</div>` : "";
     c.dialog(K.stage("du-fin m8-fin", `<div class="m8-h fromL"><span class="gx-eyb">${NAME()} · ${Tf("{n} preguntas", "{n} questions", { n: st.nq })}</span>
         <h2 class="gx-t-xl">${win ? T("Victoria", "Victory") : m.quit ? T("Te levantas", "You get up") : Tf("Puesto {a} de {b}", "Place {a} of {b}", { a: m.place, b: st.N })}</h2><p class="gx-lead">${lead}</p>
         <div class="rows">${stat}</div>${club ? `<div class="du-club rise" style="--d:1.05s"><div class="gx-paper">${A.club.strip(club)}</div></div>` : ""}</div>
@@ -543,7 +554,7 @@ window.AIQ = window.AIQ || {};
       <div class="m8-win rise" style="--d:.5s">${pod}<span>${T("Tus coronas", "Your crowns")}: ${now.w} · ${T("Mesas", "Tables")}: ${now.d}</span>${extra}</div>
       <div class="seatw" id="m8VdSeat" data-tail="r"></div>
       <div class="gx-acts"><button type="button" class="gx-btn gho" id="m8Exit"><span>${T("Salir", "Exit")}</span>${A.gala.keyHint("Esc", "b")}</button>${s.net ? K.primary("m8Room", T("Volver a la sala", "Back to the room")) : K.primary("m8Again", T("Otra mesa", "Another table"))}</div>`), "tablewrap");
-    chips($("dlg"), ".m8-pod .m8-cs.g", 64, 32); chips($("dlg"), ".m8-pod .m8-cs.s", 48, 24); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
+    chips($("dlg"), ".m8-pod .m8-cs.g", 64, 32); $("dlg").querySelectorAll(".m8-pbd").forEach(e => bdIn(e, st.pl[+e.dataset.i], 80)); chips($("dlg"), ".m8-pod .m8-cs.s", 48, 24); chips($("dlg"), ".m8-tb .m8-cs", 32, 16);
     $("m8Exit").onclick = () => c.showHub("home");
     if (s.net) { $("m8Exit").querySelector("span").textContent = T("Salir de la sala", "Leave the room"); $("m8Room").onclick = () => roomBack(!o.quit && !o.closed); }
     else $("m8Again").onclick = () => M.start({ auto: s.auto, seats: s.N });
@@ -624,12 +635,13 @@ window.AIQ = window.AIQ || {};
   function roomPaint() {
     const v = NT.R; if (!v || !inRoom()) return;
     const host = NT.me === v.host, inN = seated(v).length, playing = v.st === "play";
-    const sg = JSON.stringify([v.code, v.st, NT.me, v.host, NT.cut, v.seats.map(s => s && !s.out && [s.n, s.on, s.in])]); if (sg === NT.sig) return; NT.sig = sg;
+    const sg = JSON.stringify([v.code, v.st, NT.me, v.host, NT.cut, v.seats.map(s => s && !s.out && [s.n, s.on, s.in, s.k])]); if (sg === NT.sig) return; NT.sig = sg;
     $("m8Cod").textContent = v.code;
+    const who = i => ({ me: i === NT.me, k: v.seats[i].k || "", chip: CFG.chips[i] });
     $("m8NetSeats").innerHTML = v.seats.map((s, i) => (s && !s.out
-      ? `<div class="m8-seat gx-sh"><div class="gx-paper">${chipSlot({ chip: CFG.chips[i] })}<h3 class="ink">${esc(s.n) || `${T("Jugador", "Player")} ${i + 1}`}</h3><span class="tag ${i === NT.me ? "me" : !s.on ? "red" : ""}">${i === NT.me ? (host ? `${ME()} · ${T("Anfitrión", "Host")}` : ME()) : !s.on ? T("Sin señal", "No signal") : !s.in ? T("En el veredicto", "At the verdict") : i === v.host ? T("Anfitrión", "Host") : T("En la mesa", "At the table")}</span></div></div>`
+      ? `<div class="m8-seat gx-sh${hasBd(who(i)) ? " bd" : ""}"><div class="gx-paper">${hasBd(who(i)) ? bdSlot(who(i), i) : chipSlot({ chip: CFG.chips[i] })}<h3 class="ink">${esc(s.n) || `${T("Jugador", "Player")} ${i + 1}`}</h3>${titleOf(who(i)) ? `<span class="m8-tit">${esc(titleOf(who(i)))}</span>` : ""}<span class="tag ${i === NT.me ? "me" : !s.on ? "red" : ""}">${i === NT.me ? (host ? `${ME()} · ${T("Anfitrión", "Host")}` : ME()) : !s.on ? T("Sin señal", "No signal") : !s.in ? T("En el veredicto", "At the verdict") : i === v.host ? T("Anfitrión", "Host") : T("En la mesa", "At the table")}</span></div></div>`
       : `<div class="m8-seat free"><span>${T("Asiento libre", "Empty seat")}</span></div>`)).join("");
-    chips($("m8NetSeats"), ".m8-cs", 56, 28);
+    { const box = $("m8NetSeats"); chips(box, ".m8-cs:not(.mk)", 56, 28); chips(box, ".m8-cs.mk", 32, 16); box.querySelectorAll(".m8-bd").forEach(e => bdIn(e, who(+e.dataset.bd), 80)); }
     $("m8NetRules").innerHTML = M.rules(inN >= CFG.minSeats ? inN : 0);
     $("m8DealW").classList.toggle("hidden", !host); const b = $("m8Deal"), ok = host && inN >= CFG.minSeats && !playing; b.classList.toggle("dis", !ok); b.setAttribute("aria-disabled", !ok);
     $("m8St").textContent = NT.cut ? T("Sin conexión. Reintentando…", "No connection. Retrying…")
@@ -680,7 +692,7 @@ window.AIQ = window.AIQ || {};
     if (!inRoom()) return;
     if (v.st === "play" && v.n > NT.n && v.seed && v.pl) {
       NT.n = v.n;
-      if (v.pl.includes(v.me)) { const names = {}; v.pl.forEach(s => (names[s] = (v.seats[s] && v.seats[s].n) || "")); return void M.start({ seed: v.seed, net: { n: v.n, me: v.me, pl: v.pl.slice(), names, want: 0, s: 0, claimed: {} } }); }   // el anfitrion ha repartido
+      if (v.pl.includes(v.me)) { const names = {}, ks = {}; v.pl.forEach(s => { names[s] = (v.seats[s] && v.seats[s].n) || ""; ks[s] = (v.seats[s] && v.seats[s].k) || ""; }); return void M.start({ seed: v.seed, net: { n: v.n, me: v.me, pl: v.pl.slice(), names, ks, want: 0, s: 0, claimed: {} } }); }   // el anfitrion ha repartido
     }
     roomPaint();
   }

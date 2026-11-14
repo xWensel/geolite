@@ -167,3 +167,21 @@ html.reduce-motion .m8-s .m8-stp.on { animation: none; } html.reduce-motion .m8-
 .m8-pod .p1 u { height: 92px; } .m8-pod .p2 u { height: 64px; } .m8-pod .p3 u { height: 44px; }
 @keyframes m8-pod { from { opacity: 0; translate: 0 24px; } to { opacity: 1; translate: 0 0; } }
 html.reduce-motion .m8-pod .ps { animation: none; }
+
+/* ---------------------------------------------------------------- v0.4.79: la chapa de socio en la sala, la entrada de la final y el podio */
+.m8-seat.bd .gx-paper { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto; row-gap: 2px; }
+.m8-seat .m8-bdw { position: relative; grid-row: 1 / 4; align-self: center; display: block; }
+.m8-seat .m8-bd { display: block; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .35)); }
+.m8-seat .m8-cs.mk { position: absolute; right: -8px; bottom: -6px; width: 32px; height: 32px; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.m8-seat .m8-tit { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; color: var(--gx-gold-lo); }
+.m8-seat.bd h3 { align-self: end; } .m8-seat.bd .tag { align-self: start; }
+.m8-fin-ov .m8f-bd { display: block; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, .5)); }
+.m8-fin-ov.m8f-charge:not(.m8f-hit) .m8f-bd { animation: m8-trem .1s steps(2) infinite; } .m8-fin-ov.rm .m8f-bd { animation: none; }
+.m8-fin-ov .m8f-cl .m8f-tit { font-style: normal; font-family: var(--mono); font-size: 16px; line-height: 1; letter-spacing: .08em; text-transform: uppercase; color: var(--gx-gold); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m8-fin-ov.bd2 .m8f-cl.a { left: calc(50% - 220px); } .m8-fin-ov.bd2 .m8f-cl.b { left: calc(50% - 60px); }   /* dos chapas de 160: los cantos se tocan */
+.m8-pod .m8-pbd { display: block; filter: drop-shadow(0 4px 0 rgba(2, 6, 4, .6)); }
+.m8-seats8 > .m8-seat.gx-sh { display: grid; } .m8-seats8 > .m8-seat.gx-sh > .gx-paper { height: 100%; }   /* todas las sillas de una fila, del alto de la que lleva chapa */
+.m8-fin-ov .m8f-cl { grid-template-rows: 168px auto auto; align-items: end; } .m8-fin-ov .m8f-cl > b, .m8-fin-ov .m8f-cl > .m8f-tit { align-self: start; }   /* ficha o chapa, apoyadas en la misma linea: los nombres a la misma altura */
+.m8-seat .m8-tit { white-space: normal; text-overflow: clip; line-height: 1.1; text-wrap: balance; overflow-wrap: anywhere; }   /* el titulo entero, en dos lineas si la silla es estrecha (cuatro por fila) */
+.du-st .m8-lob:not(.m8-net) .m8-seat.bd .m8-bdw { margin: -10px 0; }   /* en la practica, la chapa asoma por los bordes de la silla, como un broche: la fila no crece */
+.du-st .m8-lob:not(.m8-net) .m8-seat.bd .gx-paper { grid-template-rows: auto auto; } .du-st .m8-lob:not(.m8-net) .m8-seat.bd .m8-bdw { grid-row: 1 / 3; }   /* sin titulo: dos filas (nombre y etiqueta) */
