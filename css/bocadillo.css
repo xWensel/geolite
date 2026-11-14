@@ -73,12 +73,12 @@
 /* LIBRETA: ticket con perforacion a un lado y rotulo de la libreta; las cifras van resaltadas en latón */
 :is(.dealer .dl-bubble, [data-bb])[data-v="libreta"] p { font-size: max(18px, .93em); font-variant-numeric: tabular-nums; padding: 16px 4px 0 18px; }
 :is(.dealer .dl-bubble, [data-bb])[data-v="libreta"]::after { inset: 6px auto calc(6px + var(--bbt)) 14px; width: 3px; box-shadow: none; background: repeating-linear-gradient(0deg, rgba(181, 101, 27, .4) 0 3px, transparent 3px 9px); }
-:is(.dealer .dl-bubble, [data-bb])[data-v="libreta"] .dl-tag { display: block; position: absolute; left: 28px; top: 7px; font-family: var(--lab, var(--sans)); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: #b5651b; line-height: 1; }
+:is(.dealer .dl-bubble, [data-bb])[data-v="libreta"] .dl-tag { display: block; position: absolute; left: 28px; top: 7px; font-family: var(--lab, var(--sans)); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: #b5651b; line-height: 1; }
 /* SEÑAL: ventana de sistema (barra de titulo que se desajusta, cursor que parpadea), sin cola */
 :is(.dealer .dl-bubble, [data-bb])[data-v="senal"] p { font-size: max(18px, .93em); padding-top: 34px; }
 :is(.dealer .dl-bubble, [data-bb])[data-v="senal"] p::after { content: ""; display: inline-block; width: 12px; height: .8em; margin-left: 5px; background: #16241c; vertical-align: -.04em; animation: bbCur 1s steps(1) infinite; }
 :is(.dealer .dl-bubble, [data-bb])[data-v="senal"]::after { display: none; }
-:is(.dealer .dl-bubble, [data-bb])[data-v="senal"] .dl-tag { display: flex; align-items: center; justify-content: space-between; position: absolute; left: 3px; right: 3px; top: 3px; height: 27px; padding: 0 8px; background: #16241c; color: #dfe4e2; font-family: var(--lab, var(--sans)); font-size: 14px; letter-spacing: .05em; text-transform: uppercase; text-shadow: 2px 0 #fe5f55, -2px 0 #4ee3c1; }
+:is(.dealer .dl-bubble, [data-bb])[data-v="senal"] .dl-tag { display: flex; align-items: center; justify-content: space-between; position: absolute; left: 3px; right: 3px; top: 3px; height: 27px; padding: 0 8px; background: #16241c; color: #dfe4e2; font-family: var(--lab, var(--sans)); font-size: 16px; letter-spacing: .05em; text-transform: uppercase; text-shadow: 2px 0 #fe5f55, -2px 0 #4ee3c1; }
 :is(.dealer .dl-bubble, [data-bb])[data-v="senal"] .dl-tag::after { content: "\00d7"; display: block; width: 16px; height: 16px; background: #dfe4e2; color: #16241c; text-align: center; line-height: 16px; font-size: 14px; text-shadow: none; }
 /* ANUNCIO: placa dorada con aro de latón y una fila de bombillas planas que se turnan (sin resplandor) */
 :is(.dealer .dl-bubble, [data-bb])[data-v="anuncio"] p { font-size: 1.15em; padding: 10px 14px 12px; }

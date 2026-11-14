@@ -136,7 +136,7 @@ window.AIQ = window.AIQ || {};
     ["crusades", E, "Crusades", "Las Cruzadas", 32.9236, 35.0816, ["jerusalem"]],
     ["mughal-empire", E, "Mughal Empire", "Imperio mogol", 28.6562, 77.241, ["taj-mahal", "red-fort", "lahore"]],
     ["terracotta-army", E, "Terracotta Army", "Ejército de terracota", 34.3841, 109.2785, ["great-wall-of-china", "forbidden-city"]],
-    ["meiji-restoration", E, "Meiji Restoration", "Restauración Meiji", 35.69, 139.692, ["tokyo"]],
+    ["meiji-restoration", E, "Meiji Restoration", "Restauración Meiji", 35.0116, 135.7681, ["tokyo"]],
     ["vietnam-war", E, "Vietnam War", "Guerra de Vietnam", 21.0285, 105.8542, ["hanoi", "ho-chi-minh-city"]],
     ["korean-war", E, "Korean War", "Guerra de Corea", 39.0392, 125.7625, ["pyongyang", "seoul"]],
     ["apartheid", E, "Apartheid", "Apartheid", -25.7479, 28.2293, ["pretoria", "cape-town"]],
@@ -166,7 +166,7 @@ window.AIQ = window.AIQ || {};
     ["swiss-watch", Q, "Swiss watchmaking industry", "Relojería suiza", 46.948, 7.4474, ["bern", "zurich", "c:Switzerland"]],
     ["northern-lights", Q, "Aurora", "Aurora boreal", 64.1466, -21.9426, ["reykjavik", "yellowknife", "bodo", "iqaluit", "nuuk"]],
     
-    ["sahara", Q, "Sahara", "Sáhara", 23.4162, 25.6628, ["cairo", "timbuktu", "tunis", "c:Egypt"]],
+    ["sahara", Q, "Sahara", "Sáhara", 23, 13, ["cairo", "timbuktu", "tunis", "c:Egypt"]],
     ["amazon-rainforest", Q, "Amazon rainforest", "Selva amazónica", -3.4653, -62.2159, ["c:Brazil", "c:Peru", "c:Colombia"]],
     
     ["kangaroo", Q, "Kangaroo", "Canguro", -25.2744, 133.7751, ["canberra", "sydney", "melbourne", "c:Australia"]],

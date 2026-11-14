@@ -161,7 +161,7 @@ window.AIQ = window.AIQ || {};
             const ck = d.ck || A.ckey(clue ? d.f : d.n), pais = kind === "flag" && ck.startsWith("c:");   // una bandera es la de un pais: se acierta en todo su territorio (km 0 dentro, si no al borde), como en la Aventura
             const ar = areaOf(ck, d);
             return {
-              ...(pais ? { t: "c", key: ck.slice(2) } : { t: "p" }), lat: ar.lat, lon: ar.lon, cid: [ck], kf: d.kf || 1, ...ar.q,
+              ...(pais ? { t: "c", key: ck.slice(2) } : { t: "p" }), lat: ar.lat, lon: ar.lon, cid: [ck], kf: d.kf || (pais ? 0.7 : 1), ...ar.q,   /* v0.4.80: la bandera de un pais puntua como en la Aventura (KIND_FACTOR.country): el pais entero ya regala lo de dentro */
               name: full ? part(0) : clue && d.c6 ? { en: d.n, ...d.c6 } : tr6(sp.name), sub: full ? part(1) : tr6(sp.sub),
               clue: !!clue, answer: clue ? tr6(d.f) : null,
               fact: clue ? same("") : d.f6 ? { en: d.f, ...d.f6 } : tr6(d.f, d.f.length > 40),
