@@ -147,7 +147,7 @@ window.AIQ = window.AIQ || {};
      sobre la posicion de cada pregunta en el carrete y un suelo fl: NADA de techo duro, todo el carrete sigue en el pool (el suelo hace que lo lejano salga muy de vez en cuando) */
   /* v0.3.107: D es ahora la DIFICULTAD ABSOLUTA 0-1 (A.QDIFF/100) donde se centra el sorteo, no el percentil del carrete: el banco paso de 1.741 a ~3.000 preguntas
      (muchas faciles) y el percentil se movia solo. A0 = lo mas famoso (D .02 -> .15); A5 = .45 -> .80. Mismas formulas de antes, constantes nuevas */
-  const DK0 = { lo0: 0.02, lo5: 0.42, hi0: 0.18, hi5: 0.66, ka: 2.0, kr: 1.3, minN: 40, nb: 3, de: 0.08, dm: 0.08, dh: 0.20, dhm: 0.12, sg: 0.09, fl: 0.008, tw: 1, up: [0, 0, 0, 0, 0, 0] };
+  const DK0 = { lo0: 0.02, lo5: 0.42, hi0: 0.18, hi5: 0.66, ka: 2.0, kr: 1.3, minN: 40, nb: 3, de: 0.08, dm: 0.08, dh: 0.20, dhm: 0.12, sg: 0.09, fl: 0.008, tw: 1, up: [0, 0, 0, 0, 0, 0], cov: [0, 0, 0, 0, 1, 1] };   // cov (v0.4.80): en A4 y A5, lo nunca visto de la franja dificil compite de igual a igual hasta que sale una vez
   const DKN = () => (A.KN && A.KN.dk ? Object.assign({}, DK0, A.KN.dk) : DK0);   // perillas de medicion (dev/bot.js: CFG.knobs = { dk: {...} })
   const expo = (x, k) => (Math.abs(k) < 1e-6 ? x : (Math.exp(k * x) - 1) / (Math.exp(k) - 1));
   const diffAt = (asc, pos) => { const K = DKN(), g = expo(clamp((asc | 0) / 5, 0, 1), K.ka), lo = K.lo0 + (K.lo5 - K.lo0) * g, hi = K.hi0 + (K.hi5 - K.hi0) * g; return clamp(lo + (hi - lo) * expo(clamp(pos / 11, 0, 1), K.kr) + ((K.up && K.up[clamp(asc | 0, 0, 5)]) || 0), 0, 1); };
@@ -166,7 +166,7 @@ window.AIQ = window.AIQ || {};
     }
     const own = topic === "mixed" ? list : list.filter(q => q.topic === (topic === "flag" ? "country" : topic)), guests = topic === "mixed" ? [] : list.filter(q => !own.includes(q));   // invitadas: p. ej. capitales 9-10 en la R5 (las mas dificiles)
     const pct = new Map(); own.forEach(q => pct.set(q.cid[0], clamp(diffOf(q, topic === "mixed" ? q.topic : topic) / 100, 0, 1))); guests.forEach(q => pct.set(q.cid[0], 1));   // v0.3.107: la posicion es la dificultad ABSOLUTA 0-1 (no el percentil del carrete): con mas preguntas faciles el percentil se movia solo
-    return (BASE[bk] = { topic, tail, list: own.concat(guests), pct });
+    return (BASE[bk] = { topic, tail, list: own.concat(guests), pct, guest: new Set(guests.map(q => q.cid[0])) });   // v0.4.80: las invitadas, aparte (antes se reconocian por dificultad 1 y se colaban las 150 preguntas de dificultad 100)
   }
   function bandsOf(slot, pos) {                                      // franjas de una ronda para su Ascension: [facil, media, dificil] desplazadas segun D(a, r); cls(q) dice a cual de las tres se parece mas
     const K = DKN(), D = diffAt(run ? run.asc : 0, pos), key = [slot, (K.tw | 0) ? 1 : 0, D.toFixed(4), K.de, K.dm, K.dh, K.sg, K.fl].join(":");
@@ -175,9 +175,9 @@ window.AIQ = window.AIQ || {};
     const bell = m => {                                            // v0.3.107: si en el tema hay pocas preguntas cerca de ese punto (p. ej. personajes faciles), la campana se ensancha hasta cubrir al menos minN
       const ds = base.list.map(q => Math.abs(base.pct.get(q.cid[0]) - m)).sort((a, b) => a - b), need = Math.min(ds.length - 1, K.minN == null ? 40 : K.minN), sg = Math.max(K.sg, need > 0 ? ds[need] / 1.5 : 0), w = new Map();
       const cap = K.cap == null ? ((run ? run.asc : 0) >= 5 ? 1 : Math.min(1, diffAt(run ? run.asc : 0, 11) + K.dh + 0.12)) : K.cap;   // la Ascension 5 ve todo el banco (antes dos preguntas de nivel 99 no salian nunca)   // v0.3.107: techo de la Ascension: nada mas dificil que su ronda 12 + su franja dificil + un margen (asi la A0 nunca ve lo muy dificil y todo tiene su Ascension)
-      base.list.forEach(q => { const p = base.pct.get(q.cid[0]), z = (p - m) / sg; w.set(q, p > cap && p < 1 ? 0 : K.fl + (1 - K.fl) * Math.exp(-0.5 * z * z)); }); return w; };
+      base.list.forEach(q => { const p = base.pct.get(q.cid[0]), z = (p - m) / sg; w.set(q, p > cap && !base.guest.has(q.cid[0]) ? 0 : K.fl + (1 - K.fl) * Math.exp(-0.5 * z * z)); }); return w; };
     return (BANDS[key] = { topic: base.topic, tail: base.tail, D, pct: q => base.pct.get(q.cid[0]), cls: q => { const p = base.pct.get(q.cid[0]); return p == null || p < cut[0] ? 0 : p < cut[1] ? 1 : 2; },
-      bands: [{ k: "e", n: 3, list: base.list, w: bell(mu[0]) }, { k: "m", n: 1, list: base.list, w: bell(mu[1]) }, { k: "h", n: 1, list: base.list, w: bell(mu[2]) }] });
+      bands: [{ k: "e", n: 3, list: base.list, w: bell(mu[0]) }, { k: "m", n: 1, list: base.list, w: bell(mu[1]) }, { k: "h", n: 1, list: base.list, w: bell(mu[2]), wc: (() => { const a = clamp((run ? run.asc : 0) | 0, 0, 5), cv = (K.cov || [0, 0, 0, 0, 0, 0])[a], capH = a >= 5 ? 1 : Math.min(1, diffAt(a, 11) + K.dh + 0.12), m = new Map(); if (cv > 0) base.list.forEach(q => { const p = base.pct.get(q.cid[0]); if (p > mu[2] && p <= capH && !base.guest.has(q.cid[0])) m.set(q, cv); }); return m; })() }] });
   }
   /* saca n preguntas de una franja por sorteo con peso: todas siguen en el pool y pueden repetirse, pero las que menos te han salido pesan mas
      (peso 1 / (1 + veces - minimo de la franja): nunca vista = 1, una vez mas que la que menos = 1/2...). En el Reto diario todas pesan igual y manda la semilla.
@@ -187,7 +187,7 @@ window.AIQ = window.AIQ || {};
   function takeFrom(band, n, rr, taken, ctx, first) {                // band = una franja de bandsOf: { list: todo el carrete, w: peso de campana de cada pregunta }
     const list = band.list, bw = band.w, got = [], seen = run.board ? null : seenStore(), cnt = q => (seen && seen[seenKey(q, ctx.topic)]) || 0;
     const core = list.filter(q => bw.get(q) > 0.3), ref = core.length ? core : list;   // "lo que menos ha salido" se mide en el centro de la ventana: lo lejano casi no sale y no cuenta
-    const min = ref.reduce((m, q) => Math.min(m, cnt(q)), Infinity), w = q => bw.get(q) * (first && first.has(q.cid[0]) ? 4 : 1) * (cnt(q) === 0 && !run.board && bw.get(q) > 0.1 ? (DKN().nb || 3) : 1) / (1 + Math.max(0, cnt(q) - (min === Infinity ? 0 : min)));   // v0.3.107: lo que nunca te ha salido pesa x3 (cobertura: todo el banco acaba saliendo, partida a partida)
+    const bx = q => Math.max(bw.get(q), band.wc && cnt(q) === 0 && !run.board ? band.wc.get(q) || 0 : 0), min = ref.reduce((m, q) => Math.min(m, cnt(q)), Infinity), w = q => bx(q) * (first && first.has(q.cid[0]) ? 4 : 1) * (cnt(q) === 0 && !run.board && bw.get(q) > 0.1 ? (DKN().nb || 3) : 1) / (1 + Math.max(0, cnt(q) - (min === Infinity ? 0 : min)));   // v0.3.107: lo que nunca te ha salido pesa x3 (cobertura: todo el banco acaba saliendo, partida a partida)
     const fits = (q, lvl) => {
       if (taken.includes(q)) return false;
       if (lvl >= 1 && (ctx.used.has(q.cid[0]) || nameKeys(q).some(k => ctx.names.has(k)))) return false;
