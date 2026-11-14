@@ -310,7 +310,7 @@ window.AIQ = window.AIQ || {};
         barV = cayo ? (casi ? pl.tgt : 1) : frac;
         if (casi && cayo && meterEl && !meterEl.querySelector(".vdx-falta")) {               // el hueco que falto, en rojo, con su cifra
           const gap = document.createElement("i"); gap.className = "vdx-hueco"; gap.style.left = (pl.tgt * 100).toFixed(2) + "%"; meterEl.appendChild(gap);
-          const fb = document.createElement("b"); fb.className = "vdx-falta"; fb.textContent = "−" + A.fmt(goal - pts); fb.style.left = ((pl.tgt * 100 + 100) / 2).toFixed(2) + "%"; meterEl.appendChild(fb);
+          const fb = document.createElement("b"); fb.className = "vdx-falta"; fb.textContent = "−" + A.fmt(goal - pts); meterEl.appendChild(fb);
         }
         if (sala) { const dk = AJ.sala * sm(pl.dudaAt - 0.25, pl.dudaAt + 0.15, u) * (1 - sm(pl.cae, pl.cae + 0.35, u)); sala.style.opacity = dk.toFixed(3); }
         if (red && ctr) ctr.set(pts);
