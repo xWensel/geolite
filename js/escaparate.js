@@ -5,6 +5,9 @@
  *                      seccion, punteros incluidos). Una de ellas es la GANGA del dia, a -40 %. Se renueva a medianoche, hora del jugador.
  *   Lote               3 piezas de secciones distintas a -25 % juntas; dura 3 dias. Si ya tienes alguna, el lote baja de precio (pagas las otras).
  *   Regalo de la casa  unas fichas gratis cada dia (10 a 25). Se guardan 3 dias: si no vienes, te esperan.
+ *                      v0.4.81: lo sustituye la rueda del dia (js/rueda.js). Ya no se sortean regalos nuevos; el que tuvieras guardado se cobra como siempre.
+ *   Cupon              la rueda del dia puede dar un -50 % en la pieza que elijas, 3 dias (P.esc.cup = ultimo dia valido). Se gasta en la primera
+ *                      compra suelta que lo use (A.club.spend avisa con _spent).
  *   Lista de deseos    el corazon de cada pieza. Si algo que quieres sale en el escaparate, en el lote o en la oferta de la semana, la placa
  *                      de La tienda de la portada lo avisa con un punto.
  *   El catalogo entero sigue siempre a la venta: nada desaparece, solo cambia lo que se pone delante y su precio.
@@ -17,7 +20,7 @@
  */
 window.AIQ = window.AIQ || {};
 (function (A) {
-  const GANGA = 0.4, LOTE = 0.25, GIFT_DAYS = 3;
+  const GANGA = 0.4, LOTE = 0.25, GIFT_DAYS = 3, CUP = 0.5;
   const prof = () => A.profile.get(), save = () => A.profile.save(), P6 = s => A.pick6(s);
   const dayNo = () => { const d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 6e4) / 864e5); };   // el dia del jugador (medianoche local)
   const hash = s => { if (A.rank && A.rank.hash) return A.rank.hash(s); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
@@ -115,7 +118,7 @@ window.AIQ = window.AIQ || {};
     let ch = false;
     if (e.lb !== b || !Array.isArray(e.lote)) { drawLote(e, b); ch = true; }   // primero el lote: el escaparate del dia no repite sus piezas
     if (e.d !== d || !Array.isArray(e.s)) { draw(e, d); ch = true; }
-    if (!e.gifts.some(x => x.d === d)) { const r = rng(seedOf("g" + d)); e.gifts.push({ d, n: 10 + 5 * Math.floor(r() * 4), got: 0 }); ch = true; }
+    if (!A.rueda && !e.gifts.some(x => x.d === d)) { const r = rng(seedOf("g" + d)); e.gifts.push({ d, n: 10 + 5 * Math.floor(r() * 4), got: 0 }); ch = true; }   // v0.4.81: con la rueda del dia, ya no
     const keep = e.gifts.filter(x => x.d > d - GIFT_DAYS); if (keep.length !== e.gifts.length) { e.gifts = keep; ch = true; }
     if (ch) save();
     return e;
@@ -126,8 +129,26 @@ window.AIQ = window.AIQ || {};
     const pend = e.gifts.filter(x => !x.got);
     return { slots: e.s.slice(), ganga: e.g, lote: e.lote.slice(), gift: pend.reduce((a, x) => a + x.n, 0), giftDays: pend.length, until: until(), loteUntil: ((e.lb + 1) * 3 - dayNo()) };
   }
-  /* el descuento de hoy de una pieza (la ganga); lo consultan los precios de cada seccion */
-  function off(k) { const P = prof(); const e = P && P.esc; if (!e || e.d !== dayNo()) return 0; return e.g === k ? GANGA : 0; }
+  /* el descuento de hoy de una pieza (la ganga, o el cupon de la rueda del dia: el mayor); lo consultan los precios de cada seccion */
+  let cupK = "";                                                         // la ultima pieza que se ha preciado con el cupon: la que se compra justo despues
+  const cupOn = () => { const P = prof(), e = P && P.esc; return !!(e && e.cup && e.cup >= dayNo()); };
+  function off(k) {
+    const P = prof(); const e = P && P.esc; if (!e) return 0;
+    const g = e.d === dayNo() && e.g === k ? GANGA : 0;
+    if (cupOn() && CUP > g && !owned(k)) { cupK = k; return CUP; }
+    return g;
+  }
+  /* A.club.spend acaba de cobrar n fichas: si era la pieza del cupon a su precio con cupon, el cupon se gasta */
+  function spent(n) { if (!cupOn() || !cupK) return; const k = cupK; cupK = ""; let f = 0; try { f = full(k); } catch (e) { return; } if (n === round10(f * (1 - CUP))) { st().cup = 0; save(); } }
+  function giveCup(days) { const e = st(); e.cup = dayNo() + (days || 3) - 1; save(); return e.cup; }
+  /* una pieza gratis (la rueda de oro): primero de tu lista de deseos, si no, una al azar de la tienda que aun no tengas */
+  function freePiece(seed) {
+    const e = st(), w = Object.keys(e.wish).filter(k => !owned(k)).sort((a, b) => e.wish[a] - e.wish[b]);
+    let k = w[0];
+    if (!k) { const pl = pools(), all = Object.keys(pl).reduce((a, x) => a.concat(pl[x].filter(q => !owned(q))), []); if (all.length) k = all[Math.floor(rng(seedOf("free:" + seed))() * all.length)]; }
+    if (!k) return null;
+    give(k); save(); return k;
+  }
   const round10 = v => Math.round(v / 10) * 10;
   const price = k => { const f = full(k), o = off(k); return o ? round10(f * (1 - o)) : f; };
   /* el lote: lo que te falta de sus tres piezas, a -25 % */
@@ -151,6 +172,7 @@ window.AIQ = window.AIQ || {};
   }
   const giftWaiting = () => ensure().gifts.some(x => !x.got);
 
-  A.escaparate = { today, off, price, full, name, owned, kindOf, buy, buyLote, lotePrice, claim, wish, wished, alerts, giftWaiting, GANGA, LOTE, _dayNo: dayNo,
+  A.escaparate = { today, off, price, full, name, owned, kindOf, buy, buyLote, lotePrice, claim, wish, wished, alerts, giftWaiting, GANGA, LOTE, CUP, _dayNo: dayNo,
+    cupOn, cupUntil: () => (cupOn() ? st().cup : 0), giveCup, freePiece, _spent: spent,
     _reset: () => { const e = st(); delete e.d; delete e.lb; save(); } };
 })(window.AIQ);

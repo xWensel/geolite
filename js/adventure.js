@@ -2360,8 +2360,8 @@ window.AIQ = window.AIQ || {};
     rouOpen = true; tableOn(true);
     const ov = document.createElement("div"); ov.id = "rouOv"; ov.className = "rou spin " + cls;
     Object.keys(vars).forEach(k => ov.style.setProperty(k, vars[k])); ov.innerHTML = html + '<u class="rou-wash"></u>'; app.appendChild(ov);
-    const block = e => { e.preventDefault(); e.stopPropagation(); }; addEventListener("keydown", block, true);
-    const sh = { ov, reduced, closed: false, revealed: false, hooks: {} };
+    const sh = { ov, reduced, closed: false, revealed: false, hooks: {}, key: null };
+    const block = e => { e.preventDefault(); e.stopPropagation(); if (sh.key) sh.key(e); }; addEventListener("keydown", block, true);   // v0.4.81: sh.key, la rueda que espera a que la gires
     /* v0.2.53: mantener = x2 y SALTAR (js/casino-ctl.js). sh.waiting(true) = el juego espera al jugador (sin botones y a x1); sh.outcome() = llega el resultado (a x1, sin botones); sh.hooks.skip = salto propio del juego */
     const ctl = !reduced && A.casCtl ? A.casCtl.attach(ov, sh.hooks) : null;
     sh.hooks.close = () => sh.close();                                                                // v0.3.69: con el resultado ya se puede salir (casino-ctl.js armEnd); sin dock (reducir movimiento) tambien
@@ -2459,22 +2459,25 @@ window.AIQ = window.AIQ || {};
   }
 
   /* ---------------- Ruleta de premios: rueda circular de 12 cunas, aro de bombillas y puntero fijo arriba ---------------- */
+  /* v0.4.81: la misma rueda sirve a la rueda del dia de la portada (js/rueda.js, A.adv.wheel): o.list = sus 12 cunas { src | ico, lab, col }, o.seed,
+     sus textos (o.no titulo, o.k / o.n la placa), o.hub (el centro), o.cls, o.go (texto del boton: la rueda espera a que lo pulses), o.free (sin el
+     Probador), o.hold y o.onReveal(ov, info) (el crupier y la casa los pone quien la llama) */
   function spinWheel(o, done) {
-    const { w, info } = o, N = PRIZES.length, STEP = 360 / N, ws = Math.max(240, Math.min(620, Math.round(Math.min(innerHeight * 0.5, innerWidth * 0.78) / 4) * 4));
+    const L = o.list || PRIZES, { w, info } = o, N = L.length, STEP = 360 / N, ws = Math.max(240, Math.min(620, Math.round(Math.min(innerHeight * 0.5, innerWidth * 0.78) / 4) * 4));
     const TONE = { good: ["#f2b63d", "#1f9a58"], bad: ["#c9362c", "#23252e"], none: ["#5d6470", "#4a505b"] };
-    const cnt = { good: 0, bad: 0, none: 0 }, cols = PRIZES.map(P => TONE[P.t][cnt[P.t]++ % 2]);
+    const cnt = { good: 0, bad: 0, none: 0 }, cols = o.list ? L.map(P => P.col) : PRIZES.map(P => TONE[P.t][cnt[P.t]++ % 2]);
     const disc = `conic-gradient(from ${-STEP / 2}deg, ${cols.map((c, i) => `${c} ${i * STEP}deg ${(i + 1) * STEP}deg`).join(", ")})`;
-    const slots = PRIZES.map((P, i) => `<span class="wh-s" style="--a:${i * STEP}deg"><img src="assets/icons/${P.ico}.webp" alt="" draggable="false"><b>${wedgeLabel(P)}</b></span>`).join("");
+    const slots = L.map((P, i) => `<span class="wh-s" style="--a:${i * STEP}deg"><img src="${P.src || `assets/icons/${P.ico}.webp`}" alt="" draggable="false"><b>${o.list ? P.lab : wedgeLabel(P)}</b></span>`).join("");
     const bulbs = Array.from({ length: 24 }, (_, i) => `<i class="wh-b ${i % 2 ? "o" : "e"}" style="--a:${i * 15}deg"></i>`).join("");
-    const sh = rouShell(`wheel ${info.tone === "good" ? "win" : "lose"} tone-${info.tone}`,
-      `<div class="rou-stage"><div class="rou-top"><b class="rou-no">${A.tx(BT2.noMore)}</b><div class="rou-res"><span class="rr-plate rc-${info.tone}"><b>${info.name}</b></span><span class="rr-msg">${info.detail}</span></div>
-        <div class="rou-pick"><span class="rp-dot rp-wheel"></span><span class="rp-k">${A.tx(BT.seal)}</span><b>${A.tx(BETS.wheel.n)}</b></div></div>
+    const sh = rouShell(`wheel ${info.tone === "good" ? "win" : "lose"} tone-${info.tone}${o.cls ? " " + o.cls : ""}`,
+      `<div class="rou-stage"><div class="rou-top"><b class="rou-no">${o.no || A.tx(BT2.noMore)}</b><div class="rou-res"><span class="rr-plate rc-${info.tone}"><b>${info.name}</b></span><span class="rr-msg">${info.detail}</span></div>
+        <div class="rou-pick"><span class="rp-dot rp-wheel"></span><span class="rp-k">${o.k || A.tx(BT.seal)}</span><b>${o.n || A.tx(BETS.wheel.n)}</b></div></div>
       <div class="wh" ><div class="wh-ring">${bulbs}</div><div class="wh-disc" style="background:${disc}">${slots}<u class="wh-sep"></u><u class="wh-dim" style="--a:${w * STEP}deg"></u></div>
-        <i class="wh-hub"><img src="assets/icons/coin.webp" alt="" draggable="false"></i><i class="wh-ptr"></i></div></div>`,
+        <i class="wh-hub"><img src="${o.hub || "assets/icons/coin.webp"}" alt="" draggable="false"></i><i class="wh-ptr"></i></div>${o.go ? `<button type="button" class="gx-btn pri wh-go" data-primary><span>${o.go}</span></button>` : ""}</div>`,
       { "--ws": ws + "px", "--cw": Math.round(ws * 0.2) + "px" }, done);
     if (!sh) return;
     const ov = sh.ov, discEl = ov.querySelector(".wh-disc"), ptr = ov.querySelector(".wh-ptr");
-    const jit = (A.rng(`${run.seed}:premios:j:${roundNo()}:${run.attempt || 0}`)() - 0.5) * 0.7 * STEP;           // donde se para dentro de la cuna: a veces rozando el borde
+    const jit = (A.rng(o.seed ? o.seed + ":j" : `${run.seed}:premios:j:${roundNo()}:${run.attempt || 0}`)() - 0.5) * 0.7 * STEP;           // donde se para dentro de la cuna: a veces rozando el borde
     /* v0.2.47: el mismo carrete de finales que Rojo o negro (ROU_REEL), con el recorrido en cunas (0,36: ~2-4 vueltas), una direccion al azar y un angulo de salida al azar.
        La cuna ganadora sigue decidida y guardada antes de girar; la rueda siempre acaba en TH (la cuna bajo el puntero) */
     const F0 = A.adv._whForce || {}, kind = sh.reduced ? "classic" : F0.kind || reelPick("wh", Object.keys(ROU_REEL)), dir = F0.dir || (Math.random() < 0.5 ? 1 : -1);   // _whForce: solo pruebas
@@ -2489,18 +2492,30 @@ window.AIQ = window.AIQ || {};
       stop: () => { ov.classList.add("hush"); A.sfx.rouStop(); if (A.haptic) A.haptic([30]); },   // falso final: suena y apaga las bombillas igual que el de verdad
       kick: () => { ov.classList.remove("hush"); A.sfx.rouKick(); },
     };
-    const dec = A.decisivo ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => { const p = ptr.getBoundingClientRect(), d = discEl.getBoundingClientRect(), x = p.left + p.width / 2, cw = d.width * 0.27; return [new DOMRect(x - cw / 2, p.top, cw, d.top + d.height * 0.34 - p.top), ov.querySelector(".rou-pick")]; } }) : null;   // Probador: la cuna bajo el puntero
+    const dec = A.decisivo && !o.free ? A.decisivo.vigila(ov, { tier: A.decisivo.tierDe(o.stake || 1, o.purse || 1), keep: () => { const p = ptr.getBoundingClientRect(), d = discEl.getBoundingClientRect(), x = p.left + p.width / 2, cw = d.width * 0.27; return [new DOMRect(x - cw / 2, p.top, cw, d.top + d.height * 0.34 - p.top), ov.querySelector(".rou-pick")]; } }) : null;   // Probador: la cuna bajo el puntero
     const reveal = () => {
       if (sh.revealed) return; sh.revealed = true; if (dec) dec.fin(); sh.outcome(); put(TH); ov.classList.remove("spin", "crawl", "hush"); ov.classList.add("done", "is-" + info.tone);
       A.sfx.rouStop(); if (A.haptic) A.haptic([info.tone === "good" ? 40 : 25]);
       setTimeout(() => {
         A.dealer.enable(true);
-        if (info.tone === "good") { A.casa.premio(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", gesture: "r_gana_casino", hold: 2400 }); }
+        if (o.onReveal) o.onReveal(ov, info);
+        else if (info.tone === "good") { A.casa.premio(info.jp || 1); A.dealer.say(A.dealer.line("betWin"), { table: true, mood: "angry", gesture: "r_gana_casino", hold: 2400 }); }
         else if (info.tone === "bad") { A.casa.perdida(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "laugh", gesture: "r_pierde_casino", hold: 2400 }); }
         else { A.sfx.deny(); A.dealer.say(A.dealer.line("betLose"), { table: true, mood: "sly", hold: 2200 }); }
       }, 150);
-      sh.hold(info.jp === 3 ? 3200 : 2800);
+      sh.hold(o.hold || (info.jp === 3 ? 3200 : 2800));
     };
+    /* o.go: la rueda abre parada, con sus premios a la vista y las bombillas lentas, y gira al pulsar el boton (o Intro / Espacio) */
+    if (o.go) {
+      sh.waiting(true); ov.classList.remove("spin"); ov.classList.add("crawl", "ready");
+      const btn = ov.querySelector(".wh-go"); let gone = false;
+      const go = () => { if (gone || sh.closed) return; gone = true; sh.key = null; sh.waiting(false); ov.classList.remove("ready", "crawl"); ov.classList.add("spin"); if (btn) btn.disabled = true; if (o.onGo) o.onGo(); spinGo(); };
+      sh.key = e => { if (e.key === "Enter" || e.key === " ") go(); };
+      if (btn) { btn.onclick = e => { e.stopPropagation(); go(); }; requestAnimationFrame(() => { try { btn.focus({ preventScroll: true }); } catch (x) { /* nada */ } }); }
+      return;
+    }
+    spinGo();
+    function spinGo() {
     try {
       if (sh.reduced) { setTimeout(() => { if (!sh.closed) reveal(); }, 2000); return; }   // sin movimiento, pero con su espera
       A.sfx.rouNoMore(); setTimeout(() => { if (!sh.closed && !sh.revealed) A.sfx.rouStart(); }, T_IN * 1000);
@@ -2529,7 +2544,10 @@ window.AIQ = window.AIQ || {};
       };
       requestAnimationFrame(frame);
     } catch (e) { sh.bail(e); }
+    }
   }
+  A.adv.wheel = (o, done) => spinWheel(o, done || (() => {}));      // v0.4.81: la rueda del dia (js/rueda.js)
+  A.adv.wheelOpen = () => rouOpen;
   /* ---------------- v0.2.48: Los tres cubiletes (el trile) ----------------
      El crupier esconde un doblon bajo uno de tres cubiletes, los mezcla y eliges. El baile es HONESTO (se puede seguir con la vista): la ficha sube la dificultad
      (6 / 9 / 12 cambios, de 0,64 a 0,31 s). Aciertas = x2. Y 1 de cada 50 el crupier se queda el doblon: al levantar los tres no hay nada (el chiste del trilero;

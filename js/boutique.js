@@ -114,7 +114,7 @@ window.AIQ = window.AIQ || {};
     const o = M().offer(); if (!o) return "";
     const got = M().owned(o.id);
     return `<button type="button" class="bq-offer${o.id === ST.sel && ST.cat === "mesas" ? " sel" : ""}" data-id="${o.id}"><span class="gx-eyb">${esc(P6(TX.offer))} · ${esc(P6(TX.till))}</span>${mesaImg(o.id, "bq-oth")}
-      <span class="bq-otx"><b>${esc(M().name(o.id))}${got ? "" : `<i>−${Math.round(o.off * 100)} %</i>`}</b>${got ? `<em class="bq-own">${esc(P6(TX.bought))}</em>` : priceHtml(o.id)}</span></button>`;
+      <span class="bq-otx"><b>${esc(M().name(o.id))}${got ? "" : `<i>−${Math.round(Math.max(o.off, ES() ? ES().off("m:" + o.id) : 0) * 100)} %</i>`}</b>${got ? `<em class="bq-own">${esc(P6(TX.bought))}</em>` : priceHtml(o.id)}</span></button>`;
   }
   function detHtml() {
     const id = ST.sel, s = state(id), have = A.club ? A.club.fichas() : 0, p = M().price(id);
@@ -194,7 +194,7 @@ window.AIQ = window.AIQ || {};
   function hItem(k, i, T) {
     const own = ES().owned(k), g = T.ganga === k && !own;
     return `<button type="button" class="bq-it bq-hit${ST.hsel === k ? " sel" : ""}${own ? " got" : ""}" data-hk="${esc(k)}" aria-pressed="${ST.hsel === k}">
-      ${g ? `<em class="bq-ganga">${esc(P6(HX.ganga).replace("{p}", Math.round(ES().GANGA * 100)))}</em>` : i === 5 ? `<em class="bq-sorp">${esc(P6(HX.surprise))}</em>` : ""}${ES().wished(k) && !own ? `<i class="bq-wdot">${A.icon("heart")}</i>` : ""}
+      ${g ? `<em class="bq-ganga">${esc(P6(HX.ganga).replace("{p}", Math.round(ES().off(k) * 100)))}</em>` : i === 5 ? `<em class="bq-sorp">${esc(P6(HX.surprise))}</em>` : ""}${ES().wished(k) && !own ? `<i class="bq-wdot">${A.icon("heart")}</i>` : ""}
       ${hThumb(k)}<span class="bq-hk">${esc(P6(ES().kindOf(k) === "v" && isG(k.slice(2)) ? VX.gato : HX.k[ES().kindOf(k)]))}</span><span class="bq-prow"><b class="bq-nm">${esc(ES().name(k))}</b>${own ? `<em class="bq-own">${esc(P6(HX.bought))}</em>` : hPrice(k)}</span></button>`;
   }
   function hGridHtml() {
@@ -202,7 +202,10 @@ window.AIQ = window.AIQ || {};
     const lote = `<button type="button" class="bq-it bq-hl${ST.hsel === "lote" ? " sel" : ""}${lp.left.length ? "" : " got"}" data-hk="lote"><span class="bq-hk">${esc(P6(HX.lote))}</span>
       <span class="bq-l3">${T.lote.map(k => `<span class="bq-l1${ES().owned(k) ? " got" : ""}">${hThumb(k)}</span>`).join("")}</span>
       <span class="bq-prow"><b class="bq-nm">${esc(lp.left.length ? P6(T.loteUntil > 1 ? HX.loteD : HX.loteLast).replace("{n}", T.loteUntil) : P6(HX.loteDone))}</b>${lp.left.length ? `<span class="bq-pr"><s>${A.fmt(lp.full)}</s>${fi()}<b>${A.fmt(lp.price)}</b></span>` : ""}</span></button>`;
-    const gift = `<button type="button" class="bq-it bq-hg${ST.hsel === "regalo" ? " sel" : ""}${T.gift ? "" : " got"}" data-hk="regalo"><span class="bq-hk">${esc(P6(HX.gift))}</span>
+    const RU = !T.gift && A.rueda ? A.rueda.state() : null;             // v0.4.81: el regalo de la casa es ahora la rueda del dia (js/rueda.js)
+    const gift = RU ? `<button type="button" class="bq-it bq-hg bq-hru${ST.hsel === "regalo" ? " sel" : ""}${RU.av ? "" : " got"}" data-hk="regalo"><span class="bq-hk">${esc(P6(A.rueda.tx.name))}</span>
+      <span class="bq-gi"><img src="assets/icons/bet_wheel.webp" alt=""><b>${RU.av ? "×" + RU.av : "✓"}</b></span>
+      <span class="bq-nm">${esc(RU.av ? P6(A.rueda.tx.spin) : P6(A.rueda.tx.tomorrow))}</span></button>` : `<button type="button" class="bq-it bq-hg${ST.hsel === "regalo" ? " sel" : ""}${T.gift ? "" : " got"}" data-hk="regalo"><span class="bq-hk">${esc(P6(HX.gift))}</span>
       <span class="bq-gi"><img src="assets/icons/ficha_oro.webp" alt=""><b>${T.gift ? "+" + A.fmt(T.gift) : "✓"}</b></span>
       <span class="bq-nm">${esc(T.gift ? (T.giftDays > 1 ? P6(HX.days).replace("{n}", T.giftDays) : P6(HX.claim)) : P6(HX.claimed))}</span></button>`;
     return `<div class="bq-bar"><b class="gx-t-m bq-hh">${esc(P6(HX.title))}</b><span class="bq-clock">${esc(P6(HX.change).replace("{t}", hms(T.until)))}</span></div>
@@ -211,6 +214,13 @@ window.AIQ = window.AIQ || {};
   }
   function hDetHtml() {
     const T = ES().today(), k = ST.hsel || T.slots[0], have = A.club ? A.club.fichas() : 0;
+    if (k === "regalo" && !T.gift && A.rueda) {                         // v0.4.81: la rueda del dia, tambien desde aqui
+      const RU = A.rueda.state(), RT = A.rueda.tx, cup = ES().cupOn && ES().cupOn();
+      const sub = RU.av ? (RU.av > 1 ? P6(RT.freeN).replace("{n}", RU.av) : P6(RT.free1)) : P6(RT.tomorrow);
+      return `<span class="bq-dth bq-cprev bq-hgift"><img src="assets/icons/bet_wheel.webp" alt=""></span><span class="gx-eyb bq-tier">${esc(P6(RU.oro ? RT.oro : RT.name))}</span>
+        <h3 class="gx-t-m bq-dn">${esc(sub)}</h3><p class="bq-dd">${esc(P6(RT.tip))}</p>${cup ? `<p class="bq-dd bq-cupon">${esc(A.rueda.cupText())}</p>` : ""}
+        <div class="bq-acts">${RU.av ? `<button type="button" class="gx-btn pri wide" id="bqRueda"><span>${esc(P6(RT.spin))}</span></button>` : `<button type="button" class="gx-btn wide" disabled><span>${esc(P6(RT.tomorrow))}</span></button>`}</div>`;
+    }
     if (k === "regalo") {
       return `<span class="bq-dth bq-cprev bq-hgift"><img src="assets/icons/ficha_oro.webp" alt=""></span><span class="gx-eyb bq-tier">${esc(P6(HX.gift))}</span>
         <h3 class="gx-t-m bq-dn">${T.gift ? "+" + A.fmt(T.gift) : esc(P6(HX.claimed))}</h3><p class="bq-dd">${esc(P6(HX.giftD))}</p>
@@ -230,7 +240,7 @@ window.AIQ = window.AIQ || {};
       : have < p ? `<button type="button" class="gx-btn wide bq-short" id="bqHBuy" aria-disabled="true"><span>${esc(P6(TX.short).replace("{n}", A.fmt(p - have)))}</span>${fi("sm")}</button>`
       : `<button type="button" class="gx-btn pri wide${ST.armed === k ? " armed" : ""}" id="bqHBuy"><span>${esc(ST.armed === k ? P6(TX.sure) : P6(TX.buy))}</span><span class="bq-bp">${p < ES().full(k) ? `<s>${A.fmt(ES().full(k))}</s>` : ""}${fi("sm")}${A.fmt(p)}</span></button>`;
     return `<span class="bq-dth bq-cprev bq-hprev">${hThumb(k, true)}</span>
-      <span class="gx-eyb bq-tier">${esc(P6(HX.k[ES().kindOf(k)]))}${T.ganga === k && !own ? " · " + esc(P6(HX.ganga).replace("{p}", Math.round(ES().GANGA * 100))) : ""}</span>
+      <span class="gx-eyb bq-tier">${esc(P6(HX.k[ES().kindOf(k)]))}${T.ganga === k && !own ? " · " + esc(P6(HX.ganga).replace("{p}", Math.round(ES().off(k) * 100))) : ""}</span>
       <h3 class="gx-t-m bq-dn">${esc(ES().name(k))}</h3><p class="bq-dd">${esc(P6(HX.todayD))}</p>
       <div class="bq-acts">${act}<button type="button" class="gx-btn gho wide" id="bqHGo"><span>${esc(P6(HX.goSec))}</span></button></div>`;
   }
@@ -273,6 +283,16 @@ window.AIQ = window.AIQ || {};
     if (A.casa && A.casa.premio) A.casa.premio(n >= 40 ? 3 : 2); if (A.haptic) A.haptic([20, 30, 50]);
     const wl = $("bqWal"), to = A.club.fichas(), m = 12;
     for (let i = 1; i <= m; i++) setTimeout(() => { if (wl && wl.isConnected) wl.textContent = A.fmt(Math.round(have + ((to - have) * i) / m)); if (A.sfx && A.sfx.coin) A.sfx.coin(i); }, 120 + i * 60);
+  }
+  /* v0.4.81: girar la rueda del dia desde la tienda; al cerrarse, la tienda se repinta y la caja cuenta las fichas nuevas */
+  function hRueda() {
+    const have = A.club ? A.club.fichas() : 0;
+    if (A.sfx && A.sfx.card) A.sfx.card();
+    A.rueda.open(() => {
+      repaint();
+      const wl = $("bqWal"), to = A.club.fichas(), m = 12; if (!(to > have)) return;
+      for (let i = 1; i <= m; i++) setTimeout(() => { if (wl && wl.isConnected) wl.textContent = A.fmt(Math.round(have + ((to - have) * i) / m)); if (A.sfx && A.sfx.coin) A.sfx.coin(i); }, 120 + i * 60);
+    });
   }
   /* ir a la seccion de la pieza, con ella elegida */
   function hGo() {
@@ -795,7 +815,7 @@ window.AIQ = window.AIQ || {};
     railCard();
     const sc = document.querySelector("#dlg .bq-screen"); if (!sc) return;
     sc.querySelectorAll("[data-hk]").forEach(b => { b.onclick = () => { const k = b.dataset.hk; if (ST.busy) return; if (k !== ST.hsel) { ST.hsel = k; ST.armed = null; if (A.sfx && A.sfx.card) A.sfx.card(); } repaint(`#dlg [data-hk="${k}"]`); }; });
-    { const hb = $("bqHBuy"); if (hb) hb.onclick = hBuy; const hg = $("bqGift"); if (hg) hg.onclick = hGift; const hgo = $("bqHGo"); if (hgo) hgo.onclick = hGo; }
+    { const hb = $("bqHBuy"); if (hb) hb.onclick = hBuy; const hg = $("bqGift"); if (hg) hg.onclick = hGift; const hgo = $("bqHGo"); if (hgo) hgo.onclick = hGo; const hr = $("bqRueda"); if (hr) hr.onclick = hRueda; }
     sc.querySelectorAll(".bq-it:not(.bq-vit):not(.bq-pit):not(.bq-cit):not([data-hk]), .bq-offer").forEach(b => { b.onclick = () => pick(b.dataset.id, b.classList.contains("bq-offer") ? "#dlg .bq-offer" : null); });
     sc.querySelectorAll(".bq-rx").forEach(b => { b.onclick = () => setCat(b.dataset.cat); });
     sc.querySelectorAll(".bq-tab:not(.bq-vtab)").forEach(b => { b.onclick = () => { if (ST.tab === b.dataset.tab) return; ST.tab = b.dataset.tab; ST.page = 0; if (A.sfx && A.sfx.card) A.sfx.card(); repaint(`#dlg .bq-tab[data-tab="${ST.tab}"]`); }; });

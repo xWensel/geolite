@@ -101,7 +101,8 @@ window.AIQ = window.AIQ || {};
     if (deal.length) { Promise.all(deal.map(a => a.finished)).then(socioFit, socioFit); return; }   // se mide con las cartas ya en la mesa
     const z = w.currentCSSZoom || 1, cur = w.getBoundingClientRect(); if (cur.width < 20) return;   // aun sin dibujar: la vuelve a medir el observador
     const dx = (parseFloat(w.style.left) || 0) * z, s = { left: cur.left - dx, top: cur.top, width: cur.width };   // su sitio de siempre (sin el desliz de antes)
-    const nx = w.querySelector(".hh-socio-nx"), bot = Math.max(cur.bottom, nx ? nx.getBoundingClientRect().bottom : 0), top = cur.top, g = SO_GAP * z;
+    if (A.rueda) A.rueda.place();                                       // v0.4.81: la caja de la rueda del dia va bajo «Siguiente» y cuenta para no pisar nada
+    const nx = w.querySelector(".hh-socio-nx"), rq = w.querySelector(".hh-rueda"), bot = Math.max(cur.bottom, nx ? nx.getBoundingClientRect().bottom : 0, rq ? rq.getBoundingClientRect().bottom : 0), top = cur.top, g = SO_GAP * z;
     const rg = document.createRange(), tag = el.querySelector(".hh-tag"), rs = [...el.querySelectorAll(".hh-cards > .mcard, .hh-deck > *, .hh-resume, .hh-logo, .hh-top > button, .menu-tools")].map(e => {
       const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top - (e.classList.contains("mcard") ? SO_LIFT * z : 0), b: r.bottom }; });
     if (tag) { rg.selectNodeContents(tag); const r = rg.getBoundingClientRect(); rs.push({ l: r.left, r: r.right, t: r.top, b: r.bottom }); }
@@ -138,7 +139,7 @@ window.AIQ = window.AIQ || {};
     const clubPlq = A.club && A.clubRetos && A.boutique ? (() => {
       const [a, b] = A.clubRetos.todayDone(), RT = A.clubRetos.tx, o = A.mesas && A.mesas.offer ? A.mesas.offer() : null;
       const tl = A.boutique.tally(), shopTag = `${A.fmt(tl[0])} / ${A.fmt(tl[1])}`;   // lo tuyo (las fichas, solo en tu carta); la oferta de la semana, en su cinta
-      const shopRib = o ? `<em class="plq-rib on">${esc(A.pick6("Oferta −{p} %|Offer −{p} %|Offre −{p} %|Oferta −{p} %|Angebot −{p} %|Offerta −{p} %||特价 −{p}%|특가 −{p}%|特売 −{p}%|Скидка −{p} %|Oferta −{p}%").replace("{p}", Math.round(o.off * 100)))}</em>` : "";
+      const shopRib = o ? `<em class="plq-rib on">${esc(A.pick6("Oferta −{p} %|Offer −{p} %|Offre −{p} %|Oferta −{p} %|Angebot −{p} %|Offerta −{p} %||特价 −{p}%|특가 −{p}%|特売 −{p}%|Скидка −{p} %|Oferta −{p}%").replace("{p}", Math.round(Math.max(o.off, A.escaparate && A.escaparate.off ? A.escaparate.off("m:" + o.id) : 0) * 100)))}</em>` : "";   // v0.4.81: con el cupon de la rueda del dia, -50 %
       return [plaque("plq-retos", "clubRtBtn", "journal", esc(A.pick6(RT.tab)), `${a} / ${b}`, b ? (100 * a) / b : 0, A.ttAttr(A.pick6(RT.title), A.pick6(RT.tip))),
         plaque("plq-shop", "bqBtn", "purse", esc(A.pick6(A.club.tx.shop)), shopTag, null, A.ttAttr(A.pick6(A.club.tx.shop), A.pick6("Mesas para el mapa y ropa para el crupier, con tus fichas de oro.|Tables for the map and clothes for the dealer, paid with your gold chips.|Des tables pour la carte et des tenues pour le croupier, avec tes jetons d'or.|Mesas para o mapa e roupas para o crupiê, com suas fichas de ouro.|Tische für die Karte und Kleidung für den Croupier, mit deinen Goldchips.|Tavoli per la mappa e abiti per il croupier, con le tue fiche d'oro.||用金筹码购买地图牌桌和荷官的服饰。|골드 칩으로 지도 테이블과 딜러 의상을 사요.|金のチップで、地図のテーブルとディーラーの服を。|Столы для карты и одежда для крупье — за золотые фишки.|Stoły na mapę i ubrania dla krupiera za złote żetony.")), shopRib)];
     })() : null;
@@ -173,9 +174,10 @@ window.AIQ = window.AIQ || {};
     $("profBtn").onclick = () => { A.sfx.card(); screen("profile"); };
     if (A.barra) A.barra.wireButton();
     if (A.club) A.club.wire(() => { if (A.camino) screen("camino"); else { if (A.boutique) A.boutique.cat("carta"); screen("boutique"); } });   // tu carta: abre el camino del socio (js/camino.js) y cuenta las fichas de oro nuevas
+    if (A.rueda) A.rueda.wire();                                      // v0.4.81: la rueda del dia, bajo tu carta (js/rueda.js)
     if ($("bqBtn")) {
       $("bqBtn").onclick = () => { A.sfx.card(); if (A.escaparate && A.boutique.cat) A.boutique.cat("hoy"); screen("boutique"); };   // v2: la tienda se abre en el escaparate de hoy
-      /* el punto de la placa: algo de tu lista de deseos esta hoy delante, o te espera el regalo de la casa (js/escaparate.js) */
+      /* el punto de la placa: algo de tu lista de deseos esta hoy delante, o te espera el regalo de la casa (js/escaparate.js; desde v0.4.81, solo el que ya tuvieras guardado) */
       if (A.escaparate && (A.escaparate.alerts().length || A.escaparate.giftWaiting())) $("bqBtn").insertAdjacentHTML("beforeend", `<i class="plq-dot" aria-hidden="true"></i>`);
     }   // la tienda: placa de la derecha (v0.3.157)
     if ($("clubRtBtn")) $("clubRtBtn").onclick = () => { A.sfx.card(); screen("retos"); };       // los retos del Club: placa de la izquierda (js/club-retos.js)

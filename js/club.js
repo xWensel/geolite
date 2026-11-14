@@ -290,7 +290,7 @@ window.AIQ = window.AIQ || {};
     const tt = A.ttAttr ? A.ttAttr(P6(TX.card), P6(TX.tip) + left + " " + nextText(L.lvl) + ".") : "", lab = `${P6(TX.card)}: ${P.name || P6(TX.anon)} · ${P6(RANKS[t][0])} · ${P6(TX.lv).replace("{n}", L.lvl)}`;
     /* v2: bajo la carta, lo que te toca en el nivel siguiente (el camino entero, al pulsarla) */
     const nr = L.max ? P6(TX.nextLey).replace("{n}", A.fmt(CFG.leyPay)) : P6(TX.next).replace("{n}", L.lvl + 1) + " · +" + A.fmt(payOf(L.lvl + 1) + chestOf(L.lvl + 1));
-    return `<span class="hh-socio-w sc-v2"><button type="button" class="hh-socio sc-v2" id="socioBtn" ${tt} aria-label="${esc(lab)}"><span id="socioCard"></span></button><span class="hh-socio-nx" aria-hidden="true">${fi("sm")}<span>${esc(nr)}</span></span></span>`;
+    return `<span class="hh-socio-w sc-v2"><button type="button" class="hh-socio sc-v2" id="socioBtn" ${tt} aria-label="${esc(lab)}"><span id="socioCard"></span></button><span class="hh-socio-nx" aria-hidden="true">${fi("sm")}<span>${esc(nr)}</span></span>${A.rueda ? A.rueda.box() : ""}</span>`;   // v0.4.81: la rueda del dia y la racha, debajo (js/rueda.js)
   }
   /* tus fichas de oro en la portada, en su caja junto al engranaje (24-oct: ya no van en la carta). Al volver con fichas nuevas, la caja las cuenta
      delante de ti (moneda a moneda), con su brillo. Empieza en las que ya viste contar (fSeen) */
@@ -323,7 +323,7 @@ window.AIQ = window.AIQ || {};
    
     /* v0.3.132: gastar fichas de oro (la boutique). La tarjeta no las cuenta hacia arriba: lo gastado ya se ha visto irse */
     give(n) { const c = st(); n = Math.max(0, Math.round(n)); c.f += n; save(); return c.f; },   // entrega 3: lo que pagan los retos (la tarjeta lo cuenta al volver: fSeen no se toca)
-    spend(n) { const c = st(); n = Math.max(0, Math.round(n)); if (!(c.f >= n)) return false; c.f -= n; c.fSeen = Math.min(c.fSeen == null ? c.f : c.fSeen, c.f); save(); return true; },
+    spend(n) { const c = st(); n = Math.max(0, Math.round(n)); if (!(c.f >= n)) return false; c.f -= n; c.fSeen = Math.min(c.fSeen == null ? c.f : c.fSeen, c.f); save(); if (A.escaparate && A.escaparate._spent) A.escaparate._spent(n); return true; },   // v0.4.81: el cupon de la rueda del dia se gasta aqui
     bonusFor: kind => (kind === "win" ? CFG.bonus.win : kind === "ok" ? CFG.bonus.ok : kind === "duel" ? CFG.bonus.duel : 0),
     tx: TX, tierName: t => P6(RANKS[Math.max(0, Math.min(RANKS.length - 1, t | 0))][0]),
   };

@@ -154,7 +154,7 @@ void main(){
       if (!s0.gl && !reduced()) { s0.gate.classList.add("fuera"); setTimeout(end, 260); } else end();
       return;
     }
-    const gift = !!(A.escaparate && A.escaparate.giftWaiting && A.escaparate.giftWaiting());
+    const gift = !!((A.rueda && A.rueda.ready()) || (A.escaparate && A.escaparate.giftWaiting && A.escaparate.giftWaiting()));   // v0.4.81: o la rueda del dia por girar
     const k = (P.dura - 0.3) / 0.8;
     const lamps = [[1, 0], [2, 0.14], [3, 0.3], [4, 0.44], [5, 0.6], [6, 0.76]].map(([i, f]) => ({ i, at: 0.06 + f * k }));
     if (gift) lamps.push({ i: 7, at: 0.06 + 0.92 * k, gift: true });

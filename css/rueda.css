@@ -1,0 +1,47 @@
+/* Geolite - la rueda del dia y la racha (js/rueda.js, v0.4.81): la caja bajo «Siguiente» en la columna del socio, el sello de la carta y el boton de la rueda */
+.hh-rueda { position: absolute; left: 0; top: calc(100% + 64px); width: 100%; box-sizing: border-box; padding: 10px 10px 12px; display: flex; flex-direction: column; gap: 10px;
+  background: rgba(5, 14, 10, .78); box-shadow: inset 0 0 0 2px rgba(245, 166, 35, .55); border: 0; color: #ffd98a; font: inherit; font-size: 18px; line-height: 1; text-align: left; cursor: pointer; }
+.hh-rueda:hover { background: rgba(12, 28, 20, .86); box-shadow: inset 0 0 0 2px rgba(255, 217, 90, .9); }
+.hh-rueda:focus-visible, html[data-input="pad"] .hh-rueda:focus { outline: 3px solid var(--gx-red); outline-offset: 4px; }
+.hh-rueda .rq-dot { position: absolute; right: -7px; top: -7px; width: 16px; height: 16px; border-radius: 50%; background: #e8483c; box-shadow: 0 0 0 2px #0a140f; }
+.hh-rueda .rq-t { display: flex; align-items: center; gap: 10px; }
+.hh-rueda .rq-t img { width: 40px; height: 40px; image-rendering: pixelated; flex: none; }
+.hh-rueda .rq-t > span { min-width: 0; }
+.hh-rueda .rq-t b { display: block; font-weight: 500; font-size: 18px; line-height: 1.05; color: #fff3c4; }
+.hh-rueda .rq-t i { display: block; font-style: normal; font-size: 16px; line-height: 1.1; color: #ffd98a; margin-top: 4px; }
+.hh-rueda .rq-r { display: flex; align-items: center; gap: 6px; font-size: 16px; line-height: 1; }
+.hh-rueda .rq-r img { width: 20px; height: 20px; image-rendering: pixelated; flex: none; }
+.hh-rueda .rq-r > span { min-width: 0; }
+.hh-rueda .rq-r u { text-decoration: none; margin-left: auto; display: flex; align-items: center; gap: 4px; color: #bfe8c9; }
+.hh-rueda .rq-d { display: flex; justify-content: space-between; align-items: center; }
+.hh-rueda .rq-p { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; }
+.hh-rueda .rq-p img { width: 20px; height: 20px; image-rendering: pixelated; filter: grayscale(1) brightness(.45); }
+.hh-rueda .rq-p.on img { filter: none; }
+.hh-rueda .rq-p.gd img { width: 24px; height: 24px; }
+.hh-rueda .rq-p.gd:not(.on) img { filter: grayscale(.6) brightness(.8); }
+.hh-rueda .rq-p.hoy { box-shadow: 0 0 0 2px #ffd95a; animation: rq-hoy 1.2s steps(2) infinite; }
+@keyframes rq-hoy { 50% { box-shadow: 0 0 0 2px rgba(255, 217, 90, .35); } }
+.hh-rueda .rq-cup { font-size: 16px; line-height: 1.1; color: #f3c4ff; }
+.hh-rueda.used { cursor: default; }
+.hh-rueda.used .rq-t b { color: #ffd98a; }
+.hh-rueda.oro { box-shadow: inset 0 0 0 2px #ffd95a, 0 0 18px rgba(255, 217, 90, .35); }
+.hh-rueda.oro .rq-t b { color: #ffe27a; }
+html.reduce-motion .hh-rueda .rq-p.hoy { animation: none; }
+@media (max-width: 900px) { .hh-rueda { position: static; margin-top: 8px; } }
+
+/* el sello de lacre de la racha, en la esquina de la carta (de oro desde la primera semana completa) */
+.hh-socio-w .rq-sello { position: absolute; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; z-index: 5; pointer-events: none;
+  background: radial-gradient(circle at 38% 32%, #e2544a, #a8231f 58%, #6d1210); box-shadow: 0 0 0 3px #0a140f, 0 4px 0 3px rgba(0, 0, 0, .45), inset 0 0 0 4px rgba(255, 255, 255, .08); transform: rotate(-8deg); }
+.hh-socio-w .rq-sello img { position: absolute; width: 24px; height: 24px; top: 5px; left: 14px; image-rendering: pixelated; opacity: .95; }
+.hh-socio-w .rq-sello b { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font: 900 16px/1 var(--mono); color: #fff; text-shadow: 0 2px 0 #4a0b09; }
+.hh-socio-w .rq-sello.oro { background: radial-gradient(circle at 38% 32%, #fff0a8, #f0b94f 55%, #9a6a1c); }
+.hh-socio-w .rq-sello.oro b { color: #3a2504; text-shadow: none; }
+@media (max-width: 900px) { .hh-socio-w .rq-sello { display: none; } }
+
+/* la rueda: abre parada con su boton (Girar · gratis) debajo; la de oro, con su aro y su centro dorados */
+.rou.wheel .wh-go { margin-top: calc(var(--ws) * .05); min-width: 220px; }
+.rou.wheel .wh-go[disabled] { visibility: hidden; }
+.rou.wheel.ready .rou-no { animation: none; opacity: 1; }          /* parada: el titulo («Tu tirada de hoy») se queda; al girar, hace su destello y se va */
+.rou.wheel.rd-oro .wh-ring { filter: saturate(1.25) brightness(1.08); }
+/* nada de la portada por encima de la rueda (la ficha del gato iba en otra capa) */
+body:has(#rouOv) .hv-coin { visibility: hidden; }

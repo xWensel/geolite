@@ -3399,7 +3399,8 @@ window.AIQ = window.AIQ || {};
     { const w = winNote(); if (w) return w; }
     { const days = Math.floor((Date.now() - (DS.first || Date.now())) / 86400000), m = [30, 100, 200, 365, 500, 730, 1000].filter(x => days >= x && days <= x + 6).pop();
       if (m && DS.anniv !== m) { DS.anniv = m; saveStore(); return { t: m === 365 ? say1("annivYear") : say1("anniv", { d: days }), mood: "sly" }; } }
-    if ([3, 7, 14, 30, 60, 100, 365].includes(DS.streak) && DS.streakSaid !== DS.streak) { DS.streakSaid = DS.streak; saveStore(); return { t: say1("streakDays", { n: DS.streak }), mood: "laugh" }; }
+    { const sk = A.rueda ? A.rueda.streak() : DS.streak;                 // v0.4.81: una sola cuenta de dias, la racha de la rueda del dia (js/rueda.js)
+      if ([3, 7, 14, 30, 60, 100, 365].includes(sk) && DS.streakSaid !== sk) { DS.streakSaid = sk; saveStore(); return { t: say1("streakDays", { n: sk }), mood: "laugh" }; } }
     { const d = new Date(), key = (d.getMonth() + 1) + "-" + d.getDate(), es = /^es/.test(A.lang);   // el calendario del casino (una fecha por dia)
       const k = key === "1-1" ? "calNewYear" : key === "10-31" ? "calHalloween" : key === "12-24" || key === "12-25" ? "calXmas" : key === "12-28" && es ? "calInoc" : key === "4-1" && !es ? "calApril" : null;
       if (k && DS.calSaid !== d.getFullYear() + ":" + key) { DS.calSaid = d.getFullYear() + ":" + key; saveStore(); return { t: say1(k), mood: "laugh" }; } }
@@ -3882,7 +3883,7 @@ window.AIQ = window.AIQ || {};
     const nem = Object.values(N).filter(x => x.n >= 2 && x.p).sort((a, b) => b.n - a.n)[0], hi = H.length ? H.indexOf(Math.max(...H)) : -1;
     const L = (A.LANGS || []).find(l => l.code === A.lang), loc = L ? L.loc : undefined;
     let since = "—"; try { since = new Date(DS.first || Date.now()).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" }); } catch (e) { /* formato */ }
-    const rows = [["visits", A.fmt(DS.visits || 1)], ["hours", A.fmt(Math.floor((DS.playMs || 0) / 3600000)) + " h"], ["since", since], ["streak", A.fmt(DS.streak || 1)],
+    const rows = [["visits", A.fmt(DS.visits || 1)], ["hours", A.fmt(Math.floor((DS.playMs || 0) / 3600000)) + " h"], ["since", since], ["streak", A.fmt((A.rueda ? A.rueda.streak() : DS.streak) || 1)],
       ["door", A.fmt(q.quits || 0)], ["stays", A.fmt(q.stays || 0)], ["tricks", A.fmt(q.trolls || 0)], ["nemesis", nem ? nem.p : "—"], ["hour", hi >= 0 && H[hi] > 1 ? String(hi).padStart(2, "0") + ":00" : "—"]];
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     host.innerHTML = `<h3 class="dlf-h">${A.icon("dealer_mini_s", "sm")}<span>${esc(A.pick6(FILE.title))}</span></h3><div class="dlf">${rows.map(([k, v]) => `<div class="dlf-r"><span>${esc(A.pick6(FILE[k]))}</span><b>${esc(v)}</b></div>`).join("")}</div>`;
